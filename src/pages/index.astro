@@ -1,11 +1,15 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import "@/styles/globals.css";
+import Layout from "../layouts/Layout.astro";
+import { Hero } from "@/components/landing/hero";
+import { Features } from "@/components/landing/features";
+import { CTA } from "@/components/landing/cta";
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Bugard - Smart Expense Tracking">
+  <main>
+    <Hero client:load />
+    <Features client:load />
+    <CTA client:load />
+  </main>
 </Layout>
