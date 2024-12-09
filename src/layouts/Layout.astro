@@ -1,4 +1,7 @@
 ---
+import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/astro/components";
+import { BarChart2 } from "lucide-react";
+
 interface Props {
   title: string;
 }
@@ -9,32 +12,39 @@ const { title } = Astro.props;
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="description" content="Astro description" />
-    <meta name="viewport" content="width=device-width" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>
-  <body>
-    <slot />
+  <body class="min-h-screen bg-background">
+    <header
+      class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div class="mx-4 md:mx-8 lg:mx-auto lg:max-w-7xl flex h-14 items-center justify-between">
+        <div class="flex items-center gap-2">
+          <a href="/" class="flex items-center space-x-2">
+            <BarChart2 className="h-6 w-6 text-accent" />
+            <span class="font-bold text-xl">{title}</span>
+          </a>
+        </div>
+
+        <nav class="flex items-center gap-4">
+          <SignedOut>
+            <SignInButton
+              mode="modal"
+              class="rounded-md text-sm font-medium h-9 px-4 bg-accent text-accent-foreground hover:bg-accent/90 transition-colors"
+            />
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+        </nav>
+      </div>
+    </header>
+
+    <main class="mx-4 md:mx-8 lg:mx-auto lg:max-w-7xl py-6">
+      <slot />
+    </main>
   </body>
 </html>
-<style is:global>
-  :root {
-  }
-  html {
-    font-family: system-ui, sans-serif;
-  }
-  code {
-    font-family:
-      Menlo,
-      Monaco,
-      Lucida Console,
-      Liberation Mono,
-      DejaVu Sans Mono,
-      Bitstream Vera Sans Mono,
-      Courier New,
-      monospace;
-  }
-</style>
