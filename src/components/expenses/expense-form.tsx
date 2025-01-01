@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -7,8 +7,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { Expense } from "@/types/expense";
 
 type ExpenseFormProps = {
@@ -21,24 +30,40 @@ type ExpenseFormProps = {
 const ExpenseForm = ({ open, onClose, expense, onSuccess }: ExpenseFormProps) => {
   const [amount, setAmount] = useState(expense?.amount.toString() || "");
   const [description, setDescription] = useState(expense?.description || "");
-  const [date, setDate] = useState(
-      expense?.date || new Date().toISOString().split("T")[0]
+  const [date, setDate] = useState<Date | undefined>(
+      expense ? new Date(expense.date) : new Date()
   );
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  // Update form values when expense changes
+  useEffect(() => {
+    if (expense) {
+      setAmount(expense.amount.toString());
+      setDescription(expense.description);
+      setDate(new Date(expense.date));
+    } else {
+      setAmount("");
+      setDescription("");
+      setDate(new Date());
+    }
+  }, [expense]);
+
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
+    if (!date) return;
     setLoading(true);
 
     try {
+      const formattedDate = format(date, "yyyy-MM-dd");
+
       if (expense) {
         const { error } = await supabase
             .from("expenses")
             .update({
               amount: parseFloat(amount),
               description,
-              date,
+              date: formattedDate,
             })
             .eq("id", expense.id);
 
@@ -47,7 +72,7 @@ const ExpenseForm = ({ open, onClose, expense, onSuccess }: ExpenseFormProps) =>
         const { error } = await supabase.from("expenses").insert({
           amount: parseFloat(amount),
           description,
-          date,
+          date: formattedDate,
         });
 
         if (error) throw error;
@@ -72,7 +97,7 @@ const ExpenseForm = ({ open, onClose, expense, onSuccess }: ExpenseFormProps) =>
 
   return (
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[425px] px-6 [&>button]:hidden">
+        <DialogContent className="sm:max-w-[425px] p-6 rounded-lg [&>button]:hidden">
           <DialogHeader>
             <DialogTitle>{expense ? "Edit" : "Add"} Expense</DialogTitle>
           </DialogHeader>
@@ -99,17 +124,33 @@ const ExpenseForm = ({ open, onClose, expense, onSuccess }: ExpenseFormProps) =>
                 onChange={(e) => setDescription(e.target.value)}
                 required
             />
-            <Input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                    variant="outline"
+                    className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !date && "text-muted-foreground"
+                    )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(date, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                />
+              </PopoverContent>
+            </Popover>
             <div className="flex gap-3 justify-end">
               <Button variant="outline" onClick={onClose} type="button">
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading || !date}>
                 {loading ? "Saving..." : expense ? "Update" : "Add"}
               </Button>
             </div>

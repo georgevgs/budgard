@@ -8,8 +8,8 @@ type LoginModalProps = {
 
 const LoginModal = ({ open, onOpenChange }: LoginModalProps) => (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={"[&>button]:hidden"}>
-        <DialogHeader>
+        <DialogContent className="sm:max-w-[425px] rounded-lg">
+            <DialogHeader>
           <DialogTitle>Sign In</DialogTitle>
         </DialogHeader>
         <MagicLinkForm onSuccess={() => onOpenChange(false)} />
