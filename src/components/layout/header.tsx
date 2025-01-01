@@ -1,18 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth";
+import { LogOut } from "lucide-react";
 
-const Header = ()=> {
+const Header = () => {
     return (
-        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="container flex h-14 items-center justify-between">
-                <h1 className="text-lg font-semibold">
-                    Expense Tracker
+        <header className="sticky top-0 z-50 w-full border-b bg-background">
+            <div className="container flex h-14 items-center justify-between px-4">
+                <h1 className="text-lg font-semibold tracking-tight">
+                    Budgard
                 </h1>
                 <Button
                     variant="ghost"
+                    size="sm"
                     onClick={signOut}
+                    className="text-muted-foreground gap-2 font-normal"
                 >
-                    Sign Out
+                    <LogOut className="h-4 w-4" />
+                    Sign out
                 </Button>
             </div>
         </header>

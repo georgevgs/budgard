@@ -18,10 +18,12 @@ type ExpenseFormProps = {
   onSuccess: () => void;
 };
 
-const ExpenseForm = ({ open, onClose, expense, onSuccess }: ExpenseFormProps)=> {
+const ExpenseForm = ({ open, onClose, expense, onSuccess }: ExpenseFormProps) => {
   const [amount, setAmount] = useState(expense?.amount.toString() || "");
   const [description, setDescription] = useState(expense?.description || "");
-  const [date, setDate] = useState(expense?.date || new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(
+      expense?.date || new Date().toISOString().split("T")[0]
+  );
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -70,19 +72,26 @@ const ExpenseForm = ({ open, onClose, expense, onSuccess }: ExpenseFormProps)=> 
 
   return (
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px] px-6 [&>button]:hidden">
           <DialogHeader>
             <DialogTitle>{expense ? "Edit" : "Add"} Expense</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-                type="number"
-                placeholder="Amount"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-                step="0.01"
-            />
+            <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+              €
+            </span>
+              <Input
+                  type="number"
+                  placeholder="Amount"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  required
+                  step="0.01"
+                  min="0"
+                  className="pl-7"
+              />
+            </div>
             <Input
                 type="text"
                 placeholder="Description"
@@ -96,9 +105,14 @@ const ExpenseForm = ({ open, onClose, expense, onSuccess }: ExpenseFormProps)=> 
                 onChange={(e) => setDate(e.target.value)}
                 required
             />
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? "Loading..." : expense ? "Update" : "Add"}
-            </Button>
+            <div className="flex gap-3 justify-end">
+              <Button variant="outline" onClick={onClose} type="button">
+                Cancel
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Saving..." : expense ? "Update" : "Add"}
+              </Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
