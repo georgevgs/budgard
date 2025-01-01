@@ -16,7 +16,6 @@ const Header = () => {
                     className="text-muted-foreground gap-2 font-normal"
                 >
                     <LogOut className="h-4 w-4" />
-                    Sign out
                 </Button>
             </div>
         </header>

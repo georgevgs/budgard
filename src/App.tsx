@@ -4,6 +4,7 @@ import ExpenseList from "@/components/expenses/expense-list";
 import Header from "@/components/layout/header";
 import { Toaster } from "@/components/ui/toaster";
 import { getSession, onAuthStateChange } from "@/lib/auth";
+import { setupDefaultCategories } from "@/lib/categories";
 import type { Session } from "@supabase/supabase-js";
 
 const App = () => {
@@ -12,9 +13,18 @@ const App = () => {
     useEffect(() => {
         getSession().then(({ data: { session } }) => {
             setSession(session);
+            if (session) {
+                setupDefaultCategories();
+            }
         });
 
-        const { data: { subscription } } = onAuthStateChange(setSession);
+        const { data: { subscription } } = onAuthStateChange((session) => {
+            setSession(session);
+            if (session) {
+                setupDefaultCategories();
+            }
+        });
+
         return () => subscription.unsubscribe();
     }, []);
 

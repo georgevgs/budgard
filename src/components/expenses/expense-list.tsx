@@ -1,3 +1,4 @@
+// src/components/expenses/expense-list.tsx
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +20,10 @@ const ExpenseList = () => {
     try {
       const { data, error } = await supabase
           .from("expenses")
-          .select("*")
+          .select(`
+          *,
+          category:categories(*)
+        `)
           .order("date", { ascending: false });
 
       if (error) throw error;

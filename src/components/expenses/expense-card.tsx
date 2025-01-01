@@ -12,6 +12,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Trash2, Edit } from "lucide-react";
+import CategoryBadge from "@/components/categories/category-badge";
 import type { Expense } from "@/types/expense";
 
 type ExpenseCardProps = {
@@ -25,12 +26,15 @@ const ExpenseCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
       <Card className="group hover:shadow-md transition-shadow duration-200">
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4">
-            {/* Left side - Date and Description */}
+            {/* Left side - Date, Description and Category */}
             <div className="flex-grow space-y-1.5">
               <div className="flex items-center gap-2">
                 <p className="font-medium text-lg text-foreground line-clamp-1">
                   {expense.description}
                 </p>
+                {expense.category && (
+                    <CategoryBadge category={expense.category} />
+                )}
               </div>
               <p className="text-sm text-muted-foreground">
                 {new Date(expense.date).toLocaleDateString(undefined, {
