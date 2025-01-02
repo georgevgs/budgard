@@ -48,7 +48,7 @@ const ExpenseCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
             {/* Right side - Amount and Actions */}
             <div className="flex flex-row md:flex-row items-center justify-between md:justify-end gap-4">
               <p className="text-xl font-semibold text-foreground whitespace-nowrap">
-                ${expense.amount.toFixed(2)}
+                {expense.amount.toFixed(2)}€
               </p>
               <div className="flex gap-2">
                 <Button

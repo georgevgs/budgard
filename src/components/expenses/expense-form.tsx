@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -8,72 +6,51 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 import type { Expense } from "@/types/expense";
 import type { Category } from "@/types/category";
-import {fetchCategories} from "@/lib/categories.ts";
+import { fetchCategories } from "@/lib/categories";
+import CategoryForm from "@/components/categories/category-form.tsx";
+import ExpenseFormContent from "./expense-form-content";
+import {cn} from "@/lib/utils.ts";
 
-type ExpenseFormProps = {
+interface ExpenseFormProps {
   open: boolean;
   onClose: () => void;
   expense?: Expense;
   onSuccess: () => void;
-};
+}
 
-const ExpenseForm = ({ open, onClose, expense, onSuccess }: ExpenseFormProps) => {
+const ExpenseForm = ({
+  open,
+  onClose,
+  expense,
+  onSuccess
+}: ExpenseFormProps) => {
   const [amount, setAmount] = useState(expense?.amount.toString() || "");
   const [description, setDescription] = useState(expense?.description || "");
-  const [categoryId, setCategoryId] = useState(expense?.category_id || "none");
+  const [categoryId, setCategoryId] = useState(expense?.category_id || "");
   const [date, setDate] = useState<Date | undefined>(
       expense ? new Date(expense.date) : new Date()
   );
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
   const { toast } = useToast();
 
-  // Fetch categories when form opens
   useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const data = await fetchCategories();
-        setCategories(data);
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to fetch categories",
-          variant: "destructive",
-        });
-      }
-    };
-
     if (open) {
       loadCategories();
     }
   }, [open]);
 
-  // Update form values when expense changes
   useEffect(() => {
     if (expense) {
       setAmount(expense.amount.toString());
       setDescription(expense.description);
-      setCategoryId(expense.category_id || "none");
+      setCategoryId(expense.category_id || "");
       setDate(new Date(expense.date));
     } else {
       setAmount("");
@@ -82,6 +59,19 @@ const ExpenseForm = ({ open, onClose, expense, onSuccess }: ExpenseFormProps) =>
       setDate(new Date());
     }
   }, [expense]);
+
+  const loadCategories = async () => {
+    try {
+      const data = await fetchCategories();
+      setCategories(data);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch categories",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
@@ -93,7 +83,7 @@ const ExpenseForm = ({ open, onClose, expense, onSuccess }: ExpenseFormProps) =>
       const expenseData = {
         amount: parseFloat(amount),
         description,
-        category_id: categoryId === "none" ? null : categoryId,
+        category_id: categoryId || null,
         date: formattedDate,
       };
 
@@ -129,83 +119,60 @@ const ExpenseForm = ({ open, onClose, expense, onSuccess }: ExpenseFormProps) =>
     }
   };
 
+  const handleCategorySuccess = (newCategory: Category) => {
+    setCategories((prev) => [...prev, newCategory]);
+    setCategoryId(newCategory.id);
+    setShowCategoryForm(false);
+  };
+
   return (
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[425px] p-6 rounded-lg [&>button]:hidden">
-          <DialogHeader>
-            <DialogTitle>{expense ? "Edit" : "Add"} Expense</DialogTitle>
-            <DialogDescription>
-              Fill in the details for your expense. All fields except category are required.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-              €
-            </span>
-              <Input
-                  type="number"
-                  placeholder="Amount"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  required
-                  step="0.01"
-                  min="0"
-                  className="pl-7"
+        <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden [&>button]:hidden">
+          <div className="p-6">
+            <DialogHeader>
+              <DialogTitle>{expense ? "Edit" : "Add"} Expense</DialogTitle>
+              <DialogDescription>
+                Fill in the details for your expense. All fields except category are required.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+
+          <div className="relative h-[480px]">
+            <div
+                className={cn(
+                    "absolute inset-0 transition-transform duration-300 ease-in-out px-6 pb-6",
+                    showCategoryForm ? "-translate-x-full" : "translate-x-0"
+                )}
+            >
+              <ExpenseFormContent
+                  amount={amount}
+                  setAmount={setAmount}
+                  description={description}
+                  setDescription={setDescription}
+                  categoryId={categoryId}
+                  setCategoryId={setCategoryId}
+                  date={date}
+                  setDate={setDate}
+                  categories={categories}
+                  loading={loading}
+                  onSubmit={handleSubmit}
+                  onClose={onClose}
+                  onAddCategory={() => setShowCategoryForm(true)}
               />
             </div>
-            <Input
-                type="text"
-                placeholder="Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-            />
-            <Select value={categoryId} onValueChange={setCategoryId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
-                {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      <div className="flex items-center gap-2 font-medium">
-                        {category.name}
-                      </div>
-                    </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                    variant="outline"
-                    className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !date && "text-muted-foreground"
-                    )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, "PPP") : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-            <div className="flex gap-3 justify-end">
-              <Button variant="outline" onClick={onClose} type="button">
-                Cancel
-              </Button>
-              <Button type="submit" disabled={loading || !date}>
-                {loading ? "Saving..." : expense ? "Update" : "Add"}
-              </Button>
+
+            <div
+                className={cn(
+                    "absolute inset-0 transition-transform duration-300 ease-in-out px-6 pb-6",
+                    showCategoryForm ? "translate-x-0" : "translate-x-full"
+                )}
+            >
+              <CategoryForm
+                  onBack={() => setShowCategoryForm(false)}
+                  onSuccess={handleCategorySuccess}
+              />
             </div>
-          </form>
+          </div>
         </DialogContent>
       </Dialog>
   );
