@@ -85,7 +85,7 @@ const ExpenseForm = ({
 
   return (
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden [&>button]:hidden">
+        <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden [&>button]:hidden rounded-lg">
           <div className="p-6">
             <DialogHeader>
               <DialogTitle>{expense ? "Edit" : "Add"} Expense</DialogTitle>
@@ -95,7 +95,7 @@ const ExpenseForm = ({
             </DialogHeader>
           </div>
 
-          <div className="relative h-[480px]">
+          <div className="relative h-80">
             <div
                 className={cn(
                     "absolute inset-0 transition-transform duration-300 ease-in-out px-6 pb-6",

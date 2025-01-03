@@ -19,15 +19,17 @@ const MonthlyOverview = ({
             <p className="text-sm font-medium text-muted-foreground">Monthly Total</p>
             <p className="text-2xl font-bold">€{monthlyTotal.toFixed(2)}</p>
         </div>
-        <Button
-            variant="outline"
-            size="sm"
-            onClick={onCurrentMonthClick}
-            className={`text-muted-foreground ${selectedMonth === currentMonth ? 'bg-primary/10' : ''}`}
-        >
-            <CalendarDays className="h-4 w-4 mr-2" />
-            Today
-        </Button>
+        {selectedMonth !== currentMonth && (
+            <Button
+                variant="outline"
+                size="sm"
+                onClick={onCurrentMonthClick}
+                className="text-muted-foreground"
+            >
+                <CalendarDays className="h-4 w-4 mr-2" />
+                Today
+            </Button>
+        )}
     </div>
 );
 
