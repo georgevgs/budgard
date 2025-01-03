@@ -1,3 +1,4 @@
+// ExpenseForm.tsx
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -6,28 +7,30 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
 import { format } from "date-fns";
 import type { Expense } from "@/types/expense";
 import type { Category } from "@/types/category";
-import { fetchCategories } from "@/lib/categories";
-import CategoryForm from "@/components/categories/category-form.tsx";
+import CategoryForm from "@/components/categories/category-form";
 import ExpenseFormContent from "./expense-form-content";
-import {cn} from "@/lib/utils.ts";
+import { cn } from "@/lib/utils";
 
 interface ExpenseFormProps {
   open: boolean;
   onClose: () => void;
   expense?: Expense;
-  onSuccess: () => void;
+  categories: Category[];
+  onCategoryAdd: (categoryData: Partial<Category>) => Promise<void>;
+  // Changed to match App.tsx signature
+  onSubmit: (expenseData: Partial<Expense>, expenseId?: string) => Promise<void>;
 }
 
 const ExpenseForm = ({
   open,
   onClose,
   expense,
-  onSuccess
+  categories,
+  onCategoryAdd,
+  onSubmit,
 }: ExpenseFormProps) => {
   const [amount, setAmount] = useState(expense?.amount.toString() || "");
   const [description, setDescription] = useState(expense?.description || "");
@@ -35,16 +38,8 @@ const ExpenseForm = ({
   const [date, setDate] = useState<Date | undefined>(
       expense ? new Date(expense.date) : new Date()
   );
-  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    if (open) {
-      loadCategories();
-    }
-  }, [open]);
 
   useEffect(() => {
     if (expense) {
@@ -60,19 +55,6 @@ const ExpenseForm = ({
     }
   }, [expense]);
 
-  const loadCategories = async () => {
-    try {
-      const data = await fetchCategories();
-      setCategories(data);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch categories",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     if (!date) return;
@@ -80,48 +62,24 @@ const ExpenseForm = ({
 
     try {
       const formattedDate = format(date, "yyyy-MM-dd");
-      const expenseData = {
+      const expenseData: Partial<Expense> = {
         amount: parseFloat(amount),
         description,
-        category_id: categoryId || null,
+        category_id: categoryId || undefined,
         date: formattedDate,
       };
 
-      if (expense) {
-        const { error } = await supabase
-            .from("expenses")
-            .update(expenseData)
-            .eq("id", expense.id);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-            .from("expenses")
-            .insert(expenseData);
-
-        if (error) throw error;
-      }
-
-      toast({
-        title: "Success",
-        description: `Expense ${expense ? "updated" : "added"} successfully`,
-      });
-      onSuccess();
+      await onSubmit(expenseData, expense?.id);
       onClose();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: `Failed to ${expense ? "update" : "add"} expense`,
-        variant: "destructive",
-      });
+    } catch {
+      // Error is handled by parent
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCategorySuccess = (newCategory: Category) => {
-    setCategories((prev) => [...prev, newCategory]);
-    setCategoryId(newCategory.id);
+  const handleCategorySuccess = async (categoryData: Partial<Category>) => {
+    await onCategoryAdd(categoryData);
     setShowCategoryForm(false);
   };
 

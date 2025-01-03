@@ -1,67 +1,36 @@
-import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { useState } from "react";
 import { format } from "date-fns";
 import type { Expense } from "@/types/expense";
-import ExpenseHeader from "@/components/expenses/expense-header.tsx";
-import ExpenseTabs from "@/components/expenses/expense-tabs.tsx";
-import MonthlyOverview from "@/components/expenses/expense-monthly-overview.tsx";
-import ExpenseLoadingState from "@/components/expenses/expense-loading.tsx";
-import EmptyExpenseState from "@/components/expenses/expense-empty.tsx";
-import ExpenseGrid from "@/components/expenses/expense-grid.tsx";
-import ExpenseForm from "@/components/expenses/expense-form.tsx";
+import type { Category } from "@/types/category";
+import ExpenseHeader from "./expense-header";
+import ExpenseTabs from "./expense-tabs";
+import MonthlyOverview from "./expense-monthly-overview";
+import ExpenseLoadingState from "./expense-loading";
+import EmptyExpenseState from "./expense-empty";
+import ExpenseGrid from "./expense-grid";
+import ExpenseForm from "./expense-form";
 
-const ExpenseList = () => {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+interface ExpenseListProps {
+  expenses: Expense[];
+  categories: Category[];
+  isLoading: boolean;
+  onExpenseSubmit: (expenseData: Partial<Expense>, expenseId?: string) => Promise<void>;
+  onExpenseDelete: (id: string) => Promise<void>;
+  onCategoryAdd: (categoryData: Partial<Category>) => Promise<void>;
+}
+
+const ExpenseList = ({
+  expenses,
+  categories,
+  isLoading,
+  onExpenseSubmit,
+  onExpenseDelete,
+  onCategoryAdd
+}: ExpenseListProps) => {
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
   const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(true);
   const currentMonth = format(new Date(), "yyyy-MM");
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
-  const { toast } = useToast();
-
-  const fetchExpenses = async (): Promise<void> => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-          .from("expenses")
-          .select(`*, category:categories(*)`)
-          .order("date", { ascending: false });
-
-      if (error) throw error;
-      setExpenses(data || []);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch expenses",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: string): Promise<void> => {
-    try {
-      const { error } = await supabase.from("expenses").delete().eq("id", id);
-      if (error) throw error;
-      toast({
-        title: "Success",
-        description: "Expense deleted successfully",
-      });
-      fetchExpenses();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete expense",
-        variant: "destructive",
-      });
-    }
-  };
-
-  useEffect(() => {
-    fetchExpenses();
-  }, []);
 
   const filteredExpenses = expenses.filter(
       (expense) => format(new Date(expense.date), "yyyy-MM") === selectedMonth
@@ -71,6 +40,11 @@ const ExpenseList = () => {
       (sum, expense) => sum + expense.amount,
       0
   );
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setSelectedExpense(undefined);
+  };
 
   return (
       <div className="w-full max-w-4xl mx-auto p-4 space-y-6">
@@ -90,7 +64,7 @@ const ExpenseList = () => {
         </div>
 
         <div className="space-y-4">
-          {loading ? (
+          {isLoading ? (
               <ExpenseLoadingState />
           ) : filteredExpenses.length === 0 ? (
               <EmptyExpenseState
@@ -104,19 +78,18 @@ const ExpenseList = () => {
                     setSelectedExpense(expense);
                     setShowForm(true);
                   }}
-                  onDelete={handleDelete}
+                  onDelete={onExpenseDelete}
               />
           )}
         </div>
 
         <ExpenseForm
             open={showForm}
-            onClose={() => {
-              setShowForm(false);
-              setSelectedExpense(undefined);
-            }}
+            onClose={handleFormClose}
             expense={selectedExpense}
-            onSuccess={fetchExpenses}
+            onSubmit={onExpenseSubmit}
+            categories={categories}
+            onCategoryAdd={onCategoryAdd}
         />
       </div>
   );
