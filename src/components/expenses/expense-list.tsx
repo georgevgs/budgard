@@ -6,7 +6,7 @@ import ExpenseHeader from "./expense-header";
 import MonthlyOverview from "./expense-monthly-overview";
 import ExpenseLoadingState from "./expense-loading";
 import EmptyExpenseState from "./expense-empty";
-import ExpenseGrid from "./expense-grid";
+import PaginatedExpenseGrid from "./paginated-expense-grid";
 import ExpenseForm from "./expense-form";
 import MonthSelector from "@/components/expenses/expense-month-selector.tsx";
 
@@ -34,7 +34,7 @@ const ExpenseList = ({
 
     const filteredExpenses = expenses.filter(
         (expense) => format(new Date(expense.date), "yyyy-MM") === selectedMonth
-    );
+    ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Sort by date descending
 
     const monthlyTotal = filteredExpenses.reduce(
         (sum, expense) => sum + expense.amount,
@@ -72,7 +72,7 @@ const ExpenseList = ({
                         onAddClick={() => setShowForm(true)}
                     />
                 ) : (
-                    <ExpenseGrid
+                    <PaginatedExpenseGrid
                         expenses={filteredExpenses}
                         onEdit={(expense) => {
                             setSelectedExpense(expense);
