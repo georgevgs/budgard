@@ -9,8 +9,11 @@ import { useToast } from "@/hooks/use-toast";
 import type { Session } from "@supabase/supabase-js";
 import type { Category } from "@/types/category";
 import type { Expense } from "@/types/expense";
+import {usePWAUpdate} from "@/hooks/use-pwa-update.ts";
 
 const App = () => {
+    usePWAUpdate();
+
     const [session, setSession] = useState<Session | null>(null);
     const [categories, setCategories] = useState<Category[]>([]);
     const [expenses, setExpenses] = useState<Expense[]>([]);
