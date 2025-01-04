@@ -8,7 +8,8 @@ import ExpenseLoadingState from "./expense-loading";
 import EmptyExpenseState from "./expense-empty";
 import PaginatedExpenseGrid from "./paginated-expense-grid";
 import ExpenseForm from "./expense-form";
-import MonthSelector from "@/components/expenses/expense-month-selector.tsx";
+import MonthSelector from "@/components/expenses/expense-month-selector";
+import ExpensesDashboard from "@/components/expenses/ExpensesDashboard";
 
 interface ExpenseListProps {
     expenses: Expense[];
@@ -34,7 +35,7 @@ const ExpenseList = ({
 
     const filteredExpenses = expenses.filter(
         (expense) => format(new Date(expense.date), "yyyy-MM") === selectedMonth
-    ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Sort by date descending
+    ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const monthlyTotal = filteredExpenses.reduce(
         (sum, expense) => sum + expense.amount,
@@ -61,8 +62,18 @@ const ExpenseList = ({
                     currentMonth={currentMonth}
                     onCurrentMonthClick={() => setSelectedMonth(currentMonth)}
                 />
+
+                {/* Dashboard Section */}
+                {!isLoading && filteredExpenses.length > 0 && (
+                    <ExpensesDashboard
+                        expenses={filteredExpenses}
+                        categories={categories}
+                        selectedMonth={selectedMonth}
+                    />
+                )}
             </div>
 
+            {/* Expense List Section */}
             <div className="space-y-4">
                 {isLoading ? (
                     <ExpenseLoadingState />
