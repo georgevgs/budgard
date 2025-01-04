@@ -50,33 +50,28 @@ const ExpensesDashboard = ({ expenses, categories }: ExpensesDashboardProps) => 
     return (
         <Card>
             <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row items-center gap-6">
-
-
-                    {/* Legend */}
-                    <div className="w-full space-y-3">
-                        {categoryData.map((category) => (
-                            <div key={category.name} className="flex items-center gap-4">
-                                <div
-                                    className="w-3 h-3 rounded-sm shrink-0"
-                                    style={{ backgroundColor: category.color }}
-                                />
-                                <div className="flex-1 flex items-center justify-between gap-2 min-w-0">
-                                    <div className="flex gap-2 items-baseline min-w-0">
-                    <span className="text-sm font-medium truncate">
-                      {category.name}
-                    </span>
-                                        <span className="text-sm text-muted-foreground">
-                      {category.percentage.toFixed(0)}%
-                    </span>
-                                    </div>
-                                    <span className="text-sm font-medium shrink-0">
-                    €{category.amount.toFixed(2)}
+                <div className="w-full space-y-3">
+                    {categoryData.map((category) => (
+                        <div key={category.name} className="flex items-center gap-4">
+                            <div
+                                className="w-3 h-3 rounded-sm shrink-0"
+                                style={{ backgroundColor: category.color }}
+                            />
+                            <div className="flex-1 flex items-center justify-between gap-2 min-w-0">
+                                <div className="flex gap-2 items-baseline min-w-0">
+                  <span className="text-sm font-medium truncate">
+                    {category.name}
+                  </span>
+                                    <span className="text-sm text-muted-foreground">
+                    {category.percentage.toFixed(0)}%
                   </span>
                                 </div>
+                                <span className="text-sm font-medium shrink-0">
+                  €{category.amount.toFixed(2)}
+                </span>
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    ))}
                 </div>
             </CardContent>
         </Card>

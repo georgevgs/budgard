@@ -10,6 +10,7 @@ import PaginatedExpenseGrid from "./paginated-expense-grid";
 import ExpenseForm from "./expense-form";
 import MonthSelector from "@/components/expenses/expense-month-selector";
 import ExpensesDashboard from "@/components/expenses/ExpensesDashboard";
+import { cn } from "@/lib/utils";
 
 interface ExpenseListProps {
     expenses: Expense[];
@@ -30,6 +31,7 @@ const ExpenseList = ({
 }: ExpenseListProps) => {
     const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
     const [showForm, setShowForm] = useState(false);
+    const [isDashboardVisible, setIsDashboardVisible] = useState(false);
     const currentMonth = format(new Date(), "yyyy-MM");
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
@@ -60,17 +62,30 @@ const ExpenseList = ({
                     monthlyTotal={monthlyTotal}
                     selectedMonth={selectedMonth}
                     currentMonth={currentMonth}
+                    isExpanded={isDashboardVisible}
+                    hasExpenses={filteredExpenses.length > 0}
                     onCurrentMonthClick={() => setSelectedMonth(currentMonth)}
+                    onMonthlyTotalClick={() => setIsDashboardVisible(!isDashboardVisible)}
                 />
 
-                {/* Dashboard Section */}
-                {!isLoading && filteredExpenses.length > 0 && (
-                    <ExpensesDashboard
-                        expenses={filteredExpenses}
-                        categories={categories}
-                        selectedMonth={selectedMonth}
-                    />
-                )}
+                {/* Dashboard Section with Animation */}
+                <div
+                    className={cn(
+                        "grid transition-all duration-200 ease-in-out",
+                        isDashboardVisible
+                            ? "grid-rows-[1fr] opacity-100"
+                            : "grid-rows-[0fr] opacity-0"
+                    )}
+                >
+                    <div className="overflow-hidden">
+                        {!isLoading && filteredExpenses.length > 0 && (
+                            <ExpensesDashboard
+                                expenses={filteredExpenses}
+                                categories={categories}
+                            />
+                        )}
+                    </div>
+                </div>
             </div>
 
             {/* Expense List Section */}
