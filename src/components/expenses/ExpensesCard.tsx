@@ -12,8 +12,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Trash2, Edit } from "lucide-react";
-import CategoryBadge from "@/components/categories/category-badge";
-import type { Expense } from "@/types/expense";
+import CategoryBadge from "@/components/categories/CategoryBadge.tsx";
+import type { Expense } from "@/types/Expense.ts";
 
 type ExpenseCardProps = {
   expense: Expense;
@@ -21,7 +21,7 @@ type ExpenseCardProps = {
   onDelete: () => void;
 };
 
-const ExpenseCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
+const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
   return (
       <Card className="group hover:shadow-md transition-shadow duration-200 overflow-hidden">
         <CardContent className="px-4 py-6">
@@ -93,4 +93,4 @@ const ExpenseCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
   );
 };
 
-export default ExpenseCard;
+export default ExpensesCard;

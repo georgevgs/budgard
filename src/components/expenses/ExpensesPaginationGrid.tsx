@@ -8,8 +8,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import ExpenseCard from "./expense-card";
-import type { Expense } from "@/types/expense";
+import ExpensesCard from "./ExpensesCard.tsx";
+import type { Expense } from "@/types/Expense.ts";
 
 interface PaginationControlsProps {
     currentPage: number;
@@ -88,7 +88,7 @@ interface PaginatedExpenseGridProps {
     onDelete: (id: string) => void;
 }
 
-const PaginatedExpenseGrid = ({
+const ExpensesPaginationGrid = ({
     expenses,
     onEdit,
     onDelete
@@ -125,7 +125,7 @@ const PaginatedExpenseGrid = ({
         <div className="space-y-4">
             <div className="grid gap-4">
                 {paginatedExpenses.map((expense) => (
-                    <ExpenseCard
+                    <ExpensesCard
                         key={expense.id}
                         expense={expense}
                         onEdit={() => onEdit(expense)}
@@ -150,4 +150,4 @@ const PaginatedExpenseGrid = ({
     );
 };
 
-export default PaginatedExpenseGrid;
+export default ExpensesPaginationGrid;

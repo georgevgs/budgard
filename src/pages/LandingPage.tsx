@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Hero from "@/components/landing/hero";
-import Features from "@/components/landing/features";
+import Hero from "@/components/landing/Hero.tsx";
+import Features from "@/components/landing/Features.tsx";
 import LoginModal from "@/components/auth/LoginModal.tsx";
 
 const LandingPage = () => {

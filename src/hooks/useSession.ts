@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { getSession, onAuthStateChange } from "@/lib/auth";
-import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/useToast.ts";
+import { getSession, onAuthStateChange } from "@/lib/Auth.ts";
+import { supabase } from "@/lib/Supabase.ts";
 import type { Session } from "@supabase/supabase-js";
-import type { Category } from "@/types/category";
-import type { Expense } from "@/types/expense";
+import type { Category } from "@/types/Category.ts";
+import type { Expense } from "@/types/Expense.ts";
 
 export function useSession() {
     const [session, setSession] = useState<Session | null>(null);

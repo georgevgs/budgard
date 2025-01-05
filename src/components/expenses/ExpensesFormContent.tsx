@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/select";
 import { Calendar as CalendarIcon, Plus } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import type { Category } from "@/types/category";
+import { cn } from "@/lib/Utils.ts";
+import type { Category } from "@/types/Category.ts";
 
 interface ExpenseFormContentProps {
     amount: string;
@@ -34,7 +34,7 @@ interface ExpenseFormContentProps {
     onAddCategory: () => void;
 }
 
-const ExpenseFormContent = ({
+const ExpensesFormContent = ({
     amount,
     setAmount,
     description,
@@ -167,4 +167,4 @@ const ExpenseFormContent = ({
     );
 };
 
-export default ExpenseFormContent;
+export default ExpensesFormContent;

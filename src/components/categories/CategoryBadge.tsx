@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
-import type { Category } from "@/types/category";
+import { cn } from "@/lib/Utils.ts";
+import type { Category } from "@/types/Category.ts";
 
 type CategoryBadgeProps = {
     category: Category;

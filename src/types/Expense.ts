@@ -1,4 +1,4 @@
-import {Category} from "@/types/category.ts";
+import {Category} from "@/types/Category.ts";
 
 export interface Expense {
   id: string;

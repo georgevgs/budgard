@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast.ts';
 
-export function usePWAUpdate() {
+export function usePwaUpdate() {
     const {
         needRefresh,
         updateServiceWorker,

@@ -1,8 +1,8 @@
 import { useCallback } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
-import type { Category } from "@/types/category";
-import type { Expense } from "@/types/expense";
+import { useToast } from "@/hooks/useToast.ts";
+import { supabase } from "@/lib/Supabase.ts";
+import type { Category } from "@/types/Category.ts";
+import type { Expense } from "@/types/Expense.ts";
 
 export function useExpenses(setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>,
     setCategories: React.Dispatch<React.SetStateAction<Category[]>>) {

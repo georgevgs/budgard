@@ -5,7 +5,7 @@ type ExpenseHeaderProps = {
     onAddClick: () => void;
 };
 
-const ExpenseHeader = ({ onAddClick }: ExpenseHeaderProps) => (
+const ExpensesHeader = ({ onAddClick }: ExpenseHeaderProps) => (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="space-y-1">
             <h1 className="text-2xl font-bold tracking-tight">Expenses</h1>
@@ -20,4 +20,4 @@ const ExpenseHeader = ({ onAddClick }: ExpenseHeaderProps) => (
     </div>
 );
 
-export default ExpenseHeader;
+export default ExpensesHeader;

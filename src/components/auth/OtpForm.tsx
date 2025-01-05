@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { signInWithOTP, requestOTP } from "@/lib/auth";
+import { useToast } from "@/hooks/useToast.ts";
+import { signInWithOTP, requestOTP } from "@/lib/Auth.ts";
 import { CheckCircle2 } from "lucide-react";
 import { InputOTP,  InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp";
 

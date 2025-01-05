@@ -7,11 +7,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import type { Expense } from "@/types/expense";
-import type { Category } from "@/types/category";
-import CategoryForm from "@/components/categories/category-form";
-import ExpenseFormContent from "./expense-form-content";
-import { cn } from "@/lib/utils";
+import type { Expense } from "@/types/Expense.ts";
+import type { Category } from "@/types/Category.ts";
+import CategoryForm from "@/components/categories/CategoryForm.tsx";
+import ExpensesFormContent from "./ExpensesFormContent.tsx";
+import { cn } from "@/lib/Utils.ts";
 
 interface ExpenseFormProps {
   open: boolean;
@@ -22,7 +22,7 @@ interface ExpenseFormProps {
   onSubmit: (expenseData: Partial<Expense>, expenseId?: string) => Promise<void>;
 }
 
-const ExpenseForm = ({
+const ExpensesForm = ({
   open,
   onClose,
   expense,
@@ -118,7 +118,7 @@ const ExpenseForm = ({
                     showCategoryForm ? "-translate-x-full" : "translate-x-0"
                 )}
             >
-              <ExpenseFormContent
+              <ExpensesFormContent
                   amount={amount}
                   setAmount={setAmount}
                   description={description}
@@ -152,4 +152,4 @@ const ExpenseForm = ({
   );
 };
 
-export default ExpenseForm;
+export default ExpensesForm;

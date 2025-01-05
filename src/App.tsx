@@ -1,14 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import LandingPage from "@/pages/landing-page";
-import ExpenseList from "@/components/expenses/expense-list";
-import Header from "@/components/layout/header";
+import LandingPage from "@/pages/LandingPage.tsx";
+import ExpensesList from "@/components/expenses/ExpensesList.tsx";
+import Header from "@/components/layout/Header.tsx";
 import { Toaster } from "@/components/ui/toaster";
-import { useSession } from "@/hooks/use-session";
-import { useExpenses } from "@/hooks/use-expenses";
-import { usePWAUpdate } from "@/hooks/use-pwa-update";
+import { useSession } from "@/hooks/useSession.ts";
+import { useExpenses } from "@/hooks/useExpenses.ts";
+import { usePwaUpdate } from "@/hooks/usePwaUpdate.ts";
 
 const App = () => {
-    usePWAUpdate();
+    usePwaUpdate();
 
     const {
         session,
@@ -30,7 +30,7 @@ const App = () => {
             <Header />
             <main className="flex-1">
                 <div className="container mx-auto">
-                    <ExpenseList
+                    <ExpensesList
                         expenses={expenses}
                         categories={categories}
                         isLoading={isLoading}

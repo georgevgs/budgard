@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import type { Expense } from "@/types/expense";
-import type { Category } from "@/types/category";
-import ExpenseHeader from "./expense-header";
-import MonthlyOverview from "./expense-monthly-overview";
-import ExpenseLoadingState from "./expense-loading";
-import EmptyExpenseState from "./expense-empty";
-import PaginatedExpenseGrid from "./paginated-expense-grid";
-import ExpenseForm from "./expense-form";
-import MonthSelector from "@/components/expenses/expense-month-selector";
+import type { Expense } from "@/types/Expense.ts";
+import type { Category } from "@/types/Category.ts";
+import ExpensesHeader from "./ExpensesHeader.tsx";
+import MonthlyOverview from "./ExpensesMonthlyOverview.tsx";
+import ExpenseLoadingState from "./ExpensesLoading.tsx";
+import EmptyExpenseState from "./ExpensesEmpty.tsx";
+import ExpensesPaginationGrid from "./ExpensesPaginationGrid.tsx";
+import ExpensesForm from "./ExpensesForm.tsx";
+import MonthSelector from "@/components/expenses/ExpensesMonthlySelector.tsx";
 import ExpensesDashboard from "@/components/expenses/ExpensesDashboard";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/Utils.ts";
 
 interface ExpenseListProps {
     expenses: Expense[];
@@ -21,7 +21,7 @@ interface ExpenseListProps {
     onCategoryAdd: (categoryData: Partial<Category>) => Promise<void>;
 }
 
-const ExpenseList = ({
+const ExpensesList = ({
     expenses,
     categories,
     isLoading,
@@ -51,7 +51,7 @@ const ExpenseList = ({
 
     return (
         <div className="w-full max-w-4xl mx-auto p-4 space-y-6">
-            <ExpenseHeader onAddClick={() => setShowForm(true)} />
+            <ExpensesHeader onAddClick={() => setShowForm(true)} />
 
             <div className="space-y-4">
                 <MonthSelector
@@ -98,7 +98,7 @@ const ExpenseList = ({
                         onAddClick={() => setShowForm(true)}
                     />
                 ) : (
-                    <PaginatedExpenseGrid
+                    <ExpensesPaginationGrid
                         expenses={filteredExpenses}
                         onEdit={(expense) => {
                             setSelectedExpense(expense);
@@ -109,7 +109,7 @@ const ExpenseList = ({
                 )}
             </div>
 
-            <ExpenseForm
+            <ExpensesForm
                 open={showForm}
                 onClose={handleFormClose}
                 expense={selectedExpense}
@@ -121,4 +121,4 @@ const ExpenseList = ({
     );
 };
 
-export default ExpenseList;
+export default ExpensesList;

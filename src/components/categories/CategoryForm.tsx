@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft } from "lucide-react";
-import type { Category } from "@/types/category";
+import type { Category } from "@/types/Category.ts";
 
 interface SimplifiedCategoryFormProps {
     onBack: () => void;

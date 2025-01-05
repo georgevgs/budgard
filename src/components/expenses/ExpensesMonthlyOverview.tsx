@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { CalendarDays, ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/Utils.ts";
 
 type MonthlyOverviewProps = {
     monthlyTotal: number;
