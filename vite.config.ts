@@ -14,12 +14,6 @@ export default defineConfig({
         short_name: 'Budgard',
         description: 'A minimal and intuitive expense tracker',
         theme_color: '#ffffff',
-        protocol_handlers: [
-          {
-            protocol: 'budgard',
-            url: '/auth/callback?url=%s'
-          }
-        ],
         icons: [
           {
             src: '/icon-192x192.png',

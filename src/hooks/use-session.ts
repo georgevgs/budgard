@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { getSession, onAuthStateChange, checkPendingAuth } from "@/lib/auth";
+import { getSession, onAuthStateChange } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import type { Session } from "@supabase/supabase-js";
 import type { Category } from "@/types/category";
@@ -18,14 +18,6 @@ export function useSession() {
 
         const initializeData = async () => {
             try {
-                // Check for pending auth first
-                const wasAuthRestored = await checkPendingAuth();
-                if (wasAuthRestored) {
-                    const { data: { session: restoredSession } } = await getSession();
-                    if (mounted) setSession(restoredSession);
-                    return;
-                }
-
                 const { data: { session: initialSession } } = await getSession();
 
                 if (!mounted) return;

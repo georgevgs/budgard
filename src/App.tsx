@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "@/pages/landing-page";
 import ExpenseList from "@/components/expenses/expense-list";
 import Header from "@/components/layout/header";
-import AuthCallback from "@/components/auth/AuthCallback";
 import { Toaster } from "@/components/ui/toaster";
 import { useSession } from "@/hooks/use-session";
 import { useExpenses } from "@/hooks/use-expenses";
@@ -48,7 +47,6 @@ const App = () => {
         <BrowserRouter>
             <div className="min-h-screen bg-background flex flex-col">
                 <Routes>
-                    <Route path="/auth/callback" element={<AuthCallback />} />
                     <Route
                         path="/"
                         element={
