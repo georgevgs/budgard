@@ -1,5 +1,4 @@
-// ExpenseForm.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +19,6 @@ interface ExpenseFormProps {
   expense?: Expense;
   categories: Category[];
   onCategoryAdd: (categoryData: Partial<Category>) => Promise<void>;
-  // Changed to match App.tsx signature
   onSubmit: (expenseData: Partial<Expense>, expenseId?: string) => Promise<void>;
 }
 
@@ -57,19 +55,32 @@ const ExpenseForm = ({
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    if (!date) return;
+    if (!date || loading) return;
+
+    const trimmedDescription = description.trim();
+    if (!trimmedDescription) return;
+
     setLoading(true);
 
     try {
       const formattedDate = format(date, "yyyy-MM-dd");
       const expenseData: Partial<Expense> = {
         amount: parseFloat(amount),
-        description,
+        description: trimmedDescription,
         category_id: categoryId || undefined,
         date: formattedDate,
       };
 
       await onSubmit(expenseData, expense?.id);
+
+      // Clear form on success (only if not editing)
+      if (!expense) {
+        setAmount("");
+        setDescription("");
+        setCategoryId("");
+        setDate(new Date());
+      }
+
       onClose();
     } catch {
       // Error is handled by parent
@@ -78,10 +89,15 @@ const ExpenseForm = ({
     }
   };
 
-  const handleCategorySuccess = async (categoryData: Partial<Category>) => {
-    await onCategoryAdd(categoryData);
-    setShowCategoryForm(false);
-  };
+  const handleCategorySubmit = useCallback(async (categoryData: Partial<Category>) => {
+    try {
+      // This will now handle both the API call and updating local state
+      await onCategoryAdd(categoryData);
+      setShowCategoryForm(false);
+    } catch (error) {
+      // Error is handled by parent
+    }
+  }, [onCategoryAdd]);
 
   return (
       <Dialog open={open} onOpenChange={onClose}>
@@ -127,7 +143,7 @@ const ExpenseForm = ({
             >
               <CategoryForm
                   onBack={() => setShowCategoryForm(false)}
-                  onSuccess={handleCategorySuccess}
+                  onSubmit={handleCategorySubmit}
               />
             </div>
           </div>

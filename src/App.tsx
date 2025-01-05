@@ -152,21 +152,26 @@ const App = () => {
 
     const handleCategoryAdd = useCallback(async (categoryData: Partial<Category>): Promise<void> => {
         try {
-            const { data, error } = await supabase
+            // Insert the new category
+            const { error: insertError } = await supabase
                 .from("categories")
-                .insert(categoryData)
-                .select()
-                .single();
+                .insert(categoryData);
 
-            if (error) throw error;
+            if (insertError) throw insertError;
 
-            setCategories(prev => [...prev, data]);
+            // Refetch all categories with proper sorting
+            const { data: updatedCategories, error: fetchError } = await supabase
+                .from('categories')
+                .select('*')
+                .order('name', { ascending: true });
+
+            if (fetchError) throw fetchError;
+
+            setCategories(updatedCategories);
             toast({
                 title: "Success",
                 description: "Category added successfully"
             });
-
-            return data;
         } catch (error) {
             toast({
                 title: "Error",
