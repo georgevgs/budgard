@@ -4,12 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { signInWithOTP, requestOTP } from "@/lib/auth";
 import { CheckCircle2 } from "lucide-react";
-import {
-    InputOTP,
-    InputOTPGroup,
-    InputOTPSlot,
-    InputOTPSeparator,
-} from "@/components/ui/input-otp";
+import { InputOTP,  InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp";
 
 type OtpFormProps = {
     onSuccess?: () => void;
