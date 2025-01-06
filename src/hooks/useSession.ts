@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/useToast.ts";
-import { getSession, onAuthStateChange } from "@/lib/Auth.ts";
-import { supabase } from "@/lib/Supabase.ts";
+import { getSession, onAuthStateChange } from "@/lib/auth.ts";
+import { supabase } from "@/lib/supabase.ts";
 import type { Session } from "@supabase/supabase-js";
 import type { Category } from "@/types/Category.ts";
 import type { Expense } from "@/types/Expense.ts";

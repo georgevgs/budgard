@@ -1,4 +1,4 @@
-import { supabase } from './Supabase.ts';
+import { supabase } from './supabase.ts';
 
 export async function requestOTP(email: string) {
   return supabase.auth.signInWithOtp({

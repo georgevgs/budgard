@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/popover";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { format, addMonths, parseISO, subMonths, setMonth, setYear } from "date-fns";
-import { cn } from "@/lib/Utils.ts";
+import { cn } from "@/lib/utils.ts";
 
 interface MonthSelectorProps {
     selectedMonth: string; // Format: "yyyy-MM"

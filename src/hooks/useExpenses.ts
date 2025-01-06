@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useToast } from "@/hooks/useToast.ts";
-import { supabase } from "@/lib/Supabase.ts";
+import { supabase } from "@/lib/supabase.ts";
 import type { Category } from "@/types/Category.ts";
 import type { Expense } from "@/types/Expense.ts";
 

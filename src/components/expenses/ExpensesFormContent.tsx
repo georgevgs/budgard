@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Calendar as CalendarIcon, Plus } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/Utils.ts";
+import { cn } from "@/lib/utils.ts";
 import type { Category } from "@/types/Category.ts";
 
 interface ExpenseFormContentProps {

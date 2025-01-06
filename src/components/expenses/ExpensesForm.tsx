@@ -1,154 +1,228 @@
-import { useState, useEffect, useCallback } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { DialogTitle, DialogDescription, DialogHeader } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import type { Expense } from "@/types/Expense.ts";
-import type { Category } from "@/types/Category.ts";
-import CategoryForm from "@/components/categories/CategoryForm.tsx";
-import ExpensesFormContent from "./ExpensesFormContent.tsx";
-import { cn } from "@/lib/Utils.ts";
+import { cn } from "@/lib/utils.ts";
+import type { Expense } from "@/types/Expense";
+import type { Category } from "@/types/Category";
 
-interface ExpenseFormProps {
-  open: boolean;
-  onClose: () => void;
+const formSchema = z.object({
+  amount: z.string().min(1, "Amount is required"),
+  description: z.string().min(1, "Description is required").max(100),
+  category_id: z.string(),
+  date: z.date({
+    required_error: "Date is required",
+  }),
+});
+
+interface ExpensesFormProps {
   expense?: Expense;
   categories: Category[];
-  onCategoryAdd: (categoryData: Partial<Category>) => Promise<void>;
   onSubmit: (expenseData: Partial<Expense>, expenseId?: string) => Promise<void>;
+  onClose: () => void;
 }
 
 const ExpensesForm = ({
-  open,
-  onClose,
   expense,
   categories,
-  onCategoryAdd,
   onSubmit,
-}: ExpenseFormProps) => {
-  const [amount, setAmount] = useState(expense?.amount.toString() || "");
-  const [description, setDescription] = useState(expense?.description || "");
-  const [categoryId, setCategoryId] = useState(expense?.category_id || "");
-  const [date, setDate] = useState<Date | undefined>(
-      expense ? new Date(expense.date) : new Date()
-  );
-  const [loading, setLoading] = useState(false);
-  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  onClose,
+}: ExpensesFormProps) => {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      amount: expense?.amount.toString() || "",
+      description: expense?.description || "",
+      category_id: expense?.category_id || "none",
+      date: expense ? new Date(expense.date) : new Date(),
+    },
+  });
 
-  useEffect(() => {
-    if (expense) {
-      setAmount(expense.amount.toString());
-      setDescription(expense.description);
-      setCategoryId(expense.category_id || "");
-      setDate(new Date(expense.date));
-    } else {
-      setAmount("");
-      setDescription("");
-      setCategoryId("");
-      setDate(new Date());
-    }
-  }, [expense]);
-
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault();
-    if (!date || loading) return;
-
-    const trimmedDescription = description.trim();
-    if (!trimmedDescription) return;
-
-    setLoading(true);
-
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const formattedDate = format(date, "yyyy-MM-dd");
       const expenseData: Partial<Expense> = {
-        amount: parseFloat(amount),
-        description: trimmedDescription,
-        category_id: categoryId || undefined,
-        date: formattedDate,
+        amount: parseFloat(values.amount),
+        description: values.description.trim(),
+        category_id: values.category_id === "none" ? undefined : values.category_id,
+        date: format(values.date, "yyyy-MM-dd"),
       };
 
       await onSubmit(expenseData, expense?.id);
-
-      // Clear form on success (only if not editing)
-      if (!expense) {
-        setAmount("");
-        setDescription("");
-        setCategoryId("");
-        setDate(new Date());
-      }
-
       onClose();
     } catch {
       // Error is handled by parent
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleCategorySubmit = useCallback(async (categoryData: Partial<Category>) => {
-    try {
-      // This will now handle both the API call and updating local state
-      await onCategoryAdd(categoryData);
-      setShowCategoryForm(false);
-    } catch (error) {
-      // Error is handled by parent
-    }
-  }, [onCategoryAdd]);
-
   return (
-      <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden [&>button]:hidden rounded-lg">
-          <div className="p-6">
-            <DialogHeader>
-              <DialogTitle>{expense ? "Edit" : "Add"} Expense</DialogTitle>
-              <DialogDescription>
-                Fill in the details for your expense. All fields except category are required.
-              </DialogDescription>
-            </DialogHeader>
-          </div>
+      <div className="p-6">
+        <DialogHeader>
+          <DialogTitle>{expense ? "Edit" : "Add"} Expense</DialogTitle>
+          <DialogDescription>
+            Fill in the details for your expense. All fields except category are required.
+          </DialogDescription>
+        </DialogHeader>
 
-          <div className="relative h-80">
-            <div
-                className={cn(
-                    "absolute inset-0 transition-transform duration-300 ease-in-out px-6 pb-6",
-                    showCategoryForm ? "-translate-x-full" : "translate-x-0"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 pt-4">
+            <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                    <FormItem>
+                      <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    €
+                  </span>
+                        <FormControl>
+                          <Input
+                              type="number"
+                              placeholder="Amount"
+                              {...field}
+                              step="0.01"
+                              min="0"
+                              className="pl-7"
+                          />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
                 )}
-            >
-              <ExpensesFormContent
-                  amount={amount}
-                  setAmount={setAmount}
-                  description={description}
-                  setDescription={setDescription}
-                  categoryId={categoryId}
-                  setCategoryId={setCategoryId}
-                  date={date}
-                  setDate={setDate}
-                  categories={categories}
-                  loading={loading}
-                  onSubmit={handleSubmit}
-                  onClose={onClose}
-                  onAddCategory={() => setShowCategoryForm(true)}
-              />
-            </div>
+            />
 
-            <div
-                className={cn(
-                    "absolute inset-0 transition-transform duration-300 ease-in-out px-6 pb-6",
-                    showCategoryForm ? "translate-x-0" : "translate-x-full"
+            <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                            placeholder="Description"
+                            {...field}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (value === ' ' && !field.value) return;
+                              if (value.includes('  ')) return;
+                              field.onChange(e);
+                            }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                 )}
-            >
-              <CategoryForm
-                  onBack={() => setShowCategoryForm(false)}
-                  onSubmit={handleCategorySubmit}
-              />
+            />
+
+            <FormField
+                control={form.control}
+                name="category_id"
+                render={({ field }) => (
+                    <FormItem>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent position="popper" className="max-h-[300px]">
+                          <SelectItem value="none">No category</SelectItem>
+                          {categories.map((category) => (
+                              <SelectItem key={category.id} value={category.id}>
+                                <div className="flex items-center gap-2">
+                                  <div
+                                      className="w-3 h-3 rounded-full"
+                                      style={{ backgroundColor: category.color }}
+                                  />
+                                  {category.name}
+                                </div>
+                              </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                                variant="outline"
+                                className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value ? (
+                                  format(field.value, "PPP")
+                              ) : (
+                                  <span>Pick a date</span>
+                              )}
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={false}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <div className="flex gap-3 justify-end pt-2">
+              <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+              >
+                Cancel
+              </Button>
+              <Button
+                  type="submit"
+                  disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? "Saving..." : "Save Expense"}
+              </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </form>
+        </Form>
+      </div>
   );
 };
 
