@@ -33,6 +33,7 @@ const FormsManager = ({
                 <DialogContent
                     className="sm:max-w-[425px] p-0 overflow-hidden [&>button]:hidden rounded-lg"
                     aria-describedby="expense-form-description"
+                    onOpenAutoFocus={(e) => e.preventDefault()}
                 >
                     <div id="expense-form-description" className="sr-only">
                         Form to {formType === 'editExpense' ? 'edit an existing' : 'add a new'} expense
