@@ -8,12 +8,12 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { format, addMonths, parseISO, subMonths, setMonth, setYear } from "date-fns";
 import { cn } from "@/lib/utils.ts";
 
-interface MonthSelectorProps {
+interface ExpensesMonthlySelectorProps {
     selectedMonth: string; // Format: "yyyy-MM"
     onMonthChange: (month: string) => void;
 }
 
-const MonthSelector = ({ selectedMonth, onMonthChange }: MonthSelectorProps) => {
+const ExpensesMonthlySelector = ({ selectedMonth, onMonthChange }: ExpensesMonthlySelectorProps) => {
     const selectedDate = parseISO(`${selectedMonth}-01`);
 
     const handleMonthChange = (direction: 'prev' | 'next') => {
@@ -116,4 +116,4 @@ const MonthSelector = ({ selectedMonth, onMonthChange }: MonthSelectorProps) => 
     );
 };
 
-export default MonthSelector;
+export default ExpensesMonthlySelector;
