@@ -19,7 +19,7 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
     };
 
     return (
-        <div className="fixed bottom-4 right-4 z-50 flex flex-col-reverse items-end gap-2">
+        <div className="fixed bottom-4 right-4 z-50 flex flex-col-reverse items-end gap-2 pb-safe">
             {/* Action Buttons */}
             <div
                 className={cn(

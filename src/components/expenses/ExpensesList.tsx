@@ -2,15 +2,15 @@ import { useState } from "react";
 import { format } from "date-fns";
 import type { Expense } from "@/types/Expense.ts";
 import type { Category } from "@/types/Category.ts";
-import MonthlyOverview from "./ExpensesMonthlyOverview.tsx";
-import ExpenseLoadingState from "./ExpensesLoading.tsx";
-import EmptyExpenseState from "./ExpensesEmpty.tsx";
-import ExpensesPaginationGrid from "./ExpensesPaginationGrid.tsx";
-import MonthSelector from "@/components/expenses/ExpensesMonthlySelector.tsx";
+import MonthlyOverview from "./ExpensesMonthlyOverview";
+import ExpenseLoadingState from "./ExpensesLoading";
+import EmptyExpenseState from "./ExpensesEmpty";
+import ExpensesPaginationGrid from "./ExpensesPaginationGrid";
+import MonthSelector from "@/components/expenses/ExpensesMonthlySelector";
 import ExpensesDashboard from "@/components/expenses/ExpensesDashboard";
 import { cn } from "@/lib/utils.ts";
-import FormsManager, {FormType} from "@/components/layout/FormsManager.tsx";
-import SpeedDial from "@/components/layout/SpeedDial.tsx";
+import FormsManager, { FormType } from "@/components/layout/FormsManager";
+import SpeedDial from "@/components/layout/SpeedDial";
 
 interface ExpenseListProps {
     expenses: Expense[];
@@ -50,16 +50,9 @@ const ExpensesList = ({
     };
 
     return (
-        <>
-            <div className="w-full max-w-4xl mx-auto p-4 space-y-6">
-                <div className="space-y-1">
-                    <h1 className="text-2xl font-bold tracking-tight">Expenses</h1>
-                    <p className="text-sm text-muted-foreground">
-                        Track and manage your expenses
-                    </p>
-                </div>
-
-                <div className="space-y-4">
+        <div className="h-[calc(100vh-58px)] flex flex-col">
+            <div className="flex-1 min-h-0 w-full max-w-4xl mx-auto px-4 pt-4 pb-safe flex flex-col">
+                <div className="space-y-3 mt-2">
                     <MonthSelector
                         selectedMonth={selectedMonth}
                         onMonthChange={setSelectedMonth}
@@ -74,7 +67,6 @@ const ExpensesList = ({
                         onMonthlyTotalClick={() => setIsDashboardVisible(!isDashboardVisible)}
                     />
 
-                    {/* Dashboard Section with Animation */}
                     <div
                         className={cn(
                             "grid transition-all duration-200 ease-in-out",
@@ -94,8 +86,7 @@ const ExpensesList = ({
                     </div>
                 </div>
 
-                {/* Expense List Section */}
-                <div className="space-y-4">
+                <div className="mt-4 flex-1 min-h-0">
                     {isLoading ? (
                         <ExpenseLoadingState />
                     ) : filteredExpenses.length === 0 ? (
@@ -114,22 +105,22 @@ const ExpensesList = ({
                         />
                     )}
                 </div>
-
-                <FormsManager
-                    formType={formType}
-                    onClose={handleFormClose}
-                    selectedExpense={selectedExpense}
-                    categories={categories}
-                    onExpenseSubmit={onExpenseSubmit}
-                    onCategoryAdd={onCategoryAdd}
-                />
             </div>
+
+            <FormsManager
+                formType={formType}
+                onClose={handleFormClose}
+                selectedExpense={selectedExpense}
+                categories={categories}
+                onExpenseSubmit={onExpenseSubmit}
+                onCategoryAdd={onCategoryAdd}
+            />
 
             <SpeedDial
                 onAddExpense={() => setFormType('newExpense')}
                 onAddCategory={() => setFormType('newCategory')}
             />
-        </>
+        </div>
     );
 };
 

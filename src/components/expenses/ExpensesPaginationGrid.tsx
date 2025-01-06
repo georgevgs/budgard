@@ -1,86 +1,7 @@
 import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import ExpensesCard from "./ExpensesCard.tsx";
-import type { Expense } from "@/types/Expense.ts";
-
-interface PaginationControlsProps {
-    currentPage: number;
-    totalPages: number;
-    pageSize: number;
-    onPageChange: (page: number) => void;
-    onPageSizeChange: (size: string) => void;
-    totalItems: number;
-    startItem: number;
-    endItem: number;
-}
-
-const PaginationControls = ({
-    currentPage,
-    totalPages,
-    pageSize,
-    onPageChange,
-    onPageSizeChange,
-    totalItems,
-    startItem,
-    endItem,
-}: PaginationControlsProps) => (
-    <div className="flex items-center justify-between border-t pt-4 mt-4">
-        {/* Left - Items count */}
-        <p className="text-sm text-muted-foreground">
-            {startItem}-{endItem} of {totalItems}
-        </p>
-
-        {/* Center - Page navigation */}
-        <div className="flex items-center gap-3">
-            <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onPageChange(currentPage - 1)}
-                disabled={currentPage <= 1}
-                className="h-8 w-8"
-            >
-                <ChevronLeft className="h-4 w-4" />
-            </Button>
-
-            <span className="text-sm">
-                {currentPage} of {totalPages || 1}
-            </span>
-
-            <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onPageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages}
-                className="h-8 w-8"
-            >
-                <ChevronRight className="h-4 w-4" />
-            </Button>
-        </div>
-
-        {/* Right - Items per page */}
-        <Select
-            value={pageSize.toString()}
-            onValueChange={onPageSizeChange}
-        >
-            <SelectTrigger className="w-[70px]">
-                <SelectValue />
-            </SelectTrigger>
-            <SelectContent align="end">
-                <SelectItem value="5">5</SelectItem>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="-1">All</SelectItem>
-            </SelectContent>
-        </Select>
-    </div>
-);
+import PaginationControls from '@/components/layout/PaginationControls';
+import ExpensesGrid from '@/components/expenses/ExpensesGrid';
+import type { Expense } from "@/types/Expense";
 
 interface PaginatedExpenseGridProps {
     expenses: Expense[];
@@ -122,29 +43,28 @@ const ExpensesPaginationGrid = ({
     }
 
     return (
-        <div className="space-y-4">
-            <div className="grid gap-4">
-                {paginatedExpenses.map((expense) => (
-                    <ExpensesCard
-                        key={expense.id}
-                        expense={expense}
-                        onEdit={() => onEdit(expense)}
-                        onDelete={() => onDelete(expense.id)}
-                    />
-                ))}
+        <div className="flex flex-col h-full">
+            <div className="overflow-y-auto flex-1 min-h-0">
+                <ExpensesGrid
+                    expenses={paginatedExpenses}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                />
             </div>
 
             {totalItems > 0 && (
-                <PaginationControls
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    pageSize={pageSize}
-                    onPageChange={setCurrentPage}
-                    onPageSizeChange={handlePageSizeChange}
-                    totalItems={totalItems}
-                    startItem={startItem}
-                    endItem={endItem}
-                />
+                <div className="pb-12 md:pb-4">
+                    <PaginationControls
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        pageSize={pageSize}
+                        onPageChange={setCurrentPage}
+                        onPageSizeChange={handlePageSizeChange}
+                        totalItems={totalItems}
+                        startItem={startItem}
+                        endItem={endItem}
+                    />
+                </div>
             )}
         </div>
     );
