@@ -1,16 +1,17 @@
-import { useState } from "react";
-import { format } from "date-fns";
-import type { Expense } from "@/types/Expense";
-import type { Category } from "@/types/Category";
-import { cn } from "@/lib/utils";
-import FormsManager, { FormType } from "@/components/layout/FormsManager";
+import {useState} from "react";
+import {format} from "date-fns";
+import type {Expense} from "@/types/Expense";
+import type {Category} from "@/types/Category";
+import {cn} from "@/lib/utils";
+import FormsManager, {FormType} from "@/components/layout/FormsManager";
 import SpeedDial from "@/components/layout/SpeedDial";
-import ExpensesMonthlySelector from "@/components/expenses/ExpensesMonthlySelector.tsx";
-import ExpensesMonthlyOverview from "@/components/expenses/ExpensesMonthlyOverview.tsx";
-import ExpensesDashboard from "@/components/expenses/ExpensesDashboard.tsx";
-import EmptyExpenseState from "@/components/expenses/ExpensesEmpty.tsx";
-import ExpenseLoadingState from "@/components/expenses/ExpensesLoading.tsx";
-import ExpensesPagination from "@/components/expenses/ExpensesPagination.tsx";
+import ExpensesMonthlySelector from "@/components/expenses/ExpensesMonthlySelector";
+import ExpensesMonthlyOverview from "@/components/expenses/ExpensesMonthlyOverview";
+import ExpensesDashboard from "@/components/expenses/ExpensesDashboard";
+import EmptyExpenseState from "@/components/expenses/ExpensesEmpty";
+import ExpenseLoadingState from "@/components/expenses/ExpensesLoading";
+import ExpensesPagination from "@/components/expenses/ExpensesPagination";
+import ExpensesBudget from "@/components/expenses/ExpensesBudget";
 
 interface ExpenseListProps {
     expenses: Expense[];
@@ -52,7 +53,7 @@ const ExpensesList = ({
 
     const handleExpenseEdit = (expense: Expense) => {
         setSelectedExpense(expense);
-        setFormType('editExpense');
+        setFormType("editExpense");
     };
 
     return (
@@ -74,7 +75,7 @@ const ExpensesList = ({
                         onMonthlyTotalClick={() => setIsDashboardVisible(!isDashboardVisible)}
                     />
 
-                    {/* Collapsible Dashboard */}
+                    {/* Collapsible Dashboard and Budget */}
                     <div
                         className={cn(
                             "grid transition-all duration-200 ease-in-out",
@@ -83,12 +84,18 @@ const ExpensesList = ({
                                 : "grid-rows-[0fr] opacity-0"
                         )}
                     >
-                        <div className="overflow-hidden">
+                        <div className="overflow-hidden space-y-4">
                             {!isLoading && filteredExpenses.length > 0 && (
-                                <ExpensesDashboard
-                                    expenses={filteredExpenses}
-                                    categories={categories}
-                                />
+                                <>
+                                    <ExpensesDashboard
+                                        expenses={filteredExpenses}
+                                        categories={categories}
+                                    />
+                                    <ExpensesBudget
+                                        categories={categories}
+                                        expenses={filteredExpenses}
+                                    />
+                                </>
                             )}
                         </div>
                     </div>
@@ -97,11 +104,11 @@ const ExpensesList = ({
                 {/* Expenses List Section */}
                 <div className="flex-1 min-h-0">
                     {isLoading ? (
-                        <ExpenseLoadingState />
+                        <ExpenseLoadingState/>
                     ) : filteredExpenses.length === 0 ? (
                         <EmptyExpenseState
                             selectedMonth={selectedMonth}
-                            onAddClick={() => setFormType('newExpense')}
+                            onAddClick={() => setFormType("newExpense")}
                         />
                     ) : (
                         <ExpensesPagination
@@ -125,8 +132,8 @@ const ExpensesList = ({
 
             {/* Speed Dial */}
             <SpeedDial
-                onAddExpense={() => setFormType('newExpense')}
-                onAddCategory={() => setFormType('newCategory')}
+                onAddExpense={() => setFormType("newExpense")}
+                onAddCategory={() => setFormType("newCategory")}
             />
         </div>
     );
