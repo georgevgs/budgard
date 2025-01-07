@@ -9,10 +9,9 @@ import {useAuth} from "@/contexts/AuthContext";
 import {useTurnstile} from "@/hooks/useTurnstile";
 import {emailSchema} from "@/lib/validations";
 
-// Constants for rate limiting
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_TIME = 15 * 60 * 1000; // 15 minutes
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
 
 type OtpFormProps = {
     onSuccess?: () => void;
@@ -32,17 +31,17 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
         token,
         renderTurnstile,
         reset: resetTurnstile,
-        isLoading: isTurnstileLoading,
-        isExpired: isTurnstileExpired,
-        getToken
+        isExpired,
+        getToken,
+        isReady
     } = useTurnstile(TURNSTILE_SITE_KEY);
 
-    // Initialize Turnstile
+    // Initialize Turnstile when ready and not in OTP state
     useEffect(() => {
-        if (turnstileRef.current && !isTurnstileLoading && !otpSent) {
+        if (!otpSent && isReady && turnstileRef.current) {
             renderTurnstile(turnstileRef.current);
         }
-    }, [renderTurnstile, isTurnstileLoading, otpSent]);
+    }, [otpSent, isReady]);
 
     const checkRateLimit = (): boolean => {
         const attempts = parseInt(localStorage.getItem("otpAttempts") || "0");
@@ -58,7 +57,6 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
                 });
                 return false;
             }
-            // Reset after lockout period
             localStorage.setItem("otpAttempts", "0");
         }
         return true;
@@ -74,7 +72,6 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
         e.preventDefault();
         if (loading || isAuthLoading) return;
 
-        // Validate email
         try {
             emailSchema.parse(email);
             setEmailError("");
@@ -83,8 +80,7 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
             return;
         }
 
-        // Check Turnstile
-        if (isTurnstileExpired()) {
+        if (isExpired()) {
             toast({
                 title: "Security check expired",
                 description: "Please complete the security check again",
@@ -104,7 +100,6 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
             return;
         }
 
-        // Check rate limiting
         if (!checkRateLimit()) return;
 
         setLoading(true);
@@ -114,7 +109,6 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
 
             updateRateLimit();
             setOtpSent(true);
-            resetTurnstile();
 
             toast({
                 title: "Code Sent",
@@ -157,6 +151,11 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
         }
     };
 
+    const handleBackToEmail = () => {
+        setOtpSent(false);
+        setOtp("");
+    };
+
     if (!otpSent) {
         return (
             <div className="space-y-4">
@@ -174,10 +173,7 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
                             aria-describedby={emailError ? "email-error" : undefined}
                         />
                         {emailError && (
-                            <p
-                                id="email-error"
-                                className="text-sm text-destructive"
-                            >
+                            <p id="email-error" className="text-sm text-destructive">
                                 {emailError}
                             </p>
                         )}
@@ -192,7 +188,7 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
                     <Button
                         type="submit"
                         className="w-full h-10"
-                        disabled={loading || isAuthLoading || !token}
+                        disabled={loading || isAuthLoading || !token || !isReady}
                     >
                         {loading ? "Sending..." : "Send Code"}
                     </Button>
@@ -244,10 +240,7 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
                         type="button"
                         variant="ghost"
                         className="w-full h-10"
-                        onClick={() => {
-                            setOtpSent(false);
-                            setOtp("");
-                        }}
+                        onClick={handleBackToEmail}
                         disabled={loading || isAuthLoading}
                     >
                         Use Different Email
