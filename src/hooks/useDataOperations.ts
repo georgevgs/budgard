@@ -112,7 +112,9 @@ export function useDataOperations() {
                 const savedCategory = await dataService.createCategory(categoryData);
 
                 // Update with actual server data
-                const finalCategories = [...categories, savedCategory];
+                const finalCategories = [...categories, savedCategory].sort((a, b) =>
+                    a.name.localeCompare(b.name)
+                );
                 updateOptimistically("categories", finalCategories);
 
                 toast({
