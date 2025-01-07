@@ -1,10 +1,26 @@
-import {useState, useEffect} from "react";
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription} from "@/components/ui/dialog";
+import {useEffect} from "react";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription
+} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormMessage,
+} from "@/components/ui/form";
 import {Input} from "@/components/ui/input";
 import {useAuth} from "@/contexts/AuthContext";
 import {useData} from "@/contexts/DataContext";
 import {useDataOperations} from "@/hooks/useDataOperations";
+import {budgetSchema, type BudgetFormData} from "@/lib/validations";
 import type {Budget} from "@/types/Budget";
 
 interface ExpensesBudgetAddDialogProps {
@@ -18,28 +34,33 @@ const ExpensesBudgetAddDialog = ({
     onOpenChange,
     existingBudget,
 }: ExpensesBudgetAddDialogProps) => {
-    const [budgetAmount, setBudgetAmount] = useState<string>("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const {session} = useAuth();
     const {isInitialized} = useData();
     const {handleBudgetUpdate} = useDataOperations();
 
+    const form = useForm<BudgetFormData>({
+        resolver: zodResolver(budgetSchema),
+        defaultValues: {
+            amount: existingBudget?.amount.toString() || "",
+        },
+    });
+
+    // Reset form when dialog opens/closes or when existingBudget changes
     useEffect(() => {
-        if (isOpen && existingBudget) {
-            setBudgetAmount(existingBudget.amount.toString());
-        } else if (!isOpen) {
-            setBudgetAmount("");
+        if (isOpen) {
+            form.reset({
+                amount: existingBudget?.amount.toString() || "",
+            });
         }
-    }, [isOpen, existingBudget]);
+    }, [isOpen, existingBudget, form]);
 
-    const handleSubmit = async () => {
-        if (!budgetAmount || !session?.user?.id || !isInitialized) return;
+    const handleSubmit = async (values: BudgetFormData) => {
+        if (!session?.user?.id || !isInitialized) return;
 
-        setIsSubmitting(true);
         try {
             const success = await handleBudgetUpdate({
                 id: existingBudget?.id,
-                amount: parseFloat(budgetAmount),
+                amount: parseFloat(values.amount),
                 user_id: session.user.id
             });
 
@@ -48,13 +69,11 @@ const ExpensesBudgetAddDialog = ({
             }
         } catch (error) {
             console.error("Budget submission error:", error);
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
     // Prevent interactions if data isn't initialized
-    const isDisabled = isSubmitting || !isInitialized;
+    const isDisabled = form.formState.isSubmitting || !isInitialized;
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -67,54 +86,69 @@ const ExpensesBudgetAddDialog = ({
                     <DialogTitle>
                         {existingBudget ? "Edit Budget" : "Set Budget"}
                     </DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription id="budget-form-description">
                         {existingBudget
                             ? `Your current budget is €${existingBudget.amount.toFixed(2)}. Enter a new amount to update it.`
                             : "Set your monthly budget amount"}
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 pt-2">
-                    <div className="grid gap-2">
-                        <span className="text-sm font-medium">Budget Amount</span>
-                        <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                                €
-                            </span>
-                            <Input
-                                type="number"
-                                placeholder="Enter total monthly budget"
-                                value={budgetAmount}
-                                onChange={(e) => setBudgetAmount(e.target.value)}
-                                className="pl-7"
-                                min="0"
-                                step="0.01"
-                                disabled={isDisabled}
-                            />
-                        </div>
-                    </div>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 pt-2">
+                        <FormField
+                            control={form.control}
+                            name="amount"
+                            render={({field}) => (
+                                <FormItem>
+                                    <div className="grid gap-2">
+                                        <span className="text-sm font-medium">Budget Amount</span>
+                                        <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        €
+                      </span>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    inputMode="decimal"
+                                                    placeholder="Enter total monthly budget"
+                                                    {...field}
+                                                    className="pl-7"
+                                                    min="0"
+                                                    step="0.01"
+                                                    disabled={isDisabled}
+                                                    aria-label="Monthly budget amount"
+                                                />
+                                            </FormControl>
+                                        </div>
+                                    </div>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
 
-                    <div className="flex justify-end gap-2 pt-2">
-                        <Button
-                            variant="outline"
-                            onClick={() => onOpenChange(false)}
-                            disabled={isDisabled}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            onClick={handleSubmit}
-                            disabled={!budgetAmount || isDisabled}
-                        >
-                            {isSubmitting
-                                ? "Saving..."
-                                : existingBudget
-                                    ? "Update Budget"
-                                    : "Set Budget"
-                            }
-                        </Button>
-                    </div>
-                </div>
+                        <div className="flex justify-end gap-2 pt-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => onOpenChange(false)}
+                                disabled={isDisabled}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={isDisabled || !form.formState.isDirty}
+                            >
+                                {form.formState.isSubmitting
+                                    ? "Saving..."
+                                    : existingBudget
+                                        ? "Update Budget"
+                                        : "Set Budget"
+                                }
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
             </DialogContent>
         </Dialog>
     );

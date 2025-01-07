@@ -1,5 +1,4 @@
 import {useForm} from "react-hook-form";
-import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {DialogTitle, DialogDescription, DialogHeader} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
@@ -29,17 +28,9 @@ import {format} from "date-fns";
 import {cn} from "@/lib/utils";
 import {useAuth} from "@/hooks/useAuth";
 import {useDataOperations} from "@/hooks/useDataOperations";
+import {expenseSchema, type ExpenseFormData} from "@/lib/validations";
 import type {Expense} from "@/types/Expense";
 import type {Category} from "@/types/Category";
-
-const formSchema = z.object({
-    amount: z.string().min(1, "Amount is required"),
-    description: z.string().min(1, "Description is required").max(100),
-    category_id: z.string(),
-    date: z.date({
-        required_error: "Date is required",
-    }),
-});
 
 interface ExpensesFormProps {
     expense?: Expense;
@@ -55,8 +46,8 @@ const ExpensesForm = ({
     const {session} = useAuth();
     const {handleExpenseSubmit} = useDataOperations();
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<ExpenseFormData>({
+        resolver: zodResolver(expenseSchema),
         defaultValues: {
             amount: expense?.amount.toString() || "",
             description: expense?.description || "",
@@ -65,13 +56,13 @@ const ExpensesForm = ({
         },
     });
 
-    const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    const handleSubmit = async (values: ExpenseFormData) => {
         if (!session?.user?.id) return;
 
         try {
             const expenseData: Partial<Expense> = {
                 amount: parseFloat(values.amount),
-                description: values.description.trim(),
+                description: values.description,
                 category_id: values.category_id === "none" ? undefined : values.category_id,
                 date: format(values.date, "yyyy-MM-dd"),
                 user_id: session.user.id
@@ -101,12 +92,13 @@ const ExpensesForm = ({
                         render={({field}) => (
                             <FormItem>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                                        €
-                                    </span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    €
+                  </span>
                                     <FormControl>
                                         <Input
                                             type="number"
+                                            inputMode="decimal"
                                             placeholder="Amount"
                                             {...field}
                                             step="0.01"
@@ -129,12 +121,7 @@ const ExpensesForm = ({
                                     <Input
                                         placeholder="Description"
                                         {...field}
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            if (value === " " && !field.value) return;
-                                            if (value.includes("  ")) return;
-                                            field.onChange(e);
-                                        }}
+                                        className="overflow-ellipsis"
                                     />
                                 </FormControl>
                                 <FormMessage/>
