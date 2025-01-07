@@ -1,17 +1,13 @@
-import {useState, useRef, useEffect} from "react";
+import {useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {useToast} from "@/hooks/useToast";
 import {signInWithOTP, requestOTP} from "@/lib/auth";
-import {CheckCircle2, Shield} from "lucide-react";
+import {CheckCircle2} from "lucide-react";
 import {InputOTP, InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp";
 import {useAuth} from "@/contexts/AuthContext";
-import {useTurnstile} from "@/hooks/useTurnstile";
 import {emailSchema} from "@/lib/validations";
-
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
-const MAX_ATTEMPTS = 5;
-const LOCKOUT_TIME = 15 * 60 * 1000; // 15 minutes
+import {useNavigate} from "react-router-dom";
 
 type OtpFormProps = {
     onSuccess?: () => void;
@@ -23,52 +19,25 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
     const [otpSent, setOtpSent] = useState(false);
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
-    const turnstileRef = useRef<HTMLDivElement>(null);
+    const [honeypot, setHoneypot] = useState(""); // Honeypot field
     const {toast} = useToast();
     const {isLoading: isAuthLoading} = useAuth();
-
-    const {
-        token,
-        renderTurnstile,
-        reset: resetTurnstile,
-        isReady
-    } = useTurnstile(TURNSTILE_SITE_KEY);
-
-    // Initialize Turnstile when ready
-    useEffect(() => {
-        if (isReady && turnstileRef.current) {
-            renderTurnstile(turnstileRef.current);
-        }
-    }, [isReady]);
-
-    const checkRateLimit = (): boolean => {
-        const attempts = parseInt(localStorage.getItem("otpAttempts") || "0");
-        const lastAttempt = localStorage.getItem("lastOtpAttempt");
-
-        if (attempts >= MAX_ATTEMPTS && lastAttempt) {
-            const timeLeft = LOCKOUT_TIME - (Date.now() - parseInt(lastAttempt));
-            if (timeLeft > 0) {
-                toast({
-                    title: "Too many attempts",
-                    description: `Please try again in ${Math.ceil(timeLeft / 60000)} minutes`,
-                    variant: "destructive",
-                });
-                return false;
-            }
-            localStorage.setItem("otpAttempts", "0");
-        }
-        return true;
-    };
-
-    const updateRateLimit = () => {
-        const attempts = parseInt(localStorage.getItem("otpAttempts") || "0");
-        localStorage.setItem("otpAttempts", (attempts + 1).toString());
-        localStorage.setItem("lastOtpAttempt", Date.now().toString());
-    };
+    const navigate = useNavigate();
 
     const handleRequestOTP = async (e: React.FormEvent) => {
         e.preventDefault();
         if (loading || isAuthLoading) return;
+
+        // Check honeypot
+        if (honeypot) {
+            // Silently fail to avoid letting bots know they were detected
+            console.log("Honeypot triggered");
+
+            // Optional: redirect to a different page
+            navigate("/");
+
+            return;
+        }
 
         try {
             emailSchema.parse(email);
@@ -78,16 +47,12 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
             return;
         }
 
-        if (!checkRateLimit()) return;
-
         setLoading(true);
         try {
             const {error} = await requestOTP(email);
             if (error) throw error;
 
-            updateRateLimit();
             setOtpSent(true);
-
             toast({
                 title: "Code Sent",
                 description: "Check your email for the 6-digit code.",
@@ -128,38 +93,7 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
         }
     };
 
-    const handleBackToEmail = () => {
-        setOtpSent(false);
-        setOtp("");
-        resetTurnstile();
-        if (turnstileRef.current) {
-            renderTurnstile(turnstileRef.current);
-        }
-    };
-
     if (!otpSent) {
-        if (!token) {
-            return (
-                <div className="space-y-6">
-                    <div className="flex flex-col items-center gap-2 text-center">
-                        <Shield className="h-8 w-8 text-primary"/>
-                        <div>
-                            <h3 className="text-lg font-semibold">Security Check</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Please complete the security check to continue
-                            </p>
-                        </div>
-                    </div>
-
-                    <div
-                        ref={turnstileRef}
-                        className="flex justify-center"
-                        aria-label="Security challenge"
-                    />
-                </div>
-            );
-        }
-
         return (
             <div className="space-y-4">
                 <form onSubmit={handleRequestOTP} className="space-y-4">
@@ -180,6 +114,32 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
                                 {emailError}
                             </p>
                         )}
+
+                        {/* Honeypot field */}
+                        <div
+                            aria-hidden="true"
+                            style={{
+                                position: "absolute",
+                                left: "-9999px",
+                                opacity: 0,
+                                pointerEvents: "none",
+                                height: 0,
+                                width: 0,
+                                overflow: "hidden"
+                            }}
+                        >
+                            <label>
+                                Leave this field empty:
+                                <Input
+                                    name="phone_number" // Deceptive name to trick bots
+                                    type="text"
+                                    value={honeypot}
+                                    onChange={(e) => setHoneypot(e.target.value)}
+                                    tabIndex={-1}
+                                    autoComplete="off"
+                                />
+                            </label>
+                        </div>
                     </div>
 
                     <Button
@@ -237,7 +197,10 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
                         type="button"
                         variant="ghost"
                         className="w-full h-10"
-                        onClick={handleBackToEmail}
+                        onClick={() => {
+                            setOtpSent(false);
+                            setOtp("");
+                        }}
                         disabled={loading || isAuthLoading}
                     >
                         Use Different Email
