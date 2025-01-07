@@ -1,7 +1,7 @@
 import {useMemo} from "react";
 import {Card, CardContent} from "@/components/ui/card";
-import type {Expense} from "@/types/Expense.ts";
-import type {Category} from "@/types/Category.ts";
+import type {Expense} from "@/types/Expense";
+import type {Category} from "@/types/Category";
 
 interface ExpensesDashboardProps {
     expenses: Expense[];

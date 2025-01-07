@@ -3,8 +3,9 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {DialogTitle, DialogHeader, DialogDescription} from "@/components/ui/dialog";
 import {ArrowLeft} from "lucide-react";
-import {useAuth} from "@/hooks/useAuth";
+import {useAuth} from "@/contexts/AuthContext";
 import {useDataOperations} from "@/hooks/useDataOperations";
+import {useData} from "@/contexts/DataContext";
 
 interface CategoryFormProps {
     onBack: () => void;
@@ -17,10 +18,11 @@ const CategoryForm = ({onBack, onClose}: CategoryFormProps) => {
     const [loading, setLoading] = useState(false);
     const {session} = useAuth();
     const {handleCategoryAdd} = useDataOperations();
+    const {isInitialized} = useData();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (loading || !session?.user?.id) return;
+        if (loading || !session?.user?.id || !isInitialized) return;
 
         const trimmedName = name.trim();
         if (!trimmedName) return;
@@ -50,6 +52,9 @@ const CategoryForm = ({onBack, onClose}: CategoryFormProps) => {
         }
     };
 
+    // Prevent form submission if data isn't initialized
+    const isDisabled = loading || !isInitialized;
+
     return (
         <div className="space-y-6">
             <DialogHeader>
@@ -60,7 +65,7 @@ const CategoryForm = ({onBack, onClose}: CategoryFormProps) => {
                         size="sm"
                         onClick={onBack}
                         className="h-8 w-8 p-0"
-                        disabled={loading}
+                        disabled={isDisabled}
                     >
                         <ArrowLeft className="h-4 w-4"/>
                         <span className="sr-only">Go back</span>
@@ -88,7 +93,7 @@ const CategoryForm = ({onBack, onClose}: CategoryFormProps) => {
                         }}
                         required
                         maxLength={50}
-                        disabled={loading}
+                        disabled={isDisabled}
                         aria-label="Category name"
                     />
                 </div>
@@ -99,7 +104,7 @@ const CategoryForm = ({onBack, onClose}: CategoryFormProps) => {
                         value={color}
                         onChange={(e) => setColor(e.target.value)}
                         className="w-20 h-10 p-1 cursor-pointer"
-                        disabled={loading}
+                        disabled={isDisabled}
                         aria-label="Category color"
                     />
                     <Input
@@ -109,7 +114,7 @@ const CategoryForm = ({onBack, onClose}: CategoryFormProps) => {
                         placeholder="#000000"
                         className="flex-1"
                         pattern="^#[0-9A-Fa-f]{6}$"
-                        disabled={loading}
+                        disabled={isDisabled}
                         aria-label="Category color hex value"
                     />
                 </div>
@@ -119,13 +124,13 @@ const CategoryForm = ({onBack, onClose}: CategoryFormProps) => {
                         type="button"
                         variant="outline"
                         onClick={onBack}
-                        disabled={loading}
+                        disabled={isDisabled}
                     >
                         Cancel
                     </Button>
                     <Button
                         type="submit"
-                        disabled={loading || !name.trim()}
+                        disabled={isDisabled || !name.trim()}
                     >
                         {loading ? "Adding..." : "Add Category"}
                     </Button>

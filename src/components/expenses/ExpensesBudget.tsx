@@ -1,19 +1,15 @@
 import {useState} from "react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
-import {useAuth} from "@/hooks/useAuth";
 import {useData} from "@/contexts/DataContext";
-import {useDataOperations} from "@/hooks/useDataOperations";
-import ExpensesBudgetList from "@/components/expenses/ExpensesBudgetList";
-import ExpensesBudgetAddDialog from "@/components/expenses/ExpensesBudgetAddDialog";
+import ExpensesBudgetList from "./ExpensesBudgetList";
+import ExpensesBudgetAddDialog from "./ExpensesBudgetAddDialog";
 
 const ExpensesBudget = () => {
     const [isAddBudgetOpen, setIsAddBudgetOpen] = useState(false);
-    const {session} = useAuth();
-    const {categories, expenses, budget, isLoading} = useData();
-    const {handleBudgetUpdate} = useDataOperations();
+    const {budget, isInitialized, isLoading} = useData();
 
-    if (isLoading) {
+    if (!isInitialized || isLoading) {
         return (
             <Card>
                 <CardHeader>
@@ -44,20 +40,14 @@ const ExpensesBudget = () => {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <ExpensesBudgetList
-                        budget={budget}
-                        categories={categories}
-                        expenses={expenses}
-                    />
+                    <ExpensesBudgetList/>
                 </CardContent>
             </Card>
 
             <ExpensesBudgetAddDialog
                 isOpen={isAddBudgetOpen}
                 onOpenChange={setIsAddBudgetOpen}
-                onAddBudget={handleBudgetUpdate}
                 existingBudget={budget}
-                session={session}
             />
         </div>
     );

@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { CalendarDays, ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils.ts";
+import {Button} from "@/components/ui/button";
+import {CalendarDays, ChevronDown} from "lucide-react";
+import {cn} from "@/lib/utils.ts";
 
-type MonthlyOverviewProps = {
+type ExpensesMonthlyOverviewProps = {
     monthlyTotal: number;
     selectedMonth: string;
     currentMonth: string;
@@ -12,7 +12,7 @@ type MonthlyOverviewProps = {
     onMonthlyTotalClick: () => void;
 };
 
-const MonthlyOverview = ({
+const ExpensesMonthlyOverview = ({
     monthlyTotal,
     selectedMonth,
     currentMonth,
@@ -20,7 +20,7 @@ const MonthlyOverview = ({
     hasExpenses,
     onCurrentMonthClick,
     onMonthlyTotalClick,
-}: MonthlyOverviewProps) => (
+}: ExpensesMonthlyOverviewProps) => (
     <div className="flex items-start justify-between gap-4 bg-background border rounded-lg p-4">
         <div
             onClick={hasExpenses ? onMonthlyTotalClick : undefined}
@@ -51,11 +51,11 @@ const MonthlyOverview = ({
                 onClick={onCurrentMonthClick}
                 className="text-muted-foreground"
             >
-                <CalendarDays className="h-4 w-4 mr-2" />
+                <CalendarDays className="h-4 w-4 mr-2"/>
                 Today
             </Button>
         )}
     </div>
 );
 
-export default MonthlyOverview;
+export default ExpensesMonthlyOverview;

@@ -7,16 +7,16 @@ import {useDataOperations} from "@/hooks/useDataOperations";
 import {cn} from "@/lib/utils";
 import FormsManager from "@/components/layout/FormsManager";
 import SpeedDial from "@/components/layout/SpeedDial";
-import ExpensesMonthlySelector from "@/components/expenses/ExpensesMonthlySelector";
-import ExpensesMonthlyOverview from "@/components/expenses/ExpensesMonthlyOverview";
-import ExpensesDashboard from "@/components/expenses/ExpensesDashboard";
-import ExpensesBudget from "@/components/expenses/ExpensesBudget";
-import EmptyExpenseState from "@/components/expenses/ExpensesEmpty";
-import ExpenseLoadingState from "@/components/expenses/ExpensesLoading";
-import ExpensesPagination from "@/components/expenses/ExpensesPagination";
+import ExpensesMonthlySelector from "./ExpensesMonthlySelector";
+import ExpensesMonthlyOverview from "./ExpensesMonthlyOverview";
+import ExpensesDashboard from "./ExpensesDashboard";
+import ExpensesBudget from "./ExpensesBudget";
+import EmptyExpenseState from "./ExpensesEmpty";
+import ExpenseLoadingState from "./ExpensesLoading";
+import ExpensesPagination from "./ExpensesPagination";
 
 const ExpensesList = () => {
-    const {categories, expenses, isLoading} = useData();
+    const {categories, expenses, isLoading, isInitialized} = useData();
     const operations = useDataOperations();
 
     const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
@@ -24,6 +24,11 @@ const ExpensesList = () => {
     const [isDashboardVisible, setIsDashboardVisible] = useState(false);
     const currentMonth = format(new Date(), "yyyy-MM");
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+
+    // Show loading state if not initialized or still loading
+    if (!isInitialized || isLoading) {
+        return <ExpenseLoadingState/>;
+    }
 
     // Filter expenses for selected month and sort by date
     const filteredExpenses = expenses.filter(
@@ -74,7 +79,7 @@ const ExpensesList = () => {
                         )}
                     >
                         <div className="overflow-hidden space-y-4">
-                            {!isLoading && filteredExpenses.length > 0 && (
+                            {filteredExpenses.length > 0 && (
                                 <>
                                     <ExpensesDashboard
                                         expenses={filteredExpenses}
@@ -89,9 +94,7 @@ const ExpensesList = () => {
 
                 {/* Expenses List Section */}
                 <div className="flex-1 min-h-0">
-                    {isLoading ? (
-                        <ExpenseLoadingState/>
-                    ) : filteredExpenses.length === 0 ? (
+                    {filteredExpenses.length === 0 ? (
                         <EmptyExpenseState
                             selectedMonth={selectedMonth}
                             onAddClick={() => setFormType("newExpense")}
@@ -111,9 +114,6 @@ const ExpensesList = () => {
                 formType={formType}
                 onClose={handleFormClose}
                 selectedExpense={selectedExpense}
-                categories={categories}
-                onExpenseSubmit={operations.handleExpenseSubmit}
-                onCategoryAdd={operations.handleCategoryAdd}
             />
 
             {/* Speed Dial */}

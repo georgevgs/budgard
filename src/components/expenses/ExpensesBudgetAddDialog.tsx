@@ -2,7 +2,8 @@ import {useState, useEffect} from "react";
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import {useAuth} from "@/hooks/useAuth";
+import {useAuth} from "@/contexts/AuthContext";
+import {useData} from "@/contexts/DataContext";
 import {useDataOperations} from "@/hooks/useDataOperations";
 import type {Budget} from "@/types/Budget";
 
@@ -20,6 +21,7 @@ const ExpensesBudgetAddDialog = ({
     const [budgetAmount, setBudgetAmount] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const {session} = useAuth();
+    const {isInitialized} = useData();
     const {handleBudgetUpdate} = useDataOperations();
 
     useEffect(() => {
@@ -31,7 +33,7 @@ const ExpensesBudgetAddDialog = ({
     }, [isOpen, existingBudget]);
 
     const handleSubmit = async () => {
-        if (!budgetAmount || !session?.user?.id) return;
+        if (!budgetAmount || !session?.user?.id || !isInitialized) return;
 
         setIsSubmitting(true);
         try {
@@ -50,6 +52,9 @@ const ExpensesBudgetAddDialog = ({
             setIsSubmitting(false);
         }
     };
+
+    // Prevent interactions if data isn't initialized
+    const isDisabled = isSubmitting || !isInitialized;
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -84,7 +89,7 @@ const ExpensesBudgetAddDialog = ({
                                 className="pl-7"
                                 min="0"
                                 step="0.01"
-                                disabled={isSubmitting}
+                                disabled={isDisabled}
                             />
                         </div>
                     </div>
@@ -93,13 +98,13 @@ const ExpensesBudgetAddDialog = ({
                         <Button
                             variant="outline"
                             onClick={() => onOpenChange(false)}
-                            disabled={isSubmitting}
+                            disabled={isDisabled}
                         >
                             Cancel
                         </Button>
                         <Button
                             onClick={handleSubmit}
-                            disabled={!budgetAmount || isSubmitting}
+                            disabled={!budgetAmount || isDisabled}
                         >
                             {isSubmitting
                                 ? "Saving..."

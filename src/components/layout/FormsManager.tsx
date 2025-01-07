@@ -17,7 +17,12 @@ const FormsManager = ({
     onClose,
     selectedExpense,
 }: FormsManagerProps) => {
-    const {categories} = useData();
+    const {categories, isInitialized, isLoading} = useData();
+
+    // Don't show forms until data is ready
+    if (!isInitialized || isLoading) {
+        return null;
+    }
 
     const isExpenseForm = formType === "newExpense" || formType === "editExpense";
     const isCategoryForm = formType === "newCategory";
@@ -34,11 +39,13 @@ const FormsManager = ({
                     <div id="expense-form-description" className="sr-only">
                         Form to {formType === "editExpense" ? "edit an existing" : "add a new"} expense
                     </div>
-                    <ExpensesForm
-                        expense={formType === "editExpense" ? selectedExpense : undefined}
-                        categories={categories}
-                        onClose={onClose}
-                    />
+                    {isExpenseForm && ( // Add conditional render for type safety
+                        <ExpensesForm
+                            expense={formType === "editExpense" ? selectedExpense : undefined}
+                            categories={categories}
+                            onClose={onClose}
+                        />
+                    )}
                 </DialogContent>
             </Dialog>
 
@@ -51,10 +58,12 @@ const FormsManager = ({
                     <div id="category-form-description" className="sr-only">
                         Form to add a new expense category
                     </div>
-                    <CategoryForm
-                        onBack={onClose}
-                        onClose={onClose}
-                    />
+                    {isCategoryForm && ( // Add conditional render for type safety
+                        <CategoryForm
+                            onBack={onClose}
+                            onClose={onClose}
+                        />
+                    )}
                 </DialogContent>
             </Dialog>
         </>

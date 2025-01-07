@@ -1,11 +1,12 @@
 import {useData} from "@/contexts/DataContext";
 import {Progress} from "@/components/ui/progress";
 import {TrendingDown, TrendingUp} from "lucide-react";
+import {cn} from "@/lib/utils";
 
 const ExpensesBudgetList = () => {
-    const {budget, expenses} = useData();
+    const {budget, expenses, isInitialized} = useData();
 
-    if (!budget) {
+    if (!isInitialized || !budget) {
         return (
             <div className="text-center text-muted-foreground py-4">
                 No budget set up yet
@@ -33,7 +34,10 @@ const ExpensesBudgetList = () => {
             </div>
             <Progress
                 value={progressPercentage}
-                className="h-2"
+                className={cn(
+                    "h-2",
+                    isOverBudget && "bg-destructive/50"
+                )}
             />
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -42,11 +46,17 @@ const ExpensesBudgetList = () => {
                     ) : (
                         <TrendingDown className="h-5 w-5 text-primary"/>
                     )}
-                    <span className={`text-sm ${isOverBudget ? "text-destructive" : "text-primary"}`}>
+                    <span className={cn(
+                        "text-sm",
+                        isOverBudget ? "text-destructive" : "text-primary"
+                    )}>
                         {isOverBudget ? "Over Budget" : "Under Budget"}
                     </span>
                 </div>
-                <span className={`text-sm font-semibold ${isOverBudget ? "text-destructive" : "text-primary"}`}>
+                <span className={cn(
+                    "text-sm font-semibold",
+                    isOverBudget ? "text-destructive" : "text-primary"
+                )}>
                     €{Math.abs(remainingBudget).toFixed(2)}
                 </span>
             </div>
