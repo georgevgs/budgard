@@ -12,7 +12,7 @@ import {emailSchema} from "@/lib/validations";
 // Constants for rate limiting
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_TIME = 15 * 60 * 1000; // 15 minutes
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
 
 type OtpFormProps = {
     onSuccess?: () => void;
@@ -27,15 +27,22 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
     const turnstileRef = useRef<HTMLDivElement>(null);
     const {toast} = useToast();
     const {isLoading: isAuthLoading} = useAuth();
-    const {token, renderTurnstile, reset: resetTurnstile, isLoading: isTurnstileLoading} =
-        useTurnstile(TURNSTILE_SITE_KEY);
+
+    const {
+        token,
+        renderTurnstile,
+        reset: resetTurnstile,
+        isLoading: isTurnstileLoading,
+        isExpired: isTurnstileExpired,
+        getToken
+    } = useTurnstile(TURNSTILE_SITE_KEY);
 
     // Initialize Turnstile
     useEffect(() => {
-        if (turnstileRef.current && !isTurnstileLoading) {
+        if (turnstileRef.current && !isTurnstileLoading && !otpSent) {
             renderTurnstile(turnstileRef.current);
         }
-    }, [renderTurnstile, isTurnstileLoading]);
+    }, [renderTurnstile, isTurnstileLoading, otpSent]);
 
     const checkRateLimit = (): boolean => {
         const attempts = parseInt(localStorage.getItem("otpAttempts") || "0");
@@ -65,7 +72,7 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
 
     const handleRequestOTP = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (loading || isAuthLoading || !token) return;
+        if (loading || isAuthLoading) return;
 
         // Validate email
         try {
@@ -73,6 +80,27 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
             setEmailError("");
         } catch (error) {
             setEmailError((error as Error).message);
+            return;
+        }
+
+        // Check Turnstile
+        if (isTurnstileExpired()) {
+            toast({
+                title: "Security check expired",
+                description: "Please complete the security check again",
+                variant: "destructive",
+            });
+            resetTurnstile();
+            return;
+        }
+
+        const currentToken = getToken();
+        if (!currentToken) {
+            toast({
+                title: "Security check required",
+                description: "Please complete the security check",
+                variant: "destructive",
+            });
             return;
         }
 
@@ -98,6 +126,7 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
                 description: "Failed to send verification code. Please try again.",
                 variant: "destructive",
             });
+            resetTurnstile();
         } finally {
             setLoading(false);
         }
@@ -140,13 +169,25 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
                             onChange={(e) => setEmail(e.target.value)}
                             className={`w-full h-10 ${emailError ? "border-destructive" : ""}`}
                             disabled={loading || isAuthLoading}
+                            aria-label="Email address"
+                            aria-invalid={!!emailError}
+                            aria-describedby={emailError ? "email-error" : undefined}
                         />
                         {emailError && (
-                            <p className="text-sm text-destructive">{emailError}</p>
+                            <p
+                                id="email-error"
+                                className="text-sm text-destructive"
+                            >
+                                {emailError}
+                            </p>
                         )}
                     </div>
 
-                    <div ref={turnstileRef} className="flex justify-center"/>
+                    <div
+                        ref={turnstileRef}
+                        className="flex justify-center"
+                        aria-label="Security challenge"
+                    />
 
                     <Button
                         type="submit"
@@ -160,7 +201,6 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
         );
     }
 
-    // Rest of the component remains the same...
     return (
         <div className="space-y-4">
             <div className="flex flex-col items-center gap-2 mb-4">
@@ -177,6 +217,8 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
                         onChange={setOtp}
                         maxLength={6}
                         disabled={loading || isAuthLoading}
+                        pattern="\d{6}"
+                        inputMode="numeric"
                     >
                         <InputOTPGroup>
                             <InputOTPSlot index={0}/>
