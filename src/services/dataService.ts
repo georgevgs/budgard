@@ -81,14 +81,14 @@ export const dataService = {
     },
 
     async createCategory(categoryData: Partial<Category>) {
-        const {error: insertError} = await supabase
+        const {data, error} = await supabase
             .from("categories")
-            .insert(categoryData);
+            .insert(categoryData)
+            .select()
+            .single();
 
-        if (insertError) throw insertError;
-
-        // Fetch updated categories list
-        return this.getCategories();
+        if (error) throw error;
+        return data as Category;
     },
 
     async updateBudget(budgetData: Partial<Budget> & { user_id: string }) {

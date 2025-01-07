@@ -5,15 +5,14 @@ import {useData} from "@/contexts/DataContext";
 import type {Category} from "@/types/Category";
 import type {Expense} from "@/types/Expense";
 import type {Budget} from "@/types/Budget";
-import {invalidateQuery} from "@/lib/queryUtils";
 
 export function useDataOperations() {
     const {
-        refreshData,
+        expenses,
+        categories,
+        isInitialized,
         updateOptimistically,
         revertOptimisticUpdate,
-        expenses,
-        isInitialized
     } = useData();
     const {toast} = useToast();
 
@@ -22,26 +21,35 @@ export function useDataOperations() {
             if (!isInitialized) return;
 
             try {
+                // Create optimistic expense
                 const optimisticExpense = {
                     ...expenseData,
                     id: expenseId || `temp-${Date.now()}`,
                     created_at: new Date().toISOString(),
+                    // Add category data if category_id is provided
+                    category: expenseData.category_id
+                        ? categories.find(c => c.id === expenseData.category_id)
+                        : undefined
                 } as Expense;
 
+                // Update local state optimistically
                 const updatedExpenses = expenseId
                     ? expenses.map(e => e.id === expenseId ? {...e, ...optimisticExpense} : e)
                     : [optimisticExpense, ...expenses];
 
                 updateOptimistically("expenses", updatedExpenses);
 
-                if (expenseId) {
-                    await dataService.updateExpense(expenseData, expenseId);
-                } else {
-                    await dataService.createExpense(expenseData);
-                }
+                // Perform server operation
+                const savedExpense = expenseId
+                    ? await dataService.updateExpense(expenseData, expenseId)
+                    : await dataService.createExpense(expenseData);
 
-                invalidateQuery("expenses");
-                await refreshData();
+                // Update with actual server data
+                const finalExpenses = expenseId
+                    ? expenses.map(e => e.id === expenseId ? savedExpense : e)
+                    : [savedExpense, ...expenses.filter(e => e.id !== optimisticExpense.id)];
+
+                updateOptimistically("expenses", finalExpenses);
 
                 toast({
                     title: "Success",
@@ -57,7 +65,7 @@ export function useDataOperations() {
                 throw error;
             }
         },
-        [refreshData, updateOptimistically, revertOptimisticUpdate, toast, expenses, isInitialized]
+        [categories, expenses, isInitialized, updateOptimistically, revertOptimisticUpdate, toast]
     );
 
     const handleExpenseDelete = useCallback(
@@ -69,8 +77,6 @@ export function useDataOperations() {
                 updateOptimistically("expenses", updatedExpenses);
 
                 await dataService.deleteExpense(expenseId);
-                invalidateQuery("expenses");
-                await refreshData();
 
                 toast({
                     title: "Success",
@@ -86,7 +92,7 @@ export function useDataOperations() {
                 throw error;
             }
         },
-        [refreshData, updateOptimistically, revertOptimisticUpdate, toast, expenses, isInitialized]
+        [expenses, isInitialized, updateOptimistically, revertOptimisticUpdate, toast]
     );
 
     const handleCategoryAdd = useCallback(
@@ -94,15 +100,27 @@ export function useDataOperations() {
             if (!isInitialized) return;
 
             try {
-                await dataService.createCategory(categoryData);
-                invalidateQuery("categories");
-                await refreshData();
+                const optimisticCategory = {
+                    ...categoryData,
+                    id: `temp-${Date.now()}`,
+                    created_at: new Date().toISOString(),
+                } as Category;
+
+                const updatedCategories = [...categories, optimisticCategory];
+                updateOptimistically("categories", updatedCategories);
+
+                const savedCategory = await dataService.createCategory(categoryData);
+
+                // Update with actual server data
+                const finalCategories = [...categories, savedCategory];
+                updateOptimistically("categories", finalCategories);
 
                 toast({
                     title: "Success",
                     description: "Category added successfully",
                 });
             } catch (error) {
+                revertOptimisticUpdate();
                 toast({
                     title: "Error",
                     description: "Failed to add category",
@@ -111,7 +129,7 @@ export function useDataOperations() {
                 throw error;
             }
         },
-        [refreshData, toast, isInitialized]
+        [categories, isInitialized, updateOptimistically, revertOptimisticUpdate, toast]
     );
 
     const handleBudgetUpdate = useCallback(
@@ -119,9 +137,15 @@ export function useDataOperations() {
             if (!isInitialized) return false;
 
             try {
-                await dataService.updateBudget(budgetData);
-                invalidateQuery("budget");
-                await refreshData();
+                const optimisticBudget = {
+                    ...budgetData,
+                    id: budgetData.id || `temp-${Date.now()}`,
+                } as Budget;
+
+                updateOptimistically("budget", optimisticBudget);
+
+                const savedBudget = await dataService.updateBudget(budgetData);
+                updateOptimistically("budget", savedBudget);
 
                 toast({
                     title: "Success",
@@ -129,6 +153,7 @@ export function useDataOperations() {
                 });
                 return true;
             } catch (error) {
+                revertOptimisticUpdate();
                 toast({
                     title: "Error",
                     description: "Failed to update budget",
@@ -137,7 +162,7 @@ export function useDataOperations() {
                 return false;
             }
         },
-        [refreshData, toast, isInitialized]
+        [isInitialized, updateOptimistically, revertOptimisticUpdate, toast]
     );
 
     return {

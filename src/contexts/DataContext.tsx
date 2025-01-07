@@ -18,7 +18,7 @@ interface DataState {
 interface DataContextType extends DataState {
     refreshData: () => Promise<void>;
     dispatch: React.Dispatch<DataAction>;
-    updateOptimistically: <T extends "expenses" | "categories" | "budget">(
+    updateOptimistically: <T extends keyof DataState>(
         key: T,
         data: DataState[T]
     ) => void;
@@ -29,8 +29,8 @@ type DataAction =
     | { type: "SET_LOADING"; payload: boolean }
     | { type: "SET_ERROR"; payload: Error | null }
     | { type: "SET_DATA"; payload: Partial<DataState> }
-    | { type: "RESET_DATA" }
-    | { type: "OPTIMISTIC_UPDATE"; payload: Partial<DataState> };
+    | { type: "OPTIMISTIC_UPDATE"; payload: Partial<DataState> }
+    | { type: "RESET_DATA" };
 
 const initialState: DataState = {
     categories: [],
@@ -102,8 +102,6 @@ export function DataProvider({children}: { children: ReactNode }) {
 
     const refreshData = useCallback(async () => {
         if (!session?.user?.id) return;
-
-        dispatch({type: "SET_LOADING", payload: true});
         await fetchData(session.user.id);
     }, [session?.user?.id]);
 
@@ -117,7 +115,7 @@ export function DataProvider({children}: { children: ReactNode }) {
         }
     }, [isAuthLoading, session?.user?.id, state.isInitialized]);
 
-    const updateOptimistically = useCallback(<T extends "expenses" | "categories" | "budget">(
+    const updateOptimistically = useCallback(<T extends keyof DataState>(
         key: T,
         data: DataState[T]
     ) => {
