@@ -3,25 +3,31 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import type {Category} from "@/types/Category";
 import type {Expense} from "@/types/Expense";
+import type {Budget} from "@/types/Budget";
 import ExpensesBudgetList from "@/components/expenses/ExpensesBudgetList";
 import ExpensesBudgetAddDialog from "@/components/expenses/ExpensesBudgetAddDialog";
-import {useBudget} from "@/hooks/useBudget";
+import type {DataOperations} from "@/hooks/useOptimizedData";
+import {Session} from "@supabase/supabase-js";
 
 interface ExpensesBudgetProps {
     categories: Category[];
     expenses: Expense[];
+    budget: Budget | null;
+    isLoading: boolean;
+    operations: DataOperations;
+    session: Session | null;
 }
 
-const ExpensesBudget = ({categories, expenses}: ExpensesBudgetProps) => {
-    const {budget, isLoading, updateBudget} = useBudget();
+const ExpensesBudget = ({
+    categories,
+    expenses,
+    budget,
+    isLoading,
+    operations,
+    session // Destructure session
+}: ExpensesBudgetProps) => {
     const [isAddBudgetOpen, setIsAddBudgetOpen] = useState(false);
-
-    const handleBudgetUpdate = async (amount: string) => {
-        const success = await updateBudget(amount);
-        if (success) {
-            setIsAddBudgetOpen(false);
-        }
-    };
+    const {handleBudgetUpdate} = operations;
 
     if (isLoading) {
         return (
@@ -67,6 +73,7 @@ const ExpensesBudget = ({categories, expenses}: ExpensesBudgetProps) => {
                 onOpenChange={setIsAddBudgetOpen}
                 onAddBudget={handleBudgetUpdate}
                 existingBudget={budget}
+                session={session}
             />
         </div>
     );

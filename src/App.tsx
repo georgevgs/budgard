@@ -1,47 +1,61 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import LandingPage from "@/pages/LandingPage.tsx";
-import ExpensesList from "@/components/expenses/ExpensesList.tsx";
+import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
+import {Toaster} from "@/components/ui/toaster";
+import {useAuth} from "@/hooks/useAuth";
+import {DataOperations, useAppData} from "@/hooks/useOptimizedData";
 import Header from "@/components/layout/Header.tsx";
-import { Toaster } from "@/components/ui/toaster";
-import { useSession } from "@/hooks/useSession.ts";
-import { useExpenses } from "@/hooks/useExpenses.ts";
-import { usePwaUpdate } from "@/hooks/usePwaUpdate.ts";
+import ExpensesList from "@/components/expenses/ExpensesList.tsx";
+import {usePwaUpdate} from "@/hooks/usePwaUpdate.ts";
+import LandingPage from "@/pages/LandingPage.tsx";
+import {Expense} from "@/types/Expense.ts";
+import {Category} from "@/types/Category.ts";
+import {Budget} from "@/types/Budget.ts";
+import {Session} from "@supabase/supabase-js";
+
+interface ExpensesContentProps {
+    expenses: Expense[];
+    categories: Category[];
+    budget: Budget | null;
+    session: Session | null;
+    isLoading: boolean;
+    operations: DataOperations;
+}
+
+const ExpensesContent = ({
+    expenses,
+    categories,
+    budget,
+    session,
+    isLoading,
+    operations
+}: ExpensesContentProps) => (
+    <>
+        <Header/>
+        <main className="flex-1">
+            <div className="container mx-auto">
+                <ExpensesList
+                    expenses={expenses}
+                    categories={categories}
+                    budget={budget}
+                    session={session}
+                    isLoading={isLoading}
+                    operations={operations}
+                />
+            </div>
+        </main>
+    </>
+);
 
 const App = () => {
     usePwaUpdate();
 
+    const {session, isAuthenticated} = useAuth();
     const {
-        session,
         categories,
-        setCategories,
         expenses,
-        setExpenses,
-        isLoading
-    } = useSession();
-
-    const {
-        handleExpenseSubmit,
-        handleExpenseDelete,
-        handleCategoryAdd,
-    } = useExpenses(setExpenses, setCategories);
-
-    const ExpensesContent = () => (
-        <>
-            <Header />
-            <main className="flex-1">
-                <div className="container mx-auto">
-                    <ExpensesList
-                        expenses={expenses}
-                        categories={categories}
-                        isLoading={isLoading}
-                        onExpenseSubmit={handleExpenseSubmit}
-                        onExpenseDelete={handleExpenseDelete}
-                        onCategoryAdd={handleCategoryAdd}
-                    />
-                </div>
-            </main>
-        </>
-    );
+        budget,
+        isLoading,
+        operations
+    } = useAppData(isAuthenticated, session?.user?.id);
 
     return (
         <BrowserRouter>
@@ -52,10 +66,10 @@ const App = () => {
                         element={
                             !session ? (
                                 <main className="flex-1">
-                                    <LandingPage />
+                                    <LandingPage/>
                                 </main>
                             ) : (
-                                <Navigate to="/expenses" replace />
+                                <Navigate to="/expenses" replace/>
                             )
                         }
                     />
@@ -63,15 +77,22 @@ const App = () => {
                         path="/expenses"
                         element={
                             session ? (
-                                <ExpensesContent />
+                                <ExpensesContent
+                                    expenses={expenses}
+                                    categories={categories}
+                                    budget={budget}
+                                    session={session}
+                                    isLoading={isLoading}
+                                    operations={operations}
+                                />
                             ) : (
-                                <Navigate to="/" replace />
+                                <Navigate to="/" replace/>
                             )
                         }
                     />
-                    <Route path="*" element={<Navigate to="/" replace />} />
+                    <Route path="*" element={<Navigate to="/" replace/>}/>
                 </Routes>
-                <Toaster />
+                <Toaster/>
             </div>
         </BrowserRouter>
     );

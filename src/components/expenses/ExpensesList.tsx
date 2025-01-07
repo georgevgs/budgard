@@ -2,39 +2,44 @@ import {useState} from "react";
 import {format} from "date-fns";
 import type {Expense} from "@/types/Expense";
 import type {Category} from "@/types/Category";
+import type {Budget} from "@/types/Budget";
+import type {Session} from "@supabase/supabase-js";
+import type {DataOperations} from "@/hooks/useOptimizedData";
 import {cn} from "@/lib/utils";
 import FormsManager, {FormType} from "@/components/layout/FormsManager";
 import SpeedDial from "@/components/layout/SpeedDial";
 import ExpensesMonthlySelector from "@/components/expenses/ExpensesMonthlySelector";
 import ExpensesMonthlyOverview from "@/components/expenses/ExpensesMonthlyOverview";
 import ExpensesDashboard from "@/components/expenses/ExpensesDashboard";
+import ExpensesBudget from "@/components/expenses/ExpensesBudget";
 import EmptyExpenseState from "@/components/expenses/ExpensesEmpty";
 import ExpenseLoadingState from "@/components/expenses/ExpensesLoading";
 import ExpensesPagination from "@/components/expenses/ExpensesPagination";
-import ExpensesBudget from "@/components/expenses/ExpensesBudget";
 
 interface ExpenseListProps {
     expenses: Expense[];
     categories: Category[];
+    budget: Budget | null;
+    session: Session | null;
     isLoading: boolean;
-    onExpenseSubmit: (expenseData: Partial<Expense>, expenseId?: string) => Promise<void>;
-    onExpenseDelete: (id: string) => Promise<void>;
-    onCategoryAdd: (categoryData: Partial<Category>) => Promise<void>;
+    operations: DataOperations;
 }
 
 const ExpensesList = ({
     expenses,
     categories,
+    budget,
+    session,
     isLoading,
-    onExpenseSubmit,
-    onExpenseDelete,
-    onCategoryAdd
+    operations
 }: ExpenseListProps) => {
     const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
     const [formType, setFormType] = useState<FormType>(null);
     const [isDashboardVisible, setIsDashboardVisible] = useState(false);
     const currentMonth = format(new Date(), "yyyy-MM");
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+
+    const {handleExpenseSubmit, handleExpenseDelete, handleCategoryAdd} = operations;
 
     // Filter expenses for selected month and sort by date
     const filteredExpenses = expenses.filter(
@@ -94,6 +99,10 @@ const ExpensesList = ({
                                     <ExpensesBudget
                                         categories={categories}
                                         expenses={filteredExpenses}
+                                        budget={budget}
+                                        isLoading={isLoading}
+                                        operations={operations}
+                                        session={session}
                                     />
                                 </>
                             )}
@@ -114,7 +123,7 @@ const ExpensesList = ({
                         <ExpensesPagination
                             expenses={filteredExpenses}
                             onEdit={handleExpenseEdit}
-                            onDelete={onExpenseDelete}
+                            onDelete={handleExpenseDelete}
                         />
                     )}
                 </div>
@@ -126,8 +135,8 @@ const ExpensesList = ({
                 onClose={handleFormClose}
                 selectedExpense={selectedExpense}
                 categories={categories}
-                onExpenseSubmit={onExpenseSubmit}
-                onCategoryAdd={onCategoryAdd}
+                onExpenseSubmit={handleExpenseSubmit}
+                onCategoryAdd={handleCategoryAdd}
             />
 
             {/* Speed Dial */}

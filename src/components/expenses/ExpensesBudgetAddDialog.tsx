@@ -2,24 +2,28 @@ import {useState, useEffect} from "react";
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
+import {useToast} from "@/hooks/useToast";
 import type {Budget} from "@/types/Budget";
+import type {Session} from "@supabase/supabase-js";
 
 interface ExpensesBudgetAddDialogProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    onAddBudget: (budgetAmount: string) => Promise<void>;
-    existingBudget?: Budget | null;
+    existingBudget: Budget | null;
+    onAddBudget: (budgetData: Partial<Budget> & { user_id: string }) => Promise<boolean>;
+    session: Session | null;
 }
 
 const ExpensesBudgetAddDialog = ({
     isOpen,
     onOpenChange,
+    existingBudget,
     onAddBudget,
-    existingBudget
+    session
 }: ExpensesBudgetAddDialogProps) => {
-    const [budgetAmount, setBudgetAmount] = useState<string>(
-        existingBudget?.amount.toString() ?? ""
-    );
+    const [budgetAmount, setBudgetAmount] = useState<string>("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const {toast} = useToast();
 
     // Update budget amount when dialog opens with existing budget
     useEffect(() => {
@@ -33,7 +37,31 @@ const ExpensesBudgetAddDialog = ({
     const handleSubmit = async () => {
         if (!budgetAmount) return;
 
-        await onAddBudget(budgetAmount);
+        setIsSubmitting(true);
+        try {
+            if (!session?.user?.id) {
+                toast({
+                    title: "Error",
+                    description: "User session is required",
+                    variant: "destructive"
+                });
+                return;
+            }
+
+            const success = await onAddBudget({
+                id: existingBudget?.id,
+                amount: parseFloat(budgetAmount),
+                user_id: session.user.id
+            });
+
+            if (success) {
+                onOpenChange(false);
+            }
+        } catch (error) {
+            console.error("Budget submission error:", error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -69,16 +97,29 @@ const ExpensesBudgetAddDialog = ({
                                 className="pl-7"
                                 min="0"
                                 step="0.01"
+                                disabled={isSubmitting}
                             />
                         </div>
                     </div>
 
                     <div className="flex justify-end gap-2 pt-2">
-                        <Button variant="outline" onClick={() => onOpenChange(false)}>
+                        <Button
+                            variant="outline"
+                            onClick={() => onOpenChange(false)}
+                            disabled={isSubmitting}
+                        >
                             Cancel
                         </Button>
-                        <Button onClick={handleSubmit} disabled={!budgetAmount}>
-                            {existingBudget ? "Update Budget" : "Set Budget"}
+                        <Button
+                            onClick={handleSubmit}
+                            disabled={!budgetAmount || isSubmitting}
+                        >
+                            {isSubmitting
+                                ? "Saving..."
+                                : existingBudget
+                                    ? "Update Budget"
+                                    : "Set Budget"
+                            }
                         </Button>
                     </div>
                 </div>
