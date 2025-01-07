@@ -14,7 +14,7 @@ interface CategoryFormProps {
 
 const CategoryForm = ({onBack, onClose}: CategoryFormProps) => {
     const [name, setName] = useState("");
-    const [color, setColor] = useState("#4A90E2");
+    const [color, setColor] = useState("#000000");
     const [loading, setLoading] = useState(false);
     const {session} = useAuth();
     const {handleCategoryAdd} = useDataOperations();
@@ -36,7 +36,7 @@ const CategoryForm = ({onBack, onClose}: CategoryFormProps) => {
             });
             // Clear form on success
             setName("");
-            setColor("#4A90E2");
+            setColor("#000000");
             onClose();
         } catch (error) {
             // Error toast is handled by parent
