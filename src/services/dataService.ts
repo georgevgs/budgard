@@ -31,7 +31,8 @@ export const dataService = {
         const {data, error} = await supabase
             .from("expenses")
             .select(`*, category:categories(*)`)
-            .order("date", {ascending: false});
+            .order("date", {ascending: false})
+            .order("created_at", {ascending: false});
 
         if (error) throw error;
         return data as Expense[];
