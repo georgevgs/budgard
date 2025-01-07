@@ -2,53 +2,40 @@ import {useState, useEffect} from "react";
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import {useToast} from "@/hooks/useToast";
+import {useAuth} from "@/hooks/useAuth";
+import {useDataOperations} from "@/hooks/useDataOperations";
 import type {Budget} from "@/types/Budget";
-import type {Session} from "@supabase/supabase-js";
 
 interface ExpensesBudgetAddDialogProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
     existingBudget: Budget | null;
-    onAddBudget: (budgetData: Partial<Budget> & { user_id: string }) => Promise<boolean>;
-    session: Session | null;
 }
 
 const ExpensesBudgetAddDialog = ({
     isOpen,
     onOpenChange,
     existingBudget,
-    onAddBudget,
-    session
 }: ExpensesBudgetAddDialogProps) => {
     const [budgetAmount, setBudgetAmount] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const {toast} = useToast();
+    const {session} = useAuth();
+    const {handleBudgetUpdate} = useDataOperations();
 
-    // Update budget amount when dialog opens with existing budget
     useEffect(() => {
         if (isOpen && existingBudget) {
             setBudgetAmount(existingBudget.amount.toString());
         } else if (!isOpen) {
-            setBudgetAmount(""); // Reset when dialog closes
+            setBudgetAmount("");
         }
     }, [isOpen, existingBudget]);
 
     const handleSubmit = async () => {
-        if (!budgetAmount) return;
+        if (!budgetAmount || !session?.user?.id) return;
 
         setIsSubmitting(true);
         try {
-            if (!session?.user?.id) {
-                toast({
-                    title: "Error",
-                    description: "User session is required",
-                    variant: "destructive"
-                });
-                return;
-            }
-
-            const success = await onAddBudget({
+            const success = await handleBudgetUpdate({
                 id: existingBudget?.id,
                 amount: parseFloat(budgetAmount),
                 user_id: session.user.id

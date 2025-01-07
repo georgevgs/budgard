@@ -1,29 +1,31 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/useToast.ts";
-import { signInWithOTP, requestOTP } from "@/lib/auth.ts";
-import { CheckCircle2 } from "lucide-react";
-import { InputOTP,  InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp";
+import {useState} from "react";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {useToast} from "@/hooks/useToast";
+import {signInWithOTP, requestOTP} from "@/lib/auth";
+import {CheckCircle2} from "lucide-react";
+import {InputOTP, InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp";
+import {useAuth} from "@/contexts/AuthContext";
 
 type OtpFormProps = {
     onSuccess?: () => void;
 };
 
-const OtpForm = ({ onSuccess }: OtpFormProps) => {
+const OtpForm = ({onSuccess}: OtpFormProps) => {
     const [email, setEmail] = useState("");
     const [otpSent, setOtpSent] = useState(false);
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
-    const { toast } = useToast();
+    const {toast} = useToast();
+    const {isLoading: isAuthLoading} = useAuth();
 
     const handleRequestOTP = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (loading) return;
+        if (loading || isAuthLoading) return;
 
         setLoading(true);
         try {
-            const { error } = await requestOTP(email);
+            const {error} = await requestOTP(email);
             if (error) throw error;
 
             setOtpSent(true);
@@ -44,11 +46,11 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
 
     const handleVerifyOTP = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (loading || otp.length !== 6) return;
+        if (loading || isAuthLoading || otp.length !== 6) return;
 
         setLoading(true);
         try {
-            const { error } = await signInWithOTP(email, otp);
+            const {error} = await signInWithOTP(email, otp);
             if (error) throw error;
 
             toast({
@@ -78,12 +80,12 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                         className="w-full h-10"
-                        disabled={loading}
+                        disabled={loading || isAuthLoading}
                     />
                     <Button
                         type="submit"
                         className="w-full h-10"
-                        disabled={loading}
+                        disabled={loading || isAuthLoading}
                     >
                         {loading ? "Sending..." : "Send Code"}
                     </Button>
@@ -95,7 +97,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
     return (
         <div className="space-y-4">
             <div className="flex flex-col items-center gap-2 mb-4">
-                <CheckCircle2 className="h-8 w-8 text-primary" />
+                <CheckCircle2 className="h-8 w-8 text-primary"/>
                 <p className="text-muted-foreground text-sm text-center px-4">
                     Enter the 6-digit code sent to {email}
                 </p>
@@ -107,15 +109,15 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
                         value={otp}
                         onChange={setOtp}
                         maxLength={6}
-                        disabled={loading}
+                        disabled={loading || isAuthLoading}
                     >
                         <InputOTPGroup>
-                            <InputOTPSlot index={0} />
-                            <InputOTPSlot index={1} />
-                            <InputOTPSlot index={2} />
-                            <InputOTPSlot index={3} />
-                            <InputOTPSlot index={4} />
-                            <InputOTPSlot index={5} />
+                            <InputOTPSlot index={0}/>
+                            <InputOTPSlot index={1}/>
+                            <InputOTPSlot index={2}/>
+                            <InputOTPSlot index={3}/>
+                            <InputOTPSlot index={4}/>
+                            <InputOTPSlot index={5}/>
                         </InputOTPGroup>
                     </InputOTP>
                 </div>
@@ -124,7 +126,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
                     <Button
                         type="submit"
                         className="w-full h-10"
-                        disabled={loading || otp.length !== 6}
+                        disabled={loading || isAuthLoading || otp.length !== 6}
                     >
                         {loading ? "Verifying..." : "Verify Code"}
                     </Button>
@@ -137,7 +139,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
                             setOtpSent(false);
                             setOtp("");
                         }}
-                        disabled={loading}
+                        disabled={loading || isAuthLoading}
                     >
                         Use Different Email
                     </Button>

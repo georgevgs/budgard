@@ -1,33 +1,17 @@
 import {useState} from "react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
-import type {Category} from "@/types/Category";
-import type {Expense} from "@/types/Expense";
-import type {Budget} from "@/types/Budget";
+import {useAuth} from "@/hooks/useAuth";
+import {useData} from "@/contexts/DataContext";
+import {useDataOperations} from "@/hooks/useDataOperations";
 import ExpensesBudgetList from "@/components/expenses/ExpensesBudgetList";
 import ExpensesBudgetAddDialog from "@/components/expenses/ExpensesBudgetAddDialog";
-import type {DataOperations} from "@/hooks/useOptimizedData";
-import {Session} from "@supabase/supabase-js";
 
-interface ExpensesBudgetProps {
-    categories: Category[];
-    expenses: Expense[];
-    budget: Budget | null;
-    isLoading: boolean;
-    operations: DataOperations;
-    session: Session | null;
-}
-
-const ExpensesBudget = ({
-    categories,
-    expenses,
-    budget,
-    isLoading,
-    operations,
-    session // Destructure session
-}: ExpensesBudgetProps) => {
+const ExpensesBudget = () => {
     const [isAddBudgetOpen, setIsAddBudgetOpen] = useState(false);
-    const {handleBudgetUpdate} = operations;
+    const {session} = useAuth();
+    const {categories, expenses, budget, isLoading} = useData();
+    const {handleBudgetUpdate} = useDataOperations();
 
     if (isLoading) {
         return (

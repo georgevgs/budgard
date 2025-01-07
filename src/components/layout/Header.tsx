@@ -1,8 +1,21 @@
 import {Button} from "@/components/ui/button";
-import {signOut} from "@/lib/auth.ts";
+import {signOut} from "@/lib/auth";
 import {LogOut} from "lucide-react";
+import {useAuth} from "@/contexts/AuthContext";
 
 const Header = () => {
+    const {session} = useAuth();
+
+    const handleSignOut = async () => {
+        try {
+            await signOut();
+        } catch (error) {
+            console.error("Error signing out:", error);
+        }
+    };
+
+    if (!session) return null;
+
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background">
             <div className="container flex h-14 items-center justify-between px-4">
@@ -20,7 +33,7 @@ const Header = () => {
                 <Button
                     variant="ghost"
                     size="sm"
-                    onClick={signOut}
+                    onClick={handleSignOut}
                     className="text-muted-foreground gap-2 font-normal"
                 >
                     <LogOut className="h-4 w-4"/>

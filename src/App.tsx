@@ -1,61 +1,26 @@
 import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
 import {Toaster} from "@/components/ui/toaster";
-import {useAuth} from "@/hooks/useAuth";
-import {DataOperations, useAppData} from "@/hooks/useOptimizedData";
-import Header from "@/components/layout/Header.tsx";
-import ExpensesList from "@/components/expenses/ExpensesList.tsx";
-import {usePwaUpdate} from "@/hooks/usePwaUpdate.ts";
-import LandingPage from "@/pages/LandingPage.tsx";
-import {Expense} from "@/types/Expense.ts";
-import {Category} from "@/types/Category.ts";
-import {Budget} from "@/types/Budget.ts";
-import {Session} from "@supabase/supabase-js";
-
-interface ExpensesContentProps {
-    expenses: Expense[];
-    categories: Category[];
-    budget: Budget | null;
-    session: Session | null;
-    isLoading: boolean;
-    operations: DataOperations;
-}
-
-const ExpensesContent = ({
-    expenses,
-    categories,
-    budget,
-    session,
-    isLoading,
-    operations
-}: ExpensesContentProps) => (
-    <>
-        <Header/>
-        <main className="flex-1">
-            <div className="container mx-auto">
-                <ExpensesList
-                    expenses={expenses}
-                    categories={categories}
-                    budget={budget}
-                    session={session}
-                    isLoading={isLoading}
-                    operations={operations}
-                />
-            </div>
-        </main>
-    </>
-);
+import {useAuth} from "@/contexts/AuthContext";
+import {usePwaUpdate} from "@/hooks/usePwaUpdate";
+import Header from "@/components/layout/Header";
+import ExpensesList from "@/components/expenses/ExpensesList";
+import LandingPage from "@/pages/LandingPage";
 
 const App = () => {
     usePwaUpdate();
+    const {session, isLoading} = useAuth();
 
-    const {session, isAuthenticated} = useAuth();
-    const {
-        categories,
-        expenses,
-        budget,
-        isLoading,
-        operations
-    } = useAppData(isAuthenticated, session?.user?.id);
+    // Show loading state while checking auth
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="flex flex-col items-center gap-2">
+                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"/>
+                    <p className="text-sm text-muted-foreground">Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <BrowserRouter>
@@ -77,14 +42,14 @@ const App = () => {
                         path="/expenses"
                         element={
                             session ? (
-                                <ExpensesContent
-                                    expenses={expenses}
-                                    categories={categories}
-                                    budget={budget}
-                                    session={session}
-                                    isLoading={isLoading}
-                                    operations={operations}
-                                />
+                                <>
+                                    <Header/>
+                                    <main className="flex-1">
+                                        <div className="container mx-auto">
+                                            <ExpensesList/>
+                                        </div>
+                                    </main>
+                                </>
                             ) : (
                                 <Navigate to="/" replace/>
                             )

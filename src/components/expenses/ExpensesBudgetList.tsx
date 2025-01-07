@@ -1,19 +1,10 @@
-import type {Category} from "@/types/Category";
-import type {Budget} from "@/types/Budget";
-import type {Expense} from "@/types/Expense";
+import {useData} from "@/contexts/DataContext";
 import {Progress} from "@/components/ui/progress";
 import {TrendingDown, TrendingUp} from "lucide-react";
 
-interface ExpensesBudgetListProps {
-    budget: Budget | null;
-    categories: Category[];
-    expenses: Expense[];
-}
+const ExpensesBudgetList = () => {
+    const {budget, expenses} = useData();
 
-const ExpensesBudgetList = ({
-    budget,
-    expenses
-}: ExpensesBudgetListProps) => {
     if (!budget) {
         return (
             <div className="text-center text-muted-foreground py-4">

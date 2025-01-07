@@ -1,8 +1,16 @@
-import {useState, useEffect} from "react";
+import {createContext, useContext, useEffect, useState, ReactNode} from "react";
 import type {Session} from "@supabase/supabase-js";
 import {getSession, onAuthStateChange} from "@/lib/auth";
 
-export function useAuth() {
+interface AuthContextType {
+    session: Session | null;
+    isLoading: boolean;
+    isAuthenticated: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
+
+export function AuthProvider({children}: { children: ReactNode }) {
     const [session, setSession] = useState<Session | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -14,6 +22,8 @@ export function useAuth() {
                 const {data: {session: initialSession}} = await getSession();
                 if (!mounted) return;
                 setSession(initialSession);
+            } catch (error) {
+                console.error("Failed to get session:", error);
             } finally {
                 if (mounted) {
                     setIsLoading(false);
@@ -26,6 +36,7 @@ export function useAuth() {
         const {data: {subscription}} = onAuthStateChange((newSession) => {
             if (!mounted) return;
             setSession(newSession);
+            setIsLoading(false);
         });
 
         return () => {
@@ -34,9 +45,23 @@ export function useAuth() {
         };
     }, []);
 
-    return {
+    const value = {
         session,
         isLoading,
         isAuthenticated: !!session?.user
     };
+
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+        </AuthContext.Provider>
+    );
+}
+
+export function useAuth() {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error("useAuth must be used within an AuthProvider");
+    }
+    return context;
 }

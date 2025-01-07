@@ -1,33 +1,41 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { DialogTitle, DialogHeader, DialogDescription } from "@/components/ui/dialog";
-import { ArrowLeft } from "lucide-react";
-import type { Category } from "@/types/Category";
+import {useState} from "react";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {DialogTitle, DialogHeader, DialogDescription} from "@/components/ui/dialog";
+import {ArrowLeft} from "lucide-react";
+import {useAuth} from "@/hooks/useAuth";
+import {useDataOperations} from "@/hooks/useDataOperations";
 
 interface CategoryFormProps {
-    onSubmit: (categoryData: Partial<Category>) => Promise<void>;
     onBack: () => void;
+    onClose: () => void;
 }
 
-const CategoryForm = ({ onSubmit, onBack }: CategoryFormProps) => {
+const CategoryForm = ({onBack, onClose}: CategoryFormProps) => {
     const [name, setName] = useState("");
     const [color, setColor] = useState("#4A90E2");
     const [loading, setLoading] = useState(false);
+    const {session} = useAuth();
+    const {handleCategoryAdd} = useDataOperations();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (loading) return;
+        if (loading || !session?.user?.id) return;
 
         const trimmedName = name.trim();
         if (!trimmedName) return;
 
         setLoading(true);
         try {
-            await onSubmit({ name: trimmedName, color });
+            await handleCategoryAdd({
+                name: trimmedName,
+                color,
+                user_id: session.user.id
+            });
             // Clear form on success
             setName("");
             setColor("#4A90E2");
+            onClose();
         } catch (error) {
             // Error toast is handled by parent
         } finally {
@@ -54,7 +62,7 @@ const CategoryForm = ({ onSubmit, onBack }: CategoryFormProps) => {
                         className="h-8 w-8 p-0"
                         disabled={loading}
                     >
-                        <ArrowLeft className="h-4 w-4" />
+                        <ArrowLeft className="h-4 w-4"/>
                         <span className="sr-only">Go back</span>
                     </Button>
                     <DialogTitle>Add New Category</DialogTitle>
@@ -73,9 +81,9 @@ const CategoryForm = ({ onSubmit, onBack }: CategoryFormProps) => {
                         onChange={(e) => {
                             const value = e.target.value;
                             // Prevent starting with space
-                            if (value === ' ' && !name) return;
+                            if (value === " " && !name) return;
                             // Prevent multiple spaces
-                            if (value.includes('  ')) return;
+                            if (value.includes("  ")) return;
                             setName(value);
                         }}
                         required
