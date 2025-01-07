@@ -3,7 +3,7 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {useToast} from "@/hooks/useToast";
 import {signInWithOTP, requestOTP} from "@/lib/auth";
-import {CheckCircle2} from "lucide-react";
+import {CheckCircle2, Shield} from "lucide-react";
 import {InputOTP, InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp";
 import {useAuth} from "@/contexts/AuthContext";
 import {useTurnstile} from "@/hooks/useTurnstile";
@@ -31,17 +31,15 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
         token,
         renderTurnstile,
         reset: resetTurnstile,
-        isExpired,
-        getToken,
         isReady
     } = useTurnstile(TURNSTILE_SITE_KEY);
 
-    // Initialize Turnstile when ready and not in OTP state
+    // Initialize Turnstile when ready
     useEffect(() => {
-        if (!otpSent && isReady && turnstileRef.current) {
+        if (isReady && turnstileRef.current) {
             renderTurnstile(turnstileRef.current);
         }
-    }, [otpSent, isReady]);
+    }, [isReady]);
 
     const checkRateLimit = (): boolean => {
         const attempts = parseInt(localStorage.getItem("otpAttempts") || "0");
@@ -80,26 +78,6 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
             return;
         }
 
-        if (isExpired()) {
-            toast({
-                title: "Security check expired",
-                description: "Please complete the security check again",
-                variant: "destructive",
-            });
-            resetTurnstile();
-            return;
-        }
-
-        const currentToken = getToken();
-        if (!currentToken) {
-            toast({
-                title: "Security check required",
-                description: "Please complete the security check",
-                variant: "destructive",
-            });
-            return;
-        }
-
         if (!checkRateLimit()) return;
 
         setLoading(true);
@@ -120,7 +98,6 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
                 description: "Failed to send verification code. Please try again.",
                 variant: "destructive",
             });
-            resetTurnstile();
         } finally {
             setLoading(false);
         }
@@ -154,9 +131,35 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
     const handleBackToEmail = () => {
         setOtpSent(false);
         setOtp("");
+        resetTurnstile();
+        if (turnstileRef.current) {
+            renderTurnstile(turnstileRef.current);
+        }
     };
 
     if (!otpSent) {
+        if (!token) {
+            return (
+                <div className="space-y-6">
+                    <div className="flex flex-col items-center gap-2 text-center">
+                        <Shield className="h-8 w-8 text-primary"/>
+                        <div>
+                            <h3 className="text-lg font-semibold">Security Check</h3>
+                            <p className="text-sm text-muted-foreground">
+                                Please complete the security check to continue
+                            </p>
+                        </div>
+                    </div>
+
+                    <div
+                        ref={turnstileRef}
+                        className="flex justify-center"
+                        aria-label="Security challenge"
+                    />
+                </div>
+            );
+        }
+
         return (
             <div className="space-y-4">
                 <form onSubmit={handleRequestOTP} className="space-y-4">
@@ -179,16 +182,10 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
                         )}
                     </div>
 
-                    <div
-                        ref={turnstileRef}
-                        className="flex justify-center"
-                        aria-label="Security challenge"
-                    />
-
                     <Button
                         type="submit"
                         className="w-full h-10"
-                        disabled={loading || isAuthLoading || !token || !isReady}
+                        disabled={loading || isAuthLoading}
                     >
                         {loading ? "Sending..." : "Send Code"}
                     </Button>

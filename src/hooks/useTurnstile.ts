@@ -12,7 +12,6 @@ declare global {
             remove: (widgetId: string) => void;
             getResponse: (widgetId?: string) => string | undefined;
             isExpired: (widgetId?: string) => boolean;
-            ready: (callback: () => void) => void;
         };
     }
 }
@@ -38,9 +37,7 @@ export function useTurnstile(siteKey: string) {
             scriptLoading = true;
 
             const script = document.createElement("script");
-            script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-            script.async = true;
-            script.defer = true;
+            script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
 
             script.onload = () => {
                 scriptLoaded = true;
@@ -85,26 +82,24 @@ export function useTurnstile(siteKey: string) {
         }
 
         try {
-            window.turnstile.ready(() => {
-                const id = window.turnstile.render(container, {
-                    sitekey: siteKey,
-                    callback: (token: string) => {
-                        setToken(token);
-                    },
-                    "theme": "auto",
-                    "refresh-expired": "auto",
-                    "retry": "auto",
-                    "execution": "render",
-                    "error-callback": () => {
-                        setToken(null);
-                    },
-                    "expired-callback": () => {
-                        setToken(null);
-                    }
-                });
-
-                setWidgetId(id);
+            const id = window.turnstile.render(container, {
+                sitekey: siteKey,
+                callback: (token: string) => {
+                    setToken(token);
+                },
+                "theme": "auto",
+                "refresh-expired": "auto",
+                "retry": "auto",
+                "retry-interval": 8000,
+                "error-callback": () => {
+                    setToken(null);
+                },
+                "expired-callback": () => {
+                    setToken(null);
+                }
             });
+
+            setWidgetId(id);
         } catch (e) {
             console.error("Error rendering Turnstile widget:", e);
         }
