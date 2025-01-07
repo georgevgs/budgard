@@ -5,16 +5,16 @@ import {Progress} from "@/components/ui/progress";
 import {TrendingDown, TrendingUp} from "lucide-react";
 
 interface ExpensesBudgetListProps {
-    budgets: Budget[];
+    budget: Budget | null;
     categories: Category[];
     expenses: Expense[];
 }
 
 const ExpensesBudgetList = ({
-    budgets,
+    budget,
     expenses
 }: ExpensesBudgetListProps) => {
-    if (budgets.length === 0) {
+    if (!budget) {
         return (
             <div className="text-center text-muted-foreground py-4">
                 No budget set up yet
@@ -27,7 +27,7 @@ const ExpensesBudgetList = ({
         (sum, expense) => sum + expense.amount,
         0
     );
-    const budget = budgets[0];
+
     const progressPercentage = Math.min((monthlyExpenses / budget.amount) * 100, 100);
     const remainingBudget = budget.amount - monthlyExpenses;
     const isOverBudget = remainingBudget < 0;
