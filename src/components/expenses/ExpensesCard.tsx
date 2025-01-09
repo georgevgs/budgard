@@ -19,6 +19,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {formatCurrency} from "@/lib/utils";
 import type {Expense} from "@/types/Expense";
 
 type ExpenseCardProps = {
@@ -42,7 +43,7 @@ const ExpensesCard = ({expense, onEdit, onDelete}: ExpenseCardProps) => {
                             )}
                         </div>
                         <p className="text-sm text-muted-foreground">
-                            {new Date(expense.date).toLocaleDateString(undefined, {
+                            {new Date(expense.date).toLocaleDateString("de-DE", {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric"
@@ -52,7 +53,7 @@ const ExpensesCard = ({expense, onEdit, onDelete}: ExpenseCardProps) => {
 
                     <div className="flex items-center gap-4">
                         <p className="text-lg font-semibold whitespace-nowrap">
-                            €{expense.amount.toFixed(2)}
+                            {formatCurrency(expense.amount)}
                         </p>
 
                         <DropdownMenu>

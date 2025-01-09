@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import {CalendarIcon} from "lucide-react";
 import {format} from "date-fns";
-import {cn} from "@/lib/utils";
+import {cn, formatCurrencyInput, parseCurrencyInput} from "@/lib/utils";
 import {useAuth} from "@/hooks/useAuth";
 import {useDataOperations} from "@/hooks/useDataOperations";
 import {expenseSchema, type ExpenseFormData} from "@/lib/validations";
@@ -49,7 +49,7 @@ const ExpensesForm = ({
     const form = useForm<ExpenseFormData>({
         resolver: zodResolver(expenseSchema),
         defaultValues: {
-            amount: expense?.amount.toString() || "",
+            amount: expense ? formatCurrencyInput(expense.amount.toString()) : "",
             description: expense?.description || "",
             category_id: expense?.category_id || "none",
             date: expense ? new Date(expense.date) : new Date(),
@@ -61,7 +61,7 @@ const ExpensesForm = ({
 
         try {
             const expenseData: Partial<Expense> = {
-                amount: parseFloat(values.amount),
+                amount: parseCurrencyInput(values.amount),
                 description: values.description,
                 category_id: values.category_id === "none" ? undefined : values.category_id,
                 date: format(values.date, "yyyy-MM-dd"),
@@ -92,17 +92,19 @@ const ExpensesForm = ({
                         render={({field}) => (
                             <FormItem>
                                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                    €
-                  </span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                        €
+                                    </span>
                                     <FormControl>
                                         <Input
-                                            type="number"
+                                            type="text"
                                             inputMode="decimal"
-                                            placeholder="Amount"
-                                            {...field}
-                                            step="0.01"
-                                            min="0"
+                                            placeholder="0,00"
+                                            value={field.value}
+                                            onChange={(e) => {
+                                                const formatted = formatCurrencyInput(e.target.value);
+                                                field.onChange(formatted);
+                                            }}
                                             className="pl-7"
                                         />
                                     </FormControl>

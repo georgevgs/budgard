@@ -1,8 +1,9 @@
 import * as z from "zod";
+import {parseCurrencyInput} from "@/lib/utils";
 
 // Shared regex patterns
 const SAFE_STRING = /^[\p{L}\p{N}\s.,!?-]*$/u; // Unicode letters, numbers, basic punctuation
-const AMOUNT_PATTERN = /^\d+(\.\d{0,2})?$/;
+const AMOUNT_PATTERN = /^\d{1,3}(?:\.\d{3})*(?:,\d{0,2})?$/;
 const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
 
 // Email validation with common disposable email providers blocked
@@ -25,10 +26,10 @@ export const expenseSchema = z.object({
         .regex(AMOUNT_PATTERN, "Invalid amount format")
         .refine(
             (val) => {
-                const amount = parseFloat(val);
+                const amount = parseCurrencyInput(val);
                 return amount > 0 && amount <= 1000000;
             },
-            "Amount must be between 0 and 1,000,000"
+            "Amount must be between 0 and 1.000.000"
         ),
     description: z.string()
         .min(1, "Description is required")
@@ -61,10 +62,10 @@ export const budgetSchema = z.object({
         .regex(AMOUNT_PATTERN, "Invalid amount format")
         .refine(
             (val) => {
-                const amount = parseFloat(val);
+                const amount = parseCurrencyInput(val);
                 return amount >= 0 && amount <= 1000000;
             },
-            "Budget must be between 0 and 1,000,000"
+            "Budget must be between 0 and 1.000.000"
         )
 });
 
