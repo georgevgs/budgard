@@ -1,10 +1,30 @@
 import {Button} from "@/components/ui/button";
 import {signOut} from "@/lib/auth";
-import {LogOut} from "lucide-react";
+import {LogOut, Moon, Sun, Sparkles} from "lucide-react";
 import {useAuth} from "@/contexts/AuthContext";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {useEffect, useState} from "react";
 
 const Header = () => {
     const {session} = useAuth();
+    const [theme, setTheme] = useState("light");
+
+    useEffect(() => {
+        const root = window.document.documentElement;
+        root.setAttribute("data-theme", theme);
+
+        // Handle dark mode class
+        if (theme === "dark") {
+            root.classList.add("dark");
+        } else {
+            root.classList.remove("dark");
+        }
+    }, [theme]);
 
     const handleSignOut = async () => {
         try {
@@ -30,14 +50,40 @@ const Header = () => {
                         Budgard
                     </span>
                 </div>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleSignOut}
-                    className="text-muted-foreground gap-2 font-normal"
-                >
-                    <LogOut className="h-4 w-4"/>
-                </Button>
+                <div className="flex items-center gap-2">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+                                {theme === "light" && <Sun className="h-4 w-4"/>}
+                                {theme === "dark" && <Moon className="h-4 w-4"/>}
+                                {theme === "barbie" && <Sparkles className="h-4 w-4 text-pink-500"/>}
+                                <span className="sr-only">Toggle theme</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setTheme("light")}>
+                                <Sun className="h-4 w-4 mr-2"/>
+                                Light
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setTheme("dark")}>
+                                <Moon className="h-4 w-4 mr-2"/>
+                                Dark
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setTheme("barbie")} className="text-pink-500">
+                                <Sparkles className="h-4 w-4 mr-2"/>
+                                Barbie
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleSignOut}
+                        className="text-muted-foreground gap-2 font-normal"
+                    >
+                        <LogOut className="h-4 w-4"/>
+                    </Button>
+                </div>
             </div>
         </header>
     );
