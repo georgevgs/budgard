@@ -67,7 +67,7 @@ const ExpensesDashboard = ({expenses, categories}: ExpensesDashboardProps) => {
                                     </span>
                                 </div>
                                 <span className="text-sm font-medium shrink-0">
-                                    €{category.amount.toFixed(2)}
+                                    {category.amount.toFixed(2)}€
                                 </span>
                             </div>
                         </div>
