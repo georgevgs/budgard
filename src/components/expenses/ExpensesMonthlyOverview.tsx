@@ -30,7 +30,7 @@ const ExpensesMonthlyOverview = ({
             )}
         >
             <p className="text-sm font-medium text-muted-foreground">Monthly Total</p>
-            <p className="text-2xl font-bold">€{monthlyTotal.toFixed(2)}</p>
+            <p className="text-2xl font-bold">{monthlyTotal.toFixed(2)}€</p>
             {hasExpenses && (
                 <div className="flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
                     <ChevronDown
