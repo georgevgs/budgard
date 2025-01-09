@@ -43,6 +43,12 @@ const ExpensesDashboard = ({expenses, categories}: ExpensesDashboardProps) => {
             .sort((a, b) => b.amount - a.amount);
     }, [expenses, categories]);
 
+    const formatPercentage = (percentage: number): string => {
+        if (percentage === 0) return "0%";
+        if (percentage < 1) return "<1%";
+        return `${Math.round(percentage)}%`;
+    };
+
     if (categoryData.length === 0) {
         return null;
     }
@@ -63,7 +69,7 @@ const ExpensesDashboard = ({expenses, categories}: ExpensesDashboardProps) => {
                                         {category.name}
                                     </span>
                                     <span className="text-sm text-muted-foreground">
-                                        {category.percentage.toFixed(0)}%
+                                        {formatPercentage(category.percentage)}
                                     </span>
                                 </div>
                                 <span className="text-sm font-medium shrink-0">
