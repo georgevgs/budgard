@@ -1,39 +1,39 @@
-import { Button } from "@/components/ui/button";
+import {Button} from "@/components/ui/button";
 import {
     Popover,
     PopoverContent,
     PopoverTrigger
 } from "@/components/ui/popover";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { format, addMonths, parseISO, subMonths, setMonth, setYear } from "date-fns";
-import { cn } from "@/lib/utils.ts";
+import {ChevronLeft, ChevronRight} from "lucide-react";
+import {format, addMonths, parseISO, subMonths, setMonth, setYear} from "date-fns";
+import {cn} from "@/lib/utils";
 
 interface ExpensesMonthlySelectorProps {
     selectedMonth: string; // Format: "yyyy-MM"
     onMonthChange: (month: string) => void;
 }
 
-const ExpensesMonthlySelector = ({ selectedMonth, onMonthChange }: ExpensesMonthlySelectorProps) => {
+const ExpensesMonthlySelector = ({selectedMonth, onMonthChange}: ExpensesMonthlySelectorProps) => {
     const selectedDate = parseISO(`${selectedMonth}-01`);
 
-    const handleMonthChange = (direction: 'prev' | 'next') => {
-        const newDate = direction === 'next'
+    const handleMonthChange = (direction: "prev" | "next") => {
+        const newDate = direction === "next"
             ? addMonths(selectedDate, 1)
             : subMonths(selectedDate, 1);
-        onMonthChange(format(newDate, 'yyyy-MM'));
+        onMonthChange(format(newDate, "yyyy-MM"));
     };
 
     const handleMonthSelect = (month: number) => {
         const newDate = setMonth(selectedDate, month);
-        onMonthChange(format(newDate, 'yyyy-MM'));
+        onMonthChange(format(newDate, "yyyy-MM"));
     };
 
-    const handleYearChange = (direction: 'prev' | 'next') => {
+    const handleYearChange = (direction: "prev" | "next") => {
         const newDate = setYear(
             selectedDate,
-            selectedDate.getFullYear() + (direction === 'next' ? 1 : -1)
+            selectedDate.getFullYear() + (direction === "next" ? 1 : -1)
         );
-        onMonthChange(format(newDate, 'yyyy-MM'));
+        onMonthChange(format(newDate, "yyyy-MM"));
     };
 
     const months = [
@@ -50,10 +50,10 @@ const ExpensesMonthlySelector = ({ selectedMonth, onMonthChange }: ExpensesMonth
             <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleMonthChange('prev')}
+                onClick={() => handleMonthChange("prev")}
                 className="h-8 w-8 p-0"
             >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4"/>
             </Button>
 
             <Popover>
@@ -62,7 +62,7 @@ const ExpensesMonthlySelector = ({ selectedMonth, onMonthChange }: ExpensesMonth
                         variant="ghost"
                         className="font-medium text-sm h-8"
                     >
-                        {format(selectedDate, 'MMMM yyyy')}
+                        {format(selectedDate, "MMMM yyyy")}
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-64 p-0" align="center">
@@ -71,18 +71,18 @@ const ExpensesMonthlySelector = ({ selectedMonth, onMonthChange }: ExpensesMonth
                             variant="ghost"
                             size="sm"
                             className="h-8 w-8 p-0"
-                            onClick={() => handleYearChange('prev')}
+                            onClick={() => handleYearChange("prev")}
                         >
-                            <ChevronLeft className="h-4 w-4" />
+                            <ChevronLeft className="h-4 w-4"/>
                         </Button>
                         <div className="font-semibold">{currentYear}</div>
                         <Button
                             variant="ghost"
                             size="sm"
                             className="h-8 w-8 p-0"
-                            onClick={() => handleYearChange('next')}
+                            onClick={() => handleYearChange("next")}
                         >
-                            <ChevronRight className="h-4 w-4" />
+                            <ChevronRight className="h-4 w-4"/>
                         </Button>
                     </div>
                     <div className="grid grid-cols-3 gap-2 p-2">
@@ -97,7 +97,7 @@ const ExpensesMonthlySelector = ({ selectedMonth, onMonthChange }: ExpensesMonth
                                 )}
                                 onClick={() => handleMonthSelect(index)}
                             >
-                                {format(setMonth(selectedDate, index), 'MMM')}
+                                {format(setMonth(selectedDate, index), "MMM")}
                             </Button>
                         ))}
                     </div>
@@ -107,10 +107,10 @@ const ExpensesMonthlySelector = ({ selectedMonth, onMonthChange }: ExpensesMonth
             <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleMonthChange('next')}
+                onClick={() => handleMonthChange("next")}
                 className="h-8 w-8 p-0"
             >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4"/>
             </Button>
         </div>
     );

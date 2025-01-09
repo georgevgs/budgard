@@ -19,8 +19,9 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {formatCurrency} from "@/lib/utils";
+import {format} from "date-fns";
 import type {Expense} from "@/types/Expense";
+import {formatCurrency} from "@/lib/utils.ts";
 
 type ExpenseCardProps = {
     expense: Expense;
@@ -43,11 +44,7 @@ const ExpensesCard = ({expense, onEdit, onDelete}: ExpenseCardProps) => {
                             )}
                         </div>
                         <p className="text-sm text-muted-foreground">
-                            {new Date(expense.date).toLocaleDateString("de-DE", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric"
-                            })}
+                            {format(new Date(expense.date), "MMMM d, yyyy")}
                         </p>
                     </div>
 

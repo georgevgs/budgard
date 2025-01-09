@@ -179,7 +179,7 @@ const ExpensesForm = ({
                                             >
                                                 <CalendarIcon className="mr-2 h-4 w-4"/>
                                                 {field.value ? (
-                                                    format(field.value, "PPP")
+                                                    format(field.value, "MMMM d, yyyy")
                                                 ) : (
                                                     <span>Pick a date</span>
                                                 )}
