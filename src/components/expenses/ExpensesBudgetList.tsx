@@ -29,7 +29,7 @@ const ExpensesBudgetList = () => {
             <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Monthly Budget</span>
                 <span className="text-sm text-muted-foreground">
-                    €{monthlyExpenses.toFixed(2)} / €{budget.amount.toFixed(2)}
+                    {monthlyExpenses.toFixed(2)}€ / {budget.amount.toFixed(2)}€
                 </span>
             </div>
             <Progress
@@ -57,7 +57,7 @@ const ExpensesBudgetList = () => {
                     "text-sm font-semibold",
                     isOverBudget ? "text-destructive" : "text-primary"
                 )}>
-                    €{Math.abs(remainingBudget).toFixed(2)}
+                    {Math.abs(remainingBudget).toFixed(2)}€
                 </span>
             </div>
         </div>
