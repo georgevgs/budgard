@@ -8,23 +8,11 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {useEffect, useState} from "react";
+import {useTheme} from "@/hooks/useTheme";
 
 const Header = () => {
     const {session} = useAuth();
-    const [theme, setTheme] = useState("light");
-
-    useEffect(() => {
-        const root = window.document.documentElement;
-        root.setAttribute("data-theme", theme);
-
-        // Handle dark mode class
-        if (theme === "dark") {
-            root.classList.add("dark");
-        } else {
-            root.classList.remove("dark");
-        }
-    }, [theme]);
+    const {theme, setTheme} = useTheme();
 
     const handleSignOut = async () => {
         try {

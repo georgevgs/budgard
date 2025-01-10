@@ -6,15 +6,10 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {Moon, Sun, Sparkles} from "lucide-react";
-import {useEffect, useState} from "react";
+import {useTheme} from "@/hooks/useTheme";
 
 const ThemeToggle = () => {
-    const [theme, setTheme] = useState("light");
-
-    useEffect(() => {
-        const root = window.document.documentElement;
-        root.setAttribute("data-theme", theme);
-    }, [theme]);
+    const {theme, setTheme} = useTheme();
 
     return (
         <DropdownMenu>
