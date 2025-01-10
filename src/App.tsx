@@ -3,14 +3,15 @@ import {Toaster} from "@/components/ui/toaster";
 import {useAuth} from "@/contexts/AuthContext";
 import {usePwaUpdate} from "@/hooks/usePwaUpdate";
 import Header from "@/components/layout/Header";
+import NavTabs from "@/components/layout/NavTabs";
 import ExpensesList from "@/components/expenses/ExpensesList";
+import AnalyticsView from "@/components/analytics/AnalyticsView";
 import LandingPage from "@/pages/LandingPage";
 
 const App = () => {
     usePwaUpdate();
     const {session, isLoading} = useAuth();
 
-    // Show loading state while checking auth
     if (isLoading) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
@@ -38,23 +39,34 @@ const App = () => {
                             )
                         }
                     />
-                    <Route
-                        path="/expenses"
-                        element={
-                            session ? (
-                                <>
-                                    <Header/>
-                                    <main className="flex-1">
-                                        <div className="container mx-auto">
+                    {session && (
+                        <>
+                            <Route
+                                path="/expenses"
+                                element={
+                                    <>
+                                        <Header/>
+                                        <NavTabs/>
+                                        <main className="flex-1">
                                             <ExpensesList/>
-                                        </div>
-                                    </main>
-                                </>
-                            ) : (
-                                <Navigate to="/" replace/>
-                            )
-                        }
-                    />
+                                        </main>
+                                    </>
+                                }
+                            />
+                            <Route
+                                path="/analytics"
+                                element={
+                                    <>
+                                        <Header/>
+                                        <NavTabs/>
+                                        <main className="flex-1">
+                                            <AnalyticsView/>
+                                        </main>
+                                    </>
+                                }
+                            />
+                        </>
+                    )}
                     <Route path="*" element={<Navigate to="/" replace/>}/>
                 </Routes>
                 <Toaster/>

@@ -60,7 +60,7 @@ const ExpensesDashboard = ({expenses, categories}: ExpensesDashboardProps) => {
                     {categoryData.map((category) => (
                         <div key={category.name} className="flex items-center gap-4">
                             <div
-                                className="w-3 h-3 rounded-sm shrink-0"
+                                className="w-3 h-3 rounded-full shrink-0"
                                 style={{backgroundColor: category.color}}
                             />
                             <div className="flex-1 flex items-center justify-between gap-2 min-w-0">
