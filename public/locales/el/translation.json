@@ -1,0 +1,115 @@
+{
+  "common": {
+    "switchLanguage": "Αλλαγή γλώσσας",
+    "logoAlt": "Λογότυπο Budgard",
+    "toggleTheme": "Εναλλαγή θέματος",
+    "openMenu": "Άνοιγμα μενού",
+    "actionUndone": "Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.",
+    "add": "Προσθήκη",
+    "edit": "Επεξεργασία",
+    "delete": "Διαγραφή",
+    "cancel": "Ακύρωση",
+    "save": "Αποθήκευση",
+    "loading": "Φόρτωση...",
+    "error": "Σφάλμα",
+    "success": "Επιτυχία"
+  },
+  "auth": {
+    "signIn": "Σύνδεση",
+    "signOut": "Αποσύνδεση",
+    "emailVerification": "Συνδεθείτε στον λογαριασμό σας χρησιμοποιώντας επαλήθευση email",
+    "enterEmail": "Εισάγετε το email σας",
+    "sendCode": "Αποστολή Κωδικού",
+    "verifyCode": "Επαλήθευση Κωδικού",
+    "invalidCode": "Μη έγκυρος κωδικός επαλήθευσης. Παρακαλώ δοκιμάστε ξανά."
+  },
+  "expenses": {
+    "recurring": "Επαναλαμβανόμενο",
+    "deleteTitle": "Διαγραφή Εξόδου",
+    "deleteConfirmation": "Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτό το έξοδο;",
+    "deleteRecurringNote": " Αυτό δεν θα επηρεάσει τα μελλοντικά επαναλαμβανόμενα έξοδα.",
+    "title": "Έξοδα",
+    "addExpense": "Προσθήκη Εξόδου",
+    "editExpense": "Επεξεργασία Εξόδου",
+    "deleteExpense": "Διαγραφή Εξόδου",
+    "noExpenses": "Δεν υπάρχουν έξοδα για {{month}}",
+    "addFirst": "Προσθέστε το πρώτο σας έξοδο για αυτό το μήνα",
+    "amount": "Ποσό",
+    "description": "Περιγραφή",
+    "category": "Κατηγορία",
+    "date": "Ημερομηνία",
+    "totalSpent": "Συνολικά Έξοδα",
+    "monthlyAverage": "Μηνιαίος Μέσος Όρος",
+    "loading": "Φόρτωση εξόδων...",
+    "monthlyTotal": "Μηνιαίο Σύνολο",
+    "showBreakdown": "Εμφάνιση ανάλυσης",
+    "hideBreakdown": "Απόκρυψη ανάλυσης"
+  },
+  "categories": {
+    "title": "Κατηγορίες",
+    "addCategory": "Προσθήκη Κατηγορίας",
+    "editCategory": "Επεξεργασία Κατηγορίας",
+    "deleteCategory": "Διαγραφή Κατηγορίας",
+    "categoryName": "Όνομα Κατηγορίας",
+    "color": "Χρώμα"
+  },
+  "budget": {
+    "title": "Προϋπολογισμός",
+    "setBudget": "Προσθήκη",
+    "editBudget": "Επεξεργασία",
+    "monthly": "Μηνιαίος προϋπολογισμός",
+    "remaining": "Υπόλοιπο",
+    "loading": "Φόρτωση προϋπολογισμού...",
+    "noBudgetSet": "Δεν έχει οριστεί προϋπολογισμός ακόμα",
+    "monthlyBudget": "Μηνιαίος Προϋπολογισμός",
+    "budgetProgress": "{{current}} / {{total}}",
+    "overBudget": "Υπέρβαση Προϋπολογισμού",
+    "underBudget": "Εντός Προϋπολογισμού",
+    "updateDescription": "Ο τρέχων προϋπολογισμός σας είναι {{amount}}. Εισάγετε νέο ποσό για ενημέρωση.",
+    "setDescription": "Ορίστε το ποσό του μηνιαίου προϋπολογισμού σας",
+    "amountLabel": "Ποσό Προϋπολογισμού",
+    "amountPlaceholder": "Εισάγετε συνολικό μηνιαίο προϋπολογισμό",
+    "amountAriaLabel": "Ποσό μηνιαίου προϋπολογισμού",
+    "updateButton": "Ενημέρωση",
+    "setButton": "Ορισμός"
+  },
+  "recurring": {
+    "title": "Επαναλαμβανόμενα",
+    "addRecurring": "Προσθήκη Επαναλαμβανόμενου",
+    "editRecurring": "Επεξεργασία Επαναλαμβανόμενου",
+    "deleteRecurring": "Διαγραφή Επαναλαμβανόμενου",
+    "frequency": "Συχνότητα",
+    "startDate": "Ημερομηνία Έναρξης",
+    "endDate": "Ημερομηνία Λήξης",
+    "frequencies": {
+      "weekly": "Εβδομαδιαία",
+      "monthly": "Μηνιαία",
+      "quarterly": "Τριμηνιαία",
+      "yearly": "Ετήσια"
+    }
+  },
+  "navigation": {
+    "expenses": "Έξοδα",
+    "recurring": "Επαναλαμβανόμενα",
+    "analytics": "Αναλύσεις",
+    "ariaLabel": "Κύρια πλοήγηση",
+    "previousMonth": "Προηγούμενος μήνας",
+    "nextMonth": "Επόμενος μήνας",
+    "previousYear": "Προηγούμενο έτος",
+    "nextYear": "Επόμενο έτος",
+    "selectMonth": "Επιλογή μήνα",
+    "today": "Σήμερα"
+  },
+  "theme": {
+    "light": "Φωτεινό",
+    "dark": "Σκοτεινό",
+    "barbie": "Barbie"
+  },
+  "analytics": {
+    "title": "Αναλύσεις",
+    "expensesByCategory": "Έξοδα ανά Κατηγορία",
+    "monthlyTrends": "Μηνιαίες Τάσεις",
+    "highestMonth": "Μήνας με τα Περισσότερα Έξοδα",
+    "lowestMonth": "Μήνας με τα Λιγότερα Έξοδα"
+  }
+}

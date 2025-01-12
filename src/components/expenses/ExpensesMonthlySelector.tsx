@@ -1,3 +1,4 @@
+import {useTranslation} from "react-i18next";
 import {Button} from "@/components/ui/button";
 import {
     Popover,
@@ -6,6 +7,7 @@ import {
 } from "@/components/ui/popover";
 import {ChevronLeft, ChevronRight} from "lucide-react";
 import {format, addMonths, parseISO, subMonths, setMonth, setYear} from "date-fns";
+import {el, enUS} from "date-fns/locale";
 import {cn} from "@/lib/utils";
 
 interface ExpensesMonthlySelectorProps {
@@ -14,7 +16,9 @@ interface ExpensesMonthlySelectorProps {
 }
 
 const ExpensesMonthlySelector = ({selectedMonth, onMonthChange}: ExpensesMonthlySelectorProps) => {
+    const {t, i18n} = useTranslation();
     const selectedDate = parseISO(`${selectedMonth}-01`);
+    const dateLocale = i18n.language === "el" ? el : enUS;
 
     const handleMonthChange = (direction: "prev" | "next") => {
         const newDate = direction === "next"
@@ -36,12 +40,6 @@ const ExpensesMonthlySelector = ({selectedMonth, onMonthChange}: ExpensesMonthly
         onMonthChange(format(newDate, "yyyy-MM"));
     };
 
-    const months = [
-        "January", "February", "March", "April",
-        "May", "June", "July", "August",
-        "September", "October", "November", "December"
-    ];
-
     const currentYear = selectedDate.getFullYear();
     const currentMonth = selectedDate.getMonth();
 
@@ -52,6 +50,7 @@ const ExpensesMonthlySelector = ({selectedMonth, onMonthChange}: ExpensesMonthly
                 size="sm"
                 onClick={() => handleMonthChange("prev")}
                 className="h-8 w-8 p-0"
+                aria-label={t("navigation.previousMonth")}
             >
                 <ChevronLeft className="h-4 w-4"/>
             </Button>
@@ -61,8 +60,9 @@ const ExpensesMonthlySelector = ({selectedMonth, onMonthChange}: ExpensesMonthly
                     <Button
                         variant="ghost"
                         className="font-medium text-sm h-8"
+                        aria-label={t("navigation.selectMonth")}
                     >
-                        {format(selectedDate, "MMMM yyyy")}
+                        {format(selectedDate, "MMMM yyyy", {locale: dateLocale})}
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-64 p-0" align="center">
@@ -72,6 +72,7 @@ const ExpensesMonthlySelector = ({selectedMonth, onMonthChange}: ExpensesMonthly
                             size="sm"
                             className="h-8 w-8 p-0"
                             onClick={() => handleYearChange("prev")}
+                            aria-label={t("navigation.previousYear")}
                         >
                             <ChevronLeft className="h-4 w-4"/>
                         </Button>
@@ -81,14 +82,15 @@ const ExpensesMonthlySelector = ({selectedMonth, onMonthChange}: ExpensesMonthly
                             size="sm"
                             className="h-8 w-8 p-0"
                             onClick={() => handleYearChange("next")}
+                            aria-label={t("navigation.nextYear")}
                         >
                             <ChevronRight className="h-4 w-4"/>
                         </Button>
                     </div>
                     <div className="grid grid-cols-3 gap-2 p-2">
-                        {months.map((month, index) => (
+                        {Array.from({length: 12}, (_, index) => (
                             <Button
-                                key={month}
+                                key={index}
                                 variant="ghost"
                                 size="sm"
                                 className={cn(
@@ -97,7 +99,7 @@ const ExpensesMonthlySelector = ({selectedMonth, onMonthChange}: ExpensesMonthly
                                 )}
                                 onClick={() => handleMonthSelect(index)}
                             >
-                                {format(setMonth(selectedDate, index), "MMM")}
+                                {format(setMonth(selectedDate, index), "MMM", {locale: dateLocale})}
                             </Button>
                         ))}
                     </div>
@@ -109,6 +111,7 @@ const ExpensesMonthlySelector = ({selectedMonth, onMonthChange}: ExpensesMonthly
                 size="sm"
                 onClick={() => handleMonthChange("next")}
                 className="h-8 w-8 p-0"
+                aria-label={t("navigation.nextMonth")}
             >
                 <ChevronRight className="h-4 w-4"/>
             </Button>

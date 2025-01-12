@@ -1,6 +1,5 @@
 import {useState} from "react";
 import {format} from "date-fns";
-import type {Expense} from "@/types/Expense";
 import type {FormType} from "@/components/layout/FormsManager";
 import {useData} from "@/contexts/DataContext";
 import {useDataOperations} from "@/hooks/useDataOperations";
@@ -14,6 +13,7 @@ import ExpensesBudget from "./ExpensesBudget";
 import EmptyExpenseState from "./ExpensesEmpty";
 import ExpenseLoadingState from "./ExpensesLoading";
 import ExpensesPagination from "./ExpensesPagination";
+import {Expense} from "@/types/Expense.ts";
 
 const ExpensesList = () => {
     const {categories, expenses, isLoading, isInitialized} = useData();
@@ -25,12 +25,10 @@ const ExpensesList = () => {
     const currentMonth = format(new Date(), "yyyy-MM");
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
-    // Show loading state if not initialized or still loading
     if (!isInitialized || isLoading) {
         return <ExpenseLoadingState/>;
     }
 
-    // Filter expenses for selected month and sort by date
     const filteredExpenses = expenses.filter(
         (expense) => format(new Date(expense.date), "yyyy-MM") === selectedMonth
     ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -51,8 +49,8 @@ const ExpensesList = () => {
     };
 
     return (
-        <div className="h-[calc(100vh-58px)] flex flex-col">
-            <div className="flex-1 min-h-0 w-full max-w-4xl mx-auto px-4 pt-4 pb-safe flex flex-col">
+        <div className="flex flex-col min-h-[calc(100vh-58px)]">
+            <div className="flex-1 container max-w-4xl mx-auto px-4 pt-4 pb-4">
                 {/* Month Selection and Overview Section */}
                 <div className="space-y-3 mb-4">
                     <ExpensesMonthlySelector
@@ -93,7 +91,7 @@ const ExpensesList = () => {
                 </div>
 
                 {/* Expenses List Section */}
-                <div className="flex-1 min-h-0">
+                <div className="flex-1">
                     {filteredExpenses.length === 0 ? (
                         <EmptyExpenseState
                             selectedMonth={selectedMonth}

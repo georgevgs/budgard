@@ -5,38 +5,47 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(value: number): string {
-    return new Intl.NumberFormat("de-DE", {
-        style: "currency",
-        currency: "EUR",
+export function formatCurrency(amount: number): string {
+    // Format number to European style (1.234,56)
+    return amount.toLocaleString("de-DE", {
         minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    }).format(value);
-}
-
-export function parseCurrencyInput(value: string): number {
-    // Remove currency symbol and any whitespace
-    const cleaned = value.replace(/[€\s]/g, "");
-    // Replace comma with dot for decimal
-    const normalized = cleaned.replace(/\./g, "").replace(",", ".");
-    return parseFloat(normalized);
+        maximumFractionDigits: 2
+    }) + "€";
 }
 
 export function formatCurrencyInput(value: string): string {
-    // Remove any non-digit, non-comma, non-dot characters
-    const cleaned = value.replace(/[^\d.,]/g, "");
+    // Remove all characters except numbers and comma
+    const cleaned = value.replace(/[^\d,]/g, "");
 
-    // Convert to the format with dots for thousands and comma for decimal
+    // Ensure only one comma
     const parts = cleaned.split(",");
-    if (parts[0]) {
-        // Format the integer part with dots for thousands
-        parts[0] = parts[0].replace(/\./g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    if (parts.length > 2) {
+        parts[1] = parts.slice(1).join("");
+        value = parts.slice(0, 2).join(",");
+    } else {
+        value = cleaned;
     }
 
-    // Ensure max 2 decimal places
-    if (parts[1]) {
-        parts[1] = parts[1].slice(0, 2);
-    }
+    // Add thousand separators
+    const [whole = "", decimal = ""] = value.split(",");
+    const formattedWhole = whole
+        .split("")
+        .reverse()
+        .reduce((acc, digit, i) => {
+            if (i > 0 && i % 3 === 0) {
+                return digit + "." + acc;
+            }
+            return digit + acc;
+        }, "");
 
-    return parts.join(",");
+    // Return formatted string
+    return formattedWhole + (decimal ? "," + decimal.slice(0, 2) : "");
+}
+
+export function parseCurrencyInput(value: string): number {
+    // Convert from European format (1.234,56) to number
+    const cleaned = value
+        .replace(/\./g, "")  // Remove thousand separators
+        .replace(",", ".");  // Convert decimal comma to dot
+    return parseFloat(cleaned) || 0;
 }

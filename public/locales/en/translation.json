@@ -1,0 +1,115 @@
+{
+  "common": {
+    "switchLanguage": "Switch language",
+    "logoAlt": "Budgard Logo",
+    "toggleTheme": "Toggle theme",
+    "openMenu": "Open menu",
+    "actionUndone": "This action cannot be undone.",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "save": "Save",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "emailVerification": "Sign in to your account using email verification",
+    "enterEmail": "Enter your email",
+    "sendCode": "Send Code",
+    "verifyCode": "Verify Code",
+    "invalidCode": "Invalid verification code. Please try again."
+  },
+  "expenses": {
+    "recurring": "Recurring",
+    "deleteTitle": "Delete Expense",
+    "deleteConfirmation": "Are you sure you want to delete this expense?",
+    "deleteRecurringNote": " This won't affect future recurring expenses.",
+    "title": "Expenses",
+    "addExpense": "Add Expense",
+    "editExpense": "Edit Expense",
+    "deleteExpense": "Delete Expense",
+    "noExpenses": "No expenses for {{month}}",
+    "addFirst": "Add your first expense for this month",
+    "amount": "Amount",
+    "description": "Description",
+    "category": "Category",
+    "date": "Date",
+    "totalSpent": "Total Spent",
+    "monthlyAverage": "Monthly Average",
+    "loading": "Loading expenses...",
+    "monthlyTotal": "Monthly Total",
+    "showBreakdown": "Show breakdown",
+    "hideBreakdown": "Hide breakdown"
+  },
+  "categories": {
+    "title": "Categories",
+    "addCategory": "Add Category",
+    "editCategory": "Edit Category",
+    "deleteCategory": "Delete Category",
+    "categoryName": "Category Name",
+    "color": "Color"
+  },
+  "budget": {
+    "title": "Budget",
+    "setBudget": "Set Budget",
+    "editBudget": "Edit Budget",
+    "monthly": "Monthly Budget",
+    "remaining": "Remaining",
+    "loading": "Loading budget...",
+    "noBudgetSet": "No budget set up yet",
+    "monthlyBudget": "Monthly Budget",
+    "budgetProgress": "{{current}} / {{total}}",
+    "overBudget": "Over Budget",
+    "underBudget": "Under Budget",
+    "updateDescription": "Your current budget is {{amount}}. Enter a new amount to update it.",
+    "setDescription": "Set your monthly budget amount",
+    "amountLabel": "Budget Amount",
+    "amountPlaceholder": "Enter total monthly budget",
+    "amountAriaLabel": "Monthly budget amount",
+    "updateButton": "Update Budget",
+    "setButton": "Set Budget"
+  },
+  "recurring": {
+    "title": "Recurring",
+    "addRecurring": "Add Recurring",
+    "editRecurring": "Edit Recurring",
+    "deleteRecurring": "Delete Recurring",
+    "frequency": "Frequency",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "frequencies": {
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "yearly": "Yearly"
+    }
+  },
+  "navigation": {
+    "expenses": "Expenses",
+    "recurring": "Recurring",
+    "analytics": "Analytics",
+    "ariaLabel": "Main navigation",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "previousYear": "Previous year",
+    "nextYear": "Next year",
+    "selectMonth": "Select month",
+    "today": "Today"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "barbie": "Barbie"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "expensesByCategory": "Expenses by Category",
+    "monthlyTrends": "Monthly Trends",
+    "highestMonth": "Highest Spending Month",
+    "lowestMonth": "Lowest Spending Month"
+  }
+}

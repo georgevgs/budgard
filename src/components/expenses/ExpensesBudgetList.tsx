@@ -1,15 +1,17 @@
+import {useTranslation} from "react-i18next";
 import {useData} from "@/contexts/DataContext";
 import {Progress} from "@/components/ui/progress";
 import {TrendingDown, TrendingUp} from "lucide-react";
-import {cn} from "@/lib/utils";
+import {cn, formatCurrency} from "@/lib/utils";
 
 const ExpensesBudgetList = () => {
     const {budget, expenses, isInitialized} = useData();
+    const {t} = useTranslation();
 
     if (!isInitialized || !budget) {
         return (
             <div className="text-center text-muted-foreground py-4">
-                No budget set up yet
+                {t("budget.noBudgetSet")}
             </div>
         );
     }
@@ -27,9 +29,12 @@ const ExpensesBudgetList = () => {
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Monthly Budget</span>
+                <span className="text-sm font-medium">{t("budget.monthlyBudget")}</span>
                 <span className="text-sm text-muted-foreground">
-                    {monthlyExpenses.toFixed(2)}€ / {budget.amount.toFixed(2)}€
+                    {t("budget.budgetProgress", {
+                        current: formatCurrency(monthlyExpenses),
+                        total: formatCurrency(budget.amount)
+                    })}
                 </span>
             </div>
             <Progress
@@ -50,14 +55,14 @@ const ExpensesBudgetList = () => {
                         "text-sm",
                         isOverBudget ? "text-destructive" : "text-primary"
                     )}>
-                        {isOverBudget ? "Over Budget" : "Under Budget"}
+                        {t(isOverBudget ? "budget.overBudget" : "budget.underBudget")}
                     </span>
                 </div>
                 <span className={cn(
                     "text-sm font-semibold",
                     isOverBudget ? "text-destructive" : "text-primary"
                 )}>
-                    {Math.abs(remainingBudget).toFixed(2)}€
+                    {formatCurrency(Math.abs(remainingBudget))}
                 </span>
             </div>
         </div>
