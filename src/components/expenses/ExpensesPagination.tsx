@@ -1,3 +1,4 @@
+import {useTranslation} from "react-i18next";
 import {useState} from "react";
 import {
     Pagination,
@@ -20,6 +21,7 @@ interface ExpensesPaginationProps {
 const ITEMS_PER_PAGE = 5;
 
 const ExpensesPagination = ({expenses, onEdit, onDelete}: ExpensesPaginationProps) => {
+    const {t} = useTranslation();
     const [currentPage, setCurrentPage] = useState(1);
 
     // Calculate pagination
@@ -31,11 +33,9 @@ const ExpensesPagination = ({expenses, onEdit, onDelete}: ExpensesPaginationProp
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
-        // Smooth scroll to top
         window.scrollTo({top: 0, behavior: "smooth"});
     };
 
-    // Generate page numbers to display
     const getVisiblePages = () => {
         const pages = [];
         if (totalPages <= 5) {
@@ -77,18 +77,22 @@ const ExpensesPagination = ({expenses, onEdit, onDelete}: ExpensesPaginationProp
                                 <PaginationPrevious
                                     onClick={() => handlePageChange(currentPage - 1)}
                                     className={currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                                />
+                                    aria-label={t("pagination.previous")}
+                                >
+                                    {t("pagination.previous")}
+                                </PaginationPrevious>
                             </PaginationItem>
 
                             {getVisiblePages().map((page, index) => (
                                 <PaginationItem key={index}>
                                     {page === "ellipsis" ? (
-                                        <PaginationEllipsis/>
+                                        <PaginationEllipsis aria-label={t("pagination.more")}/>
                                     ) : (
                                         <PaginationLink
                                             onClick={() => handlePageChange(page as number)}
                                             isActive={currentPage === page}
                                             className="cursor-pointer"
+                                            aria-label={t("pagination.page", {page})}
                                         >
                                             {page}
                                         </PaginationLink>
@@ -100,7 +104,10 @@ const ExpensesPagination = ({expenses, onEdit, onDelete}: ExpensesPaginationProp
                                 <PaginationNext
                                     onClick={() => handlePageChange(currentPage + 1)}
                                     className={currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                                />
+                                    aria-label={t("pagination.next")}
+                                >
+                                    {t("pagination.next")}
+                                </PaginationNext>
                             </PaginationItem>
                         </PaginationContent>
                     </Pagination>

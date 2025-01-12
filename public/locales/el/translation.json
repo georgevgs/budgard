@@ -43,7 +43,18 @@
     "loading": "Φόρτωση εξόδων...",
     "monthlyTotal": "Μηνιαίο Σύνολο",
     "showBreakdown": "Εμφάνιση ανάλυσης",
-    "hideBreakdown": "Απόκρυψη ανάλυσης"
+    "hideBreakdown": "Απόκρυψη ανάλυσης",
+    "noExpensesFor": "Δεν υπάρχουν έξοδα για {{month}}",
+    "addFirstExpense": "Προσθέστε το πρώτο σας έξοδο για αυτό το μήνα",
+    "formDescription": "Συμπληρώστε τα στοιχεία για το έξοδό σας. Όλα τα πεδία εκτός από την κατηγορία είναι υποχρεωτικά.",
+    "amountPlaceholder": "0,00",
+    "amountLabel": "Ποσό",
+    "descriptionPlaceholder": "Περιγραφή",
+    "descriptionLabel": "Περιγραφή",
+    "selectCategory": "Επιλέξτε κατηγορία",
+    "noCategory": "Χωρίς κατηγορία",
+    "pickDate": "Επιλέξτε ημερομηνία",
+    "saveExpense": "Αποθήκευση Εξόδου"
   },
   "categories": {
     "title": "Κατηγορίες",
@@ -100,10 +111,33 @@
     "selectMonth": "Επιλογή μήνα",
     "today": "Σήμερα"
   },
+  "pagination": {
+    "previous": "Προηγούμενη",
+    "next": "Επόμενη",
+    "page": "Σελίδα {{page}}",
+    "more": "Περισσότερες σελίδες"
+  },
+  "forms": {
+    "expenseDescription": "Φόρμα για {{action}} έξοδο",
+    "editExisting": "επεξεργασία υπάρχοντος",
+    "addNew": "προσθήκη νέου",
+    "categoryDescription": "Φόρμα για προσθήκη νέας κατηγορίας εξόδων"
+  },
   "theme": {
     "light": "Φωτεινό",
     "dark": "Σκοτεινό",
     "barbie": "Barbie"
+  },
+  "speedDial": {
+    "open": "Άνοιγμα μενού ενεργειών",
+    "close": "Κλείσιμο μενού ενεργειών",
+    "closeMenu": "Κάντε κλικ για κλείσιμο του μενού"
+  },
+  "dashboard": {
+    "zeroPercent": "0%",
+    "lessThanOnePercent": "<1%",
+    "percent": "{{value}}%",
+    "categoryBreakdown": "{{name}}: {{amount}}, {{percent}} των συνολικών εξόδων"
   },
   "analytics": {
     "title": "Αναλύσεις",

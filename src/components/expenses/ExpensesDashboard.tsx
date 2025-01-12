@@ -1,5 +1,7 @@
+import {useTranslation} from "react-i18next";
 import {useMemo} from "react";
 import {Card, CardContent} from "@/components/ui/card";
+import {formatCurrency} from "@/lib/utils";
 import type {Expense} from "@/types/Expense";
 import type {Category} from "@/types/Category";
 
@@ -9,6 +11,8 @@ interface ExpensesDashboardProps {
 }
 
 const ExpensesDashboard = ({expenses, categories}: ExpensesDashboardProps) => {
+    const {t} = useTranslation();
+
     const categoryData = useMemo(() => {
         // Group expenses by category
         const categoryExpenses = expenses.reduce<Record<string, Expense[]>>((acc, expense) => {
@@ -44,9 +48,9 @@ const ExpensesDashboard = ({expenses, categories}: ExpensesDashboardProps) => {
     }, [expenses, categories]);
 
     const formatPercentage = (percentage: number): string => {
-        if (percentage === 0) return "0%";
-        if (percentage < 1) return "<1%";
-        return `${Math.round(percentage)}%`;
+        if (percentage === 0) return t("dashboard.zeroPercent");
+        if (percentage < 1) return t("dashboard.lessThanOnePercent");
+        return t("dashboard.percent", {value: Math.round(percentage)});
     };
 
     if (categoryData.length === 0) {
@@ -58,10 +62,19 @@ const ExpensesDashboard = ({expenses, categories}: ExpensesDashboardProps) => {
             <CardContent className="pt-6">
                 <div className="w-full space-y-3">
                     {categoryData.map((category) => (
-                        <div key={category.name} className="flex items-center gap-4">
+                        <div
+                            key={category.name}
+                            className="flex items-center gap-4"
+                            aria-label={t("dashboard.categoryBreakdown", {
+                                name: category.name,
+                                amount: formatCurrency(category.amount),
+                                percent: formatPercentage(category.percentage)
+                            })}
+                        >
                             <div
                                 className="w-3 h-3 rounded-full shrink-0"
                                 style={{backgroundColor: category.color}}
+                                aria-hidden="true"
                             />
                             <div className="flex-1 flex items-center justify-between gap-2 min-w-0">
                                 <div className="flex gap-2 items-baseline min-w-0">
@@ -73,7 +86,7 @@ const ExpensesDashboard = ({expenses, categories}: ExpensesDashboardProps) => {
                                     </span>
                                 </div>
                                 <span className="text-sm font-medium shrink-0">
-                                    {category.amount.toFixed(2)}€
+                                    {formatCurrency(category.amount)}
                                 </span>
                             </div>
                         </div>

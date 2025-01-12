@@ -10,10 +10,10 @@ import ExpensesMonthlySelector from "./ExpensesMonthlySelector";
 import ExpensesMonthlyOverview from "./ExpensesMonthlyOverview";
 import ExpensesDashboard from "./ExpensesDashboard";
 import ExpensesBudget from "./ExpensesBudget";
-import EmptyExpenseState from "./ExpensesEmpty";
 import ExpenseLoadingState from "./ExpensesLoading";
 import ExpensesPagination from "./ExpensesPagination";
 import {Expense} from "@/types/Expense.ts";
+import ExpensesEmpty from "./ExpensesEmpty";
 
 const ExpensesList = () => {
     const {categories, expenses, isLoading, isInitialized} = useData();
@@ -93,7 +93,7 @@ const ExpensesList = () => {
                 {/* Expenses List Section */}
                 <div className="flex-1">
                     {filteredExpenses.length === 0 ? (
-                        <EmptyExpenseState
+                        <ExpensesEmpty
                             selectedMonth={selectedMonth}
                             onAddClick={() => setFormType("newExpense")}
                         />

@@ -1,3 +1,4 @@
+import {useTranslation} from "react-i18next";
 import {Dialog, DialogContent} from "@/components/ui/dialog";
 import type {Expense} from "@/types/Expense";
 import ExpensesForm from "@/components/expenses/ExpensesForm";
@@ -17,6 +18,7 @@ const FormsManager = ({
     onClose,
     selectedExpense,
 }: FormsManagerProps) => {
+    const {t} = useTranslation();
     const {categories, isInitialized, isLoading} = useData();
 
     // Don't show forms until data is ready
@@ -37,9 +39,15 @@ const FormsManager = ({
                     onOpenAutoFocus={(e) => e.preventDefault()}
                 >
                     <div id="expense-form-description" className="sr-only">
-                        Form to {formType === "editExpense" ? "edit an existing" : "add a new"} expense
+                        {t("forms.expenseDescription", {
+                            action: t(
+                                formType === "editExpense"
+                                    ? "forms.editExisting"
+                                    : "forms.addNew"
+                            )
+                        })}
                     </div>
-                    {isExpenseForm && ( // Add conditional render for type safety
+                    {isExpenseForm && (
                         <ExpensesForm
                             expense={formType === "editExpense" ? selectedExpense : undefined}
                             categories={categories}
@@ -56,9 +64,9 @@ const FormsManager = ({
                     aria-describedby="category-form-description"
                 >
                     <div id="category-form-description" className="sr-only">
-                        Form to add a new expense category
+                        {t("forms.categoryDescription")}
                     </div>
-                    {isCategoryForm && ( // Add conditional render for type safety
+                    {isCategoryForm && (
                         <CategoryForm
                             onBack={onClose}
                             onClose={onClose}

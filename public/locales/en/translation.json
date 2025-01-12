@@ -43,7 +43,18 @@
     "loading": "Loading expenses...",
     "monthlyTotal": "Monthly Total",
     "showBreakdown": "Show breakdown",
-    "hideBreakdown": "Hide breakdown"
+    "hideBreakdown": "Hide breakdown",
+    "noExpensesFor": "No expenses for {{month}}",
+    "addFirstExpense": "Add your first expense for this month",
+    "formDescription": "Fill in the details for your expense. All fields except category are required.",
+    "amountPlaceholder": "0,00",
+    "amountLabel": "Amount",
+    "descriptionPlaceholder": "Description",
+    "descriptionLabel": "Description",
+    "selectCategory": "Select a category",
+    "noCategory": "No category",
+    "pickDate": "Pick a date",
+    "saveExpense": "Save Expense"
   },
   "categories": {
     "title": "Categories",
@@ -100,10 +111,33 @@
     "selectMonth": "Select month",
     "today": "Today"
   },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "more": "More",
+    "page": "Page {{page}}"
+  },
+  "forms": {
+    "expenseDescription": "Form to {{action}} expense",
+    "editExisting": "edit an existing",
+    "addNew": "add a new",
+    "categoryDescription": "Form to add a new expense category"
+  },
   "theme": {
     "light": "Light",
     "dark": "Dark",
     "barbie": "Barbie"
+  },
+  "speedDial": {
+    "open": "Open actions menu",
+    "close": "Close actions menu",
+    "closeMenu": "Click to close menu"
+  },
+  "dashboard": {
+    "zeroPercent": "0%",
+    "lessThanOnePercent": "<1%",
+    "percent": "{{value}}%",
+    "categoryBreakdown": "{{name}}: {{amount}}, {{percent}} of total expenses"
   },
   "analytics": {
     "title": "Analytics",

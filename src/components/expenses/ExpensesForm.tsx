@@ -1,3 +1,4 @@
+import {useTranslation} from "react-i18next";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {DialogTitle, DialogDescription, DialogHeader} from "@/components/ui/dialog";
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import {CalendarIcon} from "lucide-react";
 import {format} from "date-fns";
+import {el, enUS} from "date-fns/locale";
 import {cn, formatCurrencyInput, parseCurrencyInput} from "@/lib/utils";
 import {useAuth} from "@/hooks/useAuth";
 import {useDataOperations} from "@/hooks/useDataOperations";
@@ -43,8 +45,10 @@ const ExpensesForm = ({
     categories,
     onClose,
 }: ExpensesFormProps) => {
+    const {t, i18n} = useTranslation();
     const {session} = useAuth();
     const {handleExpenseSubmit} = useDataOperations();
+    const dateLocale = i18n.language === "el" ? el : enUS;
 
     const form = useForm<ExpenseFormData>({
         resolver: zodResolver(expenseSchema),
@@ -78,9 +82,11 @@ const ExpensesForm = ({
     return (
         <div className="p-6">
             <DialogHeader>
-                <DialogTitle>{expense ? "Edit" : "Add"} Expense</DialogTitle>
+                <DialogTitle>
+                    {t(expense ? "expenses.editExpense" : "expenses.addExpense")}
+                </DialogTitle>
                 <DialogDescription>
-                    Fill in the details for your expense. All fields except category are required.
+                    {t("expenses.formDescription")}
                 </DialogDescription>
             </DialogHeader>
 
@@ -99,13 +105,14 @@ const ExpensesForm = ({
                                         <Input
                                             type="text"
                                             inputMode="decimal"
-                                            placeholder="0,00"
+                                            placeholder={t("expenses.amountPlaceholder")}
                                             value={field.value}
                                             onChange={(e) => {
                                                 const formatted = formatCurrencyInput(e.target.value);
                                                 field.onChange(formatted);
                                             }}
                                             className="pl-7"
+                                            aria-label={t("expenses.amountLabel")}
                                         />
                                     </FormControl>
                                 </div>
@@ -121,9 +128,10 @@ const ExpensesForm = ({
                             <FormItem>
                                 <FormControl>
                                     <Input
-                                        placeholder="Description"
+                                        placeholder={t("expenses.descriptionPlaceholder")}
                                         {...field}
                                         className="overflow-ellipsis"
+                                        aria-label={t("expenses.descriptionLabel")}
                                     />
                                 </FormControl>
                                 <FormMessage/>
@@ -136,20 +144,27 @@ const ExpensesForm = ({
                         name="category_id"
                         render={({field}) => (
                             <FormItem>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    value={field.value}
+                                >
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select a category"/>
+                                            <SelectValue placeholder={t("expenses.selectCategory")}/>
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent position="popper" className="max-h-[300px]">
-                                        <SelectItem value="none">No category</SelectItem>
+                                        <SelectItem value="none">
+                                            {t("expenses.noCategory")}
+                                        </SelectItem>
                                         {categories.map((category) => (
                                             <SelectItem key={category.id} value={category.id}>
                                                 <div className="flex items-center gap-2">
                                                     <div
                                                         className="w-3 h-3 rounded-full"
                                                         style={{backgroundColor: category.color}}
+                                                        aria-hidden="true"
                                                     />
                                                     {category.name}
                                                 </div>
@@ -171,6 +186,7 @@ const ExpensesForm = ({
                                     <PopoverTrigger asChild>
                                         <FormControl>
                                             <Button
+                                                type="button"
                                                 variant="outline"
                                                 className={cn(
                                                     "w-full justify-start text-left font-normal",
@@ -179,9 +195,9 @@ const ExpensesForm = ({
                                             >
                                                 <CalendarIcon className="mr-2 h-4 w-4"/>
                                                 {field.value ? (
-                                                    format(field.value, "MMMM d, yyyy")
+                                                    format(field.value, "PPP", {locale: dateLocale})
                                                 ) : (
-                                                    <span>Pick a date</span>
+                                                    <span>{t("expenses.pickDate")}</span>
                                                 )}
                                             </Button>
                                         </FormControl>
@@ -192,6 +208,7 @@ const ExpensesForm = ({
                                             selected={field.value}
                                             onSelect={field.onChange}
                                             disabled={false}
+                                            locale={dateLocale}
                                         />
                                     </PopoverContent>
                                 </Popover>
@@ -206,13 +223,15 @@ const ExpensesForm = ({
                             variant="outline"
                             onClick={onClose}
                         >
-                            Cancel
+                            {t("common.cancel")}
                         </Button>
                         <Button
                             type="submit"
                             disabled={form.formState.isSubmitting}
                         >
-                            {form.formState.isSubmitting ? "Saving..." : "Save Expense"}
+                            {form.formState.isSubmitting
+                                ? t("common.saving")
+                                : t("expenses.saveExpense")}
                         </Button>
                     </div>
                 </form>
