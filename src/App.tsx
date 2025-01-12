@@ -6,6 +6,7 @@ import Header from "@/components/layout/Header";
 import NavTabs from "@/components/layout/NavTabs";
 import ExpensesList from "@/components/expenses/ExpensesList";
 import AnalyticsView from "@/components/analytics/AnalyticsView";
+import RecurringExpensesList from "@/components/recurring/RecurringExpensesList";
 import LandingPage from "@/pages/LandingPage";
 
 const App = () => {
@@ -49,6 +50,18 @@ const App = () => {
                                         <NavTabs/>
                                         <main className="flex-1">
                                             <ExpensesList/>
+                                        </main>
+                                    </>
+                                }
+                            />
+                            <Route
+                                path="/recurring"
+                                element={
+                                    <>
+                                        <Header/>
+                                        <NavTabs/>
+                                        <main className="flex-1">
+                                            <RecurringExpensesList/>
                                         </main>
                                     </>
                                 }

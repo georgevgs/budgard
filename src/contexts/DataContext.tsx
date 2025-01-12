@@ -5,10 +5,12 @@ import type {Category} from "@/types/Category";
 import type {Expense} from "@/types/Expense";
 import type {Budget} from "@/types/Budget";
 import {useToast} from "@/hooks/useToast";
+import {RecurringExpense} from "@/types/RecurringExpense.ts";
 
 interface DataState {
     categories: Category[];
     expenses: Expense[];
+    recurringExpenses: RecurringExpense[];
     budget: Budget | null;
     isLoading: boolean;
     error: Error | null;
@@ -35,6 +37,7 @@ type DataAction =
 const initialState: DataState = {
     categories: [],
     expenses: [],
+    recurringExpenses: [],
     budget: null,
     isLoading: true,
     error: null,
@@ -73,10 +76,11 @@ export function DataProvider({children}: { children: ReactNode }) {
         initializingRef.current = true;
 
         try {
-            const [categories, expenses, budget] = await Promise.all([
+            const [categories, expenses, budget, recurringExpenses] = await Promise.all([
                 dataService.getCategories(),
                 dataService.getExpenses(),
                 dataService.getBudget(userId),
+                dataService.getRecurringExpenses(),
             ]);
 
             dispatch({
@@ -85,6 +89,7 @@ export function DataProvider({children}: { children: ReactNode }) {
                     categories,
                     expenses,
                     budget,
+                    recurringExpenses,
                     isInitialized: true
                 },
             });

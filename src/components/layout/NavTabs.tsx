@@ -1,6 +1,6 @@
 import {NavLink} from "react-router-dom";
 import {cn} from "@/lib/utils";
-import {FileText, BarChart} from "lucide-react";
+import {FileText, BarChart, Repeat} from "lucide-react";
 
 const NavTabs = () => {
     const tabs = [
@@ -8,6 +8,11 @@ const NavTabs = () => {
             name: "Expenses",
             path: "/expenses",
             icon: FileText
+        },
+        {
+            name: "Recurring",
+            path: "/recurring",
+            icon: Repeat
         },
         {
             name: "Analytics",

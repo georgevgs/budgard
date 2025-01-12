@@ -69,7 +69,34 @@ export const budgetSchema = z.object({
         )
 });
 
+// Recurring expense validation schema
+export const recurringExpenseSchema = z.object({
+    amount: z.string()
+        .min(1, "Amount is required")
+        .regex(AMOUNT_PATTERN, "Invalid amount format")
+        .refine(
+            (val) => {
+                const amount = parseCurrencyInput(val);
+                return amount > 0 && amount <= 1000000;
+            },
+            "Amount must be between 0 and 1.000.000"
+        ),
+    description: z.string()
+        .min(1, "Description is required")
+        .max(100, "Description must be less than 100 characters")
+        .regex(SAFE_STRING, "Description contains invalid characters")
+        .transform(str => str.trim())
+        .refine(str => str.length > 0, "Description cannot be empty"),
+    category_id: z.string(),
+    frequency: z.enum(["weekly", "monthly", "quarterly", "yearly"] as const),
+    start_date: z.date({
+        required_error: "Start date is required",
+    }),
+    end_date: z.date().optional()
+});
+
 // Types
 export type ExpenseFormData = z.infer<typeof expenseSchema>;
 export type CategoryFormData = z.infer<typeof categorySchema>;
 export type BudgetFormData = z.infer<typeof budgetSchema>;
+export type RecurringExpenseFormData = z.infer<typeof recurringExpenseSchema>;

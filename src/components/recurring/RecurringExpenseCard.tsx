@@ -1,5 +1,12 @@
+import {Switch} from "@/components/ui/switch";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent} from "@/components/ui/card";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -11,25 +18,31 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {MoreVertical, Repeat} from "lucide-react";
+import {MoreVertical} from "lucide-react";
 import CategoryBadge from "@/components/categories/CategoryBadge";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {format} from "date-fns";
-import type {Expense} from "@/types/Expense";
-import {formatCurrency} from "@/lib/utils.ts";
+import type {RecurringExpense} from "@/types/RecurringExpense";
 
-type ExpenseCardProps = {
-    expense: Expense;
-    onEdit: () => void;
-    onDelete: () => void;
-};
+const frequencyLabels = {
+    weekly: "Weekly",
+    monthly: "Monthly",
+    quarterly: "Quarterly",
+    yearly: "Yearly"
+} as const;
 
-const ExpensesCard = ({expense, onEdit, onDelete}: ExpenseCardProps) => {
+interface RecurringExpenseCardProps {
+    expense: RecurringExpense;
+    onEdit: (expense: RecurringExpense) => void;
+    onDelete: (id: string) => void;
+    onToggle: (id: string, active: boolean) => void;
+}
+
+const RecurringExpenseCard = ({
+    expense,
+    onEdit,
+    onDelete,
+    onToggle
+}: RecurringExpenseCardProps) => {
     return (
         <Card className="rounded-lg transition-colors hover:bg-accent">
             <CardContent className="p-4">
@@ -42,22 +55,26 @@ const ExpensesCard = ({expense, onEdit, onDelete}: ExpenseCardProps) => {
                             {expense.category && (
                                 <CategoryBadge category={expense.category}/>
                             )}
-                            {expense.recurring_expense_id && (
-                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                    <Repeat className="h-3 w-3"/>
-                                    <span>Recurring</span>
-                                </div>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>{frequencyLabels[expense.frequency]}</span>
+                            <span>•</span>
+                            <span>€{expense.amount.toFixed(2)}</span>
+                            {expense.end_date && (
+                                <>
+                                    <span>•</span>
+                                    <span>Until {format(new Date(expense.end_date), "MMM d, yyyy")}</span>
+                                </>
                             )}
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                            {format(new Date(expense.date), "MMMM d, yyyy")}
-                        </p>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <p className="text-lg font-semibold whitespace-nowrap">
-                            {formatCurrency(expense.amount)}
-                        </p>
+                    <div className="flex items-center gap-2">
+                        <Switch
+                            checked={expense.active}
+                            onCheckedChange={(checked) => onToggle(expense.id, checked)}
+                            aria-label={`Toggle ${expense.description} recurring expense`}
+                        />
 
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -67,15 +84,13 @@ const ExpensesCard = ({expense, onEdit, onDelete}: ExpenseCardProps) => {
                                     className="h-8 w-8 text-muted-foreground hover:text-foreground"
                                 >
                                     <MoreVertical className="h-4 w-4"/>
-                                    <span className="sr-only">Open actions menu</span>
+                                    <span className="sr-only">Open menu</span>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-32">
-                                {!expense.recurring_expense_id && (  // Only show edit for non-recurring expenses
-                                    <DropdownMenuItem onClick={onEdit}>
-                                        Edit
-                                    </DropdownMenuItem>
-                                )}
+                                <DropdownMenuItem onClick={() => onEdit(expense)}>
+                                    Edit
+                                </DropdownMenuItem>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                         <DropdownMenuItem
@@ -86,24 +101,23 @@ const ExpensesCard = ({expense, onEdit, onDelete}: ExpenseCardProps) => {
                                         </DropdownMenuItem>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent className="sm:max-w-[400px] rounded-lg">
-                                        <AlertDialogHeader className="mb-4">
-                                            <AlertDialogTitle>Delete Expense</AlertDialogTitle>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Delete Recurring Expense</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                Are you sure you want to delete this expense?
-                                                {expense.recurring_expense_id && (
-                                                    " This won't affect future recurring expenses."
-                                                )}
-                                                This action cannot be undone.
+                                                Are you sure you want to delete this recurring expense?
+                                                This will not delete previously created expenses.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter className="flex flex-row justify-end gap-2">
                                             <AlertDialogAction
-                                                onClick={onDelete}
+                                                onClick={() => onDelete(expense.id)}
                                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90 flex-1"
                                             >
                                                 Delete
                                             </AlertDialogAction>
-                                            <AlertDialogCancel className="mt-0 flex-1">Cancel</AlertDialogCancel>
+                                            <AlertDialogCancel className="mt-0 flex-1">
+                                                Cancel
+                                            </AlertDialogCancel>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>
@@ -116,4 +130,4 @@ const ExpensesCard = ({expense, onEdit, onDelete}: ExpenseCardProps) => {
     );
 };
 
-export default ExpensesCard;
+export default RecurringExpenseCard;
