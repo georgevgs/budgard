@@ -10,6 +10,7 @@
     "delete": "Delete",
     "cancel": "Cancel",
     "save": "Save",
+    "saving": "Saving...",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success"

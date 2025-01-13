@@ -14,20 +14,23 @@ export function formatCurrency(amount: number): string {
 }
 
 export function formatCurrencyInput(value: string): string {
+    // First, normalize any periods to commas to handle mobile keyboards
+    let normalized = value.replace(/\./g, ",");
+
     // Remove all characters except numbers and comma
-    const cleaned = value.replace(/[^\d,]/g, "");
+    const cleaned = normalized.replace(/[^\d,]/g, "");
 
     // Ensure only one comma
     const parts = cleaned.split(",");
     if (parts.length > 2) {
         parts[1] = parts.slice(1).join("");
-        value = parts.slice(0, 2).join(",");
+        normalized = parts.slice(0, 2).join(",");
     } else {
-        value = cleaned;
+        normalized = cleaned;
     }
 
     // Add thousand separators
-    const [whole = "", decimal = ""] = value.split(",");
+    const [whole = "", decimal = ""] = normalized.split(",");
     const formattedWhole = whole
         .split("")
         .reverse()
