@@ -55,7 +55,21 @@
     "selectCategory": "Select a category",
     "noCategory": "No category",
     "pickDate": "Pick a date",
-    "saveExpense": "Save Expense"
+    "saveExpense": "Save Expense",
+    "noExpensesMatchFilter": "No expenses match your current filters",
+    "search": {
+      "placeholder": "Search expenses...",
+      "label": "Search expenses",
+      "active": "Search: {{query}}"
+    },
+    "filter": {
+      "allCategories": "All Categories",
+      "selectCategory": "Select category",
+      "activeFilters": "Active filters:",
+      "categoryFilter": "Category: {{name}}",
+      "clearAll": "Clear all",
+      "toggleFilters": "Toggle filters"
+    }
   },
   "categories": {
     "title": "Categories",

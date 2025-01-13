@@ -1,5 +1,6 @@
 import {useState} from "react";
 import {format} from "date-fns";
+import {useTranslation} from "react-i18next";
 import type {FormType} from "@/components/layout/FormsManager";
 import {useData} from "@/contexts/DataContext";
 import {useDataOperations} from "@/hooks/useDataOperations";
@@ -12,10 +13,13 @@ import ExpensesDashboard from "./ExpensesDashboard";
 import ExpensesBudget from "./ExpensesBudget";
 import ExpenseLoadingState from "./ExpensesLoading";
 import ExpensesPagination from "./ExpensesPagination";
-import {Expense} from "@/types/Expense.ts";
+import ExpensesFilter from "./ExpensesFilter";
+import {useExpensesFilter} from "@/hooks/useExpensesFilter";
+import {Expense} from "@/types/Expense";
 import ExpensesEmpty from "./ExpensesEmpty";
 
 const ExpensesList = () => {
+    const {t} = useTranslation();
     const {categories, expenses, isLoading, isInitialized} = useData();
     const operations = useDataOperations();
 
@@ -25,13 +29,23 @@ const ExpensesList = () => {
     const currentMonth = format(new Date(), "yyyy-MM");
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
+    // Use the filter hook
+    const {
+        filteredExpenses,
+        search,
+        selectedCategoryId,
+        hasActiveFilters,
+        setSearch,
+        setSelectedCategoryId,
+        handleClearFilters
+    } = useExpensesFilter({
+        expenses,
+        selectedMonth
+    });
+
     if (!isInitialized || isLoading) {
         return <ExpenseLoadingState/>;
     }
-
-    const filteredExpenses = expenses.filter(
-        (expense) => format(new Date(expense.date), "yyyy-MM") === selectedMonth
-    ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const monthlyTotal = filteredExpenses.reduce(
         (sum, expense) => sum + expense.amount,
@@ -67,6 +81,16 @@ const ExpensesList = () => {
                         onMonthlyTotalClick={() => setIsDashboardVisible(!isDashboardVisible)}
                     />
 
+                    <ExpensesFilter
+                        categories={categories}
+                        search={search}
+                        selectedCategoryId={selectedCategoryId}
+                        hasActiveFilters={hasActiveFilters}
+                        onSearchChange={setSearch}
+                        onCategoryChange={setSelectedCategoryId}
+                        onClearFilters={handleClearFilters}
+                    />
+
                     {/* Collapsible Dashboard and Budget */}
                     <div
                         className={cn(
@@ -93,10 +117,18 @@ const ExpensesList = () => {
                 {/* Expenses List Section */}
                 <div className="flex-1">
                     {filteredExpenses.length === 0 ? (
-                        <ExpensesEmpty
-                            selectedMonth={selectedMonth}
-                            onAddClick={() => setFormType("newExpense")}
-                        />
+                        hasActiveFilters ? (
+                            <div className="text-center py-12 px-4 rounded-lg border-2 border-dashed">
+                                <p className="text-sm text-muted-foreground">
+                                    {t("expenses.noExpensesMatchFilter")}
+                                </p>
+                            </div>
+                        ) : (
+                            <ExpensesEmpty
+                                selectedMonth={selectedMonth}
+                                onAddClick={() => setFormType("newExpense")}
+                            />
+                        )
                     ) : (
                         <ExpensesPagination
                             expenses={filteredExpenses}

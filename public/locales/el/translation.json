@@ -55,7 +55,21 @@
     "selectCategory": "Επιλέξτε κατηγορία",
     "noCategory": "Χωρίς κατηγορία",
     "pickDate": "Επιλέξτε ημερομηνία",
-    "saveExpense": "Αποθήκευση Εξόδου"
+    "saveExpense": "Αποθήκευση Εξόδου",
+    "noExpensesMatchFilter": "Δεν βρέθηκαν έξοδα με τα τρέχοντα φίλτρα",
+    "search": {
+      "placeholder": "Αναζήτηση εξόδων...",
+      "label": "Αναζήτηση εξόδων",
+      "active": "Αναζήτηση: {{query}}"
+    },
+    "filter": {
+      "allCategories": "Όλες οι κατηγορίες",
+      "selectCategory": "Επιλογή κατηγορίας",
+      "activeFilters": "Ενεργά φίλτρα:",
+      "categoryFilter": "Κατηγορία: {{name}}",
+      "clearAll": "Εκκαθάριση όλων",
+      "toggleFilters": "Εναλλαγή φίλτρων"
+    }
   },
   "categories": {
     "title": "Κατηγορίες",
