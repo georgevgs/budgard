@@ -57,6 +57,8 @@
     "pickDate": "Επιλέξτε ημερομηνία",
     "saveExpense": "Αποθήκευση Εξόδου",
     "noExpensesMatchFilter": "Δεν βρέθηκαν έξοδα με τα τρέχοντα φίλτρα",
+    "totalCount": "Σύνολο Εξόδων",
+    "mostExpensive": "Μεγαλύτερο Έξοδο",
     "search": {
       "placeholder": "Αναζήτηση εξόδων...",
       "label": "Αναζήτηση εξόδων",

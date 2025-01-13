@@ -77,6 +77,7 @@ const ExpensesList = () => {
                         currentMonth={currentMonth}
                         isExpanded={isDashboardVisible}
                         hasExpenses={filteredExpenses.length > 0}
+                        expenses={filteredExpenses}
                         onCurrentMonthClick={() => setSelectedMonth(currentMonth)}
                         onMonthlyTotalClick={() => setIsDashboardVisible(!isDashboardVisible)}
                     />

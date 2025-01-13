@@ -57,6 +57,8 @@
     "pickDate": "Pick a date",
     "saveExpense": "Save Expense",
     "noExpensesMatchFilter": "No expenses match your current filters",
+    "totalCount": "Total Expenses",
+    "mostExpensive": "Most Expensive",
     "search": {
       "placeholder": "Search expenses...",
       "label": "Search expenses",
