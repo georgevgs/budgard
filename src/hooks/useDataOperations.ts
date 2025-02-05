@@ -18,56 +18,50 @@ export function useDataOperations() {
     } = useData();
     const {toast} = useToast();
 
+    const showErrorToast = (message: string) => {
+        toast({
+            variant: "destructive",
+            description: message,
+            className: "border-2 border-destructive bg-destructive/5",
+        });
+    };
+
     const handleExpenseSubmit = useCallback(
         async (expenseData: Partial<Expense>, expenseId?: string) => {
             if (!isInitialized) return;
 
             try {
-                // Create optimistic expense
                 const optimisticExpense = {
                     ...expenseData,
                     id: expenseId || `temp-${Date.now()}`,
                     created_at: new Date().toISOString(),
-                    // Add category data if category_id is provided
                     category: expenseData.category_id
                         ? categories.find(c => c.id === expenseData.category_id)
                         : undefined
                 } as Expense;
 
-                // Update local state optimistically
                 const updatedExpenses = expenseId
                     ? expenses.map(e => e.id === expenseId ? {...e, ...optimisticExpense} : e)
                     : [optimisticExpense, ...expenses];
 
                 updateOptimistically("expenses", updatedExpenses);
 
-                // Perform server operation
                 const savedExpense = expenseId
                     ? await dataService.updateExpense(expenseData, expenseId)
                     : await dataService.createExpense(expenseData);
 
-                // Update with actual server data
                 const finalExpenses = expenseId
                     ? expenses.map(e => e.id === expenseId ? savedExpense : e)
                     : [savedExpense, ...expenses.filter(e => e.id !== optimisticExpense.id)];
 
                 updateOptimistically("expenses", finalExpenses);
-
-                toast({
-                    title: "Success",
-                    description: `Expense ${expenseId ? "updated" : "added"} successfully`,
-                });
             } catch (error) {
                 revertOptimisticUpdate();
-                toast({
-                    title: "Error",
-                    description: `Failed to ${expenseId ? "update" : "add"} expense`,
-                    variant: "destructive",
-                });
+                showErrorToast(`Failed to ${expenseId ? "update" : "add"} expense`);
                 throw error;
             }
         },
-        [categories, expenses, isInitialized, updateOptimistically, revertOptimisticUpdate, toast]
+        [categories, expenses, isInitialized, updateOptimistically, revertOptimisticUpdate]
     );
 
     const handleExpenseDelete = useCallback(
@@ -77,24 +71,14 @@ export function useDataOperations() {
             try {
                 const updatedExpenses = expenses.filter(e => e.id !== expenseId);
                 updateOptimistically("expenses", updatedExpenses);
-
                 await dataService.deleteExpense(expenseId);
-
-                toast({
-                    title: "Success",
-                    description: "Expense deleted successfully",
-                });
             } catch (error) {
                 revertOptimisticUpdate();
-                toast({
-                    title: "Error",
-                    description: "Failed to delete expense",
-                    variant: "destructive",
-                });
+                showErrorToast("Failed to delete expense");
                 throw error;
             }
         },
-        [expenses, isInitialized, updateOptimistically, revertOptimisticUpdate, toast]
+        [expenses, isInitialized, updateOptimistically, revertOptimisticUpdate]
     );
 
     const handleCategoryAdd = useCallback(
@@ -112,28 +96,18 @@ export function useDataOperations() {
                 updateOptimistically("categories", updatedCategories);
 
                 const savedCategory = await dataService.createCategory(categoryData);
-
-                // Update with actual server data
                 const finalCategories = [...categories, savedCategory].sort((a, b) =>
                     a.name.localeCompare(b.name)
                 );
-                updateOptimistically("categories", finalCategories);
 
-                toast({
-                    title: "Success",
-                    description: "Category added successfully",
-                });
+                updateOptimistically("categories", finalCategories);
             } catch (error) {
                 revertOptimisticUpdate();
-                toast({
-                    title: "Error",
-                    description: "Failed to add category",
-                    variant: "destructive",
-                });
+                showErrorToast("Failed to add category");
                 throw error;
             }
         },
-        [categories, isInitialized, updateOptimistically, revertOptimisticUpdate, toast]
+        [categories, isInitialized, updateOptimistically, revertOptimisticUpdate]
     );
 
     const handleBudgetUpdate = useCallback(
@@ -147,26 +121,16 @@ export function useDataOperations() {
                 } as Budget;
 
                 updateOptimistically("budget", optimisticBudget);
-
                 const savedBudget = await dataService.updateBudget(budgetData);
                 updateOptimistically("budget", savedBudget);
-
-                toast({
-                    title: "Success",
-                    description: "Budget updated successfully",
-                });
                 return true;
             } catch (error) {
                 revertOptimisticUpdate();
-                toast({
-                    title: "Error",
-                    description: "Failed to update budget",
-                    variant: "destructive",
-                });
+                showErrorToast("Failed to update budget");
                 return false;
             }
         },
-        [isInitialized, updateOptimistically, revertOptimisticUpdate, toast]
+        [isInitialized, updateOptimistically, revertOptimisticUpdate]
     );
 
     const handleRecurringExpenseSubmit = useCallback(
@@ -174,7 +138,6 @@ export function useDataOperations() {
             if (!isInitialized) return;
 
             try {
-                // Create optimistic recurring expense
                 const optimisticExpense = {
                     ...expenseData,
                     id: expenseId || `temp-${Date.now()}`,
@@ -185,40 +148,28 @@ export function useDataOperations() {
                         : undefined
                 } as RecurringExpense;
 
-                // Update local state optimistically
                 const updatedExpenses = expenseId
                     ? recurringExpenses.map(e => e.id === expenseId ? {...e, ...optimisticExpense} : e)
                     : [optimisticExpense, ...recurringExpenses];
 
                 updateOptimistically("recurringExpenses", updatedExpenses);
 
-                // Perform server operation
                 const savedExpense = expenseId
                     ? await dataService.updateRecurringExpense(expenseData, expenseId)
                     : await dataService.createRecurringExpense(expenseData);
 
-                // Update with actual server data
                 const finalExpenses = expenseId
                     ? recurringExpenses.map(e => e.id === expenseId ? savedExpense : e)
                     : [savedExpense, ...recurringExpenses.filter(e => e.id !== optimisticExpense.id)];
 
                 updateOptimistically("recurringExpenses", finalExpenses);
-
-                toast({
-                    title: "Success",
-                    description: `Recurring expense ${expenseId ? "updated" : "added"} successfully`,
-                });
             } catch (error) {
                 revertOptimisticUpdate();
-                toast({
-                    title: "Error",
-                    description: `Failed to ${expenseId ? "update" : "add"} recurring expense`,
-                    variant: "destructive",
-                });
+                showErrorToast(`Failed to ${expenseId ? "update" : "add"} recurring expense`);
                 throw error;
             }
         },
-        [categories, recurringExpenses, isInitialized, updateOptimistically, revertOptimisticUpdate, toast]
+        [categories, recurringExpenses, isInitialized, updateOptimistically, revertOptimisticUpdate]
     );
 
     const handleRecurringExpenseDelete = useCallback(
@@ -228,24 +179,14 @@ export function useDataOperations() {
             try {
                 const updatedExpenses = recurringExpenses.filter(e => e.id !== expenseId);
                 updateOptimistically("recurringExpenses", updatedExpenses);
-
                 await dataService.deleteRecurringExpense(expenseId);
-
-                toast({
-                    title: "Success",
-                    description: "Recurring expense deleted successfully",
-                });
             } catch (error) {
                 revertOptimisticUpdate();
-                toast({
-                    title: "Error",
-                    description: "Failed to delete recurring expense",
-                    variant: "destructive",
-                });
+                showErrorToast("Failed to delete recurring expense");
                 throw error;
             }
         },
-        [recurringExpenses, isInitialized, updateOptimistically, revertOptimisticUpdate, toast]
+        [recurringExpenses, isInitialized, updateOptimistically, revertOptimisticUpdate]
     );
 
     const handleRecurringExpenseToggle = useCallback(
@@ -257,24 +198,14 @@ export function useDataOperations() {
                     e.id === expenseId ? {...e, active} : e
                 );
                 updateOptimistically("recurringExpenses", updatedExpenses);
-
                 await dataService.toggleRecurringExpense(expenseId, active);
-
-                toast({
-                    title: "Success",
-                    description: `Recurring expense ${active ? "activated" : "paused"} successfully`,
-                });
             } catch (error) {
                 revertOptimisticUpdate();
-                toast({
-                    title: "Error",
-                    description: "Failed to update recurring expense status",
-                    variant: "destructive",
-                });
+                showErrorToast("Failed to update recurring expense status");
                 throw error;
             }
         },
-        [recurringExpenses, isInitialized, updateOptimistically, revertOptimisticUpdate, toast]
+        [recurringExpenses, isInitialized, updateOptimistically, revertOptimisticUpdate]
     );
 
     return {
