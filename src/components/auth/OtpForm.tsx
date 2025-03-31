@@ -1,56 +1,86 @@
-import {useState} from "react";
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
-import {useToast} from "@/hooks/useToast";
-import {signInWithOTP, requestOTP} from "@/lib/auth";
-import {CheckCircle2} from "lucide-react";
-import {InputOTP, InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp";
-import {useAuth} from "@/contexts/AuthContext";
-import {emailSchema} from "@/lib/validations";
-import {useNavigate} from "react-router-dom";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/useToast";
+import { signInWithOTP, requestOTP } from "@/lib/auth";
+import { CheckCircle2 } from "lucide-react";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { useAuth } from "@/contexts/AuthContext";
+import { emailSchema } from "@/lib/validations";
+import { useNavigate } from "react-router-dom";
 
 type OtpFormProps = {
     onSuccess?: () => void;
 };
 
-const OtpForm = ({onSuccess}: OtpFormProps) => {
+const OtpForm = ({ onSuccess }: OtpFormProps) => {
     const [email, setEmail] = useState("");
     const [emailError, setEmailError] = useState("");
     const [otpSent, setOtpSent] = useState(false);
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
     const [honeypot, setHoneypot] = useState(""); // Honeypot field
-    const {toast} = useToast();
-    const {isLoading: isAuthLoading} = useAuth();
+    const { toast } = useToast();
+    const { isLoading: isAuthLoading } = useAuth();
     const navigate = useNavigate();
 
-    const handleRequestOTP = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (loading || isAuthLoading) return;
+    const isDisabled = loading || isAuthLoading;
 
-        // Check honeypot
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setEmail(e.target.value);
+        if (emailError) {
+            setEmailError("");
+        }
+    };
+
+    const validateEmail = () => {
+        try {
+            emailSchema.parse(email);
+            setEmailError("");
+            return true;
+        } catch (error) {
+            setEmailError((error as Error).message);
+            return false;
+        }
+    };
+
+    const handleHoneypotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setHoneypot(e.target.value);
+    };
+
+    const isHoneypotTriggered = () => {
         if (honeypot) {
             // Silently fail to avoid letting bots know they were detected
             console.log("Honeypot triggered");
 
             // Optional: redirect to a different page
             navigate("/");
+            return true;
+        }
+        return false;
+    };
 
+    const handleRequestOTP = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (isDisabled) {
             return;
         }
 
-        try {
-            emailSchema.parse(email);
-            setEmailError("");
-        } catch (error) {
-            setEmailError((error as Error).message);
+        // Check honeypot
+        if (isHoneypotTriggered()) {
+            return;
+        }
+
+        if (!validateEmail()) {
             return;
         }
 
         setLoading(true);
         try {
-            const {error} = await requestOTP(email);
-            if (error) throw error;
+            const { error } = await requestOTP(email);
+            if (error) {
+                throw error;
+            }
 
             setOtpSent(true);
             toast({
@@ -70,18 +100,25 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
 
     const handleVerifyOTP = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (loading || isAuthLoading || otp.length !== 6) return;
+        if (isDisabled || otp.length !== 6) {
+            return;
+        }
 
         setLoading(true);
         try {
-            const {error} = await signInWithOTP(email, otp);
-            if (error) throw error;
+            const { error } = await signInWithOTP(email, otp);
+            if (error) {
+                throw error;
+            }
 
             toast({
                 title: "Success",
                 description: "Successfully signed in!",
             });
-            onSuccess?.();
+
+            if (onSuccess) {
+                onSuccess();
+            }
         } catch (error) {
             toast({
                 title: "Error",
@@ -93,7 +130,12 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
         }
     };
 
-    if (!otpSent) {
+    const handleUseAnotherEmail = () => {
+        setOtpSent(false);
+        setOtp("");
+    };
+
+    const renderEmailForm = () => {
         return (
             <div className="space-y-4">
                 <form onSubmit={handleRequestOTP} className="space-y-4">
@@ -102,9 +144,9 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
                             type="email"
                             placeholder="Enter your email"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={handleEmailChange}
                             className={`w-full h-10 ${emailError ? "border-destructive" : ""}`}
-                            disabled={loading || isAuthLoading}
+                            disabled={isDisabled}
                             aria-label="Email address"
                             aria-invalid={!!emailError}
                             aria-describedby={emailError ? "email-error" : undefined}
@@ -134,7 +176,7 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
                                     name="phone_number" // Deceptive name to trick bots
                                     type="text"
                                     value={honeypot}
-                                    onChange={(e) => setHoneypot(e.target.value)}
+                                    onChange={handleHoneypotChange}
                                     tabIndex={-1}
                                     autoComplete="off"
                                 />
@@ -145,70 +187,71 @@ const OtpForm = ({onSuccess}: OtpFormProps) => {
                     <Button
                         type="submit"
                         className="w-full h-10"
-                        disabled={loading || isAuthLoading}
+                        disabled={isDisabled}
                     >
                         {loading ? "Sending..." : "Send Code"}
                     </Button>
                 </form>
             </div>
         );
-    }
+    };
 
-    return (
-        <div className="space-y-4">
-            <div className="flex flex-col items-center gap-2 mb-4">
-                <CheckCircle2 className="h-8 w-8 text-primary"/>
-                <p className="text-muted-foreground text-sm text-center px-4">
-                    Enter the 6-digit code sent to {email}
-                </p>
+    const renderOTPForm = () => {
+        return (
+            <div className="space-y-4">
+                <div className="flex flex-col items-center gap-2 mb-4">
+                    <CheckCircle2 className="h-8 w-8 text-primary"/>
+                    <p className="text-muted-foreground text-sm text-center px-4">
+                        Enter the 6-digit code sent to {email}
+                    </p>
+                </div>
+
+                <form onSubmit={handleVerifyOTP} className="space-y-4">
+                    <div className="flex justify-center">
+                        <InputOTP
+                            value={otp}
+                            onChange={setOtp}
+                            maxLength={6}
+                            disabled={isDisabled}
+                            pattern="\d{6}"
+                            inputMode="numeric"
+                        >
+                            <InputOTPGroup>
+                                <InputOTPSlot index={0}/>
+                                <InputOTPSlot index={1}/>
+                                <InputOTPSlot index={2}/>
+                                <InputOTPSlot index={3}/>
+                                <InputOTPSlot index={4}/>
+                                <InputOTPSlot index={5}/>
+                            </InputOTPGroup>
+                        </InputOTP>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Button
+                            type="submit"
+                            className="w-full h-10"
+                            disabled={isDisabled || otp.length !== 6}
+                        >
+                            {loading ? "Verifying..." : "Verify Code"}
+                        </Button>
+
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            className="w-full h-10"
+                            onClick={handleUseAnotherEmail}
+                            disabled={isDisabled}
+                        >
+                            Use Different Email
+                        </Button>
+                    </div>
+                </form>
             </div>
+        );
+    };
 
-            <form onSubmit={handleVerifyOTP} className="space-y-4">
-                <div className="flex justify-center">
-                    <InputOTP
-                        value={otp}
-                        onChange={setOtp}
-                        maxLength={6}
-                        disabled={loading || isAuthLoading}
-                        pattern="\d{6}"
-                        inputMode="numeric"
-                    >
-                        <InputOTPGroup>
-                            <InputOTPSlot index={0}/>
-                            <InputOTPSlot index={1}/>
-                            <InputOTPSlot index={2}/>
-                            <InputOTPSlot index={3}/>
-                            <InputOTPSlot index={4}/>
-                            <InputOTPSlot index={5}/>
-                        </InputOTPGroup>
-                    </InputOTP>
-                </div>
-
-                <div className="space-y-2">
-                    <Button
-                        type="submit"
-                        className="w-full h-10"
-                        disabled={loading || isAuthLoading || otp.length !== 6}
-                    >
-                        {loading ? "Verifying..." : "Verify Code"}
-                    </Button>
-
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        className="w-full h-10"
-                        onClick={() => {
-                            setOtpSent(false);
-                            setOtp("");
-                        }}
-                        disabled={loading || isAuthLoading}
-                    >
-                        Use Different Email
-                    </Button>
-                </div>
-            </form>
-        </div>
-    );
+    return otpSent ? renderOTPForm() : renderEmailForm();
 };
 
 export default OtpForm;
