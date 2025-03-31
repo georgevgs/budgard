@@ -24,63 +24,33 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
     const { isLoading: isAuthLoading } = useAuth();
     const navigate = useNavigate();
 
-    const isDisabled = loading || isAuthLoading;
+    const handleRequestOTP = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (loading || isAuthLoading) return;
 
-    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setEmail(e.target.value);
-        if (emailError) {
-            setEmailError("");
-        }
-    };
-
-    const validateEmail = () => {
-        try {
-            emailSchema.parse(email);
-            setEmailError("");
-            return true;
-        } catch (error) {
-            setEmailError((error as Error).message);
-            return false;
-        }
-    };
-
-    const handleHoneypotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setHoneypot(e.target.value);
-    };
-
-    const isHoneypotTriggered = () => {
+        // Check honeypot
         if (honeypot) {
             // Silently fail to avoid letting bots know they were detected
             console.log("Honeypot triggered");
 
             // Optional: redirect to a different page
             navigate("/");
-            return true;
-        }
-        return false;
-    };
 
-    const handleRequestOTP = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (isDisabled) {
             return;
         }
 
-        // Check honeypot
-        if (isHoneypotTriggered()) {
-            return;
-        }
-
-        if (!validateEmail()) {
+        try {
+            emailSchema.parse(email);
+            setEmailError("");
+        } catch (error) {
+            setEmailError((error as Error).message);
             return;
         }
 
         setLoading(true);
         try {
             const { error } = await requestOTP(email);
-            if (error) {
-                throw error;
-            }
+            if (error) throw error;
 
             setOtpSent(true);
             toast({
@@ -100,22 +70,17 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
 
     const handleVerifyOTP = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (isDisabled || otp.length !== 6) {
-            return;
-        }
+        if (loading || isAuthLoading || otp.length !== 6) return;
 
         setLoading(true);
         try {
             const { error } = await signInWithOTP(email, otp);
-            if (error) {
-                throw error;
-            }
+            if (error) throw error;
 
             toast({
                 title: "Success",
                 description: "Successfully signed in!",
             });
-
             if (onSuccess) {
                 onSuccess();
             }
@@ -130,12 +95,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
         }
     };
 
-    const handleUseAnotherEmail = () => {
-        setOtpSent(false);
-        setOtp("");
-    };
-
-    const renderEmailForm = () => {
+    if (!otpSent) {
         return (
             <div className="space-y-4">
                 <form onSubmit={handleRequestOTP} className="space-y-4">
@@ -144,9 +104,9 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
                             type="email"
                             placeholder="Enter your email"
                             value={email}
-                            onChange={handleEmailChange}
+                            onChange={(e) => setEmail(e.target.value)}
                             className={`w-full h-10 ${emailError ? "border-destructive" : ""}`}
-                            disabled={isDisabled}
+                            disabled={loading || isAuthLoading}
                             aria-label="Email address"
                             aria-invalid={!!emailError}
                             aria-describedby={emailError ? "email-error" : undefined}
@@ -176,7 +136,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
                                     name="phone_number" // Deceptive name to trick bots
                                     type="text"
                                     value={honeypot}
-                                    onChange={handleHoneypotChange}
+                                    onChange={(e) => setHoneypot(e.target.value)}
                                     tabIndex={-1}
                                     autoComplete="off"
                                 />
@@ -187,71 +147,70 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
                     <Button
                         type="submit"
                         className="w-full h-10"
-                        disabled={isDisabled}
+                        disabled={loading || isAuthLoading}
                     >
                         {loading ? "Sending..." : "Send Code"}
                     </Button>
                 </form>
             </div>
         );
-    };
+    }
 
-    const renderOTPForm = () => {
-        return (
-            <div className="space-y-4">
-                <div className="flex flex-col items-center gap-2 mb-4">
-                    <CheckCircle2 className="h-8 w-8 text-primary"/>
-                    <p className="text-muted-foreground text-sm text-center px-4">
-                        Enter the 6-digit code sent to {email}
-                    </p>
+    return (
+        <div className="space-y-4">
+            <div className="flex flex-col items-center gap-2 mb-4">
+                <CheckCircle2 className="h-8 w-8 text-primary"/>
+                <p className="text-muted-foreground text-sm text-center px-4">
+                    Enter the 6-digit code sent to {email}
+                </p>
+            </div>
+
+            <form onSubmit={handleVerifyOTP} className="space-y-4">
+                <div className="flex justify-center">
+                    <InputOTP
+                        value={otp}
+                        onChange={setOtp}
+                        maxLength={6}
+                        disabled={loading || isAuthLoading}
+                        pattern="\d{6}"
+                        inputMode="numeric"
+                    >
+                        <InputOTPGroup>
+                            <InputOTPSlot index={0}/>
+                            <InputOTPSlot index={1}/>
+                            <InputOTPSlot index={2}/>
+                            <InputOTPSlot index={3}/>
+                            <InputOTPSlot index={4}/>
+                            <InputOTPSlot index={5}/>
+                        </InputOTPGroup>
+                    </InputOTP>
                 </div>
 
-                <form onSubmit={handleVerifyOTP} className="space-y-4">
-                    <div className="flex justify-center">
-                        <InputOTP
-                            value={otp}
-                            onChange={setOtp}
-                            maxLength={6}
-                            disabled={isDisabled}
-                            pattern="\d{6}"
-                            inputMode="numeric"
-                        >
-                            <InputOTPGroup>
-                                <InputOTPSlot index={0}/>
-                                <InputOTPSlot index={1}/>
-                                <InputOTPSlot index={2}/>
-                                <InputOTPSlot index={3}/>
-                                <InputOTPSlot index={4}/>
-                                <InputOTPSlot index={5}/>
-                            </InputOTPGroup>
-                        </InputOTP>
-                    </div>
+                <div className="space-y-2">
+                    <Button
+                        type="submit"
+                        className="w-full h-10"
+                        disabled={loading || isAuthLoading || otp.length !== 6}
+                    >
+                        {loading ? "Verifying..." : "Verify Code"}
+                    </Button>
 
-                    <div className="space-y-2">
-                        <Button
-                            type="submit"
-                            className="w-full h-10"
-                            disabled={isDisabled || otp.length !== 6}
-                        >
-                            {loading ? "Verifying..." : "Verify Code"}
-                        </Button>
-
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            className="w-full h-10"
-                            onClick={handleUseAnotherEmail}
-                            disabled={isDisabled}
-                        >
-                            Use Different Email
-                        </Button>
-                    </div>
-                </form>
-            </div>
-        );
-    };
-
-    return otpSent ? renderOTPForm() : renderEmailForm();
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        className="w-full h-10"
+                        onClick={() => {
+                            setOtpSent(false);
+                            setOtp("");
+                        }}
+                        disabled={loading || isAuthLoading}
+                    >
+                        Use Different Email
+                    </Button>
+                </div>
+            </form>
+        </div>
+    );
 };
 
 export default OtpForm;
