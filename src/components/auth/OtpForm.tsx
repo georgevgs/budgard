@@ -1,27 +1,27 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/useToast";
-import { signInWithOTP, requestOTP } from "@/lib/auth";
-import { CheckCircle2 } from "lucide-react";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { useAuth } from "@/contexts/AuthContext";
-import { emailSchema } from "@/lib/validations";
-import { useNavigate } from "react-router-dom";
+import {useState} from "react";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {useToast} from "@/hooks/useToast";
+import {signInWithOTP, requestOTP} from "@/lib/auth";
+import {CheckCircle2} from "lucide-react";
+import {InputOTP, InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp";
+import {useAuth} from "@/contexts/AuthContext";
+import {emailSchema} from "@/lib/validations";
+import {useNavigate} from "react-router-dom";
 
 type OtpFormProps = {
     onSuccess?: () => void;
 };
 
-const OtpForm = ({ onSuccess }: OtpFormProps) => {
+const OtpForm = ({onSuccess}: OtpFormProps) => {
     const [email, setEmail] = useState("");
     const [emailError, setEmailError] = useState("");
     const [otpSent, setOtpSent] = useState(false);
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
     const [honeypot, setHoneypot] = useState(""); // Honeypot field
-    const { toast } = useToast();
-    const { isLoading: isAuthLoading } = useAuth();
+    const {toast} = useToast();
+    const {isLoading: isAuthLoading} = useAuth();
     const navigate = useNavigate();
 
     const handleRequestOTP = async (e: React.FormEvent) => {
@@ -49,7 +49,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
 
         setLoading(true);
         try {
-            const { error } = await requestOTP(email);
+            const {error} = await requestOTP(email);
             if (error) throw error;
 
             setOtpSent(true);
@@ -74,16 +74,14 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
 
         setLoading(true);
         try {
-            const { error } = await signInWithOTP(email, otp);
+            const {error} = await signInWithOTP(email, otp);
             if (error) throw error;
 
             toast({
                 title: "Success",
                 description: "Successfully signed in!",
             });
-            if (onSuccess) {
-                onSuccess();
-            }
+            onSuccess?.();
         } catch (error) {
             toast({
                 title: "Error",
@@ -168,20 +166,18 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
             <form onSubmit={handleVerifyOTP} className="space-y-4">
                 <div className="flex justify-center">
                     <InputOTP
+                        maxLength={6}
                         value={otp}
                         onChange={setOtp}
-                        maxLength={6}
                         disabled={loading || isAuthLoading}
-                        pattern="\d{6}"
-                        inputMode="numeric"
                     >
                         <InputOTPGroup>
-                            <InputOTPSlot index={0}/>
-                            <InputOTPSlot index={1}/>
-                            <InputOTPSlot index={2}/>
-                            <InputOTPSlot index={3}/>
-                            <InputOTPSlot index={4}/>
-                            <InputOTPSlot index={5}/>
+                            <InputOTPSlot index={0} />
+                            <InputOTPSlot index={1} />
+                            <InputOTPSlot index={2} />
+                            <InputOTPSlot index={3} />
+                            <InputOTPSlot index={4} />
+                            <InputOTPSlot index={5} />
                         </InputOTPGroup>
                     </InputOTP>
                 </div>
