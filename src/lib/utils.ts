@@ -14,35 +14,30 @@ export function formatCurrency(amount: number): string {
 }
 
 export function formatCurrencyInput(value: string): string {
-    // First, normalize any periods to commas to handle mobile keyboards
-    let normalized = value.replace(/\./g, ",");
-
-    // Remove all characters except numbers and comma
-    const cleaned = normalized.replace(/[^\d,]/g, "");
-
-    // Ensure only one comma
+    // Remove everything except digits and comma
+    const cleaned = value.replace(/[^\d,]/g, "");
+    
+    // Split into whole and decimal parts
     const parts = cleaned.split(",");
-    if (parts.length > 2) {
-        parts[1] = parts.slice(1).join("");
-        normalized = parts.slice(0, 2).join(",");
-    } else {
-        normalized = cleaned;
+    let whole = parts[0] || "";
+    let decimal = parts[1] || "";
+    
+    // Limit decimal to 2 digits
+    if (decimal.length > 2) {
+        decimal = decimal.slice(0, 2);
     }
-
-    // Add thousand separators
-    const [whole = "", decimal = ""] = normalized.split(",");
-    const formattedWhole = whole
-        .split("")
-        .reverse()
-        .reduce((acc, digit, i) => {
-            if (i > 0 && i % 3 === 0) {
-                return digit + "." + acc;
-            }
-            return digit + acc;
-        }, "");
-
-    // Return formatted string
-    return formattedWhole + (decimal ? "," + decimal.slice(0, 2) : "");
+    
+    // Add thousand separators to whole number
+    if (whole.length > 3) {
+        whole = whole.replace(/(\d)(?=(\d{3})+$)/g, "$1.");
+    }
+    
+    // Combine parts
+    if (parts.length > 1) {
+        return whole + "," + decimal;
+    }
+    
+    return whole;
 }
 
 export function parseCurrencyInput(value: string): number {

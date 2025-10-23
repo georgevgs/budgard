@@ -109,20 +109,8 @@ const ExpensesForm = ({
                                             placeholder={t("expenses.amountPlaceholder")}
                                             value={field.value}
                                             onChange={(e) => {
-                                                let input = e.target.value;
-
-                                                // Convert dots to commas for consistency
-                                                if (input.slice(-1) === ".") {
-                                                    input = input.slice(0, -1) + ",";
-                                                }
-
-                                                // Only format if we're not trying to add a comma
-                                                if (input.slice(-1) === "," && !field.value.includes(",")) {
-                                                    field.onChange(input);
-                                                } else {
-                                                    const formatted = formatCurrencyInput(input);
-                                                    field.onChange(formatted);
-                                                }
+                                                const formatted = formatCurrencyInput(e.target.value);
+                                                field.onChange(formatted);
                                             }}
                                             className="pl-7"
                                             aria-label={t("expenses.amountLabel")}
