@@ -1,7 +1,6 @@
 import {supabase} from "@/lib/supabase";
 import type {Category} from "@/types/Category";
 import type {Expense} from "@/types/Expense";
-import type {Budget} from "@/types/Budget";
 import type {RecurringExpense} from "@/types/RecurringExpense";
 
 export const QueryKeys = {
@@ -33,7 +32,7 @@ export const dataService = {
         const {data, error} = await supabase
             .from("expenses")
             .select(`
-               *, 
+               *,
                category:categories(*),
                recurring_expense:recurring_expenses(*)
            `)
@@ -42,17 +41,6 @@ export const dataService = {
 
         if (error) throw error;
         return data as (Expense & { recurring_expense: RecurringExpense | null })[];
-    },
-
-    async getBudget(userId: string) {
-        const {data, error} = await supabase
-            .from("budgets")
-            .select()
-            .eq("user_id", userId)
-            .single();
-
-        if (error && error.code !== "PGRST116") throw error;
-        return data as Budget | null;
     },
 
     async updateExpense(expenseData: Partial<Expense>, expenseId: string) {
@@ -96,17 +84,6 @@ export const dataService = {
 
         if (error) throw error;
         return data as Category;
-    },
-
-    async updateBudget(budgetData: Partial<Budget> & { user_id: string }) {
-        const {data, error} = await supabase
-            .from("budgets")
-            .upsert(budgetData)
-            .select()
-            .single();
-
-        if (error) throw error;
-        return data as Budget;
     },
 
     async getRecurringExpenses() {

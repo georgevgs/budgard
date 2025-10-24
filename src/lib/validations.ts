@@ -55,20 +55,6 @@ export const categorySchema = z.object({
         .regex(HEX_COLOR, "Invalid color format")
 });
 
-// Budget validation schema
-export const budgetSchema = z.object({
-    amount: z.string()
-        .min(1, "Budget amount is required")
-        .regex(AMOUNT_PATTERN, "Invalid amount format")
-        .refine(
-            (val) => {
-                const amount = parseCurrencyInput(val);
-                return amount >= 0 && amount <= 1000000;
-            },
-            "Budget must be between 0 and 1.000.000"
-        )
-});
-
 // Recurring expense validation schema
 export const recurringExpenseSchema = z.object({
     amount: z.string()
@@ -98,5 +84,4 @@ export const recurringExpenseSchema = z.object({
 // Types
 export type ExpenseFormData = z.infer<typeof expenseSchema>;
 export type CategoryFormData = z.infer<typeof categorySchema>;
-export type BudgetFormData = z.infer<typeof budgetSchema>;
 export type RecurringExpenseFormData = z.infer<typeof recurringExpenseSchema>;

@@ -4,8 +4,7 @@ import {dataService} from "@/services/dataService";
 import {useData} from "@/contexts/DataContext";
 import type {Category} from "@/types/Category";
 import type {Expense} from "@/types/Expense";
-import type {Budget} from "@/types/Budget";
-import {RecurringExpense} from "@/types/RecurringExpense.ts";
+import type {RecurringExpense} from "@/types/RecurringExpense";
 
 export function useDataOperations() {
     const {
@@ -13,8 +12,9 @@ export function useDataOperations() {
         categories,
         recurringExpenses,
         isInitialized,
-        updateOptimistically,
-        revertOptimisticUpdate,
+        setExpenses,
+        setCategories,
+        setRecurringExpenses,
     } = useData();
     const {toast} = useToast();
 
@@ -28,24 +28,26 @@ export function useDataOperations() {
 
     const handleExpenseSubmit = useCallback(
         async (expenseData: Partial<Expense>, expenseId?: string) => {
-            if (!isInitialized) return;
+            if (!isInitialized) {
+                return;
+            }
+
+            const optimisticExpense = {
+                ...expenseData,
+                id: expenseId || `temp-${Date.now()}`,
+                created_at: new Date().toISOString(),
+                category: expenseData.category_id
+                    ? categories.find(c => c.id === expenseData.category_id)
+                    : undefined
+            } as Expense;
+
+            const updatedExpenses = expenseId
+                ? expenses.map(e => e.id === expenseId ? {...e, ...optimisticExpense} : e)
+                : [optimisticExpense, ...expenses];
+
+            setExpenses(updatedExpenses);
 
             try {
-                const optimisticExpense = {
-                    ...expenseData,
-                    id: expenseId || `temp-${Date.now()}`,
-                    created_at: new Date().toISOString(),
-                    category: expenseData.category_id
-                        ? categories.find(c => c.id === expenseData.category_id)
-                        : undefined
-                } as Expense;
-
-                const updatedExpenses = expenseId
-                    ? expenses.map(e => e.id === expenseId ? {...e, ...optimisticExpense} : e)
-                    : [optimisticExpense, ...expenses];
-
-                updateOptimistically("expenses", updatedExpenses);
-
                 const savedExpense = expenseId
                     ? await dataService.updateExpense(expenseData, expenseId)
                     : await dataService.createExpense(expenseData);
@@ -54,106 +56,90 @@ export function useDataOperations() {
                     ? expenses.map(e => e.id === expenseId ? savedExpense : e)
                     : [savedExpense, ...expenses.filter(e => e.id !== optimisticExpense.id)];
 
-                updateOptimistically("expenses", finalExpenses);
+                setExpenses(finalExpenses);
             } catch (error) {
-                revertOptimisticUpdate();
+                setExpenses(expenses);
                 showErrorToast(`Failed to ${expenseId ? "update" : "add"} expense`);
                 throw error;
             }
         },
-        [categories, expenses, isInitialized, updateOptimistically, revertOptimisticUpdate]
+        [categories, expenses, isInitialized, setExpenses]
     );
 
     const handleExpenseDelete = useCallback(
         async (expenseId: string) => {
-            if (!isInitialized) return;
+            if (!isInitialized) {
+                return;
+            }
+
+            const previousExpenses = expenses;
+            const updatedExpenses = expenses.filter(e => e.id !== expenseId);
+            setExpenses(updatedExpenses);
 
             try {
-                const updatedExpenses = expenses.filter(e => e.id !== expenseId);
-                updateOptimistically("expenses", updatedExpenses);
                 await dataService.deleteExpense(expenseId);
             } catch (error) {
-                revertOptimisticUpdate();
+                setExpenses(previousExpenses);
                 showErrorToast("Failed to delete expense");
                 throw error;
             }
         },
-        [expenses, isInitialized, updateOptimistically, revertOptimisticUpdate]
+        [expenses, isInitialized, setExpenses]
     );
 
     const handleCategoryAdd = useCallback(
         async (categoryData: Partial<Category>) => {
-            if (!isInitialized) return;
+            if (!isInitialized) {
+                return;
+            }
+
+            const optimisticCategory = {
+                ...categoryData,
+                id: `temp-${Date.now()}`,
+                created_at: new Date().toISOString(),
+            } as Category;
+
+            const updatedCategories = [...categories, optimisticCategory];
+            setCategories(updatedCategories);
 
             try {
-                const optimisticCategory = {
-                    ...categoryData,
-                    id: `temp-${Date.now()}`,
-                    created_at: new Date().toISOString(),
-                } as Category;
-
-                const updatedCategories = [...categories, optimisticCategory];
-                updateOptimistically("categories", updatedCategories);
-
                 const savedCategory = await dataService.createCategory(categoryData);
                 const finalCategories = [...categories, savedCategory].sort((a, b) =>
                     a.name.localeCompare(b.name)
                 );
-
-                updateOptimistically("categories", finalCategories);
+                setCategories(finalCategories);
             } catch (error) {
-                revertOptimisticUpdate();
+                setCategories(categories);
                 showErrorToast("Failed to add category");
                 throw error;
             }
         },
-        [categories, isInitialized, updateOptimistically, revertOptimisticUpdate]
-    );
-
-    const handleBudgetUpdate = useCallback(
-        async (budgetData: Partial<Budget> & { user_id: string }) => {
-            if (!isInitialized) return false;
-
-            try {
-                const optimisticBudget = {
-                    ...budgetData,
-                    id: budgetData.id || `temp-${Date.now()}`,
-                } as Budget;
-
-                updateOptimistically("budget", optimisticBudget);
-                const savedBudget = await dataService.updateBudget(budgetData);
-                updateOptimistically("budget", savedBudget);
-                return true;
-            } catch (error) {
-                revertOptimisticUpdate();
-                showErrorToast("Failed to update budget");
-                return false;
-            }
-        },
-        [isInitialized, updateOptimistically, revertOptimisticUpdate]
+        [categories, isInitialized, setCategories]
     );
 
     const handleRecurringExpenseSubmit = useCallback(
         async (expenseData: Partial<RecurringExpense>, expenseId?: string) => {
-            if (!isInitialized) return;
+            if (!isInitialized) {
+                return;
+            }
+
+            const optimisticExpense = {
+                ...expenseData,
+                id: expenseId || `temp-${Date.now()}`,
+                created_at: new Date().toISOString(),
+                active: true,
+                category: expenseData.category_id
+                    ? categories.find(c => c.id === expenseData.category_id)
+                    : undefined
+            } as RecurringExpense;
+
+            const updatedExpenses = expenseId
+                ? recurringExpenses.map(e => e.id === expenseId ? {...e, ...optimisticExpense} : e)
+                : [optimisticExpense, ...recurringExpenses];
+
+            setRecurringExpenses(updatedExpenses);
 
             try {
-                const optimisticExpense = {
-                    ...expenseData,
-                    id: expenseId || `temp-${Date.now()}`,
-                    created_at: new Date().toISOString(),
-                    active: true,
-                    category: expenseData.category_id
-                        ? categories.find(c => c.id === expenseData.category_id)
-                        : undefined
-                } as RecurringExpense;
-
-                const updatedExpenses = expenseId
-                    ? recurringExpenses.map(e => e.id === expenseId ? {...e, ...optimisticExpense} : e)
-                    : [optimisticExpense, ...recurringExpenses];
-
-                updateOptimistically("recurringExpenses", updatedExpenses);
-
                 const savedExpense = expenseId
                     ? await dataService.updateRecurringExpense(expenseData, expenseId)
                     : await dataService.createRecurringExpense(expenseData);
@@ -162,57 +148,64 @@ export function useDataOperations() {
                     ? recurringExpenses.map(e => e.id === expenseId ? savedExpense : e)
                     : [savedExpense, ...recurringExpenses.filter(e => e.id !== optimisticExpense.id)];
 
-                updateOptimistically("recurringExpenses", finalExpenses);
+                setRecurringExpenses(finalExpenses);
             } catch (error) {
-                revertOptimisticUpdate();
+                setRecurringExpenses(recurringExpenses);
                 showErrorToast(`Failed to ${expenseId ? "update" : "add"} recurring expense`);
                 throw error;
             }
         },
-        [categories, recurringExpenses, isInitialized, updateOptimistically, revertOptimisticUpdate]
+        [categories, recurringExpenses, isInitialized, setRecurringExpenses]
     );
 
     const handleRecurringExpenseDelete = useCallback(
         async (expenseId: string) => {
-            if (!isInitialized) return;
+            if (!isInitialized) {
+                return;
+            }
+
+            const previousExpenses = recurringExpenses;
+            const updatedExpenses = recurringExpenses.filter(e => e.id !== expenseId);
+            setRecurringExpenses(updatedExpenses);
 
             try {
-                const updatedExpenses = recurringExpenses.filter(e => e.id !== expenseId);
-                updateOptimistically("recurringExpenses", updatedExpenses);
                 await dataService.deleteRecurringExpense(expenseId);
             } catch (error) {
-                revertOptimisticUpdate();
+                setRecurringExpenses(previousExpenses);
                 showErrorToast("Failed to delete recurring expense");
                 throw error;
             }
         },
-        [recurringExpenses, isInitialized, updateOptimistically, revertOptimisticUpdate]
+        [recurringExpenses, isInitialized, setRecurringExpenses]
     );
 
     const handleRecurringExpenseToggle = useCallback(
         async (expenseId: string, active: boolean) => {
-            if (!isInitialized) return;
+            if (!isInitialized) {
+                return;
+            }
+
+            const previousExpenses = recurringExpenses;
+            const updatedExpenses = recurringExpenses.map(e =>
+                e.id === expenseId ? {...e, active} : e
+            );
+            setRecurringExpenses(updatedExpenses);
 
             try {
-                const updatedExpenses = recurringExpenses.map(e =>
-                    e.id === expenseId ? {...e, active} : e
-                );
-                updateOptimistically("recurringExpenses", updatedExpenses);
                 await dataService.toggleRecurringExpense(expenseId, active);
             } catch (error) {
-                revertOptimisticUpdate();
+                setRecurringExpenses(previousExpenses);
                 showErrorToast("Failed to update recurring expense status");
                 throw error;
             }
         },
-        [recurringExpenses, isInitialized, updateOptimistically, revertOptimisticUpdate]
+        [recurringExpenses, isInitialized, setRecurringExpenses]
     );
 
     return {
         handleExpenseSubmit,
         handleExpenseDelete,
         handleCategoryAdd,
-        handleBudgetUpdate,
         handleRecurringExpenseSubmit,
         handleRecurringExpenseDelete,
         handleRecurringExpenseToggle,

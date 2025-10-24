@@ -10,7 +10,6 @@ import SpeedDial from "@/components/layout/SpeedDial";
 import ExpensesMonthlySelector from "./ExpensesMonthlySelector";
 import ExpensesMonthlyOverview from "./ExpensesMonthlyOverview";
 import ExpensesDashboard from "./ExpensesDashboard";
-import ExpensesBudget from "./ExpensesBudget";
 import ExpenseLoadingState from "./ExpensesLoading";
 import ExpensesPagination from "./ExpensesPagination";
 import ExpensesFilter from "./ExpensesFilter";
@@ -92,7 +91,7 @@ const ExpensesList = () => {
                         onClearFilters={handleClearFilters}
                     />
 
-                    {/* Collapsible Dashboard and Budget */}
+                    {/* Collapsible Dashboard */}
                     <div
                         className={cn(
                             "grid transition-all duration-200 ease-in-out",
@@ -101,15 +100,12 @@ const ExpensesList = () => {
                                 : "grid-rows-[0fr] opacity-0"
                         )}
                     >
-                        <div className="overflow-hidden space-y-4">
+                        <div className="overflow-hidden">
                             {filteredExpenses.length > 0 && (
-                                <>
-                                    <ExpensesDashboard
-                                        expenses={filteredExpenses}
-                                        categories={categories}
-                                    />
-                                    <ExpensesBudget/>
-                                </>
+                                <ExpensesDashboard
+                                    expenses={filteredExpenses}
+                                    categories={categories}
+                                />
                             )}
                         </div>
                     </div>
