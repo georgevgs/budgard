@@ -40,6 +40,10 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
       return;
     }
 
+    if (!session) {
+      return;
+    }
+
     try {
       await handleCategoryAdd({
         name: values.name,
