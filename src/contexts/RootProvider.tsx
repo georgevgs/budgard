@@ -1,11 +1,17 @@
-import {ReactNode} from "react";
-import {AuthProvider} from "@/contexts/AuthContext.tsx";
-import {DataProvider} from "@/contexts/DataContext.tsx";
+import type { ReactNode, ReactElement } from "react";
+import { AuthProvider } from "@/contexts/AuthContext.tsx";
+import { DataProvider } from "@/contexts/DataContext.tsx";
 
-export const RootProvider = ({children}: { children: ReactNode }) => (
+interface RootProviderProps {
+  children: ReactNode;
+}
+
+export const RootProvider = ({ children }: RootProviderProps): ReactElement => {
+  return (
     <AuthProvider>
-        <DataProvider>
-            {children}
-        </DataProvider>
+      <DataProvider>
+        {children}
+      </DataProvider>
     </AuthProvider>
-);
+  );
+};

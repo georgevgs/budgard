@@ -1,7 +1,9 @@
-import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
-import {Toaster} from "@/components/ui/toaster";
-import {useAuth} from "@/contexts/AuthContext";
-import {usePwaUpdate} from "@/hooks/usePwaUpdate";
+import type { ReactElement } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import type { Session } from "@supabase/supabase-js";
+import { Toaster } from "@/components/ui/toaster";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePwaUpdate } from "@/hooks/usePwaUpdate";
 import Header from "@/components/layout/Header";
 import NavTabs from "@/components/layout/NavTabs";
 import ExpensesList from "@/components/expenses/ExpensesList";
@@ -10,82 +12,95 @@ import RecurringExpensesList from "@/components/recurring/RecurringExpensesList"
 import LandingPage from "@/pages/LandingPage";
 
 const App = () => {
-    usePwaUpdate();
-    const {session, isLoading} = useAuth();
+  usePwaUpdate();
+  const { session, isLoading } = useAuth();
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="flex flex-col items-center gap-2">
-                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"/>
-                    <p className="text-sm text-muted-foreground">Loading...</p>
-                </div>
-            </div>
-        );
-    }
+  if (isLoading) {
+    return renderLoadingState();
+  }
 
-    return (
-        <BrowserRouter>
-            <div className="min-h-screen bg-background flex flex-col">
-                <Routes>
-                    <Route
-                        path="/"
-                        element={
-                            !session ? (
-                                <main className="flex-1">
-                                    <LandingPage/>
-                                </main>
-                            ) : (
-                                <Navigate to="/expenses" replace/>
-                            )
-                        }
-                    />
-                    {session && (
-                        <>
-                            <Route
-                                path="/expenses"
-                                element={
-                                    <>
-                                        <Header/>
-                                        <NavTabs/>
-                                        <main className="flex-1">
-                                            <ExpensesList/>
-                                        </main>
-                                    </>
-                                }
-                            />
-                            <Route
-                                path="/recurring"
-                                element={
-                                    <>
-                                        <Header/>
-                                        <NavTabs/>
-                                        <main className="flex-1">
-                                            <RecurringExpensesList/>
-                                        </main>
-                                    </>
-                                }
-                            />
-                            <Route
-                                path="/analytics"
-                                element={
-                                    <>
-                                        <Header/>
-                                        <NavTabs/>
-                                        <main className="flex-1">
-                                            <AnalyticsView/>
-                                        </main>
-                                    </>
-                                }
-                            />
-                        </>
-                    )}
-                    <Route path="*" element={<Navigate to="/" replace/>}/>
-                </Routes>
-                <Toaster/>
-            </div>
-        </BrowserRouter>
-    );
+  return (
+    <BrowserRouter>
+      <div className="min-h-screen bg-background flex flex-col">
+        <Routes>
+          <Route path="/" element={renderHomeRoute(session)} />
+          {renderAuthenticatedRoutes(session)}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+        <Toaster />
+      </div>
+    </BrowserRouter>
+  );
+};
+
+const renderLoadingState = (): ReactElement => {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex flex-col items-center gap-2">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+  );
+};
+
+const renderHomeRoute = (session: Session | null): ReactElement => {
+  if (session) {
+    return <Navigate to="/expenses" replace />;
+  }
+
+  return (
+    <main className="flex-1">
+      <LandingPage />
+    </main>
+  );
+};
+
+const renderAuthenticatedRoutes = (session: Session | null): ReactElement | null => {
+  if (!session) {
+    return null;
+  }
+
+  return (
+    <>
+      <Route
+        path="/expenses"
+        element={
+          <>
+            <Header />
+            <NavTabs />
+            <main className="flex-1">
+              <ExpensesList />
+            </main>
+          </>
+        }
+      />
+      <Route
+        path="/recurring"
+        element={
+          <>
+            <Header />
+            <NavTabs />
+            <main className="flex-1">
+              <RecurringExpensesList />
+            </main>
+          </>
+        }
+      />
+      <Route
+        path="/analytics"
+        element={
+          <>
+            <Header />
+            <NavTabs />
+            <main className="flex-1">
+              <AnalyticsView />
+            </main>
+          </>
+        }
+      />
+    </>
+  );
 };
 
 export default App;
