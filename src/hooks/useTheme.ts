@@ -2,22 +2,35 @@ import {useEffect, useState} from "react";
 
 type Theme = "light" | "dark" | "barbie";
 
-export function useTheme() {
-    // Get initial theme from localStorage or default to 'light'
-    const [theme, setTheme] = useState<Theme>(() => {
+const getInitialTheme = (): Theme => {
+    try {
         const savedTheme = localStorage.getItem("theme");
-        return (savedTheme as Theme) || "light";
-    });
+        
+        if (savedTheme === "light" || savedTheme === "dark" || savedTheme === "barbie") {
+            return savedTheme;
+        }
+        
+        return "light";
+    } catch (error) {
+        console.error("Error reading theme from localStorage:", error);
+        return "light";
+    }
+};
+
+export function useTheme() {
+    const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
     useEffect(() => {
-        // Update localStorage when theme changes
-        localStorage.setItem("theme", theme);
+        try {
+            localStorage.setItem("theme", theme);
+            console.log("Theme saved to localStorage:", theme);
+        } catch (error) {
+            console.error("Error saving theme to localStorage:", error);
+        }
 
-        // Update root element
         const root = window.document.documentElement;
         root.setAttribute("data-theme", theme);
 
-        // Handle dark mode class
         if (theme === "dark") {
             root.classList.add("dark");
         } else {

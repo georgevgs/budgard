@@ -19,6 +19,18 @@
   <link rel="icon" type="image/png" sizes="512x512" href="/icon-512x512.png" />
 
   <title>Budgard - Expense Tracker</title>
+  
+  <!-- Theme initialization script - runs before page render to prevent flash -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      const root = document.documentElement;
+      root.setAttribute('data-theme', savedTheme);
+      if (savedTheme === 'dark') {
+        root.classList.add('dark');
+      }
+    })();
+  </script>
 </head>
 <body>
 <div id="root"></div>
