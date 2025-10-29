@@ -1,15 +1,18 @@
 import type { ReactElement } from "react";
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import type { Session } from "@supabase/supabase-js";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePwaUpdate } from "@/hooks/usePwaUpdate";
-import Header from "@/components/layout/Header";
-import NavTabs from "@/components/layout/NavTabs";
-import ExpensesList from "@/components/expenses/ExpensesList";
-import AnalyticsView from "@/components/analytics/AnalyticsView";
-import RecurringExpensesList from "@/components/recurring/RecurringExpensesList";
-import LandingPage from "@/pages/LandingPage";
+
+// Lazy load heavy components
+const Header = lazy(() => import("@/components/layout/Header"));
+const NavTabs = lazy(() => import("@/components/layout/NavTabs"));
+const ExpensesList = lazy(() => import("@/components/expenses/ExpensesList"));
+const AnalyticsView = lazy(() => import("@/components/analytics/AnalyticsView"));
+const RecurringExpensesList = lazy(() => import("@/components/recurring/RecurringExpensesList"));
+const LandingPage = lazy(() => import("@/pages/LandingPage"));
 
 const App = () => {
   usePwaUpdate();
@@ -22,11 +25,13 @@ const App = () => {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-background flex flex-col">
-        <Routes>
-          <Route path="/" element={renderHomeRoute(session)} />
-          {renderAuthenticatedRoutes(session)}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Suspense fallback={renderLoadingState()}>
+          <Routes>
+            <Route path="/" element={renderHomeRoute(session)} />
+            {renderAuthenticatedRoutes(session)}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
         <Toaster />
       </div>
     </BrowserRouter>
@@ -61,42 +66,42 @@ const renderAuthenticatedRoutes = (session: Session | null): ReactElement | null
     return null;
   }
 
+  const LayoutWrapper = ({ children }: { children: ReactElement }) => {
+    return (
+      <>
+        <Header />
+        <NavTabs />
+        <main className="flex-1">
+          {children}
+        </main>
+      </>
+    );
+  };
+
   return (
     <>
       <Route
         path="/expenses"
         element={
-          <>
-            <Header />
-            <NavTabs />
-            <main className="flex-1">
-              <ExpensesList />
-            </main>
-          </>
+          <LayoutWrapper>
+            <ExpensesList />
+          </LayoutWrapper>
         }
       />
       <Route
         path="/recurring"
         element={
-          <>
-            <Header />
-            <NavTabs />
-            <main className="flex-1">
-              <RecurringExpensesList />
-            </main>
-          </>
+          <LayoutWrapper>
+            <RecurringExpensesList />
+          </LayoutWrapper>
         }
       />
       <Route
         path="/analytics"
         element={
-          <>
-            <Header />
-            <NavTabs />
-            <main className="flex-1">
-              <AnalyticsView />
-            </main>
-          </>
+          <LayoutWrapper>
+            <AnalyticsView />
+          </LayoutWrapper>
         }
       />
     </>
