@@ -59,6 +59,7 @@
     "noExpensesMatchFilter": "Δεν βρέθηκαν έξοδα με τα τρέχοντα φίλτρα",
     "totalCount": "Σύνολο Εξόδων",
     "mostExpensive": "Μεγαλύτερο Έξοδο",
+    "exportCSV": "Εξαγωγή CSV",
     "search": {
       "placeholder": "Αναζήτηση εξόδων...",
       "label": "Αναζήτηση εξόδων",

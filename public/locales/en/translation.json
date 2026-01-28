@@ -59,6 +59,7 @@
     "noExpensesMatchFilter": "No expenses match your current filters",
     "totalCount": "Total Expenses",
     "mostExpensive": "Most Expensive",
+    "exportCSV": "Export CSV",
     "search": {
       "placeholder": "Search expenses...",
       "label": "Search expenses",

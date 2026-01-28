@@ -1,10 +1,10 @@
-import {useState} from "react";
-import {format} from "date-fns";
-import {useTranslation} from "react-i18next";
-import type {FormType} from "@/components/layout/FormsManager";
-import {useData} from "@/contexts/DataContext";
-import {useDataOperations} from "@/hooks/useDataOperations";
-import {cn} from "@/lib/utils";
+import { useState } from "react";
+import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
+import type { FormType } from "@/components/layout/FormsManager";
+import { useData } from "@/contexts/DataContext";
+import { useDataOperations } from "@/hooks/useDataOperations";
+import { cn } from "@/lib/utils";
 import FormsManager from "@/components/layout/FormsManager";
 import SpeedDial from "@/components/layout/SpeedDial";
 import ExpensesMonthlySelector from "./ExpensesMonthlySelector";
@@ -13,13 +13,13 @@ import ExpensesDashboard from "./ExpensesDashboard";
 import ExpenseLoadingState from "./ExpensesLoading";
 import ExpensesPagination from "./ExpensesPagination";
 import ExpensesFilter from "./ExpensesFilter";
-import {useExpensesFilter} from "@/hooks/useExpensesFilter";
-import {Expense} from "@/types/Expense";
+import { useExpensesFilter } from "@/hooks/useExpensesFilter";
+import { Expense } from "@/types/Expense";
 import ExpensesEmpty from "./ExpensesEmpty";
 
 const ExpensesList = () => {
-    const {t} = useTranslation();
-    const {categories, expenses, isLoading, isInitialized} = useData();
+    const { t } = useTranslation();
+    const { categories, expenses, isLoading, isInitialized } = useData();
     const operations = useDataOperations();
 
     const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
@@ -43,7 +43,7 @@ const ExpensesList = () => {
     });
 
     if (!isInitialized || isLoading) {
-        return <ExpenseLoadingState/>;
+        return <ExpenseLoadingState />;
     }
 
     const monthlyTotal = filteredExpenses.reduce(
@@ -77,6 +77,7 @@ const ExpensesList = () => {
                         isExpanded={isDashboardVisible}
                         hasExpenses={filteredExpenses.length > 0}
                         expenses={filteredExpenses}
+                        categories={categories}
                         onCurrentMonthClick={() => setSelectedMonth(currentMonth)}
                         onMonthlyTotalClick={() => setIsDashboardVisible(!isDashboardVisible)}
                     />
