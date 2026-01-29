@@ -43,7 +43,13 @@ export class ErrorBoundary extends Component<Props, State> {
         return fallback;
       }
 
-      return <ErrorFallback error={error} onReset={this.handleReset} onReload={this.handleReload} />;
+      return (
+        <ErrorFallback
+          error={error}
+          onReset={this.handleReset}
+          onReload={this.handleReload}
+        />
+      );
     }
 
     return children;

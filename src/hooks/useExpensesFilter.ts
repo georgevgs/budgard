@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
-import { format } from "date-fns";
-import type { Expense } from "@/types/Expense";
+import { useState, useMemo } from 'react';
+import { format } from 'date-fns';
+import type { Expense } from '@/types/Expense';
 
 interface UseExpensesFilterProps {
   expenses: Expense[];
@@ -20,24 +20,28 @@ interface UseExpensesFilterReturn {
 
 export const useExpensesFilter = ({
   expenses,
-  selectedMonth
+  selectedMonth,
 }: UseExpensesFilterProps): UseExpensesFilterReturn => {
-  const [search, setSearch] = useState("");
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    null,
+  );
 
   const hasActiveFilters = search.length > 0 || selectedCategoryId !== null;
 
   // Pre-filter expenses by month once
   const monthlyExpenses = useMemo(() => {
     return expenses.filter((expense) => {
-      return format(new Date(expense.date), "yyyy-MM") === selectedMonth;
+      return format(new Date(expense.date), 'yyyy-MM') === selectedMonth;
     });
   }, [expenses, selectedMonth]);
 
   // Then apply search and category filters
   const filteredExpenses = useMemo(() => {
     if (!hasActiveFilters) {
-      return monthlyExpenses.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      return monthlyExpenses.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+      );
     }
 
     const searchLower = search.toLowerCase();
@@ -62,7 +66,7 @@ export const useExpensesFilter = ({
   };
 
   const handleClearFilters = () => {
-    setSearch("");
+    setSearch('');
     setSelectedCategoryId(null);
   };
 

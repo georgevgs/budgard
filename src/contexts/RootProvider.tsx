@@ -1,6 +1,6 @@
-import type { ReactNode, ReactElement } from "react";
-import { AuthProvider } from "@/contexts/AuthContext.tsx";
-import { DataProvider } from "@/contexts/DataContext.tsx";
+import type { ReactNode, ReactElement } from 'react';
+import { AuthProvider } from '@/contexts/AuthContext.tsx';
+import { DataProvider } from '@/contexts/DataContext.tsx';
 
 interface RootProviderProps {
   children: ReactNode;
@@ -9,9 +9,7 @@ interface RootProviderProps {
 export const RootProvider = ({ children }: RootProviderProps): ReactElement => {
   return (
     <AuthProvider>
-      <DataProvider>
-        {children}
-      </DataProvider>
+      <DataProvider>{children}</DataProvider>
     </AuthProvider>
   );
 };

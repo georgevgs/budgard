@@ -1,21 +1,25 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { Session } from "@supabase/supabase-js";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { DialogTitle, DialogHeader, DialogDescription } from "@/components/ui/dialog";
-import { ArrowLeft } from "lucide-react";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { Session } from '@supabase/supabase-js';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  DialogTitle,
+  DialogHeader,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { ArrowLeft } from 'lucide-react';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
-import { useAuth } from "@/contexts/AuthContext";
-import { useDataOperations } from "@/hooks/useDataOperations";
-import { useData } from "@/contexts/DataContext";
-import { categorySchema, type CategoryFormData } from "@/lib/validations";
+} from '@/components/ui/form';
+import { useAuth } from '@/contexts/AuthContext';
+import { useDataOperations } from '@/hooks/useDataOperations';
+import { useData } from '@/contexts/DataContext';
+import { categorySchema, type CategoryFormData } from '@/lib/validations';
 
 interface CategoryFormProps {
   onBack: () => void;
@@ -30,8 +34,8 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
-      name: "",
-      color: "#000000",
+      name: '',
+      color: '#000000',
     },
   });
 
@@ -52,11 +56,14 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
       });
       onClose();
     } catch (error) {
-      console.error("Error adding category:", error);
+      console.error('Error adding category:', error);
     }
   };
 
-  const isDisabled = getIsFormDisabled(form.formState.isSubmitting, isInitialized);
+  const isDisabled = getIsFormDisabled(
+    form.formState.isSubmitting,
+    isInitialized,
+  );
   const submitButtonText = getSubmitButtonText(form.formState.isSubmitting);
 
   return (
@@ -132,7 +139,12 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
           />
 
           <div className="flex gap-3 justify-end pt-2">
-            <Button type="button" variant="outline" onClick={onBack} disabled={isDisabled}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onBack}
+              disabled={isDisabled}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isDisabled}>
@@ -145,7 +157,10 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
   );
 };
 
-const canSubmitForm = (session: Session | null, isInitialized: boolean): boolean => {
+const canSubmitForm = (
+  session: Session | null,
+  isInitialized: boolean,
+): boolean => {
   if (!session?.user?.id) {
     return false;
   }
@@ -157,7 +172,10 @@ const canSubmitForm = (session: Session | null, isInitialized: boolean): boolean
   return true;
 };
 
-const getIsFormDisabled = (isSubmitting: boolean, isInitialized: boolean): boolean => {
+const getIsFormDisabled = (
+  isSubmitting: boolean,
+  isInitialized: boolean,
+): boolean => {
   if (isSubmitting) {
     return true;
   }
@@ -171,10 +189,10 @@ const getIsFormDisabled = (isSubmitting: boolean, isInitialized: boolean): boole
 
 const getSubmitButtonText = (isSubmitting: boolean): string => {
   if (isSubmitting) {
-    return "Adding...";
+    return 'Adding...';
   }
 
-  return "Add Category";
+  return 'Add Category';
 };
 
 export default CategoryForm;

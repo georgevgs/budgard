@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import LanguageSwitcher from './LanguageSwitcher';
+import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 
 type Theme = 'light' | 'dark' | 'barbie';
 
@@ -20,7 +20,11 @@ const DEFAULT_THEME: Theme = 'light';
 const getInitialTheme = (): Theme => {
   const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
 
-  if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'barbie') {
+  if (
+    savedTheme === 'light' ||
+    savedTheme === 'dark' ||
+    savedTheme === 'barbie'
+  ) {
     return savedTheme;
   }
 
@@ -87,9 +91,7 @@ const Header = () => {
             className="h-7 w-7"
             style={{ objectFit: 'contain' }}
           />
-          <span className="text-lg font-semibold tracking-tight">
-            Budgard
-          </span>
+          <span className="text-lg font-semibold tracking-tight">Budgard</span>
         </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
@@ -110,7 +112,10 @@ const Header = () => {
                 <Moon className="h-4 w-4 mr-2" />
                 {t('theme.dark')}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleThemeChange('barbie')} className="text-pink-500">
+              <DropdownMenuItem
+                onClick={() => handleThemeChange('barbie')}
+                className="text-pink-500"
+              >
                 <Sparkles className="h-4 w-4 mr-2" />
                 {t('theme.barbie')}
               </DropdownMenuItem>

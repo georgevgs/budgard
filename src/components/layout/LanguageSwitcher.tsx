@@ -1,17 +1,17 @@
-import type { ReactElement } from "react";
-import { useTranslation } from "react-i18next";
+import type { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Languages } from "lucide-react";
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Languages } from 'lucide-react';
 
 const languages = {
-  en: "English",
-  el: "Ελληνικά",
+  en: 'English',
+  el: 'Ελληνικά',
 };
 
 const LanguageSwitcher = () => {
@@ -27,7 +27,7 @@ const LanguageSwitcher = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {Object.entries(languages).map(([code, name]) =>
-          renderLanguageItem(code, name, i18n)
+          renderLanguageItem(code, name, i18n),
         )}
       </DropdownMenuContent>
     </DropdownMenu>
@@ -37,7 +37,7 @@ const LanguageSwitcher = () => {
 const renderLanguageItem = (
   code: string,
   name: string,
-  i18n: { language: string; changeLanguage: (lang: string) => void }
+  i18n: { language: string; changeLanguage: (lang: string) => void },
 ): ReactElement => {
   const isCurrentLanguage = i18n.language === code;
   const className = getLanguageItemClassName(isCurrentLanguage);
@@ -55,10 +55,10 @@ const renderLanguageItem = (
 
 const getLanguageItemClassName = (isCurrentLanguage: boolean): string => {
   if (isCurrentLanguage) {
-    return "bg-accent";
+    return 'bg-accent';
   }
 
-  return "";
+  return '';
 };
 
 export default LanguageSwitcher;

@@ -1,74 +1,85 @@
-import { useMemo, useState, lazy, Suspense } from "react";
-import { format, parseISO, getYear } from "date-fns";
-import { Card, CardContent } from "@/components/ui/card";
-import { useData } from "@/contexts/DataContext";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useMemo, useState, lazy, Suspense } from 'react';
+import { format, parseISO, getYear } from 'date-fns';
+import { Card, CardContent } from '@/components/ui/card';
+import { useData } from '@/contexts/DataContext';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 // Lazy load the heavy chart component
-const Chart = lazy(() => import("react-apexcharts"));
+const Chart = lazy(() => import('react-apexcharts'));
 
 const AnalyticsView = () => {
   const { expenses, categories } = useData();
 
   const availableYears = useMemo(() => {
-    const years = new Set(
-      expenses.map(e => getYear(parseISO(e.date)))
-    );
+    const years = new Set(expenses.map((e) => getYear(parseISO(e.date))));
     return Array.from(years).sort().reverse();
   }, [expenses]);
 
-  const [selectedYear, setSelectedYear] = useState(() =>
-    availableYears[0] || new Date().getFullYear()
+  const [selectedYear, setSelectedYear] = useState(
+    () => availableYears[0] || new Date().getFullYear(),
   );
 
   // Memoize year expenses to avoid recalculating on every render
   const yearExpenses = useMemo(() => {
-    return expenses.filter(e => getYear(parseISO(e.date)) === selectedYear);
+    return expenses.filter((e) => getYear(parseISO(e.date)) === selectedYear);
   }, [expenses, selectedYear]);
 
   const monthlyData = useMemo(() => {
     const months = Array.from({ length: 12 }, (_, i) => {
-      const month = (i + 1).toString().padStart(2, "0");
+      const month = (i + 1).toString().padStart(2, '0');
       return `${selectedYear}-${month}`;
     });
 
-    return months.map(month => {
-      const monthExpenses = yearExpenses.filter(e =>
-        format(parseISO(e.date), "yyyy-MM") === month
+    return months.map((month) => {
+      const monthExpenses = yearExpenses.filter(
+        (e) => format(parseISO(e.date), 'yyyy-MM') === month,
       );
 
       return {
-        month: format(parseISO(`${month}-01`), "MMM"),
-        fullMonth: format(parseISO(`${month}-01`), "MMMM"),
-        amount: monthExpenses.reduce((sum, e) => sum + e.amount, 0)
+        month: format(parseISO(`${month}-01`), 'MMM'),
+        fullMonth: format(parseISO(`${month}-01`), 'MMMM'),
+        amount: monthExpenses.reduce((sum, e) => sum + e.amount, 0),
       };
     });
   }, [yearExpenses, selectedYear]);
 
   const yearlyStats = useMemo(() => {
     const totalSpent = yearExpenses.reduce((sum, e) => sum + e.amount, 0);
-    const monthsWithExpenses = monthlyData.filter(m => m.amount > 0).length;
-    const monthlyAverage = monthsWithExpenses > 0 ? totalSpent / monthsWithExpenses : 0;
+    const monthsWithExpenses = monthlyData.filter((m) => m.amount > 0).length;
+    const monthlyAverage =
+      monthsWithExpenses > 0 ? totalSpent / monthsWithExpenses : 0;
 
-    const activeMonths = monthlyData.filter(m => m.amount > 0);
+    const activeMonths = monthlyData.filter((m) => m.amount > 0);
 
-    const highestMonth = activeMonths.length > 0
-      ? activeMonths.reduce((prev, curr) => curr.amount > prev.amount ? curr : prev)
-      : null;
+    const highestMonth =
+      activeMonths.length > 0
+        ? activeMonths.reduce((prev, curr) =>
+            curr.amount > prev.amount ? curr : prev,
+          )
+        : null;
 
-    const lowestMonth = activeMonths.length > 1
-      ? activeMonths.reduce((prev, curr) => curr.amount < prev.amount ? curr : prev)
-      : null;
+    const lowestMonth =
+      activeMonths.length > 1
+        ? activeMonths.reduce((prev, curr) =>
+            curr.amount < prev.amount ? curr : prev,
+          )
+        : null;
 
     const categoryBreakdown = categories
-      .map(cat => ({
+      .map((cat) => ({
         name: cat.name,
         color: cat.color,
         amount: yearExpenses
-          .filter(e => e.category_id === cat.id)
-          .reduce((sum, e) => sum + e.amount, 0)
+          .filter((e) => e.category_id === cat.id)
+          .reduce((sum, e) => sum + e.amount, 0),
       }))
-      .filter(cat => cat.amount > 0)
+      .filter((cat) => cat.amount > 0)
       .sort((a, b) => b.amount - a.amount);
 
     return {
@@ -77,65 +88,73 @@ const AnalyticsView = () => {
       categoryBreakdown,
       highestMonth,
       lowestMonth,
-      activeMonths: activeMonths.length
+      activeMonths: activeMonths.length,
     };
   }, [yearExpenses, categories, monthlyData]);
 
-  const chartOptions = useMemo(() => ({
-    chart: {
-      type: "area" as const,
-      toolbar: { show: false },
-      fontFamily: "inherit",
-      background: "transparent",
-      animations: {
-        enabled: true
-      }
-    },
-    grid: {
-      borderColor: "hsl(var(--border) / 0.2)",
-      strokeDashArray: 4
-    },
-    stroke: {
-      curve: "smooth" as const,
-      width: 2
-    },
-    fill: {
-      type: "gradient" as const,
-      gradient: {
-        shadeIntensity: 1,
-        opacityFrom: 0.7,
-        opacityTo: 0.2,
-        stops: [0, 90, 100]
-      }
-    },
-    dataLabels: { enabled: false },
-    xaxis: {
-      categories: monthlyData.map(d => d.month),
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-      labels: {
-        style: { colors: "hsl(var(--muted-foreground))" }
-      }
-    },
-    yaxis: {
-      labels: {
-        formatter: (val: number) => `${Math.round(val)} €`,
-        style: { colors: "hsl(var(--muted-foreground))" }
-      }
-    },
-    tooltip: {
-      theme: "dark",
-      y: {
-        formatter: (val: number) => `${val.toFixed(2)} €`
-      }
-    },
-    colors: ["hsl(var(--primary))"]
-  }), [monthlyData]);
+  const chartOptions = useMemo(
+    () => ({
+      chart: {
+        type: 'area' as const,
+        toolbar: { show: false },
+        fontFamily: 'inherit',
+        background: 'transparent',
+        animations: {
+          enabled: true,
+        },
+      },
+      grid: {
+        borderColor: 'hsl(var(--border) / 0.2)',
+        strokeDashArray: 4,
+      },
+      stroke: {
+        curve: 'smooth' as const,
+        width: 2,
+      },
+      fill: {
+        type: 'gradient' as const,
+        gradient: {
+          shadeIntensity: 1,
+          opacityFrom: 0.7,
+          opacityTo: 0.2,
+          stops: [0, 90, 100],
+        },
+      },
+      dataLabels: { enabled: false },
+      xaxis: {
+        categories: monthlyData.map((d) => d.month),
+        axisBorder: { show: false },
+        axisTicks: { show: false },
+        labels: {
+          style: { colors: 'hsl(var(--muted-foreground))' },
+        },
+      },
+      yaxis: {
+        labels: {
+          formatter: (val: number) => `${Math.round(val)} €`,
+          style: { colors: 'hsl(var(--muted-foreground))' },
+        },
+      },
+      tooltip: {
+        theme: 'dark',
+        y: {
+          formatter: (val: number) => `${val.toFixed(2)} €`,
+        },
+      },
+      colors: ['hsl(var(--primary))'],
+    }),
+    [monthlyData],
+  );
 
-  const chartSeries = useMemo(() => [{
-    name: "Monthly Spending",
-    data: monthlyData.map(d => d.amount)
-  }], [monthlyData]);
+  const chartSeries = useMemo(
+    () => [
+      {
+        name: 'Monthly Spending',
+        data: monthlyData.map((d) => d.amount),
+      },
+    ],
+    [monthlyData],
+  );
 
   const formatAmount = (amount: number) => `${amount.toFixed(2)} €`;
 
@@ -150,7 +169,7 @@ const AnalyticsView = () => {
             <SelectValue placeholder="Select year" />
           </SelectTrigger>
           <SelectContent>
-            {availableYears.map(year => (
+            {availableYears.map((year) => (
               <SelectItem key={year} value={year.toString()}>
                 {year}
               </SelectItem>
@@ -177,11 +196,13 @@ const AnalyticsView = () => {
       <Card className="overflow-hidden">
         <CardContent className="p-6">
           <div className="h-[300px] w-full">
-            <Suspense fallback={
-              <div className="h-full w-full flex items-center justify-center">
-                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-              </div>
-            }>
+            <Suspense
+              fallback={
+                <div className="h-full w-full flex items-center justify-center">
+                  <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+                </div>
+              }
+            >
               <Chart
                 options={chartOptions}
                 series={chartSeries}
@@ -242,8 +263,11 @@ const AnalyticsView = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                {yearlyStats.categoryBreakdown.slice(0, 5).map(category => (
-                  <div key={category.name} className="flex items-center justify-between">
+                {yearlyStats.categoryBreakdown.slice(0, 5).map((category) => (
+                  <div
+                    key={category.name}
+                    className="flex items-center justify-between"
+                  >
                     <div className="flex items-center gap-2">
                       <div
                         className="w-3 h-3 rounded-full"

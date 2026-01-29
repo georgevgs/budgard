@@ -1,4 +1,5 @@
-import { supabase } from './supabase.ts';
+import type { Session } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 export async function requestOTP(email: string) {
   return supabase.auth.signInWithOtp({
@@ -13,7 +14,7 @@ export async function signInWithOTP(email: string, token: string) {
   return supabase.auth.verifyOtp({
     email,
     token,
-    type: 'email'
+    type: 'email',
   });
 }
 
@@ -25,7 +26,7 @@ export function getSession() {
   return supabase.auth.getSession();
 }
 
-export function onAuthStateChange(callback: (session: any) => void) {
+export function onAuthStateChange(callback: (session: Session | null) => void) {
   return supabase.auth.onAuthStateChange((_event, session) => {
     callback(session);
   });

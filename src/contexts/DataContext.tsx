@@ -1,10 +1,17 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { useAuth } from "./AuthContext";
-import { dataService } from "@/services/dataService";
-import type { Category } from "@/types/Category";
-import type { Expense } from "@/types/Expense";
-import type { RecurringExpense } from "@/types/RecurringExpense";
-import { useToast } from "@/hooks/useToast";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useCallback,
+} from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { dataService } from '@/services/dataService';
+import type { Category } from '@/types/Category';
+import type { Expense } from '@/types/Expense';
+import type { RecurringExpense } from '@/types/RecurringExpense';
+import { useToast } from '@/hooks/useToast';
 
 interface DataState {
   categories: Category[];
@@ -29,7 +36,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [recurringExpenses, setRecurringExpenses] = useState<RecurringExpense[]>([]);
+  const [recurringExpenses, setRecurringExpenses] = useState<
+    RecurringExpense[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -42,11 +51,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     try {
       // Parallel fetch for better performance
-      const [categoriesData, expensesData, recurringExpensesData] = await Promise.all([
-        dataService.getCategories(),
-        dataService.getExpenses(),
-        dataService.getRecurringExpenses(),
-      ]);
+      const [categoriesData, expensesData, recurringExpensesData] =
+        await Promise.all([
+          dataService.getCategories(),
+          dataService.getExpenses(),
+          dataService.getRecurringExpenses(),
+        ]);
 
       // React 18+ automatically batches these state updates
       setCategories(categoriesData);
@@ -55,11 +65,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setIsInitialized(true);
       setIsLoading(false);
     } catch (error) {
-      console.error("Failed to load data:", error);
+      console.error('Failed to load data:', error);
       toast({
-        title: "Error",
-        description: "Failed to load data",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to load data',
+        variant: 'destructive',
       });
       setIsLoading(false);
     }
@@ -100,18 +110,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setRecurringExpenses,
   };
 
-  return (
-    <DataContext.Provider value={value}>
-      {children}
-    </DataContext.Provider>
-  );
+  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }
 
 export function useData() {
   const context = useContext(DataContext);
 
   if (!context) {
-    throw new Error("useData must be used within a DataProvider");
+    throw new Error('useData must be used within a DataProvider');
   }
 
   return context;

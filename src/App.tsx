@@ -1,5 +1,11 @@
 import { lazy, Suspense, type ReactNode } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+} from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePwaUpdate } from '@/hooks/usePwaUpdate';
@@ -9,7 +15,9 @@ import { ErrorBoundary } from '@/components/ui/error-boundary';
 const Header = lazy(() => import('@/components/layout/Header'));
 const NavTabs = lazy(() => import('@/components/layout/NavTabs'));
 const ExpensesList = lazy(() => import('@/components/expenses/ExpensesList'));
-const AnalyticsView = lazy(() => import('@/components/analytics/AnalyticsView'));
+const AnalyticsView = lazy(
+  () => import('@/components/analytics/AnalyticsView'),
+);
 const RecurringExpensesList = lazy(
   () => import('@/components/recurring/RecurringExpensesList'),
 );
