@@ -48,14 +48,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
         dataService.getRecurringExpenses(),
       ]);
 
-      // Batch state updates to reduce re-renders
-      requestAnimationFrame(() => {
-        setCategories(categoriesData);
-        setExpenses(expensesData);
-        setRecurringExpenses(recurringExpensesData);
-        setIsInitialized(true);
-        setIsLoading(false);
-      });
+      // React 18+ automatically batches these state updates
+      setCategories(categoriesData);
+      setExpenses(expensesData);
+      setRecurringExpenses(recurringExpensesData);
+      setIsInitialized(true);
+      setIsLoading(false);
     } catch (error) {
       console.error("Failed to load data:", error);
       toast({
