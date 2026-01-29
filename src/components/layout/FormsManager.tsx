@@ -5,7 +5,13 @@ import ExpensesForm from '@/components/expenses/ExpensesForm';
 import CategoryForm from '@/components/categories/CategoryForm';
 import { useData } from '@/contexts/DataContext';
 
-export type FormType = 'newExpense' | 'editExpense' | 'newCategory' | null;
+export const FORM_TYPES = {
+  NEW_EXPENSE: 'newExpense',
+  EDIT_EXPENSE: 'editExpense',
+  NEW_CATEGORY: 'newCategory',
+} as const;
+
+export type FormType = (typeof FORM_TYPES)[keyof typeof FORM_TYPES] | null;
 
 interface FormsManagerProps {
   formType: FormType;
@@ -26,8 +32,9 @@ const FormsManager = ({
     return null;
   }
 
-  const isExpenseForm = formType === 'newExpense' || formType === 'editExpense';
-  const isCategoryForm = formType === 'newCategory';
+  const isExpenseForm =
+    formType === FORM_TYPES.NEW_EXPENSE || formType === FORM_TYPES.EDIT_EXPENSE;
+  const isCategoryForm = formType === FORM_TYPES.NEW_CATEGORY;
 
   return (
     <>
@@ -41,7 +48,7 @@ const FormsManager = ({
           <div id="expense-form-description" className="sr-only">
             {t('forms.expenseDescription', {
               action: t(
-                formType === 'editExpense'
+                formType === FORM_TYPES.EDIT_EXPENSE
                   ? 'forms.editExisting'
                   : 'forms.addNew',
               ),
@@ -49,7 +56,7 @@ const FormsManager = ({
           </div>
           {isExpenseForm && (
             <ExpensesForm
-              expense={formType === 'editExpense' ? selectedExpense : undefined}
+              expense={formType === FORM_TYPES.EDIT_EXPENSE ? selectedExpense : undefined}
               categories={categories}
               onClose={onClose}
             />

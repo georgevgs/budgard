@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import type { FormType } from '@/components/layout/FormsManager';
+import { FORM_TYPES, type FormType } from '@/components/layout/FormsManager';
 import { useData } from '@/contexts/DataContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { cn } from '@/lib/utils';
@@ -105,7 +105,7 @@ const ExpensesList = () => {
 
   const handleExpenseEdit = (expense: Expense) => {
     setSelectedExpense(expense);
-    setFormType('editExpense');
+    setFormType(FORM_TYPES.EDIT_EXPENSE);
   };
 
   return (
@@ -168,7 +168,7 @@ const ExpensesList = () => {
             hasActiveFilters={hasActiveFilters}
             noMatchMessage={t('expenses.noExpensesMatchFilter')}
             selectedMonth={selectedMonth}
-            onAddClick={() => setFormType('newExpense')}
+            onAddClick={() => setFormType(FORM_TYPES.NEW_EXPENSE)}
             onEdit={handleExpenseEdit}
             onDelete={operations.handleExpenseDelete}
           />
@@ -184,8 +184,8 @@ const ExpensesList = () => {
 
       {/* Speed Dial */}
       <SpeedDial
-        onAddExpense={() => setFormType('newExpense')}
-        onAddCategory={() => setFormType('newCategory')}
+        onAddExpense={() => setFormType(FORM_TYPES.NEW_EXPENSE)}
+        onAddCategory={() => setFormType(FORM_TYPES.NEW_CATEGORY)}
       />
     </div>
   );
