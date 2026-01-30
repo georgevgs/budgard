@@ -10,7 +10,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Plus, MoreVertical, Calendar } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
@@ -28,13 +27,15 @@ import RecurringExpenseForm from '@/components/recurring/RecurringExpenseForm';
 import CategoryBadge from '@/components/categories/CategoryBadge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
-import { parseCurrencyInput } from '@/lib/utils';
+import { formatCurrency, parseCurrencyInput } from '@/lib/utils';
 
 const RecurringExpensesList = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<
     RecurringExpense | undefined
   >(undefined);
+  const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const { recurringExpenses, categories, isLoading } = useData();
   const { session } = useAuth();
   const {
@@ -68,12 +69,21 @@ const RecurringExpensesList = () => {
   };
 
   const handleEditExpense = (expense: RecurringExpense) => {
+    setOpenDropdownId(null);
     setSelectedExpense(expense);
-    setIsFormOpen(true);
+    setTimeout(() => setIsFormOpen(true), 0);
   };
 
-  const handleDeleteExpense = async (expenseId: string) => {
-    await deleteRecurringExpense(expenseId);
+  const handleDeleteClick = (expenseId: string) => {
+    setOpenDropdownId(null);
+    setTimeout(() => setExpenseToDelete(expenseId), 0);
+  };
+
+  const handleDeleteExpense = async () => {
+    if (expenseToDelete) {
+      await deleteRecurringExpense(expenseToDelete);
+      setExpenseToDelete(null);
+    }
   };
 
   if (isLoading) {
@@ -129,7 +139,7 @@ const RecurringExpensesList = () => {
                   </div>
                   <div className="text-sm text-muted-foreground space-y-1">
                     <div>
-                      €{expense.amount.toFixed(2)} • {expense.frequency}
+                      {formatCurrency(expense.amount)} • {expense.frequency}
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
@@ -142,7 +152,12 @@ const RecurringExpensesList = () => {
                     </div>
                   </div>
                 </div>
-                <DropdownMenu>
+                <DropdownMenu
+                  open={openDropdownId === expense.id}
+                  onOpenChange={(open) =>
+                    setOpenDropdownId(open ? expense.id : null)
+                  }
+                >
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
                       <MoreVertical className="h-4 w-4" />
@@ -155,37 +170,12 @@ const RecurringExpensesList = () => {
                     >
                       Edit
                     </DropdownMenuItem>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <DropdownMenuItem
-                          onSelect={(e) => e.preventDefault()}
-                          className="text-destructive"
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent className="sm:max-w-[425px]">
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Delete Recurring Expense
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete this recurring
-                            expense? This won't affect previously generated
-                            expenses.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDeleteExpense(expense.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    <DropdownMenuItem
+                      onClick={() => handleDeleteClick(expense.id)}
+                      className="text-destructive"
+                    >
+                      Delete
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CardContent>
@@ -200,10 +190,13 @@ const RecurringExpensesList = () => {
           setIsFormOpen(false);
           setSelectedExpense(undefined);
         }}
+        modal={false}
       >
         <DialogContent
           className="sm:max-w-[425px] p-0 overflow-hidden rounded-lg"
           onOpenAutoFocus={(e) => e.preventDefault()}
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
         >
           <RecurringExpenseForm
             expense={selectedExpense}
@@ -216,6 +209,30 @@ const RecurringExpensesList = () => {
           />
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={expenseToDelete !== null}
+        onOpenChange={(open) => !open && setExpenseToDelete(null)}
+      >
+        <AlertDialogContent className="sm:max-w-[425px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Recurring Expense</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this recurring expense? This
+              won&apos;t affect previously generated expenses.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteExpense}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

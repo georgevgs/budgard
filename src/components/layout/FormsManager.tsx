@@ -39,11 +39,13 @@ const FormsManager = ({
   return (
     <>
       {/* Expense Form Modal */}
-      <Dialog open={isExpenseForm} onOpenChange={onClose}>
+      <Dialog open={isExpenseForm} onOpenChange={onClose} modal={false}>
         <DialogContent
           className="sm:max-w-[425px] p-0 overflow-hidden [&>button]:hidden rounded-lg"
           aria-describedby="expense-form-description"
           onOpenAutoFocus={(e) => e.preventDefault()}
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
         >
           <div id="expense-form-description" className="sr-only">
             {t('forms.expenseDescription', {
@@ -65,10 +67,13 @@ const FormsManager = ({
       </Dialog>
 
       {/* Category Form Modal */}
-      <Dialog open={isCategoryForm} onOpenChange={onClose}>
+      <Dialog open={isCategoryForm} onOpenChange={onClose} modal={false}>
         <DialogContent
           className="sm:max-w-[425px] p-6 rounded-lg"
           aria-describedby="category-form-description"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
         >
           <div id="category-form-description" className="sr-only">
             {t('forms.categoryDescription')}

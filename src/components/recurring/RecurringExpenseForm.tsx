@@ -63,7 +63,9 @@ const RecurringExpenseForm = ({
   const form = useForm<RecurringExpenseFormData>({
     resolver: zodResolver(recurringExpenseSchema),
     defaultValues: {
-      amount: expense ? formatCurrencyInput(expense.amount.toString()) : '',
+      amount: expense
+        ? formatCurrencyInput(expense.amount.toString().replace('.', ','))
+        : '',
       description: expense?.description || '',
       category_id: expense?.category_id || 'none',
       frequency: expense?.frequency || 'monthly',
@@ -199,10 +201,11 @@ const RecurringExpenseForm = ({
             name="start_date"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <Popover>
+                <Popover modal={false}>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
+                        type="button"
                         variant="outline"
                         className={cn(
                           'w-full pl-3 text-left font-normal',
@@ -227,7 +230,6 @@ const RecurringExpenseForm = ({
                         // Only disable dates before today when creating new recurring expense
                         !expense && date < new Date()
                       }
-                      initialFocus
                     />
                   </PopoverContent>
                 </Popover>
@@ -241,10 +243,11 @@ const RecurringExpenseForm = ({
             name="end_date"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <Popover>
+                <Popover modal={false}>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
+                        type="button"
                         variant="outline"
                         className={cn(
                           'w-full pl-3 text-left font-normal',
@@ -266,7 +269,6 @@ const RecurringExpenseForm = ({
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) => date < form.getValues('start_date')}
-                      initialFocus
                     />
                   </PopoverContent>
                 </Popover>

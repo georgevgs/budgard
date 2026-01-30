@@ -53,7 +53,9 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
-      amount: expense ? formatCurrencyInput(expense.amount.toString()) : '',
+      amount: expense
+        ? formatCurrencyInput(expense.amount.toString().replace('.', ','))
+        : '',
       description: expense?.description || '',
       category_id: expense?.category_id || 'none',
       date: expense ? new Date(expense.date) : new Date(),
@@ -185,7 +187,7 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
             name="date"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <Popover>
+                <Popover modal={false}>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
