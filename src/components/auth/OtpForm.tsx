@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/useToast';
@@ -12,6 +12,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { emailSchema } from '@/lib/validations';
 import { useNavigate } from 'react-router-dom';
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 
 type OtpFormProps = {
   onSuccess?: () => void;
@@ -24,6 +25,8 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [honeypot, setHoneypot] = useState(''); // Honeypot field
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
   const { toast } = useToast();
   const { isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
@@ -35,11 +38,17 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
     // Check honeypot
     if (honeypot) {
       // Silently fail to avoid letting bots know they were detected
-      console.log('Honeypot triggered');
-
-      // Optional: redirect to a different page
       navigate('/');
+      return;
+    }
 
+    // Verify Turnstile token exists
+    if (!turnstileToken) {
+      toast({
+        title: 'Verification Required',
+        description: 'Please complete the security check.',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -67,6 +76,9 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
         description: 'Failed to send verification code. Please try again.',
         variant: 'destructive',
       });
+      // Reset Turnstile on error so user can try again
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
     } finally {
       setLoading(false);
     }
@@ -146,10 +158,25 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
             </div>
           </div>
 
+          {/* Cloudflare Turnstile */}
+          <div className="flex justify-center">
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+              onSuccess={setTurnstileToken}
+              onError={() => setTurnstileToken(null)}
+              onExpire={() => setTurnstileToken(null)}
+              options={{
+                theme: 'auto',
+                size: 'normal',
+              }}
+            />
+          </div>
+
           <Button
             type="submit"
             className="w-full h-10"
-            disabled={loading || isAuthLoading}
+            disabled={loading || isAuthLoading || !turnstileToken}
           >
             {loading ? 'Sending...' : 'Send Code'}
           </Button>
