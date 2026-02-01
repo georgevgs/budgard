@@ -26,6 +26,7 @@ import type { RecurringExpense } from '@/types/RecurringExpense';
 
 const frequencyLabels = {
   weekly: 'Weekly',
+  biweekly: 'Every 2 weeks',
   monthly: 'Monthly',
   quarterly: 'Quarterly',
   yearly: 'Yearly',

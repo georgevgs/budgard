@@ -153,4 +153,57 @@ export const dataService = {
     if (error) throw error;
     return data as RecurringExpense;
   },
+
+  async processRecurringExpenses(targetDate?: string) {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      throw new Error('Not authenticated');
+    }
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-recurring-expenses`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          target_date: targetDate || new Date().toISOString().split('T')[0],
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to process recurring expenses');
+    }
+
+    return response.json() as Promise<{
+      success: boolean;
+      generated_count: number;
+      processed_recurring_ids: string[];
+      target_date: string;
+    }>;
+  },
+
+  async getUpcomingRecurringExpenses(daysAhead: number = 30) {
+    const { data, error } = await supabase.rpc('get_upcoming_recurring_expenses', {
+      p_user_id: (await supabase.auth.getUser()).data.user?.id,
+      p_days_ahead: daysAhead,
+    });
+
+    if (error) throw error;
+    return data as Array<{
+      recurring_expense_id: string;
+      description: string;
+      amount: number;
+      category_id: string | null;
+      next_occurrence: string;
+      frequency: string;
+    }>;
+  },
 };
