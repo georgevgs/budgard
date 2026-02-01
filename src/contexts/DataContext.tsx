@@ -17,6 +17,7 @@ interface DataState {
   categories: Category[];
   expenses: Expense[];
   recurringExpenses: RecurringExpense[];
+  monthlyBudget: number | null;
   isLoading: boolean;
   isInitialized: boolean;
 }
@@ -26,6 +27,7 @@ interface DataContextType extends DataState {
   setCategories: (categories: Category[]) => void;
   setExpenses: (expenses: Expense[]) => void;
   setRecurringExpenses: (recurringExpenses: RecurringExpense[]) => void;
+  setMonthlyBudget: (amount: number | null) => void;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -39,6 +41,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [recurringExpenses, setRecurringExpenses] = useState<
     RecurringExpense[]
   >([]);
+  const [monthlyBudget, setMonthlyBudget] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -51,17 +54,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     try {
       // Parallel fetch for better performance
-      const [categoriesData, expensesData, recurringExpensesData] =
+      const [categoriesData, expensesData, recurringExpensesData, budgetData] =
         await Promise.all([
           dataService.getCategories(),
           dataService.getExpenses(),
           dataService.getRecurringExpenses(),
+          dataService.getBudget(),
         ]);
 
       // React 18+ automatically batches these state updates
       setCategories(categoriesData);
       setExpenses(expensesData);
       setRecurringExpenses(recurringExpensesData);
+      setMonthlyBudget(budgetData?.monthly_amount ?? null);
       setIsInitialized(true);
       setIsLoading(false);
     } catch (error) {
@@ -93,6 +98,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setCategories([]);
       setExpenses([]);
       setRecurringExpenses([]);
+      setMonthlyBudget(null);
       setIsInitialized(false);
       setIsLoading(false);
     }
@@ -102,12 +108,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
     categories,
     expenses,
     recurringExpenses,
+    monthlyBudget,
     isLoading,
     isInitialized,
     refreshData,
     setCategories,
     setExpenses,
     setRecurringExpenses,
+    setMonthlyBudget,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

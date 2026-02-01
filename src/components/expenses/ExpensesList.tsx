@@ -1,12 +1,18 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
+import { Download } from 'lucide-react';
 import { FORM_TYPES, type FormType } from '@/components/layout/FormsManager';
 import { useData } from '@/contexts/DataContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
+import { dataService } from '@/services/dataService';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/useToast';
+import { downloadExpensesAsCSV } from '@/lib/csvExport';
+import { Button } from '@/components/ui/button';
 import FormsManager from '@/components/layout/FormsManager';
 import SpeedDial from '@/components/layout/SpeedDial';
+import BudgetProgress from '@/components/budget/BudgetProgress';
 import ExpensesMonthlySelector from '@/components/expenses/ExpensesMonthlySelector';
 import ExpensesMonthlyOverview from '@/components/expenses/ExpensesMonthlyOverview';
 import ExpensesDashboard from '@/components/expenses/ExpensesDashboard';
@@ -66,8 +72,9 @@ const ExpensesContent = ({
 
 const ExpensesList = () => {
   const { t } = useTranslation();
-  const { categories, expenses, isLoading, isInitialized } = useData();
+  const { categories, expenses, isLoading, isInitialized, monthlyBudget, setMonthlyBudget } = useData();
   const operations = useDataOperations();
+  const { toast } = useToast();
 
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
   const [formType, setFormType] = useState<FormType>(null);
@@ -88,6 +95,26 @@ const ExpensesList = () => {
     expenses,
     selectedMonth,
   });
+
+  const handleBudgetUpdate = useCallback(
+    async (amount: number) => {
+      const previousBudget = monthlyBudget;
+      setMonthlyBudget(amount);
+
+      try {
+        await dataService.upsertBudget(amount);
+      } catch (error) {
+        setMonthlyBudget(previousBudget);
+        toast({
+          title: t('common.error'),
+          description: t('budget.updateError', { defaultValue: 'Failed to update budget' }),
+          variant: 'destructive',
+        });
+        throw error;
+      }
+    },
+    [monthlyBudget, setMonthlyBudget, toast, t],
+  );
 
   if (!isInitialized || isLoading) {
     return <ExpenseLoadingState />;
@@ -124,7 +151,6 @@ const ExpensesList = () => {
             isExpanded={isDashboardVisible}
             hasExpenses={filteredExpenses.length > 0}
             expenses={filteredExpenses}
-            categories={categories}
             onCurrentMonthClick={() => setSelectedMonth(currentMonth)}
             onMonthlyTotalClick={() =>
               setIsDashboardVisible(!isDashboardVisible)
@@ -150,12 +176,39 @@ const ExpensesList = () => {
                 : 'grid-rows-[0fr] opacity-0',
             )}
           >
-            <div className="overflow-hidden">
+            <div className="overflow-hidden space-y-3">
+              {/* Budget Progress */}
+              <BudgetProgress
+                monthlyBudget={monthlyBudget}
+                monthlySpent={monthlyTotal}
+                onBudgetUpdate={handleBudgetUpdate}
+              />
+
+              {/* Category Breakdown */}
               {filteredExpenses.length > 0 && (
                 <ExpensesDashboard
                   expenses={filteredExpenses}
                   categories={categories}
                 />
+              )}
+
+              {/* Export CSV */}
+              {filteredExpenses.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    downloadExpensesAsCSV({
+                      expenses: filteredExpenses,
+                      categories,
+                      selectedMonth,
+                    })
+                  }
+                  className="text-muted-foreground"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  {t('expenses.exportCSV')}
+                </Button>
               )}
             </div>
           </div>
