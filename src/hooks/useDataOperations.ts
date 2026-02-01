@@ -227,45 +227,6 @@ export function useDataOperations() {
     [recurringExpenses, isInitialized, setRecurringExpenses, showErrorToast],
   );
 
-  const handleProcessRecurringExpenses = useCallback(async () => {
-    if (!isInitialized) {
-      return { generated_count: 0 };
-    }
-
-    try {
-      const result = await dataService.processRecurringExpenses();
-
-      if (result.generated_count > 0) {
-        // Refresh expenses to include newly generated ones
-        const updatedExpenses = await dataService.getExpenses();
-        setExpenses(updatedExpenses);
-
-        // Refresh recurring expenses to get updated last_generated_date
-        const updatedRecurring = await dataService.getRecurringExpenses();
-        setRecurringExpenses(updatedRecurring);
-
-        toast({
-          description: `Generated ${result.generated_count} expense${result.generated_count > 1 ? 's' : ''} from recurring templates`,
-        });
-      } else {
-        toast({
-          description: 'No recurring expenses due for processing',
-        });
-      }
-
-      return result;
-    } catch (error) {
-      showErrorToast('Failed to process recurring expenses');
-      throw error;
-    }
-  }, [
-    isInitialized,
-    setExpenses,
-    setRecurringExpenses,
-    toast,
-    showErrorToast,
-  ]);
-
   return {
     handleExpenseSubmit,
     handleExpenseDelete,
@@ -273,6 +234,5 @@ export function useDataOperations() {
     handleRecurringExpenseSubmit,
     handleRecurringExpenseDelete,
     handleRecurringExpenseToggle,
-    handleProcessRecurringExpenses,
   };
 }

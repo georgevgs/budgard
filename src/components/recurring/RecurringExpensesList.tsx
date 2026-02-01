@@ -17,7 +17,6 @@ import {
   Plus,
   MoreVertical,
   Calendar,
-  RefreshCw,
   Clock,
   Repeat,
 } from 'lucide-react';
@@ -100,14 +99,12 @@ const RecurringExpensesList = () => {
   >(undefined);
   const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
   const { recurringExpenses, categories, isLoading } = useData();
   const { session } = useAuth();
   const {
     handleRecurringExpenseSubmit: submitRecurringExpense,
     handleRecurringExpenseDelete: deleteRecurringExpense,
     handleRecurringExpenseToggle: toggleRecurringExpense,
-    handleProcessRecurringExpenses: processRecurringExpenses,
   } = useDataOperations();
 
   const handleSubmit = async (values: RecurringExpenseFormData) => {
@@ -157,15 +154,6 @@ const RecurringExpensesList = () => {
     await toggleRecurringExpense(expenseId, active);
   };
 
-  const handleProcessNow = async () => {
-    setIsProcessing(true);
-    try {
-      await processRecurringExpenses();
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   // Calculate summary stats
   const activeExpenses = recurringExpenses.filter((e) => e.active);
   const monthlyTotal = activeExpenses.reduce((sum, expense) => {
@@ -211,21 +199,10 @@ const RecurringExpensesList = () => {
               </p>
             )}
           </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={handleProcessNow}
-              size="sm"
-              variant="outline"
-              disabled={isProcessing || activeExpenses.length === 0}
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isProcessing ? 'animate-spin' : ''}`} />
-              {isProcessing ? 'Processing...' : 'Process Now'}
-            </Button>
-            <Button onClick={() => setIsFormOpen(true)} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Recurring
-            </Button>
-          </div>
+          <Button onClick={() => setIsFormOpen(true)} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Recurring
+          </Button>
         </div>
       </div>
 
