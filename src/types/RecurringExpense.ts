@@ -2,6 +2,7 @@ import { Category } from '@/types/Category';
 
 export type RecurringExpenseFrequency =
   | 'weekly'
+  | 'biweekly'
   | 'monthly'
   | 'quarterly'
   | 'yearly';

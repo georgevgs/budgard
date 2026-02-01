@@ -1,7 +1,7 @@
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import { format, addWeeks, addMonths, addYears } from 'date-fns';
+import { CalendarIcon, Info } from 'lucide-react';
 import {
   DialogTitle,
   DialogHeader,
@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
+import { Label } from '@/components/ui/label';
 import {
   Form,
   FormControl,
@@ -30,20 +31,73 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
-import { cn, formatCurrencyInput } from '@/lib/utils';
+import { cn, formatCurrencyInput, formatCurrency, parseCurrencyInput } from '@/lib/utils';
 import {
   recurringExpenseSchema,
   type RecurringExpenseFormData,
 } from '@/lib/validations';
-import type { RecurringExpense } from '@/types/RecurringExpense';
+import type { RecurringExpense, RecurringExpenseFrequency } from '@/types/RecurringExpense';
 import type { Category } from '@/types/Category';
 
 const frequencies = [
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'monthly', label: 'Monthly' },
-  { value: 'quarterly', label: 'Quarterly' },
-  { value: 'yearly', label: 'Yearly' },
+  { value: 'weekly', label: 'Weekly', description: 'Every 7 days' },
+  { value: 'biweekly', label: 'Every 2 weeks', description: 'Every 14 days' },
+  { value: 'monthly', label: 'Monthly', description: 'Same day each month' },
+  { value: 'quarterly', label: 'Quarterly', description: 'Every 3 months' },
+  { value: 'yearly', label: 'Yearly', description: 'Once a year' },
 ];
+
+// Calculate estimated monthly cost
+function getMonthlyEstimate(amount: number, frequency: RecurringExpenseFrequency): number {
+  switch (frequency) {
+    case 'weekly':
+      return amount * 4.33;
+    case 'biweekly':
+      return amount * 2.17;
+    case 'monthly':
+      return amount;
+    case 'quarterly':
+      return amount / 3;
+    case 'yearly':
+      return amount / 12;
+    default:
+      return amount;
+  }
+}
+
+// Calculate next occurrence after a date
+function getNextOccurrence(startDate: Date, frequency: RecurringExpenseFrequency): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // If start date is in the future, that's the first occurrence
+  if (startDate >= today) {
+    return startDate;
+  }
+
+  // Otherwise calculate next occurrence from start date
+  let next = new Date(startDate);
+  while (next < today) {
+    switch (frequency) {
+      case 'weekly':
+        next = addWeeks(next, 1);
+        break;
+      case 'biweekly':
+        next = addWeeks(next, 2);
+        break;
+      case 'monthly':
+        next = addMonths(next, 1);
+        break;
+      case 'quarterly':
+        next = addMonths(next, 3);
+        break;
+      case 'yearly':
+        next = addYears(next, 1);
+        break;
+    }
+  }
+  return next;
+}
 
 interface RecurringExpenseFormProps {
   expense?: RecurringExpense;
@@ -74,6 +128,20 @@ const RecurringExpenseForm = ({
     },
   });
 
+  // Watch form values for preview
+  const watchedAmount = useWatch({ control: form.control, name: 'amount' });
+  const watchedFrequency = useWatch({ control: form.control, name: 'frequency' });
+  const watchedStartDate = useWatch({ control: form.control, name: 'start_date' });
+
+  // Calculate preview values
+  const parsedAmount = watchedAmount ? parseCurrencyInput(watchedAmount) : 0;
+  const monthlyEstimate = parsedAmount > 0 && watchedFrequency
+    ? getMonthlyEstimate(parsedAmount, watchedFrequency)
+    : 0;
+  const nextOccurrence = watchedStartDate && watchedFrequency
+    ? getNextOccurrence(watchedStartDate, watchedFrequency)
+    : null;
+
   const handleSubmit = async (values: RecurringExpenseFormData) => {
     if (!session?.user?.id) return;
     await onSubmit(values);
@@ -99,6 +167,7 @@ const RecurringExpenseForm = ({
             name="amount"
             render={({ field }) => (
               <FormItem>
+                <Label>Amount</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                     €
@@ -127,8 +196,9 @@ const RecurringExpenseForm = ({
             name="description"
             render={({ field }) => (
               <FormItem>
+                <Label>Description</Label>
                 <FormControl>
-                  <Input placeholder="Description" {...field} />
+                  <Input placeholder="e.g., Netflix subscription" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -140,6 +210,7 @@ const RecurringExpenseForm = ({
             name="category_id"
             render={({ field }) => (
               <FormItem>
+                <Label>Category</Label>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -174,6 +245,7 @@ const RecurringExpenseForm = ({
             name="frequency"
             render={({ field }) => (
               <FormItem>
+                <Label>Frequency</Label>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -186,7 +258,12 @@ const RecurringExpenseForm = ({
                   <SelectContent>
                     {frequencies.map((freq) => (
                       <SelectItem key={freq.value} value={freq.value}>
-                        {freq.label}
+                        <div className="flex flex-col">
+                          <span>{freq.label}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {freq.description}
+                          </span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -196,86 +273,114 @@ const RecurringExpenseForm = ({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="start_date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <Popover modal={false}>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className={cn(
-                          'w-full pl-3 text-left font-normal',
-                          !field.value && 'text-muted-foreground',
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, 'PPP')
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        // Only disable dates before today when creating new recurring expense
-                        !expense && date < new Date()
-                      }
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="start_date"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <Label>Start date</Label>
+                  <Popover modal={false}>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className={cn(
+                            'w-full pl-3 text-left font-normal',
+                            !field.value && 'text-muted-foreground',
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, 'MMM d, yyyy')
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => {
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          // Only disable dates before today when creating new recurring expense
+                          return !expense && date < today;
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="end_date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <Popover modal={false}>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className={cn(
-                          'w-full pl-3 text-left font-normal',
-                          !field.value && 'text-muted-foreground',
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, 'PPP')
-                        ) : (
-                          <span>End date (optional)</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) => date < form.getValues('start_date')}
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="end_date"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <Label>End date (optional)</Label>
+                  <Popover modal={false}>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className={cn(
+                            'w-full pl-3 text-left font-normal',
+                            !field.value && 'text-muted-foreground',
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, 'MMM d, yyyy')
+                          ) : (
+                            <span>No end date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => date < form.getValues('start_date')}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Preview section */}
+          {parsedAmount > 0 && watchedFrequency && (
+            <div className="rounded-lg bg-muted/50 p-3 text-sm space-y-1">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Info className="h-3.5 w-3.5" />
+                <span>Preview</span>
+              </div>
+              <div className="text-foreground">
+                {nextOccurrence && (
+                  <p>
+                    First expense: <strong>{format(nextOccurrence, 'MMM d, yyyy')}</strong>
+                  </p>
+                )}
+                {monthlyEstimate > 0 && watchedFrequency !== 'monthly' && (
+                  <p className="text-muted-foreground">
+                    ~{formatCurrency(monthlyEstimate)}/month
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>

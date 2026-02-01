@@ -189,7 +189,7 @@ export const recurringExpenseSchema = z.object({
     .transform((str) => str.trim())
     .refine((str) => str.length > 0, 'Description cannot be empty'),
   category_id: z.string(),
-  frequency: z.enum(['weekly', 'monthly', 'quarterly', 'yearly'] as const),
+  frequency: z.enum(['weekly', 'biweekly', 'monthly', 'quarterly', 'yearly'] as const),
   start_date: z.date({
     required_error: 'Start date is required',
   }),
