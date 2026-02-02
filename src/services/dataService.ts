@@ -72,6 +72,23 @@ export const dataService = {
     return data as Expense;
   },
 
+  async createExpensesBulk(
+    expensesData: Array<{
+      date: string;
+      description: string;
+      amount: number;
+      category_id: string | null;
+    }>,
+  ) {
+    const { data, error } = await supabase
+      .from('expenses')
+      .insert(expensesData)
+      .select(`*, category:categories(*)`);
+
+    if (error) throw error;
+    return data as Expense[];
+  },
+
   async deleteExpense(expenseId: string) {
     const { error } = await supabase
       .from('expenses')
