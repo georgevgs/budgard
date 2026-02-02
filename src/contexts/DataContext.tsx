@@ -24,6 +24,7 @@ interface DataState {
 
 interface DataContextType extends DataState {
   refreshData: () => Promise<void>;
+  refreshExpenses: () => Promise<void>;
   setCategories: (categories: Category[]) => void;
   setExpenses: (expenses: Expense[]) => void;
   setRecurringExpenses: (recurringExpenses: RecurringExpense[]) => void;
@@ -84,6 +85,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
     await fetchData();
   }, [fetchData]);
 
+  const refreshExpenses = useCallback(async () => {
+    try {
+      const expensesData = await dataService.getExpenses();
+      setExpenses(expensesData);
+    } catch (error) {
+      console.error('Failed to refresh expenses:', error);
+    }
+  }, []);
+
   useEffect(() => {
     if (isAuthLoading) {
       return;
@@ -112,6 +122,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     isLoading,
     isInitialized,
     refreshData,
+    refreshExpenses,
     setCategories,
     setExpenses,
     setRecurringExpenses,

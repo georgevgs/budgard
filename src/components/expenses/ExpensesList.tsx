@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import { Download } from 'lucide-react';
+import { Download, Upload } from 'lucide-react';
 import { FORM_TYPES, type FormType } from '@/components/layout/FormsManager';
 import { useData } from '@/contexts/DataContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
@@ -19,6 +19,7 @@ import ExpensesDashboard from '@/components/expenses/ExpensesDashboard';
 import ExpenseLoadingState from '@/components/expenses/ExpensesLoading';
 import ExpensesPagination from '@/components/expenses/ExpensesPagination';
 import ExpensesFilter from '@/components/expenses/ExpensesFilter';
+import CsvImportDialog from '@/components/expenses/CsvImportDialog';
 import { useExpensesFilter } from '@/hooks/useExpensesFilter';
 import { Expense } from '@/types/Expense';
 import ExpensesEmpty from '@/components/expenses/ExpensesEmpty';
@@ -79,6 +80,7 @@ const ExpensesList = () => {
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
   const [formType, setFormType] = useState<FormType>(null);
   const [isDashboardVisible, setIsDashboardVisible] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const currentMonth = format(new Date(), 'yyyy-MM');
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
@@ -192,24 +194,35 @@ const ExpensesList = () => {
                 />
               )}
 
-              {/* Export CSV */}
-              {filteredExpenses.length > 0 && (
+              {/* Import/Export CSV */}
+              <div className="flex gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    downloadExpensesAsCSV({
-                      expenses: filteredExpenses,
-                      categories,
-                      selectedMonth,
-                    })
-                  }
+                  onClick={() => setIsImportDialogOpen(true)}
                   className="text-muted-foreground"
                 >
-                  <Download className="h-4 w-4 mr-2" />
-                  {t('expenses.exportCSV')}
+                  <Upload className="h-4 w-4 mr-2" />
+                  {t('import.importCSV')}
                 </Button>
-              )}
+                {filteredExpenses.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      downloadExpensesAsCSV({
+                        expenses: filteredExpenses,
+                        categories,
+                        selectedMonth,
+                      })
+                    }
+                    className="text-muted-foreground"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    {t('expenses.exportCSV')}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -233,6 +246,12 @@ const ExpensesList = () => {
         formType={formType}
         onClose={handleFormClose}
         selectedExpense={selectedExpense}
+      />
+
+      {/* CSV Import Dialog */}
+      <CsvImportDialog
+        open={isImportDialogOpen}
+        onClose={() => setIsImportDialogOpen(false)}
       />
 
       {/* Speed Dial */}
