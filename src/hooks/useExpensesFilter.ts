@@ -52,7 +52,9 @@ export const useExpensesFilter = ({
           ? expense.description.toLowerCase().includes(searchLower)
           : true;
         const matchesCategory = selectedCategoryId
-          ? expense.category_id === selectedCategoryId
+          ? selectedCategoryId === 'uncategorized'
+            ? expense.category_id === null
+            : expense.category_id === selectedCategoryId
           : true;
 
         return matchesSearch && matchesCategory;

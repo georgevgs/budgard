@@ -40,6 +40,8 @@ const ExpensesFilter = ({
     onCategoryChange(categoryId === 'all' ? '' : categoryId);
   };
 
+  const UNCATEGORIZED_VALUE = 'uncategorized';
+
   return (
     <div>
       {/* Filter Button with Counter */}
@@ -91,6 +93,9 @@ const ExpensesFilter = ({
               <SelectItem value="all">
                 {t('expenses.filter.allCategories')}
               </SelectItem>
+              <SelectItem value={UNCATEGORIZED_VALUE}>
+                {t('expenses.noCategory')}
+              </SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   <div className="flex items-center gap-2">
@@ -122,7 +127,10 @@ const ExpensesFilter = ({
           {selectedCategoryId && (
             <Badge variant="secondary" className="text-xs">
               {t('expenses.filter.categoryFilter', {
-                name: categories.find((c) => c.id === selectedCategoryId)?.name,
+                name:
+                  selectedCategoryId === UNCATEGORIZED_VALUE
+                    ? t('expenses.noCategory')
+                    : categories.find((c) => c.id === selectedCategoryId)?.name,
               })}
               <X
                 className="h-3 w-3 ml-1 cursor-pointer"
