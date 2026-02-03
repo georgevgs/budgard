@@ -5,7 +5,7 @@ const COMPRESSION_OPTIONS = {
   maxSizeMB: 1,
   maxWidthOrHeight: 1920,
   fileType: 'image/webp' as const,
-  useWebWorker: true,
+  useWebWorker: false,
 };
 
 const SKIP_COMPRESSION_THRESHOLD = 500 * 1024; // 500KB
