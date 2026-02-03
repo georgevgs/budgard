@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,6 +38,7 @@ import { useDataOperations } from '@/hooks/useDataOperations';
 import { expenseSchema, type ExpenseFormData } from '@/lib/validations';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
+import ReceiptUpload from '@/components/expenses/ReceiptUpload';
 
 interface ExpensesFormProps {
   expense?: Expense;
@@ -49,6 +51,8 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
   const { session } = useAuth();
   const { handleExpenseSubmit } = useDataOperations();
   const dateLocale = i18n.language === 'el' ? el : enUS;
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [removeExistingReceipt, setRemoveExistingReceipt] = useState(false);
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
@@ -75,7 +79,11 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
         user_id: session.user.id,
       };
 
-      await handleExpenseSubmit(expenseData, expense?.id);
+      await handleExpenseSubmit(expenseData, expense?.id, {
+        receiptFile,
+        removeExistingReceipt,
+        existingReceiptPath: expense?.receipt_path ?? null,
+      });
       onClose();
     } catch {
       // Error is handled by parent
@@ -220,6 +228,14 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
                 <FormMessage />
               </FormItem>
             )}
+          />
+
+          <ReceiptUpload
+            currentReceiptPath={expense?.receipt_path}
+            selectedFile={receiptFile}
+            isRemoving={removeExistingReceipt}
+            onFileSelect={setReceiptFile}
+            onRemoveExisting={() => setRemoveExistingReceipt(true)}
           />
 
           <div className="flex gap-3 justify-end pt-2">

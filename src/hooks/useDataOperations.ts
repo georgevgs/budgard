@@ -5,6 +5,13 @@ import { useData } from '@/contexts/DataContext';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
+import { uploadReceipt, deleteReceipt } from '@/services/receiptService';
+
+export interface ReceiptOptions {
+  receiptFile: File | null;
+  removeExistingReceipt: boolean;
+  existingReceiptPath: string | null;
+}
 
 export function useDataOperations() {
   const {
@@ -30,7 +37,11 @@ export function useDataOperations() {
   );
 
   const handleExpenseSubmit = useCallback(
-    async (expenseData: Partial<Expense>, expenseId?: string) => {
+    async (
+      expenseData: Partial<Expense>,
+      expenseId?: string,
+      receiptOptions?: ReceiptOptions,
+    ) => {
       if (!isInitialized) {
         return;
       }
@@ -57,6 +68,41 @@ export function useDataOperations() {
           ? await dataService.updateExpense(expenseData, expenseId)
           : await dataService.createExpense(expenseData);
 
+        // Handle receipt after expense is saved (we need the real ID)
+        let receiptPath = savedExpense.receipt_path ?? null;
+
+        if (receiptOptions) {
+          const { receiptFile, removeExistingReceipt, existingReceiptPath } =
+            receiptOptions;
+
+          // Upload new receipt first, then delete old one to prevent data loss
+          if (receiptFile && expenseData.user_id) {
+            receiptPath = await uploadReceipt(
+              receiptFile,
+              expenseData.user_id,
+              savedExpense.id,
+            );
+            // Clean up old receipt after successful upload
+            if (existingReceiptPath) {
+              deleteReceipt(existingReceiptPath).catch(() => {});
+            }
+          } else if (removeExistingReceipt) {
+            receiptPath = null;
+            if (existingReceiptPath) {
+              deleteReceipt(existingReceiptPath).catch(() => {});
+            }
+          }
+
+          // Update expense with receipt_path if changed
+          if (receiptPath !== (savedExpense.receipt_path ?? null)) {
+            const updated = await dataService.updateExpense(
+              { receipt_path: receiptPath },
+              savedExpense.id,
+            );
+            savedExpense.receipt_path = updated.receipt_path;
+          }
+        }
+
         const finalExpenses = expenseId
           ? expenses.map((e) => (e.id === expenseId ? savedExpense : e))
           : [
@@ -81,11 +127,17 @@ export function useDataOperations() {
       }
 
       const previousExpenses = expenses;
+      const expenseToDelete = expenses.find((e) => e.id === expenseId);
       const updatedExpenses = expenses.filter((e) => e.id !== expenseId);
       setExpenses(updatedExpenses);
 
       try {
         await dataService.deleteExpense(expenseId);
+
+        // Fire-and-forget receipt cleanup
+        if (expenseToDelete?.receipt_path) {
+          deleteReceipt(expenseToDelete.receipt_path).catch(() => {});
+        }
       } catch (error) {
         setExpenses(previousExpenses);
         showErrorToast('Failed to delete expense');
