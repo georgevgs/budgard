@@ -43,10 +43,10 @@ export async function uploadReceipt(
 export async function getReceiptUrl(path: string): Promise<string> {
   const { data, error } = await supabase.storage
     .from('receipts')
-    .createSignedUrl(path, 3600); // 1 hour
+    .download(path);
 
   if (error) throw error;
-  return data.signedUrl;
+  return URL.createObjectURL(data);
 }
 
 export async function deleteReceipt(path: string): Promise<void> {

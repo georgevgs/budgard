@@ -24,6 +24,7 @@ const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
 
   useEffect(() => {
     if (!open) {
+      if (url) URL.revokeObjectURL(url);
       setUrl(null);
       setError(false);
       return;
@@ -36,7 +37,11 @@ const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
       .then(setUrl)
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, [open, receiptPath]);
+
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [open, receiptPath]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
