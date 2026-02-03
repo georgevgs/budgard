@@ -197,5 +197,17 @@
     "successMessage": "Επιτυχής εισαγωγή {{count}} εξόδου(ων)",
     "importError": "Αποτυχία εισαγωγής εξόδων",
     "importCSV": "Εισαγωγή CSV"
+  },
+  "receipt": {
+    "receipt": "Απόδειξη",
+    "addReceipt": "Προσθήκη απόδειξης",
+    "removeReceipt": "Αφαίρεση απόδειξης",
+    "viewReceipt": "Προβολή απόδειξης",
+    "receiptImage": "Εικόνα απόδειξης",
+    "loadError": "Αποτυχία φόρτωσης απόδειξης",
+    "uploadError": "Αποτυχία μεταφόρτωσης απόδειξης",
+    "invalidType": "Μη έγκυρος τύπος αρχείου. Χρησιμοποιήστε JPEG, PNG, WebP ή HEIC",
+    "fileTooLarge": "Το αρχείο είναι πολύ μεγάλο. Μέγιστο μέγεθος 10MB",
+    "changeReceipt": "Αλλαγή απόδειξης"
   }
 }

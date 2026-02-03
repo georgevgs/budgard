@@ -1,6 +1,16 @@
 import * as z from 'zod';
 import { parseCurrencyInput } from '@/lib/utils';
 
+// Receipt validation constants
+export const RECEIPT_ALLOWED_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/heic',
+  'image/heif',
+];
+export const RECEIPT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 // Shared regex patterns
 const SAFE_STRING = /^[\p{L}\p{N}\s.,!?-]*$/u; // Unicode letters, numbers, basic punctuation
 const AMOUNT_PATTERN = /^\d{1,3}(?:\.\d{3})*(?:,\d{0,2})?$/;

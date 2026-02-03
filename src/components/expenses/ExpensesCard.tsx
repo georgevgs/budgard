@@ -12,7 +12,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { MoreVertical, Repeat } from 'lucide-react';
+import { Camera, MoreVertical, Repeat } from 'lucide-react';
+import ReceiptViewer from '@/components/expenses/ReceiptViewer';
 import CategoryBadge from '@/components/categories/CategoryBadge';
 import {
   DropdownMenu,
@@ -34,6 +35,7 @@ const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
   const { t } = useTranslation();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
 
   const handleDeleteClick = () => {
     setDropdownOpen(false);
@@ -64,6 +66,16 @@ const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
                     <Repeat className="h-3 w-3" />
                     <span>{t('expenses.recurring')}</span>
                   </div>
+                )}
+                {expense.receipt_path && (
+                  <button
+                    type="button"
+                    onClick={() => setShowReceipt(true)}
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Camera className="h-3 w-3" />
+                    <span>{t('receipt.receipt')}</span>
+                  </button>
                 )}
               </div>
               <p className="text-sm text-muted-foreground">
@@ -132,6 +144,14 @@ const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {expense.receipt_path && (
+        <ReceiptViewer
+          receiptPath={expense.receipt_path}
+          open={showReceipt}
+          onClose={() => setShowReceipt(false)}
+        />
+      )}
     </>
   );
 };

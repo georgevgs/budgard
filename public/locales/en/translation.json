@@ -197,5 +197,17 @@
     "successMessage": "Successfully imported {{count}} expense(s)",
     "importError": "Failed to import expenses",
     "importCSV": "Import CSV"
+  },
+  "receipt": {
+    "receipt": "Receipt",
+    "addReceipt": "Add receipt",
+    "removeReceipt": "Remove receipt",
+    "viewReceipt": "View receipt",
+    "receiptImage": "Receipt image",
+    "loadError": "Failed to load receipt",
+    "uploadError": "Failed to upload receipt",
+    "invalidType": "Invalid file type. Please use JPEG, PNG, WebP, or HEIC",
+    "fileTooLarge": "File is too large. Maximum size is 10MB",
+    "changeReceipt": "Change receipt"
   }
 }

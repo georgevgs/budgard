@@ -30,6 +30,7 @@
     "@radix-ui/react-toast": "^1.2.6",
     "@supabase/supabase-js": "^2.39.8",
     "apexcharts": "^4.3.0",
+    "browser-image-compression": "^2.0.2",
     "caniuse-lite": "^1.0.30001751",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
