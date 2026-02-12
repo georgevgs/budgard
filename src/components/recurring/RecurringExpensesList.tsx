@@ -349,13 +349,9 @@ const RecurringExpensesList = () => {
           setIsFormOpen(false);
           setSelectedExpense(undefined);
         }}
-        modal={false}
       >
         <DialogContent
-          className="sm:max-w-[425px] p-0 overflow-hidden rounded-lg"
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          onPointerDownOutside={(e) => e.preventDefault()}
-          onInteractOutside={(e) => e.preventDefault()}
+          className="sm:max-w-[500px] p-0 gap-0"
         >
           <RecurringExpenseForm
             expense={selectedExpense}

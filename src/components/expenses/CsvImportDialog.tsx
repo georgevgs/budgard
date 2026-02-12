@@ -196,18 +196,25 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className="sm:max-w-[550px] max-h-[85vh] overflow-hidden flex flex-col"
+        className="sm:max-w-[550px] p-0 gap-0"
         aria-describedby={undefined}
       >
-        <DialogHeader>
-          <DialogTitle>{t('import.title')}</DialogTitle>
-        </DialogHeader>
+        {/* Mobile drag handle */}
+        <div className="flex justify-center pt-3 pb-2 sm:hidden">
+          <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
+        </div>
 
-        {/* Step 1: Upload */}
-        {step === 'upload' && (
+        {/* Scrollable content */}
+        <div className="overflow-y-auto flex-1 px-4 sm:px-6 overscroll-contain" style={{ touchAction: 'pan-y' }}>
+          <DialogHeader className="pb-4 pt-2 sm:pt-0">
+            <DialogTitle className="text-xl">{t('import.title')}</DialogTitle>
+          </DialogHeader>
+
+          {/* Step 1: Upload */}
+          {step === 'upload' && (
           <div
             className={`
-              border-2 border-dashed rounded-lg p-8 text-center transition-colors
+              border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-colors mb-4
               ${isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'}
             `}
             onDragOver={(e) => {
@@ -236,11 +243,11 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
               </Button>
             </label>
           </div>
-        )}
+          )}
 
-        {/* Step 2: Column Mapping */}
-        {step === 'mapping' && csvPreview && (
-          <div className="flex-1 overflow-hidden flex flex-col space-y-4">
+          {/* Step 2: Column Mapping */}
+          {step === 'mapping' && csvPreview && (
+          <div className="flex flex-col space-y-4 pb-4">
             <p className="text-sm text-muted-foreground">
               {t('import.mappingDescription')}
             </p>
@@ -339,11 +346,11 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
             </div>
 
             {/* Sample Data Preview */}
-            <div className="flex-1 overflow-hidden flex flex-col">
+            <div className="flex flex-col">
               <p className="text-sm font-medium mb-2">
                 {t('import.sampleData', { count: csvPreview.totalRows })}
               </p>
-              <div className="flex-1 overflow-auto border rounded-md text-xs">
+              <div className="overflow-auto border rounded-md text-xs max-h-48">
                 <table className="w-full">
                   <thead className="bg-muted sticky top-0">
                     <tr>
@@ -390,11 +397,11 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
               </Button>
             </div>
           </div>
-        )}
+          )}
 
-        {/* Step 3: Preview */}
-        {step === 'preview' && (
-          <div className="flex-1 overflow-hidden flex flex-col space-y-4">
+          {/* Step 3: Preview */}
+          {step === 'preview' && (
+          <div className="flex flex-col space-y-4 pb-4">
             {/* Summary */}
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-2 text-sm">
@@ -448,9 +455,9 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
 
             {/* Preview Table */}
             {validRows.length > 0 && (
-              <div className="flex-1 overflow-hidden flex flex-col">
+              <div className="flex flex-col">
                 <p className="text-sm font-medium mb-2">{t('import.preview')}</p>
-                <div className="flex-1 overflow-auto border rounded-md">
+                <div className="overflow-auto border rounded-md max-h-64">
                   <table className="w-full text-sm">
                     <thead className="bg-muted sticky top-0">
                       <tr>
@@ -514,17 +521,18 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
               </Button>
             </div>
           </div>
-        )}
+          )}
 
-        {/* Step 4: Importing */}
-        {step === 'importing' && (
-          <div className="py-8 text-center">
+          {/* Step 4: Importing */}
+          {step === 'importing' && (
+          <div className="py-8 text-center pb-4">
             <FileText className="h-10 w-10 mx-auto mb-4 text-muted-foreground animate-pulse" />
             <p className="text-sm text-muted-foreground">
               {t('import.importing', { count: validRows.length })}
             </p>
           </div>
-        )}
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -148,20 +148,29 @@ const RecurringExpenseForm = ({
   };
 
   return (
-    <div className="p-6">
-      <DialogHeader>
-        <DialogTitle>{expense ? 'Edit' : 'Add'} Recurring Expense</DialogTitle>
-        <DialogDescription>
-          Set up an expense that will automatically repeat based on the
-          frequency you choose.
-        </DialogDescription>
-      </DialogHeader>
+    <div className="flex flex-col max-h-full">
+      {/* Mobile drag handle */}
+      <div className="flex justify-center pt-3 pb-2 sm:hidden">
+        <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
+      </div>
 
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-4 pt-4"
-        >
+      {/* Scrollable content */}
+      <div className="overflow-y-auto flex-1 px-4 sm:px-6 overscroll-contain" style={{ touchAction: 'pan-y' }}>
+        <DialogHeader className="pb-4">
+          <DialogTitle className="text-xl">
+            {expense ? 'Edit' : 'Add'} Recurring Expense
+          </DialogTitle>
+          <DialogDescription>
+            Set up an expense that will automatically repeat based on the
+            frequency you choose.
+          </DialogDescription>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4 pb-4"
+          >
           <FormField
             control={form.control}
             name="amount"
@@ -382,7 +391,7 @@ const RecurringExpenseForm = ({
             </div>
           )}
 
-          <div className="flex justify-end gap-2 pt-4">
+          <div className="flex justify-end gap-2 pt-4 pb-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
@@ -396,6 +405,7 @@ const RecurringExpenseForm = ({
           </div>
         </form>
       </Form>
+      </div>
     </div>
   );
 };
