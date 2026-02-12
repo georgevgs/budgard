@@ -4,7 +4,7 @@
     "logoAlt": "Budgard Logo",
     "toggleTheme": "Toggle theme",
     "openMenu": "Open menu",
-    "actionUndone": "This action cannot be undone.",
+    "actionUndone": " This action cannot be undone.",
     "add": "Add",
     "edit": "Edit",
     "delete": "Delete",

@@ -119,8 +119,8 @@ const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
       </Card>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="sm:max-w-[400px] rounded-lg">
-          <AlertDialogHeader className="mb-4">
+        <AlertDialogContent className="sm:max-w-[425px]">
+          <AlertDialogHeader>
             <AlertDialogTitle>{t('expenses.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
               {t('expenses.deleteConfirmation')}
@@ -128,19 +128,19 @@ const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
               {t('common.actionUndone')}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex flex-row justify-end gap-2">
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t('common.cancel')}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 onDelete();
                 setShowDeleteDialog(false);
               }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 flex-1"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {t('common.delete')}
             </AlertDialogAction>
-            <AlertDialogCancel className="mt-0 flex-1">
-              {t('common.cancel')}
-            </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

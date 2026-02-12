@@ -91,19 +91,26 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
   };
 
   return (
-    <div className="p-6">
-      <DialogHeader>
-        <DialogTitle>
-          {t(expense ? 'expenses.editExpense' : 'expenses.addExpense')}
-        </DialogTitle>
-        <DialogDescription>{t('expenses.formDescription')}</DialogDescription>
-      </DialogHeader>
+    <div className="flex flex-col max-h-full">
+      {/* Mobile drag handle */}
+      <div className="flex justify-center pt-3 pb-2 sm:hidden">
+        <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
+      </div>
 
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-4 pt-4"
-        >
+      {/* Scrollable content */}
+      <div className="overflow-y-auto flex-1 px-4 sm:px-6 overscroll-contain" style={{ touchAction: 'pan-y' }}>
+        <DialogHeader className="pb-4">
+          <DialogTitle className="text-xl">
+            {t(expense ? 'expenses.editExpense' : 'expenses.addExpense')}
+          </DialogTitle>
+          <DialogDescription>{t('expenses.formDescription')}</DialogDescription>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4 pb-4"
+          >
           <FormField
             control={form.control}
             name="amount"
@@ -238,7 +245,7 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
             onRemoveExisting={() => setRemoveExistingReceipt(true)}
           />
 
-          <div className="flex gap-3 justify-end pt-2">
+          <div className="flex gap-3 justify-end pt-2 pb-2">
             <Button type="button" variant="outline" onClick={onClose}>
               {t('common.cancel')}
             </Button>
@@ -250,6 +257,7 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
           </div>
         </form>
       </Form>
+      </div>
     </div>
   );
 };

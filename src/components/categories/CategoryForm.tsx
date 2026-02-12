@@ -67,29 +67,36 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
   const submitButtonText = getSubmitButtonText(form.formState.isSubmitting);
 
   return (
-    <div className="space-y-6">
-      <DialogHeader>
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={onBack}
-            className="h-8 w-8 p-0"
-            disabled={isDisabled}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Go back</span>
-          </Button>
-          <DialogTitle>Add New Category</DialogTitle>
-        </div>
-        <DialogDescription>
-          Create a new category to organize your expenses
-        </DialogDescription>
-      </DialogHeader>
+    <div className="flex flex-col max-h-full">
+      {/* Mobile drag handle */}
+      <div className="flex justify-center pt-3 pb-2 sm:hidden">
+        <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
+      </div>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      {/* Scrollable content */}
+      <div className="overflow-y-auto flex-1 px-4 sm:px-6 py-4 sm:py-2 overscroll-contain" style={{ touchAction: 'pan-y' }}>
+        <DialogHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={onBack}
+              className="h-8 w-8 p-0"
+              disabled={isDisabled}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Go back</span>
+            </Button>
+            <DialogTitle className="text-xl">Add New Category</DialogTitle>
+          </div>
+          <DialogDescription>
+            Create a new category to organize your expenses
+          </DialogDescription>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 pb-4">
           <FormField
             control={form.control}
             name="name"
@@ -138,7 +145,7 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
             )}
           />
 
-          <div className="flex gap-3 justify-end pt-2">
+          <div className="flex gap-3 justify-end pt-2 pb-2">
             <Button
               type="button"
               variant="outline"
@@ -153,6 +160,7 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
           </div>
         </form>
       </Form>
+      </div>
     </div>
   );
 };
