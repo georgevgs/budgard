@@ -11,6 +11,10 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
+
+    .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
 }
 
 @layer base {
@@ -99,11 +103,56 @@
 }
 
 @layer base {
+    html {
+        overscroll-behavior: none;
+    }
+
     * {
         @apply border-border;
     }
 
     body {
         @apply bg-background text-foreground;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Prevent text selection on UI shell, allow on content */
+    button,
+    nav,
+    header {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    /* Frosted glass status bar overlay for iOS standalone */
+    @supports (padding-top: env(safe-area-inset-top)) {
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: env(safe-area-inset-top);
+            background: hsl(var(--background) / 0.7);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            backdrop-filter: saturate(180%) blur(20px);
+            z-index: 9999;
+        }
+    }
+
+    /* iOS-native touch feedback for tappable elements */
+    button,
+    a,
+    [role='button'] {
+        transition: transform 0.1s ease;
+    }
+
+    button:active,
+    a:active,
+    [role='button']:active {
+        transform: scale(0.97);
     }
 }

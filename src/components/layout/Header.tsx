@@ -40,6 +40,28 @@ const applyThemeToDocument = (theme: Theme): void => {
   } else {
     root.classList.remove('dark');
   }
+
+  // Update meta theme-color to match the current theme's background
+  requestAnimationFrame(() => {
+    const bgHsl = getComputedStyle(root).getPropertyValue('--background').trim();
+    if (bgHsl) {
+      const themeColorMeta = document.querySelector(
+        'meta[name="theme-color"]:not([media])',
+      );
+      // Remove media-specific tags and use a single dynamic one
+      document
+        .querySelectorAll('meta[name="theme-color"][media]')
+        .forEach((el) => el.remove());
+      if (themeColorMeta) {
+        themeColorMeta.setAttribute('content', `hsl(${bgHsl})`);
+      } else {
+        const meta = document.createElement('meta');
+        meta.name = 'theme-color';
+        meta.content = `hsl(${bgHsl})`;
+        document.head.appendChild(meta);
+      }
+    }
+  });
 };
 
 const Header = () => {
@@ -82,7 +104,7 @@ const Header = () => {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background">
+    <header className="sticky top-0 z-50 w-full border-b bg-background pt-safe-t">
       <div className="container flex h-14 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <img

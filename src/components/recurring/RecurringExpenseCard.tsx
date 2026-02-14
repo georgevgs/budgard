@@ -48,14 +48,22 @@ const RecurringExpenseCard = ({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const blurActiveElement = () => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  };
+
   const handleDeleteClick = () => {
+    blurActiveElement();
     setDropdownOpen(false);
     setTimeout(() => setShowDeleteDialog(true), 0);
   };
 
   const handleEditClick = () => {
+    blurActiveElement();
     setDropdownOpen(false);
-    onEdit(expense);
+    setTimeout(() => onEdit(expense), 0);
   };
 
   return (
