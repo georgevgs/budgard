@@ -123,8 +123,8 @@ const RecurringExpenseCard = ({
       </Card>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="sm:max-w-[425px]">
-          <AlertDialogHeader>
+        <AlertDialogContent className="sm:max-w-[425px]" onOpenChange={setShowDeleteDialog}>
+          <AlertDialogHeader data-draggable-area>
             <AlertDialogTitle>Delete Recurring Expense</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this recurring expense? This will

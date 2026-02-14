@@ -119,8 +119,8 @@ const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
       </Card>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="sm:max-w-[425px]">
-          <AlertDialogHeader>
+        <AlertDialogContent className="sm:max-w-[425px]" onOpenChange={setShowDeleteDialog}>
+          <AlertDialogHeader data-draggable-area>
             <AlertDialogTitle>{t('expenses.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
               {t('expenses.deleteConfirmation')}
