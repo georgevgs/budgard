@@ -37,13 +37,20 @@ const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
 
+  const blurActiveElement = () => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  };
+
   const handleDeleteClick = () => {
+    blurActiveElement();
     setDropdownOpen(false);
-    // Small delay to let dropdown close before opening dialog
     setTimeout(() => setShowDeleteDialog(true), 0);
   };
 
   const handleEditClick = () => {
+    blurActiveElement();
     setDropdownOpen(false);
     setTimeout(() => onEdit(), 0);
   };

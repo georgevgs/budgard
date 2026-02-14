@@ -25,37 +25,34 @@ const NavTabs = () => {
   ];
 
   return (
-    <div className="w-full border-b bg-background sticky top-14 z-40">
-      <div className="container mx-auto px-4">
-        <nav
-          className="overflow-x-auto no-scrollbar flex justify-center"
-          aria-label={t('navigation.ariaLabel')}
-        >
-          <div className="inline-flex whitespace-nowrap">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <NavLink
-                  key={tab.path}
-                  to={tab.path}
-                  className={({ isActive }) =>
-                    cn(
-                      'flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors min-w-[120px]',
-                      isActive
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-muted-foreground hover:text-foreground',
-                    )
-                  }
-                >
-                  <Icon className="h-4 w-4 flex-shrink-0" />
-                  <span>{tab.name}</span>
-                </NavLink>
-              );
-            })}
-          </div>
-        </nav>
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60"
+      aria-label={t('navigation.ariaLabel')}
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
+      <div className="flex items-center justify-around">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <NavLink
+              key={tab.path}
+              to={tab.path}
+              className={({ isActive }) =>
+                cn(
+                  'flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors',
+                  isActive
+                    ? 'text-primary'
+                    : 'text-muted-foreground',
+                )
+              }
+            >
+              <Icon className="h-5 w-5" />
+              <span>{tab.name}</span>
+            </NavLink>
+          );
+        })}
       </div>
-    </div>
+    </nav>
   );
 };
 

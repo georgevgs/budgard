@@ -4,6 +4,18 @@ export default {
 	content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
 	theme: {
     	extend: {
+    		padding: {
+    			'safe-t': 'env(safe-area-inset-top)',
+    			'safe-r': 'env(safe-area-inset-right)',
+    			'safe-b': 'env(safe-area-inset-bottom)',
+    			'safe-l': 'env(safe-area-inset-left)',
+    		},
+    		margin: {
+    			'safe-t': 'env(safe-area-inset-top)',
+    			'safe-r': 'env(safe-area-inset-right)',
+    			'safe-b': 'env(safe-area-inset-bottom)',
+    			'safe-l': 'env(safe-area-inset-left)',
+    		},
     		borderRadius: {
     			lg: 'var(--radius)',
     			md: 'calc(var(--radius) - 2px)',
