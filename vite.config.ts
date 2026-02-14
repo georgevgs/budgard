@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "icon-192x192.png", "icon-512x512.png", "locales/**/*.json"],
+      includeAssets: ["favicon.ico", "icon-192x192.png", "icon-512x512.png", "apple-touch-icon.png"],
       manifest: {
         name: "Budgard",
         short_name: "Budgard",

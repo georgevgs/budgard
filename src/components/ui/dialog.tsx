@@ -77,6 +77,7 @@ const DialogContent = React.forwardRef<
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onOpenAutoFocus={(e) => e.preventDefault()}
           className={cn(
             'fixed z-50 grid w-full gap-4 border bg-background shadow-lg duration-200',
             // Mobile: drawer from bottom with rounded top corners

@@ -14,7 +14,10 @@ type LoginModalProps = {
 
 const LoginModal = ({ open, onOpenChange }: LoginModalProps) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="sm:max-w-[425px] p-0 gap-0" onOpenChange={onOpenChange}>
+    <DialogContent
+      className="sm:max-w-[425px] p-0 gap-0"
+      onOpenChange={onOpenChange}
+    >
       {/* Mobile drag handle */}
       <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
         <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />

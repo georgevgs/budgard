@@ -67,7 +67,10 @@ const BudgetForm = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[400px] p-0 gap-0" onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        className="sm:max-w-[400px] p-0 gap-0"
+        onOpenChange={(open) => !open && onClose()}
+      >
         {/* Mobile drag handle */}
         <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
           <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
