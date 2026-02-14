@@ -93,13 +93,13 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
   return (
     <div className="flex flex-col max-h-full">
       {/* Mobile drag handle */}
-      <div className="flex justify-center pt-3 pb-2 sm:hidden">
+      <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
         <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
       </div>
 
       {/* Scrollable content */}
       <div className="overflow-y-auto flex-1 px-4 sm:px-6 overscroll-contain" style={{ touchAction: 'pan-y' }}>
-        <DialogHeader className="pb-4">
+        <DialogHeader className="pb-4" data-draggable-area>
           <DialogTitle className="text-xl">
             {t(expense ? 'expenses.editExpense' : 'expenses.addExpense')}
           </DialogTitle>

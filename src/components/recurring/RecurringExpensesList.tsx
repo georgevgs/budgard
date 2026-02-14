@@ -352,6 +352,10 @@ const RecurringExpensesList = () => {
       >
         <DialogContent
           className="sm:max-w-[500px] p-0 gap-0"
+          onOpenChange={() => {
+            setIsFormOpen(false);
+            setSelectedExpense(undefined);
+          }}
         >
           <RecurringExpenseForm
             expense={selectedExpense}
@@ -369,8 +373,11 @@ const RecurringExpensesList = () => {
         open={expenseToDelete !== null}
         onOpenChange={(open) => !open && setExpenseToDelete(null)}
       >
-        <AlertDialogContent className="sm:max-w-[425px]">
-          <AlertDialogHeader>
+        <AlertDialogContent
+          className="sm:max-w-[425px]"
+          onOpenChange={(open) => !open && setExpenseToDelete(null)}
+        >
+          <AlertDialogHeader data-draggable-area>
             <AlertDialogTitle>Delete Recurring Expense</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this recurring expense? This

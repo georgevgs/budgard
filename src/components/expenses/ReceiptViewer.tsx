@@ -45,15 +45,21 @@ const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>{t('receipt.viewReceipt')}</DialogTitle>
-          <DialogDescription className="sr-only">
-            {t('receipt.receiptImage')}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[600px] p-0 gap-0" onOpenChange={(v) => !v && onClose()}>
+        {/* Mobile drag handle */}
+        <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
+          <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
+        </div>
 
-        <div className="flex items-center justify-center min-h-[200px]">
+        <div className="px-6 pb-6 pt-2 sm:pt-6">
+          <DialogHeader data-draggable-area>
+            <DialogTitle>{t('receipt.viewReceipt')}</DialogTitle>
+            <DialogDescription className="sr-only">
+              {t('receipt.receiptImage')}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex items-center justify-center min-h-[200px] mt-4">
           {loading && <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />}
           {error && (
             <p className="text-sm text-destructive">{t('receipt.loadError')}</p>
@@ -66,6 +72,7 @@ const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
               onError={() => setError(true)}
             />
           )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

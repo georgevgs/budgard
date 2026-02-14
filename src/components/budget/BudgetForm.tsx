@@ -67,21 +67,27 @@ const BudgetForm = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[400px]">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditing ? t('budget.editBudget') : t('budget.setBudget')}
-          </DialogTitle>
-          <DialogDescription>
-            {isEditing
-              ? t('budget.updateDescription', {
-                  amount: formatCurrency(currentBudget),
-                })
-              : t('budget.setDescription')}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[400px] p-0 gap-0" onOpenChange={(open) => !open && onClose()}>
+        {/* Mobile drag handle */}
+        <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
+          <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
+        </div>
 
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+        <div className="px-6 pb-6 pt-2 sm:pt-6">
+          <DialogHeader className="pb-4" data-draggable-area>
+            <DialogTitle>
+              {isEditing ? t('budget.editBudget') : t('budget.setBudget')}
+            </DialogTitle>
+            <DialogDescription>
+              {isEditing
+                ? t('budget.updateDescription', {
+                    amount: formatCurrency(currentBudget),
+                  })
+                : t('budget.setDescription')}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="budget-amount">{t('budget.amountLabel')}</Label>
             <div className="relative">
@@ -116,6 +122,7 @@ const BudgetForm = ({
             </Button>
           </div>
         </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

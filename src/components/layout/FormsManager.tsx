@@ -43,6 +43,7 @@ const FormsManager = ({
         <DialogContent
           className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
           aria-describedby="expense-form-description"
+          onOpenChange={onClose}
         >
           <div id="expense-form-description" className="sr-only">
             {t('forms.expenseDescription', {
@@ -68,6 +69,7 @@ const FormsManager = ({
         <DialogContent
           className="sm:max-w-[500px] p-0 gap-0"
           aria-describedby="category-form-description"
+          onOpenChange={onClose}
         >
           <div id="category-form-description" className="sr-only">
             {t('forms.categoryDescription')}
