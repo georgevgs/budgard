@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,22 +19,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { MoreVertical } from 'lucide-react';
+import { MoreVertical, Clock } from 'lucide-react';
 import CategoryBadge from '@/components/categories/CategoryBadge';
 import { format } from 'date-fns';
 import { formatCurrency } from '@/lib/utils';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
-const frequencyLabels = {
+const frequencyLabels: Record<string, string> = {
   weekly: 'Weekly',
   biweekly: 'Every 2 weeks',
   monthly: 'Monthly',
   quarterly: 'Quarterly',
   yearly: 'Yearly',
-} as const;
+};
 
 interface RecurringExpenseCardProps {
   expense: RecurringExpense;
+  nextOccurrence: Date | null;
+  isOverdue: boolean;
   onEdit: (expense: RecurringExpense) => void;
   onDelete: (id: string) => void;
   onToggle: (id: string, active: boolean) => void;
@@ -41,6 +44,8 @@ interface RecurringExpenseCardProps {
 
 const RecurringExpenseCard = ({
   expense,
+  nextOccurrence,
+  isOverdue,
   onEdit,
   onDelete,
   onToggle,
@@ -54,61 +59,64 @@ const RecurringExpenseCard = ({
     }
   };
 
-  const handleDeleteClick = () => {
-    blurActiveElement();
-    setDropdownOpen(false);
-    setTimeout(() => setShowDeleteDialog(true), 0);
-  };
-
   const handleEditClick = () => {
     blurActiveElement();
     setDropdownOpen(false);
     setTimeout(() => onEdit(expense), 0);
   };
 
+  const handleDeleteClick = () => {
+    blurActiveElement();
+    setDropdownOpen(false);
+    setTimeout(() => setShowDeleteDialog(true), 0);
+  };
+
   return (
     <>
-      <Card className="rounded-lg transition-colors hover:bg-accent">
+      <Card
+        className={`transition-opacity ${!expense.active ? 'opacity-60 bg-muted/30' : ''}`}
+      >
         <CardContent className="p-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-grow min-w-0">
-              <p className="font-medium text-base truncate">
+          <div className="flex items-center justify-between gap-3">
+            {/* Left side - Main info */}
+            <div className="flex-1 min-w-0">
+              <p className="font-medium truncate">
                 {expense.description}
               </p>
-              {expense.category && (
-                <div className="mt-1 mb-1">
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                {expense.category && (
                   <CategoryBadge category={expense.category} />
-                </div>
-              )}
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span>{frequencyLabels[expense.frequency]}</span>
-                <span>•</span>
-                <span>{formatCurrency(expense.amount)}</span>
-                {expense.end_date && (
-                  <>
-                    <span>•</span>
-                    <span>
-                      Until {format(new Date(expense.end_date), 'MMM d, yyyy')}
-                    </span>
-                  </>
+                )}
+                <Badge variant="secondary" className="text-xs">
+                  {frequencyLabels[expense.frequency] || expense.frequency}
+                </Badge>
+                {isOverdue && expense.active && (
+                  <Badge variant="destructive" className="text-xs">
+                    Due
+                  </Badge>
                 )}
               </div>
+              <p className="text-base font-semibold mt-1">
+                {formatCurrency(expense.amount)}
+              </p>
+              {nextOccurrence && expense.active && (
+                <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  <span>Next: {format(nextOccurrence, 'MMM d, yyyy')}</span>
+                </div>
+              )}
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* Right side - Controls */}
+            <div className="flex items-center gap-2 shrink-0">
               <Switch
                 checked={expense.active}
                 onCheckedChange={(checked) => onToggle(expense.id, checked)}
-                aria-label={`Toggle ${expense.description} recurring expense`}
+                aria-label={`Toggle ${expense.description}`}
               />
-
               <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                  >
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
                     <MoreVertical className="h-4 w-4" />
                     <span className="sr-only">Open menu</span>
                   </Button>
@@ -131,12 +139,15 @@ const RecurringExpenseCard = ({
       </Card>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="sm:max-w-[425px]" onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent
+          className="sm:max-w-[425px]"
+          onOpenChange={setShowDeleteDialog}
+        >
           <AlertDialogHeader data-draggable-area>
             <AlertDialogTitle>Delete Recurring Expense</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this recurring expense? This will
-              not delete previously created expenses.
+              Are you sure you want to delete this recurring expense? This
+              won&apos;t affect previously generated expenses.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
