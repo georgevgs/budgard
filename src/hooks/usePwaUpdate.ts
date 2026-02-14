@@ -4,11 +4,8 @@ import { useToast } from '@/hooks/useToast';
 
 export function usePwaUpdate() {
   const { needRefresh, updateServiceWorker } = useRegisterSW({
-    onRegistered(registration) {
-      console.log('SW Registered:', registration);
-    },
     onRegisterError(error) {
-      console.log('SW registration error', error);
+      console.error('SW registration error:', error);
     },
   });
 

@@ -12,9 +12,6 @@
         scrollbar-width: none;
     }
 
-    .pb-safe {
-        padding-bottom: env(safe-area-inset-bottom);
-    }
 }
 
 @layer base {
