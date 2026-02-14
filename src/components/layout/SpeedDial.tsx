@@ -17,6 +17,10 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
 
   const handleAction = (callback: () => void) => {
     setIsOpen(false);
+    // Blur the active element to release focus before modal opens
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     callback();
   };
 
@@ -31,14 +35,14 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
         />
       )}
 
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col-reverse items-end gap-2 pb-safe pointer-events-none">
+      <div className="fixed bottom-8 right-4 z-50 flex flex-col items-end gap-2 pb-safe pointer-events-none">
         {/* Action Buttons */}
         <div
           className={cn(
             'flex flex-col gap-2 items-end transition-all duration-200 scale-90 origin-bottom pointer-events-auto',
             isOpen
               ? 'opacity-100 translate-y-0'
-              : 'opacity-0 translate-y-4 pointer-events-none',
+              : 'opacity-0 -translate-y-4 pointer-events-none',
           )}
         >
           {/* Add Expense Button */}
