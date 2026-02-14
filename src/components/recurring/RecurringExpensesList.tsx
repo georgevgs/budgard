@@ -190,16 +190,16 @@ const RecurringExpensesList = () => {
     <div className="container max-w-4xl mx-auto p-4 space-y-4">
       {/* Header with summary */}
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
             <h2 className="text-lg font-semibold">Recurring Expenses</h2>
             {activeExpenses.length > 0 && (
               <p className="text-sm text-muted-foreground">
-                ~{formatCurrency(monthlyTotal)}/month from {activeExpenses.length} active
+                ~{formatCurrency(monthlyTotal)} / month from {activeExpenses.length} active
               </p>
             )}
           </div>
-          <Button onClick={() => setIsFormOpen(true)} size="sm">
+          <Button onClick={() => setIsFormOpen(true)} size="sm" className="shrink-0">
             <Plus className="h-4 w-4 mr-2" />
             Add Recurring
           </Button>
@@ -237,10 +237,10 @@ const RecurringExpensesList = () => {
                   <div className="flex items-start justify-between gap-4">
                     {/* Left side - Main info */}
                     <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate mb-1">
+                        {expense.description}
+                      </p>
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <span className="font-medium truncate">
-                          {expense.description}
-                        </span>
                         {expense.category && (
                           <CategoryBadge category={expense.category} />
                         )}
