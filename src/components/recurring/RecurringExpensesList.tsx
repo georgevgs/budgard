@@ -1,38 +1,14 @@
 import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
-  Plus,
-  MoreVertical,
-  Calendar,
-  Clock,
-  Repeat,
-} from 'lucide-react';
+import { Plus, Repeat } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { format, addWeeks, addMonths, addYears } from 'date-fns';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { RecurringExpenseFormData } from '@/lib/validations';
 import RecurringExpenseForm from '@/components/recurring/RecurringExpenseForm';
-import CategoryBadge from '@/components/categories/CategoryBadge';
+import RecurringExpenseCard from '@/components/recurring/RecurringExpenseCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { formatCurrency, parseCurrencyInput } from '@/lib/utils';
@@ -80,25 +56,11 @@ function calculateNextOccurrence(expense: RecurringExpense): Date | null {
   return nextDate;
 }
 
-// Helper to format frequency for display
-function formatFrequency(frequency: string): string {
-  const labels: Record<string, string> = {
-    weekly: 'Weekly',
-    biweekly: 'Every 2 weeks',
-    monthly: 'Monthly',
-    quarterly: 'Quarterly',
-    yearly: 'Yearly',
-  };
-  return labels[frequency] || frequency;
-}
-
 const RecurringExpensesList = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<
     RecurringExpense | undefined
   >(undefined);
-  const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const { recurringExpenses, categories, isLoading } = useData();
   const { session } = useAuth();
   const {
@@ -133,25 +95,17 @@ const RecurringExpensesList = () => {
   };
 
   const handleEditExpense = (expense: RecurringExpense) => {
-    setOpenDropdownId(null);
     setSelectedExpense(expense);
-    setTimeout(() => setIsFormOpen(true), 0);
-  };
-
-  const handleDeleteClick = (expenseId: string) => {
-    setOpenDropdownId(null);
-    setTimeout(() => setExpenseToDelete(expenseId), 0);
-  };
-
-  const handleDeleteExpense = async () => {
-    if (expenseToDelete) {
-      await deleteRecurringExpense(expenseToDelete);
-      setExpenseToDelete(null);
-    }
+    setIsFormOpen(true);
   };
 
   const handleToggle = async (expenseId: string, active: boolean) => {
     await toggleRecurringExpense(expenseId, active);
+  };
+
+  const handleFormClose = () => {
+    setIsFormOpen(false);
+    setSelectedExpense(undefined);
   };
 
   // Calculate summary stats
@@ -226,175 +180,36 @@ const RecurringExpensesList = () => {
         ) : (
           recurringExpenses.map((expense) => {
             const nextOccurrence = calculateNextOccurrence(expense);
-            const isOverdue = nextOccurrence && nextOccurrence <= new Date();
+            const isOverdue = !!(nextOccurrence && nextOccurrence <= new Date());
 
             return (
-              <Card
+              <RecurringExpenseCard
                 key={expense.id}
-                className={`transition-opacity ${!expense.active ? 'opacity-60 bg-muted/30' : ''}`}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-4">
-                    {/* Left side - Main info */}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate mb-1">
-                        {expense.description}
-                      </p>
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        {expense.category && (
-                          <CategoryBadge category={expense.category} />
-                        )}
-                        <Badge variant="secondary" className="text-xs">
-                          {formatFrequency(expense.frequency)}
-                        </Badge>
-                        {!expense.active && (
-                          <Badge variant="outline" className="text-xs text-muted-foreground">
-                            Paused
-                          </Badge>
-                        )}
-                        {isOverdue && expense.active && (
-                          <Badge variant="destructive" className="text-xs">
-                            Due
-                          </Badge>
-                        )}
-                      </div>
-
-                      <div className="text-xl font-semibold mb-2">
-                        {formatCurrency(expense.amount)}
-                      </div>
-
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3.5 w-3.5" />
-                          <span>
-                            Started {format(new Date(expense.start_date), 'MMM d, yyyy')}
-                          </span>
-                        </div>
-                        {expense.end_date && (
-                          <div className="flex items-center gap-1">
-                            <span>
-                              Ends {format(new Date(expense.end_date), 'MMM d, yyyy')}
-                            </span>
-                          </div>
-                        )}
-                        {nextOccurrence && expense.active && (
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5" />
-                            <span>
-                              Next: {format(nextOccurrence, 'MMM d, yyyy')}
-                            </span>
-                          </div>
-                        )}
-                        {expense.last_generated_date && (
-                          <div className="flex items-center gap-1 text-xs">
-                            <span className="text-muted-foreground/70">
-                              Last: {format(new Date(expense.last_generated_date), 'MMM d')}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Right side - Controls */}
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">
-                          {expense.active ? 'Active' : 'Paused'}
-                        </span>
-                        <Switch
-                          checked={expense.active}
-                          onCheckedChange={(checked) =>
-                            handleToggle(expense.id, checked)
-                          }
-                        />
-                      </div>
-                      <DropdownMenu
-                        open={openDropdownId === expense.id}
-                        onOpenChange={(open) =>
-                          setOpenDropdownId(open ? expense.id : null)
-                        }
-                      >
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreVertical className="h-4 w-4" />
-                            <span className="sr-only">Open menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleEditExpense(expense)}
-                          >
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDeleteClick(expense.id)}
-                            className="text-destructive"
-                          >
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                expense={expense}
+                nextOccurrence={nextOccurrence}
+                isOverdue={isOverdue}
+                onEdit={handleEditExpense}
+                onDelete={deleteRecurringExpense}
+                onToggle={handleToggle}
+              />
             );
           })
         )}
       </div>
 
-      <Dialog
-        open={isFormOpen}
-        onOpenChange={() => {
-          setIsFormOpen(false);
-          setSelectedExpense(undefined);
-        }}
-      >
+      <Dialog open={isFormOpen} onOpenChange={handleFormClose}>
         <DialogContent
           className="sm:max-w-[500px] p-0 gap-0"
-          onOpenChange={() => {
-            setIsFormOpen(false);
-            setSelectedExpense(undefined);
-          }}
+          onOpenChange={handleFormClose}
         >
           <RecurringExpenseForm
             expense={selectedExpense}
             categories={categories}
             onSubmit={handleSubmit}
-            onClose={() => {
-              setIsFormOpen(false);
-              setSelectedExpense(undefined);
-            }}
+            onClose={handleFormClose}
           />
         </DialogContent>
       </Dialog>
-
-      <AlertDialog
-        open={expenseToDelete !== null}
-        onOpenChange={(open) => !open && setExpenseToDelete(null)}
-      >
-        <AlertDialogContent
-          className="sm:max-w-[425px]"
-          onOpenChange={(open) => !open && setExpenseToDelete(null)}
-        >
-          <AlertDialogHeader data-draggable-area>
-            <AlertDialogTitle>Delete Recurring Expense</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this recurring expense? This
-              won&apos;t affect previously generated expenses.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteExpense}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

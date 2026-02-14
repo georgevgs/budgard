@@ -159,13 +159,13 @@ const AnalyticsView = () => {
   const formatAmount = (amount: number) => `${amount.toFixed(2)} €`;
 
   return (
-    <div className="container max-w-6xl mx-auto p-4 space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="container max-w-4xl mx-auto px-4 pt-4 pb-4 space-y-6">
+      <div className="space-y-4">
         <Select
           value={selectedYear.toString()}
           onValueChange={(value) => setSelectedYear(parseInt(value))}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Select year" />
           </SelectTrigger>
           <SelectContent>
@@ -177,18 +177,18 @@ const AnalyticsView = () => {
           </SelectContent>
         </Select>
 
-        <div className="flex gap-4 text-sm text-muted-foreground">
-          <div>
-            <span className="block text-lg text-foreground font-semibold">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="rounded-lg border bg-card p-4">
+            <p className="text-sm text-muted-foreground">Total Spent</p>
+            <p className="text-xl font-semibold">
               {formatAmount(yearlyStats.totalSpent)}
-            </span>
-            Total Spent
+            </p>
           </div>
-          <div>
-            <span className="block text-lg text-foreground font-semibold">
+          <div className="rounded-lg border bg-card p-4">
+            <p className="text-sm text-muted-foreground">Monthly Average</p>
+            <p className="text-xl font-semibold">
               {formatAmount(yearlyStats.monthlyAverage)}
-            </span>
-            Monthly Average
+            </p>
           </div>
         </div>
       </div>
