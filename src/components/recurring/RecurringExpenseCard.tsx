@@ -72,14 +72,14 @@ const RecurringExpenseCard = ({
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-grow min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <p className="font-medium text-base truncate">
-                  {expense.description}
-                </p>
-                {expense.category && (
+              <p className="font-medium text-base truncate">
+                {expense.description}
+              </p>
+              {expense.category && (
+                <div className="mt-1 mb-1">
                   <CategoryBadge category={expense.category} />
-                )}
-              </div>
+                </div>
+              )}
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <span>{frequencyLabels[expense.frequency]}</span>
                 <span>•</span>

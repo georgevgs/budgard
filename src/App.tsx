@@ -43,7 +43,7 @@ const LoadingSpinner = () => (
 const AuthenticatedLayout = () => (
   <>
     <Header />
-    <main className="flex-1 pb-20">
+    <main className="flex-1 pt-2 pb-20">
       <Outlet />
     </main>
     <NavTabs />
