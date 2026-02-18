@@ -262,22 +262,46 @@ const AnalyticsView = () => {
                 No categorized expenses for {selectedYear}
               </div>
             ) : (
-              <div className="space-y-3">
-                {yearlyStats.categoryBreakdown.slice(0, 5).map((category) => (
-                  <div
-                    key={category.name}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: category.color }}
-                      />
-                      <span className="font-medium">{category.name}</span>
+              <div className="space-y-1">
+                {yearlyStats.categoryBreakdown.slice(0, 5).map((category) => {
+                  const total = yearlyStats.categoryBreakdown.reduce(
+                    (sum, c) => sum + c.amount,
+                    0,
+                  );
+                  const percentage =
+                    total > 0 ? (category.amount / total) * 100 : 0;
+                  return (
+                    <div key={category.name} className="py-2">
+                      <div className="flex items-center gap-3 mb-1.5">
+                        <div
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: category.color }}
+                        />
+                        <span className="flex-1 text-sm font-medium truncate">
+                          {category.name}
+                        </span>
+                        <span
+                          className="text-sm font-semibold shrink-0 tabular-nums"
+                          style={{ color: category.color }}
+                        >
+                          {formatAmount(category.amount)}
+                        </span>
+                        <span className="text-xs text-muted-foreground shrink-0 w-8 text-right tabular-nums">
+                          {Math.round(percentage)}%
+                        </span>
+                      </div>
+                      <div className="ml-5 h-1 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-700 ease-out"
+                          style={{
+                            width: `${percentage}%`,
+                            backgroundColor: category.color,
+                          }}
+                        />
+                      </div>
                     </div>
-                    <span>{formatAmount(category.amount)}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>

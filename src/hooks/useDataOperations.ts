@@ -6,6 +6,7 @@ import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import { uploadReceipt, deleteReceipt } from '@/services/receiptService';
+import { haptics } from '@/lib/haptics';
 
 export interface ReceiptOptions {
   receiptFile: File | null;
@@ -110,8 +111,10 @@ export function useDataOperations() {
               ...expenses.filter((e) => e.id !== optimisticExpense.id),
             ];
 
+        haptics.success();
         setExpenses(finalExpenses);
       } catch (error) {
+        haptics.error();
         setExpenses(expenses);
         showErrorToast(`Failed to ${expenseId ? 'update' : 'add'} expense`);
         throw error;
@@ -132,6 +135,7 @@ export function useDataOperations() {
       setExpenses(updatedExpenses);
 
       try {
+        haptics.warning();
         await dataService.deleteExpense(expenseId);
 
         // Fire-and-forget receipt cleanup
@@ -139,6 +143,7 @@ export function useDataOperations() {
           deleteReceipt(expenseToDelete.receipt_path).catch(() => {});
         }
       } catch (error) {
+        haptics.error();
         setExpenses(previousExpenses);
         showErrorToast('Failed to delete expense');
         throw error;
@@ -164,11 +169,13 @@ export function useDataOperations() {
 
       try {
         const savedCategory = await dataService.createCategory(categoryData);
+        haptics.success();
         const finalCategories = [...categories, savedCategory].sort((a, b) =>
           a.name.localeCompare(b.name),
         );
         setCategories(finalCategories);
       } catch (error) {
+        haptics.error();
         setCategories(categories);
         showErrorToast('Failed to add category');
         throw error;
