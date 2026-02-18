@@ -1,8 +1,6 @@
-import { CircleDollarSign, PieChart, Shield } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-
 type Feature = {
-  icon: LucideIcon;
+  icon: string;
+  iconAlt: string;
   title: string;
   description: string;
   delay: string;
@@ -10,19 +8,22 @@ type Feature = {
 
 const features: Feature[] = [
   {
-    icon: CircleDollarSign,
+    icon: '/icons/money-bag.png',
+    iconAlt: 'Money bag',
     title: 'Easy Tracking',
     description: 'Record your expenses quickly and efficiently',
     delay: '0',
   },
   {
-    icon: PieChart,
+    icon: '/icons/bar-chart.png',
+    iconAlt: 'Bar chart',
     title: 'Clear Overview',
     description: 'See where your money goes at a glance',
     delay: '100',
   },
   {
-    icon: Shield,
+    icon: '/icons/shield.png',
+    iconAlt: 'Shield',
     title: 'Secure Data',
     description: 'Your financial data is always protected',
     delay: '200',
@@ -42,9 +43,11 @@ const Features = () => {
             >
               <div className="relative mb-4">
                 <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl transition-opacity duration-500 opacity-0 group-hover:opacity-100" />
-                <div className="relative rounded-full bg-muted p-4 transition-transform duration-500 ease-out animate-float">
-                  <feature.icon className="h-5 w-5 md:h-6 md:w-6 transition-transform duration-300 group-hover:scale-110" />
-                </div>
+                <img
+                  src={feature.icon}
+                  alt={feature.iconAlt}
+                  className="relative h-16 w-16 animate-float drop-shadow-md transition-transform duration-300 group-hover:scale-110"
+                />
               </div>
               <h3 className="text-base font-semibold mb-1.5 transition-colors duration-300 group-hover:text-primary">
                 {feature.title}

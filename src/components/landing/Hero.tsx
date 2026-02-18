@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { ArrowRight, LineChart, WalletCards, Shield } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 type HeroProps = {
   onGetStarted: () => void;
@@ -13,16 +13,28 @@ const Hero = ({ onGetStarted }: HeroProps) => {
 
       <div className="relative px-4 pt-12 mx-auto max-w-7xl">
         <div className="text-center space-y-6 animate-fade-up">
-          {/* Stats Section */}
-          <div className="flex justify-center gap-4 mb-8">
+          {/* Floating 3D Icons */}
+          <div className="flex justify-center gap-6 mb-8">
             <div className="animate-float delay-100">
-              <LineChart className="w-8 h-8 text-primary/80" />
+              <img
+                src="/icons/wallet.png"
+                alt=""
+                className="w-12 h-12 drop-shadow-lg"
+              />
             </div>
             <div className="animate-float delay-200">
-              <WalletCards className="w-8 h-8 text-primary/80" />
+              <img
+                src="/icons/coins.png"
+                alt=""
+                className="w-14 h-14 drop-shadow-lg"
+              />
             </div>
             <div className="animate-float delay-300">
-              <Shield className="w-8 h-8 text-primary/80" />
+              <img
+                src="/icons/credit-card.png"
+                alt=""
+                className="w-12 h-12 drop-shadow-lg"
+              />
             </div>
           </div>
 

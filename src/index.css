@@ -113,6 +113,8 @@
         -webkit-tap-highlight-color: transparent;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        /* Tabular (monospaced) numbers prevent layout shift as digits update */
+        font-variant-numeric: tabular-nums lining-nums;
     }
 
     /* Prevent text selection on UI shell, allow on content */
@@ -137,6 +139,18 @@
             -webkit-backdrop-filter: saturate(180%) blur(20px);
             backdrop-filter: saturate(180%) blur(20px);
             z-index: 9999;
+        }
+    }
+
+    /* Respect OS-level reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
         }
     }
 

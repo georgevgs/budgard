@@ -17,7 +17,6 @@ const ExpensesDashboard = ({
   const { t } = useTranslation();
 
   const categoryData = useMemo(() => {
-    // Group expenses by category
     const categoryExpenses = expenses.reduce<Record<string, Expense[]>>(
       (acc, expense) => {
         const categoryId = expense.category_id;
@@ -32,10 +31,8 @@ const ExpensesDashboard = ({
       {},
     );
 
-    // Calculate total
     const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
-    // Map categories to their data
     return categories
       .map((category) => {
         const categoryExpenseList = categoryExpenses[category.id] || [];
@@ -68,35 +65,45 @@ const ExpensesDashboard = ({
 
   return (
     <Card>
-      <CardContent className="pt-6">
-        <div className="w-full space-y-3">
+      <CardContent className="pt-4 pb-2">
+        <div className="w-full space-y-1">
           {categoryData.map((category) => (
             <div
               key={category.name}
-              className="flex items-center gap-4"
+              className="py-2"
               aria-label={t('dashboard.categoryBreakdown', {
                 name: category.name,
                 amount: formatCurrency(category.amount),
                 percent: formatPercentage(category.percentage),
               })}
             >
-              <div
-                className="w-3 h-3 rounded-full shrink-0"
-                style={{ backgroundColor: category.color }}
-                aria-hidden="true"
-              />
-              <div className="flex-1 flex items-center justify-between gap-2 min-w-0">
-                <div className="flex gap-2 items-baseline min-w-0">
-                  <span className="text-sm font-medium truncate">
-                    {category.name}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {formatPercentage(category.percentage)}
-                  </span>
-                </div>
-                <span className="text-sm font-medium shrink-0">
+              <div className="flex items-center gap-3 mb-1.5">
+                <div
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: category.color }}
+                  aria-hidden="true"
+                />
+                <span className="flex-1 text-sm font-medium truncate">
+                  {category.name}
+                </span>
+                <span
+                  className="text-sm font-semibold shrink-0 tabular-nums"
+                  style={{ color: category.color }}
+                >
                   {formatCurrency(category.amount)}
                 </span>
+                <span className="text-xs text-muted-foreground shrink-0 w-8 text-right tabular-nums">
+                  {formatPercentage(category.percentage)}
+                </span>
+              </div>
+              <div className="ml-5 h-1 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-700 ease-out"
+                  style={{
+                    width: `${category.percentage}%`,
+                    backgroundColor: category.color,
+                  }}
+                />
               </div>
             </div>
           ))}
