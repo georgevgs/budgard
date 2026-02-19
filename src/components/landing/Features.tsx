@@ -43,11 +43,13 @@ const Features = () => {
             >
               <div className="relative mb-4">
                 <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl transition-opacity duration-500 opacity-0 group-hover:opacity-100" />
-                <img
-                  src={feature.icon}
-                  alt={feature.iconAlt}
-                  className="relative h-16 w-16 animate-float drop-shadow-md transition-transform duration-300 group-hover:scale-110"
-                />
+                <div className="transition-transform duration-300 group-hover:scale-110">
+                  <img
+                    src={feature.icon}
+                    alt={feature.iconAlt}
+                    className="h-16 w-16 animate-float drop-shadow-md"
+                  />
+                </div>
               </div>
               <h3 className="text-base font-semibold mb-1.5 transition-colors duration-300 group-hover:text-primary">
                 {feature.title}

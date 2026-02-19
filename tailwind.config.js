@@ -139,7 +139,7 @@ export default {
     		animation: {
     			'accordion-down': 'accordion-down 0.2s ease-out',
     			'accordion-up': 'accordion-up 0.2s ease-out',
-    			float: 'float 3s ease-in-out infinite',
+    			float: 'float 2s ease-in-out infinite',
     			'fade-up': 'fade-up 0.5s ease-out',
     			'fade-down': 'fade-down 0.5s ease-out',
     			'slide-in-right': 'slide-in-right 0.5s ease-out',
