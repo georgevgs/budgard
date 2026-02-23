@@ -62,6 +62,7 @@ export function useDataOperations() {
           : undefined,
       } as Expense;
 
+      const previousExpenses = expenses;
       const updatedExpenses = expenseId
         ? expenses.map((e) =>
             e.id === expenseId ? { ...e, ...optimisticExpense } : e,
@@ -111,17 +112,17 @@ export function useDataOperations() {
         }
 
         const finalExpenses = expenseId
-          ? expenses.map((e) => (e.id === expenseId ? savedExpense : e))
+          ? updatedExpenses.map((e) => (e.id === expenseId ? savedExpense : e))
           : [
               savedExpense,
-              ...expenses.filter((e) => e.id !== optimisticExpense.id),
+              ...updatedExpenses.filter((e) => e.id !== optimisticExpense.id),
             ];
 
         haptics.success();
         setExpenses(finalExpenses);
       } catch (error) {
         haptics.error();
-        setExpenses(expenses);
+        setExpenses(previousExpenses);
         showErrorToast(`Failed to ${expenseId ? 'update' : 'add'} expense`);
         throw error;
       }
@@ -206,6 +207,7 @@ export function useDataOperations() {
           : undefined,
       } as RecurringExpense;
 
+      const previousRecurringExpenses = recurringExpenses;
       const updatedExpenses = expenseId
         ? recurringExpenses.map((e) =>
             e.id === expenseId ? { ...e, ...optimisticExpense } : e,
@@ -220,17 +222,17 @@ export function useDataOperations() {
           : await dataService.createRecurringExpense(expenseData);
 
         const finalExpenses = expenseId
-          ? recurringExpenses.map((e) =>
+          ? updatedExpenses.map((e) =>
               e.id === expenseId ? savedExpense : e,
             )
           : [
               savedExpense,
-              ...recurringExpenses.filter((e) => e.id !== optimisticExpense.id),
+              ...updatedExpenses.filter((e) => e.id !== optimisticExpense.id),
             ];
 
         setRecurringExpenses(finalExpenses);
       } catch (error) {
-        setRecurringExpenses(recurringExpenses);
+        setRecurringExpenses(previousRecurringExpenses);
         showErrorToast(
           `Failed to ${expenseId ? 'update' : 'add'} recurring expense`,
         );
@@ -302,20 +304,24 @@ export function useDataOperations() {
         created_at: new Date().toISOString(),
       };
 
-      setTags([...tags, optimisticTag].sort((a, b) =>
+      const previousTags = tags;
+      const updatedTags = [...tags, optimisticTag].sort((a, b) =>
         a.name.localeCompare(b.name),
-      ));
+      );
+      setTags(updatedTags);
 
       try {
         const savedTag = await dataService.createTag({ name, color });
         haptics.success();
         setTags(
-          [...tags, savedTag].sort((a, b) => a.name.localeCompare(b.name)),
+          [...updatedTags.filter((t) => t.id !== optimisticTag.id), savedTag].sort(
+            (a, b) => a.name.localeCompare(b.name),
+          ),
         );
         return savedTag;
       } catch (error) {
         haptics.error();
-        setTags(tags);
+        setTags(previousTags);
         showErrorToast('Failed to create tag');
         throw error;
       }

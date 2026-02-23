@@ -1,4 +1,4 @@
-import { useMemo, useState, lazy, Suspense } from 'react';
+import { useMemo, useState, useEffect, lazy, Suspense } from 'react';
 import { format, parseISO, getYear } from 'date-fns';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,6 +25,12 @@ const AnalyticsView = () => {
   const [selectedYear, setSelectedYear] = useState(
     () => availableYears[0] || new Date().getFullYear(),
   );
+
+  useEffect(() => {
+    if (availableYears.length > 0 && !availableYears.includes(selectedYear)) {
+      setSelectedYear(availableYears[0]);
+    }
+  }, [availableYears, selectedYear]);
 
   // Memoize year expenses to avoid recalculating on every render
   const yearExpenses = useMemo(() => {
