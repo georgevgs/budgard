@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Camera, MoreVertical, Repeat } from 'lucide-react';
+import { Camera, MoreVertical, Repeat, Tag as TagIcon } from 'lucide-react';
 import ReceiptViewer from '@/components/expenses/ReceiptViewer';
 import CategoryBadge from '@/components/categories/CategoryBadge';
 import {
@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import type { Expense } from '@/types/Expense';
+import type { Tag } from '@/types/Tag';
 import { formatCurrency } from '@/lib/utils.ts';
 
 type ExpenseCardProps = {
@@ -70,6 +71,9 @@ const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
                     </p>
                     {expense.category && (
                       <CategoryBadge category={expense.category} />
+                    )}
+                    {expense.tag && (
+                      <TagBadge tag={expense.tag} />
                     )}
                     {expense.recurring_expense_id && (
                       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -180,6 +184,21 @@ const renderCategoryAccent = (expense: Expense) => {
       className="w-1 shrink-0"
       style={{ backgroundColor: expense.category.color }}
     />
+  );
+};
+
+const TagBadge = ({ tag }: { tag: Tag }) => {
+  return (
+    <div
+      className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium"
+      style={{
+        backgroundColor: `${tag.color}20`,
+        color: tag.color,
+      }}
+    >
+      <TagIcon className="h-3 w-3" />
+      {tag.name}
+    </div>
   );
 };
 

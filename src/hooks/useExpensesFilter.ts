@@ -11,8 +11,10 @@ interface UseExpensesFilterReturn {
   filteredExpenses: Expense[];
   search: string;
   selectedCategoryId: string | null;
+  selectedTagId: string | null;
   setSearch: (value: string) => void;
   setSelectedCategoryId: (value: string | null) => void;
+  setSelectedTagId: (value: string | null) => void;
   handleFilterChange: (search: string, categoryId: string | null) => void;
   handleClearFilters: () => void;
   hasActiveFilters: boolean;
@@ -26,8 +28,10 @@ export const useExpensesFilter = ({
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null,
   );
+  const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
 
-  const hasActiveFilters = search.length > 0 || selectedCategoryId !== null;
+  const hasActiveFilters =
+    search.length > 0 || selectedCategoryId !== null || selectedTagId !== null;
 
   // Pre-filter expenses by month once
   const monthlyExpenses = useMemo(() => {
@@ -36,7 +40,7 @@ export const useExpensesFilter = ({
     });
   }, [expenses, selectedMonth]);
 
-  // Then apply search and category filters
+  // Then apply search and category/tag filters
   const filteredExpenses = useMemo(() => {
     if (!hasActiveFilters) {
       return monthlyExpenses.sort(
@@ -53,14 +57,17 @@ export const useExpensesFilter = ({
           : true;
         const matchesCategory = selectedCategoryId
           ? selectedCategoryId === 'uncategorized'
-            ? expense.category_id === null
+            ? expense.category_id === null || expense.category_id === undefined
             : expense.category_id === selectedCategoryId
           : true;
+        const matchesTag = selectedTagId
+          ? expense.tag_id === selectedTagId
+          : true;
 
-        return matchesSearch && matchesCategory;
+        return matchesSearch && matchesCategory && matchesTag;
       })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [monthlyExpenses, search, selectedCategoryId, hasActiveFilters]);
+  }, [monthlyExpenses, search, selectedCategoryId, selectedTagId, hasActiveFilters]);
 
   const handleFilterChange = (newSearch: string, categoryId: string | null) => {
     setSearch(newSearch);
@@ -70,14 +77,17 @@ export const useExpensesFilter = ({
   const handleClearFilters = () => {
     setSearch('');
     setSelectedCategoryId(null);
+    setSelectedTagId(null);
   };
 
   return {
     filteredExpenses,
     search,
     selectedCategoryId,
+    selectedTagId,
     setSearch,
     setSelectedCategoryId,
+    setSelectedTagId,
     handleFilterChange,
     handleClearFilters,
     hasActiveFilters,

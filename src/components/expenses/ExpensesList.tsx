@@ -73,7 +73,7 @@ const ExpensesContent = ({
 
 const ExpensesList = () => {
   const { t } = useTranslation();
-  const { categories, expenses, isLoading, isInitialized, monthlyBudget, setMonthlyBudget } = useData();
+  const { categories, expenses, tags, isLoading, isInitialized, monthlyBudget, setMonthlyBudget } = useData();
   const operations = useDataOperations();
   const { toast } = useToast();
 
@@ -89,9 +89,11 @@ const ExpensesList = () => {
     filteredExpenses,
     search,
     selectedCategoryId,
+    selectedTagId,
     hasActiveFilters,
     setSearch,
     setSelectedCategoryId,
+    setSelectedTagId,
     handleClearFilters,
   } = useExpensesFilter({
     expenses,
@@ -161,11 +163,14 @@ const ExpensesList = () => {
 
           <ExpensesFilter
             categories={categories}
+            tags={tags}
             search={search}
             selectedCategoryId={selectedCategoryId}
+            selectedTagId={selectedTagId}
             hasActiveFilters={hasActiveFilters}
             onSearchChange={setSearch}
             onCategoryChange={setSelectedCategoryId}
+            onTagChange={setSelectedTagId}
             onClearFilters={handleClearFilters}
           />
 
