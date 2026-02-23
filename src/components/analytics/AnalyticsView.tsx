@@ -1,5 +1,6 @@
 import { useMemo, useState, lazy, Suspense } from 'react';
 import { format, parseISO, getYear } from 'date-fns';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useData } from '@/contexts/DataContext';
 import {
@@ -14,7 +15,7 @@ import {
 const Chart = lazy(() => import('react-apexcharts'));
 
 const AnalyticsView = () => {
-  const { expenses, categories } = useData();
+  const { expenses, categories, monthlyBudget } = useData();
 
   const availableYears = useMemo(() => {
     const years = new Set(expenses.map((e) => getYear(parseISO(e.date))));
@@ -48,6 +49,34 @@ const AnalyticsView = () => {
       };
     });
   }, [yearExpenses, selectedYear]);
+
+  const monthComparison = useMemo(() => {
+    const now = new Date();
+    const thisMonthKey = format(now, 'yyyy-MM');
+    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthKey = format(lastMonthDate, 'yyyy-MM');
+
+    const thisMonthAmount = expenses
+      .filter((e) => format(parseISO(e.date), 'yyyy-MM') === thisMonthKey)
+      .reduce((sum, e) => sum + e.amount, 0);
+
+    const lastMonthAmount = expenses
+      .filter((e) => format(parseISO(e.date), 'yyyy-MM') === lastMonthKey)
+      .reduce((sum, e) => sum + e.amount, 0);
+
+    const delta = thisMonthAmount - lastMonthAmount;
+    const percentChange =
+      lastMonthAmount > 0 ? (delta / lastMonthAmount) * 100 : null;
+
+    return {
+      thisMonthLabel: format(now, 'MMMM yyyy'),
+      lastMonthLabel: format(lastMonthDate, 'MMMM yyyy'),
+      thisMonthAmount,
+      lastMonthAmount,
+      delta,
+      percentChange,
+    };
+  }, [expenses]);
 
   const yearlyStats = useMemo(() => {
     const totalSpent = yearExpenses.reduce((sum, e) => sum + e.amount, 0);
@@ -103,6 +132,27 @@ const AnalyticsView = () => {
           enabled: true,
         },
       },
+      annotations: monthlyBudget
+        ? {
+            yaxis: [
+              {
+                y: monthlyBudget,
+                borderColor: '#f59e0b',
+                strokeDashArray: 5,
+                label: {
+                  text: `Budget: ${monthlyBudget} €`,
+                  position: 'right',
+                  style: {
+                    color: '#fff',
+                    background: '#f59e0b',
+                    fontSize: '11px',
+                    padding: { top: 2, bottom: 2, left: 4, right: 4 },
+                  },
+                },
+              },
+            ],
+          }
+        : {},
       grid: {
         borderColor: 'hsl(var(--border) / 0.2)',
         strokeDashArray: 4,
@@ -130,6 +180,13 @@ const AnalyticsView = () => {
         },
       },
       yaxis: {
+        min: 0,
+        max: monthlyBudget
+          ? Math.max(
+              monthlyBudget * 1.15,
+              Math.max(...monthlyData.map((d) => d.amount), 0) * 1.15,
+            )
+          : undefined,
         labels: {
           formatter: (val: number) => `${Math.round(val)} €`,
           style: { colors: 'hsl(var(--muted-foreground))' },
@@ -143,7 +200,7 @@ const AnalyticsView = () => {
       },
       colors: ['hsl(var(--primary))'],
     }),
-    [monthlyData],
+    [monthlyData, monthlyBudget],
   );
 
   const chartSeries = useMemo(
@@ -160,6 +217,34 @@ const AnalyticsView = () => {
 
   return (
     <div className="container max-w-4xl mx-auto px-4 pt-4 pb-4 space-y-6">
+      {/* This month vs last month */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="rounded-lg border bg-card p-4">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
+            Last Month
+          </p>
+          <p className="text-xl font-semibold">
+            {formatAmount(monthComparison.lastMonthAmount)}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {monthComparison.lastMonthLabel}
+          </p>
+        </div>
+        <div className="rounded-lg border bg-card p-4">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
+            This Month
+          </p>
+          <p className="text-xl font-semibold">
+            {formatAmount(monthComparison.thisMonthAmount)}
+          </p>
+          {renderMonthChangeIndicator(
+            monthComparison.percentChange,
+            monthComparison.delta,
+            monthComparison.lastMonthAmount,
+          )}
+        </div>
+      </div>
+
       <div className="space-y-4">
         <Select
           value={selectedYear.toString()}
@@ -204,6 +289,7 @@ const AnalyticsView = () => {
               }
             >
               <Chart
+                key={`${selectedYear}-${monthlyBudget}`}
                 options={chartOptions}
                 series={chartSeries}
                 type="area"
@@ -312,3 +398,35 @@ const AnalyticsView = () => {
 };
 
 export default AnalyticsView;
+
+function renderMonthChangeIndicator(
+  percentChange: number | null,
+  delta: number,
+  lastMonthAmount: number,
+) {
+  if (percentChange === null || lastMonthAmount === 0) {
+    return null;
+  }
+
+  if (delta > 0) {
+    return (
+      <div className="flex items-center gap-1 mt-1 text-xs font-medium text-destructive">
+        <TrendingUp className="h-3 w-3" />
+        <span>+{percentChange.toFixed(1)}% vs last month</span>
+      </div>
+    );
+  }
+
+  if (delta < 0) {
+    return (
+      <div className="flex items-center gap-1 mt-1 text-xs font-medium text-green-600 dark:text-green-400">
+        <TrendingDown className="h-3 w-3" />
+        <span>{percentChange.toFixed(1)}% vs last month</span>
+      </div>
+    );
+  }
+
+  return (
+    <p className="text-xs text-muted-foreground mt-1">Same as last month</p>
+  );
+}
