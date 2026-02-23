@@ -1,4 +1,4 @@
-import { lazy, Suspense, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   BrowserRouter,
   Routes,
@@ -9,6 +9,7 @@ import {
 import { Toaster } from '@/components/ui/toaster';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePwaUpdate } from '@/hooks/usePwaUpdate';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 // Lazy load heavy components
@@ -91,6 +92,55 @@ const PublicRoute = () => {
 };
 
 // ============================================================================
+// Offline Banner
+// ============================================================================
+
+const OfflineBanner = () => {
+  const isOnline = useOnlineStatus();
+  // Track whether we've ever gone offline so we can show a "back online" flash
+  const wentOffline = useRef(false);
+  const [showBackOnline, setShowBackOnline] = useState(false);
+
+  useEffect(() => {
+    if (!isOnline) {
+      wentOffline.current = true;
+    }
+  }, [isOnline]);
+
+  useEffect(() => {
+    if (isOnline && wentOffline.current) {
+      setShowBackOnline(true);
+      const t = setTimeout(() => setShowBackOnline(false), 2500);
+      return () => clearTimeout(t);
+    }
+  }, [isOnline]);
+
+  if (!isOnline) {
+    return (
+      <div className="fixed bottom-16 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+        <div className="flex items-center gap-2 rounded-full bg-destructive text-destructive-foreground text-sm font-medium px-4 py-2 shadow-lg pointer-events-auto">
+          <span className="h-2 w-2 rounded-full bg-destructive-foreground/70 animate-pulse" />
+          No internet connection
+        </div>
+      </div>
+    );
+  }
+
+  if (showBackOnline) {
+    return (
+      <div className="fixed bottom-16 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+        <div className="flex items-center gap-2 rounded-full bg-green-600 text-white text-sm font-medium px-4 py-2 shadow-lg pointer-events-auto">
+          <span className="h-2 w-2 rounded-full bg-white/70" />
+          Back online
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+// ============================================================================
 // App Component
 // ============================================================================
 
@@ -118,6 +168,7 @@ const App = () => {
             </Routes>
           </Suspense>
         </ErrorBoundary>
+        <OfflineBanner />
         <Toaster />
       </div>
     </BrowserRouter>
