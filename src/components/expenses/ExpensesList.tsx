@@ -16,7 +16,7 @@ import BudgetProgress from '@/components/budget/BudgetProgress';
 import ExpensesMonthlySelector from '@/components/expenses/ExpensesMonthlySelector';
 import ExpensesMonthlyOverview from '@/components/expenses/ExpensesMonthlyOverview';
 import ExpensesDashboard from '@/components/expenses/ExpensesDashboard';
-import ExpenseLoadingState from '@/components/expenses/ExpensesLoading';
+import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
 import ExpensesPagination from '@/components/expenses/ExpensesPagination';
 import ExpensesFilter from '@/components/expenses/ExpensesFilter';
 import CsvImportDialog from '@/components/expenses/CsvImportDialog';

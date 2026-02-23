@@ -1,8 +1,46 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Full-page skeleton shown during the auth check phase so users never
+// see a spinner — the skeleton is visible from the very first frame.
+export const AppLoadingSkeleton = () => (
+  <div className="min-h-screen bg-background flex flex-col">
+    {/* Header */}
+    <div className="sticky top-0 z-50 w-full border-b bg-background">
+      <div className="container flex h-14 items-center justify-between px-4">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-7 w-7 rounded-md" />
+          <Skeleton className="h-5 w-20" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-8 w-8 rounded-md" />
+          <Skeleton className="h-8 w-8 rounded-md" />
+          <Skeleton className="h-8 w-8 rounded-md" />
+        </div>
+      </div>
+    </div>
+
+    {/* Content */}
+    <main className="flex-1 pt-2 pb-20">
+      <ExpenseLoadingState />
+    </main>
+
+    {/* Nav tabs */}
+    <div className="fixed bottom-0 left-0 right-0 border-t bg-background">
+      <div className="flex items-center justify-around">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="flex flex-1 flex-col items-center gap-1 py-2">
+            <Skeleton className="h-5 w-5 rounded-sm" />
+            <Skeleton className="h-2 w-10" />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
 // Mirrors the exact structure of the expenses page so the transition
 // from skeleton → real content feels seamless rather than jarring.
-const ExpenseLoadingState = () => {
+export const ExpenseLoadingState = () => {
   return (
     <div className="flex flex-col min-h-[calc(100vh-58px)]">
       <div className="container max-w-4xl mx-auto px-4 pt-4 pb-4 space-y-3">
@@ -72,4 +110,3 @@ const renderSkeletonCards = () => {
   );
 };
 
-export default ExpenseLoadingState;
