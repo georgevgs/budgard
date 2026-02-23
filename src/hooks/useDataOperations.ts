@@ -5,6 +5,7 @@ import { useData } from '@/contexts/DataContext';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
+import type { Tag } from '@/types/Tag';
 import { uploadReceipt, deleteReceipt } from '@/services/receiptService';
 import { haptics } from '@/lib/haptics';
 
@@ -18,10 +19,12 @@ export function useDataOperations() {
   const {
     expenses,
     categories,
+    tags,
     recurringExpenses,
     isInitialized,
     setExpenses,
     setCategories,
+    setTags,
     setRecurringExpenses,
   } = useData();
   const { toast } = useToast();
@@ -53,6 +56,9 @@ export function useDataOperations() {
         created_at: new Date().toISOString(),
         category: expenseData.category_id
           ? categories.find((c) => c.id === expenseData.category_id)
+          : undefined,
+        tag: expenseData.tag_id
+          ? tags.find((t) => t.id === expenseData.tag_id)
           : undefined,
       } as Expense;
 
@@ -120,7 +126,7 @@ export function useDataOperations() {
         throw error;
       }
     },
-    [categories, expenses, isInitialized, setExpenses, showErrorToast],
+    [categories, tags, expenses, isInitialized, setExpenses, showErrorToast],
   );
 
   const handleExpenseDelete = useCallback(
@@ -286,10 +292,42 @@ export function useDataOperations() {
     [recurringExpenses, isInitialized, setRecurringExpenses, showErrorToast],
   );
 
+  const handleTagCreate = useCallback(
+    async (name: string, color: string): Promise<Tag> => {
+      const optimisticTag: Tag = {
+        id: `temp-${Date.now()}`,
+        user_id: '',
+        name,
+        color,
+        created_at: new Date().toISOString(),
+      };
+
+      setTags([...tags, optimisticTag].sort((a, b) =>
+        a.name.localeCompare(b.name),
+      ));
+
+      try {
+        const savedTag = await dataService.createTag({ name, color });
+        haptics.success();
+        setTags(
+          [...tags, savedTag].sort((a, b) => a.name.localeCompare(b.name)),
+        );
+        return savedTag;
+      } catch (error) {
+        haptics.error();
+        setTags(tags);
+        showErrorToast('Failed to create tag');
+        throw error;
+      }
+    },
+    [tags, setTags, showErrorToast],
+  );
+
   return {
     handleExpenseSubmit,
     handleExpenseDelete,
     handleCategoryAdd,
+    handleTagCreate,
     handleRecurringExpenseSubmit,
     handleRecurringExpenseDelete,
     handleRecurringExpenseToggle,

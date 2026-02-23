@@ -13,24 +13,31 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Category } from '@/types/Category';
+import type { Tag } from '@/types/Tag';
 
 interface ExpensesFilterProps {
   categories: Category[];
+  tags: Tag[];
   search: string;
   selectedCategoryId: string | null;
+  selectedTagId: string | null;
   hasActiveFilters: boolean;
   onSearchChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
+  onTagChange: (value: string | null) => void;
   onClearFilters: () => void;
 }
 
 const ExpensesFilter = ({
   categories,
+  tags,
   search,
   selectedCategoryId,
+  selectedTagId,
   hasActiveFilters,
   onSearchChange,
   onCategoryChange,
+  onTagChange,
   onClearFilters,
 }: ExpensesFilterProps) => {
   const { t } = useTranslation();
@@ -40,7 +47,14 @@ const ExpensesFilter = ({
     onCategoryChange(categoryId === 'all' ? '' : categoryId);
   };
 
+  const handleTagSelectChange = (value: string) => {
+    onTagChange(value === 'all' ? null : value);
+  };
+
   const UNCATEGORIZED_VALUE = 'uncategorized';
+
+  const activeFilterCount =
+    (search ? 1 : 0) + (selectedCategoryId ? 1 : 0) + (selectedTagId ? 1 : 0);
 
   return (
     <div>
@@ -66,7 +80,7 @@ const ExpensesFilter = ({
           <Filter className="h-4 w-4" />
           {hasActiveFilters && (
             <span className="absolute -right-1 -top-1 h-4 w-4 rounded-full bg-primary text-[10px] font-medium text-primary-foreground flex items-center justify-center">
-              {(search ? 1 : 0) + (selectedCategoryId ? 1 : 0)}
+              {activeFilterCount}
             </span>
           )}
         </Button>
@@ -109,6 +123,33 @@ const ExpensesFilter = ({
               ))}
             </SelectContent>
           </Select>
+
+          {tags.length > 0 && (
+            <Select
+              value={selectedTagId || 'all'}
+              onValueChange={handleTagSelectChange}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t('expenses.filter.selectTag', { defaultValue: 'All tags' })} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  {t('expenses.filter.allTags', { defaultValue: 'All tags' })}
+                </SelectItem>
+                {tags.map((tag) => (
+                  <SelectItem key={tag.id} value={tag.id}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: tag.color }}
+                      />
+                      {tag.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
 
@@ -135,6 +176,15 @@ const ExpensesFilter = ({
               <X
                 className="h-3 w-3 ml-1 cursor-pointer"
                 onClick={() => handleCategoryChange('all')}
+              />
+            </Badge>
+          )}
+          {selectedTagId && (
+            <Badge variant="secondary" className="text-xs">
+              {tags.find((tag) => tag.id === selectedTagId)?.name}
+              <X
+                className="h-3 w-3 ml-1 cursor-pointer"
+                onClick={() => onTagChange(null)}
               />
             </Badge>
           )}

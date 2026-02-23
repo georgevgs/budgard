@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,16 +29,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Tag, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import { cn, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { useData } from '@/contexts/DataContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { expenseSchema, type ExpenseFormData } from '@/lib/validations';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import ReceiptUpload from '@/components/expenses/ReceiptUpload';
+
+// Preset colors cycled when auto-assigning a color to a new tag
+const TAG_COLORS = [
+  '#6366f1',
+  '#ec4899',
+  '#f59e0b',
+  '#10b981',
+  '#3b82f6',
+  '#ef4444',
+  '#8b5cf6',
+  '#14b8a6',
+  '#f97316',
+  '#06b6d4',
+];
 
 interface ExpensesFormProps {
   expense?: Expense;
@@ -49,10 +64,14 @@ interface ExpensesFormProps {
 const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
   const { t, i18n } = useTranslation();
   const { session } = useAuth();
-  const { handleExpenseSubmit } = useDataOperations();
+  const { tags } = useData();
+  const { handleExpenseSubmit, handleTagCreate } = useDataOperations();
   const dateLocale = i18n.language === 'el' ? el : enUS;
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [removeExistingReceipt, setRemoveExistingReceipt] = useState(false);
+  const [tagPopoverOpen, setTagPopoverOpen] = useState(false);
+  const [tagSearch, setTagSearch] = useState('');
+  const [isCreatingTag, setIsCreatingTag] = useState(false);
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
@@ -62,9 +81,51 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
         : '',
       description: expense?.description || '',
       category_id: expense?.category_id || 'none',
+      tag_id: expense?.tag_id || undefined,
       date: expense ? new Date(expense.date) : new Date(),
     },
   });
+
+  const selectedTagId = form.watch('tag_id');
+  const selectedTag = tags.find((t) => t.id === selectedTagId);
+
+  const filteredTags = useMemo(() => {
+    if (!tagSearch) return tags;
+    const lower = tagSearch.toLowerCase();
+    return tags.filter((t) => t.name.toLowerCase().includes(lower));
+  }, [tags, tagSearch]);
+
+  const hasExactMatch = tags.some(
+    (t) => t.name.toLowerCase() === tagSearch.toLowerCase(),
+  );
+  const showCreateOption = tagSearch.trim().length > 0 && !hasExactMatch;
+
+  const handleTagSelect = (tagId: string) => {
+    form.setValue('tag_id', tagId);
+    setTagPopoverOpen(false);
+    setTagSearch('');
+  };
+
+  const handleTagClear = () => {
+    form.setValue('tag_id', undefined);
+    setTagSearch('');
+  };
+
+  const handleTagCreateInline = async () => {
+    if (!tagSearch.trim() || isCreatingTag) return;
+    setIsCreatingTag(true);
+    try {
+      const color = TAG_COLORS[tags.length % TAG_COLORS.length];
+      const newTag = await handleTagCreate(tagSearch.trim(), color);
+      form.setValue('tag_id', newTag.id);
+      setTagPopoverOpen(false);
+      setTagSearch('');
+    } catch {
+      // error already shown via toast
+    } finally {
+      setIsCreatingTag(false);
+    }
+  };
 
   const handleSubmit = async (values: ExpenseFormData) => {
     if (!session?.user?.id) return;
@@ -75,6 +136,7 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
         description: values.description,
         category_id:
           values.category_id === 'none' ? undefined : values.category_id,
+        tag_id: values.tag_id || undefined,
         date: format(values.date, 'yyyy-MM-dd'),
         user_id: session.user.id,
       };
@@ -197,6 +259,111 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
             )}
           />
 
+          {/* Tag field */}
+          <FormField
+            control={form.control}
+            name="tag_id"
+            render={() => (
+              <FormItem>
+                <Popover
+                  open={tagPopoverOpen}
+                  onOpenChange={setTagPopoverOpen}
+                  modal={false}
+                >
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          'w-full justify-between font-normal',
+                          !selectedTag && 'text-muted-foreground',
+                        )}
+                      >
+                        {renderTagButtonContent(selectedTag)}
+                        {selectedTag && (
+                          <span
+                            role="button"
+                            aria-label="Clear tag"
+                            className="ml-auto h-4 w-4 shrink-0 opacity-50 hover:opacity-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTagClear();
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.stopPropagation();
+                                handleTagClear();
+                              }
+                            }}
+                            tabIndex={0}
+                          >
+                            <X className="h-4 w-4" />
+                          </span>
+                        )}
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <div className="p-2">
+                      <Input
+                        placeholder="Search or create tag..."
+                        value={tagSearch}
+                        onChange={(e) => setTagSearch(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (filteredTags.length === 1 && !showCreateOption) {
+                              handleTagSelect(filteredTags[0].id);
+                            } else if (showCreateOption) {
+                              handleTagCreateInline();
+                            }
+                          }
+                        }}
+                        autoFocus
+                      />
+                    </div>
+                    <div className="max-h-[200px] overflow-y-auto">
+                      {filteredTags.map((tag) => (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left"
+                          onClick={() => handleTagSelect(tag.id)}
+                        >
+                          <div
+                            className="w-3 h-3 rounded-full shrink-0"
+                            style={{ backgroundColor: tag.color }}
+                          />
+                          {tag.name}
+                        </button>
+                      ))}
+                      {showCreateOption && (
+                        <button
+                          type="button"
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left text-primary"
+                          onClick={handleTagCreateInline}
+                          disabled={isCreatingTag}
+                        >
+                          <Tag className="h-3 w-3 shrink-0" />
+                          {isCreatingTag
+                            ? 'Creating...'
+                            : `Create tag: "${tagSearch.trim()}"`}
+                        </button>
+                      )}
+                      {filteredTags.length === 0 && !showCreateOption && (
+                        <p className="px-3 py-2 text-sm text-muted-foreground">
+                          No tags found.
+                        </p>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="date"
@@ -259,6 +426,26 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
       </Form>
       </div>
     </div>
+  );
+};
+
+const renderTagButtonContent = (selectedTag: { name: string; color: string } | undefined) => {
+  if (!selectedTag) {
+    return (
+      <span className="flex items-center gap-2">
+        <Tag className="h-4 w-4" />
+        No tag
+      </span>
+    );
+  }
+  return (
+    <span className="flex items-center gap-2">
+      <div
+        className="w-3 h-3 rounded-full"
+        style={{ backgroundColor: selectedTag.color }}
+      />
+      {selectedTag.name}
+    </span>
   );
 };
 

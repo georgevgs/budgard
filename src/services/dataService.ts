@@ -3,6 +3,7 @@ import type { Budget } from '@/types/Budget';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
+import type { Tag } from '@/types/Tag';
 
 export const QueryKeys = {
   USER: 'user',
@@ -32,6 +33,27 @@ export const dataService = {
     return data as Category[];
   },
 
+  async getTags() {
+    const { data, error } = await supabase
+      .from('tags')
+      .select('*')
+      .order('name');
+
+    if (error) throw error;
+    return data as Tag[];
+  },
+
+  async createTag(tagData: { name: string; color: string }) {
+    const { data, error } = await supabase
+      .from('tags')
+      .insert(tagData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Tag;
+  },
+
   async getExpenses() {
     const { data, error } = await supabase
       .from('expenses')
@@ -39,6 +61,7 @@ export const dataService = {
         `
                *,
                category:categories(*),
+               tag:tags(*),
                recurring_expense:recurring_expenses(*)
            `,
       )
@@ -54,7 +77,7 @@ export const dataService = {
       .from('expenses')
       .update(expenseData)
       .eq('id', expenseId)
-      .select(`*, category:categories(*)`)
+      .select(`*, category:categories(*), tag:tags(*)`)
       .single();
 
     if (error) throw error;
@@ -65,7 +88,7 @@ export const dataService = {
     const { data, error } = await supabase
       .from('expenses')
       .insert(expenseData)
-      .select(`*, category:categories(*)`)
+      .select(`*, category:categories(*), tag:tags(*)`)
       .single();
 
     if (error) throw error;
@@ -83,7 +106,7 @@ export const dataService = {
     const { data, error } = await supabase
       .from('expenses')
       .insert(expensesData)
-      .select(`*, category:categories(*)`);
+      .select(`*, category:categories(*), tag:tags(*)`);
 
     if (error) throw error;
     return data as Expense[];

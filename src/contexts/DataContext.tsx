@@ -11,12 +11,14 @@ import { dataService } from '@/services/dataService';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
+import type { Tag } from '@/types/Tag';
 import { useToast } from '@/hooks/useToast';
 
 interface DataState {
   categories: Category[];
   expenses: Expense[];
   recurringExpenses: RecurringExpense[];
+  tags: Tag[];
   monthlyBudget: number | null;
   isLoading: boolean;
   isInitialized: boolean;
@@ -28,6 +30,7 @@ interface DataContextType extends DataState {
   setCategories: (categories: Category[]) => void;
   setExpenses: (expenses: Expense[]) => void;
   setRecurringExpenses: (recurringExpenses: RecurringExpense[]) => void;
+  setTags: (tags: Tag[]) => void;
   setMonthlyBudget: (amount: number | null) => void;
 }
 
@@ -42,6 +45,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [recurringExpenses, setRecurringExpenses] = useState<
     RecurringExpense[]
   >([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [monthlyBudget, setMonthlyBudget] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -55,18 +59,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     try {
       // Parallel fetch for better performance
-      const [categoriesData, expensesData, recurringExpensesData, budgetData] =
+      const [categoriesData, expensesData, recurringExpensesData, budgetData, tagsData] =
         await Promise.all([
           dataService.getCategories(),
           dataService.getExpenses(),
           dataService.getRecurringExpenses(),
           dataService.getBudget(),
+          dataService.getTags(),
         ]);
 
       // React 18+ automatically batches these state updates
       setCategories(categoriesData);
       setExpenses(expensesData);
       setRecurringExpenses(recurringExpensesData);
+      setTags(tagsData);
       setMonthlyBudget(budgetData?.monthly_amount ?? null);
       setIsInitialized(true);
       setIsLoading(false);
@@ -108,6 +114,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setCategories([]);
       setExpenses([]);
       setRecurringExpenses([]);
+      setTags([]);
       setMonthlyBudget(null);
       setIsInitialized(false);
       setIsLoading(false);
@@ -118,6 +125,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     categories,
     expenses,
     recurringExpenses,
+    tags,
     monthlyBudget,
     isLoading,
     isInitialized,
@@ -126,6 +134,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setCategories,
     setExpenses,
     setRecurringExpenses,
+    setTags,
     setMonthlyBudget,
   };
 

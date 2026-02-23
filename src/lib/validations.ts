@@ -146,6 +146,18 @@ export const emailSchema = z
     },
   );
 
+// Tag validation schema
+export const tagSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Tag name is required')
+    .max(50, 'Tag name must be less than 50 characters')
+    .regex(SAFE_STRING, 'Tag name contains invalid characters')
+    .transform((s) => s.trim())
+    .refine((s) => s.length > 0, 'Tag name cannot be empty'),
+  color: z.string().regex(HEX_COLOR, 'Invalid color format'),
+});
+
 // Expense validation schema
 export const expenseSchema = z.object({
   amount: z
@@ -164,6 +176,7 @@ export const expenseSchema = z.object({
     .transform((str) => str.trim())
     .refine((str) => str.length > 0, 'Description cannot be empty'),
   category_id: z.string(),
+  tag_id: z.string().optional(),
   date: z.date({
     required_error: 'Date is required',
   }),
@@ -221,5 +234,6 @@ export const budgetSchema = z.object({
 // Types
 export type ExpenseFormData = z.infer<typeof expenseSchema>;
 export type CategoryFormData = z.infer<typeof categorySchema>;
+export type TagFormData = z.infer<typeof tagSchema>;
 export type RecurringExpenseFormData = z.infer<typeof recurringExpenseSchema>;
 export type BudgetFormData = z.infer<typeof budgetSchema>;
