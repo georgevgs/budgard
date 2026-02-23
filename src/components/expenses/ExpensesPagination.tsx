@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Pagination,
   PaginationContent,
@@ -27,6 +27,10 @@ const ExpensesPagination = ({
 }: ExpensesPaginationProps) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [expenses]);
 
   // Calculate pagination
   const totalItems = expenses.length;

@@ -23,7 +23,7 @@ interface ExpensesFilterProps {
   selectedTagId: string | null;
   hasActiveFilters: boolean;
   onSearchChange: (value: string) => void;
-  onCategoryChange: (value: string) => void;
+  onCategoryChange: (value: string | null) => void;
   onTagChange: (value: string | null) => void;
   onClearFilters: () => void;
 }
@@ -44,7 +44,7 @@ const ExpensesFilter = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const handleCategoryChange = (categoryId: string) => {
-    onCategoryChange(categoryId === 'all' ? '' : categoryId);
+    onCategoryChange(categoryId === 'all' ? null : categoryId);
   };
 
   const handleTagSelectChange = (value: string) => {

@@ -9,6 +9,7 @@ interface UseExpensesFilterProps {
 
 interface UseExpensesFilterReturn {
   filteredExpenses: Expense[];
+  monthlyExpenses: Expense[];
   search: string;
   selectedCategoryId: string | null;
   selectedTagId: string | null;
@@ -31,7 +32,7 @@ export const useExpensesFilter = ({
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
 
   const hasActiveFilters =
-    search.length > 0 || selectedCategoryId !== null || selectedTagId !== null;
+    search.length > 0 || !!selectedCategoryId || selectedTagId !== null;
 
   // Pre-filter expenses by month once
   const monthlyExpenses = useMemo(() => {
@@ -82,6 +83,7 @@ export const useExpensesFilter = ({
 
   return {
     filteredExpenses,
+    monthlyExpenses,
     search,
     selectedCategoryId,
     selectedTagId,

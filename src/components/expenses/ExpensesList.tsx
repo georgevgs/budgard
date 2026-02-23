@@ -87,6 +87,7 @@ const ExpensesList = () => {
   // Use the filter hook
   const {
     filteredExpenses,
+    monthlyExpenses,
     search,
     selectedCategoryId,
     selectedTagId,
@@ -124,7 +125,7 @@ const ExpensesList = () => {
     return <ExpenseLoadingState />;
   }
 
-  const monthlyTotal = filteredExpenses.reduce(
+  const monthlyTotal = monthlyExpenses.reduce(
     (sum, expense) => sum + expense.amount,
     0,
   );
