@@ -12,6 +12,7 @@ import RecurringExpenseCard from '@/components/recurring/RecurringExpenseCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { formatCurrency, parseCurrencyInput } from '@/lib/utils';
+import RecurringLoadingState from '@/components/recurring/RecurringLoading';
 
 // Helper to calculate next occurrence date
 function calculateNextOccurrence(expense: RecurringExpense): Date | null {
@@ -130,14 +131,7 @@ const RecurringExpensesList = () => {
   }, 0);
 
   if (isLoading) {
-    return (
-      <div className="text-center py-8">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
-        <p className="text-sm text-muted-foreground mt-2">
-          Loading recurring expenses...
-        </p>
-      </div>
-    );
+    return <RecurringLoadingState />;
   }
 
   return (

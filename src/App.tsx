@@ -11,10 +11,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePwaUpdate } from '@/hooks/usePwaUpdate';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import Header from '@/components/layout/Header';
+import NavTabs from '@/components/layout/NavTabs';
+import { AppLoadingSkeleton, ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
+import RecurringLoadingState from '@/components/recurring/RecurringLoading';
+import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
 
-// Lazy load heavy components
-const Header = lazy(() => import('@/components/layout/Header'));
-const NavTabs = lazy(() => import('@/components/layout/NavTabs'));
+// Lazy load route-level components
 const ExpensesList = lazy(() => import('@/components/expenses/ExpensesList'));
 const AnalyticsView = lazy(
   () => import('@/components/analytics/AnalyticsView'),
@@ -63,7 +66,7 @@ const PrivateRoute = () => {
   const { session, isLoading } = useAuth();
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <AppLoadingSkeleton />;
   }
 
   if (!session) {
@@ -158,9 +161,30 @@ const App = () => {
 
               {/* Authenticated routes with shared layout */}
               <Route element={<PrivateRoute />}>
-                <Route path="/expenses" element={<ExpensesList />} />
-                <Route path="/recurring" element={<RecurringExpensesList />} />
-                <Route path="/analytics" element={<AnalyticsView />} />
+                <Route
+                  path="/expenses"
+                  element={
+                    <Suspense fallback={<ExpenseLoadingState />}>
+                      <ExpensesList />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/recurring"
+                  element={
+                    <Suspense fallback={<RecurringLoadingState />}>
+                      <RecurringExpensesList />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/analytics"
+                  element={
+                    <Suspense fallback={<AnalyticsLoadingState />}>
+                      <AnalyticsView />
+                    </Suspense>
+                  }
+                />
               </Route>
 
               {/* Catch-all redirect */}

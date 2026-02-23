@@ -10,12 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
 
 // Lazy load the heavy chart component
 const Chart = lazy(() => import('react-apexcharts'));
 
 const AnalyticsView = () => {
-  const { expenses, categories, monthlyBudget } = useData();
+  const { expenses, categories, monthlyBudget, isLoading } = useData();
 
   const availableYears = useMemo(() => {
     const years = new Set(expenses.map((e) => getYear(parseISO(e.date))));
@@ -220,6 +221,10 @@ const AnalyticsView = () => {
   );
 
   const formatAmount = (amount: number) => `${amount.toFixed(2)} €`;
+
+  if (isLoading) {
+    return <AnalyticsLoadingState />;
+  }
 
   return (
     <div className="container max-w-4xl mx-auto px-4 pt-4 pb-4 space-y-6">
