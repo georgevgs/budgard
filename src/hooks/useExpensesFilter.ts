@@ -34,40 +34,41 @@ export const useExpensesFilter = ({
   const hasActiveFilters =
     search.length > 0 || !!selectedCategoryId || selectedTagId !== null;
 
-  // Pre-filter expenses by month once
+  // Pre-filter expenses by month and sort once — order is preserved by filter()
   const monthlyExpenses = useMemo(() => {
-    return expenses.filter((expense) => {
-      return format(new Date(expense.date), 'yyyy-MM') === selectedMonth;
-    });
-  }, [expenses, selectedMonth]);
-
-  // Then apply search and category/tag filters
-  const filteredExpenses = useMemo(() => {
-    if (!hasActiveFilters) {
-      return monthlyExpenses.sort(
+    return expenses
+      .filter(
+        (expense) =>
+          format(new Date(expense.date), 'yyyy-MM') === selectedMonth,
+      )
+      .toSorted(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
       );
+  }, [expenses, selectedMonth]);
+
+  // Apply search/category/tag filters — no re-sort needed, order preserved
+  const filteredExpenses = useMemo(() => {
+    if (!hasActiveFilters) {
+      return monthlyExpenses;
     }
 
     const searchLower = search.toLowerCase();
 
-    return monthlyExpenses
-      .filter((expense) => {
-        const matchesSearch = search
-          ? expense.description.toLowerCase().includes(searchLower)
-          : true;
-        const matchesCategory = selectedCategoryId
-          ? selectedCategoryId === 'uncategorized'
-            ? expense.category_id === null || expense.category_id === undefined
-            : expense.category_id === selectedCategoryId
-          : true;
-        const matchesTag = selectedTagId
-          ? expense.tag_id === selectedTagId
-          : true;
+    return monthlyExpenses.filter((expense) => {
+      const matchesSearch = search
+        ? expense.description.toLowerCase().includes(searchLower)
+        : true;
+      const matchesCategory = selectedCategoryId
+        ? selectedCategoryId === 'uncategorized'
+          ? expense.category_id === null || expense.category_id === undefined
+          : expense.category_id === selectedCategoryId
+        : true;
+      const matchesTag = selectedTagId
+        ? expense.tag_id === selectedTagId
+        : true;
 
-        return matchesSearch && matchesCategory && matchesTag;
-      })
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      return matchesSearch && matchesCategory && matchesTag;
+    });
   }, [monthlyExpenses, search, selectedCategoryId, selectedTagId, hasActiveFilters]);
 
   const handleFilterChange = (newSearch: string, categoryId: string | null) => {

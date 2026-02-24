@@ -300,7 +300,6 @@ const AnalyticsView = () => {
               }
             >
               <Chart
-                key={`${selectedYear}-${monthlyBudget}`}
                 options={chartOptions}
                 series={chartSeries}
                 type="area"

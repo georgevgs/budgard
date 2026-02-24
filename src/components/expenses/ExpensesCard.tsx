@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -28,8 +28,8 @@ import { formatCurrency } from '@/lib/utils.ts';
 
 type ExpenseCardProps = {
   expense: Expense;
-  onEdit: () => void;
-  onDelete: () => void;
+  onEdit: (expense: Expense) => void;
+  onDelete: (id: string) => void;
 };
 
 const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
@@ -53,7 +53,7 @@ const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
   const handleEditClick = () => {
     blurActiveElement();
     setDropdownOpen(false);
-    setTimeout(() => onEdit(), 0);
+    setTimeout(() => onEdit(expense), 0);
   };
 
   return (
@@ -155,7 +155,7 @@ const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
             <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                onDelete();
+                onDelete(expense.id);
                 setShowDeleteDialog(false);
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -202,4 +202,4 @@ const TagBadge = ({ tag }: { tag: Tag }) => {
   );
 };
 
-export default ExpensesCard;
+export default memo(ExpensesCard);
