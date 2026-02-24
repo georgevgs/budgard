@@ -38,14 +38,9 @@ import {
 } from '@/lib/validations';
 import type { RecurringExpense, RecurringExpenseFrequency } from '@/types/RecurringExpense';
 import type { Category } from '@/types/Category';
+import { useTranslation } from 'react-i18next';
 
-const frequencies = [
-  { value: 'weekly', label: 'Weekly', description: 'Every 7 days' },
-  { value: 'biweekly', label: 'Every 2 weeks', description: 'Every 14 days' },
-  { value: 'monthly', label: 'Monthly', description: 'Same day each month' },
-  { value: 'quarterly', label: 'Quarterly', description: 'Every 3 months' },
-  { value: 'yearly', label: 'Yearly', description: 'Once a year' },
-];
+const frequencyValues = ['weekly', 'biweekly', 'monthly', 'quarterly', 'yearly'] as const;
 
 // Calculate estimated monthly cost
 function getMonthlyEstimate(amount: number, frequency: RecurringExpenseFrequency): number {
@@ -113,6 +108,7 @@ const RecurringExpenseForm = ({
   onClose,
 }: RecurringExpenseFormProps) => {
   const { session } = useAuth();
+  const { t } = useTranslation();
 
   const form = useForm<RecurringExpenseFormData>({
     resolver: zodResolver(recurringExpenseSchema),
@@ -158,11 +154,12 @@ const RecurringExpenseForm = ({
       <div className="overflow-y-auto flex-1 px-4 sm:px-6 overscroll-contain" style={{ touchAction: 'pan-y' }}>
         <DialogHeader className="pb-4" data-draggable-area>
           <DialogTitle className="text-xl">
-            {expense ? 'Edit' : 'Add'} Recurring Expense
+            {t('recurring.formTitle', {
+              action: expense ? t('recurring.formEdit') : t('recurring.formAdd'),
+            })}
           </DialogTitle>
           <DialogDescription>
-            Set up an expense that will automatically repeat based on the
-            frequency you choose.
+            {t('recurring.formDescription')}
           </DialogDescription>
         </DialogHeader>
 
@@ -176,7 +173,7 @@ const RecurringExpenseForm = ({
             name="amount"
             render={({ field }) => (
               <FormItem>
-                <Label>Amount</Label>
+                <Label>{t('recurring.amount')}</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                     €
@@ -205,9 +202,9 @@ const RecurringExpenseForm = ({
             name="description"
             render={({ field }) => (
               <FormItem>
-                <Label>Description</Label>
+                <Label>{t('recurring.description')}</Label>
                 <FormControl>
-                  <Input placeholder="e.g., Netflix subscription" {...field} />
+                  <Input placeholder={t('recurring.descriptionPlaceholder')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -219,18 +216,18 @@ const RecurringExpenseForm = ({
             name="category_id"
             render={({ field }) => (
               <FormItem>
-                <Label>Category</Label>
+                <Label>{t('recurring.category')}</Label>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
+                      <SelectValue placeholder={t('recurring.selectCategory')} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="none">No category</SelectItem>
+                    <SelectItem value="none">{t('recurring.noCategory')}</SelectItem>
                     {categories.map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         <div className="flex items-center gap-2">
@@ -254,23 +251,23 @@ const RecurringExpenseForm = ({
             name="frequency"
             render={({ field }) => (
               <FormItem>
-                <Label>Frequency</Label>
+                <Label>{t('recurring.frequency')}</Label>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select frequency" />
+                      <SelectValue placeholder={t('recurring.selectFrequency')} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {frequencies.map((freq) => (
-                      <SelectItem key={freq.value} value={freq.value}>
+                    {frequencyValues.map((freq) => (
+                      <SelectItem key={freq} value={freq}>
                         <div className="flex flex-col">
-                          <span>{freq.label}</span>
+                          <span>{t(`recurring.frequencies.${freq}`)}</span>
                           <span className="text-xs text-muted-foreground">
-                            {freq.description}
+                            {t(`recurring.frequencyDescriptions.${freq}`)}
                           </span>
                         </div>
                       </SelectItem>
@@ -282,13 +279,13 @@ const RecurringExpenseForm = ({
             )}
           />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="start_date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <Label>Start date</Label>
+                  <Label>{t('recurring.startDateLabel')}</Label>
                   <Popover modal={false}>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -303,7 +300,7 @@ const RecurringExpenseForm = ({
                           {field.value ? (
                             format(field.value, 'MMM d, yyyy')
                           ) : (
-                            <span>Pick a date</span>
+                            <span>{t('recurring.pickDate')}</span>
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
@@ -333,7 +330,7 @@ const RecurringExpenseForm = ({
               name="end_date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <Label>End date (optional)</Label>
+                  <Label>{t('recurring.endDateLabel')}</Label>
                   <Popover modal={false}>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -348,7 +345,7 @@ const RecurringExpenseForm = ({
                           {field.value ? (
                             format(field.value, 'MMM d, yyyy')
                           ) : (
-                            <span>No end date</span>
+                            <span>{t('recurring.noEndDate')}</span>
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
@@ -374,17 +371,21 @@ const RecurringExpenseForm = ({
             <div className="rounded-lg bg-muted/50 p-3 text-sm space-y-1">
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <Info className="h-3.5 w-3.5" />
-                <span>Preview</span>
+                <span>{t('recurring.preview')}</span>
               </div>
               <div className="text-foreground">
                 {nextOccurrence && (
                   <p>
-                    First expense: <strong>{format(nextOccurrence, 'MMM d, yyyy')}</strong>
+                    {t('recurring.firstExpense', {
+                      date: format(nextOccurrence, 'MMM d, yyyy'),
+                    })}
                   </p>
                 )}
                 {monthlyEstimate > 0 && watchedFrequency !== 'monthly' && (
                   <p className="text-muted-foreground">
-                    ~{formatCurrency(monthlyEstimate)}/month
+                    {t('recurring.perMonth', {
+                      amount: formatCurrency(monthlyEstimate),
+                    })}
                   </p>
                 )}
               </div>
@@ -393,14 +394,14 @@ const RecurringExpenseForm = ({
 
           <div className="flex justify-end gap-2 pt-4 pb-2">
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={form.formState.isSubmitting}>
               {form.formState.isSubmitting
-                ? 'Saving...'
+                ? t('common.saving')
                 : expense
-                  ? 'Update'
-                  : 'Create'}
+                  ? t('recurring.update')
+                  : t('recurring.create')}
             </Button>
           </div>
         </form>

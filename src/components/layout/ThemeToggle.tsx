@@ -29,10 +29,10 @@ const ThemeToggle: React.FC = () => {
           variant="ghost"
           size="sm"
           className="w-8 h-8 p-0"
-          aria-label={t('theme.toggle')}
+          aria-label={t('common.toggleTheme')}
         >
           {themeIcons[theme as Theme]}
-          <span className="sr-only">{t('theme.toggle')}</span>
+          <span className="sr-only">{t('common.toggleTheme')}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

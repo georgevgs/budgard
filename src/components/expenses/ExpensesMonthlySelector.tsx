@@ -73,7 +73,7 @@ const ExpensesMonthlySelector = ({
             className="font-medium text-sm h-8"
             aria-label={t('navigation.selectMonth')}
           >
-            {format(selectedDate, 'MMMM yyyy', { locale: dateLocale })}
+            {format(selectedDate, 'LLLL yyyy', { locale: dateLocale })}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-64 p-0" align="center">
@@ -111,7 +111,7 @@ const ExpensesMonthlySelector = ({
                 )}
                 onClick={() => handleMonthSelect(index)}
               >
-                {format(setMonth(selectedDate, index), 'MMM', {
+                {format(setMonth(selectedDate, index), 'LLL', {
                   locale: dateLocale,
                 })}
               </Button>

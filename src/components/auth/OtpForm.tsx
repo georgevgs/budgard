@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { emailSchema } from '@/lib/validations';
 import { useNavigate } from 'react-router-dom';
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
+import { useTranslation } from 'react-i18next';
 
 type OtpFormProps = {
   onSuccess?: () => void;
@@ -30,6 +31,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
   const { toast } = useToast();
   const { isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleRequestOTP = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,8 +47,8 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
     // Verify Turnstile token exists
     if (!turnstileToken) {
       toast({
-        title: 'Verification Required',
-        description: 'Please complete the security check.',
+        title: t('auth.verificationRequired'),
+        description: t('auth.securityCheck'),
         variant: 'destructive',
       });
       return;
@@ -67,13 +69,13 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
 
       setOtpSent(true);
       toast({
-        title: 'Code Sent',
-        description: 'Check your email for the 6-digit code.',
+        title: t('auth.codeSent'),
+        description: t('auth.checkEmail'),
       });
     } catch {
       toast({
-        title: 'Error',
-        description: 'Failed to send verification code. Please try again.',
+        title: t('common.error'),
+        description: t('auth.sendFailed'),
         variant: 'destructive',
       });
       // Reset Turnstile on error so user can try again
@@ -94,14 +96,14 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
       if (error) throw error;
 
       toast({
-        title: 'Success',
-        description: 'Successfully signed in!',
+        title: t('common.success'),
+        description: t('auth.signedIn'),
       });
       onSuccess?.();
     } catch {
       toast({
-        title: 'Error',
-        description: 'Invalid verification code. Please try again.',
+        title: t('common.error'),
+        description: t('auth.invalidCode'),
         variant: 'destructive',
       });
     } finally {
@@ -116,7 +118,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
           <div className="space-y-2">
             <Input
               type="email"
-              placeholder="Enter your email"
+              placeholder={t('auth.enterEmail')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={`w-full h-10 ${emailError ? 'border-destructive' : ''}`}
@@ -124,7 +126,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
               autoCorrect="off"
               autoCapitalize="none"
               spellCheck={false}
-              aria-label="Email address"
+              aria-label={t('auth.enterEmail')}
               aria-invalid={!!emailError}
               aria-describedby={emailError ? 'email-error' : undefined}
             />
@@ -181,7 +183,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
             className="w-full h-10"
             disabled={loading || isAuthLoading || !turnstileToken}
           >
-            {loading ? 'Sending...' : 'Send Code'}
+            {loading ? t('auth.sending') : t('auth.sendCode')}
           </Button>
         </form>
       </div>
@@ -193,7 +195,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
       <div className="flex flex-col items-center gap-2 mb-4">
         <CheckCircle2 className="h-8 w-8 text-primary" />
         <p className="text-muted-foreground text-sm text-center px-4">
-          Enter the 6-digit code sent to {email}
+          {t('auth.codeEmailSent', { email })}
         </p>
       </div>
 
@@ -224,7 +226,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
             className="w-full h-10"
             disabled={loading || isAuthLoading || otp.length !== 6}
           >
-            {loading ? 'Verifying...' : 'Verify Code'}
+            {loading ? t('auth.verifying') : t('auth.verifyCode')}
           </Button>
 
           <Button
@@ -237,7 +239,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
             }}
             disabled={loading || isAuthLoading}
           >
-            Use Different Email
+            {t('auth.useDifferentEmail')}
           </Button>
         </div>
       </form>

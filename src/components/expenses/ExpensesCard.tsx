@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
+import { el, enUS } from 'date-fns/locale';
 import type { Expense } from '@/types/Expense';
 import type { Tag } from '@/types/Tag';
 import { formatCurrency } from '@/lib/utils.ts';
@@ -33,7 +34,8 @@ type ExpenseCardProps = {
 };
 
 const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'el' ? el : enUS;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
@@ -93,7 +95,7 @@ const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(expense.date), 'MMMM d, yyyy')}
+                    {format(new Date(expense.date), 'MMMM d, yyyy', { locale: dateLocale })}
                   </p>
                 </div>
 

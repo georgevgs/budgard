@@ -13,7 +13,9 @@
     "saving": "Saving...",
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "update": "Update",
+    "create": "Create"
   },
   "auth": {
     "signIn": "Sign In",
@@ -22,7 +24,17 @@
     "enterEmail": "Enter your email",
     "sendCode": "Send Code",
     "verifyCode": "Verify Code",
-    "invalidCode": "Invalid verification code. Please try again."
+    "invalidCode": "Invalid verification code. Please try again.",
+    "verificationRequired": "Verification Required",
+    "securityCheck": "Please complete the security check.",
+    "codeSent": "Code Sent",
+    "checkEmail": "Check your email for the 6-digit code.",
+    "sendFailed": "Failed to send verification code. Please try again.",
+    "signedIn": "Successfully signed in!",
+    "codeEmailSent": "Enter the 6-digit code sent to {{email}}",
+    "sending": "Sending...",
+    "verifying": "Verifying...",
+    "useDifferentEmail": "Use Different Email"
   },
   "expenses": {
     "recurring": "Recurring",
@@ -73,7 +85,9 @@
       "activeFilters": "Active filters:",
       "categoryFilter": "Category: {{name}}",
       "clearAll": "Clear all",
-      "toggleFilters": "Toggle filters"
+      "toggleFilters": "Toggle filters",
+      "allTags": "All tags",
+      "selectTag": "All tags"
     }
   },
   "categories": {
@@ -114,10 +128,48 @@
     "endDate": "End Date",
     "frequencies": {
       "weekly": "Weekly",
+      "biweekly": "Every 2 weeks",
       "monthly": "Monthly",
       "quarterly": "Quarterly",
       "yearly": "Yearly"
-    }
+    },
+    "due": "Due",
+    "next": "Next: {{date}}",
+    "deleteTitle": "Delete Recurring Expense",
+    "deleteConfirmation": "Are you sure you want to delete this recurring expense? This won't affect previously generated expenses.",
+    "expensesTitle": "Recurring Expenses",
+    "monthlyFrom": "~{{amount}} / month from {{count}} active",
+    "noRecurring": "No recurring expenses set up yet",
+    "noRecurringDescription": "Add recurring expenses like rent, subscriptions, or bills",
+    "addFirstRecurring": "Add Your First Recurring Expense",
+    "formTitle": "{{action}} Recurring Expense",
+    "formAdd": "Add",
+    "formEdit": "Edit",
+    "formDescription": "Set up an expense that will automatically repeat based on the frequency you choose.",
+    "amount": "Amount",
+    "description": "Description",
+    "descriptionPlaceholder": "e.g. Netflix subscription",
+    "category": "Category",
+    "selectCategory": "Select a category",
+    "noCategory": "No category",
+    "selectFrequency": "Select frequency",
+    "startDateLabel": "Start date",
+    "endDateLabel": "End date (optional)",
+    "pickDate": "Pick a date",
+    "noEndDate": "No end date",
+    "preview": "Preview",
+    "firstExpense": "First expense: {{date}}",
+    "perMonth": "~{{amount}}/month",
+    "frequencyDescriptions": {
+      "weekly": "Every 7 days",
+      "biweekly": "Every 14 days",
+      "monthly": "Same day each month",
+      "quarterly": "Every 3 months",
+      "yearly": "Once a year"
+    },
+    "create": "Create",
+    "update": "Update",
+    "toggleLabel": "Toggle {{description}}"
   },
   "navigation": {
     "expenses": "Expenses",
@@ -164,7 +216,20 @@
     "expensesByCategory": "Expenses by Category",
     "monthlyTrends": "Monthly Trends",
     "highestMonth": "Highest Spending Month",
-    "lowestMonth": "Lowest Spending Month"
+    "lowestMonth": "Lowest Spending Month",
+    "lastMonth": "Last Month",
+    "thisMonth": "This Month",
+    "selectYear": "Select year",
+    "totalSpent": "Total Spent",
+    "monthlyAverage": "Monthly Average",
+    "noSpendingData": "No spending data available for {{year}}",
+    "topCategories": "Top Categories",
+    "noCategorizedExpenses": "No categorized expenses for {{year}}",
+    "monthlySpending": "Monthly Spending",
+    "vsLastMonthUp": "+{{percent}}% vs last month",
+    "vsLastMonthDown": "{{percent}}% vs last month",
+    "sameAsLastMonth": "Same as last month",
+    "budgetLabel": "Budget: {{amount}} €"
   },
   "import": {
     "title": "Import Expenses",
@@ -211,5 +276,32 @@
     "invalidType": "Invalid file type. Please use JPEG, PNG, WebP, or HEIC",
     "fileTooLarge": "File is too large. Maximum size is 10MB",
     "changeReceipt": "Change receipt"
+  },
+  "landing": {
+    "hero": {
+      "heading1": "Track expenses with",
+      "heading2": "simplicity and ease",
+      "subtitle": "A minimal and intuitive expense tracker that helps you manage your finances without the complexity. Start organizing your spending today.",
+      "getStarted": "Get Started",
+      "freeToUse": "Free to use · No credit card required",
+      "previewBudget": "{{percent}}% of {{amount}} budget"
+    },
+    "features": {
+      "easyTracking": {
+        "title": "Easy Tracking",
+        "description": "Record your expenses quickly and efficiently",
+        "iconAlt": "Money bag"
+      },
+      "clearOverview": {
+        "title": "Clear Overview",
+        "description": "See where your money goes at a glance",
+        "iconAlt": "Bar chart"
+      },
+      "secureData": {
+        "title": "Secure Data",
+        "description": "Your financial data is always protected",
+        "iconAlt": "Shield"
+      }
+    }
   }
 }

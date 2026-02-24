@@ -12,7 +12,7 @@ type ExpensesEmptyProps = {
 const ExpensesEmpty = ({ selectedMonth, onAddClick }: ExpensesEmptyProps) => {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'el' ? el : enUS;
-  const monthLabel = format(new Date(selectedMonth + '-01'), 'MMMM yyyy', {
+  const monthLabel = format(new Date(selectedMonth + '-01'), 'LLLL yyyy', {
     locale: dateLocale,
   });
 
