@@ -154,6 +154,16 @@
         }
     }
 
+    /* Eliminate 300ms tap delay on all interactive elements */
+    button,
+    a,
+    input,
+    select,
+    textarea,
+    [role='button'] {
+        touch-action: manipulation;
+    }
+
     /* iOS-native touch feedback for tappable elements */
     button,
     a,

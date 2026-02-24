@@ -96,7 +96,7 @@ const RecurringExpenseCard = ({
                   </Badge>
                 )}
               </div>
-              <p className="text-base font-semibold mt-1">
+              <p className="text-base font-bold mt-1">
                 {formatCurrency(expense.amount)}
               </p>
               {nextOccurrence && expense.active && (

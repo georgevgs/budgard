@@ -75,24 +75,15 @@ const BudgetProgress = ({
         </div>
 
         {/* Progress bar */}
-        <div className="relative">
-          <Progress
-            value={percentage}
-            className="h-2"
-            aria-label={t('budget.budgetProgress', {
-              current: formatCurrency(monthlySpent),
-              total: formatCurrency(monthlyBudget),
-            })}
-          />
-          {/* Custom colored indicator overlay */}
-          <div
-            className={cn(
-              'absolute top-0 left-0 h-2 rounded-full transition-all',
-              getProgressColor(),
-            )}
-            style={{ width: `${percentage}%` }}
-          />
-        </div>
+        <Progress
+          value={percentage}
+          className="h-2"
+          indicatorClassName={getProgressColor()}
+          aria-label={t('budget.budgetProgress', {
+            current: formatCurrency(monthlySpent),
+            total: formatCurrency(monthlyBudget),
+          })}
+        />
 
         {/* Budget amounts */}
         <div className="flex items-center justify-between text-sm">
