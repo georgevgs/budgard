@@ -41,8 +41,10 @@ export const useExpensesFilter = ({
         (expense) =>
           format(new Date(expense.date), 'yyyy-MM') === selectedMonth,
       )
-      .toSorted(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+      .slice()
+      .sort(
+        (a: Expense, b: Expense) =>
+          new Date(b.date).getTime() - new Date(a.date).getTime(),
       );
   }, [expenses, selectedMonth]);
 
