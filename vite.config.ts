@@ -41,7 +41,7 @@ export default defineConfig({
               cacheName: "supabase-cache",
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24
+                maxAgeSeconds: 60 * 60 * 2
               },
               cacheableResponse: {
                 statuses: [0, 200]
@@ -66,7 +66,6 @@ export default defineConfig({
             '@radix-ui/react-dialog',
             '@radix-ui/react-dropdown-menu',
             '@radix-ui/react-select',
-            '@radix-ui/react-tabs',
             '@radix-ui/react-toast',
             '@radix-ui/react-popover'
           ],

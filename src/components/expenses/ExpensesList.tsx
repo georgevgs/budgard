@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { Download, Upload } from 'lucide-react';
@@ -121,29 +121,29 @@ const ExpensesList = () => {
     [monthlyBudget, setMonthlyBudget, toast, t],
   );
 
+  const monthlyTotal = useMemo(
+    () => monthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0),
+    [monthlyExpenses],
+  );
+
+  const filteredTotal = useMemo(
+    () => filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0),
+    [filteredExpenses],
+  );
+
+  const handleFormClose = useCallback(() => {
+    setFormType(null);
+    setSelectedExpense(undefined);
+  }, []);
+
+  const handleExpenseEdit = useCallback((expense: Expense) => {
+    setSelectedExpense(expense);
+    setFormType(FORM_TYPES.EDIT_EXPENSE);
+  }, []);
+
   if (!isInitialized || isLoading) {
     return <ExpenseLoadingState />;
   }
-
-  const monthlyTotal = monthlyExpenses.reduce(
-    (sum, expense) => sum + expense.amount,
-    0,
-  );
-
-  const filteredTotal = filteredExpenses.reduce(
-    (sum, expense) => sum + expense.amount,
-    0,
-  );
-
-  const handleFormClose = () => {
-    setFormType(null);
-    setSelectedExpense(undefined);
-  };
-
-  const handleExpenseEdit = (expense: Expense) => {
-    setSelectedExpense(expense);
-    setFormType(FORM_TYPES.EDIT_EXPENSE);
-  };
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-58px)]">

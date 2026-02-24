@@ -85,8 +85,8 @@ const ExpensesPagination = ({
           <ExpensesCard
             key={expense.id}
             expense={expense}
-            onEdit={() => onEdit(expense)}
-            onDelete={() => onDelete(expense.id)}
+            onEdit={onEdit}
+            onDelete={onDelete}
           />
         ))}
       </div>
