@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { formatCurrency, parseCurrencyInput } from '@/lib/utils';
 import RecurringLoadingState from '@/components/recurring/RecurringLoading';
+import { useTranslation } from 'react-i18next';
 
 // Helper to calculate next occurrence date
 function calculateNextOccurrence(expense: RecurringExpense): Date | null {
@@ -69,6 +70,7 @@ const RecurringExpensesList = () => {
     handleRecurringExpenseDelete: deleteRecurringExpense,
     handleRecurringExpenseToggle: toggleRecurringExpense,
   } = useDataOperations();
+  const { t } = useTranslation();
 
   const handleSubmit = async (values: RecurringExpenseFormData) => {
     if (!session?.user?.id) return;
@@ -140,16 +142,21 @@ const RecurringExpensesList = () => {
       <div className="flex flex-col gap-4">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <h2 className="text-lg font-semibold">Recurring Expenses</h2>
+            <h2 className="text-lg font-semibold">
+              {t('recurring.expensesTitle')}
+            </h2>
             {activeExpenses.length > 0 && (
               <p className="text-sm text-muted-foreground">
-                ~{formatCurrency(monthlyTotal)} / month from {activeExpenses.length} active
+                {t('recurring.monthlyFrom', {
+                  amount: formatCurrency(monthlyTotal),
+                  count: activeExpenses.length,
+                })}
               </p>
             )}
           </div>
           <Button onClick={() => setIsFormOpen(true)} size="sm" className="shrink-0">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Recurring
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">{t('recurring.addRecurring')}</span>
           </Button>
         </div>
       </div>
@@ -160,14 +167,14 @@ const RecurringExpensesList = () => {
             <div className="flex flex-col items-center gap-3">
               <Repeat className="h-12 w-12 text-muted-foreground/50" />
               <div>
-                <p className="font-medium">No recurring expenses set up yet</p>
+                <p className="font-medium">{t('recurring.noRecurring')}</p>
                 <p className="text-sm text-muted-foreground">
-                  Add recurring expenses like rent, subscriptions, or bills
+                  {t('recurring.noRecurringDescription')}
                 </p>
               </div>
-              <Button onClick={() => setIsFormOpen(true)} variant="outline" className="mt-2">
+              <Button onClick={() => setIsFormOpen(true)} variant="outline" size="sm" className="mt-2">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Your First Recurring Expense
+                {t('recurring.addFirstRecurring')}
               </Button>
             </div>
           </Card>

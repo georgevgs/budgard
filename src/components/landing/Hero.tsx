@@ -1,11 +1,14 @@
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Wallet, TrendingDown, CreditCard } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 type HeroProps = {
   onGetStarted: () => void;
 };
 
 const Hero = ({ onGetStarted }: HeroProps) => {
+  const { t } = useTranslation();
+
   return (
     <div className="relative overflow-hidden pt-12 pb-16">
       {/* Background Pattern */}
@@ -27,16 +30,14 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           </div>
 
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-            Track expenses with
+            {t('landing.hero.heading1')}
             <span className="block mt-1 bg-gradient-to-r from-primary to-primary/50 bg-clip-text text-transparent">
-              simplicity and ease
+              {t('landing.hero.heading2')}
             </span>
           </h1>
 
           <p className="max-w-2xl mx-auto text-base sm:text-lg text-muted-foreground">
-            A minimal and intuitive expense tracker that helps you manage your
-            finances without the complexity. Start organizing your spending
-            today.
+            {t('landing.hero.subtitle')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-2">
@@ -45,13 +46,13 @@ const Hero = ({ onGetStarted }: HeroProps) => {
               onClick={onGetStarted}
               className="group min-w-[200px] animate-fade-up delay-200"
             >
-              Get Started
+              {t('landing.hero.getStarted')}
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </div>
 
           <p className="text-xs text-muted-foreground animate-fade-up delay-300">
-            Free to use · No credit card required
+            {t('landing.hero.freeToUse')}
           </p>
 
           {/* App Preview */}

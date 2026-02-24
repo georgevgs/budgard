@@ -22,16 +22,10 @@ import {
 import { MoreVertical, Clock } from 'lucide-react';
 import CategoryBadge from '@/components/categories/CategoryBadge';
 import { format } from 'date-fns';
+import { el, enUS } from 'date-fns/locale';
 import { formatCurrency } from '@/lib/utils';
 import type { RecurringExpense } from '@/types/RecurringExpense';
-
-const frequencyLabels: Record<string, string> = {
-  weekly: 'Weekly',
-  biweekly: 'Every 2 weeks',
-  monthly: 'Monthly',
-  quarterly: 'Quarterly',
-  yearly: 'Yearly',
-};
+import { useTranslation } from 'react-i18next';
 
 interface RecurringExpenseCardProps {
   expense: RecurringExpense;
@@ -52,6 +46,8 @@ const RecurringExpenseCard = ({
 }: RecurringExpenseCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'el' ? el : enUS;
 
   const blurActiveElement = () => {
     if (document.activeElement instanceof HTMLElement) {
@@ -88,11 +84,13 @@ const RecurringExpenseCard = ({
                   <CategoryBadge category={expense.category} />
                 )}
                 <Badge variant="secondary" className="text-xs">
-                  {frequencyLabels[expense.frequency] || expense.frequency}
+                  {t(`recurring.frequencies.${expense.frequency}`, {
+                    defaultValue: expense.frequency,
+                  })}
                 </Badge>
                 {isOverdue && expense.active && (
                   <Badge variant="destructive" className="text-xs">
-                    Due
+                    {t('recurring.due')}
                   </Badge>
                 )}
               </div>
@@ -102,7 +100,11 @@ const RecurringExpenseCard = ({
               {nextOccurrence && expense.active && (
                 <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" />
-                  <span>Next: {format(nextOccurrence, 'MMM d, yyyy')}</span>
+                  <span>
+                    {t('recurring.next', {
+                      date: format(nextOccurrence, 'MMM d, yyyy', { locale: dateLocale }),
+                    })}
+                  </span>
                 </div>
               )}
             </div>
@@ -112,24 +114,26 @@ const RecurringExpenseCard = ({
               <Switch
                 checked={expense.active}
                 onCheckedChange={(checked) => onToggle(expense.id, checked)}
-                aria-label={`Toggle ${expense.description}`}
+                aria-label={t('recurring.toggleLabel', {
+                  description: expense.description,
+                })}
               />
               <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
                     <MoreVertical className="h-4 w-4" />
-                    <span className="sr-only">Open menu</span>
+                    <span className="sr-only">{t('common.openMenu')}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-32">
                   <DropdownMenuItem onClick={handleEditClick}>
-                    Edit
+                    {t('common.edit')}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={handleDeleteClick}
                     className="text-destructive focus:text-destructive"
                   >
-                    Delete
+                    {t('common.delete')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -144,14 +148,13 @@ const RecurringExpenseCard = ({
           onOpenChange={setShowDeleteDialog}
         >
           <AlertDialogHeader data-draggable-area>
-            <AlertDialogTitle>Delete Recurring Expense</AlertDialogTitle>
+            <AlertDialogTitle>{t('recurring.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this recurring expense? This
-              won&apos;t affect previously generated expenses.
+              {t('recurring.deleteConfirmation')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 onDelete(expense.id);
@@ -159,7 +162,7 @@ const RecurringExpenseCard = ({
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

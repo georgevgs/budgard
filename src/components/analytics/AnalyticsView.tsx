@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect, lazy, Suspense } from 'react';
 import { format, parseISO, getYear } from 'date-fns';
+import { el, enUS } from 'date-fns/locale';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useData } from '@/contexts/DataContext';
@@ -11,12 +12,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
+import { useTranslation } from 'react-i18next';
 
 // Lazy load the heavy chart component
 const Chart = lazy(() => import('react-apexcharts'));
 
 const AnalyticsView = () => {
   const { expenses, categories, monthlyBudget, isLoading } = useData();
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'el' ? el : enUS;
 
   const availableYears = useMemo(() => {
     const years = new Set(expenses.map((e) => getYear(parseISO(e.date))));
@@ -50,12 +54,12 @@ const AnalyticsView = () => {
       );
 
       return {
-        month: format(parseISO(`${month}-01`), 'MMM'),
-        fullMonth: format(parseISO(`${month}-01`), 'MMMM'),
+        month: format(parseISO(`${month}-01`), 'LLL', { locale: dateLocale }),
+        fullMonth: format(parseISO(`${month}-01`), 'LLLL', { locale: dateLocale }),
         amount: monthExpenses.reduce((sum, e) => sum + e.amount, 0),
       };
     });
-  }, [yearExpenses, selectedYear]);
+  }, [yearExpenses, selectedYear, dateLocale]);
 
   const monthComparison = useMemo(() => {
     const now = new Date();
@@ -76,14 +80,14 @@ const AnalyticsView = () => {
       lastMonthAmount > 0 ? (delta / lastMonthAmount) * 100 : null;
 
     return {
-      thisMonthLabel: format(now, 'MMMM yyyy'),
-      lastMonthLabel: format(lastMonthDate, 'MMMM yyyy'),
+      thisMonthLabel: format(now, 'LLLL yyyy', { locale: dateLocale }),
+      lastMonthLabel: format(lastMonthDate, 'LLLL yyyy', { locale: dateLocale }),
       thisMonthAmount,
       lastMonthAmount,
       delta,
       percentChange,
     };
-  }, [expenses]);
+  }, [expenses, dateLocale]);
 
   const yearlyStats = useMemo(() => {
     const totalSpent = yearExpenses.reduce((sum, e) => sum + e.amount, 0);
@@ -147,7 +151,7 @@ const AnalyticsView = () => {
                 borderColor: '#f59e0b',
                 strokeDashArray: 5,
                 label: {
-                  text: `Budget: ${monthlyBudget} €`,
+                  text: t('analytics.budgetLabel', { amount: monthlyBudget }),
                   position: 'right',
                   style: {
                     color: '#fff',
@@ -207,17 +211,17 @@ const AnalyticsView = () => {
       },
       colors: ['hsl(var(--primary))'],
     }),
-    [monthlyData, monthlyBudget],
+    [monthlyData, monthlyBudget, t],
   );
 
   const chartSeries = useMemo(
     () => [
       {
-        name: 'Monthly Spending',
+        name: t('analytics.monthlySpending'),
         data: monthlyData.map((d) => d.amount),
       },
     ],
-    [monthlyData],
+    [monthlyData, t],
   );
 
   const formatAmount = (amount: number) => `${amount.toFixed(2)} €`;
@@ -232,7 +236,7 @@ const AnalyticsView = () => {
       <div className="grid grid-cols-2 gap-4">
         <div className="rounded-lg border bg-card p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
-            Last Month
+            {t('analytics.lastMonth')}
           </p>
           <p className="text-xl font-semibold">
             {formatAmount(monthComparison.lastMonthAmount)}
@@ -243,7 +247,7 @@ const AnalyticsView = () => {
         </div>
         <div className="rounded-lg border bg-card p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
-            This Month
+            {t('analytics.thisMonth')}
           </p>
           <p className="text-xl font-semibold">
             {formatAmount(monthComparison.thisMonthAmount)}
@@ -252,6 +256,7 @@ const AnalyticsView = () => {
             monthComparison.percentChange,
             monthComparison.delta,
             monthComparison.lastMonthAmount,
+            t,
           )}
         </div>
       </div>
@@ -262,7 +267,7 @@ const AnalyticsView = () => {
           onValueChange={(value) => setSelectedYear(parseInt(value))}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select year" />
+            <SelectValue placeholder={t('analytics.selectYear')} />
           </SelectTrigger>
           <SelectContent>
             {availableYears.map((year) => (
@@ -275,13 +280,17 @@ const AnalyticsView = () => {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-lg border bg-card p-4">
-            <p className="text-sm text-muted-foreground">Total Spent</p>
+            <p className="text-sm text-muted-foreground">
+              {t('analytics.totalSpent')}
+            </p>
             <p className="text-xl font-semibold">
               {formatAmount(yearlyStats.totalSpent)}
             </p>
           </div>
           <div className="rounded-lg border bg-card p-4">
-            <p className="text-sm text-muted-foreground">Monthly Average</p>
+            <p className="text-sm text-muted-foreground">
+              {t('analytics.monthlyAverage')}
+            </p>
             <p className="text-xl font-semibold">
               {formatAmount(yearlyStats.monthlyAverage)}
             </p>
@@ -315,13 +324,13 @@ const AnalyticsView = () => {
           <CardContent className="p-6 space-y-4">
             {yearlyStats.activeMonths === 0 ? (
               <div className="text-center text-muted-foreground py-8">
-                No spending data available for {selectedYear}
+                {t('analytics.noSpendingData', { year: selectedYear })}
               </div>
             ) : (
               <>
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                    Highest Spending Month
+                    {t('analytics.highestMonth')}
                   </h3>
                   <p className="text-2xl font-semibold">
                     {formatAmount(yearlyStats.highestMonth?.amount || 0)}
@@ -333,7 +342,7 @@ const AnalyticsView = () => {
                 {yearlyStats.activeMonths > 1 && yearlyStats.lowestMonth && (
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                      Lowest Spending Month
+                      {t('analytics.lowestMonth')}
                     </h3>
                     <p className="text-2xl font-semibold">
                       {formatAmount(yearlyStats.lowestMonth.amount)}
@@ -351,11 +360,11 @@ const AnalyticsView = () => {
         <Card>
           <CardContent className="p-6">
             <h3 className="text-sm font-medium text-muted-foreground mb-4">
-              Top Categories
+              {t('analytics.topCategories')}
             </h3>
             {yearlyStats.categoryBreakdown.length === 0 ? (
               <div className="text-center text-muted-foreground py-8">
-                No categorized expenses for {selectedYear}
+                {t('analytics.noCategorizedExpenses', { year: selectedYear })}
               </div>
             ) : (
               <div className="space-y-1">
@@ -413,6 +422,7 @@ function renderMonthChangeIndicator(
   percentChange: number | null,
   delta: number,
   lastMonthAmount: number,
+  t: (key: string, options?: Record<string, unknown>) => string,
 ) {
   if (percentChange === null || lastMonthAmount === 0) {
     return null;
@@ -422,7 +432,11 @@ function renderMonthChangeIndicator(
     return (
       <div className="flex items-center gap-1 mt-1 text-xs font-medium text-destructive">
         <TrendingUp className="h-3 w-3" />
-        <span>+{percentChange.toFixed(1)}% vs last month</span>
+        <span>
+          {t('analytics.vsLastMonthUp', {
+            percent: percentChange.toFixed(1),
+          })}
+        </span>
       </div>
     );
   }
@@ -431,12 +445,18 @@ function renderMonthChangeIndicator(
     return (
       <div className="flex items-center gap-1 mt-1 text-xs font-medium text-green-600 dark:text-green-400">
         <TrendingDown className="h-3 w-3" />
-        <span>{percentChange.toFixed(1)}% vs last month</span>
+        <span>
+          {t('analytics.vsLastMonthDown', {
+            percent: percentChange.toFixed(1),
+          })}
+        </span>
       </div>
     );
   }
 
   return (
-    <p className="text-xs text-muted-foreground mt-1">Same as last month</p>
+    <p className="text-xs text-muted-foreground mt-1">
+      {t('analytics.sameAsLastMonth')}
+    </p>
   );
 }
