@@ -6,6 +6,8 @@ import type { Expense } from '@/types/Expense';
 
 type ExpensesMonthlyOverviewProps = {
   monthlyTotal: number;
+  filteredTotal: number;
+  hasActiveFilters: boolean;
   selectedMonth: string;
   currentMonth: string;
   isExpanded?: boolean;
@@ -17,6 +19,8 @@ type ExpensesMonthlyOverviewProps = {
 
 const ExpensesMonthlyOverview = ({
   monthlyTotal,
+  filteredTotal,
+  hasActiveFilters,
   selectedMonth,
   currentMonth,
   isExpanded = false,
@@ -46,9 +50,18 @@ const ExpensesMonthlyOverview = ({
         )}
       >
         <p className="text-sm font-medium text-muted-foreground">
-          {t('expenses.monthlyTotal')}
+          {hasActiveFilters
+            ? t('expenses.filteredTotal')
+            : t('expenses.monthlyTotal')}
         </p>
-        <p className="text-2xl font-bold">{formatCurrency(monthlyTotal)}</p>
+        <p className="text-2xl font-bold">
+          {formatCurrency(hasActiveFilters ? filteredTotal : monthlyTotal)}
+        </p>
+        {hasActiveFilters && (
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {t('expenses.ofMonthlyTotal', { total: formatCurrency(monthlyTotal) })}
+          </p>
+        )}
         {hasExpenses && (
           <div className="flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
             <ChevronDown
