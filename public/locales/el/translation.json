@@ -43,6 +43,8 @@
     "monthlyAverage": "Μηνιαίος Μέσος Όρος",
     "loading": "Φόρτωση εξόδων...",
     "monthlyTotal": "Μηνιαίο Σύνολο",
+    "filteredTotal": "Φιλτραρισμένο Σύνολο",
+    "ofMonthlyTotal": "από {{total}} σύνολο",
     "showBreakdown": "Εμφάνιση ανάλυσης",
     "hideBreakdown": "Απόκρυψη ανάλυσης",
     "noExpensesFor": "Δεν υπάρχουν έξοδα για {{month}}",

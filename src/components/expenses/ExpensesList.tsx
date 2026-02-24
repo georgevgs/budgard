@@ -130,6 +130,11 @@ const ExpensesList = () => {
     0,
   );
 
+  const filteredTotal = filteredExpenses.reduce(
+    (sum, expense) => sum + expense.amount,
+    0,
+  );
+
   const handleFormClose = () => {
     setFormType(null);
     setSelectedExpense(undefined);
@@ -151,6 +156,8 @@ const ExpensesList = () => {
           />
           <ExpensesMonthlyOverview
             monthlyTotal={monthlyTotal}
+            filteredTotal={filteredTotal}
+            hasActiveFilters={hasActiveFilters}
             selectedMonth={selectedMonth}
             currentMonth={currentMonth}
             isExpanded={isDashboardVisible}

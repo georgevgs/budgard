@@ -43,6 +43,8 @@
     "monthlyAverage": "Monthly Average",
     "loading": "Loading expenses...",
     "monthlyTotal": "Monthly Total",
+    "filteredTotal": "Filtered Total",
+    "ofMonthlyTotal": "of {{total}} total",
     "showBreakdown": "Show breakdown",
     "hideBreakdown": "Hide breakdown",
     "noExpensesFor": "No expenses for {{month}}",
