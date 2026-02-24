@@ -58,7 +58,7 @@ const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
 
   return (
     <>
-      <Card className="rounded-lg transition-colors hover:bg-accent overflow-hidden">
+      <Card className="rounded-lg transition-colors hover:bg-accent overflow-hidden border-border/60">
         <CardContent className="p-0">
           <div className="flex">
             {renderCategoryAccent(expense)}
@@ -98,7 +98,7 @@ const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
                 </div>
 
                 <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-                  <p className="text-lg font-semibold tabular-nums">
+                  <p className="text-lg font-bold tabular-nums">
                     {formatCurrency(expense.amount)}
                   </p>
 

@@ -96,7 +96,7 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
         <Button
           size="icon"
           className={cn(
-            'h-14 w-14 rounded-full shadow-lg transition-transform duration-200 pointer-events-auto',
+            'h-14 w-14 rounded-full shadow-lg shadow-primary/30 transition-transform duration-200 pointer-events-auto',
             isOpen && 'rotate-45',
           )}
           onClick={toggleMenu}
