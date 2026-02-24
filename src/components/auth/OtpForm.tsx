@@ -121,6 +121,9 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
               onChange={(e) => setEmail(e.target.value)}
               className={`w-full h-10 ${emailError ? 'border-destructive' : ''}`}
               disabled={loading || isAuthLoading}
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
               aria-label="Email address"
               aria-invalid={!!emailError}
               aria-describedby={emailError ? 'email-error' : undefined}
@@ -201,6 +204,8 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
             value={otp}
             onChange={setOtp}
             disabled={loading || isAuthLoading}
+            inputMode="numeric"
+            pattern="[0-9]*"
           >
             <InputOTPGroup>
               <InputOTPSlot index={0} />
