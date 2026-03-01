@@ -31,9 +31,10 @@ type ExpenseCardProps = {
   expense: Expense;
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
+  searchQuery?: string;
 };
 
-const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
+const ExpensesCard = ({ expense, onEdit, onDelete, searchQuery }: ExpenseCardProps) => {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'el' ? el : enUS;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -69,7 +70,7 @@ const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <p className="font-medium text-base truncate max-w-[200px] sm:max-w-none">
-                      {expense.description}
+                      {renderHighlightedText(expense.description, searchQuery)}
                     </p>
                     {expense.category && (
                       <CategoryBadge category={expense.category} />
@@ -178,6 +179,23 @@ const ExpensesCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => {
     </>
   );
 };
+
+function renderHighlightedText(text: string, query: string | undefined) {
+  if (!query) return <>{text}</>;
+  const lower = text.toLowerCase();
+  const queryLower = query.toLowerCase();
+  const idx = lower.indexOf(queryLower);
+  if (idx === -1) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark className="bg-primary/20 text-foreground rounded-sm px-0.5">
+        {text.slice(idx, idx + query.length)}
+      </mark>
+      {text.slice(idx + query.length)}
+    </>
+  );
+}
 
 const renderCategoryAccent = (expense: Expense) => {
   if (!expense.category) return null;

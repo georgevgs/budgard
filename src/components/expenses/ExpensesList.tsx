@@ -33,6 +33,7 @@ interface ExpensesContentProps {
   hasActiveFilters: boolean;
   noMatchMessage: string;
   selectedMonth: string;
+  searchQuery: string;
   onAddClick: () => void;
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
@@ -43,6 +44,7 @@ const ExpensesContent = ({
   hasActiveFilters,
   noMatchMessage,
   selectedMonth,
+  searchQuery,
   onAddClick,
   onEdit,
   onDelete,
@@ -50,7 +52,7 @@ const ExpensesContent = ({
   // Has expenses - show paginated list
   if (expenses.length > 0) {
     return (
-      <ExpensesPagination expenses={expenses} onEdit={onEdit} onDelete={onDelete} />
+      <ExpensesPagination expenses={expenses} onEdit={onEdit} onDelete={onDelete} searchQuery={searchQuery} />
     );
   }
 
@@ -182,6 +184,15 @@ const ExpensesList = () => {
             onClearFilters={handleClearFilters}
           />
 
+          {search.length > 0 && (
+            <p className="text-xs text-muted-foreground px-1">
+              {t('expenses.search.resultCount', {
+                count: filteredExpenses.length,
+                total: monthlyExpenses.length,
+              })}
+            </p>
+          )}
+
           {/* Collapsible Dashboard */}
           <div
             className={cn(
@@ -247,6 +258,7 @@ const ExpensesList = () => {
             hasActiveFilters={hasActiveFilters}
             noMatchMessage={t('expenses.noExpensesMatchFilter')}
             selectedMonth={selectedMonth}
+            searchQuery={search}
             onAddClick={() => setFormType(FORM_TYPES.NEW_EXPENSE)}
             onEdit={handleExpenseEdit}
             onDelete={operations.handleExpenseDelete}

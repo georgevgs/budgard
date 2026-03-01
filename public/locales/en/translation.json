@@ -77,7 +77,8 @@
     "search": {
       "placeholder": "Search expenses...",
       "label": "Search expenses",
-      "active": "Search: {{query}}"
+      "active": "Search: {{query}}",
+      "resultCount": "{{count}} of {{total}} expenses"
     },
     "filter": {
       "allCategories": "All Categories",
