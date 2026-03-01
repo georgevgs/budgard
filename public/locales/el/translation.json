@@ -237,6 +237,11 @@
     "vsLastMonthDown": "{{percent}}% σε σχέση με τον προηγούμενο μήνα",
     "sameAsLastMonth": "Ίδιο με τον προηγούμενο μήνα",
     "budgetLabel": "Προϋπολογισμός: {{amount}} €",
+    "heatmap": {
+      "title": "Ημερήσιες Δαπάνες",
+      "less": "Λίγο",
+      "more": "Πολύ"
+    },
     "insights": {
       "sectionTitle": "Αναλύσεις Δαπανών",
       "monthProjection": "Εκτιμώμενες δαπάνες μήνα: ~{{amount}}",

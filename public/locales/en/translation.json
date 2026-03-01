@@ -237,6 +237,11 @@
     "vsLastMonthDown": "{{percent}}% vs last month",
     "sameAsLastMonth": "Same as last month",
     "budgetLabel": "Budget: {{amount}} €",
+    "heatmap": {
+      "title": "Daily Spending",
+      "less": "Less",
+      "more": "More"
+    },
     "insights": {
       "sectionTitle": "Spending Insights",
       "monthProjection": "On track to spend ~{{amount}} this month",
