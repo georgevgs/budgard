@@ -237,6 +237,10 @@
     "vsLastMonthDown": "{{percent}}% vs last month",
     "sameAsLastMonth": "Same as last month",
     "budgetLabel": "Budget: {{amount}} €",
+    "yearOverYear": {
+      "title": "Year-over-Year Comparison",
+      "noData": "No spending data to compare"
+    },
     "heatmap": {
       "title": "Daily Spending",
       "less": "Less",
