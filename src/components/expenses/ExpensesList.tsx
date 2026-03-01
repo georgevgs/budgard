@@ -93,10 +93,12 @@ const ExpensesList = () => {
     search,
     selectedCategoryId,
     selectedTagId,
+    sortOrder,
     hasActiveFilters,
     setSearch,
     setSelectedCategoryId,
     setSelectedTagId,
+    setSortOrder,
     handleClearFilters,
   } = useExpensesFilter({
     expenses,
@@ -177,10 +179,12 @@ const ExpensesList = () => {
             search={search}
             selectedCategoryId={selectedCategoryId}
             selectedTagId={selectedTagId}
+            sortOrder={sortOrder}
             hasActiveFilters={hasActiveFilters}
             onSearchChange={setSearch}
             onCategoryChange={setSelectedCategoryId}
             onTagChange={setSelectedTagId}
+            onSortChange={setSortOrder}
             onClearFilters={handleClearFilters}
           />
 

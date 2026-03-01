@@ -80,6 +80,12 @@
       "active": "Αναζήτηση: {{query}}",
       "resultCount": "{{count}} από {{total}} έξοδα"
     },
+    "sort": {
+      "dateDesc": "Ημερομηνία (νεότερο πρώτο)",
+      "dateAsc": "Ημερομηνία (παλαιότερο πρώτο)",
+      "amountDesc": "Ποσό (υψηλότερο πρώτο)",
+      "amountAsc": "Ποσό (χαμηλότερο πρώτο)"
+    },
     "filter": {
       "allCategories": "Όλες οι κατηγορίες",
       "selectCategory": "Επιλογή κατηγορίας",
