@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useOptimistic, useTransition } from 'react';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { Download, Upload } from 'lucide-react';
@@ -21,7 +21,7 @@ import ExpensesPagination from '@/components/expenses/ExpensesPagination';
 import ExpensesFilter from '@/components/expenses/ExpensesFilter';
 import CsvImportDialog from '@/components/expenses/CsvImportDialog';
 import { useExpensesFilter } from '@/hooks/useExpensesFilter';
-import { Expense } from '@/types/Expense';
+import type { Expense } from '@/types/Expense';
 import ExpensesEmpty from '@/components/expenses/ExpensesEmpty';
 
 // ============================================================================
@@ -78,6 +78,8 @@ const ExpensesList = () => {
   const { categories, expenses, tags, isLoading, isInitialized, monthlyBudget, setMonthlyBudget } = useData();
   const operations = useDataOperations();
   const { toast } = useToast();
+  const [optimisticExpenses, addOptimisticExpense] = useOptimistic(expenses, expensesReducer);
+  const [, startTransition] = useTransition();
 
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
   const [formType, setFormType] = useState<FormType>(null);
@@ -86,7 +88,7 @@ const ExpensesList = () => {
   const currentMonth = format(new Date(), 'yyyy-MM');
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
-  // Use the filter hook
+  // Use the filter hook — pass optimistic list so deletes reflect immediately
   const {
     filteredExpenses,
     monthlyExpenses,
@@ -101,9 +103,19 @@ const ExpensesList = () => {
     setSortOrder,
     handleClearFilters,
   } = useExpensesFilter({
-    expenses,
+    expenses: optimisticExpenses,
     selectedMonth,
   });
+
+  const handleExpenseDelete = useCallback(
+    (id: string) => {
+      startTransition(async () => {
+        addOptimisticExpense({ type: 'delete', id });
+        await operations.handleExpenseDelete(id);
+      });
+    },
+    [addOptimisticExpense, operations],
+  );
 
   const handleBudgetUpdate = useCallback(
     async (amount: number) => {
@@ -265,7 +277,7 @@ const ExpensesList = () => {
             searchQuery={search}
             onAddClick={() => setFormType(FORM_TYPES.NEW_EXPENSE)}
             onEdit={handleExpenseEdit}
-            onDelete={operations.handleExpenseDelete}
+            onDelete={handleExpenseDelete}
           />
         </div>
       </div>
@@ -293,3 +305,23 @@ const ExpensesList = () => {
 };
 
 export default ExpensesList;
+
+// ============================================================================
+// Optimistic reducer
+// ============================================================================
+
+type OptimisticAction =
+  | { type: 'add'; expense: Expense }
+  | { type: 'update'; expense: Expense }
+  | { type: 'delete'; id: string };
+
+function expensesReducer(state: Expense[], action: OptimisticAction): Expense[] {
+  switch (action.type) {
+    case 'add':
+      return [action.expense, ...state];
+    case 'update':
+      return state.map((e) => (e.id === action.expense.id ? action.expense : e));
+    case 'delete':
+      return state.filter((e) => e.id !== action.id);
+  }
+}

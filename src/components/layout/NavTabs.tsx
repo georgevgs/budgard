@@ -37,6 +37,7 @@ const NavTabs = () => {
             <NavLink
               key={tab.path}
               to={tab.path}
+              viewTransition
               className={({ isActive }) =>
                 cn(
                   'flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-medium transition-colors',
