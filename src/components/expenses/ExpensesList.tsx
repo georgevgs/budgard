@@ -22,6 +22,7 @@ import ExpensesFilter from '@/components/expenses/ExpensesFilter';
 import CsvImportDialog from '@/components/expenses/CsvImportDialog';
 import { useExpensesFilter } from '@/hooks/useExpensesFilter';
 import type { Expense } from '@/types/Expense';
+import type { ReceiptOptions } from '@/hooks/useDataOperations';
 import ExpensesEmpty from '@/components/expenses/ExpensesEmpty';
 
 // ============================================================================
@@ -75,7 +76,15 @@ const ExpensesContent = ({
 
 const ExpensesList = () => {
   const { t } = useTranslation();
-  const { categories, expenses, tags, isLoading, isInitialized, monthlyBudget, setMonthlyBudget } = useData();
+  const {
+    categories,
+    expenses,
+    tags,
+    isLoading,
+    isInitialized,
+    monthlyBudget,
+    setMonthlyBudget,
+  } = useData();
   const operations = useDataOperations();
   const { toast } = useToast();
   const [optimisticExpenses, addOptimisticExpense] = useOptimistic(expenses, expensesReducer);
@@ -109,12 +118,56 @@ const ExpensesList = () => {
 
   const handleExpenseDelete = useCallback(
     (id: string) => {
+      if (id.startsWith('temp-')) return;
       startTransition(async () => {
         addOptimisticExpense({ type: 'delete', id });
         await operations.handleExpenseDelete(id);
       });
     },
     [addOptimisticExpense, operations],
+  );
+
+  const handleExpenseFormSubmit = useCallback(
+    (
+      data: Partial<Expense>,
+      expenseId?: string,
+      receiptOptions?: ReceiptOptions,
+    ) => {
+      startTransition(async () => {
+        const category = categories.find((c) => c.id === data.category_id);
+        const tag = tags.find((t) => t.id === data.tag_id);
+
+        if (expenseId) {
+          const existing = optimisticExpenses.find((e) => e.id === expenseId);
+          if (existing) {
+            addOptimisticExpense({
+              type: 'update',
+              expense: { ...existing, ...data, category, tag },
+            });
+          }
+        } else {
+          addOptimisticExpense({
+            type: 'add',
+            expense: {
+              id: `temp-${Date.now()}`,
+              user_id: data.user_id!,
+              amount: data.amount!,
+              description: data.description!,
+              date: data.date!,
+              category_id: data.category_id,
+              tag_id: data.tag_id,
+              category,
+              tag,
+              receipt_path: null,
+              created_at: new Date().toISOString(),
+            },
+          });
+        }
+
+        await operations.handleExpenseSubmit(data, expenseId, receiptOptions);
+      });
+    },
+    [addOptimisticExpense, categories, tags, optimisticExpenses, operations],
   );
 
   const handleBudgetUpdate = useCallback(
@@ -153,6 +206,7 @@ const ExpensesList = () => {
   }, []);
 
   const handleExpenseEdit = useCallback((expense: Expense) => {
+    if (expense.id.startsWith('temp-')) return;
     setSelectedExpense(expense);
     setFormType(FORM_TYPES.EDIT_EXPENSE);
   }, []);
@@ -287,6 +341,7 @@ const ExpensesList = () => {
         formType={formType}
         onClose={handleFormClose}
         selectedExpense={selectedExpense}
+        onExpenseSubmit={handleExpenseFormSubmit}
       />
 
       {/* CSV Import Dialog */}

@@ -35,7 +35,7 @@ import { el, enUS } from 'date-fns/locale';
 import { cn, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useData } from '@/contexts/DataContext';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useDataOperations, type ReceiptOptions } from '@/hooks/useDataOperations';
 import { expenseSchema, type ExpenseFormData } from '@/lib/validations';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
@@ -59,13 +59,23 @@ interface ExpensesFormProps {
   expense?: Expense;
   categories: Category[];
   onClose: () => void;
+  onSubmit: (
+    data: Partial<Expense>,
+    expenseId?: string,
+    receiptOptions?: ReceiptOptions,
+  ) => void;
 }
 
-const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
+const ExpensesForm = ({
+  expense,
+  categories,
+  onClose,
+  onSubmit,
+}: ExpensesFormProps) => {
   const { t, i18n } = useTranslation();
   const { session } = useAuth();
   const { tags } = useData();
-  const { handleExpenseSubmit, handleTagCreate } = useDataOperations();
+  const { handleTagCreate } = useDataOperations();
   const dateLocale = i18n.language === 'el' ? el : enUS;
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [removeExistingReceipt, setRemoveExistingReceipt] = useState(false);
@@ -126,29 +136,25 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
     });
   };
 
-  const handleSubmit = async (values: ExpenseFormData) => {
+  const handleSubmit = (values: ExpenseFormData) => {
     if (!session?.user?.id) return;
 
-    try {
-      const expenseData: Partial<Expense> = {
-        amount: parseCurrencyInput(values.amount),
-        description: values.description,
-        category_id:
-          values.category_id === 'none' ? undefined : values.category_id,
-        tag_id: values.tag_id || undefined,
-        date: format(values.date, 'yyyy-MM-dd'),
-        user_id: session.user.id,
-      };
+    const expenseData: Partial<Expense> = {
+      amount: parseCurrencyInput(values.amount),
+      description: values.description,
+      category_id:
+        values.category_id === 'none' ? undefined : values.category_id,
+      tag_id: values.tag_id || undefined,
+      date: format(values.date, 'yyyy-MM-dd'),
+      user_id: session.user.id,
+    };
 
-      await handleExpenseSubmit(expenseData, expense?.id, {
-        receiptFile,
-        removeExistingReceipt,
-        existingReceiptPath: expense?.receipt_path ?? null,
-      });
-      onClose();
-    } catch {
-      // Error is handled by parent
-    }
+    onSubmit(expenseData, expense?.id, {
+      receiptFile,
+      removeExistingReceipt,
+      existingReceiptPath: expense?.receipt_path ?? null,
+    });
+    onClose();
   };
 
   return (
@@ -415,10 +421,8 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
             <Button type="button" variant="outline" onClick={onClose}>
               {t('common.cancel')}
             </Button>
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting
-                ? t('common.saving')
-                : t('expenses.saveExpense')}
+            <Button type="submit">
+              {t('expenses.saveExpense')}
             </Button>
           </div>
         </form>

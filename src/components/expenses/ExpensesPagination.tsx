@@ -83,14 +83,19 @@ const ExpensesPagination = ({
     <div className="space-y-4">
       {/* Expenses List */}
       <div className="grid gap-4">
-        {currentExpenses.map((expense) => (
-          <ExpensesCard
+        {currentExpenses.map((expense, index) => (
+          <div
             key={expense.id}
-            expense={expense}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            searchQuery={searchQuery}
-          />
+            className="card-enter"
+            style={{ animationDelay: `${index * 40}ms` }}
+          >
+            <ExpensesCard
+              expense={expense}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              searchQuery={searchQuery}
+            />
+          </div>
         ))}
       </div>
 
