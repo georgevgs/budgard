@@ -50,26 +50,7 @@ export function useDataOperations() {
         return;
       }
 
-      const optimisticExpense = {
-        ...expenseData,
-        id: expenseId || `temp-${Date.now()}`,
-        created_at: new Date().toISOString(),
-        category: expenseData.category_id
-          ? categories.find((c) => c.id === expenseData.category_id)
-          : undefined,
-        tag: expenseData.tag_id
-          ? tags.find((t) => t.id === expenseData.tag_id)
-          : undefined,
-      } as Expense;
-
       const previousExpenses = expenses;
-      const updatedExpenses = expenseId
-        ? expenses.map((e) =>
-            e.id === expenseId ? { ...e, ...optimisticExpense } : e,
-          )
-        : [optimisticExpense, ...expenses];
-
-      setExpenses(updatedExpenses);
 
       try {
         const savedExpense = expenseId
@@ -112,11 +93,8 @@ export function useDataOperations() {
         }
 
         const finalExpenses = expenseId
-          ? updatedExpenses.map((e) => (e.id === expenseId ? savedExpense : e))
-          : [
-              savedExpense,
-              ...updatedExpenses.filter((e) => e.id !== optimisticExpense.id),
-            ];
+          ? previousExpenses.map((e) => (e.id === expenseId ? savedExpense : e))
+          : [savedExpense, ...previousExpenses];
 
         haptics.success();
         setExpenses(finalExpenses);
@@ -127,7 +105,7 @@ export function useDataOperations() {
         throw error;
       }
     },
-    [categories, tags, expenses, isInitialized, setExpenses, showErrorToast],
+    [expenses, isInitialized, setExpenses, showErrorToast],
   );
 
   const handleExpenseDelete = useCallback(
@@ -137,13 +115,12 @@ export function useDataOperations() {
       }
 
       const previousExpenses = expenses;
-      const expenseToDelete = expenses.find((e) => e.id === expenseId);
-      const updatedExpenses = expenses.filter((e) => e.id !== expenseId);
-      setExpenses(updatedExpenses);
+      const expenseToDelete = previousExpenses.find((e) => e.id === expenseId);
 
+      haptics.warning();
       try {
-        haptics.warning();
         await dataService.deleteExpense(expenseId);
+        setExpenses(previousExpenses.filter((e) => e.id !== expenseId));
 
         // Fire-and-forget receipt cleanup
         if (expenseToDelete?.receipt_path) {
@@ -197,24 +174,7 @@ export function useDataOperations() {
         return;
       }
 
-      const optimisticExpense = {
-        ...expenseData,
-        id: expenseId || `temp-${Date.now()}`,
-        created_at: new Date().toISOString(),
-        active: true,
-        category: expenseData.category_id
-          ? categories.find((c) => c.id === expenseData.category_id)
-          : undefined,
-      } as RecurringExpense;
-
       const previousRecurringExpenses = recurringExpenses;
-      const updatedExpenses = expenseId
-        ? recurringExpenses.map((e) =>
-            e.id === expenseId ? { ...e, ...optimisticExpense } : e,
-          )
-        : [optimisticExpense, ...recurringExpenses];
-
-      setRecurringExpenses(updatedExpenses);
 
       try {
         const savedExpense = expenseId
@@ -222,13 +182,10 @@ export function useDataOperations() {
           : await dataService.createRecurringExpense(expenseData);
 
         const finalExpenses = expenseId
-          ? updatedExpenses.map((e) =>
+          ? previousRecurringExpenses.map((e) =>
               e.id === expenseId ? savedExpense : e,
             )
-          : [
-              savedExpense,
-              ...updatedExpenses.filter((e) => e.id !== optimisticExpense.id),
-            ];
+          : [savedExpense, ...previousRecurringExpenses];
 
         setRecurringExpenses(finalExpenses);
       } catch (error) {
@@ -239,13 +196,7 @@ export function useDataOperations() {
         throw error;
       }
     },
-    [
-      categories,
-      recurringExpenses,
-      isInitialized,
-      setRecurringExpenses,
-      showErrorToast,
-    ],
+    [recurringExpenses, isInitialized, setRecurringExpenses, showErrorToast],
   );
 
   const handleRecurringExpenseDelete = useCallback(
@@ -255,13 +206,10 @@ export function useDataOperations() {
       }
 
       const previousExpenses = recurringExpenses;
-      const updatedExpenses = recurringExpenses.filter(
-        (e) => e.id !== expenseId,
-      );
-      setRecurringExpenses(updatedExpenses);
 
       try {
         await dataService.deleteRecurringExpense(expenseId);
+        setRecurringExpenses(previousExpenses.filter((e) => e.id !== expenseId));
       } catch (error) {
         setRecurringExpenses(previousExpenses);
         showErrorToast('Failed to delete recurring expense');
@@ -278,13 +226,12 @@ export function useDataOperations() {
       }
 
       const previousExpenses = recurringExpenses;
-      const updatedExpenses = recurringExpenses.map((e) =>
-        e.id === expenseId ? { ...e, active } : e,
-      );
-      setRecurringExpenses(updatedExpenses);
 
       try {
         await dataService.toggleRecurringExpense(expenseId, active);
+        setRecurringExpenses(
+          previousExpenses.map((e) => (e.id === expenseId ? { ...e, active } : e)),
+        );
       } catch (error) {
         setRecurringExpenses(previousExpenses);
         showErrorToast('Failed to update recurring expense status');

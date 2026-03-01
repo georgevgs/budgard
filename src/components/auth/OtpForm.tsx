@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useActionState, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/useToast';
@@ -11,132 +11,120 @@ import {
 } from '@/components/ui/input-otp';
 import { useAuth } from '@/contexts/AuthContext';
 import { emailSchema } from '@/lib/validations';
-import { useNavigate } from 'react-router-dom';
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { useTranslation } from 'react-i18next';
+import FormSubmitButton from '@/components/ui/form-submit-button';
 
 type OtpFormProps = {
   onSuccess?: () => void;
 };
 
+type OtpState = {
+  step: 'request' | 'verify';
+  email: string;
+  error: string | null;
+};
+
+const initialState: OtpState = { step: 'request', email: '', error: null };
+
 const OtpForm = ({ onSuccess }: OtpFormProps) => {
-  const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [honeypot, setHoneypot] = useState(''); // Honeypot field
+  const { isLoading: isAuthLoading } = useAuth();
+  const { toast } = useToast();
+  const { t } = useTranslation();
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
-  const { toast } = useToast();
-  const { isLoading: isAuthLoading } = useAuth();
-  const navigate = useNavigate();
-  const { t } = useTranslation();
+  const [otp, setOtp] = useState('');
 
-  const handleRequestOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (loading || isAuthLoading) return;
+  const [state, formAction] = useActionState(
+    async (prev: OtpState, formData: FormData): Promise<OtpState> => {
+      // Handle go-back action
+      if (formData.get('_action') === 'back') {
+        setOtp('');
+        return { ...initialState };
+      }
 
-    // Check honeypot
-    if (honeypot) {
-      // Silently fail to avoid letting bots know they were detected
-      navigate('/');
-      return;
-    }
+      // Step: request OTP
+      if (prev.step === 'request') {
+        // Honeypot check — silently fail to avoid revealing detection
+        if (formData.get('phone_number')) {
+          return { ...initialState };
+        }
 
-    // Verify Turnstile token exists
-    if (!turnstileToken) {
-      toast({
-        title: t('auth.verificationRequired'),
-        description: t('auth.securityCheck'),
-        variant: 'destructive',
-      });
-      return;
-    }
+        const token = formData.get('turnstile_token') as string;
+        if (!token) {
+          return {
+            step: 'request',
+            email: '',
+            error: t('auth.securityCheck'),
+          };
+        }
 
-    try {
-      emailSchema.parse(email);
-      setEmailError('');
-    } catch (error) {
-      setEmailError((error as Error).message);
-      return;
-    }
+        const email = formData.get('email') as string;
+        try {
+          emailSchema.parse(email);
+        } catch {
+          return {
+            step: 'request',
+            email: '',
+            error: t('auth.invalidEmail'),
+          };
+        }
 
-    setLoading(true);
-    try {
-      const { error } = await requestOTP(email);
-      if (error) throw error;
+        const { error } = await requestOTP(email);
+        if (error) {
+          turnstileRef.current?.reset();
+          setTurnstileToken(null);
+          return { step: 'request', email: '', error: t('auth.sendFailed') };
+        }
 
-      setOtpSent(true);
-      toast({
-        title: t('auth.codeSent'),
-        description: t('auth.checkEmail'),
-      });
-    } catch {
-      toast({
-        title: t('common.error'),
-        description: t('auth.sendFailed'),
-        variant: 'destructive',
-      });
-      // Reset Turnstile on error so user can try again
-      turnstileRef.current?.reset();
-      setTurnstileToken(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+        toast({
+          title: t('auth.codeSent'),
+          description: t('auth.checkEmail'),
+        });
+        return { step: 'verify', email, error: null };
+      }
 
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (loading || isAuthLoading || otp.length !== 6) return;
+      // Step: verify OTP
+      const email = formData.get('email') as string;
+      const otpValue = formData.get('otp') as string;
 
-    setLoading(true);
-    try {
-      const { error } = await signInWithOTP(email, otp);
-      if (error) throw error;
+      const { error } = await signInWithOTP(email, otpValue);
+      if (error) {
+        return { step: 'verify', email: prev.email, error: t('auth.invalidCode') };
+      }
 
-      toast({
-        title: t('common.success'),
-        description: t('auth.signedIn'),
-      });
+      toast({ title: t('common.success'), description: t('auth.signedIn') });
       onSuccess?.();
-    } catch {
-      toast({
-        title: t('common.error'),
-        description: t('auth.invalidCode'),
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+      return { step: 'verify', email: prev.email, error: null };
+    },
+    initialState,
+  );
 
-  if (!otpSent) {
+  if (state.step === 'request') {
     return (
       <div className="space-y-4">
-        <form onSubmit={handleRequestOTP} className="space-y-4">
+        <form action={formAction} className="space-y-4">
           <div className="space-y-2">
             <Input
+              name="email"
               type="email"
               placeholder={t('auth.enterEmail')}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={`w-full h-10 ${emailError ? 'border-destructive' : ''}`}
-              disabled={loading || isAuthLoading}
+              className={`w-full h-10 ${state.error ? 'border-destructive' : ''}`}
+              disabled={isAuthLoading}
               autoCorrect="off"
               autoCapitalize="none"
               spellCheck={false}
               aria-label={t('auth.enterEmail')}
-              aria-invalid={!!emailError}
-              aria-describedby={emailError ? 'email-error' : undefined}
+              aria-invalid={!!state.error}
+              aria-describedby={state.error ? 'email-error' : undefined}
             />
-            {emailError && (
+            {state.error && (
               <p id="email-error" className="text-sm text-destructive">
-                {emailError}
+                {state.error}
               </p>
             )}
 
-            {/* Honeypot field */}
+            {/* Honeypot field — visually hidden text input for bot detection */}
             <div
               aria-hidden="true"
               style={{
@@ -151,11 +139,9 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
             >
               <label>
                 Leave this field empty:
-                <Input
-                  name="phone_number" // Deceptive name to trick bots
+                <input
+                  name="phone_number"
                   type="text"
-                  value={honeypot}
-                  onChange={(e) => setHoneypot(e.target.value)}
                   tabIndex={-1}
                   autoComplete="off"
                 />
@@ -163,7 +149,13 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
             </div>
           </div>
 
-          {/* Cloudflare Turnstile */}
+          {/* Turnstile token synced to a hidden input so the action can read it */}
+          <input
+            type="hidden"
+            name="turnstile_token"
+            value={turnstileToken ?? ''}
+          />
+
           <div className="flex justify-center">
             <Turnstile
               ref={turnstileRef}
@@ -171,20 +163,17 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
               onSuccess={setTurnstileToken}
               onError={() => setTurnstileToken(null)}
               onExpire={() => setTurnstileToken(null)}
-              options={{
-                theme: 'auto',
-                size: 'normal',
-              }}
+              options={{ theme: 'auto', size: 'normal' }}
             />
           </div>
 
-          <Button
-            type="submit"
+          <FormSubmitButton
             className="w-full h-10"
-            disabled={loading || isAuthLoading || !turnstileToken}
+            pendingText={t('auth.sending')}
+            disabled={isAuthLoading || !turnstileToken}
           >
-            {loading ? t('auth.sending') : t('auth.sendCode')}
-          </Button>
+            {t('auth.sendCode')}
+          </FormSubmitButton>
         </form>
       </div>
     );
@@ -195,17 +184,20 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
       <div className="flex flex-col items-center gap-2 mb-4">
         <CheckCircle2 className="h-8 w-8 text-primary" />
         <p className="text-muted-foreground text-sm text-center px-4">
-          {t('auth.codeEmailSent', { email })}
+          {t('auth.codeEmailSent', { email: state.email })}
         </p>
       </div>
 
-      <form onSubmit={handleVerifyOTP} className="space-y-4">
+      <form action={formAction} className="space-y-4">
+        <input type="hidden" name="email" value={state.email} />
+        <input type="hidden" name="otp" value={otp} />
+
         <div className="flex justify-center">
           <InputOTP
             maxLength={6}
             value={otp}
             onChange={setOtp}
-            disabled={loading || isAuthLoading}
+            disabled={isAuthLoading}
             inputMode="numeric"
             pattern="[0-9]*"
           >
@@ -220,28 +212,32 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
           </InputOTP>
         </div>
 
-        <div className="space-y-2">
-          <Button
-            type="submit"
-            className="w-full h-10"
-            disabled={loading || isAuthLoading || otp.length !== 6}
-          >
-            {loading ? t('auth.verifying') : t('auth.verifyCode')}
-          </Button>
+        {state.error && (
+          <p className="text-sm text-destructive text-center">{state.error}</p>
+        )}
 
-          <Button
-            type="button"
-            variant="ghost"
+        <div className="space-y-2">
+          <FormSubmitButton
             className="w-full h-10"
-            onClick={() => {
-              setOtpSent(false);
-              setOtp('');
-            }}
-            disabled={loading || isAuthLoading}
+            pendingText={t('auth.verifying')}
+            disabled={isAuthLoading || otp.length !== 6}
           >
-            {t('auth.useDifferentEmail')}
-          </Button>
+            {t('auth.verifyCode')}
+          </FormSubmitButton>
         </div>
+      </form>
+
+      {/* Separate form to submit the back action */}
+      <form action={formAction}>
+        <input type="hidden" name="_action" value="back" />
+        <Button
+          type="submit"
+          variant="ghost"
+          className="w-full h-10"
+          disabled={isAuthLoading}
+        >
+          {t('auth.useDifferentEmail')}
+        </Button>
       </form>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useOptimistic, useTransition } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, Repeat } from 'lucide-react';
@@ -71,6 +71,11 @@ const RecurringExpensesList = () => {
     handleRecurringExpenseToggle: toggleRecurringExpense,
   } = useDataOperations();
   const { t } = useTranslation();
+  const [optimisticRecurring, addOptimisticRecurring] = useOptimistic(
+    recurringExpenses,
+    recurringReducer,
+  );
+  const [, startTransition] = useTransition();
 
   const handleSubmit = async (values: RecurringExpenseFormData) => {
     if (!session?.user?.id) return;
@@ -102,8 +107,18 @@ const RecurringExpensesList = () => {
     setIsFormOpen(true);
   };
 
-  const handleToggle = async (expenseId: string, active: boolean) => {
-    await toggleRecurringExpense(expenseId, active);
+  const handleDelete = (expenseId: string) => {
+    startTransition(async () => {
+      addOptimisticRecurring({ type: 'delete', id: expenseId });
+      await deleteRecurringExpense(expenseId);
+    });
+  };
+
+  const handleToggle = (expenseId: string, active: boolean) => {
+    startTransition(async () => {
+      addOptimisticRecurring({ type: 'toggle', id: expenseId, active });
+      await toggleRecurringExpense(expenseId, active);
+    });
   };
 
   const handleFormClose = () => {
@@ -111,8 +126,8 @@ const RecurringExpensesList = () => {
     setSelectedExpense(undefined);
   };
 
-  // Calculate summary stats
-  const activeExpenses = recurringExpenses.filter((e) => e.active);
+  // Calculate summary stats from the optimistic list for instant feedback
+  const activeExpenses = optimisticRecurring.filter((e) => e.active);
   const monthlyTotal = activeExpenses.reduce((sum, expense) => {
     let monthlyAmount = expense.amount;
     switch (expense.frequency) {
@@ -162,7 +177,7 @@ const RecurringExpensesList = () => {
       </div>
 
       <div className="grid gap-4">
-        {recurringExpenses.length === 0 ? (
+        {optimisticRecurring.length === 0 ? (
           <Card className="p-8 text-center">
             <div className="flex flex-col items-center gap-3">
               <Repeat className="h-12 w-12 text-muted-foreground/50" />
@@ -179,7 +194,7 @@ const RecurringExpensesList = () => {
             </div>
           </Card>
         ) : (
-          recurringExpenses.map((expense) => {
+          optimisticRecurring.map((expense) => {
             const nextOccurrence = calculateNextOccurrence(expense);
             const isOverdue = !!(nextOccurrence && nextOccurrence <= new Date());
 
@@ -190,7 +205,7 @@ const RecurringExpensesList = () => {
                 nextOccurrence={nextOccurrence}
                 isOverdue={isOverdue}
                 onEdit={handleEditExpense}
-                onDelete={deleteRecurringExpense}
+                onDelete={handleDelete}
                 onToggle={handleToggle}
               />
             );
@@ -216,3 +231,33 @@ const RecurringExpensesList = () => {
 };
 
 export default RecurringExpensesList;
+
+// ============================================================================
+// Optimistic reducer
+// ============================================================================
+
+type RecurringOptimisticAction =
+  | { type: 'add'; expense: RecurringExpense }
+  | { type: 'update'; expense: RecurringExpense }
+  | { type: 'delete'; id: string }
+  | { type: 'toggle'; id: string; active: boolean };
+
+function recurringReducer(
+  state: RecurringExpense[],
+  action: RecurringOptimisticAction,
+): RecurringExpense[] {
+  switch (action.type) {
+    case 'add':
+      return [action.expense, ...state];
+    case 'update':
+      return state.map((e) =>
+        e.id === action.expense.id ? action.expense : e,
+      );
+    case 'delete':
+      return state.filter((e) => e.id !== action.id);
+    case 'toggle':
+      return state.map((e) =>
+        e.id === action.id ? { ...e, active: action.active } : e,
+      );
+  }
+}

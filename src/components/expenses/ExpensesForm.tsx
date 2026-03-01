@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useTransition } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -71,7 +71,7 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
   const [removeExistingReceipt, setRemoveExistingReceipt] = useState(false);
   const [tagPopoverOpen, setTagPopoverOpen] = useState(false);
   const [tagSearch, setTagSearch] = useState('');
-  const [isCreatingTag, setIsCreatingTag] = useState(false);
+  const [isCreatingTag, startTagCreation] = useTransition();
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
@@ -111,20 +111,19 @@ const ExpensesForm = ({ expense, categories, onClose }: ExpensesFormProps) => {
     setTagSearch('');
   };
 
-  const handleTagCreateInline = async () => {
+  const handleTagCreateInline = () => {
     if (!tagSearch.trim() || isCreatingTag) return;
-    setIsCreatingTag(true);
-    try {
-      const color = TAG_COLORS[tags.length % TAG_COLORS.length];
-      const newTag = await handleTagCreate(tagSearch.trim(), color);
-      form.setValue('tag_id', newTag.id);
-      setTagPopoverOpen(false);
-      setTagSearch('');
-    } catch {
-      // error already shown via toast
-    } finally {
-      setIsCreatingTag(false);
-    }
+    startTagCreation(async () => {
+      try {
+        const color = TAG_COLORS[tags.length % TAG_COLORS.length];
+        const newTag = await handleTagCreate(tagSearch.trim(), color);
+        form.setValue('tag_id', newTag.id);
+        setTagPopoverOpen(false);
+        setTagSearch('');
+      } catch {
+        // error already shown via toast
+      }
+    });
   };
 
   const handleSubmit = async (values: ExpenseFormData) => {
