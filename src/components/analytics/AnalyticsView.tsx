@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
 import SpendingInsights from '@/components/analytics/SpendingInsights';
+import SpendingHeatmap from '@/components/analytics/SpendingHeatmap';
 import { useTranslation } from 'react-i18next';
 
 // Lazy load the heavy chart component
@@ -328,6 +329,12 @@ const AnalyticsView = () => {
           </div>
         </CardContent>
       </Card>
+
+      <SpendingHeatmap
+        expenses={yearExpenses}
+        selectedYear={selectedYear}
+        dateLocale={dateLocale}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Card>
