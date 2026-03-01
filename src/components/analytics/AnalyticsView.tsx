@@ -14,6 +14,7 @@ import {
 import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
 import SpendingInsights from '@/components/analytics/SpendingInsights';
 import SpendingHeatmap from '@/components/analytics/SpendingHeatmap';
+import YearOverYearChart from '@/components/analytics/YearOverYearChart';
 import { useTranslation } from 'react-i18next';
 
 // Lazy load the heavy chart component
@@ -62,6 +63,21 @@ const AnalyticsView = () => {
       };
     });
   }, [yearExpenses, selectedYear, dateLocale]);
+
+  const prevYearMonthlyData = useMemo(() => {
+    const prevYear = selectedYear - 1;
+    return Array.from({ length: 12 }, (_, i) => {
+      const month = (i + 1).toString().padStart(2, '0');
+      const monthKey = `${prevYear}-${month}`;
+      const monthExpenses = expenses.filter(
+        (e) => format(parseISO(e.date), 'yyyy-MM') === monthKey,
+      );
+      return {
+        month: format(parseISO(`${monthKey}-01`), 'LLL', { locale: dateLocale }),
+        amount: monthExpenses.reduce((sum, e) => sum + e.amount, 0),
+      };
+    });
+  }, [expenses, selectedYear, dateLocale]);
 
   const monthComparison = useMemo(() => {
     const now = new Date();
@@ -334,6 +350,13 @@ const AnalyticsView = () => {
         expenses={yearExpenses}
         selectedYear={selectedYear}
         dateLocale={dateLocale}
+      />
+
+      <YearOverYearChart
+        currentYearData={monthlyData}
+        prevYearData={prevYearMonthlyData}
+        currentYear={selectedYear}
+        prevYear={selectedYear - 1}
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
