@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Category } from '@/types/Category';
 import type { Tag } from '@/types/Tag';
+import type { SortOrder } from '@/hooks/useExpensesFilter';
 
 interface ExpensesFilterProps {
   categories: Category[];
@@ -21,10 +22,12 @@ interface ExpensesFilterProps {
   search: string;
   selectedCategoryId: string | null;
   selectedTagId: string | null;
+  sortOrder: SortOrder;
   hasActiveFilters: boolean;
   onSearchChange: (value: string) => void;
   onCategoryChange: (value: string | null) => void;
   onTagChange: (value: string | null) => void;
+  onSortChange: (value: SortOrder) => void;
   onClearFilters: () => void;
 }
 
@@ -34,10 +37,12 @@ const ExpensesFilter = ({
   search,
   selectedCategoryId,
   selectedTagId,
+  sortOrder,
   hasActiveFilters,
   onSearchChange,
   onCategoryChange,
   onTagChange,
+  onSortChange,
   onClearFilters,
 }: ExpensesFilterProps) => {
   const { t } = useTranslation();
@@ -150,6 +155,18 @@ const ExpensesFilter = ({
               </SelectContent>
             </Select>
           )}
+
+          <Select value={sortOrder} onValueChange={onSortChange}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date-desc">{t('expenses.sort.dateDesc')}</SelectItem>
+              <SelectItem value="date-asc">{t('expenses.sort.dateAsc')}</SelectItem>
+              <SelectItem value="amount-desc">{t('expenses.sort.amountDesc')}</SelectItem>
+              <SelectItem value="amount-asc">{t('expenses.sort.amountAsc')}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

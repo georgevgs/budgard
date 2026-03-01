@@ -80,6 +80,12 @@
       "active": "Search: {{query}}",
       "resultCount": "{{count}} of {{total}} expenses"
     },
+    "sort": {
+      "dateDesc": "Date (newest first)",
+      "dateAsc": "Date (oldest first)",
+      "amountDesc": "Amount (highest first)",
+      "amountAsc": "Amount (lowest first)"
+    },
     "filter": {
       "allCategories": "All Categories",
       "selectCategory": "Select category",
