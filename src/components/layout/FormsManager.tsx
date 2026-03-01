@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import type { Expense } from '@/types/Expense';
+import type { ReceiptOptions } from '@/hooks/useDataOperations';
 import ExpensesForm from '@/components/expenses/ExpensesForm';
 import CategoryForm from '@/components/categories/CategoryForm';
 import { useData } from '@/contexts/DataContext';
@@ -17,12 +18,18 @@ interface FormsManagerProps {
   formType: FormType;
   onClose: () => void;
   selectedExpense?: Expense;
+  onExpenseSubmit: (
+    data: Partial<Expense>,
+    expenseId?: string,
+    receiptOptions?: ReceiptOptions,
+  ) => void;
 }
 
 const FormsManager = ({
   formType,
   onClose,
   selectedExpense,
+  onExpenseSubmit,
 }: FormsManagerProps) => {
   const { t } = useTranslation();
   const { categories, isInitialized, isLoading } = useData();
@@ -59,6 +66,7 @@ const FormsManager = ({
               expense={formType === FORM_TYPES.EDIT_EXPENSE ? selectedExpense : undefined}
               categories={categories}
               onClose={onClose}
+              onSubmit={onExpenseSubmit}
             />
           )}
         </DialogContent>

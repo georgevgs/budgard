@@ -38,17 +38,33 @@ const NavTabs = () => {
               key={tab.path}
               to={tab.path}
               viewTransition
-              className={({ isActive }) =>
-                cn(
-                  'flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-medium transition-colors',
-                  isActive
-                    ? 'text-primary'
-                    : 'text-muted-foreground',
-                )
-              }
+              className="flex flex-1 flex-col items-center py-1.5"
             >
-              <Icon className="h-5 w-5" />
-              <span>{tab.name}</span>
+              {({ isActive }) => (
+                <>
+                  <div
+                    className={cn(
+                      'flex flex-col items-center gap-0.5 px-5 py-1.5 rounded-2xl transition-all duration-200',
+                      isActive ? 'bg-primary/10' : '',
+                    )}
+                  >
+                    <Icon
+                      className={cn(
+                        'h-5 w-5 transition-colors',
+                        isActive ? 'text-primary' : 'text-muted-foreground',
+                      )}
+                    />
+                  </div>
+                  <span
+                    className={cn(
+                      'text-xs font-medium transition-colors',
+                      isActive ? 'text-primary' : 'text-muted-foreground',
+                    )}
+                  >
+                    {tab.name}
+                  </span>
+                </>
+              )}
             </NavLink>
           );
         })}
