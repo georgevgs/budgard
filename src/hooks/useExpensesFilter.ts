@@ -58,7 +58,9 @@ export const useExpensesFilter = ({
 
     return monthlyExpenses.filter((expense) => {
       const matchesSearch = search
-        ? expense.description.toLowerCase().includes(searchLower)
+        ? expense.description.toLowerCase().includes(searchLower) ||
+          (expense.category?.name.toLowerCase().includes(searchLower) ?? false) ||
+          (expense.tag?.name.toLowerCase().includes(searchLower) ?? false)
         : true;
       const matchesCategory = selectedCategoryId
         ? selectedCategoryId === 'uncategorized'

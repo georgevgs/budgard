@@ -77,7 +77,8 @@
     "search": {
       "placeholder": "Αναζήτηση εξόδων...",
       "label": "Αναζήτηση εξόδων",
-      "active": "Αναζήτηση: {{query}}"
+      "active": "Αναζήτηση: {{query}}",
+      "resultCount": "{{count}} από {{total}} έξοδα"
     },
     "filter": {
       "allCategories": "Όλες οι κατηγορίες",
