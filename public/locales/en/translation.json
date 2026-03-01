@@ -229,7 +229,18 @@
     "vsLastMonthUp": "+{{percent}}% vs last month",
     "vsLastMonthDown": "{{percent}}% vs last month",
     "sameAsLastMonth": "Same as last month",
-    "budgetLabel": "Budget: {{amount}} €"
+    "budgetLabel": "Budget: {{amount}} €",
+    "insights": {
+      "sectionTitle": "Spending Insights",
+      "monthProjection": "On track to spend ~{{amount}} this month",
+      "categoryUp": "{{name}} is up {{percent}}% vs last month",
+      "categoryDown": "{{name}} is down {{percent}}% vs last month",
+      "peakDay": "You tend to spend most on {{day}}s",
+      "budgetStreak": "Under budget {{count}} months in a row",
+      "inactive": "No expenses logged in {{days}} days",
+      "largestExpense": "Biggest this month: {{amount}} ({{category}})",
+      "largestExpenseNoCategory": "Biggest this month: {{amount}}"
+    }
   },
   "import": {
     "title": "Import Expenses",

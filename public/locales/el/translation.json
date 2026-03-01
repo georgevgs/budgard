@@ -229,7 +229,18 @@
     "vsLastMonthUp": "+{{percent}}% σε σχέση με τον προηγούμενο μήνα",
     "vsLastMonthDown": "{{percent}}% σε σχέση με τον προηγούμενο μήνα",
     "sameAsLastMonth": "Ίδιο με τον προηγούμενο μήνα",
-    "budgetLabel": "Προϋπολογισμός: {{amount}} €"
+    "budgetLabel": "Προϋπολογισμός: {{amount}} €",
+    "insights": {
+      "sectionTitle": "Αναλύσεις Δαπανών",
+      "monthProjection": "Εκτιμώμενες δαπάνες μήνα: ~{{amount}}",
+      "categoryUp": "{{name}} +{{percent}}% σε σχέση με τον προηγ. μήνα",
+      "categoryDown": "{{name}} -{{percent}}% σε σχέση με τον προηγ. μήνα",
+      "peakDay": "Ξοδεύετε περισσότερο {{day}}",
+      "budgetStreak": "Εντός προϋπολογισμού {{count}} μήνες στη σειρά",
+      "inactive": "Δεν έχετε καταχωρίσει έξοδα εδώ και {{days}} ημέρες",
+      "largestExpense": "Μεγαλύτερο αυτό το μήνα: {{amount}} ({{category}})",
+      "largestExpenseNoCategory": "Μεγαλύτερο αυτό το μήνα: {{amount}}"
+    }
   },
   "import": {
     "title": "Εισαγωγή Εξόδων",

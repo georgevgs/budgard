@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
+import SpendingInsights from '@/components/analytics/SpendingInsights';
 import { useTranslation } from 'react-i18next';
 
 // Lazy load the heavy chart component
@@ -260,6 +261,15 @@ const AnalyticsView = () => {
           )}
         </div>
       </div>
+
+      <SpendingInsights
+        expenses={expenses}
+        monthlyBudget={monthlyBudget}
+        monthComparison={monthComparison}
+        monthlyData={monthlyData}
+        categories={categories}
+        dateLocale={dateLocale}
+      />
 
       <div className="space-y-4">
         <Select
