@@ -27,11 +27,7 @@ export function useDataOperations() {
 
   const showErrorToast = useCallback(
     (message: string) => {
-      toast({
-        variant: 'destructive',
-        description: message,
-        className: 'border-2 border-destructive bg-destructive/5',
-      });
+      toast({ variant: 'destructive', description: message });
     },
     [toast],
   );
@@ -87,6 +83,10 @@ export function useDataOperations() {
         }
 
         haptics.success();
+        toast({
+          variant: 'success',
+          title: expenseId ? 'Expense updated' : 'Expense added',
+        });
         setExpenses((prev) =>
           expenseId
             ? prev.map((e) => (e.id === expenseId ? savedExpense : e))
@@ -98,7 +98,7 @@ export function useDataOperations() {
         throw error;
       }
     },
-    [isInitialized, setExpenses, showErrorToast],
+    [isInitialized, setExpenses, showErrorToast, toast],
   );
 
   const handleExpenseDelete = useCallback(

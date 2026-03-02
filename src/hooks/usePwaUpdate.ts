@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
-import { useToast } from '@/hooks/useToast';
+import { toast } from '@/hooks/useToast';
 
 export function usePwaUpdate() {
   const { needRefresh, updateServiceWorker } = useRegisterSW({
@@ -10,19 +10,21 @@ export function usePwaUpdate() {
   });
 
   const [isNeedRefresh, setNeedRefresh] = needRefresh;
-  const { toast } = useToast();
 
   useEffect(() => {
     if (isNeedRefresh) {
       toast({
-        title: 'Update Available',
-        description: 'New content is available, click to update.',
-        variant: 'default',
-        onClick: () => {
-          updateServiceWorker(true);
-          setNeedRefresh(false);
+        title: 'Update available',
+        description: 'A new version of Budgard is ready.',
+        duration: Infinity,
+        action: {
+          label: 'Update',
+          onClick: () => {
+            updateServiceWorker(true);
+            setNeedRefresh(false);
+          },
         },
       });
     }
-  }, [isNeedRefresh, setNeedRefresh, updateServiceWorker, toast]);
+  }, [isNeedRefresh, setNeedRefresh, updateServiceWorker]);
 }
