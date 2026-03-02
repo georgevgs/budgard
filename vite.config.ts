@@ -2,6 +2,7 @@ import path from "path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 export default defineConfig({
   plugins: [
@@ -51,7 +52,17 @@ export default defineConfig({
           }
         ]
       }
-    })
+    }),
+    sentryVitePlugin({
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      sourcemaps: {
+        filesToDeleteAfterUpload: ['./dist/**/*.map'],
+      },
+      // Only upload during CI/CD builds (skip if no auth token)
+      disable: !process.env.SENTRY_AUTH_TOKEN,
+    }),
   ],
   resolve: {
     alias: {
@@ -59,6 +70,7 @@ export default defineConfig({
     },
   },
   build: {
+    sourcemap: 'hidden',
     rollupOptions: {
       output: {
         manualChunks: {
