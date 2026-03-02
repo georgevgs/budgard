@@ -1,6 +1,11 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Upload, FileText, AlertCircle, CheckCircle2, X, ArrowRight } from 'lucide-react';
+import Upload from 'lucide-react/dist/esm/icons/upload';
+import FileText from 'lucide-react/dist/esm/icons/file-text';
+import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
+import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
+import X from 'lucide-react/dist/esm/icons/x';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

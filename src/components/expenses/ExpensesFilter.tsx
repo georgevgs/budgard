@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Filter, X } from 'lucide-react';
+import Search from 'lucide-react/dist/esm/icons/search';
+import Filter from 'lucide-react/dist/esm/icons/filter';
+import X from 'lucide-react/dist/esm/icons/x';
 import { Input } from '@/components/ui/input';
 import {
   Select,

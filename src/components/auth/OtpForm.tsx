@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/useToast';
 import { signInWithOTP, requestOTP } from '@/lib/auth';
-import { CheckCircle2 } from 'lucide-react';
+import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 import {
   InputOTP,
   InputOTPGroup,

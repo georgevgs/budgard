@@ -1,7 +1,8 @@
 import { useState, useOptimistic, useTransition } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Repeat } from 'lucide-react';
+import Plus from 'lucide-react/dist/esm/icons/plus';
+import Repeat from 'lucide-react/dist/esm/icons/repeat';
 import { useData } from '@/contexts/DataContext';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { format, addWeeks, addMonths, addYears } from 'date-fns';

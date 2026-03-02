@@ -1,7 +1,8 @@
 import { useMemo, useState, useEffect, lazy, Suspense } from 'react';
 import { format, parseISO, getYear } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import { Card, CardContent } from '@/components/ui/card';
 import { useData } from '@/contexts/DataContext';
 import {

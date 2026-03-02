@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Loader2 } from 'lucide-react';
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import {
   Dialog,
   DialogContent,
@@ -63,7 +63,11 @@ const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
           </DialogHeader>
 
           <div className="flex items-center justify-center min-h-[200px] mt-4">
-          {loading && <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />}
+          {loading && (
+            <div className="animate-spin">
+              <Loader2 className="h-8 w-8 text-muted-foreground" />
+            </div>
+          )}
           {error && (
             <p className="text-sm text-destructive">{t('receipt.loadError')}</p>
           )}

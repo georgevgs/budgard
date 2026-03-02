@@ -1,7 +1,8 @@
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format, addWeeks, addMonths, addYears } from 'date-fns';
-import { CalendarIcon, Info } from 'lucide-react';
+import CalendarIcon from 'lucide-react/dist/esm/icons/calendar';
+import Info from 'lucide-react/dist/esm/icons/info';
 import {
   DialogTitle,
   DialogHeader,

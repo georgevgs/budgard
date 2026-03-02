@@ -1,7 +1,8 @@
 import { useState, useCallback, useMemo, useOptimistic, useTransition } from 'react';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import { Download, Upload } from 'lucide-react';
+import Download from 'lucide-react/dist/esm/icons/download';
+import Upload from 'lucide-react/dist/esm/icons/upload';
 import { FORM_TYPES, type FormType } from '@/components/layout/FormsManager';
 import { useData } from '@/contexts/DataContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
