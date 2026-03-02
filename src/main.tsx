@@ -1,9 +1,17 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import * as Sentry from '@sentry/react';
 import { RootProvider } from '@/contexts/RootProvider';
 import App from '@/App';
 import './lib/i18n';
 import './index.css';
+
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  enabled: import.meta.env.PROD && !!import.meta.env.VITE_SENTRY_DSN,
+  integrations: [Sentry.browserTracingIntegration()],
+  tracesSampleRate: 0.1,
+});
 
 // Recover from stale SW cache causing chunk load failures (common on iOS PWA after
 // a deployment while the app was backgrounded — old JS tries to load old chunk hashes
