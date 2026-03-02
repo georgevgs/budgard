@@ -8,28 +8,9 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "icon-192x192.png", "icon-512x512.png", "apple-touch-icon.png", "offline.html"],
-      manifest: {
-        name: "Budgard",
-        short_name: "Budgard",
-        description: "A minimal and intuitive expense tracker",
-        theme_color: "#ffffff",
-        icons: [
-          {
-            src: "/icon-192x192.png",
-            sizes: "192x192",
-            type: "image/png",
-            purpose: "any maskable"
-          },
-          {
-            src: "/icon-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any maskable"
-          }
-        ]
-      },
+      registerType: "prompt",
+      manifest: false,
+      includeAssets: ["favicon.ico", "icon-192x192.png", "icon-512x512.png", "apple-touch-icon.png", "offline.html", "manifest.json"],
       workbox: {
         cleanupOutdatedCaches: true,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,json}"],
