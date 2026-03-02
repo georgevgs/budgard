@@ -7,7 +7,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Moon, Sun, Sparkles } from 'lucide-react';
+import Moon from 'lucide-react/dist/esm/icons/moon';
+import Sun from 'lucide-react/dist/esm/icons/sun';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import { useTheme } from '@/hooks/useTheme';
 
 type Theme = 'light' | 'dark' | 'barbie';

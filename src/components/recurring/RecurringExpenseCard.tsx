@@ -19,7 +19,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { MoreVertical, Clock } from 'lucide-react';
+import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
+import Clock from 'lucide-react/dist/esm/icons/clock';
 import CategoryBadge from '@/components/categories/CategoryBadge';
 import { format } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';

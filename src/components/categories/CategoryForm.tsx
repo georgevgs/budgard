@@ -8,7 +8,8 @@ import {
   DialogHeader,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Check } from 'lucide-react';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
+import Check from 'lucide-react/dist/esm/icons/check';
 import {
   Form,
   FormControl,

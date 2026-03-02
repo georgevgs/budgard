@@ -3,7 +3,10 @@ import {
   useContext,
   useState,
   useEffect,
-  ReactNode,
+  useRef,
+  type Dispatch,
+  type SetStateAction,
+  type ReactNode,
   useCallback,
 } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,11 +30,11 @@ interface DataState {
 interface DataContextType extends DataState {
   refreshData: () => Promise<void>;
   refreshExpenses: () => Promise<void>;
-  setCategories: (categories: Category[]) => void;
-  setExpenses: (expenses: Expense[]) => void;
-  setRecurringExpenses: (recurringExpenses: RecurringExpense[]) => void;
-  setTags: (tags: Tag[]) => void;
-  setMonthlyBudget: (amount: number | null) => void;
+  setCategories: Dispatch<SetStateAction<Category[]>>;
+  setExpenses: Dispatch<SetStateAction<Expense[]>>;
+  setRecurringExpenses: Dispatch<SetStateAction<RecurringExpense[]>>;
+  setTags: Dispatch<SetStateAction<Tag[]>>;
+  setMonthlyBudget: Dispatch<SetStateAction<number | null>>;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -39,6 +42,8 @@ const DataContext = createContext<DataContextType | null>(null);
 export function DataProvider({ children }: { children: ReactNode }) {
   const { session, isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
+  const toastRef = useRef(toast);
+  toastRef.current = toast;
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -78,14 +83,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     } catch (error) {
       console.error('Failed to load data:', error);
-      toast({
+      toastRef.current({
         title: 'Error',
         description: 'Failed to load data',
         variant: 'destructive',
       });
       setIsLoading(false);
     }
-  }, [session?.user?.id, toast]);
+  }, [session?.user?.id]);
 
   const refreshData = useCallback(async () => {
     await fetchData();

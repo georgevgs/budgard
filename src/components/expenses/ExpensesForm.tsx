@@ -29,7 +29,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CalendarIcon, Tag, X } from 'lucide-react';
+import CalendarIcon from 'lucide-react/dist/esm/icons/calendar';
+import Tag from 'lucide-react/dist/esm/icons/tag';
+import X from 'lucide-react/dist/esm/icons/x';
 import { format } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import { cn, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';

@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { FileText, BarChart, Repeat } from 'lucide-react';
+import FileText from 'lucide-react/dist/esm/icons/file-text';
+import BarChart from 'lucide-react/dist/esm/icons/bar-chart';
+import Repeat from 'lucide-react/dist/esm/icons/repeat';
 
 const NavTabs = () => {
   const { t } = useTranslation();

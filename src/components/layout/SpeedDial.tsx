@@ -1,7 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Receipt, Tag, X } from 'lucide-react';
+import Plus from 'lucide-react/dist/esm/icons/plus';
+import Receipt from 'lucide-react/dist/esm/icons/receipt';
+import Tag from 'lucide-react/dist/esm/icons/tag';
+import X from 'lucide-react/dist/esm/icons/x';
 import { cn } from '@/lib/utils';
 
 interface SpeedDialProps {

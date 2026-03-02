@@ -1,6 +1,7 @@
 import { useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Camera, X } from 'lucide-react';
+import Camera from 'lucide-react/dist/esm/icons/camera';
+import X from 'lucide-react/dist/esm/icons/x';
 import { Button } from '@/components/ui/button';
 import { RECEIPT_ALLOWED_TYPES, RECEIPT_MAX_FILE_SIZE } from '@/lib/validations';
 import { useToast } from '@/hooks/useToast';

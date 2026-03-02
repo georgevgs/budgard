@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, ChevronDown } from 'lucide-react';
+import CalendarDays from 'lucide-react/dist/esm/icons/calendar-days';
+import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { Expense } from '@/types/Expense';
 

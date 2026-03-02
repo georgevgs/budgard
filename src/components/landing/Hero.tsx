@@ -1,5 +1,8 @@
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Wallet, TrendingDown, CreditCard } from 'lucide-react';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import Wallet from 'lucide-react/dist/esm/icons/wallet';
+import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
+import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
 import { useTranslation } from 'react-i18next';
 
 type HeroProps = {

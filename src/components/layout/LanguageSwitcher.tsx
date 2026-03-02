@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Languages } from 'lucide-react';
+import Languages from 'lucide-react/dist/esm/icons/languages';
 
 const languages = {
   en: 'English',

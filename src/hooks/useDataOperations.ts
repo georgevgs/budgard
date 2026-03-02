@@ -17,10 +17,6 @@ export interface ReceiptOptions {
 
 export function useDataOperations() {
   const {
-    expenses,
-    categories,
-    tags,
-    recurringExpenses,
     isInitialized,
     setExpenses,
     setCategories,
@@ -49,8 +45,6 @@ export function useDataOperations() {
       if (!isInitialized) {
         return;
       }
-
-      const previousExpenses = expenses;
 
       try {
         const savedExpense = expenseId
@@ -92,20 +86,19 @@ export function useDataOperations() {
           }
         }
 
-        const finalExpenses = expenseId
-          ? previousExpenses.map((e) => (e.id === expenseId ? savedExpense : e))
-          : [savedExpense, ...previousExpenses];
-
         haptics.success();
-        setExpenses(finalExpenses);
+        setExpenses((prev) =>
+          expenseId
+            ? prev.map((e) => (e.id === expenseId ? savedExpense : e))
+            : [savedExpense, ...prev],
+        );
       } catch (error) {
         haptics.error();
-        setExpenses(previousExpenses);
         showErrorToast(`Failed to ${expenseId ? 'update' : 'add'} expense`);
         throw error;
       }
     },
-    [expenses, isInitialized, setExpenses, showErrorToast],
+    [isInitialized, setExpenses, showErrorToast],
   );
 
   const handleExpenseDelete = useCallback(
@@ -114,26 +107,28 @@ export function useDataOperations() {
         return;
       }
 
-      const previousExpenses = expenses;
-      const expenseToDelete = previousExpenses.find((e) => e.id === expenseId);
-
       haptics.warning();
       try {
         await dataService.deleteExpense(expenseId);
-        setExpenses(previousExpenses.filter((e) => e.id !== expenseId));
+
+        // Read receipt path and update state atomically
+        let receiptPath: string | null = null;
+        setExpenses((prev) => {
+          receiptPath = prev.find((e) => e.id === expenseId)?.receipt_path ?? null;
+          return prev.filter((e) => e.id !== expenseId);
+        });
 
         // Fire-and-forget receipt cleanup
-        if (expenseToDelete?.receipt_path) {
-          deleteReceipt(expenseToDelete.receipt_path).catch(() => {});
+        if (receiptPath) {
+          deleteReceipt(receiptPath).catch(() => {});
         }
       } catch (error) {
         haptics.error();
-        setExpenses(previousExpenses);
         showErrorToast('Failed to delete expense');
         throw error;
       }
     },
-    [expenses, isInitialized, setExpenses, showErrorToast],
+    [isInitialized, setExpenses, showErrorToast],
   );
 
   const handleCategoryAdd = useCallback(
@@ -148,24 +143,30 @@ export function useDataOperations() {
         created_at: new Date().toISOString(),
       } as Category;
 
-      const updatedCategories = [...categories, optimisticCategory];
-      setCategories(updatedCategories);
+      // Optimistic add — capture snapshot for rollback
+      let snapshot: Category[] = [];
+      setCategories((prev) => {
+        snapshot = prev;
+        return [...prev, optimisticCategory];
+      });
 
       try {
         const savedCategory = await dataService.createCategory(categoryData);
         haptics.success();
-        const finalCategories = [...categories, savedCategory].sort((a, b) =>
-          a.name.localeCompare(b.name),
+        setCategories((prev) =>
+          [
+            ...prev.filter((c) => c.id !== optimisticCategory.id),
+            savedCategory,
+          ].sort((a, b) => a.name.localeCompare(b.name)),
         );
-        setCategories(finalCategories);
       } catch (error) {
         haptics.error();
-        setCategories(categories);
+        setCategories(snapshot);
         showErrorToast('Failed to add category');
         throw error;
       }
     },
-    [categories, isInitialized, setCategories, showErrorToast],
+    [isInitialized, setCategories, showErrorToast],
   );
 
   const handleRecurringExpenseSubmit = useCallback(
@@ -174,29 +175,24 @@ export function useDataOperations() {
         return;
       }
 
-      const previousRecurringExpenses = recurringExpenses;
-
       try {
         const savedExpense = expenseId
           ? await dataService.updateRecurringExpense(expenseData, expenseId)
           : await dataService.createRecurringExpense(expenseData);
 
-        const finalExpenses = expenseId
-          ? previousRecurringExpenses.map((e) =>
-              e.id === expenseId ? savedExpense : e,
-            )
-          : [savedExpense, ...previousRecurringExpenses];
-
-        setRecurringExpenses(finalExpenses);
+        setRecurringExpenses((prev) =>
+          expenseId
+            ? prev.map((e) => (e.id === expenseId ? savedExpense : e))
+            : [savedExpense, ...prev],
+        );
       } catch (error) {
-        setRecurringExpenses(previousRecurringExpenses);
         showErrorToast(
           `Failed to ${expenseId ? 'update' : 'add'} recurring expense`,
         );
         throw error;
       }
     },
-    [recurringExpenses, isInitialized, setRecurringExpenses, showErrorToast],
+    [isInitialized, setRecurringExpenses, showErrorToast],
   );
 
   const handleRecurringExpenseDelete = useCallback(
@@ -205,18 +201,15 @@ export function useDataOperations() {
         return;
       }
 
-      const previousExpenses = recurringExpenses;
-
       try {
         await dataService.deleteRecurringExpense(expenseId);
-        setRecurringExpenses(previousExpenses.filter((e) => e.id !== expenseId));
+        setRecurringExpenses((prev) => prev.filter((e) => e.id !== expenseId));
       } catch (error) {
-        setRecurringExpenses(previousExpenses);
         showErrorToast('Failed to delete recurring expense');
         throw error;
       }
     },
-    [recurringExpenses, isInitialized, setRecurringExpenses, showErrorToast],
+    [isInitialized, setRecurringExpenses, showErrorToast],
   );
 
   const handleRecurringExpenseToggle = useCallback(
@@ -225,20 +218,17 @@ export function useDataOperations() {
         return;
       }
 
-      const previousExpenses = recurringExpenses;
-
       try {
         await dataService.toggleRecurringExpense(expenseId, active);
-        setRecurringExpenses(
-          previousExpenses.map((e) => (e.id === expenseId ? { ...e, active } : e)),
+        setRecurringExpenses((prev) =>
+          prev.map((e) => (e.id === expenseId ? { ...e, active } : e)),
         );
       } catch (error) {
-        setRecurringExpenses(previousExpenses);
         showErrorToast('Failed to update recurring expense status');
         throw error;
       }
     },
-    [recurringExpenses, isInitialized, setRecurringExpenses, showErrorToast],
+    [isInitialized, setRecurringExpenses, showErrorToast],
   );
 
   const handleTagCreate = useCallback(
@@ -251,29 +241,33 @@ export function useDataOperations() {
         created_at: new Date().toISOString(),
       };
 
-      const previousTags = tags;
-      const updatedTags = [...tags, optimisticTag].sort((a, b) =>
-        a.name.localeCompare(b.name),
-      );
-      setTags(updatedTags);
+      // Optimistic add — capture snapshot for rollback
+      let snapshot: Tag[] = [];
+      setTags((prev) => {
+        snapshot = prev;
+        return [...prev, optimisticTag].sort((a, b) =>
+          a.name.localeCompare(b.name),
+        );
+      });
 
       try {
         const savedTag = await dataService.createTag({ name, color });
         haptics.success();
-        setTags(
-          [...updatedTags.filter((t) => t.id !== optimisticTag.id), savedTag].sort(
-            (a, b) => a.name.localeCompare(b.name),
-          ),
+        setTags((prev) =>
+          [
+            ...prev.filter((t) => t.id !== optimisticTag.id),
+            savedTag,
+          ].sort((a, b) => a.name.localeCompare(b.name)),
         );
         return savedTag;
       } catch (error) {
         haptics.error();
-        setTags(previousTags);
+        setTags(snapshot);
         showErrorToast('Failed to create tag');
         throw error;
       }
     },
-    [tags, setTags, showErrorToast],
+    [setTags, showErrorToast],
   );
 
   return {

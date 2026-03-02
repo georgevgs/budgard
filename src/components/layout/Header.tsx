@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { signOut } from '@/lib/auth';
-import { LogOut } from 'lucide-react';
+import LogOut from 'lucide-react/dist/esm/icons/log-out';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';

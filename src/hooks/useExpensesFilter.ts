@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useDeferredValue } from 'react';
 import { format } from 'date-fns';
 import type { Expense } from '@/types/Expense';
 
@@ -30,6 +30,7 @@ export const useExpensesFilter = ({
   selectedMonth,
 }: UseExpensesFilterProps): UseExpensesFilterReturn => {
   const [search, setSearch] = useState('');
+  const deferredSearch = useDeferredValue(search);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null,
   );
@@ -54,12 +55,13 @@ export const useExpensesFilter = ({
   }, [expenses, selectedMonth]);
 
   // Apply search/category/tag filters then sort
+  // deferredSearch keeps the input snappy while filtering is deferred
   const filteredExpenses = useMemo(() => {
-    const searchLower = search.toLowerCase();
+    const searchLower = deferredSearch.toLowerCase();
 
     const filtered = hasActiveFilters
       ? monthlyExpenses.filter((expense) => {
-          const matchesSearch = search
+          const matchesSearch = deferredSearch
             ? expense.description.toLowerCase().includes(searchLower) ||
               (expense.category?.name.toLowerCase().includes(searchLower) ?? false) ||
               (expense.tag?.name.toLowerCase().includes(searchLower) ?? false)
@@ -87,7 +89,7 @@ export const useExpensesFilter = ({
       if (sortOrder === 'amount-desc') return b.amount - a.amount;
       return a.amount - b.amount; // amount-asc
     });
-  }, [monthlyExpenses, search, selectedCategoryId, selectedTagId, hasActiveFilters, sortOrder]);
+  }, [monthlyExpenses, deferredSearch, selectedCategoryId, selectedTagId, hasActiveFilters, sortOrder]);
 
   const handleFilterChange = (newSearch: string, categoryId: string | null) => {
     setSearch(newSearch);

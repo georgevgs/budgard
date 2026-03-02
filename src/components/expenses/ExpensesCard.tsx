@@ -12,7 +12,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Camera, MoreVertical, Repeat, Tag as TagIcon } from 'lucide-react';
+import Camera from 'lucide-react/dist/esm/icons/camera';
+import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
+import Repeat from 'lucide-react/dist/esm/icons/repeat';
+import TagIcon from 'lucide-react/dist/esm/icons/tag';
 import ReceiptViewer from '@/components/expenses/ReceiptViewer';
 import CategoryBadge from '@/components/categories/CategoryBadge';
 import {

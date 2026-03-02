@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import Plus from 'lucide-react/dist/esm/icons/plus';
 import { format } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 
