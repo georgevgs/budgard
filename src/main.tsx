@@ -16,15 +16,20 @@ Sentry.init({
 // Recover from stale SW cache causing chunk load failures (common on iOS PWA after
 // a deployment while the app was backgrounded — old JS tries to load old chunk hashes
 // that no longer exist in the new SW precache).
-if (!sessionStorage.getItem('sw-chunk-reload')) {
+// We track attempts in sessionStorage to avoid an infinite loop, but cap at 1 reload.
+// We use location.href assignment instead of location.reload() to bypass iOS bfcache.
+const SW_RELOAD_KEY = 'sw-chunk-reload';
+const reloadAttempts = Number(sessionStorage.getItem(SW_RELOAD_KEY) ?? '0');
+if (reloadAttempts < 1) {
   window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
     const msg: string = event.reason?.message ?? '';
     const isChunkLoadError =
       msg.includes('dynamically imported module') ||
       msg.includes('Importing a module script failed');
     if (isChunkLoadError) {
-      sessionStorage.setItem('sw-chunk-reload', '1');
-      window.location.reload();
+      sessionStorage.setItem(SW_RELOAD_KEY, String(reloadAttempts + 1));
+      // Use href assignment to force a full navigation, bypassing iOS PWA bfcache.
+      window.location.href = window.location.href;
     }
   });
 }

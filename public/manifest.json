@@ -2,12 +2,13 @@
   "name": "Budgard",
   "short_name": "Budgard",
   "id": "/",
+  "lang": "en",
   "description": "A minimal and intuitive expense tracker",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
   "icons": [
     {
       "src": "/icon-192x192.png",
