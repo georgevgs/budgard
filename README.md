@@ -30,9 +30,9 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 
 ## Tech
 
-React 19 + TypeScript + Vite on the frontend. Supabase handles auth (email OTP magic links), the Postgres database, and receipt storage. Deployed on Netlify.
+React 19 + TypeScript + Vite on the frontend. Supabase handles auth (email OTP magic links), the Postgres database, file storage for receipts, and an Edge Function for recurring expense generation. Deployed on Netlify.
 
-UI components are from shadcn/ui, charts from Recharts, forms from react-hook-form + Zod. State lives in React Context with optimistic updates so the UI never feels slow.
+UI components are from shadcn/ui, charts from ApexCharts, forms from react-hook-form + Zod. State lives in React Context with optimistic updates so the UI never feels slow. Cloudflare Turnstile protects the auth flow from bots. Errors are monitored with Sentry (with sourcemap upload on every production deploy).
 
 ## Running locally
 
@@ -45,11 +45,18 @@ npm install
 cp .env.example .env
 ```
 
-Add your Supabase credentials to `.env`:
+Add your credentials to `.env`:
 
 ```env
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_TURNSTILE_SITE_KEY=your_turnstile_site_key  # optional, skips bot check if absent
+
+# Sentry (optional — only needed for production error monitoring)
+VITE_SENTRY_DSN=your_sentry_dsn
+SENTRY_ORG=your_sentry_org
+SENTRY_PROJECT=your_sentry_project
+SENTRY_AUTH_TOKEN=your_sentry_auth_token         # enables sourcemap upload on build
 ```
 
 Push the database migrations and start the dev server:
