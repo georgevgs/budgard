@@ -234,18 +234,13 @@
     "noCategorizedExpenses": "Δεν υπάρχουν κατηγοριοποιημένα έξοδα για το {{year}}",
     "monthlySpending": "Μηνιαίες Δαπάνες",
     "vsLastMonthUp": "+{{percent}}% σε σχέση με τον προηγούμενο μήνα",
-    "vsLastMonthDown": "{{percent}}% σε σχέση με τον προηγούμενο μήνα",
+    "vsLastMonthDown": "-{{percent}}% σε σχέση με τον προηγούμενο μήνα",
+    "vsLastMonthContext": "έναντι {{amount}} τον {{month}}",
     "sameAsLastMonth": "Ίδιο με τον προηγούμενο μήνα",
     "budgetLabel": "Προϋπολογισμός: {{amount}} €",
-    "yearOverYear": {
-      "title": "Σύγκριση Έτους προς Έτος",
-      "noData": "Δεν υπάρχουν δεδομένα για σύγκριση"
-    },
-    "heatmap": {
-      "title": "Ημερήσιες Δαπάνες",
-      "less": "Λίγο",
-      "more": "Πολύ"
-    },
+    "budgetUsed": "{{percent}}% του προϋπολογισμού χρησιμοποιήθηκε",
+    "avgPerMonth": "μέσος {{amount}}/μήνα",
+    "categoryTrends": "Ανάλυση Κατηγοριών",
     "insights": {
       "sectionTitle": "Αναλύσεις Δαπανών",
       "monthProjection": "Εκτιμώμενες δαπάνες μήνα: ~{{amount}}",

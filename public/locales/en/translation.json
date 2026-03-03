@@ -234,18 +234,13 @@
     "noCategorizedExpenses": "No categorized expenses for {{year}}",
     "monthlySpending": "Monthly Spending",
     "vsLastMonthUp": "+{{percent}}% vs last month",
-    "vsLastMonthDown": "{{percent}}% vs last month",
+    "vsLastMonthDown": "-{{percent}}% vs last month",
+    "vsLastMonthContext": "vs {{amount}} in {{month}}",
     "sameAsLastMonth": "Same as last month",
     "budgetLabel": "Budget: {{amount}} €",
-    "yearOverYear": {
-      "title": "Year-over-Year Comparison",
-      "noData": "No spending data to compare"
-    },
-    "heatmap": {
-      "title": "Daily Spending",
-      "less": "Less",
-      "more": "More"
-    },
+    "budgetUsed": "{{percent}}% of budget used",
+    "avgPerMonth": "avg {{amount}}/mo",
+    "categoryTrends": "Category Breakdown",
     "insights": {
       "sectionTitle": "Spending Insights",
       "monthProjection": "On track to spend ~{{amount}} this month",
