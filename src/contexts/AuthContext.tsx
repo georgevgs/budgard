@@ -5,6 +5,7 @@ import {
   useState,
   ReactNode,
 } from 'react';
+import * as Sentry from '@sentry/react';
 import type { Session } from '@supabase/supabase-js';
 import { getSession, onAuthStateChange } from '@/lib/auth';
 
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!mounted) return;
         setSession(initialSession);
       } catch (error) {
+        Sentry.captureException(error, { tags: { context: 'initializeSession' } });
         console.error('Failed to get session:', error);
       } finally {
         if (mounted) {
@@ -47,6 +49,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted) return;
       setSession(newSession);
       setIsLoading(false);
+      if (newSession?.user) {
+        Sentry.setUser({ id: newSession.user.id, email: newSession.user.email });
+      } else {
+        Sentry.setUser(null);
+      }
     });
 
     return () => {

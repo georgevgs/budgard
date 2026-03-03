@@ -9,6 +9,7 @@ import {
   type ReactNode,
   useCallback,
 } from 'react';
+import * as Sentry from '@sentry/react';
 import { useAuth } from '@/contexts/AuthContext';
 import { dataService } from '@/services/dataService';
 import type { Category } from '@/types/Category';
@@ -82,6 +83,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setIsInitialized(true);
       setIsLoading(false);
     } catch (error) {
+      Sentry.captureException(error, { tags: { context: 'fetchData' } });
       console.error('Failed to load data:', error);
       toastRef.current({
         title: 'Error',
@@ -101,6 +103,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const expensesData = await dataService.getExpenses();
       setExpenses(expensesData);
     } catch (error) {
+      Sentry.captureException(error, { tags: { context: 'refreshExpenses' } });
       console.error('Failed to refresh expenses:', error);
     }
   }, []);
