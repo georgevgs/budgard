@@ -18,7 +18,17 @@ function readStoredSession(): Session | null {
 type AuthSnapshot = { session: Session | null; isLoading: boolean };
 
 const stored = readStoredSession();
-let _snapshot: AuthSnapshot = { session: stored, isLoading: stored === null };
+// Only trust the stored session if the access token is still fresh.
+// An expired token causes a flicker: the app renders authenticated, then
+// onAuthStateChange fires with null (refresh failed) and redirects to login.
+const isTokenFresh =
+  stored !== null &&
+  (stored.expires_at ?? 0) > Math.floor(Date.now() / 1000) + 60;
+
+let _snapshot: AuthSnapshot = {
+  session: isTokenFresh ? stored : null,
+  isLoading: !isTokenFresh,
+};
 
 const listeners = new Set<() => void>();
 
