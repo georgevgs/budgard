@@ -40,17 +40,23 @@
       })();
     </script>
 
-    <!-- SW stale-cache recovery: if a JS chunk fails to load (MIME error after deploy),
-         auto-redirect to /reset which clears the SW and caches, then returns here. -->
+    <!-- SW stale-cache recovery: if one of our own JS chunks fails to load (MIME error
+         after a deploy), auto-redirect to /reset which clears the SW and caches.
+         Only triggers for same-origin scripts to avoid reacting to third-party failures.
+         The flag is cleared in main.tsx once React successfully boots. -->
     <script>
       (function() {
         var RESET_KEY = 'budgard-sw-reset';
         window.addEventListener('error', function(event) {
           var target = event.target;
           if (target && target.tagName === 'SCRIPT' && !sessionStorage.getItem(RESET_KEY)) {
-            sessionStorage.setItem(RESET_KEY, '1');
-            var returnTo = encodeURIComponent(window.location.pathname);
-            window.location.replace('/reset?from=' + returnTo);
+            var src = target.src || '';
+            var isSameOrigin = src.startsWith(window.location.origin + '/assets/');
+            if (isSameOrigin) {
+              sessionStorage.setItem(RESET_KEY, '1');
+              var returnTo = encodeURIComponent(window.location.pathname);
+              window.location.replace('/reset?from=' + returnTo);
+            }
           }
         }, true);
       })();
