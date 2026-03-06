@@ -21,7 +21,7 @@ export const IosInstallModal = ({ open, onOpenChange }: Props) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm p-6">
+      <DialogContent className="sm:max-w-sm p-6">
         <DialogHeader>
           <DialogTitle>{t('landing.install.title')}</DialogTitle>
           <DialogDescription>
