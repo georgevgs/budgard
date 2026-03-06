@@ -16,7 +16,9 @@ import { formatCurrency, parseCurrencyInput } from '@/lib/utils';
 import RecurringLoadingState from '@/components/recurring/RecurringLoading';
 import { useTranslation } from 'react-i18next';
 
-// Helper to calculate next occurrence date
+const WEEKS_PER_MONTH = 4.33;
+const BIWEEKLY_PERIODS_PER_MONTH = 2.17;
+
 function calculateNextOccurrence(expense: RecurringExpense): Date | null {
   if (!expense.active) return null;
   if (expense.end_date && new Date(expense.end_date) < new Date()) return null;
@@ -25,8 +27,10 @@ function calculateNextOccurrence(expense: RecurringExpense): Date | null {
     ? new Date(expense.last_generated_date)
     : new Date(expense.start_date);
 
-  // If we haven't generated yet and start date is in the future, use start date
-  if (!expense.last_generated_date && new Date(expense.start_date) > new Date()) {
+  if (
+    !expense.last_generated_date &&
+    new Date(expense.start_date) > new Date()
+  ) {
     return new Date(expense.start_date);
   }
 
@@ -51,12 +55,26 @@ function calculateNextOccurrence(expense: RecurringExpense): Date | null {
       nextDate = addMonths(fromDate, 1);
   }
 
-  // If we haven't generated anything yet, start from start_date
   if (!expense.last_generated_date) {
     return new Date(expense.start_date);
   }
 
   return nextDate;
+}
+
+function getMonthlyAmount(expense: RecurringExpense): number {
+  switch (expense.frequency) {
+    case 'weekly':
+      return expense.amount * WEEKS_PER_MONTH;
+    case 'biweekly':
+      return expense.amount * BIWEEKLY_PERIODS_PER_MONTH;
+    case 'quarterly':
+      return expense.amount / 3;
+    case 'yearly':
+      return expense.amount / 12;
+    default:
+      return expense.amount;
+  }
 }
 
 const RecurringExpensesList = () => {
@@ -127,26 +145,11 @@ const RecurringExpensesList = () => {
     setSelectedExpense(undefined);
   };
 
-  // Calculate summary stats from the optimistic list for instant feedback
   const activeExpenses = optimisticRecurring.filter((e) => e.active);
-  const monthlyTotal = activeExpenses.reduce((sum, expense) => {
-    let monthlyAmount = expense.amount;
-    switch (expense.frequency) {
-      case 'weekly':
-        monthlyAmount = expense.amount * 4.33;
-        break;
-      case 'biweekly':
-        monthlyAmount = expense.amount * 2.17;
-        break;
-      case 'quarterly':
-        monthlyAmount = expense.amount / 3;
-        break;
-      case 'yearly':
-        monthlyAmount = expense.amount / 12;
-        break;
-    }
-    return sum + monthlyAmount;
-  }, 0);
+  const monthlyTotal = activeExpenses.reduce(
+    (sum, expense) => sum + getMonthlyAmount(expense),
+    0,
+  );
 
   if (isLoading) {
     return <RecurringLoadingState />;
@@ -154,63 +157,35 @@ const RecurringExpensesList = () => {
 
   return (
     <div className="container max-w-4xl mx-auto p-4 space-y-4">
-      {/* Header with summary */}
       <div className="flex flex-col gap-4">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h2 className="text-lg font-semibold">
               {t('recurring.expensesTitle')}
             </h2>
-            {activeExpenses.length > 0 && (
-              <p className="text-sm text-muted-foreground">
-                {t('recurring.monthlyFrom', {
-                  amount: formatCurrency(monthlyTotal),
-                  count: activeExpenses.length,
-                })}
-              </p>
-            )}
+            {renderMonthlySummary(activeExpenses.length, monthlyTotal, t)}
           </div>
-          <Button onClick={() => setIsFormOpen(true)} size="sm" className="shrink-0">
+          <Button
+            onClick={() => setIsFormOpen(true)}
+            size="sm"
+            className="shrink-0"
+          >
             <Plus className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">{t('recurring.addRecurring')}</span>
+            <span className="hidden sm:inline">
+              {t('recurring.addRecurring')}
+            </span>
           </Button>
         </div>
       </div>
 
       <div className="grid gap-4">
-        {optimisticRecurring.length === 0 ? (
-          <Card className="p-8 text-center">
-            <div className="flex flex-col items-center gap-3">
-              <Repeat className="h-12 w-12 text-muted-foreground/50" />
-              <div>
-                <p className="font-medium">{t('recurring.noRecurring')}</p>
-                <p className="text-sm text-muted-foreground">
-                  {t('recurring.noRecurringDescription')}
-                </p>
-              </div>
-              <Button onClick={() => setIsFormOpen(true)} variant="outline" size="sm" className="mt-2">
-                <Plus className="h-4 w-4 mr-2" />
-                {t('recurring.addFirstRecurring')}
-              </Button>
-            </div>
-          </Card>
-        ) : (
-          optimisticRecurring.map((expense) => {
-            const nextOccurrence = calculateNextOccurrence(expense);
-            const isOverdue = !!(nextOccurrence && nextOccurrence <= new Date());
-
-            return (
-              <RecurringExpenseCard
-                key={expense.id}
-                expense={expense}
-                nextOccurrence={nextOccurrence}
-                isOverdue={isOverdue}
-                onEdit={handleEditExpense}
-                onDelete={handleDelete}
-                onToggle={handleToggle}
-              />
-            );
-          })
+        {renderExpensesList(
+          optimisticRecurring,
+          handleEditExpense,
+          handleDelete,
+          handleToggle,
+          setIsFormOpen,
+          t,
         )}
       </div>
 
@@ -233,9 +208,89 @@ const RecurringExpensesList = () => {
 
 export default RecurringExpensesList;
 
-// ============================================================================
-// Optimistic reducer
-// ============================================================================
+// ─── Helper render functions ──────────────────────────────────────────────────
+
+type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
+const renderMonthlySummary = (
+  activeCount: number,
+  monthlyTotal: number,
+  t: TranslateFunction,
+) => {
+  if (activeCount === 0) return null;
+
+  return (
+    <p className="text-sm text-muted-foreground">
+      {t('recurring.monthlyFrom', {
+        amount: formatCurrency(monthlyTotal),
+        count: activeCount,
+      })}
+    </p>
+  );
+};
+
+const renderExpensesList = (
+  expenses: RecurringExpense[],
+  onEdit: (expense: RecurringExpense) => void,
+  onDelete: (id: string) => void,
+  onToggle: (id: string, active: boolean) => void,
+  onOpenForm: (open: boolean) => void,
+  t: TranslateFunction,
+) => {
+  if (expenses.length === 0) {
+    return renderEmptyState(onOpenForm, t);
+  }
+
+  return expenses.map((expense) => {
+    const nextOccurrence = calculateNextOccurrence(expense);
+    const isOverdue = !!(nextOccurrence && nextOccurrence <= new Date());
+
+    return (
+      <RecurringExpenseCard
+        key={expense.id}
+        expense={expense}
+        nextOccurrence={nextOccurrence}
+        isOverdue={isOverdue}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onToggle={onToggle}
+      />
+    );
+  });
+};
+
+const renderEmptyState = (
+  onOpenForm: (open: boolean) => void,
+  t: TranslateFunction,
+) => {
+  return (
+    <Card className="p-8 text-center">
+      <div className="flex flex-col items-center gap-3">
+        <Repeat className="h-12 w-12 text-muted-foreground/50" />
+        <div>
+          <p className="font-medium">{t('recurring.noRecurring')}</p>
+          <p className="text-sm text-muted-foreground">
+            {t('recurring.noRecurringDescription')}
+          </p>
+        </div>
+        <Button
+          onClick={() => onOpenForm(true)}
+          variant="outline"
+          size="sm"
+          className="mt-2"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          {t('recurring.addFirstRecurring')}
+        </Button>
+      </div>
+    </Card>
+  );
+};
+
+// ─── Optimistic reducer ───────────────────────────────────────────────────────
 
 type RecurringOptimisticAction =
   | { type: 'add'; expense: RecurringExpense }
@@ -243,10 +298,10 @@ type RecurringOptimisticAction =
   | { type: 'delete'; id: string }
   | { type: 'toggle'; id: string; active: boolean };
 
-function recurringReducer(
+const recurringReducer = (
   state: RecurringExpense[],
   action: RecurringOptimisticAction,
-): RecurringExpense[] {
+): RecurringExpense[] => {
   switch (action.type) {
     case 'add':
       return [action.expense, ...state];
@@ -261,4 +316,4 @@ function recurringReducer(
         e.id === action.id ? { ...e, active: action.active } : e,
       );
   }
-}
+};

@@ -322,11 +322,11 @@ export default AnalyticsView;
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-function renderMonthChangeBadge(
+const renderMonthChangeBadge = (
   percentChange: number | null,
   delta: number,
   t: TFunc,
-) {
+) => {
   if (percentChange === null) return null;
 
   if (delta > 0) {
@@ -355,13 +355,13 @@ function renderMonthChangeBadge(
       {t('analytics.sameAsLastMonth')}
     </span>
   );
-}
+};
 
-function renderLastMonthContext(
+const renderLastMonthContext = (
   lastMonthAmount: number,
   lastMonthLabel: string,
   t: TFunc,
-) {
+) => {
   if (lastMonthAmount === 0) return null;
 
   return (
@@ -372,13 +372,13 @@ function renderLastMonthContext(
       })}
     </p>
   );
-}
+};
 
-function renderBudgetProgress(
+const renderBudgetProgress = (
   budgetUsedPercent: number | null,
   monthlyBudget: number | null,
   t: TFunc,
-) {
+) => {
   if (budgetUsedPercent === null || monthlyBudget === null) return null;
 
   let barClass = 'bg-primary';
@@ -406,14 +406,14 @@ function renderBudgetProgress(
       </div>
     </div>
   );
-}
+};
 
-function renderYearSummary(
+const renderYearSummary = (
   totalSpent: number,
   monthlyAverage: number,
   activeMonths: number,
   t: TFunc,
-) {
+) => {
   if (activeMonths === 0) return null;
 
   return (
@@ -426,22 +426,22 @@ function renderYearSummary(
       </span>
     </div>
   );
-}
+};
 
-interface CategoryRow {
+type CategoryRow = {
   id: string;
   name: string;
   color: string;
   amount: number;
   monthlyAmounts: number[];
-}
+};
 
-function renderCategoryBreakdown(
+const renderCategoryBreakdown = (
   breakdown: CategoryRow[],
   totalSpent: number,
   selectedYear: number,
   t: TFunc,
-) {
+) => {
   if (breakdown.length === 0) {
     return (
       <p className="text-center text-sm text-muted-foreground py-8">
@@ -485,4 +485,4 @@ function renderCategoryBreakdown(
       </CardContent>
     </Card>
   );
-}
+};

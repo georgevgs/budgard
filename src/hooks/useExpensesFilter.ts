@@ -4,12 +4,12 @@ import type { Expense } from '@/types/Expense';
 
 export type SortOrder = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc';
 
-interface UseExpensesFilterProps {
+type UseExpensesFilterProps = {
   expenses: Expense[];
   selectedMonth: string;
-}
+};
 
-interface UseExpensesFilterReturn {
+type UseExpensesFilterReturn = {
   filteredExpenses: Expense[];
   monthlyExpenses: Expense[];
   search: string;
@@ -23,7 +23,7 @@ interface UseExpensesFilterReturn {
   handleFilterChange: (search: string, categoryId: string | null) => void;
   handleClearFilters: () => void;
   hasActiveFilters: boolean;
-}
+};
 
 export const useExpensesFilter = ({
   expenses,

@@ -7,14 +7,14 @@ import {
   type Insight,
 } from '@/hooks/useSpendingInsights';
 
-interface SpendingInsightsProps {
+type SpendingInsightsProps = {
   expenses: Expense[];
   monthlyBudget: number | null;
   monthComparison: { thisMonthAmount: number; lastMonthAmount: number };
   monthlyData: { month: string; fullMonth: string; amount: number }[];
   categories: Category[];
   dateLocale: Locale;
-}
+};
 
 const SpendingInsights = (props: SpendingInsightsProps) => {
   const { t } = useTranslation();
@@ -36,15 +36,12 @@ const SpendingInsights = (props: SpendingInsightsProps) => {
 
 export default SpendingInsights;
 
-function renderInsightCard(insight: Insight) {
+const renderInsightCard = (insight: Insight) => {
   const Icon = insight.icon;
 
-  const iconClass =
-    insight.variant === 'warning'
-      ? 'text-amber-500'
-      : insight.variant === 'positive'
-        ? 'text-green-500'
-        : 'text-primary';
+  let iconClass = 'text-primary';
+  if (insight.variant === 'warning') iconClass = 'text-amber-500';
+  if (insight.variant === 'positive') iconClass = 'text-green-500';
 
   return (
     <div
@@ -55,4 +52,4 @@ function renderInsightCard(insight: Insight) {
       <p className="text-sm">{insight.text}</p>
     </div>
   );
-}
+};

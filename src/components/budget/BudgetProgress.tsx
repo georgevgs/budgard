@@ -6,11 +6,11 @@ import { Progress } from '@/components/ui/progress';
 import { formatCurrency, cn } from '@/lib/utils';
 import BudgetForm from '@/components/budget/BudgetForm';
 
-interface BudgetProgressProps {
+type BudgetProgressProps = {
   monthlyBudget: number | null;
   monthlySpent: number;
   onBudgetUpdate: (amount: number) => Promise<void>;
-}
+};
 
 const BudgetProgress = ({
   monthlyBudget,
@@ -100,9 +100,7 @@ const BudgetProgress = ({
               isWarning && 'text-yellow-600 dark:text-yellow-500',
             )}
           >
-            {isOverBudget
-              ? t('budget.overBudget')
-              : `${formatCurrency(remaining)} ${t('budget.remaining')}`}
+            {renderRemainingLabel(isOverBudget, remaining, monthlyBudget, t)}
           </span>
         </div>
       </div>
@@ -118,3 +116,21 @@ const BudgetProgress = ({
 };
 
 export default BudgetProgress;
+
+// ─── Helper render functions ──────────────────────────────────────────────────
+
+type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
+const renderRemainingLabel = (
+  isOverBudget: boolean,
+  remaining: number,
+  monthlyBudget: number,
+  t: TranslateFunction,
+) => {
+  if (isOverBudget) return t('budget.overBudget');
+
+  return `${formatCurrency(remaining)} ${t('budget.remaining')}`;
+};

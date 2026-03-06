@@ -24,18 +24,18 @@ import Clock from 'lucide-react/dist/esm/icons/clock';
 import CategoryBadge from '@/components/categories/CategoryBadge';
 import { format } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
-import { formatCurrency } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import { useTranslation } from 'react-i18next';
 
-interface RecurringExpenseCardProps {
+type RecurringExpenseCardProps = {
   expense: RecurringExpense;
   nextOccurrence: Date | null;
   isOverdue: boolean;
   onEdit: (expense: RecurringExpense) => void;
   onDelete: (id: string) => void;
   onToggle: (id: string, active: boolean) => void;
-}
+};
 
 const RecurringExpenseCard = ({
   expense,
@@ -68,49 +68,38 @@ const RecurringExpenseCard = ({
     setTimeout(() => setShowDeleteDialog(true), 0);
   };
 
+  const handleConfirmDelete = () => {
+    onDelete(expense.id);
+    setShowDeleteDialog(false);
+  };
+
   return (
     <>
       <Card
-        className={`transition-opacity ${!expense.active ? 'opacity-60 bg-muted/30' : ''}`}
+        className={cn(
+          'transition-opacity',
+          !expense.active && 'opacity-60 bg-muted/30',
+        )}
       >
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3">
-            {/* Left side - Main info */}
             <div className="flex-1 min-w-0">
-              <p className="font-medium truncate">
-                {expense.description}
-              </p>
+              <p className="font-medium truncate">{expense.description}</p>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
-                {expense.category && (
-                  <CategoryBadge category={expense.category} />
-                )}
+                {renderCategoryBadge(expense)}
                 <Badge variant="secondary" className="text-xs">
                   {t(`recurring.frequencies.${expense.frequency}`, {
                     defaultValue: expense.frequency,
                   })}
                 </Badge>
-                {isOverdue && expense.active && (
-                  <Badge variant="destructive" className="text-xs">
-                    {t('recurring.due')}
-                  </Badge>
-                )}
+                {renderOverdueBadge(expense, isOverdue, t)}
               </div>
               <p className="text-base font-bold mt-1">
                 {formatCurrency(expense.amount)}
               </p>
-              {nextOccurrence && expense.active && (
-                <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  <span>
-                    {t('recurring.next', {
-                      date: format(nextOccurrence, 'MMM d, yyyy', { locale: dateLocale }),
-                    })}
-                  </span>
-                </div>
-              )}
+              {renderNextOccurrence(expense, nextOccurrence, dateLocale, t)}
             </div>
 
-            {/* Right side - Controls */}
             <div className="flex items-center gap-2 shrink-0">
               <Switch
                 checked={expense.active}
@@ -157,10 +146,7 @@ const RecurringExpenseCard = ({
           <AlertDialogFooter>
             <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
-                onDelete(expense.id);
-                setShowDeleteDialog(false);
-              }}
+              onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {t('common.delete')}
@@ -173,3 +159,50 @@ const RecurringExpenseCard = ({
 };
 
 export default RecurringExpenseCard;
+
+// ─── Helper render functions ──────────────────────────────────────────────────
+
+type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
+const renderCategoryBadge = (expense: RecurringExpense) => {
+  if (!expense.category) return null;
+
+  return <CategoryBadge category={expense.category} />;
+};
+
+const renderOverdueBadge = (
+  expense: RecurringExpense,
+  isOverdue: boolean,
+  t: TranslateFunction,
+) => {
+  if (!isOverdue || !expense.active) return null;
+
+  return (
+    <Badge variant="destructive" className="text-xs">
+      {t('recurring.due')}
+    </Badge>
+  );
+};
+
+const renderNextOccurrence = (
+  expense: RecurringExpense,
+  nextOccurrence: Date | null,
+  dateLocale: Locale,
+  t: TranslateFunction,
+) => {
+  if (!nextOccurrence || !expense.active) return null;
+
+  return (
+    <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+      <Clock className="h-3 w-3" />
+      <span>
+        {t('recurring.next', {
+          date: format(nextOccurrence, 'MMM d, yyyy', { locale: dateLocale }),
+        })}
+      </span>
+    </div>
+  );
+};

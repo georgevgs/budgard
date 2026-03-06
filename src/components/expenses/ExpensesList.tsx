@@ -23,6 +23,7 @@ import ExpensesFilter from '@/components/expenses/ExpensesFilter';
 import CsvImportDialog from '@/components/expenses/CsvImportDialog';
 import { useExpensesFilter } from '@/hooks/useExpensesFilter';
 import type { Expense } from '@/types/Expense';
+import type { Category } from '@/types/Category';
 import type { ReceiptOptions } from '@/hooks/useDataOperations';
 import ExpensesEmpty from '@/components/expenses/ExpensesEmpty';
 
@@ -30,7 +31,7 @@ import ExpensesEmpty from '@/components/expenses/ExpensesEmpty';
 // Extracted Components for Readability
 // ============================================================================
 
-interface ExpensesContentProps {
+type ExpensesContentProps = {
   expenses: Expense[];
   hasActiveFilters: boolean;
   noMatchMessage: string;
@@ -39,7 +40,7 @@ interface ExpensesContentProps {
   onAddClick: () => void;
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
-}
+};
 
 const ExpensesContent = ({
   expenses,
@@ -255,13 +256,11 @@ const ExpensesList = () => {
             onClearFilters={handleClearFilters}
           />
 
-          {search.length > 0 && (
-            <p className="text-xs text-muted-foreground px-1">
-              {t('expenses.search.resultCount', {
-                count: filteredExpenses.length,
-                total: monthlyExpenses.length,
-              })}
-            </p>
+          {renderSearchResultCount(
+            search,
+            filteredExpenses.length,
+            monthlyExpenses.length,
+            t,
           )}
 
           {/* Collapsible Dashboard */}
@@ -281,15 +280,8 @@ const ExpensesList = () => {
                 onBudgetUpdate={handleBudgetUpdate}
               />
 
-              {/* Category Breakdown */}
-              {filteredExpenses.length > 0 && (
-                <ExpensesDashboard
-                  expenses={filteredExpenses}
-                  categories={categories}
-                />
-              )}
+              {renderDashboard(filteredExpenses, categories)}
 
-              {/* Import/Export CSV */}
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -300,22 +292,11 @@ const ExpensesList = () => {
                   <Upload className="h-4 w-4 mr-2" />
                   {t('import.importCSV')}
                 </Button>
-                {filteredExpenses.length > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      downloadExpensesAsCSV({
-                        expenses: filteredExpenses,
-                        categories,
-                        selectedMonth,
-                      })
-                    }
-                    className="text-muted-foreground"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    {t('expenses.exportCSV')}
-                  </Button>
+                {renderExportButton(
+                  filteredExpenses,
+                  categories,
+                  selectedMonth,
+                  t,
                 )}
               </div>
             </div>
@@ -362,6 +343,60 @@ const ExpensesList = () => {
 
 export default ExpensesList;
 
+// ─── Helper render functions ──────────────────────────────────────────────────
+
+type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
+const renderSearchResultCount = (
+  search: string,
+  filteredCount: number,
+  totalCount: number,
+  t: TranslateFunction,
+) => {
+  if (search.length === 0) return null;
+
+  return (
+    <p className="text-xs text-muted-foreground px-1">
+      {t('expenses.search.resultCount', {
+        count: filteredCount,
+        total: totalCount,
+      })}
+    </p>
+  );
+};
+
+const renderDashboard = (expenses: Expense[], categories: Category[]) => {
+  if (expenses.length === 0) return null;
+
+  return <ExpensesDashboard expenses={expenses} categories={categories} />;
+};
+
+const renderExportButton = (
+  expenses: Expense[],
+  categories: Category[],
+  selectedMonth: string,
+  t: TranslateFunction,
+) => {
+  if (expenses.length === 0) return null;
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() =>
+        downloadExpensesAsCSV({ expenses, categories, selectedMonth })
+      }
+      className="text-muted-foreground"
+    >
+      <Download className="h-4 w-4 mr-2" />
+      {t('expenses.exportCSV')}
+    </Button>
+  );
+};
+
 // ============================================================================
 // Optimistic reducer
 // ============================================================================
@@ -371,13 +406,18 @@ type OptimisticAction =
   | { type: 'update'; expense: Expense }
   | { type: 'delete'; id: string };
 
-function expensesReducer(state: Expense[], action: OptimisticAction): Expense[] {
+const expensesReducer = (
+  state: Expense[],
+  action: OptimisticAction,
+): Expense[] => {
   switch (action.type) {
     case 'add':
       return [action.expense, ...state];
     case 'update':
-      return state.map((e) => (e.id === action.expense.id ? action.expense : e));
+      return state.map((e) =>
+        e.id === action.expense.id ? action.expense : e,
+      );
     case 'delete':
       return state.filter((e) => e.id !== action.id);
   }
-}
+};

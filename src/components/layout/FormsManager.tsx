@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import type { Expense } from '@/types/Expense';
+import type { Category } from '@/types/Category';
 import type { ReceiptOptions } from '@/hooks/useDataOperations';
 import ExpensesForm from '@/components/expenses/ExpensesForm';
 import CategoryForm from '@/components/categories/CategoryForm';
@@ -14,7 +15,7 @@ export const FORM_TYPES = {
 
 export type FormType = (typeof FORM_TYPES)[keyof typeof FORM_TYPES] | null;
 
-interface FormsManagerProps {
+type FormsManagerProps = {
   formType: FormType;
   onClose: () => void;
   selectedExpense?: Expense;
@@ -23,7 +24,7 @@ interface FormsManagerProps {
     expenseId?: string,
     receiptOptions?: ReceiptOptions,
   ) => void;
-}
+};
 
 const FormsManager = ({
   formType,
@@ -42,10 +43,12 @@ const FormsManager = ({
   const isExpenseForm =
     formType === FORM_TYPES.NEW_EXPENSE || formType === FORM_TYPES.EDIT_EXPENSE;
   const isCategoryForm = formType === FORM_TYPES.NEW_CATEGORY;
+  const isEditingExpense = formType === FORM_TYPES.EDIT_EXPENSE;
+  const expenseActionKey = isEditingExpense ? 'forms.editExisting' : 'forms.addNew';
+  const expenseForEdit = isEditingExpense ? selectedExpense : undefined;
 
   return (
     <>
-      {/* Expense Form Modal */}
       <Dialog open={isExpenseForm} onOpenChange={onClose}>
         <DialogContent
           className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
@@ -54,25 +57,19 @@ const FormsManager = ({
         >
           <div id="expense-form-description" className="sr-only">
             {t('forms.expenseDescription', {
-              action: t(
-                formType === FORM_TYPES.EDIT_EXPENSE
-                  ? 'forms.editExisting'
-                  : 'forms.addNew',
-              ),
+              action: t(expenseActionKey),
             })}
           </div>
-          {isExpenseForm && (
-            <ExpensesForm
-              expense={formType === FORM_TYPES.EDIT_EXPENSE ? selectedExpense : undefined}
-              categories={categories}
-              onClose={onClose}
-              onSubmit={onExpenseSubmit}
-            />
+          {renderExpenseForm(
+            isExpenseForm,
+            expenseForEdit,
+            categories,
+            onClose,
+            onExpenseSubmit,
           )}
         </DialogContent>
       </Dialog>
 
-      {/* Category Form Modal */}
       <Dialog open={isCategoryForm} onOpenChange={onClose}>
         <DialogContent
           className="sm:max-w-[500px] p-0 gap-0"
@@ -82,9 +79,7 @@ const FormsManager = ({
           <div id="category-form-description" className="sr-only">
             {t('forms.categoryDescription')}
           </div>
-          {isCategoryForm && (
-            <CategoryForm onBack={onClose} onClose={onClose} />
-          )}
+          {renderCategoryForm(isCategoryForm, onClose)}
         </DialogContent>
       </Dialog>
     </>
@@ -92,3 +87,34 @@ const FormsManager = ({
 };
 
 export default FormsManager;
+
+// ─── Helper render functions ──────────────────────────────────────────────────
+
+const renderExpenseForm = (
+  isOpen: boolean,
+  expense: Expense | undefined,
+  categories: Category[],
+  onClose: () => void,
+  onSubmit: (
+    data: Partial<Expense>,
+    expenseId?: string,
+    receiptOptions?: ReceiptOptions,
+  ) => void,
+) => {
+  if (!isOpen) return null;
+
+  return (
+    <ExpensesForm
+      expense={expense}
+      categories={categories}
+      onClose={onClose}
+      onSubmit={onSubmit}
+    />
+  );
+};
+
+const renderCategoryForm = (isOpen: boolean, onClose: () => void) => {
+  if (!isOpen) return null;
+
+  return <CategoryForm onBack={onClose} onClose={onClose} />;
+};
