@@ -35,7 +35,13 @@ export class ErrorBoundary extends Component<Props, State> {
       error.message.includes('Loading chunk');
 
     if (isChunkError) {
-      this.handleReload();
+      const SW_RELOAD_KEY = 'sw-chunk-reload';
+      const attempts = Number(sessionStorage.getItem(SW_RELOAD_KEY) ?? '0');
+      if (attempts < 1) {
+        sessionStorage.setItem(SW_RELOAD_KEY, String(attempts + 1));
+        // Use href assignment to force a full navigation, bypassing iOS PWA bfcache.
+        window.location.href = window.location.href;
+      }
     }
   }
 
@@ -44,11 +50,6 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   handleReload = () => {
-    const SW_RELOAD_KEY = 'sw-chunk-reload';
-    const attempts = Number(sessionStorage.getItem(SW_RELOAD_KEY) ?? '0');
-    if (attempts < 1) {
-      sessionStorage.setItem(SW_RELOAD_KEY, String(attempts + 1));
-    }
     // Use href assignment to force a full navigation, bypassing iOS PWA bfcache.
     window.location.href = window.location.href;
   };
