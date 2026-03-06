@@ -100,7 +100,7 @@ const BudgetProgress = ({
               isWarning && 'text-yellow-600 dark:text-yellow-500',
             )}
           >
-            {renderRemainingLabel(isOverBudget, remaining, monthlyBudget, t)}
+            {renderRemainingLabel(isOverBudget, remaining, t)}
           </span>
         </div>
       </div>
@@ -127,7 +127,6 @@ type TranslateFunction = (
 const renderRemainingLabel = (
   isOverBudget: boolean,
   remaining: number,
-  monthlyBudget: number,
   t: TranslateFunction,
 ) => {
   if (isOverBudget) return t('budget.overBudget');
