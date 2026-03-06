@@ -79,11 +79,148 @@ i18next with translations in `public/locales/{en,el}/translation.json`. Config i
 
 Supabase PostgreSQL with tables: `expenses`, `categories`, `recurring_expenses`, `user_budgets`. Migrations in `supabase/migrations/`. A Supabase Edge Function handles recurring expense generation (`processRecurringExpenses`).
 
-## Code Style Conventions
+---
 
-- **No ternary operators in JSX** — use explicit `if`/`return` with helper render functions
-- **No `&&` for conditional rendering** — same pattern as above
-- **Full TypeScript type annotations** — strict mode enabled, no unused locals/params
-- **Helper functions placed below the component** they serve
-- Prettier: single quotes, trailing commas, 80 char width, LF line endings
-- Components are arrow functions with default exports for route-level components
+## Code Style
+
+The guiding principle is **human-readable code**. Every rule below serves that goal — if following a rule makes code harder to read in a specific situation, the readable version wins.
+
+### Variables and Values
+
+- Always use `const`. Use `let` only when the variable is reassigned. Never use `var`.
+- Prefer destructuring for objects and arrays when it makes the intent clearer:
+  ```ts
+  // good
+  const { id, name, amount } = expense;
+
+  // avoid when you only need one property — just use dot access
+  const name = expense.name;
+  ```
+- Use object shorthand: `{ name }` not `{ name: name }`.
+- Use spread for shallow copies: `{ ...expense, amount: 100 }`.
+- Use template literals instead of string concatenation.
+- Use `===` and `!==`. Never `==` or `!=`.
+
+### Functions
+
+- Use arrow functions for callbacks and inline handlers.
+- Name every function — avoid anonymous `function()` declarations.
+- Name event handlers with the `handle` prefix: `handleSubmit`, `handleDeleteClick`.
+- Keep functions short and focused on one thing. If a function needs a comment to explain what it does, consider extracting it and naming it well instead.
+- No unused parameters. Prefix intentionally unused params with `_` (e.g., `_event`).
+
+### TypeScript
+
+- Full type annotations on all function signatures (parameters and return types).
+- No `any`. If a type is truly unknown, use `unknown` and narrow it.
+- Prefer `type` over `interface` for consistency. Use `interface` only when you need declaration merging.
+- Do not suppress TypeScript errors with `// @ts-ignore` or `// @ts-expect-error` unless there is no alternative — if used, add a comment explaining why.
+- Strict mode is enabled. Keep the build clean: no unused locals, no unused parameters.
+
+### React Components
+
+- One component per file.
+- PascalCase for component names. camelCase for instances.
+- Components are arrow functions:
+  ```tsx
+  const ExpenseCard = ({ expense }: ExpenseCardProps) => { ... };
+  export default ExpenseCard;
+  ```
+- Route-level components use default exports. All other components use named exports.
+- Destructure props in the function signature. Define a `Props` type above the component:
+  ```tsx
+  type Props = {
+    expense: Expense;
+    onDelete: (id: string) => void;
+  };
+
+  export const ExpenseCard = ({ expense, onDelete }: Props) => { ... };
+  ```
+- Boolean props use the `is` or `has` prefix: `isOpen`, `isLoading`, `hasError`.
+- Keep components under ~100 lines. Extract sub-components or helper render functions when they grow larger.
+
+### Conditional Rendering
+
+- **No ternary operators in JSX.** Use explicit `if`/`return` with helper render functions.
+- **No `&&` for conditional rendering.** Same rule — use helper functions.
+
+  ```tsx
+  // good
+  const renderBadge = () => {
+    if (!expense.tag) {
+      return null;
+    }
+    return <TagBadge tag={expense.tag} />;
+  };
+
+  // then in JSX
+  {renderBadge()}
+  ```
+
+### Hooks
+
+- Custom hooks are prefixed with `use` and live in `src/hooks/`.
+- Extract reusable stateful logic into a custom hook rather than duplicating it across components.
+- `useEffect` dependency arrays must be complete and honest. Never suppress exhaustive-deps warnings.
+- Do not call hooks conditionally or inside loops.
+- Avoid prop drilling beyond two levels — use context or lift state appropriately.
+
+### Imports
+
+- Group imports in this order, with a blank line between each group:
+  1. React and third-party libraries
+  2. Internal modules via `@/*` alias
+  3. Types (can be merged with group 2 using `import type`)
+- No default exports for utility functions or hooks — use named exports.
+- Remove all unused imports.
+
+### Naming
+
+- Components: `PascalCase`
+- Hooks, functions, variables: `camelCase`
+- Constants that are truly fixed values: `UPPER_SNAKE_CASE`
+- Files: match the primary export name (`ExpenseCard.tsx`, `useDataOperations.ts`)
+- Avoid abbreviations. Write `expense` not `exp`, `category` not `cat`, `index` not `idx`.
+
+### State and Data
+
+- Never mutate state directly. Always produce a new value.
+- Use `Array.map`, `Array.filter`, `Array.find`, and `Array.reduce` for data transforms. Prefer these over `for` loops when the intent is a transformation.
+- Keep derived values as plain variables computed from state — not duplicated state:
+  ```ts
+  // good — derived on render
+  const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
+
+  // avoid — duplicated state that can go out of sync
+  const [totalAmount, setTotalAmount] = useState(0);
+  ```
+
+### Array Keys
+
+- Keys must be stable, unique IDs from the data. Never use array indices as keys.
+
+### No Magic Values
+
+- No unexplained numbers or strings inline. Extract them as named constants with a clear name that explains their purpose:
+  ```ts
+  // good
+  const MAX_RECEIPT_SIZE_BYTES = 1_000_000;
+
+  // avoid
+  if (file.size > 1000000) { ... }
+  ```
+
+### Error Handling
+
+- Handle errors explicitly. Do not swallow them silently.
+- Only validate at system boundaries (user input, Supabase responses). Trust internal data structures.
+- Do not add defensive checks for impossible states.
+
+### Formatting
+
+- Prettier handles formatting. Do not fight it.
+- Single quotes, trailing commas, 80 character line width, LF line endings.
+- Helper functions are placed **below** the component they serve.
+- Helper functions use **arrow function syntax** (`const foo = (...) => { ... }`). `function` declarations are only used for React components and named exports.
+- **Add a blank line before `return`** in any function body that has statements above it. Early guard returns (`if (!x) return null;`) are exempt.
+- No `console.log` left in committed code.

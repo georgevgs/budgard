@@ -23,6 +23,7 @@ import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import Clock from 'lucide-react/dist/esm/icons/clock';
 import CategoryBadge from '@/components/categories/CategoryBadge';
 import { format } from 'date-fns';
+import type { Locale } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { RecurringExpense } from '@/types/RecurringExpense';

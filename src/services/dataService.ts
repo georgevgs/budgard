@@ -255,9 +255,9 @@ export const dataService = {
   },
 
   async getBudget(signal?: AbortSignal) {
-    let query = supabase.from('user_budgets').select('*').maybeSingle();
+    let query = supabase.from('user_budgets').select('*');
     if (signal) query = query.abortSignal(signal);
-    const { data, error } = await query;
+    const { data, error } = await query.maybeSingle();
 
     if (error) throw error;
 
