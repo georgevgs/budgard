@@ -25,10 +25,18 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
     Sentry.captureException(error, {
       extra: { componentStack: errorInfo.componentStack },
     });
+
+    const isChunkError =
+      error.message.includes('dynamically imported module') ||
+      error.message.includes('Importing a module script failed') ||
+      error.message.includes('Loading chunk');
+
+    if (isChunkError) {
+      this.handleReload();
+    }
   }
 
   handleReset = () => {
@@ -36,7 +44,13 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   handleReload = () => {
-    window.location.reload();
+    const SW_RELOAD_KEY = 'sw-chunk-reload';
+    const attempts = Number(sessionStorage.getItem(SW_RELOAD_KEY) ?? '0');
+    if (attempts < 1) {
+      sessionStorage.setItem(SW_RELOAD_KEY, String(attempts + 1));
+    }
+    // Use href assignment to force a full navigation, bypassing iOS PWA bfcache.
+    window.location.href = window.location.href;
   };
 
   render() {
