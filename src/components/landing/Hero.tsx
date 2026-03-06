@@ -22,6 +22,10 @@ const Hero = ({ onGetStarted }: HeroProps) => {
   const showInstallButton = !isStandalone && (isIosSafari || isAndroidInstallable);
 
   const handleInstallClick = () => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
     if (isIosSafari) {
       setShowIosModal(true);
     } else {
@@ -30,11 +34,11 @@ const Hero = ({ onGetStarted }: HeroProps) => {
   };
 
   return (
-    <div className="relative overflow-hidden pt-16 pb-24">
+    <div className="relative overflow-hidden pb-24">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-slate-100/50 [mask-image:radial-gradient(ellipse_at_center,black_70%,transparent_100%)] -z-10" />
 
-      <div className="relative px-4 pt-16 mx-auto max-w-7xl">
+      <div className="relative px-4 pt-4 mx-auto max-w-7xl">
         <div className="text-center space-y-8 animate-fade-up">
           {/* Floating Icon Badges */}
           <div className="flex justify-center gap-4 mb-8">
@@ -60,11 +64,11 @@ const Hero = ({ onGetStarted }: HeroProps) => {
             {t('landing.hero.subtitle')}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+          <div className="flex flex-col gap-4 justify-center items-center pt-4 w-full max-w-[280px] mx-auto">
             <Button
               size="lg"
               onClick={onGetStarted}
-              className="group min-w-[200px] animate-fade-up delay-200"
+              className="group w-full animate-fade-up delay-200"
             >
               {t('landing.hero.getStarted')}
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -74,7 +78,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
                 size="lg"
                 variant="outline"
                 onClick={handleInstallClick}
-                className="group min-w-[200px] animate-fade-up delay-200"
+                className="group w-full animate-fade-up delay-200"
               >
                 <Download className="mr-2 h-4 w-4" />
                 {t('landing.hero.addToHomeScreen')}
