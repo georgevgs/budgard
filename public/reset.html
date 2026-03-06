@@ -45,7 +45,6 @@
             await Promise.all(keys.map(function(key) { return caches.delete(key); }));
           }
 
-          sessionStorage.removeItem('budgard-sw-reset');
           status.textContent = 'Done! Loading…';
           window.location.replace(returnTo);
         } catch (err) {
