@@ -37,7 +37,60 @@ function notify(next: AuthSnapshot) {
   listeners.forEach(l => l());
 }
 
-supabase.auth.onAuthStateChange((_event, session) => {
+// Track the last valid session so we can attempt recovery when iOS aborts
+// Supabase's internal token refresh (which fires a spurious SIGNED_OUT).
+let _lastKnownSession: Session | null = isTokenFresh ? stored : null;
+let _recoveryTimer: ReturnType<typeof setTimeout> | null = null;
+// Set to true before an explicit signOut() call so we don't try to recover.
+let _intentionalSignOut = false;
+
+export function markIntentionalSignOut() {
+  _intentionalSignOut = true;
+}
+
+supabase.auth.onAuthStateChange((event, session) => {
+  if (_recoveryTimer !== null) {
+    clearTimeout(_recoveryTimer);
+    _recoveryTimer = null;
+  }
+
+  if (session) {
+    _lastKnownSession = session;
+    notify({ session, isLoading: false });
+    return;
+  }
+
+  // iOS PWA: when the app is backgrounded, Supabase's token refresh request
+  // gets aborted, which triggers a spurious SIGNED_OUT with session=null.
+  // If we have a previous valid session and this wasn't an intentional sign
+  // out, hold the current session and attempt recovery with the old refresh
+  // token before deciding to actually sign the user out.
+  if (event === 'SIGNED_OUT' && _lastKnownSession && !_intentionalSignOut) {
+    const refreshToken = _lastKnownSession.refresh_token;
+    _recoveryTimer = setTimeout(() => {
+      _recoveryTimer = null;
+      supabase.auth
+        .refreshSession({ refresh_token: refreshToken })
+        .then(({ data, error }) => {
+          if (data.session && !error) {
+            _lastKnownSession = data.session;
+            notify({ session: data.session, isLoading: false });
+          } else {
+            _lastKnownSession = null;
+            notify({ session: null, isLoading: false });
+          }
+        })
+        .catch(() => {
+          _lastKnownSession = null;
+          notify({ session: null, isLoading: false });
+        });
+    }, 2000);
+    // Don't update the snapshot yet — keep the user on their current page.
+    return;
+  }
+
+  _intentionalSignOut = false;
+  _lastKnownSession = null;
   notify({ session, isLoading: false });
 });
 

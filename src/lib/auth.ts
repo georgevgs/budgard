@@ -1,5 +1,6 @@
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { markIntentionalSignOut } from '@/lib/authStore';
 
 export async function requestOTP(email: string) {
   return supabase.auth.signInWithOtp({
@@ -19,6 +20,7 @@ export async function signInWithOTP(email: string, token: string) {
 }
 
 export async function signOut() {
+  markIntentionalSignOut();
   return supabase.auth.signOut();
 }
 

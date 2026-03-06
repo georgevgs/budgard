@@ -23,23 +23,23 @@ export const dataService = {
     return user;
   },
 
-  async getCategories() {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .order('name');
+  async getCategories(signal?: AbortSignal) {
+    let query = supabase.from('categories').select('*').order('name');
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
 
     if (error) throw error;
+
     return data as Category[];
   },
 
-  async getTags() {
-    const { data, error } = await supabase
-      .from('tags')
-      .select('*')
-      .order('name');
+  async getTags(signal?: AbortSignal) {
+    let query = supabase.from('tags').select('*').order('name');
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
 
     if (error) throw error;
+
     return data as Tag[];
   },
 
@@ -54,8 +54,8 @@ export const dataService = {
     return data as Tag;
   },
 
-  async getExpenses() {
-    const { data, error } = await supabase
+  async getExpenses(signal?: AbortSignal) {
+    let query = supabase
       .from('expenses')
       .select(
         `
@@ -67,8 +67,11 @@ export const dataService = {
       )
       .order('date', { ascending: false })
       .order('created_at', { ascending: false });
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
 
     if (error) throw error;
+
     return data as (Expense & { recurring_expense: RecurringExpense | null })[];
   },
 
@@ -132,8 +135,8 @@ export const dataService = {
     return data as Category;
   },
 
-  async getRecurringExpenses() {
-    const { data, error } = await supabase
+  async getRecurringExpenses(signal?: AbortSignal) {
+    let query = supabase
       .from('recurring_expenses')
       .select(
         `
@@ -143,8 +146,11 @@ export const dataService = {
            `,
       )
       .order('created_at', { ascending: false });
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
 
     if (error) throw error;
+
     return data as (RecurringExpense & { expenses: Expense[] })[];
   },
 
@@ -248,13 +254,13 @@ export const dataService = {
     }>;
   },
 
-  async getBudget() {
-    const { data, error } = await supabase
-      .from('user_budgets')
-      .select('*')
-      .maybeSingle();
+  async getBudget(signal?: AbortSignal) {
+    let query = supabase.from('user_budgets').select('*').maybeSingle();
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
 
     if (error) throw error;
+
     return data as Budget | null;
   },
 
