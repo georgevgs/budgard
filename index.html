@@ -39,6 +39,22 @@
         }
       })();
     </script>
+
+    <!-- SW stale-cache recovery: if a JS chunk fails to load (MIME error after deploy),
+         auto-redirect to /reset which clears the SW and caches, then returns here. -->
+    <script>
+      (function() {
+        var RESET_KEY = 'budgard-sw-reset';
+        window.addEventListener('error', function(event) {
+          var target = event.target;
+          if (target && target.tagName === 'SCRIPT' && !sessionStorage.getItem(RESET_KEY)) {
+            sessionStorage.setItem(RESET_KEY, '1');
+            var returnTo = encodeURIComponent(window.location.pathname);
+            window.location.replace('/reset?from=' + returnTo);
+          }
+        }, true);
+      })();
+    </script>
     <link rel="apple-touch-startup-image" href="/splash/apple-splash-2048-2732.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
     <link rel="apple-touch-startup-image" href="/splash/apple-splash-2732-2048.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
     <link rel="apple-touch-startup-image" href="/splash/apple-splash-1668-2388.jpg" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
