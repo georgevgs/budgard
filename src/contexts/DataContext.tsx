@@ -83,6 +83,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setIsInitialized(true);
       setIsLoading(false);
     } catch (error) {
+      // iOS PWA aborts in-flight requests when the app goes to background.
+      // Silently ignore AbortErrors — the visibilitychange listener will retry.
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        setIsLoading(false);
+        return;
+      }
       Sentry.captureException(error, { tags: { context: 'fetchData' } });
       console.error('Failed to load data:', error);
       toastRef.current({
@@ -128,6 +134,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     }
   }, [isAuthLoading, session, isInitialized, fetchData]);
+
+  // Retry data fetch when the PWA comes back to foreground (iOS aborts
+  // in-flight requests when backgrounded, leaving isInitialized = false).
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible' && session?.user?.id && !isInitialized) {
+        fetchData();
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [session?.user?.id, isInitialized, fetchData]);
 
   const value = {
     categories,
