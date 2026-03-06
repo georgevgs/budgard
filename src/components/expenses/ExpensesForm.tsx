@@ -34,6 +34,7 @@ import Tag from 'lucide-react/dist/esm/icons/tag';
 import X from 'lucide-react/dist/esm/icons/x';
 import { format } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
+import type { Locale } from 'date-fns';
 import { cn, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useData } from '@/contexts/DataContext';
@@ -57,7 +58,7 @@ const TAG_COLORS = [
   '#06b6d4',
 ];
 
-interface ExpensesFormProps {
+type ExpensesFormProps = {
   expense?: Expense;
   categories: Category[];
   onClose: () => void;
@@ -66,7 +67,7 @@ interface ExpensesFormProps {
     expenseId?: string,
     receiptOptions?: ReceiptOptions,
   ) => void;
-}
+};
 
 const ExpensesForm = ({
   expense,
@@ -170,7 +171,7 @@ const ExpensesForm = ({
       <div className="overflow-y-auto flex-1 px-4 sm:px-6 overscroll-contain" style={{ touchAction: 'pan-y' }}>
         <DialogHeader className="pb-4" data-draggable-area>
           <DialogTitle className="text-xl">
-            {t(expense ? 'expenses.editExpense' : 'expenses.addExpense')}
+            {renderFormTitle(Boolean(expense), t)}
           </DialogTitle>
           <DialogDescription>{t('expenses.formDescription')}</DialogDescription>
         </DialogHeader>
@@ -288,26 +289,7 @@ const ExpensesForm = ({
                         )}
                       >
                         {renderTagButtonContent(selectedTag)}
-                        {selectedTag && (
-                          <span
-                            role="button"
-                            aria-label="Clear tag"
-                            className="ml-auto h-4 w-4 shrink-0 opacity-50 hover:opacity-100"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleTagClear();
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                e.stopPropagation();
-                                handleTagClear();
-                              }
-                            }}
-                            tabIndex={0}
-                          >
-                            <X className="h-4 w-4" />
-                          </span>
-                        )}
+                        {renderTagClearButton(selectedTag, handleTagClear)}
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -345,24 +327,13 @@ const ExpensesForm = ({
                           {tag.name}
                         </button>
                       ))}
-                      {showCreateOption && (
-                        <button
-                          type="button"
-                          className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left text-primary"
-                          onClick={handleTagCreateInline}
-                          disabled={isCreatingTag}
-                        >
-                          <Tag className="h-3 w-3 shrink-0" />
-                          {isCreatingTag
-                            ? 'Creating...'
-                            : `Create tag: "${tagSearch.trim()}"`}
-                        </button>
+                      {renderCreateTagOption(
+                        showCreateOption,
+                        isCreatingTag,
+                        tagSearch,
+                        handleTagCreateInline,
                       )}
-                      {filteredTags.length === 0 && !showCreateOption && (
-                        <p className="px-3 py-2 text-sm text-muted-foreground">
-                          No tags found.
-                        </p>
-                      )}
+                      {renderNoTagsMessage(filteredTags.length, showCreateOption)}
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -388,11 +359,7 @@ const ExpensesForm = ({
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value ? (
-                          format(field.value, 'PPP', { locale: dateLocale })
-                        ) : (
-                          <span>{t('expenses.pickDate')}</span>
-                        )}
+                        {renderDateValue(field.value, dateLocale, t('expenses.pickDate'))}
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -434,7 +401,34 @@ const ExpensesForm = ({
   );
 };
 
-const renderTagButtonContent = (selectedTag: { name: string; color: string } | undefined) => {
+export default ExpensesForm;
+
+// ─── Helper render functions ──────────────────────────────────────────────────
+
+type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
+const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {
+  if (isEditing) return t('expenses.editExpense');
+
+  return t('expenses.addExpense');
+};
+
+const renderDateValue = (
+  date: Date | undefined,
+  locale: Locale,
+  placeholder: string,
+) => {
+  if (!date) return <span>{placeholder}</span>;
+
+  return format(date, 'PPP', { locale });
+};
+
+const renderTagButtonContent = (
+  selectedTag: { name: string; color: string } | undefined,
+) => {
   if (!selectedTag) {
     return (
       <span className="flex items-center gap-2">
@@ -443,6 +437,7 @@ const renderTagButtonContent = (selectedTag: { name: string; color: string } | u
       </span>
     );
   }
+
   return (
     <span className="flex items-center gap-2">
       <div
@@ -454,4 +449,70 @@ const renderTagButtonContent = (selectedTag: { name: string; color: string } | u
   );
 };
 
-export default ExpensesForm;
+const renderTagClearButton = (
+  selectedTag: { name: string; color: string } | undefined,
+  onClear: () => void,
+) => {
+  if (!selectedTag) return null;
+
+  const handleClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    onClear();
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.stopPropagation();
+      onClear();
+    }
+  };
+
+  return (
+    <span
+      role="button"
+      aria-label="Clear tag"
+      className="ml-auto h-4 w-4 shrink-0 opacity-50 hover:opacity-100"
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+    >
+      <X className="h-4 w-4" />
+    </span>
+  );
+};
+
+const renderCreateTagOption = (
+  showCreateOption: boolean,
+  isCreatingTag: boolean,
+  tagSearch: string,
+  onCreate: () => void,
+) => {
+  if (!showCreateOption) return null;
+
+  const label = isCreatingTag
+    ? 'Creating...'
+    : `Create tag: "${tagSearch.trim()}"`;
+
+  return (
+    <button
+      type="button"
+      className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left text-primary"
+      onClick={onCreate}
+      disabled={isCreatingTag}
+    >
+      <Tag className="h-3 w-3 shrink-0" />
+      {label}
+    </button>
+  );
+};
+
+const renderNoTagsMessage = (
+  filteredCount: number,
+  showCreateOption: boolean,
+) => {
+  if (filteredCount > 0 || showCreateOption) return null;
+
+  return (
+    <p className="px-3 py-2 text-sm text-muted-foreground">No tags found.</p>
+  );
+};

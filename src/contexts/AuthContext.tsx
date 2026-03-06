@@ -3,17 +3,17 @@ import {
   useContext,
   useEffect,
   useSyncExternalStore,
-  ReactNode,
+  type ReactNode,
 } from 'react';
 import * as Sentry from '@sentry/react';
 import type { Session } from '@supabase/supabase-js';
 import { authStore } from '@/lib/authStore';
 
-interface AuthContextType {
+type AuthContextType = {
   session: Session | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-}
+};
 
 const AuthContext = createContext<AuthContextType | null>(null);
 

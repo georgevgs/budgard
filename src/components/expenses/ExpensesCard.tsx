@@ -37,7 +37,12 @@ type ExpenseCardProps = {
   searchQuery?: string;
 };
 
-const ExpensesCard = ({ expense, onEdit, onDelete, searchQuery }: ExpenseCardProps) => {
+const ExpensesCard = ({
+  expense,
+  onEdit,
+  onDelete,
+  searchQuery,
+}: ExpenseCardProps) => {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'el' ? el : enUS;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -62,6 +67,14 @@ const ExpensesCard = ({ expense, onEdit, onDelete, searchQuery }: ExpenseCardPro
     setTimeout(() => onEdit(expense), 0);
   };
 
+  const handleConfirmDelete = () => {
+    onDelete(expense.id);
+    setShowDeleteDialog(false);
+  };
+
+  const handleReceiptOpen = () => setShowReceipt(true);
+  const handleReceiptClose = () => setShowReceipt(false);
+
   return (
     <>
       <Card className="rounded-lg transition-colors hover:bg-accent overflow-hidden border-border/60">
@@ -75,31 +88,15 @@ const ExpensesCard = ({ expense, onEdit, onDelete, searchQuery }: ExpenseCardPro
                     <p className="font-medium text-base truncate max-w-[200px] sm:max-w-none">
                       {renderHighlightedText(expense.description, searchQuery)}
                     </p>
-                    {expense.category && (
-                      <CategoryBadge category={expense.category} />
-                    )}
-                    {expense.tag && (
-                      <TagBadge tag={expense.tag} />
-                    )}
-                    {expense.recurring_expense_id && (
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Repeat className="h-3 w-3" />
-                        <span>{t('expenses.recurring')}</span>
-                      </div>
-                    )}
-                    {expense.receipt_path && (
-                      <button
-                        type="button"
-                        onClick={() => setShowReceipt(true)}
-                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <Camera className="h-3 w-3" />
-                        <span>{t('receipt.receipt')}</span>
-                      </button>
-                    )}
+                    {renderCategoryBadge(expense)}
+                    {renderTagBadge(expense)}
+                    {renderRecurringBadge(expense, t)}
+                    {renderReceiptButton(expense, t, handleReceiptOpen)}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(expense.date), 'MMMM d, yyyy', { locale: dateLocale })}
+                    {format(new Date(expense.date), 'MMMM d, yyyy', {
+                      locale: dateLocale,
+                    })}
                   </p>
                 </div>
 
@@ -123,11 +120,7 @@ const ExpensesCard = ({ expense, onEdit, onDelete, searchQuery }: ExpenseCardPro
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-32">
-                      {!expense.recurring_expense_id && (
-                        <DropdownMenuItem onClick={handleEditClick}>
-                          {t('common.edit')}
-                        </DropdownMenuItem>
-                      )}
+                      {renderEditMenuItem(expense, t, handleEditClick)}
                       <DropdownMenuItem
                         onClick={handleDeleteClick}
                         className="text-destructive focus:text-destructive"
@@ -151,19 +144,13 @@ const ExpensesCard = ({ expense, onEdit, onDelete, searchQuery }: ExpenseCardPro
           <AlertDialogHeader data-draggable-area>
             <AlertDialogTitle>{t('expenses.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('expenses.deleteConfirmation')}
-              {expense.recurring_expense_id &&
-                t('expenses.deleteRecurringNote')}
-              {t('common.actionUndone')}
+              {renderDeleteDescription(expense, t)}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
-                onDelete(expense.id);
-                setShowDeleteDialog(false);
-              }}
+              onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {t('common.delete')}
@@ -172,40 +159,126 @@ const ExpensesCard = ({ expense, onEdit, onDelete, searchQuery }: ExpenseCardPro
         </AlertDialogContent>
       </AlertDialog>
 
-      {expense.receipt_path && (
-        <ReceiptViewer
-          receiptPath={expense.receipt_path}
-          open={showReceipt}
-          onClose={() => setShowReceipt(false)}
-        />
-      )}
+      {renderReceiptViewer(expense, showReceipt, handleReceiptClose)}
     </>
   );
 };
 
-function renderHighlightedText(text: string, query: string | undefined) {
+export default memo(ExpensesCard);
+
+// ─── Helper render functions ──────────────────────────────────────────────────
+
+type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
+const renderHighlightedText = (text: string, query: string | undefined) => {
   if (!query) return <>{text}</>;
   const lower = text.toLowerCase();
   const queryLower = query.toLowerCase();
-  const idx = lower.indexOf(queryLower);
-  if (idx === -1) return <>{text}</>;
+  const matchIndex = lower.indexOf(queryLower);
+  if (matchIndex === -1) return <>{text}</>;
+
   return (
     <>
-      {text.slice(0, idx)}
+      {text.slice(0, matchIndex)}
       <mark className="bg-primary/20 text-foreground rounded-sm px-0.5">
-        {text.slice(idx, idx + query.length)}
+        {text.slice(matchIndex, matchIndex + query.length)}
       </mark>
-      {text.slice(idx + query.length)}
+      {text.slice(matchIndex + query.length)}
     </>
   );
-}
+};
 
 const renderCategoryAccent = (expense: Expense) => {
   if (!expense.category) return null;
+
   return (
     <div
       className="w-1 shrink-0"
       style={{ backgroundColor: expense.category.color }}
+    />
+  );
+};
+
+const renderCategoryBadge = (expense: Expense) => {
+  if (!expense.category) return null;
+
+  return <CategoryBadge category={expense.category} />;
+};
+
+const renderTagBadge = (expense: Expense) => {
+  if (!expense.tag) return null;
+
+  return <TagBadge tag={expense.tag} />;
+};
+
+const renderRecurringBadge = (expense: Expense, t: TranslateFunction) => {
+  if (!expense.recurring_expense_id) return null;
+
+  return (
+    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <Repeat className="h-3 w-3" />
+      <span>{t('expenses.recurring')}</span>
+    </div>
+  );
+};
+
+const renderReceiptButton = (
+  expense: Expense,
+  t: TranslateFunction,
+  onClick: () => void,
+) => {
+  if (!expense.receipt_path) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+    >
+      <Camera className="h-3 w-3" />
+      <span>{t('receipt.receipt')}</span>
+    </button>
+  );
+};
+
+const renderEditMenuItem = (
+  expense: Expense,
+  t: TranslateFunction,
+  onClick: () => void,
+) => {
+  if (expense.recurring_expense_id) return null;
+
+  return (
+    <DropdownMenuItem onClick={onClick}>{t('common.edit')}</DropdownMenuItem>
+  );
+};
+
+const renderDeleteDescription = (expense: Expense, t: TranslateFunction) => {
+  const confirmation = t('expenses.deleteConfirmation');
+  const actionUndone = t('common.actionUndone');
+
+  if (expense.recurring_expense_id) {
+    return `${confirmation}${t('expenses.deleteRecurringNote')}${actionUndone}`;
+  }
+
+  return `${confirmation}${actionUndone}`;
+};
+
+const renderReceiptViewer = (
+  expense: Expense,
+  isOpen: boolean,
+  onClose: () => void,
+) => {
+  if (!expense.receipt_path) return null;
+
+  return (
+    <ReceiptViewer
+      receiptPath={expense.receipt_path}
+      open={isOpen}
+      onClose={onClose}
     />
   );
 };
@@ -224,5 +297,3 @@ const TagBadge = ({ tag }: { tag: Tag }) => {
     </div>
   );
 };
-
-export default memo(ExpensesCard);

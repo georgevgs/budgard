@@ -18,7 +18,7 @@ import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Tag } from '@/types/Tag';
 import { useToast } from '@/hooks/useToast';
 
-interface DataState {
+type DataState = {
   categories: Category[];
   expenses: Expense[];
   recurringExpenses: RecurringExpense[];
@@ -26,9 +26,9 @@ interface DataState {
   monthlyBudget: number | null;
   isLoading: boolean;
   isInitialized: boolean;
-}
+};
 
-interface DataContextType extends DataState {
+type DataContextType = DataState & {
   refreshData: () => Promise<void>;
   refreshExpenses: () => Promise<void>;
   setCategories: Dispatch<SetStateAction<Category[]>>;
@@ -36,7 +36,7 @@ interface DataContextType extends DataState {
   setRecurringExpenses: Dispatch<SetStateAction<RecurringExpense[]>>;
   setTags: Dispatch<SetStateAction<Tag[]>>;
   setMonthlyBudget: Dispatch<SetStateAction<number | null>>;
-}
+};
 
 const DataContext = createContext<DataContextType | null>(null);
 
