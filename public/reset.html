@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Budgard – Reset App</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        background: #0a0a0a;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        text-align: center;
+        padding: 2rem;
+        box-sizing: border-box;
+      }
+      h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+      p { color: #888; margin-bottom: 2rem; font-size: 0.9rem; }
+      #status { font-size: 0.875rem; color: #aaa; margin-top: 1rem; min-height: 1.5rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Updating Budgard…</h1>
+    <p>Refreshing app data, this only takes a second.</p>
+    <div id="status">Working…</div>
+    <script>
+      var status = document.getElementById('status');
+      var params = new URLSearchParams(window.location.search);
+      var returnTo = params.get('from') || '/';
+
+      var reset = async function() {
+        try {
+          if ('serviceWorker' in navigator) {
+            var registrations = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(registrations.map(function(reg) { return reg.unregister(); }));
+          }
+
+          if ('caches' in window) {
+            var keys = await caches.keys();
+            await Promise.all(keys.map(function(key) { return caches.delete(key); }));
+          }
+
+          sessionStorage.removeItem('budgard-sw-reset');
+          status.textContent = 'Done! Loading…';
+          window.location.replace(returnTo);
+        } catch (err) {
+          status.textContent = 'Could not reset automatically. Go to iOS Settings → Safari → Clear History and Website Data, then reopen the app.';
+        }
+      };
+
+      reset();
+    </script>
+  </body>
+</html>
