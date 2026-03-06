@@ -1,9 +1,13 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import Download from 'lucide-react/dist/esm/icons/download';
 import Wallet from 'lucide-react/dist/esm/icons/wallet';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
 import { useTranslation } from 'react-i18next';
+import { useInstallPrompt } from '@/hooks/useInstallPrompt';
+import { IosInstallModal } from '@/components/landing/IosInstallModal';
 
 type HeroProps = {
   onGetStarted: () => void;
@@ -11,14 +15,27 @@ type HeroProps = {
 
 const Hero = ({ onGetStarted }: HeroProps) => {
   const { t } = useTranslation();
+  const { isIosSafari, isAndroidInstallable, isStandalone, triggerAndroidInstall } =
+    useInstallPrompt();
+  const [showIosModal, setShowIosModal] = useState(false);
+
+  const showInstallButton = !isStandalone && (isIosSafari || isAndroidInstallable);
+
+  const handleInstallClick = () => {
+    if (isIosSafari) {
+      setShowIosModal(true);
+    } else {
+      void triggerAndroidInstall();
+    }
+  };
 
   return (
-    <div className="relative overflow-hidden pt-12 pb-16">
+    <div className="relative overflow-hidden pt-16 pb-24">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-slate-100/50 [mask-image:radial-gradient(ellipse_at_center,black_70%,transparent_100%)] -z-10" />
 
-      <div className="relative px-4 pt-12 mx-auto max-w-7xl">
-        <div className="text-center space-y-6 animate-fade-up">
+      <div className="relative px-4 pt-16 mx-auto max-w-7xl">
+        <div className="text-center space-y-8 animate-fade-up">
           {/* Floating Icon Badges */}
           <div className="flex justify-center gap-4 mb-8">
             <div className="animate-float delay-100 flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 shadow-lg">
@@ -43,7 +60,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
             {t('landing.hero.subtitle')}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-2">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
             <Button
               size="lg"
               onClick={onGetStarted}
@@ -52,7 +69,19 @@ const Hero = ({ onGetStarted }: HeroProps) => {
               {t('landing.hero.getStarted')}
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
+            {showInstallButton && (
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={handleInstallClick}
+                className="group min-w-[200px] animate-fade-up delay-200"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                {t('landing.hero.addToHomeScreen')}
+              </Button>
+            )}
           </div>
+          <IosInstallModal open={showIosModal} onOpenChange={setShowIosModal} />
 
           <p className="text-xs text-muted-foreground animate-fade-up delay-300">
             {t('landing.hero.freeToUse')}
