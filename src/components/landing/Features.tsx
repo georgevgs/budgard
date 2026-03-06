@@ -36,7 +36,7 @@ const Features = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="relative px-4">
+    <div className="relative px-4 pb-16">
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {features.map((feature) => (
