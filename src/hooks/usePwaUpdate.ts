@@ -20,19 +20,23 @@ export function usePwaUpdate(): void {
       // Periodic update check — fetch the SW file with no-cache to detect
       // new deployments, then call update() if the server has a new version.
       setInterval(async () => {
-        if (registration.installing || !navigator) return;
-        if ('connection' in navigator && !navigator.onLine) return;
+        try {
+          if (registration.installing || !navigator) return;
+          if ('connection' in navigator && !navigator.onLine) return;
 
-        const resp = await fetch(_swUrl, {
-          cache: 'no-store',
-          headers: {
-            'cache': 'no-store',
-            'cache-control': 'no-cache',
-          },
-        });
+          const resp = await fetch(_swUrl, {
+            cache: 'no-store',
+            headers: {
+              cache: 'no-store',
+              'cache-control': 'no-cache',
+            },
+          });
 
-        if (resp?.status === 200) {
-          await registration.update();
+          if (resp?.status === 200) {
+            await registration.update();
+          }
+        } catch {
+          // Network failures are expected (offline, flaky connection)
         }
       }, UPDATE_CHECK_INTERVAL_MS);
     },
@@ -72,7 +76,9 @@ export function usePwaUpdate(): void {
       const registration = swRegistrationRef.current;
       if (!registration) return;
 
-      registration.update();
+      registration.update().catch(() => {
+        // SW script fetch can fail (offline, server error) — non-critical
+      });
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
