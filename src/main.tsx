@@ -15,7 +15,7 @@ Sentry.init({
     Sentry.browserProfilingIntegration(),
   ],
   tracesSampleRate: 0.1,
-  profilesSampleRate: 0.1,
+  profileSessionSampleRate: 0.1,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
 });
