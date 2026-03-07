@@ -6,9 +6,6 @@ import App from '@/App';
 import './lib/i18n';
 import './index.css';
 
-// Clear the SW reset flag — app booted successfully, future stale-cache issues can auto-fix again.
-sessionStorage.removeItem('budgard-sw-reset');
-
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
   enabled: import.meta.env.PROD && !!import.meta.env.VITE_SENTRY_DSN,
