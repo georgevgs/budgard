@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   BrowserRouter,
   Routes,
@@ -16,16 +16,19 @@ import NavTabs from '@/components/layout/NavTabs';
 import { AppLoadingSkeleton, ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
 import RecurringLoadingState from '@/components/recurring/RecurringLoading';
 import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
+import { lazyWithRetry } from '@/lib/lazyWithRetry';
 
-// Lazy load route-level components
-const ExpensesList = lazy(() => import('@/components/expenses/ExpensesList'));
-const AnalyticsView = lazy(
+// Lazy load route-level components with retry on chunk failure
+const ExpensesList = lazyWithRetry(
+  () => import('@/components/expenses/ExpensesList'),
+);
+const AnalyticsView = lazyWithRetry(
   () => import('@/components/analytics/AnalyticsView'),
 );
-const RecurringExpensesList = lazy(
+const RecurringExpensesList = lazyWithRetry(
   () => import('@/components/recurring/RecurringExpensesList'),
 );
-const LandingPage = lazy(() => import('@/pages/LandingPage'));
+const LandingPage = lazyWithRetry(() => import('@/pages/LandingPage'));
 
 // ============================================================================
 // Loading Component
