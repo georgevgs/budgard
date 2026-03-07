@@ -33,7 +33,7 @@ const Header = () => {
           <img
             src="/icon-512x512.png"
             alt={t('common.logoAlt')}
-            className="h-7 w-7"
+            className="h-7 w-7 rounded-lg mix-blend-multiply dark:invert dark:mix-blend-screen"
             style={{ objectFit: 'contain' }}
           />
           <span className="text-lg font-semibold tracking-tight">Budgard</span>
