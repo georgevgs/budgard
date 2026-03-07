@@ -71,16 +71,16 @@ const AlertDialogContent = React.forwardRef<
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           className={cn(
-            'fixed z-50 grid w-full gap-4 border bg-background shadow-lg duration-200',
+            'fixed z-50 grid w-full gap-4 border border-border/40 bg-card shadow-lg duration-200',
             // Mobile: drawer from bottom with rounded top corners
-            'bottom-0 left-0 right-0 rounded-t-[20px] p-6',
+            'bottom-0 left-0 right-0 rounded-t-[24px] p-6',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
             'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
             // Desktop: centered modal
             'sm:left-[50%] sm:top-[50%] sm:bottom-auto sm:right-auto',
             'sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%]',
-            'sm:rounded-lg',
+            'sm:rounded-2xl',
             'sm:data-[state=closed]:slide-out-to-left-1/2 sm:data-[state=closed]:slide-out-to-top-[48%]',
             'sm:data-[state=open]:slide-in-from-left-1/2 sm:data-[state=open]:slide-in-from-top-[48%]',
             'sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95',

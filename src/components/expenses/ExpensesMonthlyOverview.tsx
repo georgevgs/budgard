@@ -41,7 +41,7 @@ const ExpensesMonthlyOverview = ({
       : null;
 
   return (
-    <div className="flex flex-col gap-4 bg-background border rounded-lg p-4">
+    <div className="flex flex-col gap-4 bg-card border border-border/40 rounded-2xl p-5 shadow-sm">
       {/* Monthly Total */}
       <div
         onClick={hasExpenses ? onMonthlyTotalClick : undefined}

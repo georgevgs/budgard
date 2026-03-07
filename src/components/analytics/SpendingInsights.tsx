@@ -46,7 +46,7 @@ const renderInsightCard = (insight: Insight) => {
   return (
     <div
       key={insight.id}
-      className="rounded-lg border bg-card p-3 flex items-center gap-3"
+      className="rounded-2xl border border-border/40 bg-card p-3 shadow-sm flex items-center gap-3"
     >
       <Icon className={`h-4 w-4 shrink-0 ${iconClass}`} />
       <p className="text-sm">{insight.text}</p>

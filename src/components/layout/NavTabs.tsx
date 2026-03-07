@@ -28,7 +28,7 @@ const NavTabs = () => {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60"
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 bg-card/80 backdrop-blur-xl supports-[backdrop-filter]:bg-card/60"
       aria-label={t('navigation.ariaLabel')}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
