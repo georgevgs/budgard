@@ -32,6 +32,9 @@
       var status = document.getElementById('status');
       var params = new URLSearchParams(window.location.search);
       var returnTo = params.get('from') || '/';
+      if (!returnTo.startsWith('/') || returnTo.startsWith('//')) {
+        returnTo = '/';
+      }
 
       var reset = async function() {
         try {
