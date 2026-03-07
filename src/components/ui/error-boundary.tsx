@@ -32,7 +32,8 @@ export class ErrorBoundary extends Component<Props, State> {
     const isChunkError =
       error.message.includes('dynamically imported module') ||
       error.message.includes('Importing a module script failed') ||
-      error.message.includes('Loading chunk');
+      error.message.includes('Loading chunk') ||
+      error.message.includes('is not a valid JavaScript MIME type');
 
     if (isChunkError) {
       const SW_RELOAD_KEY = 'sw-chunk-reload';
@@ -87,7 +88,11 @@ interface ErrorFallbackProps {
 }
 
 const ErrorFallback = ({ error, onReset, onReload }: ErrorFallbackProps) => {
-  const isChunkError = error?.message?.includes('Loading chunk');
+  const isChunkError =
+    error?.message?.includes('dynamically imported module') ||
+    error?.message?.includes('Importing a module script failed') ||
+    error?.message?.includes('Loading chunk') ||
+    error?.message?.includes('is not a valid JavaScript MIME type');
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
