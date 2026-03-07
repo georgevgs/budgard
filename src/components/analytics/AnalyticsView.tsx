@@ -195,7 +195,7 @@ const AnalyticsView = () => {
         },
       },
       tooltip: {
-        theme: 'dark',
+        theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
         y: { formatter: (val: number) => `${val.toFixed(2)} €` },
       },
       colors: ['hsl(var(--primary))'],

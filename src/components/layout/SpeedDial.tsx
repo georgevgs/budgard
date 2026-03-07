@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Receipt from 'lucide-react/dist/esm/icons/receipt';
@@ -18,29 +18,46 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
+  const closeMenu = useCallback(() => setIsOpen(false), []);
+
   const handleAction = (callback: () => void) => {
-    setIsOpen(false);
-    // Blur the active element to release focus before modal opens
+    closeMenu();
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
     callback();
   };
 
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeMenu();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, closeMenu]);
+
   return (
     <>
-      {/* Overlay to handle clicks outside when menu is open */}
+      {/* Overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-transparent z-40"
-          onClick={() => setIsOpen(false)}
-          aria-label={t('speedDial.closeMenu')}
+          onClick={closeMenu}
+          role="presentation"
         />
       )}
 
       <div className="fixed bottom-24 right-4 z-50 flex flex-col items-end gap-2 pb-safe-b pointer-events-none">
         {/* Action Buttons */}
         <div
+          aria-hidden={!isOpen}
           className={cn(
             'flex flex-col gap-2 items-end transition-all duration-200 scale-90 origin-bottom pointer-events-auto',
             isOpen
@@ -66,6 +83,7 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
               className="h-12 w-12 rounded-full shadow-lg"
               onClick={() => handleAction(onAddExpense)}
               aria-label={t('expenses.addExpense')}
+              tabIndex={isOpen ? 0 : -1}
             >
               <Receipt className="h-5 w-5" />
             </Button>
@@ -89,6 +107,7 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
               className="h-12 w-12 rounded-full shadow-lg"
               onClick={() => handleAction(onAddCategory)}
               aria-label={t('categories.addCategory')}
+              tabIndex={isOpen ? 0 : -1}
             >
               <Tag className="h-5 w-5" />
             </Button>

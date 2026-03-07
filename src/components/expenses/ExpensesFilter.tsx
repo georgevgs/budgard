@@ -269,7 +269,7 @@ const renderActiveFiltersSection = (props: ActiveFiltersSectionProps) => {
         t,
         onCategoryChange,
       )}
-      {renderTagFilterBadge(selectedTagId, tags, onTagChange)}
+      {renderTagFilterBadge(selectedTagId, tags, t, onTagChange)}
       <Button
         variant="ghost"
         size="sm"
@@ -290,12 +290,16 @@ const renderSearchBadge = (
   if (!search) return null;
 
   return (
-    <Badge variant="secondary" className="text-xs">
+    <Badge variant="secondary" className="text-xs gap-1">
       {t('expenses.search.active', { query: search })}
-      <X
-        className="h-3 w-3 ml-1 cursor-pointer"
+      <button
+        type="button"
+        className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20"
         onClick={() => onClear('')}
-      />
+        aria-label={t('expenses.filter.clearSearch', { defaultValue: 'Clear search' })}
+      >
+        <X className="h-3 w-3" />
+      </button>
     </Badge>
   );
 };
@@ -314,12 +318,16 @@ const renderCategoryFilterBadge = (
       : categories.find((c) => c.id === selectedCategoryId)?.name;
 
   return (
-    <Badge variant="secondary" className="text-xs">
+    <Badge variant="secondary" className="text-xs gap-1">
       {t('expenses.filter.categoryFilter', { name: categoryName })}
-      <X
-        className="h-3 w-3 ml-1 cursor-pointer"
+      <button
+        type="button"
+        className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20"
         onClick={() => onClear('all')}
-      />
+        aria-label={t('expenses.filter.clearCategory', { defaultValue: 'Clear category filter' })}
+      >
+        <X className="h-3 w-3" />
+      </button>
     </Badge>
   );
 };
@@ -327,6 +335,7 @@ const renderCategoryFilterBadge = (
 const renderTagFilterBadge = (
   selectedTagId: string | null,
   tags: Tag[],
+  t: TranslateFunction,
   onClear: (value: string | null) => void,
 ) => {
   if (!selectedTagId) return null;
@@ -334,12 +343,16 @@ const renderTagFilterBadge = (
   const tagName = tags.find((tag) => tag.id === selectedTagId)?.name;
 
   return (
-    <Badge variant="secondary" className="text-xs">
+    <Badge variant="secondary" className="text-xs gap-1">
       {tagName}
-      <X
-        className="h-3 w-3 ml-1 cursor-pointer"
+      <button
+        type="button"
+        className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20"
         onClick={() => onClear(null)}
-      />
+        aria-label={t('expenses.filter.clearTag', { defaultValue: 'Clear tag filter' })}
+      >
+        <X className="h-3 w-3" />
+      </button>
     </Badge>
   );
 };

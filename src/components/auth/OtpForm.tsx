@@ -213,7 +213,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
         </div>
 
         {state.error && (
-          <p className="text-sm text-destructive text-center">{state.error}</p>
+          <p id="otp-error" className="text-sm text-destructive text-center" role="alert">{state.error}</p>
         )}
 
         <div className="space-y-2">

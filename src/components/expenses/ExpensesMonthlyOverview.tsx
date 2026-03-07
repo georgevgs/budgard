@@ -43,11 +43,15 @@ const ExpensesMonthlyOverview = ({
   return (
     <div className="flex flex-col gap-4 bg-card border border-border/40 rounded-2xl p-5 shadow-sm">
       {/* Monthly Total */}
-      <div
+      <button
+        type="button"
         onClick={hasExpenses ? onMonthlyTotalClick : undefined}
+        disabled={!hasExpenses}
+        aria-expanded={hasExpenses ? isExpanded : undefined}
         className={cn(
-          'group transition-all',
+          'w-full text-left transition-all',
           hasExpenses && 'cursor-pointer hover:opacity-70',
+          !hasExpenses && 'cursor-default',
         )}
       >
         <p className="text-sm font-medium text-muted-foreground">
@@ -80,34 +84,34 @@ const ExpensesMonthlyOverview = ({
             </span>
           </div>
         )}
-      </div>
+      </button>
 
       {/* Statistics */}
       {hasExpenses && (
-        <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+        <dl className="grid grid-cols-2 gap-4 pt-2 border-t">
           {/* Number of Expenses */}
           <div>
-            <p className="text-sm text-muted-foreground">
+            <dt className="text-sm text-muted-foreground">
               {t('expenses.totalCount')}
-            </p>
-            <p className="text-lg font-semibold">{expenses.length}</p>
+            </dt>
+            <dd className="text-lg font-semibold">{expenses.length}</dd>
           </div>
 
           {/* Most Expensive */}
           {mostExpensive && (
             <div>
-              <p className="text-sm text-muted-foreground">
+              <dt className="text-sm text-muted-foreground">
                 {t('expenses.mostExpensive')}
-              </p>
-              <p className="text-lg font-semibold">
+              </dt>
+              <dd className="text-lg font-semibold">
                 {formatCurrency(mostExpensive.amount)}
-              </p>
-              <p className="text-xs text-muted-foreground truncate">
+              </dd>
+              <dd className="text-xs text-muted-foreground truncate">
                 {mostExpensive.description}
-              </p>
+              </dd>
             </div>
           )}
-        </div>
+        </dl>
       )}
 
       {/* Action Buttons */}

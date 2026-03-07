@@ -30,7 +30,7 @@ const ThemeToggle: React.FC = () => {
         <Button
           variant="ghost"
           size="sm"
-          className="w-8 h-8 p-0"
+          className="w-10 h-10 p-0"
           aria-label={t('common.toggleTheme')}
         >
           {themeIcons[theme as Theme]}

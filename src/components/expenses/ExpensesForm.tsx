@@ -460,24 +460,15 @@ const renderTagClearButton = (
     onClear();
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.stopPropagation();
-      onClear();
-    }
-  };
-
   return (
-    <span
-      role="button"
+    <button
+      type="button"
       aria-label="Clear tag"
-      className="ml-auto h-4 w-4 shrink-0 opacity-50 hover:opacity-100"
+      className="ml-auto p-1 -mr-1 shrink-0 opacity-50 hover:opacity-100 rounded-full"
       onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
     >
-      <X className="h-4 w-4" />
-    </span>
+      <X className="h-3.5 w-3.5" />
+    </button>
   );
 };
 
