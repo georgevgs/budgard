@@ -67,7 +67,7 @@ const BudgetProgress = ({
             variant="ghost"
             size="sm"
             onClick={() => setIsFormOpen(true)}
-            className="h-6 w-6 p-0"
+            className="h-10 w-10 p-0"
             aria-label={t('budget.editBudget')}
           >
             <Pencil className="h-3.5 w-3.5" />

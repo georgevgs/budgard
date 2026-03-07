@@ -20,7 +20,7 @@ const LanguageSwitcher = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+        <Button variant="ghost" size="sm" className="w-10 h-10 p-0">
           <Languages className="h-4 w-4" />
           <span className="sr-only">{t('common.switchLanguage')}</span>
         </Button>

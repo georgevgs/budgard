@@ -35,22 +35,26 @@ type ExpensesContentProps = {
   expenses: Expense[];
   hasActiveFilters: boolean;
   noMatchMessage: string;
+  clearFiltersLabel: string;
   selectedMonth: string;
   searchQuery: string;
   onAddClick: () => void;
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
+  onClearFilters: () => void;
 };
 
 const ExpensesContent = ({
   expenses,
   hasActiveFilters,
   noMatchMessage,
+  clearFiltersLabel,
   selectedMonth,
   searchQuery,
   onAddClick,
   onEdit,
   onDelete,
+  onClearFilters,
 }: ExpensesContentProps) => {
   // Has expenses - show paginated list
   if (expenses.length > 0) {
@@ -62,8 +66,11 @@ const ExpensesContent = ({
   // No expenses, but filters are active - show "no matches" message
   if (hasActiveFilters) {
     return (
-      <div className="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-border/40">
-        <p className="text-sm text-muted-foreground">{noMatchMessage}</p>
+      <div className="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-border/40" role="status">
+        <p className="text-sm text-muted-foreground mb-3">{noMatchMessage}</p>
+        <Button variant="outline" size="sm" onClick={onClearFilters}>
+          {clearFiltersLabel}
+        </Button>
       </div>
     );
   }
@@ -309,11 +316,13 @@ const ExpensesList = () => {
             expenses={filteredExpenses}
             hasActiveFilters={hasActiveFilters}
             noMatchMessage={t('expenses.noExpensesMatchFilter')}
+            clearFiltersLabel={t('expenses.filter.clearAll')}
             selectedMonth={selectedMonth}
             searchQuery={search}
             onAddClick={() => setFormType(FORM_TYPES.NEW_EXPENSE)}
             onEdit={handleExpenseEdit}
             onDelete={handleExpenseDelete}
+            onClearFilters={handleClearFilters}
           />
         </div>
       </div>

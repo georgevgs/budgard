@@ -61,7 +61,7 @@ const ExpensesMonthlySelector = ({
         variant="ghost"
         size="sm"
         onClick={() => handleMonthChange('prev')}
-        className="h-8 w-8 p-0"
+        className="h-10 w-10 p-0"
         aria-label={t('navigation.previousMonth')}
       >
         <ChevronLeft className="h-4 w-4" />
@@ -71,7 +71,7 @@ const ExpensesMonthlySelector = ({
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
-            className="font-medium text-sm h-8"
+            className="font-medium text-sm h-10"
             aria-label={t('navigation.selectMonth')}
           >
             {format(selectedDate, 'LLLL yyyy', { locale: dateLocale })}
@@ -82,7 +82,7 @@ const ExpensesMonthlySelector = ({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0"
+              className="h-10 w-10 p-0"
               onClick={() => handleYearChange('prev')}
               aria-label={t('navigation.previousYear')}
             >
@@ -92,7 +92,7 @@ const ExpensesMonthlySelector = ({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0"
+              className="h-10 w-10 p-0"
               onClick={() => handleYearChange('next')}
               aria-label={t('navigation.nextYear')}
             >
@@ -106,7 +106,7 @@ const ExpensesMonthlySelector = ({
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  'h-8 w-full justify-center',
+                  'h-10 w-full justify-center',
                   currentMonth === index &&
                     'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground',
                 )}
@@ -125,7 +125,7 @@ const ExpensesMonthlySelector = ({
         variant="ghost"
         size="sm"
         onClick={() => handleMonthChange('next')}
-        className="h-8 w-8 p-0"
+        className="h-10 w-10 p-0"
         aria-label={t('navigation.nextMonth')}
       >
         <ChevronRight className="h-4 w-4" />
