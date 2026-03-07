@@ -52,7 +52,7 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
           <div className="flex items-center gap-2">
             <div
               className={cn(
-                'px-2 py-1 rounded-md bg-background border shadow-sm',
+                'px-2 py-1 rounded-xl bg-card border border-border/40 shadow-sm',
                 'opacity-0 -translate-x-4 transition-all duration-200',
                 isOpen && 'opacity-100 translate-x-0 delay-100',
               )}
@@ -75,7 +75,7 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
           <div className="flex items-center gap-2">
             <div
               className={cn(
-                'px-2 py-1 rounded-md bg-background border shadow-sm',
+                'px-2 py-1 rounded-xl bg-card border border-border/40 shadow-sm',
                 'opacity-0 -translate-x-4 transition-all duration-200',
                 isOpen && 'opacity-100 translate-x-0',
               )}

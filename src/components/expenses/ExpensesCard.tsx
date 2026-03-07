@@ -12,12 +12,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import Camera from 'lucide-react/dist/esm/icons/camera';
 import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
-import TagIcon from 'lucide-react/dist/esm/icons/tag';
 import ReceiptViewer from '@/components/expenses/ReceiptViewer';
-import CategoryBadge from '@/components/categories/CategoryBadge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +24,6 @@ import {
 import { format } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import type { Expense } from '@/types/Expense';
-import type { Tag } from '@/types/Tag';
 import { formatCurrency } from '@/lib/utils.ts';
 
 type ExpenseCardProps = {
@@ -77,31 +73,30 @@ const ExpensesCard = ({
 
   return (
     <>
-      <Card className="rounded-lg transition-colors hover:bg-accent overflow-hidden border-border/60">
+      <Card className="rounded-2xl transition-colors hover:bg-accent/50 border-border/40 overflow-hidden">
         <CardContent className="p-0">
           <div className="flex">
             {renderCategoryAccent(expense)}
-            <div className="p-4 flex-1 min-w-0">
-              <div className="flex items-center gap-4 overflow-hidden">
+            <div className="px-4 py-5 flex-1 min-w-0">
+              <div className="flex items-center gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <p className="font-medium text-base truncate max-w-[200px] sm:max-w-none">
+                  <div className="flex items-center gap-1.5">
+                    <p className="font-medium text-base leading-tight truncate">
                       {renderHighlightedText(expense.description, searchQuery)}
                     </p>
-                    {renderCategoryBadge(expense)}
-                    {renderTagBadge(expense)}
-                    {renderRecurringBadge(expense, t)}
-                    {renderReceiptButton(expense, t, handleReceiptOpen)}
+                    {renderRecurringIcon(expense)}
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {format(new Date(expense.date), 'MMMM d, yyyy', {
+                  <p className="text-sm text-muted-foreground mt-1 truncate">
+                    {format(new Date(expense.date), 'MMM d', {
                       locale: dateLocale,
                     })}
+                    {renderCategoryLabel(expense)}
+                    {renderTagLabel(expense)}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-                  <p className="text-lg font-bold tabular-nums">
+                <div className="flex items-center gap-2 shrink-0">
+                  <p className="text-lg font-semibold tabular-nums">
                     {formatCurrency(expense.amount)}
                   </p>
 
@@ -121,6 +116,7 @@ const ExpensesCard = ({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-32">
                       {renderEditMenuItem(expense, t, handleEditClick)}
+                      {renderReceiptMenuItem(expense, t, handleReceiptOpen)}
                       <DropdownMenuItem
                         onClick={handleDeleteClick}
                         className="text-destructive focus:text-destructive"
@@ -168,6 +164,17 @@ export default memo(ExpensesCard);
 
 // ─── Helper render functions ──────────────────────────────────────────────────
 
+const renderCategoryAccent = (expense: Expense) => {
+  if (!expense.category) return null;
+
+  return (
+    <div
+      className="w-1.5 shrink-0 -m-px"
+      style={{ backgroundColor: expense.category.color }}
+    />
+  );
+};
+
 type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
@@ -191,41 +198,25 @@ const renderHighlightedText = (text: string, query: string | undefined) => {
   );
 };
 
-const renderCategoryAccent = (expense: Expense) => {
+const renderCategoryLabel = (expense: Expense) => {
   if (!expense.category) return null;
 
-  return (
-    <div
-      className="w-1 shrink-0"
-      style={{ backgroundColor: expense.category.color }}
-    />
-  );
+  return <> · {expense.category.name}</>;
 };
 
-const renderCategoryBadge = (expense: Expense) => {
-  if (!expense.category) return null;
-
-  return <CategoryBadge category={expense.category} />;
-};
-
-const renderTagBadge = (expense: Expense) => {
+const renderTagLabel = (expense: Expense) => {
   if (!expense.tag) return null;
 
-  return <TagBadge tag={expense.tag} />;
+  return <> · {expense.tag.name}</>;
 };
 
-const renderRecurringBadge = (expense: Expense, t: TranslateFunction) => {
+const renderRecurringIcon = (expense: Expense) => {
   if (!expense.recurring_expense_id) return null;
 
-  return (
-    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-      <Repeat className="h-3 w-3" />
-      <span>{t('expenses.recurring')}</span>
-    </div>
-  );
+  return <Repeat className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />;
 };
 
-const renderReceiptButton = (
+const renderReceiptMenuItem = (
   expense: Expense,
   t: TranslateFunction,
   onClick: () => void,
@@ -233,14 +224,9 @@ const renderReceiptButton = (
   if (!expense.receipt_path) return null;
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-    >
-      <Camera className="h-3 w-3" />
-      <span>{t('receipt.receipt')}</span>
-    </button>
+    <DropdownMenuItem onClick={onClick}>
+      {t('receipt.receipt')}
+    </DropdownMenuItem>
   );
 };
 
@@ -283,17 +269,3 @@ const renderReceiptViewer = (
   );
 };
 
-const TagBadge = ({ tag }: { tag: Tag }) => {
-  return (
-    <div
-      className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium"
-      style={{
-        backgroundColor: `${tag.color}20`,
-        color: tag.color,
-      }}
-    >
-      <TagIcon className="h-3 w-3" />
-      {tag.name}
-    </div>
-  );
-};

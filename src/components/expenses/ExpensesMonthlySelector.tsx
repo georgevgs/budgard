@@ -56,7 +56,7 @@ const ExpensesMonthlySelector = ({
   const currentMonth = selectedDate.getMonth();
 
   return (
-    <div className="flex items-center justify-between gap-4 p-1 rounded-lg bg-muted/30">
+    <div className="flex items-center justify-between gap-4 p-1 rounded-2xl bg-card border border-border/40 shadow-sm">
       <Button
         variant="ghost"
         size="sm"

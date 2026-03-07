@@ -62,7 +62,7 @@ const ExpensesContent = ({
   // No expenses, but filters are active - show "no matches" message
   if (hasActiveFilters) {
     return (
-      <div className="text-center py-12 px-4 rounded-lg border-2 border-dashed">
+      <div className="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-border/40">
         <p className="text-sm text-muted-foreground">{noMatchMessage}</p>
       </div>
     );
@@ -219,7 +219,7 @@ const ExpensesList = () => {
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-58px)]">
-      <div className="flex-1 container max-w-4xl mx-auto px-4 pt-4 pb-4">
+      <div className="flex-1 container max-w-4xl mx-auto px-4 pt-5 pb-4">
         {/* Month Selection and Overview Section */}
         <div className="space-y-3 mb-4">
           <ExpensesMonthlySelector

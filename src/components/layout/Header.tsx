@@ -27,7 +27,7 @@ const Header = () => {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background pt-safe-t">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl pt-safe-t">
       <div className="container flex h-14 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <img
