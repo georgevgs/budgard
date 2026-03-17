@@ -12,10 +12,10 @@ export interface RecurringExpense {
   user_id: string;
   amount: number;
   description: string;
-  category_id?: string;
+  category_id?: string | null;
   frequency: RecurringExpenseFrequency;
   start_date: string;
-  end_date?: string;
+  end_date?: string | null;
   last_generated_date?: string;
   created_at: string;
   active: boolean;
