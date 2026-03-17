@@ -193,19 +193,25 @@ export function useDataOperations() {
           ? await dataService.updateRecurringExpense(expenseData, expenseId)
           : await dataService.createRecurringExpense(expenseData);
 
+        haptics.success();
+        toast({
+          variant: 'success',
+          title: expenseId ? 'Recurring expense updated' : 'Recurring expense added',
+        });
         setRecurringExpenses((prev) =>
           expenseId
             ? prev.map((e) => (e.id === expenseId ? savedExpense : e))
             : [savedExpense, ...prev],
         );
       } catch (error) {
+        haptics.error();
         showErrorToast(
           `Failed to ${expenseId ? 'update' : 'add'} recurring expense`,
         );
         throw error;
       }
     },
-    [isInitialized, setRecurringExpenses, showErrorToast],
+    [isInitialized, setRecurringExpenses, showErrorToast, toast],
   );
 
   const handleRecurringExpenseDelete = useCallback(
@@ -214,14 +220,18 @@ export function useDataOperations() {
         return;
       }
 
+      haptics.warning();
+
       // Optimistic delete
       setRecurringExpenses((prev) => prev.filter((e) => e.id !== expenseId));
 
       try {
         await dataService.deleteRecurringExpense(expenseId);
+        haptics.success();
         // Refresh expenses to remove any orphaned generated expenses
         refreshExpenses().catch(() => {});
       } catch (error) {
+        haptics.error();
         // Rollback — re-fetch to restore the deleted item
         refreshExpenses().catch(() => {});
         showErrorToast('Failed to delete recurring expense');
@@ -244,10 +254,12 @@ export function useDataOperations() {
 
       try {
         const savedExpense = await dataService.toggleRecurringExpense(expenseId, active);
+        haptics.success();
         setRecurringExpenses((prev) =>
           prev.map((e) => (e.id === expenseId ? savedExpense : e)),
         );
       } catch (error) {
+        haptics.error();
         // Rollback on failure
         setRecurringExpenses((prev) =>
           prev.map((e) => (e.id === expenseId ? { ...e, active: !active } : e)),

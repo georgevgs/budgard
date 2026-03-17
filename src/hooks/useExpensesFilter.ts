@@ -48,10 +48,15 @@ export const useExpensesFilter = ({
           format(parseISO(expense.date), 'yyyy-MM') === selectedMonth,
       )
       .slice()
-      .sort(
-        (a: Expense, b: Expense) =>
-          parseISO(b.date).getTime() - parseISO(a.date).getTime(),
-      );
+      .sort((a: Expense, b: Expense) => {
+        const dateDiff =
+          parseISO(b.date).getTime() - parseISO(a.date).getTime();
+        if (dateDiff !== 0) return dateDiff;
+
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      });
   }, [expenses, selectedMonth]);
 
   // Apply search/category/tag filters then sort
@@ -84,7 +89,13 @@ export const useExpensesFilter = ({
 
     return [...filtered].sort((a, b) => {
       if (sortOrder === 'date-asc') {
-        return parseISO(a.date).getTime() - parseISO(b.date).getTime();
+        const dateDiff =
+          parseISO(a.date).getTime() - parseISO(b.date).getTime();
+        if (dateDiff !== 0) return dateDiff;
+
+        return (
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
       }
       if (sortOrder === 'amount-desc') return b.amount - a.amount;
       return a.amount - b.amount; // amount-asc

@@ -97,6 +97,12 @@ const PublicRoute = () => {
   );
 };
 
+const CatchAllRedirect = () => {
+  const { session } = useAuth();
+
+  return <Navigate to={session ? '/expenses' : '/'} replace />;
+};
+
 // ============================================================================
 // Offline Banner
 // ============================================================================
@@ -191,7 +197,7 @@ const App = () => {
               </Route>
 
               {/* Catch-all redirect */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<CatchAllRedirect />} />
             </Routes>
           </Suspense>
         </ErrorBoundary>

@@ -80,7 +80,7 @@ export const dataService = {
       .from('expenses')
       .update(expenseData)
       .eq('id', expenseId)
-      .select(`*, category:categories(*), tag:tags(*)`)
+      .select(`*, category:categories(*), tag:tags(*), recurring_expense:recurring_expenses(*)`)
       .single();
 
     if (error) throw error;
@@ -91,7 +91,7 @@ export const dataService = {
     const { data, error } = await supabase
       .from('expenses')
       .insert(expenseData)
-      .select(`*, category:categories(*), tag:tags(*)`)
+      .select(`*, category:categories(*), tag:tags(*), recurring_expense:recurring_expenses(*)`)
       .single();
 
     if (error) throw error;
@@ -141,8 +141,7 @@ export const dataService = {
       .select(
         `
                *,
-               category:categories(*),
-               expenses:expenses(*)
+               category:categories(*)
            `,
       )
       .order('created_at', { ascending: false });
@@ -151,7 +150,7 @@ export const dataService = {
 
     if (error) throw error;
 
-    return data as (RecurringExpense & { expenses: Expense[] })[];
+    return data as RecurringExpense[];
   },
 
   async createRecurringExpense(expenseData: Partial<RecurringExpense>) {
@@ -234,23 +233,6 @@ export const dataService = {
       generated_count: number;
       processed_recurring_ids: string[];
       target_date: string;
-    }>;
-  },
-
-  async getUpcomingRecurringExpenses(daysAhead: number = 30) {
-    const { data, error } = await supabase.rpc('get_upcoming_recurring_expenses', {
-      p_user_id: (await supabase.auth.getUser()).data.user?.id,
-      p_days_ahead: daysAhead,
-    });
-
-    if (error) throw error;
-    return data as Array<{
-      recurring_expense_id: string;
-      description: string;
-      amount: number;
-      category_id: string | null;
-      next_occurrence: string;
-      frequency: string;
     }>;
   },
 

@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Hero from '@/components/landing/Hero';
 import Features from '@/components/landing/Features';
@@ -9,11 +7,7 @@ import LoginModal from '@/components/auth/LoginModal';
 
 const LandingPage = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const { session, isLoading } = useAuth();
   const { i18n } = useTranslation();
-
-  if (isLoading) return null;
-  if (session) return <Navigate to="/expenses" replace />;
 
   const currentLang = i18n.language.startsWith('el') ? 'el' : 'en';
 
