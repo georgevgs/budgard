@@ -1,8 +1,7 @@
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { format, addWeeks, addMonths, addYears } from 'date-fns';
+import { format } from 'date-fns';
 import CalendarIcon from 'lucide-react/dist/esm/icons/calendar';
-import Info from 'lucide-react/dist/esm/icons/info';
 import {
   DialogTitle,
   DialogHeader,
@@ -32,25 +31,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
-import {
-  cn,
-  formatCurrencyInput,
-  formatCurrency,
-  parseCurrencyInput,
-} from '@/lib/utils';
+import { cn, formatCurrencyInput } from '@/lib/utils';
 import {
   recurringExpenseSchema,
   type RecurringExpenseFormData,
 } from '@/lib/validations';
-import type {
-  RecurringExpense,
-  RecurringExpenseFrequency,
-} from '@/types/RecurringExpense';
+import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Category } from '@/types/Category';
 import { useTranslation } from 'react-i18next';
-
-const WEEKS_PER_MONTH = 4.33;
-const BIWEEKLY_PERIODS_PER_MONTH = 2.17;
 
 const frequencyValues = [
   'weekly',
@@ -59,60 +47,6 @@ const frequencyValues = [
   'quarterly',
   'yearly',
 ] as const;
-
-function getMonthlyEstimate(
-  amount: number,
-  frequency: RecurringExpenseFrequency,
-): number {
-  switch (frequency) {
-    case 'weekly':
-      return amount * WEEKS_PER_MONTH;
-    case 'biweekly':
-      return amount * BIWEEKLY_PERIODS_PER_MONTH;
-    case 'monthly':
-      return amount;
-    case 'quarterly':
-      return amount / 3;
-    case 'yearly':
-      return amount / 12;
-    default:
-      return amount;
-  }
-}
-
-function getNextOccurrence(
-  startDate: Date,
-  frequency: RecurringExpenseFrequency,
-): Date {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  if (startDate >= today) {
-    return startDate;
-  }
-
-  let next = new Date(startDate);
-  while (next < today) {
-    switch (frequency) {
-      case 'weekly':
-        next = addWeeks(next, 1);
-        break;
-      case 'biweekly':
-        next = addWeeks(next, 2);
-        break;
-      case 'monthly':
-        next = addMonths(next, 1);
-        break;
-      case 'quarterly':
-        next = addMonths(next, 3);
-        break;
-      case 'yearly':
-        next = addYears(next, 1);
-        break;
-    }
-  }
-  return next;
-}
 
 type RecurringExpenseFormProps = {
   expense?: RecurringExpense;
@@ -144,30 +78,11 @@ const RecurringExpenseForm = ({
     },
   });
 
-  const watchedAmount = useWatch({ control: form.control, name: 'amount' });
-  const watchedFrequency = useWatch({
-    control: form.control,
-    name: 'frequency',
-  });
-  const watchedStartDate = useWatch({
-    control: form.control,
-    name: 'start_date',
-  });
-
-  const parsedAmount = watchedAmount ? parseCurrencyInput(watchedAmount) : 0;
-  const monthlyEstimate =
-    parsedAmount > 0 && watchedFrequency
-      ? getMonthlyEstimate(parsedAmount, watchedFrequency)
-      : 0;
-  const nextOccurrence =
-    watchedStartDate && watchedFrequency
-      ? getNextOccurrence(watchedStartDate, watchedFrequency)
-      : null;
-
   const isStartDateDisabled = (date: Date) => {
     if (expense) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
     return date < today;
   };
 
@@ -402,14 +317,6 @@ const RecurringExpenseForm = ({
               />
             </div>
 
-            {renderPreviewSection(
-              parsedAmount,
-              watchedFrequency,
-              nextOccurrence,
-              monthlyEstimate,
-              t,
-            )}
-
             <div className="flex justify-end gap-2 pt-4 pb-2">
               <Button type="button" variant="outline" onClick={onClose}>
                 {t('common.cancel')}
@@ -453,58 +360,4 @@ const renderSubmitLabel = (
   if (isEditing) return t('recurring.update');
 
   return t('recurring.create');
-};
-
-const renderPreviewSection = (
-  parsedAmount: number,
-  watchedFrequency: RecurringExpenseFrequency | undefined,
-  nextOccurrence: Date | null,
-  monthlyEstimate: number,
-  t: TranslateFunction,
-) => {
-  if (parsedAmount <= 0 || !watchedFrequency) return null;
-
-  return (
-    <div className="rounded-lg bg-muted/50 p-3 text-sm space-y-1">
-      <div className="flex items-center gap-1.5 text-muted-foreground">
-        <Info className="h-3.5 w-3.5" />
-        <span>{t('recurring.preview')}</span>
-      </div>
-      <div className="text-foreground">
-        {renderNextOccurrencePreview(nextOccurrence, t)}
-        {renderMonthlyEstimatePreview(monthlyEstimate, watchedFrequency, t)}
-      </div>
-    </div>
-  );
-};
-
-const renderNextOccurrencePreview = (
-  nextOccurrence: Date | null,
-  t: TranslateFunction,
-) => {
-  if (!nextOccurrence) return null;
-
-  return (
-    <p>
-      {t('recurring.firstExpense', {
-        date: format(nextOccurrence, 'MMM d, yyyy'),
-      })}
-    </p>
-  );
-};
-
-const renderMonthlyEstimatePreview = (
-  monthlyEstimate: number,
-  watchedFrequency: RecurringExpenseFrequency,
-  t: TranslateFunction,
-) => {
-  if (monthlyEstimate <= 0 || watchedFrequency === 'monthly') return null;
-
-  return (
-    <p className="text-muted-foreground">
-      {t('recurring.perMonth', {
-        amount: formatCurrency(monthlyEstimate),
-      })}
-    </p>
-  );
 };

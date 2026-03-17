@@ -57,6 +57,9 @@ Thumbs.db
 # TypeScript cache
 *.tsbuildinfo
 
+# Supabase
+.supabase
+
 # Claude Code
 CLAUDE.md
 .agents

@@ -112,15 +112,16 @@ const RecurringExpensesList = () => {
 
     try {
       const expenseData: Partial<RecurringExpense> = {
-        ...values,
-        user_id: session.user.id,
         amount: parseCurrencyInput(values.amount),
+        description: values.description,
         category_id:
-          values.category_id === 'none' ? undefined : values.category_id,
+          values.category_id === 'none' ? null : values.category_id,
+        frequency: values.frequency,
         start_date: format(values.start_date, 'yyyy-MM-dd'),
         end_date: values.end_date
           ? format(values.end_date, 'yyyy-MM-dd')
-          : undefined,
+          : null,
+        user_id: session.user.id,
       };
 
       await submitRecurringExpense(expenseData, selectedExpense?.id);
