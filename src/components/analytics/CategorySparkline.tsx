@@ -12,7 +12,7 @@ const CategorySparkline = ({ values, color }: CategorySparklineProps) => {
     }
   }
 
-  if (lastNonZero < 1) {
+  if (lastNonZero < 0) {
     return <div className="h-7 w-16" aria-hidden="true" />;
   }
 

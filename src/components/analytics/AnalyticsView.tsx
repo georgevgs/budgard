@@ -18,12 +18,14 @@ import SpendingInsights from '@/components/analytics/SpendingInsights';
 import CategorySparkline from '@/components/analytics/CategorySparkline';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '@/lib/utils';
+import { useTheme } from '@/hooks/useTheme';
 
 const Chart = lazy(() => import('react-apexcharts'));
 
 const AnalyticsView = () => {
   const { expenses, categories, monthlyBudget, isLoading } = useData();
   const { t, i18n } = useTranslation();
+  const { theme } = useTheme();
   const dateLocale = i18n.language === 'el' ? el : enUS;
 
   const availableYears = useMemo(() => {
@@ -124,10 +126,8 @@ const AnalyticsView = () => {
 
   const budgetUsedPercent = useMemo(() => {
     if (!monthlyBudget || monthlyBudget === 0) return null;
-    return Math.min(
-      (monthComparison.thisMonthAmount / monthlyBudget) * 100,
-      100,
-    );
+
+    return (monthComparison.thisMonthAmount / monthlyBudget) * 100;
   }, [monthComparison.thisMonthAmount, monthlyBudget]);
 
   const chartOptions = useMemo(
@@ -195,12 +195,12 @@ const AnalyticsView = () => {
         },
       },
       tooltip: {
-        theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+        theme: theme === 'dark' ? 'dark' : 'light',
         y: { formatter: (val: number) => `${val.toFixed(2)} €` },
       },
       colors: ['hsl(var(--primary))'],
     }),
-    [monthlyData, monthlyBudget, t],
+    [monthlyData, monthlyBudget, t, theme],
   );
 
   const chartSeries = useMemo(
@@ -381,6 +381,8 @@ const renderBudgetProgress = (
 ) => {
   if (budgetUsedPercent === null || monthlyBudget === null) return null;
 
+  const barWidth = Math.min(budgetUsedPercent, 100);
+
   let barClass = 'bg-primary';
   if (budgetUsedPercent > 90) {
     barClass = 'bg-destructive';
@@ -401,7 +403,7 @@ const renderBudgetProgress = (
       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-700 ${barClass}`}
-          style={{ width: `${budgetUsedPercent}%` }}
+          style={{ width: `${barWidth}%` }}
         />
       </div>
     </div>

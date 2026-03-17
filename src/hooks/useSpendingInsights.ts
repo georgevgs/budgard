@@ -37,7 +37,7 @@ export interface SpendingInsightsParams {
 }
 
 export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
-  const { expenses, monthlyBudget, monthComparison, monthlyData, categories, dateLocale } = params;
+  const { expenses, monthlyBudget, monthComparison, categories, dateLocale } = params;
   const { t } = useTranslation();
 
   return useMemo(() => {
@@ -66,7 +66,7 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
       const formattedAmount = `${projected.toFixed(2)} €`;
       return {
         id: 'monthProjection',
-        icon: projected > monthComparison.thisMonthAmount ? TrendingUp : TrendingDown,
+        icon: TrendingUp,
         text: t('analytics.insights.monthProjection', { amount: formattedAmount }),
         variant: 'warning',
       };
@@ -140,16 +140,17 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
       if (expenses.length < 14) return null;
 
       const totals = new Array<number>(7).fill(0);
-      const counts = new Array<number>(7).fill(0);
+      const uniqueDates = Array.from({ length: 7 }, () => new Set<string>());
 
       for (const e of expenses) {
-        const dow = getDay(parseISO(e.date));
+        const parsed = parseISO(e.date);
+        const dow = getDay(parsed);
         totals[dow] += e.amount;
-        counts[dow]++;
+        uniqueDates[dow].add(e.date);
       }
 
       const averages = totals.map((total, i) =>
-        counts[i] > 0 ? total / counts[i] : 0,
+        uniqueDates[i].size > 0 ? total / uniqueDates[i].size : 0,
       );
 
       let peakDow = 0;
@@ -176,13 +177,32 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
     const budgetStreakInsight = (): Insight | null => {
       if (monthlyBudget === null) return null;
 
-      const currentMonthIndex = now.getMonth(); // 0-based
+      const currentYear = now.getFullYear();
       let streak = 0;
 
-      for (let i = currentMonthIndex - 1; i >= 0; i--) {
-        const monthData = monthlyData[i];
-        if (!monthData || monthData.amount <= 0 || monthData.amount >= monthlyBudget) break;
+      const getMonthTotal = (year: number, month: number): number => {
+        const key = `${year}-${(month + 1).toString().padStart(2, '0')}`;
+
+        return expenses
+          .filter((e) => format(parseISO(e.date), 'yyyy-MM') === key)
+          .reduce((sum, e) => sum + e.amount, 0);
+      };
+
+      let year = currentYear;
+      let month = now.getMonth() - 1;
+
+      while (true) {
+        if (month < 0) {
+          month = 11;
+          year--;
+        }
+
+        const total = getMonthTotal(year, month);
+        if (total >= monthlyBudget) break;
+        if (total === 0) break;
+
         streak++;
+        month--;
       }
 
       if (streak < 2) return null;
@@ -267,5 +287,5 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
     );
 
     return insights.filter((i): i is Insight => i !== null);
-  }, [expenses, monthlyBudget, monthComparison, monthlyData, categories, dateLocale, t]);
+  }, [expenses, monthlyBudget, monthComparison, categories, dateLocale, t]);
 }
