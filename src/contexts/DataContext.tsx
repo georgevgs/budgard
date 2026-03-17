@@ -163,7 +163,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      if (session?.user?.id && !isInitialized) {
+      if (session?.user?.id) {
         fetchData();
       }
     };

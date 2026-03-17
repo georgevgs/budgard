@@ -11,11 +11,13 @@ const COMPRESSION_OPTIONS = {
 const SKIP_COMPRESSION_THRESHOLD = 500 * 1024; // 500KB
 
 export async function compressImage(file: File): Promise<File> {
-  if (file.size <= SKIP_COMPRESSION_THRESHOLD) {
-    return file;
-  }
+  const options =
+    file.size <= SKIP_COMPRESSION_THRESHOLD
+      ? { ...COMPRESSION_OPTIONS, maxSizeMB: Infinity }
+      : COMPRESSION_OPTIONS;
 
-  const compressed = await imageCompression(file, COMPRESSION_OPTIONS);
+  const compressed = await imageCompression(file, options);
+
   return new File([compressed], file.name.replace(/\.[^.]+$/, '.webp'), {
     type: 'image/webp',
   });

@@ -1,4 +1,4 @@
-import { useState, useOptimistic, useTransition } from 'react';
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Plus from 'lucide-react/dist/esm/icons/plus';
@@ -23,43 +23,59 @@ function calculateNextOccurrence(expense: RecurringExpense): Date | null {
   if (!expense.active) return null;
   if (expense.end_date && new Date(expense.end_date) < new Date()) return null;
 
-  const fromDate = expense.last_generated_date
-    ? new Date(expense.last_generated_date)
-    : new Date(expense.start_date);
+  const startDate = new Date(expense.start_date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  if (
-    !expense.last_generated_date &&
-    new Date(expense.start_date) > new Date()
-  ) {
-    return new Date(expense.start_date);
+  // If there's a last_generated_date, compute next from that
+  if (expense.last_generated_date) {
+    const fromDate = new Date(expense.last_generated_date);
+
+    switch (expense.frequency) {
+      case 'weekly':
+        return addWeeks(fromDate, 1);
+      case 'biweekly':
+        return addWeeks(fromDate, 2);
+      case 'monthly':
+        return addMonths(fromDate, 1);
+      case 'quarterly':
+        return addMonths(fromDate, 3);
+      case 'yearly':
+        return addYears(fromDate, 1);
+      default:
+        return addMonths(fromDate, 1);
+    }
   }
 
-  let nextDate: Date;
-  switch (expense.frequency) {
-    case 'weekly':
-      nextDate = addWeeks(fromDate, 1);
-      break;
-    case 'biweekly':
-      nextDate = addWeeks(fromDate, 2);
-      break;
-    case 'monthly':
-      nextDate = addMonths(fromDate, 1);
-      break;
-    case 'quarterly':
-      nextDate = addMonths(fromDate, 3);
-      break;
-    case 'yearly':
-      nextDate = addYears(fromDate, 1);
-      break;
-    default:
-      nextDate = addMonths(fromDate, 1);
+  // No last_generated_date — advance from start_date until we reach today or future
+  if (startDate >= today) {
+    return startDate;
   }
 
-  if (!expense.last_generated_date) {
-    return new Date(expense.start_date);
+  let next = new Date(startDate);
+  while (next < today) {
+    switch (expense.frequency) {
+      case 'weekly':
+        next = addWeeks(next, 1);
+        break;
+      case 'biweekly':
+        next = addWeeks(next, 2);
+        break;
+      case 'monthly':
+        next = addMonths(next, 1);
+        break;
+      case 'quarterly':
+        next = addMonths(next, 3);
+        break;
+      case 'yearly':
+        next = addYears(next, 1);
+        break;
+      default:
+        next = addMonths(next, 1);
+    }
   }
 
-  return nextDate;
+  return next;
 }
 
 function getMonthlyAmount(expense: RecurringExpense): number {
@@ -90,11 +106,6 @@ const RecurringExpensesList = () => {
     handleRecurringExpenseToggle: toggleRecurringExpense,
   } = useDataOperations();
   const { t } = useTranslation();
-  const [optimisticRecurring, addOptimisticRecurring] = useOptimistic(
-    recurringExpenses,
-    recurringReducer,
-  );
-  const [, startTransition] = useTransition();
 
   const handleSubmit = async (values: RecurringExpenseFormData) => {
     if (!session?.user?.id) return;
@@ -126,18 +137,20 @@ const RecurringExpensesList = () => {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (expenseId: string) => {
-    startTransition(async () => {
-      addOptimisticRecurring({ type: 'delete', id: expenseId });
+  const handleDelete = async (expenseId: string) => {
+    try {
       await deleteRecurringExpense(expenseId);
-    });
+    } catch {
+      // Error handling is done in the hook
+    }
   };
 
-  const handleToggle = (expenseId: string, active: boolean) => {
-    startTransition(async () => {
-      addOptimisticRecurring({ type: 'toggle', id: expenseId, active });
+  const handleToggle = async (expenseId: string, active: boolean) => {
+    try {
       await toggleRecurringExpense(expenseId, active);
-    });
+    } catch {
+      // Error handling is done in the hook
+    }
   };
 
   const handleFormClose = () => {
@@ -145,7 +158,7 @@ const RecurringExpensesList = () => {
     setSelectedExpense(undefined);
   };
 
-  const activeExpenses = optimisticRecurring.filter((e) => e.active);
+  const activeExpenses = recurringExpenses.filter((e) => e.active);
   const monthlyTotal = activeExpenses.reduce(
     (sum, expense) => sum + getMonthlyAmount(expense),
     0,
@@ -180,7 +193,7 @@ const RecurringExpensesList = () => {
 
       <div className="grid gap-4">
         {renderExpensesList(
-          optimisticRecurring,
+          recurringExpenses,
           handleEditExpense,
           handleDelete,
           handleToggle,
@@ -290,30 +303,3 @@ const renderEmptyState = (
   );
 };
 
-// ─── Optimistic reducer ───────────────────────────────────────────────────────
-
-type RecurringOptimisticAction =
-  | { type: 'add'; expense: RecurringExpense }
-  | { type: 'update'; expense: RecurringExpense }
-  | { type: 'delete'; id: string }
-  | { type: 'toggle'; id: string; active: boolean };
-
-const recurringReducer = (
-  state: RecurringExpense[],
-  action: RecurringOptimisticAction,
-): RecurringExpense[] => {
-  switch (action.type) {
-    case 'add':
-      return [action.expense, ...state];
-    case 'update':
-      return state.map((e) =>
-        e.id === action.expense.id ? action.expense : e,
-      );
-    case 'delete':
-      return state.filter((e) => e.id !== action.id);
-    case 'toggle':
-      return state.map((e) =>
-        e.id === action.id ? { ...e, active: action.active } : e,
-      );
-  }
-};

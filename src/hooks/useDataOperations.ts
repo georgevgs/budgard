@@ -159,12 +159,7 @@ export function useDataOperations() {
         created_at: new Date().toISOString(),
       } as Category;
 
-      // Optimistic add — capture snapshot for rollback
-      let snapshot: Category[] = [];
-      setCategories((prev) => {
-        snapshot = prev;
-        return [...prev, optimisticCategory];
-      });
+      setCategories((prev) => [...prev, optimisticCategory]);
 
       try {
         const savedCategory = await dataService.createCategory(categoryData);
@@ -177,7 +172,9 @@ export function useDataOperations() {
         );
       } catch (error) {
         haptics.error();
-        setCategories(snapshot);
+        setCategories((prev) =>
+          prev.filter((c) => c.id !== optimisticCategory.id),
+        );
         showErrorToast('Failed to add category');
         throw error;
       }
@@ -217,12 +214,16 @@ export function useDataOperations() {
         return;
       }
 
+      // Optimistic delete
+      setRecurringExpenses((prev) => prev.filter((e) => e.id !== expenseId));
+
       try {
         await dataService.deleteRecurringExpense(expenseId);
-        setRecurringExpenses((prev) => prev.filter((e) => e.id !== expenseId));
         // Refresh expenses to remove any orphaned generated expenses
         refreshExpenses().catch(() => {});
       } catch (error) {
+        // Rollback — re-fetch to restore the deleted item
+        refreshExpenses().catch(() => {});
         showErrorToast('Failed to delete recurring expense');
         throw error;
       }
@@ -268,14 +269,11 @@ export function useDataOperations() {
         created_at: new Date().toISOString(),
       };
 
-      // Optimistic add — capture snapshot for rollback
-      let snapshot: Tag[] = [];
-      setTags((prev) => {
-        snapshot = prev;
-        return [...prev, optimisticTag].sort((a, b) =>
+      setTags((prev) =>
+        [...prev, optimisticTag].sort((a, b) =>
           a.name.localeCompare(b.name),
-        );
-      });
+        ),
+      );
 
       try {
         const savedTag = await dataService.createTag({ name, color });
@@ -289,7 +287,9 @@ export function useDataOperations() {
         return savedTag;
       } catch (error) {
         haptics.error();
-        setTags(snapshot);
+        setTags((prev) =>
+          prev.filter((t) => t.id !== optimisticTag.id),
+        );
         showErrorToast('Failed to create tag');
         throw error;
       }

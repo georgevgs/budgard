@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Pagination,
   PaginationContent,
@@ -29,15 +29,20 @@ const ExpensesPagination = ({
 }: ExpensesPaginationProps) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
+  const prevLengthRef = useRef(expenses.length);
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [expenses]);
+    if (expenses.length !== prevLengthRef.current) {
+      setCurrentPage(1);
+      prevLengthRef.current = expenses.length;
+    }
+  }, [expenses.length]);
 
   // Calculate pagination
   const totalItems = expenses.length;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const safePage = Math.min(currentPage, Math.max(totalPages, 1));
+  const startIndex = (safePage - 1) * ITEMS_PER_PAGE;
   const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
   const currentExpenses = expenses.slice(startIndex, endIndex);
 
@@ -125,7 +130,7 @@ const ExpensesPagination = ({
                   ) : (
                     <PaginationLink
                       onClick={() => handlePageChange(page as number)}
-                      isActive={currentPage === page}
+                      isActive={safePage === page}
                       className="cursor-pointer"
                       aria-label={t('pagination.page', { page })}
                     >

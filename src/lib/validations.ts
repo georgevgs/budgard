@@ -13,7 +13,7 @@ export const RECEIPT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 // Shared regex patterns
 const SAFE_STRING = /^[\p{L}\p{N}\s.,!?'"\-/()@#&%+:;]*$/u; // Unicode letters, numbers, common punctuation
-const AMOUNT_PATTERN = /^\d{1,3}(?:\.\d{3})*(?:,\d{0,2})?$/;
+const AMOUNT_PATTERN = /^\d{1,3}(?:\.\d{3})*(?:,\d{0,2})?$|^\d+(?:,\d{0,2})?$/;
 const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
 
 // Disposable/temporary email providers blocked to prevent spam signups
@@ -217,7 +217,10 @@ export const recurringExpenseSchema = z.object({
     required_error: 'Start date is required',
   }),
   end_date: z.date().optional(),
-});
+}).refine(
+  (data) => !data.end_date || data.end_date >= data.start_date,
+  { message: 'End date must be after start date', path: ['end_date'] },
+);
 
 // Budget validation schema
 export const budgetSchema = z.object({
