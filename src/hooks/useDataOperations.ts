@@ -22,6 +22,7 @@ export function useDataOperations() {
     setCategories,
     setTags,
     setRecurringExpenses,
+    refreshExpenses,
   } = useData();
   const { toast } = useToast();
 
@@ -49,6 +50,7 @@ export function useDataOperations() {
 
         // Handle receipt after expense is saved (we need the real ID)
         let receiptPath = savedExpense.receipt_path ?? null;
+        let receiptFailed = false;
 
         if (receiptOptions) {
           const { receiptFile, removeExistingReceipt, existingReceiptPath } =
@@ -56,14 +58,18 @@ export function useDataOperations() {
 
           // Upload new receipt first, then delete old one to prevent data loss
           if (receiptFile && expenseData.user_id) {
-            receiptPath = await uploadReceipt(
-              receiptFile,
-              expenseData.user_id,
-              savedExpense.id,
-            );
-            // Clean up old receipt after successful upload
-            if (existingReceiptPath) {
-              deleteReceipt(existingReceiptPath).catch(() => {});
+            try {
+              receiptPath = await uploadReceipt(
+                receiptFile,
+                expenseData.user_id,
+                savedExpense.id,
+              );
+              // Clean up old receipt after successful upload
+              if (existingReceiptPath) {
+                deleteReceipt(existingReceiptPath).catch(() => {});
+              }
+            } catch {
+              receiptFailed = true;
             }
           } else if (removeExistingReceipt) {
             receiptPath = null;
@@ -73,25 +79,35 @@ export function useDataOperations() {
           }
 
           // Update expense with receipt_path if changed
-          if (receiptPath !== (savedExpense.receipt_path ?? null)) {
+          if (!receiptFailed && receiptPath !== (savedExpense.receipt_path ?? null)) {
             const updated = await dataService.updateExpense(
               { receipt_path: receiptPath },
               savedExpense.id,
             );
-            savedExpense.receipt_path = updated.receipt_path;
+            receiptPath = updated.receipt_path ?? null;
           }
         }
 
+        const finalExpense = { ...savedExpense, receipt_path: receiptPath };
+
         haptics.success();
-        toast({
-          variant: 'success',
-          title: expenseId ? 'Expense updated' : 'Expense added',
-        });
         setExpenses((prev) =>
           expenseId
-            ? prev.map((e) => (e.id === expenseId ? savedExpense : e))
-            : [savedExpense, ...prev],
+            ? prev.map((e) => (e.id === expenseId ? finalExpense : e))
+            : [finalExpense, ...prev],
         );
+
+        if (receiptFailed) {
+          toast({
+            variant: 'destructive',
+            description: 'Expense saved but receipt upload failed',
+          });
+        } else {
+          toast({
+            variant: 'success',
+            title: expenseId ? 'Expense updated' : 'Expense added',
+          });
+        }
       } catch (error) {
         haptics.error();
         showErrorToast(`Failed to ${expenseId ? 'update' : 'add'} expense`);
@@ -204,12 +220,14 @@ export function useDataOperations() {
       try {
         await dataService.deleteRecurringExpense(expenseId);
         setRecurringExpenses((prev) => prev.filter((e) => e.id !== expenseId));
+        // Refresh expenses to remove any orphaned generated expenses
+        refreshExpenses().catch(() => {});
       } catch (error) {
         showErrorToast('Failed to delete recurring expense');
         throw error;
       }
     },
-    [isInitialized, setRecurringExpenses, showErrorToast],
+    [isInitialized, setRecurringExpenses, refreshExpenses, showErrorToast],
   );
 
   const handleRecurringExpenseToggle = useCallback(
@@ -218,12 +236,21 @@ export function useDataOperations() {
         return;
       }
 
+      // Optimistic update
+      setRecurringExpenses((prev) =>
+        prev.map((e) => (e.id === expenseId ? { ...e, active } : e)),
+      );
+
       try {
-        await dataService.toggleRecurringExpense(expenseId, active);
+        const savedExpense = await dataService.toggleRecurringExpense(expenseId, active);
         setRecurringExpenses((prev) =>
-          prev.map((e) => (e.id === expenseId ? { ...e, active } : e)),
+          prev.map((e) => (e.id === expenseId ? savedExpense : e)),
         );
       } catch (error) {
+        // Rollback on failure
+        setRecurringExpenses((prev) =>
+          prev.map((e) => (e.id === expenseId ? { ...e, active: !active } : e)),
+        );
         showErrorToast('Failed to update recurring expense status');
         throw error;
       }

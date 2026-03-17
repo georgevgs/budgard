@@ -1,5 +1,5 @@
 import { useState, useMemo, useDeferredValue } from 'react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import type { Expense } from '@/types/Expense';
 
 export type SortOrder = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc';
@@ -45,12 +45,12 @@ export const useExpensesFilter = ({
     return expenses
       .filter(
         (expense) =>
-          format(new Date(expense.date), 'yyyy-MM') === selectedMonth,
+          format(parseISO(expense.date), 'yyyy-MM') === selectedMonth,
       )
       .slice()
       .sort(
         (a: Expense, b: Expense) =>
-          new Date(b.date).getTime() - new Date(a.date).getTime(),
+          parseISO(b.date).getTime() - parseISO(a.date).getTime(),
       );
   }, [expenses, selectedMonth]);
 
@@ -84,7 +84,7 @@ export const useExpensesFilter = ({
 
     return [...filtered].sort((a, b) => {
       if (sortOrder === 'date-asc') {
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
+        return parseISO(a.date).getTime() - parseISO(b.date).getTime();
       }
       if (sortOrder === 'amount-desc') return b.amount - a.amount;
       return a.amount - b.amount; // amount-asc

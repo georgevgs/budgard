@@ -32,7 +32,7 @@ import {
 import CalendarIcon from 'lucide-react/dist/esm/icons/calendar';
 import Tag from 'lucide-react/dist/esm/icons/tag';
 import X from 'lucide-react/dist/esm/icons/x';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import type { Locale } from 'date-fns';
 import { cn, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
@@ -95,7 +95,7 @@ const ExpensesForm = ({
       description: expense?.description || '',
       category_id: expense?.category_id || 'none',
       tag_id: expense?.tag_id || undefined,
-      date: expense ? new Date(expense.date) : new Date(),
+      date: expense ? parseISO(expense.date) : new Date(),
     },
   });
 
@@ -146,8 +146,8 @@ const ExpensesForm = ({
       amount: parseCurrencyInput(values.amount),
       description: values.description,
       category_id:
-        values.category_id === 'none' ? undefined : values.category_id,
-      tag_id: values.tag_id || undefined,
+        values.category_id === 'none' ? null : values.category_id,
+      tag_id: values.tag_id || null,
       date: format(values.date, 'yyyy-MM-dd'),
       user_id: session.user.id,
     };

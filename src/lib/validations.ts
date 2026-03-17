@@ -12,7 +12,7 @@ export const RECEIPT_ALLOWED_TYPES = [
 export const RECEIPT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 // Shared regex patterns
-const SAFE_STRING = /^[\p{L}\p{N}\s.,!?-]*$/u; // Unicode letters, numbers, basic punctuation
+const SAFE_STRING = /^[\p{L}\p{N}\s.,!?'"\-/()@#&%+:;]*$/u; // Unicode letters, numbers, common punctuation
 const AMOUNT_PATTERN = /^\d{1,3}(?:\.\d{3})*(?:,\d{0,2})?$/;
 const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
 

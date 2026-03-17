@@ -2,11 +2,12 @@ import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { markIntentionalSignOut } from '@/lib/authStore';
 
-export async function requestOTP(email: string) {
+export async function requestOTP(email: string, captchaToken?: string) {
   return supabase.auth.signInWithOtp({
     email,
     options: {
       shouldCreateUser: true,
+      captchaToken,
     },
   });
 }

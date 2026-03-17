@@ -21,7 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import type { Expense } from '@/types/Expense';
 import { formatCurrency } from '@/lib/utils.ts';
@@ -87,7 +87,7 @@ const ExpensesCard = ({
                     {renderRecurringIcon(expense)}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1 truncate">
-                    {format(new Date(expense.date), 'MMM d', {
+                    {format(parseISO(expense.date), 'MMM d', {
                       locale: dateLocale,
                     })}
                     {renderCategoryLabel(expense)}

@@ -70,7 +70,8 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
           };
         }
 
-        const { error } = await requestOTP(email);
+        const captchaToken = formData.get('turnstile_token') as string;
+        const { error } = await requestOTP(email, captchaToken || undefined);
         if (error) {
           turnstileRef.current?.reset();
           setTurnstileToken(null);
