@@ -178,6 +178,11 @@
     }
 }
 
+/* Toast — safe-area offset for iOS notch / Dynamic Island */
+[data-sonner-toaster][data-y-position='top'] {
+    top: env(safe-area-inset-top, 0px) !important;
+}
+
 /* Toast — frosted glass style matching app design */
 .toast-custom {
     background: hsl(var(--card) / 0.85) !important;

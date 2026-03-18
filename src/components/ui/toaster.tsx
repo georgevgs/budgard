@@ -29,7 +29,7 @@ export function Toaster() {
       gap={8}
       style={
         {
-          '--offset': 'calc(16px + env(safe-area-inset-top, 16px))',
+          '--offset': '16px',
         } as React.CSSProperties
       }
       toastOptions={{
