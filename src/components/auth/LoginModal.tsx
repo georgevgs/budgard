@@ -27,7 +27,7 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
           <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
         </div>
 
-        <div className="px-6 pb-6 pt-2 sm:pt-6">
+        <div className="px-6 pb-6 pt-4 sm:pt-6 space-y-6">
           <DialogHeader data-draggable-area>
             <DialogTitle>{t('auth.signIn')}</DialogTitle>
             <DialogDescription>
