@@ -178,6 +178,37 @@
     }
 }
 
+/* Toast — frosted glass style matching app design */
+.toast-custom {
+    background: hsl(var(--card) / 0.85) !important;
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+}
+
+.dark .toast-custom {
+    background: hsl(224 18% 13% / 0.9) !important;
+}
+
+[data-theme='barbie'] .toast-custom {
+    background: hsl(var(--card) / 0.9) !important;
+}
+
+/* Override Sonner's default icon colors for success/error */
+[data-sonner-toast][data-type='success'] [data-icon] {
+    color: #10b981 !important;
+}
+
+[data-sonner-toast][data-type='error'] [data-icon] {
+    color: hsl(var(--destructive)) !important;
+}
+
+/* Default toast (no type) uses foreground color */
+[data-sonner-toast]:not([data-type]) {
+    background: hsl(var(--card) / 0.85) !important;
+    color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border) / 0.5) !important;
+}
+
 @keyframes card-enter {
     from {
         opacity: 0;

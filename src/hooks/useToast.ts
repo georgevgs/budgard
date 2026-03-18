@@ -19,7 +19,11 @@ function toast({ variant, title, description, duration, action }: ToastParams) {
   const opts: ExternalToast = {};
   if (title && description) opts.description = description;
   if (duration !== undefined) opts.duration = duration;
-  if (action) opts.action = { label: action.label, onClick: action.onClick };
+  if (action) {
+    opts.action = { label: action.label, onClick: action.onClick };
+    // Ensure action toasts stay visible long enough to interact with
+    if (duration === undefined) opts.duration = 8000;
+  }
 
   if (variant === 'destructive') {
     return sonnerToast.error(message, opts);
@@ -27,6 +31,7 @@ function toast({ variant, title, description, duration, action }: ToastParams) {
   if (variant === 'success') {
     return sonnerToast.success(message, opts);
   }
+
   return sonnerToast(message, opts);
 }
 

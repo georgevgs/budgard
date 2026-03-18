@@ -57,7 +57,7 @@ export function usePwaUpdate(): void {
     toast({
       title: 'Update available',
       description: 'A new version is ready.',
-      duration: Infinity,
+      duration: 15000,
       action: {
         label: 'Update',
         onClick: applyUpdate,

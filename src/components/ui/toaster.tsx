@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { Toaster as SonnerToaster } from 'sonner';
 
 function getTheme(): 'light' | 'dark' {
-  return document.documentElement.getAttribute('data-theme') === 'dark'
-    ? 'dark'
-    : 'light';
+  const attr = document.documentElement.getAttribute('data-theme');
+  if (attr === 'dark') return 'dark';
+  if (attr === 'barbie') return 'light';
+
+  return 'light';
 }
 
 export function Toaster() {
@@ -16,26 +18,32 @@ export function Toaster() {
       attributes: true,
       attributeFilter: ['data-theme'],
     });
+
     return () => observer.disconnect();
   }, []);
 
   return (
     <SonnerToaster
-      position="bottom-center"
+      position="top-center"
       theme={theme}
-      richColors
       gap={8}
       style={
         {
-          // 96px base + safe-area so toasts always clear the bottom nav
-          // (nav is ~60px content + env(safe-area-inset-bottom) on notch devices)
-          '--offset': 'calc(96px + env(safe-area-inset-bottom, 0px))',
+          '--offset': 'calc(12px + env(safe-area-inset-top, 0px))',
         } as React.CSSProperties
       }
       toastOptions={{
-        duration: 4000,
+        duration: 3000,
         classNames: {
-          toast: 'rounded-2xl',
+          toast:
+            'toast-custom !rounded-xl !shadow-lg !border !border-border/50 !backdrop-blur-xl !px-4 !py-3 !gap-2 !text-sm !font-medium',
+          title: '!text-sm !font-semibold !text-foreground',
+          description: '!text-xs !text-muted-foreground',
+          actionButton:
+            '!bg-primary !text-primary-foreground !rounded-lg !text-xs !font-semibold !px-3 !py-1.5',
+          success: '!bg-emerald-500/10 !text-emerald-500 !border-emerald-500/20',
+          error: '!bg-destructive/10 !text-destructive !border-destructive/20',
+          icon: '!text-current',
         },
       }}
     />
