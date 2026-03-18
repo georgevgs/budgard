@@ -281,10 +281,10 @@ const renderEmptyState = (
   t: TranslateFunction,
 ) => {
   return (
-    <Card className="p-8 text-center">
+    <Card className="p-8 text-center overflow-hidden">
       <div className="flex flex-col items-center gap-3">
         <Repeat className="h-12 w-12 text-muted-foreground/50" />
-        <div>
+        <div className="max-w-[260px]">
           <p className="font-medium">{t('recurring.noRecurring')}</p>
           <p className="text-sm text-muted-foreground">
             {t('recurring.noRecurringDescription')}
@@ -294,10 +294,12 @@ const renderEmptyState = (
           onClick={() => onOpenForm(true)}
           variant="outline"
           size="sm"
-          className="mt-2"
+          className="mt-2 max-w-full"
         >
-          <Plus className="h-4 w-4 mr-2" />
-          {t('recurring.addFirstRecurring')}
+          <Plus className="h-4 w-4 mr-2 shrink-0" />
+          <span className="truncate">
+            {t('recurring.addFirstRecurring')}
+          </span>
         </Button>
       </div>
     </Card>

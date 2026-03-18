@@ -446,7 +446,7 @@ const renderCategoryBreakdown = (
 ) => {
   if (breakdown.length === 0) {
     return (
-      <p className="text-center text-sm text-muted-foreground py-8">
+      <p className="text-center text-sm text-muted-foreground py-8 px-4">
         {t('analytics.noCategorizedExpenses', { year: selectedYear })}
       </p>
     );
