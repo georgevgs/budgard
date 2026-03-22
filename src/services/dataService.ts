@@ -5,14 +5,6 @@ import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Tag } from '@/types/Tag';
 
-export const QueryKeys = {
-  USER: 'user',
-  CATEGORIES: 'categories',
-  EXPENSES: 'expenses',
-  BUDGET: 'budget',
-  RECURRING_EXPENSES: 'recurring-expenses',
-} as const;
-
 export const dataService = {
   async getUser() {
     const {

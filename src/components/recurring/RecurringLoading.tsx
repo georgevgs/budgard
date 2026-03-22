@@ -20,7 +20,7 @@ const RecurringLoadingState = () => (
     {/* Cards */}
     <div className="grid gap-4">
       {ROWS.map((row, i) => (
-        <div key={i} className="rounded-lg border bg-card p-4">
+        <div key={`skeleton-${i}`} className="rounded-lg border bg-card p-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex-1 space-y-2 min-w-0">
               <Skeleton className={`h-4 ${row.desc}`} />

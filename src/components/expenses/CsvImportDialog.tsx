@@ -270,7 +270,7 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
                   </SelectTrigger>
                   <SelectContent>
                     {csvPreview.headers.map((header, idx) => (
-                      <SelectItem key={idx} value={idx.toString()}>
+                      <SelectItem key={`date-${idx}`} value={idx.toString()}>
                         {header || `Column ${idx + 1}`}
                       </SelectItem>
                     ))}
@@ -289,7 +289,7 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
                   </SelectTrigger>
                   <SelectContent>
                     {csvPreview.headers.map((header, idx) => (
-                      <SelectItem key={idx} value={idx.toString()}>
+                      <SelectItem key={`desc-${idx}`} value={idx.toString()}>
                         {header || `Column ${idx + 1}`}
                       </SelectItem>
                     ))}
@@ -308,7 +308,7 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
                   </SelectTrigger>
                   <SelectContent>
                     {csvPreview.headers.map((header, idx) => (
-                      <SelectItem key={idx} value={idx.toString()}>
+                      <SelectItem key={`amount-${idx}`} value={idx.toString()}>
                         {header || `Column ${idx + 1}`}
                       </SelectItem>
                     ))}
@@ -330,7 +330,7 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
                   <SelectContent>
                     <SelectItem value="_none">{t('import.noCategory')}</SelectItem>
                     {csvPreview.headers.map((header, idx) => (
-                      <SelectItem key={idx} value={idx.toString()}>
+                      <SelectItem key={`cat-${idx}`} value={idx.toString()}>
                         {header || `Column ${idx + 1}`}
                       </SelectItem>
                     ))}
@@ -360,7 +360,7 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
                   <thead className="bg-muted sticky top-0">
                     <tr>
                       {csvPreview.headers.map((header, idx) => (
-                        <th key={idx} className="px-2 py-1 text-left font-medium whitespace-nowrap">
+                        <th key={`th-${idx}`} className="px-2 py-1 text-left font-medium whitespace-nowrap">
                           {header || `Col ${idx + 1}`}
                         </th>
                       ))}
@@ -368,10 +368,10 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
                   </thead>
                   <tbody>
                     {csvPreview.sampleRows.map((row, rowIdx) => (
-                      <tr key={rowIdx} className="border-t">
+                      <tr key={`row-${rowIdx}`} className="border-t">
                         {row.map((cell, cellIdx) => (
                           <td
-                            key={cellIdx}
+                            key={`cell-${rowIdx}-${cellIdx}`}
                             className={`px-2 py-1 truncate max-w-[120px] ${
                               cellIdx === columnMapping.dateColumn ||
                               cellIdx === columnMapping.descriptionColumn ||
