@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/form';
 import {
   Popover,
+  PopoverAnchor,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
@@ -77,7 +78,7 @@ const ExpensesForm = ({
 }: ExpensesFormProps) => {
   const { t, i18n } = useTranslation();
   const { session } = useAuth();
-  const { tags } = useData();
+  const { tags, expenses: allExpenses } = useData();
   const { handleTagCreate } = useDataOperations();
   const dateLocale = i18n.language === 'el' ? el : enUS;
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
@@ -85,6 +86,7 @@ const ExpensesForm = ({
   const [tagPopoverOpen, setTagPopoverOpen] = useState(false);
   const [tagSearch, setTagSearch] = useState('');
   const [isCreatingTag, startTagCreation] = useTransition();
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
@@ -107,6 +109,43 @@ const ExpensesForm = ({
     const lower = tagSearch.toLowerCase();
     return tags.filter((t) => t.name.toLowerCase().includes(lower));
   }, [tags, tagSearch]);
+
+  const descriptionValue = form.watch('description');
+
+  const suggestions = useMemo(() => {
+    const seen = new Map<string, Expense>();
+    const sorted = [...allExpenses].sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+    for (const expense of sorted) {
+      const key = expense.description.toLowerCase();
+      if (!seen.has(key)) {
+        seen.set(key, expense);
+      }
+    }
+
+    return Array.from(seen.values());
+  }, [allExpenses]);
+
+  const filteredSuggestions = useMemo(() => {
+    const query = descriptionValue.trim().toLowerCase();
+    if (!query) return [];
+
+    return suggestions
+      .filter((s) => {
+        const desc = s.description.toLowerCase();
+        return desc.includes(query) && desc !== query;
+      })
+      .slice(0, 5);
+  }, [suggestions, descriptionValue]);
+
+  const handleSuggestionSelect = (selected: Expense) => {
+    form.setValue('description', selected.description);
+    form.setValue('category_id', selected.category_id ?? 'none');
+    form.setValue('tag_id', selected.tag_id ?? undefined);
+    setSuggestionsOpen(false);
+  };
 
   const hasExactMatch = tags.some(
     (t) => t.name.toLowerCase() === tagSearch.toLowerCase(),
@@ -216,14 +255,49 @@ const ExpensesForm = ({
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder={t('expenses.descriptionPlaceholder')}
-                    {...field}
-                    className="overflow-ellipsis"
-                    aria-label={t('expenses.descriptionLabel')}
-                  />
-                </FormControl>
+                <Popover
+                  open={suggestionsOpen && filteredSuggestions.length > 0}
+                  onOpenChange={setSuggestionsOpen}
+                  modal={false}
+                >
+                  <PopoverAnchor asChild>
+                    <FormControl>
+                      <Input
+                        placeholder={t('expenses.descriptionPlaceholder')}
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setSuggestionsOpen(true);
+                        }}
+                        onFocus={() => setSuggestionsOpen(true)}
+                        autoComplete="off"
+                        className="overflow-ellipsis"
+                        aria-label={t('expenses.descriptionLabel')}
+                      />
+                    </FormControl>
+                  </PopoverAnchor>
+                  <PopoverContent
+                    className="w-[var(--radix-popover-trigger-width)] p-0"
+                    align="start"
+                    onOpenAutoFocus={(e) => e.preventDefault()}
+                    onInteractOutside={() => setSuggestionsOpen(false)}
+                  >
+                    <div className="max-h-[200px] overflow-y-auto">
+                      {filteredSuggestions.map((suggestion) => (
+                        <button
+                          key={suggestion.id}
+                          type="button"
+                          className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-sm hover:bg-accent active:bg-accent text-left"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => handleSuggestionSelect(suggestion)}
+                        >
+                          <span className="truncate">{suggestion.description}</span>
+                          {renderSuggestionMeta(suggestion)}
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
                 <FormMessage />
               </FormItem>
             )}
@@ -494,6 +568,20 @@ const renderCreateTagOption = (
       <Tag className="h-3 w-3 shrink-0" />
       {label}
     </button>
+  );
+};
+
+const renderSuggestionMeta = (suggestion: Expense) => {
+  if (!suggestion.category) return null;
+
+  return (
+    <span className="flex items-center gap-1.5 shrink-0 text-xs text-muted-foreground">
+      <span
+        className="w-2 h-2 rounded-full"
+        style={{ backgroundColor: suggestion.category.color }}
+      />
+      {suggestion.category.name}
+    </span>
   );
 };
 
