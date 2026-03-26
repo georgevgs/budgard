@@ -6,8 +6,8 @@ const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
 
 export function usePwaUpdate(): void {
   const { toast } = useToast();
-  const toastShownRef = useRef(false);
   const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
+  const needRefreshRef = useRef(false);
 
   const {
     needRefresh: [needRefresh],
@@ -49,11 +49,7 @@ export function usePwaUpdate(): void {
     updateServiceWorker(true);
   }, [updateServiceWorker]);
 
-  // Show a persistent toast when an update is available
-  useEffect(() => {
-    if (!needRefresh || toastShownRef.current) return;
-
-    toastShownRef.current = true;
+  const showUpdateToast = useCallback((): void => {
     toast({
       title: 'Update available',
       description: 'A new version is ready.',
@@ -63,15 +59,34 @@ export function usePwaUpdate(): void {
         onClick: applyUpdate,
       },
     });
-  }, [needRefresh, toast, applyUpdate]);
+  }, [toast, applyUpdate]);
 
-  // iOS PWA: check for SW updates when the app returns to foreground.
+  // Keep ref in sync so the visibility handler can read it
+  useEffect(() => {
+    needRefreshRef.current = needRefresh;
+  }, [needRefresh]);
+
+  // Show toast immediately when an update is first detected
+  useEffect(() => {
+    if (!needRefresh) return;
+    showUpdateToast();
+  }, [needRefresh, showUpdateToast]);
+
+  // Check for SW updates when the app returns to foreground.
   // iOS freezes the web view when backgrounded and doesn't automatically
   // check for SW updates on resume. visibilitychange is the most reliable
-  // event that fires when an iOS standalone PWA is foregrounded.
+  // event that fires when a standalone PWA is foregrounded.
+  // Also re-shows the update toast if a pending update was previously
+  // dismissed, so the user gets another chance to apply it.
   useEffect(() => {
     const handleVisibilityChange = (): void => {
       if (document.visibilityState !== 'visible') return;
+
+      if (needRefreshRef.current) {
+        showUpdateToast();
+
+        return;
+      }
 
       const registration = swRegistrationRef.current;
       if (!registration) return;
@@ -84,7 +99,10 @@ export function usePwaUpdate(): void {
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener(
+        'visibilitychange',
+        handleVisibilityChange,
+      );
     };
-  }, []);
+  }, [showUpdateToast]);
 }
