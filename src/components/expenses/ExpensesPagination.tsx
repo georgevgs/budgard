@@ -17,6 +17,7 @@ interface ExpensesPaginationProps {
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
   searchQuery?: string;
+  showFullDate?: boolean;
 }
 
 const ITEMS_PER_PAGE = 5;
@@ -26,6 +27,7 @@ const ExpensesPagination = ({
   onEdit,
   onDelete,
   searchQuery,
+  showFullDate,
 }: ExpensesPaginationProps) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
@@ -99,6 +101,7 @@ const ExpensesPagination = ({
               onEdit={onEdit}
               onDelete={onDelete}
               searchQuery={searchQuery}
+              showFullDate={showFullDate}
             />
           </div>
         ))}

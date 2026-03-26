@@ -38,6 +38,7 @@ type ExpensesContentProps = {
   clearFiltersLabel: string;
   selectedMonth: string;
   searchQuery: string;
+  showFullDate: boolean;
   onAddClick: () => void;
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
@@ -51,6 +52,7 @@ const ExpensesContent = ({
   clearFiltersLabel,
   selectedMonth,
   searchQuery,
+  showFullDate,
   onAddClick,
   onEdit,
   onDelete,
@@ -59,7 +61,7 @@ const ExpensesContent = ({
   // Has expenses - show paginated list
   if (expenses.length > 0) {
     return (
-      <ExpensesPagination expenses={expenses} onEdit={onEdit} onDelete={onDelete} searchQuery={searchQuery} />
+      <ExpensesPagination expenses={expenses} onEdit={onEdit} onDelete={onDelete} searchQuery={searchQuery} showFullDate={showFullDate} />
     );
   }
 
@@ -115,10 +117,12 @@ const ExpensesList = () => {
     selectedTagId,
     sortOrder,
     hasActiveFilters,
+    isSearchingAllMonths,
     setSearch,
     setSelectedCategoryId,
     setSelectedTagId,
     setSortOrder,
+    setIsSearchingAllMonths,
     handleClearFilters,
   } = useExpensesFilter({
     expenses: optimisticExpenses,
@@ -204,10 +208,18 @@ const ExpensesList = () => {
     [monthlyExpenses],
   );
 
+  const allExpensesTotal = useMemo(
+    () => optimisticExpenses.reduce((sum, expense) => sum + expense.amount, 0),
+    [optimisticExpenses],
+  );
+
   const filteredTotal = useMemo(
     () => filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0),
     [filteredExpenses],
   );
+
+  // When searching all months, the base total is all expenses, not just the month
+  const baseTotal = isSearchingAllMonths ? allExpensesTotal : monthlyTotal;
 
   const handleFormClose = useCallback(() => {
     setFormType(null);
@@ -234,7 +246,7 @@ const ExpensesList = () => {
             onMonthChange={setSelectedMonth}
           />
           <ExpensesMonthlyOverview
-            monthlyTotal={monthlyTotal}
+            monthlyTotal={baseTotal}
             filteredTotal={filteredTotal}
             hasActiveFilters={hasActiveFilters}
             selectedMonth={selectedMonth}
@@ -256,17 +268,21 @@ const ExpensesList = () => {
             selectedTagId={selectedTagId}
             sortOrder={sortOrder}
             hasActiveFilters={hasActiveFilters}
+            isSearchingAllMonths={isSearchingAllMonths}
             onSearchChange={setSearch}
             onCategoryChange={setSelectedCategoryId}
             onTagChange={setSelectedTagId}
             onSortChange={setSortOrder}
+            onSearchScopeChange={setIsSearchingAllMonths}
             onClearFilters={handleClearFilters}
           />
 
           {renderSearchResultCount(
             search,
             filteredExpenses.length,
-            monthlyExpenses.length,
+            isSearchingAllMonths
+              ? optimisticExpenses.length
+              : monthlyExpenses.length,
             t,
           )}
 
@@ -319,6 +335,7 @@ const ExpensesList = () => {
             clearFiltersLabel={t('expenses.filter.clearAll')}
             selectedMonth={selectedMonth}
             searchQuery={search}
+            showFullDate={isSearchingAllMonths}
             onAddClick={() => setFormType(FORM_TYPES.NEW_EXPENSE)}
             onEdit={handleExpenseEdit}
             onDelete={handleExpenseDelete}

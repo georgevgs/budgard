@@ -31,6 +31,7 @@ type ExpenseCardProps = {
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
   searchQuery?: string;
+  showFullDate?: boolean;
 };
 
 const ExpensesCard = ({
@@ -38,6 +39,7 @@ const ExpensesCard = ({
   onEdit,
   onDelete,
   searchQuery,
+  showFullDate,
 }: ExpenseCardProps) => {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'el' ? el : enUS;
@@ -87,9 +89,11 @@ const ExpensesCard = ({
                     {renderRecurringIcon(expense)}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1 truncate">
-                    {format(parseISO(expense.date), 'MMM d', {
-                      locale: dateLocale,
-                    })}
+                    {format(
+                      parseISO(expense.date),
+                      showFullDate ? 'MMM d, yyyy' : 'MMM d',
+                      { locale: dateLocale },
+                    )}
                     {renderCategoryLabel(expense)}
                     {renderTagLabel(expense)}
                   </p>

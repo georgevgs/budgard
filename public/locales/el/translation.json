@@ -78,7 +78,9 @@
       "placeholder": "Αναζήτηση εξόδων...",
       "label": "Αναζήτηση εξόδων",
       "active": "Αναζήτηση: {{query}}",
-      "resultCount": "{{count}} από {{total}} έξοδα"
+      "resultCount": "{{count}} από {{total}} έξοδα",
+      "thisMonth": "Αυτός ο μήνας",
+      "allMonths": "Όλοι οι μήνες"
     },
     "sort": {
       "dateDesc": "Ημερομηνία (νεότερο πρώτο)",

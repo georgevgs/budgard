@@ -16,10 +16,12 @@ type UseExpensesFilterReturn = {
   selectedCategoryId: string | null;
   selectedTagId: string | null;
   sortOrder: SortOrder;
+  isSearchingAllMonths: boolean;
   setSearch: (value: string) => void;
   setSelectedCategoryId: (value: string | null) => void;
   setSelectedTagId: (value: string | null) => void;
   setSortOrder: (value: SortOrder) => void;
+  setIsSearchingAllMonths: (value: boolean) => void;
   handleFilterChange: (search: string, categoryId: string | null) => void;
   handleClearFilters: () => void;
   hasActiveFilters: boolean;
@@ -36,36 +38,41 @@ export const useExpensesFilter = ({
   );
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>('date-desc');
+  const [isSearchingAllMonths, setIsSearchingAllMonths] = useState(false);
 
   const hasActiveFilters =
     search.length > 0 || !!selectedCategoryId || selectedTagId !== null;
 
+  // Sort all expenses once for cross-month search
+  const allExpensesSorted = useMemo(() => {
+    return [...expenses].sort((a: Expense, b: Expense) => {
+      const dateDiff =
+        parseISO(b.date).getTime() - parseISO(a.date).getTime();
+      if (dateDiff !== 0) return dateDiff;
+
+      return (
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    });
+  }, [expenses]);
+
   // Pre-filter expenses by month and sort once — order is preserved by filter()
   const monthlyExpenses = useMemo(() => {
-    return expenses
-      .filter(
-        (expense) =>
-          format(parseISO(expense.date), 'yyyy-MM') === selectedMonth,
-      )
-      .slice()
-      .sort((a: Expense, b: Expense) => {
-        const dateDiff =
-          parseISO(b.date).getTime() - parseISO(a.date).getTime();
-        if (dateDiff !== 0) return dateDiff;
-
-        return (
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-      });
-  }, [expenses, selectedMonth]);
+    return allExpensesSorted.filter(
+      (expense) =>
+        format(parseISO(expense.date), 'yyyy-MM') === selectedMonth,
+    );
+  }, [allExpensesSorted, selectedMonth]);
 
   // Apply search/category/tag filters then sort
+  // When "all months" toggle is on, search across ALL expenses
   // deferredSearch keeps the input snappy while filtering is deferred
   const filteredExpenses = useMemo(() => {
     const searchLower = deferredSearch.toLowerCase();
+    const baseExpenses = isSearchingAllMonths ? allExpensesSorted : monthlyExpenses;
 
     const filtered = hasActiveFilters
-      ? monthlyExpenses.filter((expense) => {
+      ? baseExpenses.filter((expense) => {
           const matchesSearch = deferredSearch
             ? expense.description.toLowerCase().includes(searchLower) ||
               (expense.category?.name.toLowerCase().includes(searchLower) ?? false) ||
@@ -82,9 +89,9 @@ export const useExpensesFilter = ({
 
           return matchesSearch && matchesCategory && matchesTag;
         })
-      : monthlyExpenses;
+      : baseExpenses;
 
-    // monthlyExpenses is already date-desc; skip copy+sort for the default case
+    // base expenses are already date-desc; skip copy+sort for the default case
     if (sortOrder === 'date-desc') return filtered;
 
     return [...filtered].sort((a, b) => {
@@ -100,7 +107,7 @@ export const useExpensesFilter = ({
       if (sortOrder === 'amount-desc') return b.amount - a.amount;
       return a.amount - b.amount; // amount-asc
     });
-  }, [monthlyExpenses, deferredSearch, selectedCategoryId, selectedTagId, hasActiveFilters, sortOrder]);
+  }, [monthlyExpenses, allExpensesSorted, isSearchingAllMonths, deferredSearch, selectedCategoryId, selectedTagId, hasActiveFilters, sortOrder]);
 
   const handleFilterChange = (newSearch: string, categoryId: string | null) => {
     setSearch(newSearch);
@@ -111,6 +118,7 @@ export const useExpensesFilter = ({
     setSearch('');
     setSelectedCategoryId(null);
     setSelectedTagId(null);
+    setIsSearchingAllMonths(false);
   };
 
   return {
@@ -120,10 +128,12 @@ export const useExpensesFilter = ({
     selectedCategoryId,
     selectedTagId,
     sortOrder,
+    isSearchingAllMonths,
     setSearch,
     setSelectedCategoryId,
     setSelectedTagId,
     setSortOrder,
+    setIsSearchingAllMonths,
     handleFilterChange,
     handleClearFilters,
     hasActiveFilters,

@@ -28,10 +28,12 @@ type ExpensesFilterProps = {
   selectedTagId: string | null;
   sortOrder: SortOrder;
   hasActiveFilters: boolean;
+  isSearchingAllMonths: boolean;
   onSearchChange: (value: string) => void;
   onCategoryChange: (value: string | null) => void;
   onTagChange: (value: string | null) => void;
   onSortChange: (value: SortOrder) => void;
+  onSearchScopeChange: (value: boolean) => void;
   onClearFilters: () => void;
 };
 
@@ -43,10 +45,12 @@ const ExpensesFilter = ({
   selectedTagId,
   sortOrder,
   hasActiveFilters,
+  isSearchingAllMonths,
   onSearchChange,
   onCategoryChange,
   onTagChange,
   onSortChange,
+  onSearchScopeChange,
   onClearFilters,
 }: ExpensesFilterProps) => {
   const { t } = useTranslation();
@@ -89,6 +93,8 @@ const ExpensesFilter = ({
           {renderFilterCountBadge(hasActiveFilters, activeFilterCount)}
         </Button>
       </div>
+
+      {renderSearchScopeToggle(hasActiveFilters, isSearchingAllMonths, t, onSearchScopeChange)}
 
       <div
         className={cn(
@@ -178,6 +184,44 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const renderSearchScopeToggle = (
+  hasActiveFilters: boolean,
+  isSearchingAllMonths: boolean,
+  t: TranslateFunction,
+  onScopeChange: (value: boolean) => void,
+) => {
+  if (!hasActiveFilters) return null;
+
+  return (
+    <div className="inline-flex rounded-full bg-muted p-0.5 mt-2">
+      <button
+        type="button"
+        onClick={() => onScopeChange(false)}
+        className={cn(
+          'text-xs px-3 py-1 rounded-full transition-colors',
+          !isSearchingAllMonths
+            ? 'bg-background text-foreground shadow-sm'
+            : 'text-muted-foreground',
+        )}
+      >
+        {t('expenses.search.thisMonth')}
+      </button>
+      <button
+        type="button"
+        onClick={() => onScopeChange(true)}
+        className={cn(
+          'text-xs px-3 py-1 rounded-full transition-colors',
+          isSearchingAllMonths
+            ? 'bg-background text-foreground shadow-sm'
+            : 'text-muted-foreground',
+        )}
+      >
+        {t('expenses.search.allMonths')}
+      </button>
+    </div>
+  );
+};
 
 const renderFilterCountBadge = (
   hasActiveFilters: boolean,

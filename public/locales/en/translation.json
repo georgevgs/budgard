@@ -78,7 +78,9 @@
       "placeholder": "Search expenses...",
       "label": "Search expenses",
       "active": "Search: {{query}}",
-      "resultCount": "{{count}} of {{total}} expenses"
+      "resultCount": "{{count}} of {{total}} expenses",
+      "thisMonth": "This month",
+      "allMonths": "All months"
     },
     "sort": {
       "dateDesc": "Date (newest first)",
