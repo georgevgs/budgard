@@ -8,6 +8,7 @@ import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Tag } from '@/types/Tag';
 import { uploadReceipt, deleteReceipt } from '@/services/receiptService';
 import { haptics } from '@/lib/haptics';
+import { offlineQueue } from '@/lib/offlineQueue';
 
 export interface ReceiptOptions {
   receiptFile: File | null;
@@ -109,6 +110,21 @@ export function useDataOperations() {
           });
         }
       } catch (error) {
+        if (!navigator.onLine) {
+          const mutationType = expenseId ? 'updateExpense' : 'createExpense';
+          await offlineQueue.enqueue(mutationType, {
+            ...expenseData,
+            ...(expenseId ? { id: expenseId } : {}),
+          } as Record<string, unknown>);
+          haptics.success();
+          toast({
+            variant: 'success',
+            title: expenseId ? 'Expense queued' : 'Expense queued',
+            description: 'Will sync when back online',
+          });
+
+          return;
+        }
         haptics.error();
         showErrorToast(`Failed to ${expenseId ? 'update' : 'add'} expense`);
         throw error;
@@ -139,12 +155,23 @@ export function useDataOperations() {
           deleteReceipt(receiptPath).catch(() => {});
         }
       } catch (error) {
+        if (!navigator.onLine) {
+          await offlineQueue.enqueue('deleteExpense', { id: expenseId });
+          haptics.success();
+          toast({
+            variant: 'success',
+            title: 'Delete queued',
+            description: 'Will sync when back online',
+          });
+
+          return;
+        }
         haptics.error();
         showErrorToast('Failed to delete expense');
         throw error;
       }
     },
-    [isInitialized, setExpenses, showErrorToast],
+    [isInitialized, setExpenses, showErrorToast, toast],
   );
 
   const handleCategoryAdd = useCallback(

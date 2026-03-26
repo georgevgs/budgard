@@ -22,6 +22,7 @@ import ExpensesPagination from '@/components/expenses/ExpensesPagination';
 import ExpensesFilter from '@/components/expenses/ExpensesFilter';
 import CsvImportDialog from '@/components/expenses/CsvImportDialog';
 import { useExpensesFilter } from '@/hooks/useExpensesFilter';
+import { useBudgetAlerts } from '@/hooks/useBudgetAlerts';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import type { ReceiptOptions } from '@/hooks/useDataOperations';
@@ -118,11 +119,13 @@ const ExpensesList = () => {
     sortOrder,
     hasActiveFilters,
     isSearchingAllMonths,
+    dateRangePreset,
     setSearch,
     setSelectedCategoryId,
     setSelectedTagId,
     setSortOrder,
     setIsSearchingAllMonths,
+    setDateRangePreset,
     handleClearFilters,
   } = useExpensesFilter({
     expenses: optimisticExpenses,
@@ -208,18 +211,21 @@ const ExpensesList = () => {
     [monthlyExpenses],
   );
 
-  const allExpensesTotal = useMemo(
-    () => optimisticExpenses.reduce((sum, expense) => sum + expense.amount, 0),
-    [optimisticExpenses],
-  );
+  // Budget alerts — only for the current month
+  useBudgetAlerts({
+    monthlyBudget,
+    monthlySpent: selectedMonth === currentMonth ? monthlyTotal : 0,
+  });
 
   const filteredTotal = useMemo(
     () => filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0),
     [filteredExpenses],
   );
 
-  // When searching all months, the base total is all expenses, not just the month
-  const baseTotal = isSearchingAllMonths ? allExpensesTotal : monthlyTotal;
+  // When searching all months or using date range, the base total is all filtered expenses
+  const baseTotal = isSearchingAllMonths || dateRangePreset
+    ? filteredTotal
+    : monthlyTotal;
 
   const handleFormClose = useCallback(() => {
     setFormType(null);
@@ -269,11 +275,13 @@ const ExpensesList = () => {
             sortOrder={sortOrder}
             hasActiveFilters={hasActiveFilters}
             isSearchingAllMonths={isSearchingAllMonths}
+            dateRangePreset={dateRangePreset}
             onSearchChange={setSearch}
             onCategoryChange={setSelectedCategoryId}
             onTagChange={setSelectedTagId}
             onSortChange={setSortOrder}
             onSearchScopeChange={setIsSearchingAllMonths}
+            onDateRangeChange={setDateRangePreset}
             onClearFilters={handleClearFilters}
           />
 
@@ -335,7 +343,7 @@ const ExpensesList = () => {
             clearFiltersLabel={t('expenses.filter.clearAll')}
             selectedMonth={selectedMonth}
             searchQuery={search}
-            showFullDate={isSearchingAllMonths}
+            showFullDate={isSearchingAllMonths || !!dateRangePreset}
             onAddClick={() => setFormType(FORM_TYPES.NEW_EXPENSE)}
             onEdit={handleExpenseEdit}
             onDelete={handleExpenseDelete}

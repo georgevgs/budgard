@@ -13,6 +13,7 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import Header from '@/components/layout/Header';
 import NavTabs from '@/components/layout/NavTabs';
+import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { AppLoadingSkeleton, ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
 import RecurringLoadingState from '@/components/recurring/RecurringLoading';
 import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
@@ -47,15 +48,19 @@ const LoadingSpinner = () => (
 // Layout Components
 // ============================================================================
 
-const AuthenticatedLayout = () => (
-  <>
-    <Header />
-    <main className="flex-1 pt-2 pb-20">
-      <Outlet />
-    </main>
-    <NavTabs />
-  </>
-);
+const AuthenticatedLayout = () => {
+  useOfflineSync();
+
+  return (
+    <>
+      <Header />
+      <main className="flex-1 pt-2 pb-20">
+        <Outlet />
+      </main>
+      <NavTabs />
+    </>
+  );
+};
 
 const PublicLayout = ({ children }: { children: ReactNode }) => (
   <main className="flex-1">{children}</main>

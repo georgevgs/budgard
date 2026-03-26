@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Category } from '@/types/Category';
 import type { Tag } from '@/types/Tag';
-import type { SortOrder } from '@/hooks/useExpensesFilter';
+import type { SortOrder, DateRangePreset } from '@/hooks/useExpensesFilter';
 
 const UNCATEGORIZED_VALUE = 'uncategorized';
 
@@ -29,11 +29,13 @@ type ExpensesFilterProps = {
   sortOrder: SortOrder;
   hasActiveFilters: boolean;
   isSearchingAllMonths: boolean;
+  dateRangePreset: DateRangePreset;
   onSearchChange: (value: string) => void;
   onCategoryChange: (value: string | null) => void;
   onTagChange: (value: string | null) => void;
   onSortChange: (value: SortOrder) => void;
   onSearchScopeChange: (value: boolean) => void;
+  onDateRangeChange: (value: DateRangePreset) => void;
   onClearFilters: () => void;
 };
 
@@ -46,11 +48,13 @@ const ExpensesFilter = ({
   sortOrder,
   hasActiveFilters,
   isSearchingAllMonths,
+  dateRangePreset,
   onSearchChange,
   onCategoryChange,
   onTagChange,
   onSortChange,
   onSearchScopeChange,
+  onDateRangeChange,
   onClearFilters,
 }: ExpensesFilterProps) => {
   const { t } = useTranslation();
@@ -64,10 +68,15 @@ const ExpensesFilter = ({
     onTagChange(value === 'all' ? null : value);
   };
 
+  const handleDateRangeChange = (value: string) => {
+    onDateRangeChange(value === 'none' ? null : (value as DateRangePreset));
+  };
+
   const activeFilterCount =
     (search ? 1 : 0) +
     (selectedCategoryId ? 1 : 0) +
-    (selectedTagId ? 1 : 0);
+    (selectedTagId ? 1 : 0) +
+    (dateRangePreset ? 1 : 0);
 
   return (
     <div>
@@ -156,6 +165,37 @@ const ExpensesFilter = ({
               </SelectItem>
             </SelectContent>
           </Select>
+
+          <Select
+            value={dateRangePreset ?? 'none'}
+            onValueChange={handleDateRangeChange}
+          >
+            <SelectTrigger>
+              <SelectValue
+                placeholder={t('expenses.filter.dateRange')}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">
+                {t('expenses.filter.noDateRange')}
+              </SelectItem>
+              <SelectItem value="last7">
+                {t('expenses.filter.last7Days')}
+              </SelectItem>
+              <SelectItem value="last30">
+                {t('expenses.filter.last30Days')}
+              </SelectItem>
+              <SelectItem value="last90">
+                {t('expenses.filter.last90Days')}
+              </SelectItem>
+              <SelectItem value="thisQuarter">
+                {t('expenses.filter.thisQuarter')}
+              </SelectItem>
+              <SelectItem value="thisYear">
+                {t('expenses.filter.thisYear')}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -163,13 +203,15 @@ const ExpensesFilter = ({
         search,
         selectedCategoryId,
         selectedTagId,
-        hasActiveFilters,
+        dateRangePreset,
+        hasActiveFilters: hasActiveFilters || !!dateRangePreset,
         categories,
         tags,
         t,
         onSearchChange,
         onCategoryChange: handleCategoryChange,
         onTagChange,
+        onDateRangeChange,
         onClearFilters,
       })}
     </div>
@@ -277,6 +319,7 @@ type ActiveFiltersSectionProps = {
   search: string;
   selectedCategoryId: string | null;
   selectedTagId: string | null;
+  dateRangePreset: DateRangePreset;
   hasActiveFilters: boolean;
   categories: Category[];
   tags: Tag[];
@@ -284,6 +327,7 @@ type ActiveFiltersSectionProps = {
   onSearchChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
   onTagChange: (value: string | null) => void;
+  onDateRangeChange: (value: DateRangePreset) => void;
   onClearFilters: () => void;
 };
 
@@ -292,6 +336,7 @@ const renderActiveFiltersSection = (props: ActiveFiltersSectionProps) => {
     search,
     selectedCategoryId,
     selectedTagId,
+    dateRangePreset,
     hasActiveFilters,
     categories,
     tags,
@@ -299,6 +344,7 @@ const renderActiveFiltersSection = (props: ActiveFiltersSectionProps) => {
     onSearchChange,
     onCategoryChange,
     onTagChange,
+    onDateRangeChange,
     onClearFilters,
   } = props;
 
@@ -314,6 +360,7 @@ const renderActiveFiltersSection = (props: ActiveFiltersSectionProps) => {
         onCategoryChange,
       )}
       {renderTagFilterBadge(selectedTagId, tags, t, onTagChange)}
+      {renderDateRangeBadge(dateRangePreset, t, onDateRangeChange)}
       <Button
         variant="ghost"
         size="sm"
@@ -394,6 +441,38 @@ const renderTagFilterBadge = (
         className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20"
         onClick={() => onClear(null)}
         aria-label={t('expenses.filter.clearTag', { defaultValue: 'Clear tag filter' })}
+      >
+        <X className="h-3 w-3" />
+      </button>
+    </Badge>
+  );
+};
+
+const DATE_RANGE_LABELS: Record<string, string> = {
+  last7: 'expenses.filter.last7Days',
+  last30: 'expenses.filter.last30Days',
+  last90: 'expenses.filter.last90Days',
+  thisQuarter: 'expenses.filter.thisQuarter',
+  thisYear: 'expenses.filter.thisYear',
+};
+
+const renderDateRangeBadge = (
+  dateRangePreset: DateRangePreset,
+  t: TranslateFunction,
+  onClear: (value: DateRangePreset) => void,
+) => {
+  if (!dateRangePreset) return null;
+
+  const labelKey = DATE_RANGE_LABELS[dateRangePreset];
+
+  return (
+    <Badge variant="secondary" className="text-xs gap-1">
+      {t(labelKey)}
+      <button
+        type="button"
+        className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20"
+        onClick={() => onClear(null)}
+        aria-label={t('expenses.filter.clearDateRange', { defaultValue: 'Clear date range' })}
       >
         <X className="h-3 w-3" />
       </button>

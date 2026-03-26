@@ -96,7 +96,14 @@
       "clearAll": "Εκκαθάριση όλων",
       "toggleFilters": "Εναλλαγή φίλτρων",
       "allTags": "Όλες οι ετικέτες",
-      "selectTag": "Όλες οι ετικέτες"
+      "selectTag": "Όλες οι ετικέτες",
+      "dateRange": "Χρονικό εύρος",
+      "noDateRange": "Χωρίς χρονικό εύρος",
+      "last7Days": "Τελευταίες 7 ημέρες",
+      "last30Days": "Τελευταίες 30 ημέρες",
+      "last90Days": "Τελευταίες 90 ημέρες",
+      "thisQuarter": "Αυτό το τρίμηνο",
+      "thisYear": "Φέτος"
     }
   },
   "categories": {
@@ -125,7 +132,13 @@
     "amountPlaceholder": "Εισάγετε συνολικό μηνιαίο προϋπολογισμό",
     "amountAriaLabel": "Ποσό μηνιαίου προϋπολογισμού",
     "updateButton": "Ενημέρωση",
-    "setButton": "Ορισμός"
+    "setButton": "Ορισμός",
+    "alerts": {
+      "warning": "Προειδοποίηση Προϋπολογισμού",
+      "warningDescription": "Έχετε χρησιμοποιήσει {{percent}}% του προϋπολογισμού σας. Απομένουν {{remaining}}.",
+      "exceeded": "Υπέρβαση Προϋπολογισμού",
+      "exceededDescription": "Έχετε ξοδέψει {{spent}} με προϋπολογισμό {{budget}}."
+    }
   },
   "recurring": {
     "title": "Επαναλαμβανόμενα",
@@ -314,6 +327,10 @@
     "invalidType": "Μη έγκυρος τύπος αρχείου. Χρησιμοποιήστε JPEG, PNG, WebP ή HEIC",
     "fileTooLarge": "Το αρχείο είναι πολύ μεγάλο. Μέγιστο μέγεθος 10MB",
     "changeReceipt": "Αλλαγή απόδειξης"
+  },
+  "offline": {
+    "syncSuccess": "Συγχρονίστηκαν {{count}} αλλαγή(ες) σε αναμονή",
+    "syncFailed": "Αποτυχία συγχρονισμού {{count}} αλλαγής(ών)"
   },
   "landing": {
     "hero": {

@@ -96,7 +96,14 @@
       "clearAll": "Clear all",
       "toggleFilters": "Toggle filters",
       "allTags": "All tags",
-      "selectTag": "All tags"
+      "selectTag": "All tags",
+      "dateRange": "Date range",
+      "noDateRange": "No date range",
+      "last7Days": "Last 7 days",
+      "last30Days": "Last 30 days",
+      "last90Days": "Last 90 days",
+      "thisQuarter": "This quarter",
+      "thisYear": "This year"
     }
   },
   "categories": {
@@ -125,7 +132,13 @@
     "amountPlaceholder": "Enter total monthly budget",
     "amountAriaLabel": "Monthly budget amount",
     "updateButton": "Update Budget",
-    "setButton": "Set Budget"
+    "setButton": "Set Budget",
+    "alerts": {
+      "warning": "Budget Warning",
+      "warningDescription": "You've used {{percent}}% of your budget. {{remaining}} remaining.",
+      "exceeded": "Budget Exceeded",
+      "exceededDescription": "You've spent {{spent}} against a {{budget}} budget."
+    }
   },
   "recurring": {
     "title": "Recurring",
@@ -314,6 +327,10 @@
     "invalidType": "Invalid file type. Please use JPEG, PNG, WebP, or HEIC",
     "fileTooLarge": "File is too large. Maximum size is 10MB",
     "changeReceipt": "Change receipt"
+  },
+  "offline": {
+    "syncSuccess": "Synced {{count}} queued change(s)",
+    "syncFailed": "Failed to sync {{count}} change(s)"
   },
   "landing": {
     "hero": {
