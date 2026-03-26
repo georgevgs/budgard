@@ -19,23 +19,37 @@ export const useBudgetAlerts = ({
   const { t } = useTranslation();
   const shownWarning = useRef(false);
   const shownExceeded = useRef(false);
-  const prevSpent = useRef(monthlySpent);
+  // Start as null to distinguish "haven't seen real data yet" from "0 spent"
+  const prevSpent = useRef<number | null>(null);
 
-  // Reset alerts when budget changes or at the start of a new session
+  // Reset when budget amount changes
   useEffect(() => {
     shownWarning.current = false;
     shownExceeded.current = false;
+    prevSpent.current = null;
   }, [monthlyBudget]);
 
   useEffect(() => {
     if (!monthlyBudget || monthlyBudget === 0) return;
+    if (monthlySpent <= 0) return;
+
+    // First time we see real spending data — record it but don't alert.
+    // This prevents toasts on page load / reload.
+    if (prevSpent.current === null) {
+      prevSpent.current = monthlySpent;
+
+      return;
+    }
 
     const percentage = (monthlySpent / monthlyBudget) * 100;
     const prevPercentage = (prevSpent.current / monthlyBudget) * 100;
     prevSpent.current = monthlySpent;
 
-    // Only alert when spending increases (not on page load or deletions)
-    if (monthlySpent <= 0) return;
+    // Only alert when spending crosses a threshold upward
+    // (not on deletions that lower the amount)
+    if (monthlySpent <= prevSpent.current && percentage <= prevPercentage) {
+      return;
+    }
 
     // Exceeded 100%
     if (
