@@ -252,7 +252,21 @@
       "budgetStreak": "Εντός προϋπολογισμού {{count}} μήνες στη σειρά",
       "inactive": "Δεν έχετε καταχωρίσει έξοδα εδώ και {{days}} ημέρες",
       "largestExpense": "Μεγαλύτερο αυτό το μήνα: {{amount}} ({{category}})",
-      "largestExpenseNoCategory": "Μεγαλύτερο αυτό το μήνα: {{amount}}"
+      "largestExpenseNoCategory": "Μεγαλύτερο αυτό το μήνα: {{amount}}",
+      "weekendHigher": "Τα Σ/Κ ξοδεύετε {{percent}}% περισσότερο ανά συναλλαγή",
+      "weekdayHigher": "Τις καθημερινές ξοδεύετε {{percent}}% περισσότερο ανά συναλλαγή",
+      "categoryConcentration": "Το {{percent}}% των εξόδων αυτό τον μήνα είναι στην κατηγορία {{name}}",
+      "highVolatility": "Οι μηνιαίες δαπάνες σας ποικίλλουν αρκετά — σκεφτείτε σταθερό προϋπολογισμό",
+      "stableSpending": "Οι δαπάνες σας ήταν σταθερές τους τελευταίους μήνες"
+    },
+    "drillDown": {
+      "categoryTotal": "{{amount}} σε {{count}} έξοδα",
+      "allExpenses": "Όλα τα Έξοδα",
+      "monthlyTrend": "Μηνιαία Τάση",
+      "monthTotal": "{{amount}} σε {{count}} έξοδα",
+      "byCategory": "Ανά Κατηγορία",
+      "topExpenses": "Κορυφαία Έξοδα",
+      "uncategorized": "Χωρίς κατηγορία"
     }
   },
   "import": {

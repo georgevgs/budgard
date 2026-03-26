@@ -11,7 +11,6 @@ type SpendingInsightsProps = {
   expenses: Expense[];
   monthlyBudget: number | null;
   monthComparison: { thisMonthAmount: number; lastMonthAmount: number };
-  monthlyData: { month: string; fullMonth: string; amount: number }[];
   categories: Category[];
   dateLocale: Locale;
 };

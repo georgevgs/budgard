@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, lazy, Suspense } from 'react';
+import { useMemo, useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { format, parseISO, getYear } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
@@ -16,9 +16,13 @@ import {
 import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
 import SpendingInsights from '@/components/analytics/SpendingInsights';
 import CategorySparkline from '@/components/analytics/CategorySparkline';
+import { CategoryDrillDown } from '@/components/analytics/CategoryDrillDown';
+import { MonthDrillDown } from '@/components/analytics/MonthDrillDown';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '@/lib/utils';
 import { useTheme } from '@/hooks/useTheme';
+import type { Expense } from '@/types/Expense';
+import type { Category } from '@/types/Category';
 
 const Chart = lazy(() => import('react-apexcharts'));
 
@@ -130,6 +134,40 @@ const AnalyticsView = () => {
     return (monthComparison.thisMonthAmount / monthlyBudget) * 100;
   }, [monthComparison.thisMonthAmount, monthlyBudget]);
 
+  // ─── Drill-down state ────────────────────────────────────────────────────────
+
+  const [drillDownCategory, setDrillDownCategory] = useState<CategoryRow | null>(null);
+  const [drillDownMonthKey, setDrillDownMonthKey] = useState<string | null>(null);
+
+  const drillDownCategoryExpenses = useMemo(() => {
+    if (!drillDownCategory) return [];
+
+    return yearExpenses.filter(
+      (e) => e.category_id === drillDownCategory.id,
+    );
+  }, [yearExpenses, drillDownCategory]);
+
+  const handleCategoryClick = useCallback((cat: CategoryRow) => {
+    setDrillDownCategory(cat);
+  }, []);
+
+  const handleCategoryDrillDownClose = useCallback(() => {
+    setDrillDownCategory(null);
+  }, []);
+
+  const handleMonthDrillDownClose = useCallback(() => {
+    setDrillDownMonthKey(null);
+  }, []);
+
+  const handleChartMonthClick = useCallback(
+    (_event: unknown, _chartContext: unknown, config: { dataPointIndex: number }) => {
+      const monthIndex = config.dataPointIndex;
+      const month = (monthIndex + 1).toString().padStart(2, '0');
+      setDrillDownMonthKey(`${selectedYear}-${month}`);
+    },
+    [selectedYear],
+  );
+
   const chartOptions = useMemo(
     () => ({
       chart: {
@@ -138,6 +176,9 @@ const AnalyticsView = () => {
         fontFamily: 'inherit',
         background: 'transparent',
         animations: { enabled: true },
+        events: {
+          dataPointSelection: handleChartMonthClick,
+        },
       },
       annotations: monthlyBudget
         ? {
@@ -174,6 +215,11 @@ const AnalyticsView = () => {
           stops: [0, 90, 100],
         },
       },
+      markers: {
+        size: 4,
+        strokeWidth: 0,
+        hover: { size: 6 },
+      },
       dataLabels: { enabled: false },
       xaxis: {
         categories: monthlyData.map((d) => d.month),
@@ -200,7 +246,7 @@ const AnalyticsView = () => {
       },
       colors: ['hsl(var(--primary))'],
     }),
-    [monthlyData, monthlyBudget, t, theme],
+    [monthlyData, monthlyBudget, t, theme, handleChartMonthClick],
   );
 
   const chartSeries = useMemo(
@@ -247,7 +293,6 @@ const AnalyticsView = () => {
         expenses={expenses}
         monthlyBudget={monthlyBudget}
         monthComparison={monthComparison}
-        monthlyData={monthlyData}
         categories={categories}
         dateLocale={dateLocale}
       />
@@ -310,8 +355,22 @@ const AnalyticsView = () => {
           yearlyStats.totalSpent,
           selectedYear,
           t,
+          handleCategoryClick,
         )}
       </div>
+
+      {/* Drill-down dialogs */}
+      {renderCategoryDrillDown(
+        drillDownCategory,
+        drillDownCategoryExpenses,
+        handleCategoryDrillDownClose,
+      )}
+      {renderMonthDrillDown(
+        drillDownMonthKey,
+        yearExpenses,
+        categories,
+        handleMonthDrillDownClose,
+      )}
     </div>
   );
 };
@@ -443,6 +502,7 @@ const renderCategoryBreakdown = (
   totalSpent: number,
   selectedYear: number,
   t: TFunc,
+  onCategoryClick: (cat: CategoryRow) => void,
 ) => {
   if (breakdown.length === 0) {
     return (
@@ -458,7 +518,12 @@ const renderCategoryBreakdown = (
         {breakdown.map((cat) => {
           const pct = totalSpent > 0 ? (cat.amount / totalSpent) * 100 : 0;
           return (
-            <div key={cat.id} className="flex items-center gap-4 px-5 py-3.5">
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => onCategoryClick(cat)}
+              className="flex items-center gap-4 px-5 py-3.5 w-full text-left transition-colors hover:bg-accent/50 active:bg-accent/70 cursor-pointer"
+            >
               <div
                 className="w-2.5 h-2.5 rounded-full shrink-0"
                 style={{ backgroundColor: cat.color }}
@@ -481,10 +546,48 @@ const renderCategoryBreakdown = (
               <span className="text-xs text-muted-foreground tabular-nums w-8 text-right shrink-0">
                 {Math.round(pct)}%
               </span>
-            </div>
+            </button>
           );
         })}
       </CardContent>
     </Card>
+  );
+};
+
+const renderCategoryDrillDown = (
+  category: CategoryRow | null,
+  expenses: Expense[],
+  onClose: () => void,
+) => {
+  if (!category) return null;
+
+  return (
+    <CategoryDrillDown
+      isOpen={true}
+      onClose={onClose}
+      categoryName={category.name}
+      categoryColor={category.color}
+      expenses={expenses}
+      totalAmount={category.amount}
+    />
+  );
+};
+
+const renderMonthDrillDown = (
+  monthKey: string | null,
+  expenses: Expense[],
+  categories: Category[],
+  onClose: () => void,
+) => {
+  if (!monthKey) return null;
+
+  return (
+    <MonthDrillDown
+      isOpen={true}
+      onClose={onClose}
+      monthKey={monthKey}
+      expenses={expenses}
+      categories={categories}
+    />
   );
 };

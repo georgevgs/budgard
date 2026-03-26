@@ -14,6 +14,8 @@ import {
   ShieldCheck,
   AlertCircle,
   Receipt,
+  PieChart,
+  Activity,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -31,7 +33,6 @@ export interface SpendingInsightsParams {
   expenses: Expense[];
   monthlyBudget: number | null;
   monthComparison: { thisMonthAmount: number; lastMonthAmount: number };
-  monthlyData: { amount: number }[];
   categories: Category[];
   dateLocale: Locale;
 }
@@ -277,6 +278,153 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
       };
     };
 
+    // 7. Weekend vs Weekday spending
+    const weekendSpendingInsight = (): Insight | null => {
+      const thisMonthExpenses = expenses.filter(
+        (e) => format(parseISO(e.date), 'yyyy-MM') === thisMonthKey,
+      );
+
+      if (thisMonthExpenses.length < 5) return null;
+
+      let weekendTotal = 0;
+      let weekdayTotal = 0;
+      let weekendCount = 0;
+      let weekdayCount = 0;
+
+      for (const e of thisMonthExpenses) {
+        const dow = getDay(parseISO(e.date));
+        if (dow === 0 || dow === 6) {
+          weekendTotal += e.amount;
+          weekendCount++;
+        } else {
+          weekdayTotal += e.amount;
+          weekdayCount++;
+        }
+      }
+
+      if (weekendCount === 0 || weekdayCount === 0) return null;
+
+      const weekendAvg = weekendTotal / weekendCount;
+      const weekdayAvg = weekdayTotal / weekdayCount;
+      const ratio = weekendAvg / weekdayAvg;
+
+      if (ratio > 1.5) {
+        return {
+          id: 'weekendSpending',
+          icon: CalendarDays,
+          text: t('analytics.insights.weekendHigher', {
+            percent: Math.round((ratio - 1) * 100),
+          }),
+          variant: 'warning',
+        };
+      }
+
+      if (ratio < 0.5) {
+        return {
+          id: 'weekendSpending',
+          icon: CalendarDays,
+          text: t('analytics.insights.weekdayHigher', {
+            percent: Math.round((1 - ratio) * 100),
+          }),
+          variant: 'default',
+        };
+      }
+
+      return null;
+    };
+
+    // 8. Category concentration
+    const categoryConcentrationInsight = (): Insight | null => {
+      const thisMonthExpenses = expenses.filter(
+        (e) => format(parseISO(e.date), 'yyyy-MM') === thisMonthKey,
+      );
+
+      if (thisMonthExpenses.length < 3) return null;
+
+      const byCategory = new Map<string, number>();
+      let total = 0;
+      for (const e of thisMonthExpenses) {
+        const key = e.category_id ?? 'uncategorized';
+        byCategory.set(key, (byCategory.get(key) ?? 0) + e.amount);
+        total += e.amount;
+      }
+
+      if (total === 0 || byCategory.size < 2) return null;
+
+      let topCategoryId = '';
+      let topAmount = 0;
+      for (const [catId, amount] of byCategory.entries()) {
+        if (amount > topAmount) {
+          topAmount = amount;
+          topCategoryId = catId;
+        }
+      }
+
+      const concentration = (topAmount / total) * 100;
+
+      if (concentration >= 60) {
+        const category = categories.find((c) => c.id === topCategoryId);
+        const name = category?.name ?? t('analytics.drillDown.uncategorized');
+
+        return {
+          id: 'categoryConcentration',
+          icon: PieChart,
+          text: t('analytics.insights.categoryConcentration', {
+            percent: Math.round(concentration),
+            name,
+          }),
+          variant: 'default',
+        };
+      }
+
+      return null;
+    };
+
+    // 9. Month-over-month volatility
+    const spendingVolatilityInsight = (): Insight | null => {
+      const monthTotals: number[] = [];
+
+      for (let i = 0; i < 6; i++) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i - 1, 1);
+        const key = format(date, 'yyyy-MM');
+        const total = expenses
+          .filter((e) => format(parseISO(e.date), 'yyyy-MM') === key)
+          .reduce((sum, e) => sum + e.amount, 0);
+        if (total > 0) {
+          monthTotals.push(total);
+        }
+      }
+
+      if (monthTotals.length < 3) return null;
+
+      const mean = monthTotals.reduce((s, v) => s + v, 0) / monthTotals.length;
+      const variance =
+        monthTotals.reduce((s, v) => s + (v - mean) ** 2, 0) /
+        monthTotals.length;
+      const stdDev = Math.sqrt(variance);
+      const coeffOfVariation = (stdDev / mean) * 100;
+
+      if (coeffOfVariation >= 40) {
+        return {
+          id: 'spendingVolatility',
+          icon: Activity,
+          text: t('analytics.insights.highVolatility'),
+          variant: 'warning',
+        };
+      }
+
+      if (coeffOfVariation <= 15) {
+        return {
+          id: 'spendingStable',
+          icon: Activity,
+          text: t('analytics.insights.stableSpending'),
+          variant: 'positive',
+        };
+      }
+
+      return null;
+    };
+
     insights.push(
       monthProjectionInsight(),
       categoryComparisonInsight(),
@@ -284,6 +432,9 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
       budgetStreakInsight(),
       inactivityInsight(),
       largestExpenseInsight(),
+      weekendSpendingInsight(),
+      categoryConcentrationInsight(),
+      spendingVolatilityInsight(),
     );
 
     return insights.filter((i): i is Insight => i !== null);

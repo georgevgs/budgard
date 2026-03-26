@@ -252,7 +252,21 @@
       "budgetStreak": "Under budget {{count}} months in a row",
       "inactive": "No expenses logged in {{days}} days",
       "largestExpense": "Biggest this month: {{amount}} ({{category}})",
-      "largestExpenseNoCategory": "Biggest this month: {{amount}}"
+      "largestExpenseNoCategory": "Biggest this month: {{amount}}",
+      "weekendHigher": "Weekend spending is {{percent}}% higher per transaction",
+      "weekdayHigher": "Weekday spending is {{percent}}% higher per transaction",
+      "categoryConcentration": "{{percent}}% of this month's spending is on {{name}}",
+      "highVolatility": "Your monthly spending varies a lot — consider a consistent budget",
+      "stableSpending": "Your spending has been consistent over the past months"
+    },
+    "drillDown": {
+      "categoryTotal": "{{amount}} across {{count}} expenses",
+      "allExpenses": "All Expenses",
+      "monthlyTrend": "Monthly Trend",
+      "monthTotal": "{{amount}} across {{count}} expenses",
+      "byCategory": "By Category",
+      "topExpenses": "Top Expenses",
+      "uncategorized": "Uncategorized"
     }
   },
   "import": {
