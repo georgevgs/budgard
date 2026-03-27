@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { cn, formatCurrency, formatCurrencyInput, parseCurrencyInput } from './utils';
+import {
+  cn,
+  formatCurrency,
+  formatCurrencyInput,
+  parseCurrencyInput,
+} from './utils';
 
 describe('cn', () => {
   it('merges class names', () => {

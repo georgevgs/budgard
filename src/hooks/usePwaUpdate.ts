@@ -99,10 +99,7 @@ export function usePwaUpdate(): void {
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      document.removeEventListener(
-        'visibilitychange',
-        handleVisibilityChange,
-      );
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [showUpdateToast]);
 }

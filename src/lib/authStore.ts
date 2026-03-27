@@ -4,7 +4,7 @@ import type { Session } from '@supabase/supabase-js';
 function readStoredSession(): Session | null {
   try {
     const key = Object.keys(localStorage).find(
-      k => k.startsWith('sb-') && k.endsWith('-auth-token'),
+      (k) => k.startsWith('sb-') && k.endsWith('-auth-token'),
     );
     if (!key) return null;
     const raw = localStorage.getItem(key);
@@ -34,7 +34,7 @@ const listeners = new Set<() => void>();
 
 function notify(next: AuthSnapshot) {
   _snapshot = next;
-  listeners.forEach(l => l());
+  listeners.forEach((l) => l());
 }
 
 // Track the last valid session so we can attempt recovery when iOS aborts

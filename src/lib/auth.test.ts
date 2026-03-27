@@ -6,11 +6,16 @@ vi.mock('@/lib/authStore', () => ({
   markIntentionalSignOut: vi.fn(),
 }));
 
-import { requestOTP, signInWithOTP, signOut, getSession, onAuthStateChange } from './auth';
+import {
+  requestOTP,
+  signInWithOTP,
+  signOut,
+  getSession,
+  onAuthStateChange,
+} from './auth';
 import { markIntentionalSignOut } from '@/lib/authStore';
 
 describe('auth', () => {
-
   it('requestOTP calls signInWithOtp with email', async () => {
     vi.mocked(supabase.auth.signInWithOtp).mockResolvedValue({
       data: { user: null, session: null },
@@ -52,7 +57,9 @@ describe('auth', () => {
   });
 
   it('signOut marks intentional sign out before calling supabase', async () => {
-    vi.mocked(supabase.auth.signOut).mockResolvedValue({ error: null } as never);
+    vi.mocked(supabase.auth.signOut).mockResolvedValue({
+      error: null,
+    } as never);
 
     await signOut();
     expect(markIntentionalSignOut).toHaveBeenCalled();

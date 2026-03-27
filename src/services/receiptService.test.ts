@@ -1,6 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import { supabase } from '@/lib/supabase';
-import { compressImage, uploadReceipt, getReceiptUrl, deleteReceipt } from './receiptService';
+import {
+  compressImage,
+  uploadReceipt,
+  getReceiptUrl,
+  deleteReceipt,
+} from './receiptService';
 
 // Mock browser-image-compression
 vi.mock('browser-image-compression', () => ({
@@ -25,7 +30,6 @@ describe('compressImage', () => {
 });
 
 describe('uploadReceipt', () => {
-
   it('uploads compressed image and returns path', async () => {
     const mockUpload = vi.fn().mockResolvedValue({ error: null });
     vi.mocked(supabase.storage.from).mockReturnValue({
@@ -73,10 +77,14 @@ describe('getReceiptUrl', () => {
 
   it('throws on download error', async () => {
     vi.mocked(supabase.storage.from).mockReturnValue({
-      download: vi.fn().mockResolvedValue({ data: null, error: { message: 'not found' } }),
+      download: vi
+        .fn()
+        .mockResolvedValue({ data: null, error: { message: 'not found' } }),
     } as never);
 
-    await expect(getReceiptUrl('bad-path')).rejects.toEqual({ message: 'not found' });
+    await expect(getReceiptUrl('bad-path')).rejects.toEqual({
+      message: 'not found',
+    });
   });
 });
 
@@ -96,6 +104,8 @@ describe('deleteReceipt', () => {
       remove: vi.fn().mockResolvedValue({ error: { message: 'forbidden' } }),
     } as never);
 
-    await expect(deleteReceipt('path')).rejects.toEqual({ message: 'forbidden' });
+    await expect(deleteReceipt('path')).rejects.toEqual({
+      message: 'forbidden',
+    });
   });
 });

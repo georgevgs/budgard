@@ -38,7 +38,10 @@ describe('useAuth', () => {
   });
 
   it('resolves to authenticated when session exists', async () => {
-    const session = { user: { id: 'u1', email: 'test@test.com' }, access_token: 'tok' };
+    const session = {
+      user: { id: 'u1', email: 'test@test.com' },
+      access_token: 'tok',
+    };
     mockGetSession.mockResolvedValue({ data: { session } });
 
     const { result } = renderHook(() => useAuth());
@@ -62,10 +65,12 @@ describe('useAuth', () => {
 
   it('updates session when auth state changes', async () => {
     let authCallback: ((session: unknown) => void) | null = null;
-    mockOnAuthStateChange.mockImplementation((cb: (session: unknown) => void) => {
-      authCallback = cb;
-      return { data: { subscription: { unsubscribe: mockUnsubscribe } } };
-    });
+    mockOnAuthStateChange.mockImplementation(
+      (cb: (session: unknown) => void) => {
+        authCallback = cb;
+        return { data: { subscription: { unsubscribe: mockUnsubscribe } } };
+      },
+    );
 
     const { result } = renderHook(() => useAuth());
     await act(async () => {});

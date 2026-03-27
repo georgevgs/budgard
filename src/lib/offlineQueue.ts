@@ -2,10 +2,7 @@ const DB_NAME = 'budgard-offline';
 const DB_VERSION = 1;
 const STORE_NAME = 'mutations';
 
-export type MutationType =
-  | 'createExpense'
-  | 'updateExpense'
-  | 'deleteExpense';
+export type MutationType = 'createExpense' | 'updateExpense' | 'deleteExpense';
 
 export type QueuedMutation = {
   id: number;
@@ -34,7 +31,10 @@ const openDb = (): Promise<IDBDatabase> => {
 };
 
 export const offlineQueue = {
-  async enqueue(type: MutationType, payload: Record<string, unknown>): Promise<void> {
+  async enqueue(
+    type: MutationType,
+    payload: Record<string, unknown>,
+  ): Promise<void> {
     const db = await openDb();
     const transaction = db.transaction(STORE_NAME, 'readwrite');
     const store = transaction.objectStore(STORE_NAME);

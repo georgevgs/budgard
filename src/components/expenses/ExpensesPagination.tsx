@@ -127,7 +127,9 @@ const ExpensesPagination = ({
               </PaginationItem>
 
               {getVisiblePages().map((page, index) => (
-                <PaginationItem key={page === 'ellipsis' ? `ellipsis-${index}` : page}>
+                <PaginationItem
+                  key={page === 'ellipsis' ? `ellipsis-${index}` : page}
+                >
                   {page === 'ellipsis' ? (
                     <PaginationEllipsis aria-label={t('pagination.more')} />
                   ) : (

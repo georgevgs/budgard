@@ -41,7 +41,8 @@ export function Toaster() {
           description: '!text-xs !text-muted-foreground',
           actionButton:
             '!bg-primary !text-primary-foreground !rounded-lg !text-xs !font-semibold !px-3 !py-1.5',
-          success: '!bg-emerald-500/10 !text-emerald-500 !border-emerald-500/20',
+          success:
+            '!bg-emerald-500/10 !text-emerald-500 !border-emerald-500/20',
           error: '!bg-destructive/10 !text-destructive !border-destructive/20',
           icon: '!text-current',
         },

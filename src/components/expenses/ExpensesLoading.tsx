@@ -28,7 +28,10 @@ export const AppLoadingSkeleton = () => (
     <div className="fixed bottom-0 left-0 right-0 border-t bg-background">
       <div className="flex items-center justify-around">
         {[0, 1, 2].map((i) => (
-          <div key={`nav-${i}`} className="flex flex-1 flex-col items-center gap-1 py-2">
+          <div
+            key={`nav-${i}`}
+            className="flex flex-1 flex-col items-center gap-1 py-2"
+          >
             <Skeleton className="h-5 w-5 rounded-sm" />
             <Skeleton className="h-2 w-10" />
           </div>
@@ -89,10 +92,16 @@ const renderSkeletonCards = () => {
   return (
     <div className="space-y-2 pt-1">
       {SKELETON_ROWS.map((row, i) => (
-        <div key={`skeleton-${i}`} className="rounded-lg border overflow-hidden">
+        <div
+          key={`skeleton-${i}`}
+          className="rounded-lg border overflow-hidden"
+        >
           <div className="flex">
             {/* Category accent strip */}
-            <Skeleton className="w-1 rounded-none shrink-0" style={{ height: 64 }} />
+            <Skeleton
+              className="w-1 rounded-none shrink-0"
+              style={{ height: 64 }}
+            />
             <div className="p-4 flex-1 flex items-center justify-between gap-4">
               <div className="flex-1 space-y-2 min-w-0">
                 <div className="flex items-center gap-2">
@@ -109,4 +118,3 @@ const renderSkeletonCards = () => {
     </div>
   );
 };
-

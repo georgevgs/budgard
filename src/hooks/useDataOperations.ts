@@ -80,7 +80,10 @@ export function useDataOperations() {
           }
 
           // Update expense with receipt_path if changed
-          if (!receiptFailed && receiptPath !== (savedExpense.receipt_path ?? null)) {
+          if (
+            !receiptFailed &&
+            receiptPath !== (savedExpense.receipt_path ?? null)
+          ) {
             const updated = await dataService.updateExpense(
               { receipt_path: receiptPath },
               savedExpense.id,
@@ -146,7 +149,8 @@ export function useDataOperations() {
         // Read receipt path and update state atomically
         let receiptPath: string | null = null;
         setExpenses((prev) => {
-          receiptPath = prev.find((e) => e.id === expenseId)?.receipt_path ?? null;
+          receiptPath =
+            prev.find((e) => e.id === expenseId)?.receipt_path ?? null;
           return prev.filter((e) => e.id !== expenseId);
         });
 
@@ -223,7 +227,9 @@ export function useDataOperations() {
         haptics.success();
         toast({
           variant: 'success',
-          title: expenseId ? 'Recurring expense updated' : 'Recurring expense added',
+          title: expenseId
+            ? 'Recurring expense updated'
+            : 'Recurring expense added',
         });
         setRecurringExpenses((prev) =>
           expenseId
@@ -280,7 +286,10 @@ export function useDataOperations() {
       );
 
       try {
-        const savedExpense = await dataService.toggleRecurringExpense(expenseId, active);
+        const savedExpense = await dataService.toggleRecurringExpense(
+          expenseId,
+          active,
+        );
         haptics.success();
         setRecurringExpenses((prev) =>
           prev.map((e) => (e.id === expenseId ? savedExpense : e)),
@@ -309,26 +318,21 @@ export function useDataOperations() {
       };
 
       setTags((prev) =>
-        [...prev, optimisticTag].sort((a, b) =>
-          a.name.localeCompare(b.name),
-        ),
+        [...prev, optimisticTag].sort((a, b) => a.name.localeCompare(b.name)),
       );
 
       try {
         const savedTag = await dataService.createTag({ name, color });
         haptics.success();
         setTags((prev) =>
-          [
-            ...prev.filter((t) => t.id !== optimisticTag.id),
-            savedTag,
-          ].sort((a, b) => a.name.localeCompare(b.name)),
+          [...prev.filter((t) => t.id !== optimisticTag.id), savedTag].sort(
+            (a, b) => a.name.localeCompare(b.name),
+          ),
         );
         return savedTag;
       } catch (error) {
         haptics.error();
-        setTags((prev) =>
-          prev.filter((t) => t.id !== optimisticTag.id),
-        );
+        setTags((prev) => prev.filter((t) => t.id !== optimisticTag.id));
         showErrorToast('Failed to create tag');
         throw error;
       }

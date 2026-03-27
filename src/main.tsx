@@ -28,17 +28,20 @@ Sentry.init({
 const SW_RELOAD_KEY = 'sw-chunk-reload';
 const reloadAttempts = Number(sessionStorage.getItem(SW_RELOAD_KEY) ?? '0');
 if (reloadAttempts < 1) {
-  window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
-    const msg: string = event.reason?.message ?? '';
-    const isChunkLoadError =
-      msg.includes('dynamically imported module') ||
-      msg.includes('Importing a module script failed');
-    if (isChunkLoadError) {
-      sessionStorage.setItem(SW_RELOAD_KEY, String(reloadAttempts + 1));
-      // Use href assignment to force a full navigation, bypassing iOS PWA bfcache.
-      window.location.href = window.location.href;
-    }
-  });
+  window.addEventListener(
+    'unhandledrejection',
+    (event: PromiseRejectionEvent) => {
+      const msg: string = event.reason?.message ?? '';
+      const isChunkLoadError =
+        msg.includes('dynamically imported module') ||
+        msg.includes('Importing a module script failed');
+      if (isChunkLoadError) {
+        sessionStorage.setItem(SW_RELOAD_KEY, String(reloadAttempts + 1));
+        // Use href assignment to force a full navigation, bypassing iOS PWA bfcache.
+        window.location.href = window.location.href;
+      }
+    },
+  );
 }
 
 createRoot(document.getElementById('root')!).render(

@@ -15,9 +15,10 @@ vi.mock('@/lib/haptics', () => ({
 }));
 
 describe('useBudgetAlerts', () => {
-
   it('does nothing when no budget is set', () => {
-    renderHook(() => useBudgetAlerts({ monthlyBudget: null, monthlySpent: 500 }));
+    renderHook(() =>
+      useBudgetAlerts({ monthlyBudget: null, monthlySpent: 500 }),
+    );
     expect(mockToast).not.toHaveBeenCalled();
   });
 
@@ -32,13 +33,16 @@ describe('useBudgetAlerts', () => {
   });
 
   it('does not alert on first render (prevents page-load toasts)', () => {
-    renderHook(() => useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: 900 }));
+    renderHook(() =>
+      useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: 900 }),
+    );
     expect(mockToast).not.toHaveBeenCalled();
   });
 
   it('shows warning toast when crossing 80% threshold upward', () => {
     const { rerender } = renderHook(
-      ({ spent }) => useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: spent }),
+      ({ spent }) =>
+        useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: spent }),
       { initialProps: { spent: 700 } },
     );
 
@@ -53,7 +57,8 @@ describe('useBudgetAlerts', () => {
 
   it('shows exceeded toast when crossing 100% threshold', () => {
     const { rerender } = renderHook(
-      ({ spent }) => useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: spent }),
+      ({ spent }) =>
+        useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: spent }),
       { initialProps: { spent: 900 } },
     );
 
@@ -66,7 +71,8 @@ describe('useBudgetAlerts', () => {
 
   it('does not re-alert after already showing warning', () => {
     const { rerender } = renderHook(
-      ({ spent }) => useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: spent }),
+      ({ spent }) =>
+        useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: spent }),
       { initialProps: { spent: 700 } },
     );
 

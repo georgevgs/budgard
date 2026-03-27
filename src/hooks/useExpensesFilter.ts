@@ -1,5 +1,11 @@
 import { useState, useMemo, useDeferredValue } from 'react';
-import { format, parseISO, subDays, startOfQuarter, startOfYear } from 'date-fns';
+import {
+  format,
+  parseISO,
+  subDays,
+  startOfQuarter,
+  startOfYear,
+} from 'date-fns';
 import type { Expense } from '@/types/Expense';
 
 export type SortOrder = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc';
@@ -57,8 +63,7 @@ export const useExpensesFilter = ({
   // Sort all expenses once for cross-month search
   const allExpensesSorted = useMemo(() => {
     return [...expenses].sort((a: Expense, b: Expense) => {
-      const dateDiff =
-        parseISO(b.date).getTime() - parseISO(a.date).getTime();
+      const dateDiff = parseISO(b.date).getTime() - parseISO(a.date).getTime();
       if (dateDiff !== 0) return dateDiff;
 
       return (
@@ -70,8 +75,7 @@ export const useExpensesFilter = ({
   // Pre-filter expenses by month and sort once — order is preserved by filter()
   const monthlyExpenses = useMemo(() => {
     return allExpensesSorted.filter(
-      (expense) =>
-        format(parseISO(expense.date), 'yyyy-MM') === selectedMonth,
+      (expense) => format(parseISO(expense.date), 'yyyy-MM') === selectedMonth,
     );
   }, [allExpensesSorted, selectedMonth]);
 
@@ -127,12 +131,14 @@ export const useExpensesFilter = ({
       ? baseExpenses.filter((expense) => {
           const matchesSearch = deferredSearch
             ? expense.description.toLowerCase().includes(searchLower) ||
-              (expense.category?.name.toLowerCase().includes(searchLower) ?? false) ||
+              (expense.category?.name.toLowerCase().includes(searchLower) ??
+                false) ||
               (expense.tag?.name.toLowerCase().includes(searchLower) ?? false)
             : true;
           const matchesCategory = selectedCategoryId
             ? selectedCategoryId === 'uncategorized'
-              ? expense.category_id === null || expense.category_id === undefined
+              ? expense.category_id === null ||
+                expense.category_id === undefined
               : expense.category_id === selectedCategoryId
             : true;
           const matchesTag = selectedTagId
@@ -159,7 +165,18 @@ export const useExpensesFilter = ({
       if (sortOrder === 'amount-desc') return b.amount - a.amount;
       return a.amount - b.amount; // amount-asc
     });
-  }, [monthlyExpenses, allExpensesSorted, dateRangeExpenses, dateRangePreset, isSearchingAllMonths, deferredSearch, selectedCategoryId, selectedTagId, hasActiveFilters, sortOrder]);
+  }, [
+    monthlyExpenses,
+    allExpensesSorted,
+    dateRangeExpenses,
+    dateRangePreset,
+    isSearchingAllMonths,
+    deferredSearch,
+    selectedCategoryId,
+    selectedTagId,
+    hasActiveFilters,
+    sortOrder,
+  ]);
 
   const handleFilterChange = (newSearch: string, categoryId: string | null) => {
     setSearch(newSearch);

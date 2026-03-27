@@ -1,9 +1,19 @@
-import { useMemo, useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { format, parseISO, getYear } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import Minus from 'lucide-react/dist/esm/icons/minus';
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ReferenceLine,
+} from 'recharts';
+import type { CategoricalChartFunc } from 'recharts/types/chart/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { useData } from '@/contexts/DataContext';
 import {
@@ -20,16 +30,12 @@ import { CategoryDrillDown } from '@/components/analytics/CategoryDrillDown';
 import { MonthDrillDown } from '@/components/analytics/MonthDrillDown';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '@/lib/utils';
-import { useTheme } from '@/hooks/useTheme';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
-
-const Chart = lazy(() => import('react-apexcharts'));
 
 const AnalyticsView = () => {
   const { expenses, categories, monthlyBudget, isLoading } = useData();
   const { t, i18n } = useTranslation();
-  const { theme } = useTheme();
   const dateLocale = i18n.language === 'el' ? el : enUS;
 
   const availableYears = useMemo(() => {
@@ -120,12 +126,23 @@ const AnalyticsView = () => {
             .filter((e) => format(parseISO(e.date), 'yyyy-MM') === key)
             .reduce((sum, e) => sum + e.amount, 0);
         });
-        return { id: cat.id, name: cat.name, color: cat.color, amount, monthlyAmounts };
+        return {
+          id: cat.id,
+          name: cat.name,
+          color: cat.color,
+          amount,
+          monthlyAmounts,
+        };
       })
       .filter((cat) => cat.amount > 0)
       .sort((a, b) => b.amount - a.amount);
 
-    return { totalSpent, monthlyAverage, categoryBreakdown, activeMonths: monthsWithExpenses };
+    return {
+      totalSpent,
+      monthlyAverage,
+      categoryBreakdown,
+      activeMonths: monthsWithExpenses,
+    };
   }, [yearExpenses, categories, monthlyData, selectedYear]);
 
   const budgetUsedPercent = useMemo(() => {
@@ -136,15 +153,16 @@ const AnalyticsView = () => {
 
   // ─── Drill-down state ────────────────────────────────────────────────────────
 
-  const [drillDownCategory, setDrillDownCategory] = useState<CategoryRow | null>(null);
-  const [drillDownMonthKey, setDrillDownMonthKey] = useState<string | null>(null);
+  const [drillDownCategory, setDrillDownCategory] =
+    useState<CategoryRow | null>(null);
+  const [drillDownMonthKey, setDrillDownMonthKey] = useState<string | null>(
+    null,
+  );
 
   const drillDownCategoryExpenses = useMemo(() => {
     if (!drillDownCategory) return [];
 
-    return yearExpenses.filter(
-      (e) => e.category_id === drillDownCategory.id,
-    );
+    return yearExpenses.filter((e) => e.category_id === drillDownCategory.id);
   }, [yearExpenses, drillDownCategory]);
 
   const handleCategoryClick = useCallback((cat: CategoryRow) => {
@@ -159,105 +177,24 @@ const AnalyticsView = () => {
     setDrillDownMonthKey(null);
   }, []);
 
-  const handleChartMonthClick = useCallback(
-    (_event: unknown, _chartContext: unknown, config: { dataPointIndex: number }) => {
-      const monthIndex = config.dataPointIndex;
-      const month = (monthIndex + 1).toString().padStart(2, '0');
+  const handleChartClick: CategoricalChartFunc = useCallback(
+    (nextState) => {
+      const index = nextState?.activeTooltipIndex;
+      if (typeof index !== 'number' || index < 0) return;
+      const month = (index + 1).toString().padStart(2, '0');
       setDrillDownMonthKey(`${selectedYear}-${month}`);
     },
     [selectedYear],
   );
 
-  const chartOptions = useMemo(
-    () => ({
-      chart: {
-        type: 'area' as const,
-        toolbar: { show: false },
-        fontFamily: 'inherit',
-        background: 'transparent',
-        animations: { enabled: true },
-        events: {
-          dataPointSelection: handleChartMonthClick,
-        },
-      },
-      annotations: monthlyBudget
-        ? {
-            yaxis: [
-              {
-                y: monthlyBudget,
-                borderColor: '#f59e0b',
-                strokeDashArray: 5,
-                label: {
-                  text: t('analytics.budgetLabel', { amount: monthlyBudget }),
-                  position: 'right',
-                  style: {
-                    color: '#fff',
-                    background: '#f59e0b',
-                    fontSize: '11px',
-                    padding: { top: 2, bottom: 2, left: 4, right: 4 },
-                  },
-                },
-              },
-            ],
-          }
-        : {},
-      grid: {
-        borderColor: 'hsl(var(--border) / 0.2)',
-        strokeDashArray: 4,
-      },
-      stroke: { curve: 'smooth' as const, width: 2 },
-      fill: {
-        type: 'gradient' as const,
-        gradient: {
-          shadeIntensity: 1,
-          opacityFrom: 0.7,
-          opacityTo: 0.2,
-          stops: [0, 90, 100],
-        },
-      },
-      markers: {
-        size: 4,
-        strokeWidth: 0,
-        hover: { size: 6 },
-      },
-      dataLabels: { enabled: false },
-      xaxis: {
-        categories: monthlyData.map((d) => d.month),
-        axisBorder: { show: false },
-        axisTicks: { show: false },
-        labels: { style: { colors: 'hsl(var(--muted-foreground))' } },
-      },
-      yaxis: {
-        min: 0,
-        max: monthlyBudget
-          ? Math.max(
-              monthlyBudget * 1.15,
-              Math.max(...monthlyData.map((d) => d.amount), 0) * 1.15,
-            )
-          : undefined,
-        labels: {
-          formatter: (val: number) => `${Math.round(val)} €`,
-          style: { colors: 'hsl(var(--muted-foreground))' },
-        },
-      },
-      tooltip: {
-        theme: theme === 'dark' ? 'dark' : 'light',
-        y: { formatter: (val: number) => `${val.toFixed(2)} €` },
-      },
-      colors: ['hsl(var(--primary))'],
-    }),
-    [monthlyData, monthlyBudget, t, theme, handleChartMonthClick],
-  );
+  const yAxisMax = useMemo(() => {
+    const maxAmount = Math.max(...monthlyData.map((d) => d.amount), 0);
+    if (monthlyBudget) {
+      return Math.max(monthlyBudget * 1.15, maxAmount * 1.15);
+    }
 
-  const chartSeries = useMemo(
-    () => [
-      {
-        name: t('analytics.monthlySpending'),
-        data: monthlyData.map((d) => d.amount),
-      },
-    ],
-    [monthlyData, t],
-  );
+    return undefined;
+  }, [monthlyData, monthlyBudget]);
 
   if (isLoading) {
     return <AnalyticsLoadingState />;
@@ -325,21 +262,89 @@ const AnalyticsView = () => {
 
         <Card className="overflow-hidden">
           <CardContent className="p-6">
-            <div className="h-[280px] w-full">
-              <Suspense
-                fallback={
-                  <div className="h-full w-full flex items-center justify-center">
-                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-                  </div>
-                }
-              >
-                <Chart
-                  options={chartOptions}
-                  series={chartSeries}
-                  type="area"
-                  height="100%"
-                />
-              </Suspense>
+            <div className="w-full">
+              <ResponsiveContainer width="100%" height={280}>
+                <AreaChart
+                  data={monthlyData}
+                  onClick={handleChartClick}
+                  margin={{ top: 4, right: 4, bottom: 0, left: -12 }}
+                >
+                  <defs>
+                    <linearGradient
+                      id="areaGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="0%"
+                        stopColor="hsl(var(--primary))"
+                        stopOpacity={0.7}
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor="hsl(var(--primary))"
+                        stopOpacity={0.1}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <XAxis
+                    dataKey="month"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{
+                      fill: 'hsl(var(--muted-foreground))',
+                      fontSize: 12,
+                    }}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{
+                      fill: 'hsl(var(--muted-foreground))',
+                      fontSize: 12,
+                    }}
+                    tickFormatter={(val: number) => `${Math.round(val)} €`}
+                    domain={[0, yAxisMax ?? 'auto']}
+                  />
+                  <Tooltip
+                    content={<ChartTooltip />}
+                    cursor={{
+                      stroke: 'hsl(var(--border))',
+                      strokeDasharray: '4 4',
+                    }}
+                  />
+                  {monthlyBudget ? (
+                    <ReferenceLine
+                      y={monthlyBudget}
+                      stroke="#f59e0b"
+                      strokeDasharray="5 5"
+                      label={{
+                        value: t('analytics.budgetLabel', {
+                          amount: monthlyBudget,
+                        }),
+                        position: 'right',
+                        fill: '#f59e0b',
+                        fontSize: 11,
+                      }}
+                    />
+                  ) : null}
+                  <Area
+                    type="monotone"
+                    dataKey="amount"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    fill="url(#areaGradient)"
+                    dot={{ r: 4, fill: 'hsl(var(--primary))', strokeWidth: 0 }}
+                    activeDot={{
+                      r: 6,
+                      fill: 'hsl(var(--primary))',
+                      strokeWidth: 0,
+                    }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
@@ -378,6 +383,31 @@ const AnalyticsView = () => {
 export default AnalyticsView;
 
 // ─── Helper render functions ──────────────────────────────────────────────────
+
+type TooltipPayloadEntry = {
+  value: number;
+  payload: { fullMonth: string };
+};
+
+type ChartTooltipProps = {
+  active?: boolean;
+  payload?: TooltipPayloadEntry[];
+};
+
+const ChartTooltip = ({ active, payload }: ChartTooltipProps) => {
+  if (!active || !payload?.length) return null;
+
+  const { value, payload: data } = payload[0];
+
+  return (
+    <div className="rounded-lg border bg-card px-3 py-2 shadow-md">
+      <p className="text-xs text-muted-foreground">{data.fullMonth}</p>
+      <p className="text-sm font-semibold tabular-nums">
+        {formatCurrency(value)}
+      </p>
+    </div>
+  );
+};
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 

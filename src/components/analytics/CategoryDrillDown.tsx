@@ -57,10 +57,7 @@ export const CategoryDrillDown = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        className="sm:max-w-[480px]"
-        onOpenChange={onClose}
-      >
+      <DialogContent className="sm:max-w-[480px]" onOpenChange={onClose}>
         <DialogHeader className="px-6 pt-6" data-draggable-area>
           <div className="flex items-center gap-2.5">
             <div
@@ -145,9 +142,7 @@ const renderExpenseRow = (expense: Expense, dateLocale: Locale) => {
       className="flex items-center justify-between py-2 border-b border-border/30 last:border-0"
     >
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium truncate">
-          {expense.description}
-        </p>
+        <p className="text-sm font-medium truncate">{expense.description}</p>
         <p className="text-xs text-muted-foreground">
           {format(parseISO(expense.date), 'MMM d, yyyy', {
             locale: dateLocale,

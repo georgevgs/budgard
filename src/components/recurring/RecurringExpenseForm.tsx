@@ -86,8 +86,7 @@ const RecurringExpenseForm = ({
     return date < today;
   };
 
-  const isEndDateDisabled = (date: Date) =>
-    date < form.getValues('start_date');
+  const isEndDateDisabled = (date: Date) => date < form.getValues('start_date');
 
   const handleSubmit = async (values: RecurringExpenseFormData) => {
     if (!session?.user?.id) return;
@@ -258,7 +257,10 @@ const RecurringExpenseForm = ({
                               !field.value && 'text-muted-foreground',
                             )}
                           >
-                            {renderDateValue(field.value, t('recurring.pickDate'))}
+                            {renderDateValue(
+                              field.value,
+                              t('recurring.pickDate'),
+                            )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>

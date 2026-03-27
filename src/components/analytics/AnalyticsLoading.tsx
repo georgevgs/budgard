@@ -36,7 +36,10 @@ const AnalyticsLoadingState = () => (
       <Card>
         <CardContent className="p-0 divide-y divide-border/50">
           {[0, 1, 2, 3].map((i) => (
-            <div key={`skeleton-${i}`} className="flex items-center gap-4 px-5 py-3.5">
+            <div
+              key={`skeleton-${i}`}
+              className="flex items-center gap-4 px-5 py-3.5"
+            >
               <Skeleton className="h-2.5 w-2.5 rounded-full shrink-0" />
               <Skeleton className="h-4 flex-1" />
               <Skeleton className="h-7 w-16 shrink-0" />

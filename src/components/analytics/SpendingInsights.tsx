@@ -2,10 +2,7 @@ import { useTranslation } from 'react-i18next';
 import type { Locale } from 'date-fns';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
-import {
-  useSpendingInsights,
-  type Insight,
-} from '@/hooks/useSpendingInsights';
+import { useSpendingInsights, type Insight } from '@/hooks/useSpendingInsights';
 
 type SpendingInsightsProps = {
   expenses: Expense[];

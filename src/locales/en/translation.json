@@ -69,6 +69,8 @@
     "selectCategory": "Select a category",
     "noCategory": "No category",
     "pickDate": "Pick a date",
+    "moreDetails": "More details",
+    "lessDetails": "Less details",
     "saveExpense": "Save Expense",
     "noExpensesMatchFilter": "No expenses match your current filters",
     "totalCount": "Total Expenses",
@@ -331,6 +333,18 @@
   "offline": {
     "syncSuccess": "Synced {{count}} queued change(s)",
     "syncFailed": "Failed to sync {{count}} change(s)"
+  },
+  "onboarding": {
+    "budgetTitle": "Set your monthly budget",
+    "budgetDescription": "How much do you want to spend each month? You can change this later.",
+    "budgetPlaceholder": "1.500",
+    "categoriesTitle": "Pick your categories",
+    "categoriesDescription": "Select the spending categories that apply to you. You can add more later.",
+    "doneTitle": "You're all set!",
+    "doneDescription": "Start tracking your expenses and take control of your finances.",
+    "startTracking": "Start Tracking",
+    "skip": "Skip",
+    "next": "Continue"
   },
   "landing": {
     "hero": {

@@ -103,7 +103,12 @@ const ExpensesFilter = ({
         </Button>
       </div>
 
-      {renderSearchScopeToggle(hasActiveFilters, isSearchingAllMonths, t, onSearchScopeChange)}
+      {renderSearchScopeToggle(
+        hasActiveFilters,
+        isSearchingAllMonths,
+        t,
+        onSearchScopeChange,
+      )}
 
       <div
         className={cn(
@@ -119,9 +124,7 @@ const ExpensesFilter = ({
             onValueChange={handleCategoryChange}
           >
             <SelectTrigger>
-              <SelectValue
-                placeholder={t('expenses.filter.selectCategory')}
-              />
+              <SelectValue placeholder={t('expenses.filter.selectCategory')} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">
@@ -171,9 +174,7 @@ const ExpensesFilter = ({
             onValueChange={handleDateRangeChange}
           >
             <SelectTrigger>
-              <SelectValue
-                placeholder={t('expenses.filter.dateRange')}
-              />
+              <SelectValue placeholder={t('expenses.filter.dateRange')} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">
@@ -387,7 +388,9 @@ const renderSearchBadge = (
         type="button"
         className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20"
         onClick={() => onClear('')}
-        aria-label={t('expenses.filter.clearSearch', { defaultValue: 'Clear search' })}
+        aria-label={t('expenses.filter.clearSearch', {
+          defaultValue: 'Clear search',
+        })}
       >
         <X className="h-3 w-3" />
       </button>
@@ -415,7 +418,9 @@ const renderCategoryFilterBadge = (
         type="button"
         className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20"
         onClick={() => onClear('all')}
-        aria-label={t('expenses.filter.clearCategory', { defaultValue: 'Clear category filter' })}
+        aria-label={t('expenses.filter.clearCategory', {
+          defaultValue: 'Clear category filter',
+        })}
       >
         <X className="h-3 w-3" />
       </button>
@@ -440,7 +445,9 @@ const renderTagFilterBadge = (
         type="button"
         className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20"
         onClick={() => onClear(null)}
-        aria-label={t('expenses.filter.clearTag', { defaultValue: 'Clear tag filter' })}
+        aria-label={t('expenses.filter.clearTag', {
+          defaultValue: 'Clear tag filter',
+        })}
       >
         <X className="h-3 w-3" />
       </button>
@@ -472,7 +479,9 @@ const renderDateRangeBadge = (
         type="button"
         className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20"
         onClick={() => onClear(null)}
-        aria-label={t('expenses.filter.clearDateRange', { defaultValue: 'Clear date range' })}
+        aria-label={t('expenses.filter.clearDateRange', {
+          defaultValue: 'Clear date range',
+        })}
       >
         <X className="h-3 w-3" />
       </button>

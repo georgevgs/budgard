@@ -72,7 +72,9 @@ export const dataService = {
       .from('expenses')
       .update(expenseData)
       .eq('id', expenseId)
-      .select(`*, category:categories(*), tag:tags(*), recurring_expense:recurring_expenses(*)`)
+      .select(
+        `*, category:categories(*), tag:tags(*), recurring_expense:recurring_expenses(*)`,
+      )
       .single();
 
     if (error) throw error;
@@ -83,7 +85,9 @@ export const dataService = {
     const { data, error } = await supabase
       .from('expenses')
       .insert(expenseData)
-      .select(`*, category:categories(*), tag:tags(*), recurring_expense:recurring_expenses(*)`)
+      .select(
+        `*, category:categories(*), tag:tags(*), recurring_expense:recurring_expenses(*)`,
+      )
       .single();
 
     if (error) throw error;

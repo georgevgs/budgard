@@ -50,7 +50,10 @@ const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
         onOpenChange={(v) => !v && onClose()}
       >
         {/* Mobile drag handle */}
-        <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
+        <div
+          className="flex justify-center pt-3 pb-2 sm:hidden"
+          data-drag-handle
+        >
           <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
         </div>
 
@@ -63,22 +66,24 @@ const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
           </DialogHeader>
 
           <div className="flex items-center justify-center min-h-[200px] mt-4">
-          {loading && (
-            <div className="animate-spin">
-              <Loader2 className="h-8 w-8 text-muted-foreground" />
-            </div>
-          )}
-          {error && (
-            <p className="text-sm text-destructive">{t('receipt.loadError')}</p>
-          )}
-          {url && !error && (
-            <img
-              src={url}
-              alt={t('receipt.receiptImage')}
-              className="max-h-[70vh] w-full object-contain rounded"
-              onError={() => setError(true)}
-            />
-          )}
+            {loading && (
+              <div className="animate-spin">
+                <Loader2 className="h-8 w-8 text-muted-foreground" />
+              </div>
+            )}
+            {error && (
+              <p className="text-sm text-destructive">
+                {t('receipt.loadError')}
+              </p>
+            )}
+            {url && !error && (
+              <img
+                src={url}
+                alt={t('receipt.receiptImage')}
+                className="max-h-[70vh] w-full object-contain rounded"
+                onError={() => setError(true)}
+              />
+            )}
           </div>
         </div>
       </DialogContent>

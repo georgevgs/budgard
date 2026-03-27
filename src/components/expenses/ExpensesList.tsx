@@ -1,4 +1,10 @@
-import { useState, useCallback, useMemo, useOptimistic, useTransition } from 'react';
+import {
+  useState,
+  useCallback,
+  useMemo,
+  useOptimistic,
+  useTransition,
+} from 'react';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import Download from 'lucide-react/dist/esm/icons/download';
@@ -62,14 +68,23 @@ const ExpensesContent = ({
   // Has expenses - show paginated list
   if (expenses.length > 0) {
     return (
-      <ExpensesPagination expenses={expenses} onEdit={onEdit} onDelete={onDelete} searchQuery={searchQuery} showFullDate={showFullDate} />
+      <ExpensesPagination
+        expenses={expenses}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        searchQuery={searchQuery}
+        showFullDate={showFullDate}
+      />
     );
   }
 
   // No expenses, but filters are active - show "no matches" message
   if (hasActiveFilters) {
     return (
-      <div className="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-border/40" role="status">
+      <div
+        className="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-border/40"
+        role="status"
+      >
         <p className="text-sm text-muted-foreground mb-3">{noMatchMessage}</p>
         <Button variant="outline" size="sm" onClick={onClearFilters}>
           {clearFiltersLabel}
@@ -79,7 +94,9 @@ const ExpensesContent = ({
   }
 
   // No expenses at all - show empty state
-  return <ExpensesEmpty selectedMonth={selectedMonth} onAddClick={onAddClick} />;
+  return (
+    <ExpensesEmpty selectedMonth={selectedMonth} onAddClick={onAddClick} />
+  );
 };
 
 // ============================================================================
@@ -99,7 +116,10 @@ const ExpensesList = () => {
   } = useData();
   const operations = useDataOperations();
   const { toast } = useToast();
-  const [optimisticExpenses, addOptimisticExpense] = useOptimistic(expenses, expensesReducer);
+  const [optimisticExpenses, addOptimisticExpense] = useOptimistic(
+    expenses,
+    expensesReducer,
+  );
   const [, startTransition] = useTransition();
 
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
@@ -197,7 +217,9 @@ const ExpensesList = () => {
         setMonthlyBudget(previousBudget);
         toast({
           title: t('common.error'),
-          description: t('budget.updateError', { defaultValue: 'Failed to update budget' }),
+          description: t('budget.updateError', {
+            defaultValue: 'Failed to update budget',
+          }),
           variant: 'destructive',
         });
         throw error;
@@ -223,9 +245,8 @@ const ExpensesList = () => {
   );
 
   // When searching all months or using date range, the base total is all filtered expenses
-  const baseTotal = isSearchingAllMonths || dateRangePreset
-    ? filteredTotal
-    : monthlyTotal;
+  const baseTotal =
+    isSearchingAllMonths || dateRangePreset ? filteredTotal : monthlyTotal;
 
   const handleFormClose = useCallback(() => {
     setFormType(null);

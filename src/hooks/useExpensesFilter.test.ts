@@ -3,7 +3,9 @@ import { renderHook, act } from '@testing-library/react';
 import { useExpensesFilter } from './useExpensesFilter';
 import type { Expense } from '@/types/Expense';
 
-const makeExpense = (overrides: Partial<Expense> & { id: string; date: string }): Expense => ({
+const makeExpense = (
+  overrides: Partial<Expense> & { id: string; date: string },
+): Expense => ({
   amount: 10,
   description: 'Test',
   user_id: 'u1',
@@ -13,11 +15,69 @@ const makeExpense = (overrides: Partial<Expense> & { id: string; date: string })
 });
 
 const expenses: Expense[] = [
-  makeExpense({ id: '1', date: '2026-01-15', amount: 50, description: 'Groceries', category_id: 'cat-1', category: { id: 'cat-1', name: 'Food', color: '#F00', user_id: 'u1', created_at: '' } }),
-  makeExpense({ id: '2', date: '2026-01-10', amount: 20, description: 'Bus ticket', category_id: 'cat-2', category: { id: 'cat-2', name: 'Transport', color: '#0F0', user_id: 'u1', created_at: '' } }),
-  makeExpense({ id: '3', date: '2026-01-20', amount: 100, description: 'Dinner', category_id: 'cat-1', category: { id: 'cat-1', name: 'Food', color: '#F00', user_id: 'u1', created_at: '' } }),
-  makeExpense({ id: '4', date: '2026-02-05', amount: 30, description: 'Lunch', category_id: 'cat-1' }),
-  makeExpense({ id: '5', date: '2026-01-12', amount: 15, description: 'Coffee', tag_id: 'tag-1', tag: { id: 'tag-1', name: 'Daily', color: '#00F', user_id: 'u1', created_at: '' } }),
+  makeExpense({
+    id: '1',
+    date: '2026-01-15',
+    amount: 50,
+    description: 'Groceries',
+    category_id: 'cat-1',
+    category: {
+      id: 'cat-1',
+      name: 'Food',
+      color: '#F00',
+      user_id: 'u1',
+      created_at: '',
+    },
+  }),
+  makeExpense({
+    id: '2',
+    date: '2026-01-10',
+    amount: 20,
+    description: 'Bus ticket',
+    category_id: 'cat-2',
+    category: {
+      id: 'cat-2',
+      name: 'Transport',
+      color: '#0F0',
+      user_id: 'u1',
+      created_at: '',
+    },
+  }),
+  makeExpense({
+    id: '3',
+    date: '2026-01-20',
+    amount: 100,
+    description: 'Dinner',
+    category_id: 'cat-1',
+    category: {
+      id: 'cat-1',
+      name: 'Food',
+      color: '#F00',
+      user_id: 'u1',
+      created_at: '',
+    },
+  }),
+  makeExpense({
+    id: '4',
+    date: '2026-02-05',
+    amount: 30,
+    description: 'Lunch',
+    category_id: 'cat-1',
+  }),
+  makeExpense({
+    id: '5',
+    date: '2026-01-12',
+    amount: 15,
+    description: 'Coffee',
+    tag_id: 'tag-1',
+    tag: {
+      id: 'tag-1',
+      name: 'Daily',
+      color: '#00F',
+      user_id: 'u1',
+      created_at: '',
+    },
+  }),
 ];
 
 describe('useExpensesFilter', () => {
@@ -28,13 +88,20 @@ describe('useExpensesFilter', () => {
     const { result } = setup();
     expect(result.current.monthlyExpenses).toHaveLength(4);
     // February expense should be excluded
-    expect(result.current.monthlyExpenses.every((e) => e.date.startsWith('2026-01'))).toBe(true);
+    expect(
+      result.current.monthlyExpenses.every((e) => e.date.startsWith('2026-01')),
+    ).toBe(true);
   });
 
   it('sorts by date descending by default', () => {
     const { result } = setup();
     const dates = result.current.filteredExpenses.map((e) => e.date);
-    expect(dates).toEqual(['2026-01-20', '2026-01-15', '2026-01-12', '2026-01-10']);
+    expect(dates).toEqual([
+      '2026-01-20',
+      '2026-01-15',
+      '2026-01-12',
+      '2026-01-10',
+    ]);
   });
 
   it('filters by search text in description', () => {
@@ -55,9 +122,9 @@ describe('useExpensesFilter', () => {
       result.current.setSearch('food');
     });
 
-    expect(result.current.filteredExpenses.every(
-      (e) => e.category?.name === 'Food',
-    )).toBe(true);
+    expect(
+      result.current.filteredExpenses.every((e) => e.category?.name === 'Food'),
+    ).toBe(true);
   });
 
   it('filters by category id', () => {
@@ -112,7 +179,12 @@ describe('useExpensesFilter', () => {
     });
 
     const dates = result.current.filteredExpenses.map((e) => e.date);
-    expect(dates).toEqual(['2026-01-10', '2026-01-12', '2026-01-15', '2026-01-20']);
+    expect(dates).toEqual([
+      '2026-01-10',
+      '2026-01-12',
+      '2026-01-15',
+      '2026-01-20',
+    ]);
   });
 
   it('searches across all months when toggle is on', () => {
@@ -177,7 +249,7 @@ describe('useExpensesFilter', () => {
       makeExpense({ id: '10', date: '2026-01-20', amount: 10 }),
       makeExpense({ id: '11', date: '2026-01-16', amount: 20 }),
       makeExpense({ id: '12', date: '2026-01-10', amount: 30 }), // older than 7 days
-      makeExpense({ id: '13', date: '2026-02-01', amount: 40 }),  // different month
+      makeExpense({ id: '13', date: '2026-02-01', amount: 40 }), // different month
     ];
     const { result } = renderHook(() =>
       useExpensesFilter({ expenses: recentExpenses, selectedMonth: '2026-01' }),
@@ -188,9 +260,11 @@ describe('useExpensesFilter', () => {
     });
 
     // Only expenses within last 7 days from 2026-01-22
-    expect(result.current.filteredExpenses.every(
-      (e) => new Date(e.date) >= new Date('2026-01-15'),
-    )).toBe(true);
+    expect(
+      result.current.filteredExpenses.every(
+        (e) => new Date(e.date) >= new Date('2026-01-15'),
+      ),
+    ).toBe(true);
     vi.useRealTimers();
   });
 
@@ -210,9 +284,9 @@ describe('useExpensesFilter', () => {
     });
 
     expect(result.current.filteredExpenses).toHaveLength(2);
-    expect(result.current.filteredExpenses.every(
-      (e) => e.date.startsWith('2026'),
-    )).toBe(true);
+    expect(
+      result.current.filteredExpenses.every((e) => e.date.startsWith('2026')),
+    ).toBe(true);
     vi.useRealTimers();
   });
 
@@ -233,16 +307,26 @@ describe('useExpensesFilter', () => {
   it('filters uncategorized expenses', () => {
     const withUncategorized: Expense[] = [
       ...expenses,
-      makeExpense({ id: '6', date: '2026-01-18', description: 'Random', category_id: null }),
+      makeExpense({
+        id: '6',
+        date: '2026-01-18',
+        description: 'Random',
+        category_id: null,
+      }),
     ];
     const { result } = renderHook(() =>
-      useExpensesFilter({ expenses: withUncategorized, selectedMonth: '2026-01' }),
+      useExpensesFilter({
+        expenses: withUncategorized,
+        selectedMonth: '2026-01',
+      }),
     );
 
     act(() => {
       result.current.setSelectedCategoryId('uncategorized');
     });
 
-    expect(result.current.filteredExpenses.every((e) => e.category_id === null)).toBe(true);
+    expect(
+      result.current.filteredExpenses.every((e) => e.category_id === null),
+    ).toBe(true);
   });
 });

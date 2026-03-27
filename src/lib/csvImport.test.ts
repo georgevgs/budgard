@@ -8,8 +8,20 @@ import {
 import type { Category } from '@/types/Category';
 
 const categories: Category[] = [
-  { id: 'cat-1', name: 'Food', color: '#FF0000', user_id: 'u1', created_at: '' },
-  { id: 'cat-2', name: 'Transport', color: '#00FF00', user_id: 'u1', created_at: '' },
+  {
+    id: 'cat-1',
+    name: 'Food',
+    color: '#FF0000',
+    user_id: 'u1',
+    created_at: '',
+  },
+  {
+    id: 'cat-2',
+    name: 'Transport',
+    color: '#00FF00',
+    user_id: 'u1',
+    created_at: '',
+  },
 ];
 
 // --- getCsvPreviewData ---
@@ -30,11 +42,19 @@ describe('getCsvPreviewData', () => {
   it('extracts headers from first row', () => {
     const csv = 'Date,Description,Category,Amount\n2026-01-01,Test,Food,10';
     const preview = getCsvPreviewData(csv);
-    expect(preview.headers).toEqual(['Date', 'Description', 'Category', 'Amount']);
+    expect(preview.headers).toEqual([
+      'Date',
+      'Description',
+      'Category',
+      'Amount',
+    ]);
   });
 
   it('returns up to 5 sample rows', () => {
-    const rows = Array.from({ length: 10 }, (_, i) => `2026-01-0${i + 1},Item ${i},${i * 10}`);
+    const rows = Array.from(
+      { length: 10 },
+      (_, i) => `2026-01-0${i + 1},Item ${i},${i * 10}`,
+    );
     const csv = 'Date,Description,Amount\n' + rows.join('\n');
     const preview = getCsvPreviewData(csv);
     expect(preview.sampleRows).toHaveLength(5);
@@ -98,7 +118,12 @@ describe('suggestColumnMapping', () => {
 // --- parseExpensesCsv ---
 
 describe('parseExpensesCsv', () => {
-  const mapping = { dateColumn: 0, descriptionColumn: 1, amountColumn: 3, categoryColumn: 2 };
+  const mapping = {
+    dateColumn: 0,
+    descriptionColumn: 1,
+    amountColumn: 3,
+    categoryColumn: 2,
+  };
 
   it('parses valid rows', () => {
     const csv = 'Date,Description,Category,Amount\n2026-01-15,Coffee,Food,3.50';
@@ -150,13 +175,15 @@ describe('parseExpensesCsv', () => {
   });
 
   it('reports error for amount over 1 million', () => {
-    const csv = 'Date,Description,Category,Amount\n2026-01-15,Coffee,Food,1000001';
+    const csv =
+      'Date,Description,Category,Amount\n2026-01-15,Coffee,Food,1000001';
     const result = parseExpensesCsv(csv, categories, mapping);
     expect(result.errors[0].field).toBe('amount');
   });
 
   it('tracks unmatched categories', () => {
-    const csv = 'Date,Description,Category,Amount\n2026-01-15,Coffee,Unknown,3.50';
+    const csv =
+      'Date,Description,Category,Amount\n2026-01-15,Coffee,Unknown,3.50';
     const result = parseExpensesCsv(csv, categories, mapping);
     expect(result.unmatchedCategories).toContain('Unknown');
   });
@@ -169,7 +196,8 @@ describe('parseExpensesCsv', () => {
   });
 
   it('skips income transactions in bank statement mode', () => {
-    const csv = 'Date,Description,Category,Amount\n2026-01-15,Salary,Food,+500.00';
+    const csv =
+      'Date,Description,Category,Amount\n2026-01-15,Salary,Food,+500.00';
     const result = parseExpensesCsv(csv, categories, mapping, true, false);
     // With treatPositiveAsIncome=false, explicit + is income
     expect(result.skippedIncomeCount).toBe(1);
@@ -177,25 +205,29 @@ describe('parseExpensesCsv', () => {
   });
 
   it('treats negative amounts as expenses in bank statement mode', () => {
-    const csv = 'Date,Description,Category,Amount\n2026-01-15,Coffee,Food,-3.50';
+    const csv =
+      'Date,Description,Category,Amount\n2026-01-15,Coffee,Food,-3.50';
     const result = parseExpensesCsv(csv, categories, mapping, true, true);
     expect(result.validRows[0].amount).toBe(3.5);
   });
 
   it('skips positive amounts as income in bank statement mode', () => {
-    const csv = 'Date,Description,Category,Amount\n2026-01-15,Salary,Food,500.00';
+    const csv =
+      'Date,Description,Category,Amount\n2026-01-15,Salary,Food,500.00';
     const result = parseExpensesCsv(csv, categories, mapping, true, true);
     expect(result.skippedIncomeCount).toBe(1);
   });
 
   it('skips empty lines', () => {
-    const csv = 'Date,Description,Category,Amount\n\n2026-01-15,Coffee,Food,3.50\n\n';
+    const csv =
+      'Date,Description,Category,Amount\n\n2026-01-15,Coffee,Food,3.50\n\n';
     const result = parseExpensesCsv(csv, categories, mapping);
     expect(result.validRows).toHaveLength(1);
   });
 
   it('handles quoted CSV fields with commas', () => {
-    const csv = 'Date,Description,Category,Amount\n2026-01-15,"Coffee, large",Food,5.00';
+    const csv =
+      'Date,Description,Category,Amount\n2026-01-15,"Coffee, large",Food,5.00';
     const result = parseExpensesCsv(csv, categories, mapping);
     expect(result.validRows[0].description).toBe('Coffee, large');
   });
@@ -207,19 +239,22 @@ describe('parseExpensesCsv', () => {
   });
 
   it('parses US format amounts with comma thousands', () => {
-    const csv = 'Date,Description,Category,Amount\n2026-01-15,Rent,Food,"1,234.56"';
+    const csv =
+      'Date,Description,Category,Amount\n2026-01-15,Rent,Food,"1,234.56"';
     const result = parseExpensesCsv(csv, categories, mapping);
     expect(result.validRows[0].amount).toBe(1234.56);
   });
 
   it('parses European format amounts with dot thousands', () => {
-    const csv = 'Date;Description;Category;Amount\n2026-01-15;Rent;Food;1.234,56';
+    const csv =
+      'Date;Description;Category;Amount\n2026-01-15;Rent;Food;1.234,56';
     const result = parseExpensesCsv(csv, categories, mapping);
     expect(result.validRows[0].amount).toBe(1234.56);
   });
 
   it('strips currency symbols from amounts', () => {
-    const csv = 'Date,Description,Category,Amount\n2026-01-15,Coffee,Food,€3.50';
+    const csv =
+      'Date,Description,Category,Amount\n2026-01-15,Coffee,Food,€3.50';
     const result = parseExpensesCsv(csv, categories, mapping);
     expect(result.validRows[0].amount).toBe(3.5);
   });
@@ -230,7 +265,13 @@ describe('parseExpensesCsv', () => {
 describe('mapRowsToExpenses', () => {
   it('maps rows to expense objects with category lookup', () => {
     const rows = [
-      { date: '2026-01-15', description: 'Coffee', categoryName: 'Food', amount: 3.5, rowNumber: 2 },
+      {
+        date: '2026-01-15',
+        description: 'Coffee',
+        categoryName: 'Food',
+        amount: 3.5,
+        rowNumber: 2,
+      },
     ];
     const result = mapRowsToExpenses(rows, categories, new Map());
     expect(result[0].category_id).toBe('cat-1');
@@ -239,7 +280,13 @@ describe('mapRowsToExpenses', () => {
 
   it('uses manual category mapping over auto-lookup', () => {
     const rows = [
-      { date: '2026-01-15', description: 'Coffee', categoryName: 'Drinks', amount: 3.5, rowNumber: 2 },
+      {
+        date: '2026-01-15',
+        description: 'Coffee',
+        categoryName: 'Drinks',
+        amount: 3.5,
+        rowNumber: 2,
+      },
     ];
     const manualMap = new Map([['Drinks', 'cat-1']]);
     const result = mapRowsToExpenses(rows, categories, manualMap);
@@ -248,7 +295,13 @@ describe('mapRowsToExpenses', () => {
 
   it('returns null category_id for unmatched categories', () => {
     const rows = [
-      { date: '2026-01-15', description: 'Coffee', categoryName: 'Unknown', amount: 3.5, rowNumber: 2 },
+      {
+        date: '2026-01-15',
+        description: 'Coffee',
+        categoryName: 'Unknown',
+        amount: 3.5,
+        rowNumber: 2,
+      },
     ];
     const result = mapRowsToExpenses(rows, categories, new Map());
     expect(result[0].category_id).toBeNull();
@@ -256,7 +309,13 @@ describe('mapRowsToExpenses', () => {
 
   it('returns null category_id for empty category name', () => {
     const rows = [
-      { date: '2026-01-15', description: 'Coffee', categoryName: '', amount: 3.5, rowNumber: 2 },
+      {
+        date: '2026-01-15',
+        description: 'Coffee',
+        categoryName: '',
+        amount: 3.5,
+        rowNumber: 2,
+      },
     ];
     const result = mapRowsToExpenses(rows, categories, new Map());
     expect(result[0].category_id).toBeNull();

@@ -53,13 +53,20 @@ describe('tagSchema', () => {
   });
 
   it('rejects name over 50 characters', () => {
-    const result = tagSchema.safeParse({ name: 'a'.repeat(51), color: '#FF5733' });
+    const result = tagSchema.safeParse({
+      name: 'a'.repeat(51),
+      color: '#FF5733',
+    });
     expect(result.success).toBe(false);
   });
 
   it('rejects invalid color format', () => {
-    expect(tagSchema.safeParse({ name: 'Tag', color: 'red' }).success).toBe(false);
-    expect(tagSchema.safeParse({ name: 'Tag', color: '#GGG' }).success).toBe(false);
+    expect(tagSchema.safeParse({ name: 'Tag', color: 'red' }).success).toBe(
+      false,
+    );
+    expect(tagSchema.safeParse({ name: 'Tag', color: '#GGG' }).success).toBe(
+      false,
+    );
   });
 });
 
@@ -76,28 +83,39 @@ describe('expenseSchema', () => {
   });
 
   it('rejects empty amount', () => {
-    expect(expenseSchema.safeParse({ ...validExpense, amount: '' }).success).toBe(false);
+    expect(
+      expenseSchema.safeParse({ ...validExpense, amount: '' }).success,
+    ).toBe(false);
   });
 
   it('rejects zero amount', () => {
-    expect(expenseSchema.safeParse({ ...validExpense, amount: '0' }).success).toBe(false);
+    expect(
+      expenseSchema.safeParse({ ...validExpense, amount: '0' }).success,
+    ).toBe(false);
   });
 
   it('rejects amount over 1 million', () => {
-    expect(expenseSchema.safeParse({ ...validExpense, amount: '1.000.001' }).success).toBe(false);
+    expect(
+      expenseSchema.safeParse({ ...validExpense, amount: '1.000.001' }).success,
+    ).toBe(false);
   });
 
   it('accepts European formatted amount', () => {
-    expect(expenseSchema.safeParse({ ...validExpense, amount: '1.234,56' }).success).toBe(true);
+    expect(
+      expenseSchema.safeParse({ ...validExpense, amount: '1.234,56' }).success,
+    ).toBe(true);
   });
 
   it('rejects empty description', () => {
-    expect(expenseSchema.safeParse({ ...validExpense, description: '' }).success).toBe(false);
+    expect(
+      expenseSchema.safeParse({ ...validExpense, description: '' }).success,
+    ).toBe(false);
   });
 
   it('rejects description over 100 characters', () => {
     expect(
-      expenseSchema.safeParse({ ...validExpense, description: 'a'.repeat(101) }).success,
+      expenseSchema.safeParse({ ...validExpense, description: 'a'.repeat(101) })
+        .success,
     ).toBe(false);
   });
 
@@ -110,15 +128,22 @@ describe('expenseSchema', () => {
 
 describe('categorySchema', () => {
   it('accepts valid category', () => {
-    expect(categorySchema.safeParse({ name: 'Food', color: '#FF5733' }).success).toBe(true);
+    expect(
+      categorySchema.safeParse({ name: 'Food', color: '#FF5733' }).success,
+    ).toBe(true);
   });
 
   it('rejects name with invalid characters', () => {
-    expect(categorySchema.safeParse({ name: 'Food<script>', color: '#FF5733' }).success).toBe(false);
+    expect(
+      categorySchema.safeParse({ name: 'Food<script>', color: '#FF5733' })
+        .success,
+    ).toBe(false);
   });
 
   it('accepts unicode characters', () => {
-    expect(categorySchema.safeParse({ name: 'Φαγητό', color: '#FF5733' }).success).toBe(true);
+    expect(
+      categorySchema.safeParse({ name: 'Φαγητό', color: '#FF5733' }).success,
+    ).toBe(true);
   });
 });
 
@@ -136,9 +161,17 @@ describe('recurringExpenseSchema', () => {
   });
 
   it('accepts all frequency values', () => {
-    const frequencies = ['weekly', 'biweekly', 'monthly', 'quarterly', 'yearly'] as const;
+    const frequencies = [
+      'weekly',
+      'biweekly',
+      'monthly',
+      'quarterly',
+      'yearly',
+    ] as const;
     for (const frequency of frequencies) {
-      expect(recurringExpenseSchema.safeParse({ ...valid, frequency }).success).toBe(true);
+      expect(
+        recurringExpenseSchema.safeParse({ ...valid, frequency }).success,
+      ).toBe(true);
     }
   });
 
@@ -169,7 +202,9 @@ describe('budgetSchema', () => {
   });
 
   it('rejects amount over 10 million', () => {
-    expect(budgetSchema.safeParse({ amount: '10.000.001' }).success).toBe(false);
+    expect(budgetSchema.safeParse({ amount: '10.000.001' }).success).toBe(
+      false,
+    );
   });
 });
 

@@ -23,16 +23,17 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
         onOpenChange={onOpenChange}
       >
         {/* Mobile drag handle */}
-        <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
+        <div
+          className="flex justify-center pt-3 pb-2 sm:hidden"
+          data-drag-handle
+        >
           <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
         </div>
 
         <div className="px-6 pb-6 pt-4 sm:pt-6 space-y-6">
           <DialogHeader data-draggable-area>
             <DialogTitle>{t('auth.signIn')}</DialogTitle>
-            <DialogDescription>
-              {t('auth.emailVerification')}
-            </DialogDescription>
+            <DialogDescription>{t('auth.emailVerification')}</DialogDescription>
           </DialogHeader>
           <OtpForm onSuccess={() => onOpenChange(false)} />
         </div>

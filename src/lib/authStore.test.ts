@@ -3,16 +3,19 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // We need to control the Supabase mock before authStore initializes.
 // The module reads localStorage + sets up onAuthStateChange at import time.
 
-let authChangeCallback: ((event: string, session: unknown) => void) | null = null;
+let authChangeCallback: ((event: string, session: unknown) => void) | null =
+  null;
 const mockRefreshSession = vi.fn();
 
 vi.mock('@/lib/supabase', () => ({
   supabase: {
     auth: {
-      onAuthStateChange: vi.fn((cb: (event: string, session: unknown) => void) => {
-        authChangeCallback = cb;
-        return { data: { subscription: { unsubscribe: vi.fn() } } };
-      }),
+      onAuthStateChange: vi.fn(
+        (cb: (event: string, session: unknown) => void) => {
+          authChangeCallback = cb;
+          return { data: { subscription: { unsubscribe: vi.fn() } } };
+        },
+      ),
       refreshSession: (...args: unknown[]) => mockRefreshSession(...args),
     },
   },
@@ -55,7 +58,11 @@ describe('authStore', () => {
     const listener = vi.fn();
     authStore.subscribe(listener);
 
-    const session = { user: { id: 'u1' }, access_token: 'tok', refresh_token: 'ref' };
+    const session = {
+      user: { id: 'u1' },
+      access_token: 'tok',
+      refresh_token: 'ref',
+    };
     authChangeCallback?.('SIGNED_IN', session);
 
     expect(listener).toHaveBeenCalled();
@@ -64,7 +71,11 @@ describe('authStore', () => {
 
   it('attempts recovery on spurious SIGNED_OUT (iOS PWA)', async () => {
     // First sign in to establish a last known session
-    const session = { user: { id: 'u1' }, access_token: 'tok', refresh_token: 'ref-token' };
+    const session = {
+      user: { id: 'u1' },
+      access_token: 'tok',
+      refresh_token: 'ref-token',
+    };
     authChangeCallback?.('SIGNED_IN', session);
 
     // Now simulate spurious SIGNED_OUT
@@ -77,7 +88,11 @@ describe('authStore', () => {
     expect(snap.session).toBeTruthy();
 
     // Simulate successful recovery
-    const newSession = { user: { id: 'u1' }, access_token: 'new-tok', refresh_token: 'new-ref' };
+    const newSession = {
+      user: { id: 'u1' },
+      access_token: 'new-tok',
+      refresh_token: 'new-ref',
+    };
     mockRefreshSession.mockResolvedValue({
       data: { session: newSession },
       error: null,
@@ -86,11 +101,17 @@ describe('authStore', () => {
     // Advance past 2s recovery timer
     await vi.advanceTimersByTimeAsync(2000);
 
-    expect(mockRefreshSession).toHaveBeenCalledWith({ refresh_token: 'ref-token' });
+    expect(mockRefreshSession).toHaveBeenCalledWith({
+      refresh_token: 'ref-token',
+    });
   });
 
   it('signs out after failed recovery', async () => {
-    const session = { user: { id: 'u1' }, access_token: 'tok', refresh_token: 'ref-token' };
+    const session = {
+      user: { id: 'u1' },
+      access_token: 'tok',
+      refresh_token: 'ref-token',
+    };
     authChangeCallback?.('SIGNED_IN', session);
 
     // Spurious SIGNED_OUT
@@ -111,7 +132,11 @@ describe('authStore', () => {
   it('markIntentionalSignOut prevents recovery attempt', async () => {
     const { markIntentionalSignOut, authStore } = await import('./authStore');
 
-    const session = { user: { id: 'u1' }, access_token: 'tok', refresh_token: 'ref' };
+    const session = {
+      user: { id: 'u1' },
+      access_token: 'tok',
+      refresh_token: 'ref',
+    };
     authChangeCallback?.('SIGNED_IN', session);
 
     // Mark intentional before signing out

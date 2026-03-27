@@ -91,7 +91,11 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
 
       const { error } = await signInWithOTP(email, otpValue);
       if (error) {
-        return { step: 'verify', email: prev.email, error: t('auth.invalidCode') };
+        return {
+          step: 'verify',
+          email: prev.email,
+          error: t('auth.invalidCode'),
+        };
       }
 
       toast({ title: t('common.success'), description: t('auth.signedIn') });
@@ -214,7 +218,13 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
         </div>
 
         {state.error && (
-          <p id="otp-error" className="text-sm text-destructive text-center" role="alert">{state.error}</p>
+          <p
+            id="otp-error"
+            className="text-sm text-destructive text-center"
+            role="alert"
+          >
+            {state.error}
+          </p>
         )}
 
         <div className="space-y-2">

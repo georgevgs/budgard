@@ -39,12 +39,7 @@ const CategorySparkline = ({ values, color }: CategorySparklineProps) => {
     .join(' ');
 
   return (
-    <svg
-      width={W}
-      height={H}
-      aria-hidden="true"
-      className="overflow-visible"
-    >
+    <svg width={W} height={H} aria-hidden="true" className="overflow-visible">
       <path
         d={d}
         fill="none"

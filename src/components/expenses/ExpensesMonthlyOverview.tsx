@@ -64,7 +64,9 @@ const ExpensesMonthlyOverview = ({
         </p>
         {hasActiveFilters && (
           <p className="text-xs text-muted-foreground mt-0.5">
-            {t('expenses.ofMonthlyTotal', { total: formatCurrency(monthlyTotal) })}
+            {t('expenses.ofMonthlyTotal', {
+              total: formatCurrency(monthlyTotal),
+            })}
           </p>
         )}
         {hasExpenses && (

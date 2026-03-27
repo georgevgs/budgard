@@ -3,7 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { budgetSchema, type BudgetFormData } from '@/lib/validations';
-import { formatCurrencyInput, parseCurrencyInput, formatCurrency } from '@/lib/utils';
+import {
+  formatCurrencyInput,
+  parseCurrencyInput,
+  formatCurrency,
+} from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -39,7 +43,9 @@ const BudgetForm = ({
   } = useForm<BudgetFormData>({
     resolver: zodResolver(budgetSchema),
     defaultValues: {
-      amount: currentBudget ? formatCurrencyInput(currentBudget.toString()) : '',
+      amount: currentBudget
+        ? formatCurrencyInput(currentBudget.toString())
+        : '',
     },
   });
 
@@ -47,7 +53,9 @@ const BudgetForm = ({
   useEffect(() => {
     if (isOpen) {
       reset({
-        amount: currentBudget ? formatCurrencyInput(currentBudget.toString()) : '',
+        amount: currentBudget
+          ? formatCurrencyInput(currentBudget.toString())
+          : '',
       });
     }
   }, [isOpen, currentBudget, reset]);
@@ -72,7 +80,10 @@ const BudgetForm = ({
         onOpenChange={(open) => !open && onClose()}
       >
         {/* Mobile drag handle */}
-        <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
+        <div
+          className="flex justify-center pt-3 pb-2 sm:hidden"
+          data-drag-handle
+        >
           <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
         </div>
 
@@ -91,40 +102,42 @@ const BudgetForm = ({
           </DialogHeader>
 
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="budget-amount">{t('budget.amountLabel')}</Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                &euro;
-              </span>
-              <Input
-                id="budget-amount"
-                {...register('amount')}
-                onChange={handleAmountChange}
-                placeholder={t('budget.amountPlaceholder')}
-                aria-label={t('budget.amountAriaLabel')}
-                className="pl-8"
-                autoComplete="off"
-              />
+            <div className="space-y-2">
+              <Label htmlFor="budget-amount">{t('budget.amountLabel')}</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  &euro;
+                </span>
+                <Input
+                  id="budget-amount"
+                  {...register('amount')}
+                  onChange={handleAmountChange}
+                  placeholder={t('budget.amountPlaceholder')}
+                  aria-label={t('budget.amountAriaLabel')}
+                  className="pl-8"
+                  autoComplete="off"
+                />
+              </div>
+              {errors.amount && (
+                <p className="text-sm text-destructive">
+                  {errors.amount.message}
+                </p>
+              )}
             </div>
-            {errors.amount && (
-              <p className="text-sm text-destructive">{errors.amount.message}</p>
-            )}
-          </div>
 
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              {t('common.cancel')}
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting
-                ? t('common.saving')
-                : isEditing
-                  ? t('budget.updateButton')
-                  : t('budget.setButton')}
-            </Button>
-          </div>
-        </form>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={onClose}>
+                {t('common.cancel')}
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting
+                  ? t('common.saving')
+                  : isEditing
+                    ? t('budget.updateButton')
+                    : t('budget.setButton')}
+              </Button>
+            </div>
+          </form>
         </div>
       </DialogContent>
     </Dialog>

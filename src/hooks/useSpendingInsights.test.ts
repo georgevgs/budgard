@@ -7,11 +7,27 @@ import { enUS } from 'date-fns/locale';
 
 const categories: Category[] = [
   { id: 'cat-1', name: 'Food', color: '#F00', user_id: 'u1', created_at: '' },
-  { id: 'cat-2', name: 'Transport', color: '#0F0', user_id: 'u1', created_at: '' },
-  { id: 'cat-3', name: 'Entertainment', color: '#00F', user_id: 'u1', created_at: '' },
+  {
+    id: 'cat-2',
+    name: 'Transport',
+    color: '#0F0',
+    user_id: 'u1',
+    created_at: '',
+  },
+  {
+    id: 'cat-3',
+    name: 'Entertainment',
+    color: '#00F',
+    user_id: 'u1',
+    created_at: '',
+  },
 ];
 
-const makeExpense = (date: string, amount: number, categoryId: string = 'cat-1'): Expense => ({
+const makeExpense = (
+  date: string,
+  amount: number,
+  categoryId: string = 'cat-1',
+): Expense => ({
   id: crypto.randomUUID(),
   date,
   amount,
@@ -21,9 +37,17 @@ const makeExpense = (date: string, amount: number, categoryId: string = 'cat-1')
   created_at: date + 'T10:00:00Z',
 });
 
-const monthExpenses = (yearMonth: string, amounts: number[], categoryId = 'cat-1') =>
+const monthExpenses = (
+  yearMonth: string,
+  amounts: number[],
+  categoryId = 'cat-1',
+) =>
   amounts.map((amount, i) =>
-    makeExpense(`${yearMonth}-${String(i + 1).padStart(2, '0')}`, amount, categoryId),
+    makeExpense(
+      `${yearMonth}-${String(i + 1).padStart(2, '0')}`,
+      amount,
+      categoryId,
+    ),
   );
 
 describe('useSpendingInsights', () => {
@@ -31,7 +55,9 @@ describe('useSpendingInsights', () => {
     vi.setSystemTime(new Date('2026-03-15'));
   });
 
-  const render = (overrides: Partial<Parameters<typeof useSpendingInsights>[0]> = {}) =>
+  const render = (
+    overrides: Partial<Parameters<typeof useSpendingInsights>[0]> = {},
+  ) =>
     renderHook(() =>
       useSpendingInsights({
         expenses: [],
@@ -70,7 +96,9 @@ describe('useSpendingInsights', () => {
       makeExpense('2026-03-03', 100, 'cat-3'),
     ];
     const { result } = render({ expenses });
-    const insight = result.current.find((i) => i.id === 'categoryConcentration');
+    const insight = result.current.find(
+      (i) => i.id === 'categoryConcentration',
+    );
     expect(insight).toBeDefined();
   });
 
@@ -82,7 +110,9 @@ describe('useSpendingInsights', () => {
       makeExpense('2026-03-03', 100, 'cat-3'),
     ];
     const { result } = render({ expenses });
-    const insight = result.current.find((i) => i.id === 'categoryConcentration');
+    const insight = result.current.find(
+      (i) => i.id === 'categoryConcentration',
+    );
     expect(insight).toBeUndefined();
   });
 
@@ -183,9 +213,9 @@ describe('useSpendingInsights', () => {
     const expenses = [
       makeExpense('2026-03-01', 200), // Sunday
       makeExpense('2026-03-07', 200), // Saturday
-      makeExpense('2026-03-02', 10),  // Monday
-      makeExpense('2026-03-03', 10),  // Tuesday
-      makeExpense('2026-03-04', 10),  // Wednesday
+      makeExpense('2026-03-02', 10), // Monday
+      makeExpense('2026-03-03', 10), // Tuesday
+      makeExpense('2026-03-04', 10), // Wednesday
     ];
     const { result } = render({ expenses });
     const insight = result.current.find((i) => i.id === 'weekendSpending');

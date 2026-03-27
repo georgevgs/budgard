@@ -33,9 +33,7 @@ export const MonthDrillDown = ({
 
   const monthExpenses = useMemo(
     () =>
-      expenses.filter(
-        (e) => format(parseISO(e.date), 'yyyy-MM') === monthKey,
-      ),
+      expenses.filter((e) => format(parseISO(e.date), 'yyyy-MM') === monthKey),
     [expenses, monthKey],
   );
 
@@ -75,19 +73,13 @@ export const MonthDrillDown = ({
     : '';
 
   const topExpenses = useMemo(
-    () =>
-      [...monthExpenses]
-        .sort((a, b) => b.amount - a.amount)
-        .slice(0, 5),
+    () => [...monthExpenses].sort((a, b) => b.amount - a.amount).slice(0, 5),
     [monthExpenses],
   );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        className="sm:max-w-[480px]"
-        onOpenChange={onClose}
-      >
+      <DialogContent className="sm:max-w-[480px]" onOpenChange={onClose}>
         <DialogHeader className="px-6 pt-6" data-draggable-area>
           <DialogTitle className="capitalize">{monthLabel}</DialogTitle>
           <DialogDescription>

@@ -8,13 +8,21 @@ import {
 } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { useAuth } from '@/contexts/AuthContext';
+import { useData } from '@/contexts/DataContext';
 import { usePwaUpdate } from '@/hooks/usePwaUpdate';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import Header from '@/components/layout/Header';
 import NavTabs from '@/components/layout/NavTabs';
+import {
+  OnboardingFlow,
+  shouldShowOnboarding,
+} from '@/components/onboarding/OnboardingFlow';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
-import { AppLoadingSkeleton, ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
+import {
+  AppLoadingSkeleton,
+  ExpenseLoadingState,
+} from '@/components/expenses/ExpensesLoading';
 import RecurringLoadingState from '@/components/recurring/RecurringLoading';
 import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
 import { lazyWithRetry } from '@/lib/lazyWithRetry';
@@ -50,6 +58,29 @@ const LoadingSpinner = () => (
 
 const AuthenticatedLayout = () => {
   useOfflineSync();
+  const { expenses, categories, monthlyBudget, isInitialized, isLoading } =
+    useData();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    if (
+      shouldShowOnboarding(
+        isInitialized,
+        isLoading,
+        expenses.length,
+        categories.length,
+        monthlyBudget,
+      )
+    ) {
+      setShowOnboarding(true);
+    }
+  }, [
+    isInitialized,
+    isLoading,
+    expenses.length,
+    categories.length,
+    monthlyBudget,
+  ]);
 
   return (
     <>
@@ -58,6 +89,10 @@ const AuthenticatedLayout = () => {
         <Outlet />
       </main>
       <NavTabs />
+      <OnboardingFlow
+        isOpen={showOnboarding}
+        onComplete={() => setShowOnboarding(false)}
+      />
     </>
   );
 };

@@ -81,7 +81,9 @@ const renderStep = (
       <div className="flex items-center justify-center w-9 h-9 rounded-xl border border-border bg-muted shrink-0">
         {icon}
       </div>
-      <p className="text-sm text-muted-foreground leading-snug min-w-0 pt-2">{label}</p>
+      <p className="text-sm text-muted-foreground leading-snug min-w-0 pt-2">
+        {label}
+      </p>
     </div>
   </li>
 );

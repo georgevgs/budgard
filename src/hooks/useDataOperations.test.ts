@@ -58,10 +58,14 @@ vi.mock('@/services/dataService', () => ({
     deleteExpense: (...args: unknown[]) => mockDeleteExpense(...args),
     createCategory: (...args: unknown[]) => mockCreateCategory(...args),
     createTag: (...args: unknown[]) => mockCreateTag(...args),
-    createRecurringExpense: (...args: unknown[]) => mockCreateRecurring(...args),
-    updateRecurringExpense: (...args: unknown[]) => mockUpdateRecurring(...args),
-    deleteRecurringExpense: (...args: unknown[]) => mockDeleteRecurring(...args),
-    toggleRecurringExpense: (...args: unknown[]) => mockToggleRecurring(...args),
+    createRecurringExpense: (...args: unknown[]) =>
+      mockCreateRecurring(...args),
+    updateRecurringExpense: (...args: unknown[]) =>
+      mockUpdateRecurring(...args),
+    deleteRecurringExpense: (...args: unknown[]) =>
+      mockDeleteRecurring(...args),
+    toggleRecurringExpense: (...args: unknown[]) =>
+      mockToggleRecurring(...args),
   },
 }));
 
@@ -76,7 +80,10 @@ vi.mock('@/lib/offlineQueue', () => ({
 
 describe('useDataOperations', () => {
   beforeEach(() => {
-    Object.defineProperty(navigator, 'onLine', { value: true, configurable: true });
+    Object.defineProperty(navigator, 'onLine', {
+      value: true,
+      configurable: true,
+    });
   });
 
   // --- Expense Submit ---
@@ -111,7 +118,10 @@ describe('useDataOperations', () => {
   });
 
   it('queues expense offline when not connected', async () => {
-    Object.defineProperty(navigator, 'onLine', { value: false, configurable: true });
+    Object.defineProperty(navigator, 'onLine', {
+      value: false,
+      configurable: true,
+    });
     mockCreateExpense.mockRejectedValue(new Error('Network error'));
 
     const { offlineQueue } = await import('@/lib/offlineQueue');
@@ -121,7 +131,9 @@ describe('useDataOperations', () => {
       await result.current.handleExpenseSubmit({ amount: 50 });
     });
 
-    expect(offlineQueue.enqueue).toHaveBeenCalledWith('createExpense', { amount: 50 });
+    expect(offlineQueue.enqueue).toHaveBeenCalledWith('createExpense', {
+      amount: 50,
+    });
   });
 
   // --- Expense Delete ---
@@ -139,7 +151,10 @@ describe('useDataOperations', () => {
   });
 
   it('queues delete offline when not connected', async () => {
-    Object.defineProperty(navigator, 'onLine', { value: false, configurable: true });
+    Object.defineProperty(navigator, 'onLine', {
+      value: false,
+      configurable: true,
+    });
     mockDeleteExpense.mockRejectedValue(new Error('Network'));
 
     const { offlineQueue } = await import('@/lib/offlineQueue');
@@ -149,7 +164,9 @@ describe('useDataOperations', () => {
       await result.current.handleExpenseDelete('e1');
     });
 
-    expect(offlineQueue.enqueue).toHaveBeenCalledWith('deleteExpense', { id: 'e1' });
+    expect(offlineQueue.enqueue).toHaveBeenCalledWith('deleteExpense', {
+      id: 'e1',
+    });
   });
 
   // --- Category Add ---
@@ -185,7 +202,13 @@ describe('useDataOperations', () => {
 
   // --- Tag Create ---
   it('creates a tag with optimistic update', async () => {
-    const saved = { id: 't1', name: 'Work', color: '#00F', user_id: 'u1', created_at: '' };
+    const saved = {
+      id: 't1',
+      name: 'Work',
+      color: '#00F',
+      user_id: 'u1',
+      created_at: '',
+    };
     mockCreateTag.mockResolvedValue(saved);
 
     const { result } = renderHook(() => useDataOperations());
@@ -221,7 +244,9 @@ describe('useDataOperations', () => {
     const { result } = renderHook(() => useDataOperations());
 
     await act(async () => {
-      await result.current.handleRecurringExpenseSubmit({ frequency: 'monthly' });
+      await result.current.handleRecurringExpenseSubmit({
+        frequency: 'monthly',
+      });
     });
 
     expect(mockCreateRecurring).toHaveBeenCalled();
@@ -235,7 +260,10 @@ describe('useDataOperations', () => {
     const { result } = renderHook(() => useDataOperations());
 
     await act(async () => {
-      await result.current.handleRecurringExpenseSubmit({ active: false }, 'r1');
+      await result.current.handleRecurringExpenseSubmit(
+        { active: false },
+        'r1',
+      );
     });
 
     expect(mockUpdateRecurring).toHaveBeenCalledWith({ active: false }, 'r1');

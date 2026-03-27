@@ -29,8 +29,17 @@ vi.mock('@/lib/supabase', () => {
   const chain = () => {
     const obj: Record<string, unknown> = {};
     const methods = [
-      'from', 'select', 'insert', 'update', 'delete', 'upsert',
-      'eq', 'order', 'single', 'maybeSingle', 'abortSignal',
+      'from',
+      'select',
+      'insert',
+      'update',
+      'delete',
+      'upsert',
+      'eq',
+      'order',
+      'single',
+      'maybeSingle',
+      'abortSignal',
     ];
     for (const method of methods) {
       obj[method] = vi.fn(() => obj);
@@ -46,7 +55,9 @@ vi.mock('@/lib/supabase', () => {
       auth: {
         getUser: vi.fn(),
         getSession: vi.fn(),
-        onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+        onAuthStateChange: vi.fn(() => ({
+          data: { subscription: { unsubscribe: vi.fn() } },
+        })),
         signInWithOtp: vi.fn(),
         verifyOtp: vi.fn(),
         signOut: vi.fn(),

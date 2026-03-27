@@ -5,7 +5,11 @@ import { useOnlineStatus } from './useOnlineStatus';
 describe('useOnlineStatus', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    Object.defineProperty(navigator, 'onLine', { value: true, writable: true, configurable: true });
+    Object.defineProperty(navigator, 'onLine', {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
   });
 
   afterEach(() => {
@@ -18,7 +22,10 @@ describe('useOnlineStatus', () => {
   });
 
   it('returns false when browser starts offline', () => {
-    Object.defineProperty(navigator, 'onLine', { value: false, configurable: true });
+    Object.defineProperty(navigator, 'onLine', {
+      value: false,
+      configurable: true,
+    });
     const { result } = renderHook(() => useOnlineStatus());
     expect(result.current).toBe(false);
   });
@@ -64,7 +71,10 @@ describe('useOnlineStatus', () => {
   });
 
   it('goes online immediately without debounce', () => {
-    Object.defineProperty(navigator, 'onLine', { value: false, configurable: true });
+    Object.defineProperty(navigator, 'onLine', {
+      value: false,
+      configurable: true,
+    });
     const { result } = renderHook(() => useOnlineStatus());
 
     act(() => {

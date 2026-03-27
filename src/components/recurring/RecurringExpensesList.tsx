@@ -114,8 +114,7 @@ const RecurringExpensesList = () => {
       const expenseData: Partial<RecurringExpense> = {
         amount: parseCurrencyInput(values.amount),
         description: values.description,
-        category_id:
-          values.category_id === 'none' ? null : values.category_id,
+        category_id: values.category_id === 'none' ? null : values.category_id,
         frequency: values.frequency,
         start_date: format(values.start_date, 'yyyy-MM-dd'),
         end_date: values.end_date
@@ -297,12 +296,9 @@ const renderEmptyState = (
           className="mt-2 max-w-full"
         >
           <Plus className="h-4 w-4 mr-2 shrink-0" />
-          <span className="truncate">
-            {t('recurring.addFirstRecurring')}
-          </span>
+          <span className="truncate">{t('recurring.addFirstRecurring')}</span>
         </Button>
       </div>
     </Card>
   );
 };
-

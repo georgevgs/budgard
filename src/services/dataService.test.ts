@@ -6,8 +6,16 @@ import { dataService } from './dataService';
 const mockChain = (finalData: unknown = null, finalError: unknown = null) => {
   const chain: Record<string, ReturnType<typeof vi.fn>> = {};
   const methods = [
-    'select', 'insert', 'update', 'delete', 'upsert',
-    'eq', 'order', 'single', 'maybeSingle', 'abortSignal',
+    'select',
+    'insert',
+    'update',
+    'delete',
+    'upsert',
+    'eq',
+    'order',
+    'single',
+    'maybeSingle',
+    'abortSignal',
   ];
   for (const method of methods) {
     chain[method] = vi.fn(() => chain);
@@ -22,7 +30,6 @@ const mockChain = (finalData: unknown = null, finalError: unknown = null) => {
 };
 
 describe('dataService', () => {
-
   // --- getCategories ---
   it('fetches categories ordered by name', async () => {
     const chain = mockChain([{ id: 'c1', name: 'Food' }]);
@@ -39,7 +46,9 @@ describe('dataService', () => {
     const chain = mockChain(null, { message: 'fail' });
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    await expect(dataService.getCategories()).rejects.toEqual({ message: 'fail' });
+    await expect(dataService.getCategories()).rejects.toEqual({
+      message: 'fail',
+    });
   });
 
   it('passes abort signal when provided', async () => {
@@ -90,8 +99,14 @@ describe('dataService', () => {
     const chain = mockChain(expense);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.createExpense({ amount: 50, description: 'Test' });
-    expect(chain.insert).toHaveBeenCalledWith({ amount: 50, description: 'Test' });
+    const result = await dataService.createExpense({
+      amount: 50,
+      description: 'Test',
+    });
+    expect(chain.insert).toHaveBeenCalledWith({
+      amount: 50,
+      description: 'Test',
+    });
     expect(result).toEqual(expense);
   });
 
@@ -138,7 +153,10 @@ describe('dataService', () => {
     const chain = mockChain(cat);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.createCategory({ name: 'Food', color: '#F00' });
+    const result = await dataService.createCategory({
+      name: 'Food',
+      color: '#F00',
+    });
     expect(chain.insert).toHaveBeenCalledWith({ name: 'Food', color: '#F00' });
     expect(result).toEqual(cat);
   });
@@ -159,7 +177,9 @@ describe('dataService', () => {
     const chain = mockChain(rec);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.createRecurringExpense({ frequency: 'monthly' } as never);
+    const result = await dataService.createRecurringExpense({
+      frequency: 'monthly',
+    } as never);
     expect(chain.insert).toHaveBeenCalled();
     expect(result).toEqual(rec);
   });
@@ -170,7 +190,10 @@ describe('dataService', () => {
     const chain = mockChain(updated);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.updateRecurringExpense({ active: false } as never, 'r1');
+    const result = await dataService.updateRecurringExpense(
+      { active: false } as never,
+      'r1',
+    );
     expect(chain.update).toHaveBeenCalledWith({ active: false });
     expect(chain.eq).toHaveBeenCalledWith('id', 'r1');
     expect(result).toEqual(updated);
@@ -243,7 +266,9 @@ describe('dataService', () => {
       error: null,
     } as never);
 
-    await expect(dataService.upsertBudget(1000)).rejects.toThrow('Not authenticated');
+    await expect(dataService.upsertBudget(1000)).rejects.toThrow(
+      'Not authenticated',
+    );
   });
 
   // --- getUser ---
@@ -289,7 +314,9 @@ describe('dataService', () => {
       data: { session: null },
     } as never);
 
-    await expect(dataService.processRecurringExpenses()).rejects.toThrow('Not authenticated');
+    await expect(dataService.processRecurringExpenses()).rejects.toThrow(
+      'Not authenticated',
+    );
   });
 
   it('throws on edge function error response', async () => {
@@ -297,12 +324,17 @@ describe('dataService', () => {
       data: { session: { access_token: 'tok' } },
     } as never);
 
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
-      json: () => Promise.resolve({ error: 'Processing failed' }),
-    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        json: () => Promise.resolve({ error: 'Processing failed' }),
+      }),
+    );
 
-    await expect(dataService.processRecurringExpenses()).rejects.toThrow('Processing failed');
+    await expect(dataService.processRecurringExpenses()).rejects.toThrow(
+      'Processing failed',
+    );
     vi.unstubAllGlobals();
   });
 
@@ -312,6 +344,8 @@ describe('dataService', () => {
       error: { message: 'not authenticated' },
     } as never);
 
-    await expect(dataService.getUser()).rejects.toEqual({ message: 'not authenticated' });
+    await expect(dataService.getUser()).rejects.toEqual({
+      message: 'not authenticated',
+    });
   });
 });

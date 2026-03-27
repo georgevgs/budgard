@@ -1,11 +1,5 @@
 import { useMemo } from 'react';
-import {
-  format,
-  parseISO,
-  getDaysInMonth,
-  getDay,
-  setDay,
-} from 'date-fns';
+import { format, parseISO, getDaysInMonth, getDay, setDay } from 'date-fns';
 import type { Locale } from 'date-fns';
 import {
   TrendingUp,
@@ -38,7 +32,8 @@ export interface SpendingInsightsParams {
 }
 
 export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
-  const { expenses, monthlyBudget, monthComparison, categories, dateLocale } = params;
+  const { expenses, monthlyBudget, monthComparison, categories, dateLocale } =
+    params;
   const { t } = useTranslation();
 
   return useMemo(() => {
@@ -68,7 +63,9 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
       return {
         id: 'monthProjection',
         icon: TrendingUp,
-        text: t('analytics.insights.monthProjection', { amount: formattedAmount }),
+        text: t('analytics.insights.monthProjection', {
+          amount: formattedAmount,
+        }),
         variant: 'warning',
       };
     };

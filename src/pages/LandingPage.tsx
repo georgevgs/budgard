@@ -38,7 +38,9 @@ const renderLanguageToggle = (
       variant="ghost"
       size="sm"
       onClick={() => onChangeLanguage('en')}
-      className={currentLang === 'en' ? 'font-semibold' : 'text-muted-foreground'}
+      className={
+        currentLang === 'en' ? 'font-semibold' : 'text-muted-foreground'
+      }
     >
       EN
     </Button>
@@ -47,7 +49,9 @@ const renderLanguageToggle = (
       variant="ghost"
       size="sm"
       onClick={() => onChangeLanguage('el')}
-      className={currentLang === 'el' ? 'font-semibold' : 'text-muted-foreground'}
+      className={
+        currentLang === 'el' ? 'font-semibold' : 'text-muted-foreground'
+      }
     >
       ΕΛ
     </Button>

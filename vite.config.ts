@@ -64,7 +64,7 @@ export default defineConfig({
             '@radix-ui/react-toast',
             '@radix-ui/react-popover'
           ],
-          'chart-vendor': ['apexcharts', 'react-apexcharts'],
+          'chart-vendor': ['recharts'],
           'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
           'date-vendor': ['date-fns', 'react-day-picker'],
         },

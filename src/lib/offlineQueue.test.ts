@@ -13,7 +13,10 @@ describe('offlineQueue', () => {
   });
 
   it('enqueues a mutation and retrieves it', async () => {
-    await offlineQueue.enqueue('createExpense', { amount: 10, description: 'Test' });
+    await offlineQueue.enqueue('createExpense', {
+      amount: 10,
+      description: 'Test',
+    });
 
     const all = await offlineQueue.getAll();
     expect(all).toHaveLength(1);

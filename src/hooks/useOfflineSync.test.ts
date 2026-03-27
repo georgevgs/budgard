@@ -35,11 +35,17 @@ vi.mock('@/services/dataService', () => ({
 
 describe('useOfflineSync', () => {
   beforeEach(() => {
-    Object.defineProperty(navigator, 'onLine', { value: true, configurable: true });
+    Object.defineProperty(navigator, 'onLine', {
+      value: true,
+      configurable: true,
+    });
   });
 
   it('does nothing when offline', async () => {
-    Object.defineProperty(navigator, 'onLine', { value: false, configurable: true });
+    Object.defineProperty(navigator, 'onLine', {
+      value: false,
+      configurable: true,
+    });
     mockGetAll.mockResolvedValue([]);
 
     renderHook(() => useOfflineSync());
@@ -79,7 +85,12 @@ describe('useOfflineSync', () => {
 
   it('processes updateExpense mutations', async () => {
     const mutations = [
-      { id: 2, type: 'updateExpense', payload: { id: 'e1', amount: 20 }, createdAt: '' },
+      {
+        id: 2,
+        type: 'updateExpense',
+        payload: { id: 'e1', amount: 20 },
+        createdAt: '',
+      },
     ];
     mockGetAll.mockResolvedValue(mutations);
     mockUpdateExpense.mockResolvedValue({});
@@ -87,7 +98,10 @@ describe('useOfflineSync', () => {
     renderHook(() => useOfflineSync());
     await act(async () => {});
 
-    expect(mockUpdateExpense).toHaveBeenCalledWith({ id: 'e1', amount: 20 }, 'e1');
+    expect(mockUpdateExpense).toHaveBeenCalledWith(
+      { id: 'e1', amount: 20 },
+      'e1',
+    );
   });
 
   it('processes deleteExpense mutations', async () => {

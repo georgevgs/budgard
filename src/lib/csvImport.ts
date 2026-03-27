@@ -64,9 +64,11 @@ export function getCsvPreviewData(csvContent: string): CsvPreviewData {
   const sampleRows = allRows.slice(1, 6);
 
   // Count total data rows (excluding header and empty rows at end)
-  const dataRows = allRows.slice(1).filter((row) =>
-    row.some((cell) => cell.trim().replace(/^["']+|["']+$/g, ''))
-  );
+  const dataRows = allRows
+    .slice(1)
+    .filter((row) =>
+      row.some((cell) => cell.trim().replace(/^["']+|["']+$/g, '')),
+    );
   const totalRows = dataRows.length;
 
   // Check if any cell contains a negative number (indicates bank statement format)
@@ -74,7 +76,7 @@ export function getCsvPreviewData(csvContent: string): CsvPreviewData {
     row.some((cell) => {
       const cleaned = cell.trim().replace(/[€$£¥\s"']/g, '');
       return cleaned.startsWith('-') && /^-\d/.test(cleaned);
-    })
+    }),
   );
 
   return {
@@ -158,7 +160,11 @@ export function suggestColumnMapping(preview: CsvPreviewData): ColumnMapping {
     // A category column typically has repeated values and short strings
     // Skip columns already assigned
     for (let idx = 0; idx < headers.length; idx++) {
-      if (idx === dateColumn || idx === descriptionColumn || idx === amountColumn) {
+      if (
+        idx === dateColumn ||
+        idx === descriptionColumn ||
+        idx === amountColumn
+      ) {
         continue;
       }
 
@@ -166,7 +172,8 @@ export function suggestColumnMapping(preview: CsvPreviewData): ColumnMapping {
       if (values && values.size < sampleRows.length) {
         // Has repeated values, might be a category
         const avgLength =
-          Array.from(values).reduce((sum, v) => sum + v.length, 0) / values.size;
+          Array.from(values).reduce((sum, v) => sum + v.length, 0) /
+          values.size;
         if (avgLength < 30) {
           categoryColumn = idx;
           break;
@@ -217,8 +224,11 @@ export function parseExpensesCsv(
   // Skip header row if present
   const startIndex = isHeaderRow(lines[0]) ? 1 : 0;
 
-  const { dateColumn, descriptionColumn, amountColumn, categoryColumn } = columnMapping;
-  const minColumns = Math.max(dateColumn, descriptionColumn, amountColumn, categoryColumn ?? 0) + 1;
+  const { dateColumn, descriptionColumn, amountColumn, categoryColumn } =
+    columnMapping;
+  const minColumns =
+    Math.max(dateColumn, descriptionColumn, amountColumn, categoryColumn ?? 0) +
+    1;
 
   for (let i = startIndex; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -285,7 +295,10 @@ export function parseExpensesCsv(
 
     // Validate amount
     // If CSV has negative amounts, treat positive as income (bank statement convention)
-    const { amount, isIncome } = parseAmount(amountStr.trim(), hasNegativeAmounts);
+    const { amount, isIncome } = parseAmount(
+      amountStr.trim(),
+      hasNegativeAmounts,
+    );
 
     // Skip income transactions if enabled (for bank statements)
     if (skipIncomeTransactions && isIncome) {
@@ -316,8 +329,7 @@ export function parseExpensesCsv(
     // Check category (allow empty/Uncategorized)
     const trimmedCategory = categoryName.trim();
     const isUncategorized =
-      !trimmedCategory ||
-      trimmedCategory.toLowerCase() === 'uncategorized';
+      !trimmedCategory || trimmedCategory.toLowerCase() === 'uncategorized';
 
     if (!isUncategorized && !categoryMap.has(trimmedCategory.toLowerCase())) {
       unmatchedCategoriesSet.add(trimmedCategory);
@@ -347,7 +359,12 @@ export function mapRowsToExpenses(
   rows: ParsedExpenseRow[],
   categories: Category[],
   categoryMappings: Map<string, string | null>, // Maps category name to category_id or null
-): Array<{ date: string; description: string; amount: number; category_id: string | null }> {
+): Array<{
+  date: string;
+  description: string;
+  amount: number;
+  category_id: string | null;
+}> {
   const categoryMap = new Map(
     categories.map((cat) => [cat.name.toLowerCase(), cat.id]),
   );
@@ -500,7 +517,10 @@ export interface AmountParseResult {
  *   This should be true for bank statements that use -/+ convention.
  *   If false, only explicit + prefix is treated as income.
  */
-function parseAmount(amountStr: string, treatPositiveAsIncome: boolean): AmountParseResult {
+function parseAmount(
+  amountStr: string,
+  treatPositiveAsIncome: boolean,
+): AmountParseResult {
   // Remove currency symbols and whitespace
   let cleaned = amountStr.replace(/[€$£¥\s]/g, '');
 
@@ -541,7 +561,7 @@ function parseAmount(amountStr: string, treatPositiveAsIncome: boolean): AmountP
 
   return {
     amount: Math.round(amount * 100) / 100,
-    isIncome
+    isIncome,
   };
 }
 

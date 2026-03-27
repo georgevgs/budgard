@@ -44,7 +44,9 @@ const FormsManager = ({
     formType === FORM_TYPES.NEW_EXPENSE || formType === FORM_TYPES.EDIT_EXPENSE;
   const isCategoryForm = formType === FORM_TYPES.NEW_CATEGORY;
   const isEditingExpense = formType === FORM_TYPES.EDIT_EXPENSE;
-  const expenseActionKey = isEditingExpense ? 'forms.editExisting' : 'forms.addNew';
+  const expenseActionKey = isEditingExpense
+    ? 'forms.editExisting'
+    : 'forms.addNew';
   const expenseForEdit = isEditingExpense ? selectedExpense : undefined;
 
   return (
