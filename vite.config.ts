@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import path from "path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
@@ -91,5 +92,15 @@ export default defineConfig({
     hmr: {
       overlay: false
     }
-  }
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    coverage: {
+      provider: 'v8',
+      include: ['src/lib/**', 'src/hooks/**', 'src/services/**'],
+      exclude: ['src/lib/supabase.ts', 'src/lib/i18n.ts', 'src/hooks/usePwaUpdate.ts', 'src/**/*.d.ts'],
+    },
+  },
 });
