@@ -4,6 +4,7 @@ import {
   formatCurrency,
   formatCurrencyInput,
   parseCurrencyInput,
+  extractEmoji,
 } from './utils';
 
 describe('cn', () => {
@@ -91,5 +92,52 @@ describe('parseCurrencyInput', () => {
 
   it('returns 0 for non-numeric input', () => {
     expect(parseCurrencyInput('abc')).toBe(0);
+  });
+});
+
+describe('extractEmoji', () => {
+  it('extracts a single emoji from plain input', () => {
+    expect(extractEmoji('🍔')).toBe('🍔');
+  });
+
+  it('extracts emoji from mixed text', () => {
+    expect(extractEmoji('hello🍔world')).toBe('🍔');
+  });
+
+  it('returns empty string for plain text', () => {
+    expect(extractEmoji('hello world')).toBe('');
+  });
+
+  it('returns empty string for empty input', () => {
+    expect(extractEmoji('')).toBe('');
+  });
+
+  it('returns empty string for numbers only', () => {
+    expect(extractEmoji('12345')).toBe('');
+  });
+
+  it('extracts multiple emojis', () => {
+    expect(extractEmoji('🍔🍕')).toBe('🍔🍕');
+  });
+
+  it('truncates to 4 characters max', () => {
+    expect(extractEmoji('🍔🍕🎮🎬🎵').length).toBeLessThanOrEqual(4);
+  });
+
+  it('handles compound emojis with ZWJ', () => {
+    const result = extractEmoji('👨‍👩‍👧');
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  it('handles emojis with variation selectors', () => {
+    expect(extractEmoji('✈️')).toBeTruthy();
+  });
+
+  it('strips special characters and keeps only emoji', () => {
+    expect(extractEmoji('<script>🍔</script>')).toBe('🍔');
+  });
+
+  it('strips whitespace and keeps only emoji', () => {
+    expect(extractEmoji('  🏠  ')).toBe('🏠');
   });
 });

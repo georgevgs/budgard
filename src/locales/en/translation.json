@@ -15,7 +15,8 @@
     "error": "Error",
     "success": "Success",
     "update": "Update",
-    "create": "Create"
+    "create": "Create",
+    "clear": "Clear"
   },
   "auth": {
     "signIn": "Sign In",

@@ -189,10 +189,14 @@ const RecurringExpenseForm = ({
                       {categories.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
                           <div className="flex items-center gap-2">
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: category.color }}
-                            />
+                            {category.icon ? (
+                              <span className="text-sm">{category.icon}</span>
+                            ) : (
+                              <div
+                                className="w-3 h-3 rounded-full shrink-0"
+                                style={{ backgroundColor: category.color }}
+                              />
+                            )}
                             {category.name}
                           </div>
                         </SelectItem>

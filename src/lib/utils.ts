@@ -49,3 +49,14 @@ export function parseCurrencyInput(value: string): number {
     .replace(',', '.'); // Convert decimal comma to dot
   return parseFloat(cleaned) || 0;
 }
+
+// Strip non-emoji characters so the input only accepts emoji
+const EMOJI_PATTERN =
+  /[\p{Emoji_Presentation}\p{Extended_Pictographic}\u{200D}\u{FE0F}]/gu;
+
+export function extractEmoji(input: string): string {
+  const matches = input.match(EMOJI_PATTERN);
+  if (!matches) return '';
+
+  return matches.join('').slice(0, 4);
+}

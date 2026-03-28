@@ -19,7 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { cn } from '@/lib/utils';
+import { cn, extractEmoji } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { useData } from '@/contexts/DataContext';
@@ -249,50 +249,58 @@ const CategoryForm = ({ category, onBack, onClose }: Props) => {
                     {t('categories.icon')}
                   </FormLabel>
                   <FormControl>
-                    <div>
-                      <div className="grid grid-cols-8 gap-2 pt-1">
-                        {CATEGORY_ICONS.map((emoji) => (
-                          <button
-                            key={emoji}
-                            type="button"
-                            onClick={() =>
-                              field.onChange(
-                                field.value === emoji ? undefined : emoji,
-                              )
-                            }
-                            disabled={isDisabled}
-                            aria-label={`Select icon ${emoji}`}
-                            className={cn(
-                              'w-9 h-9 rounded-full transition-all duration-150 flex items-center justify-center text-lg',
-                              field.value === emoji
-                                ? 'ring-2 ring-offset-2 ring-foreground bg-accent scale-110'
-                                : 'opacity-70 hover:opacity-100 hover:scale-105 hover:bg-accent/50',
-                            )}
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
-                      {/* Custom emoji input */}
-                      <div className="flex items-center gap-2 pt-2">
-                        <Input
-                          value={field.value ?? ''}
-                          onChange={(e) => {
-                            const value = e.target.value.trim();
-                            field.onChange(value || undefined);
-                          }}
+                    <div className="grid grid-cols-8 gap-2 pt-1">
+                      {CATEGORY_ICONS.map((emoji) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() =>
+                            field.onChange(
+                              field.value === emoji ? undefined : emoji,
+                            )
+                          }
                           disabled={isDisabled}
-                          placeholder={t('categories.customIcon')}
-                          className="h-7 w-32 text-sm px-2"
-                          maxLength={4}
-                          aria-label={t('categories.customIcon')}
-                        />
-                        {renderClearIconButton(field.value, isDisabled, () =>
-                          field.onChange(undefined),
-                        )}
-                      </div>
+                          aria-label={`Select icon ${emoji}`}
+                          className={cn(
+                            'w-9 h-9 rounded-full transition-all duration-150 flex items-center justify-center text-lg',
+                            field.value === emoji
+                              ? 'ring-2 ring-offset-2 ring-foreground bg-accent scale-110'
+                              : 'opacity-70 hover:opacity-100 hover:scale-105 hover:bg-accent/50',
+                          )}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
                     </div>
                   </FormControl>
+                  {/* Custom emoji input — outside FormControl to avoid Radix event issues */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <Input
+                      value={field.value ?? ''}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        const emoji = extractEmoji(raw);
+                        field.onChange(emoji || undefined);
+                      }}
+                      disabled={isDisabled}
+                      placeholder={t('categories.customIcon')}
+                      className="h-7 w-32 text-sm px-2"
+                      maxLength={4}
+                      aria-label={t('categories.customIcon')}
+                    />
+                    {field.value ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs text-muted-foreground"
+                        onClick={() => field.onChange(undefined)}
+                        disabled={isDisabled}
+                      >
+                        {t('common.clear')}
+                      </Button>
+                    ) : null}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -326,27 +334,6 @@ const renderSwatchCheck = (isSelected: boolean) => {
   if (!isSelected) return null;
 
   return <Check className="h-3.5 w-3.5 text-white drop-shadow" />;
-};
-
-const renderClearIconButton = (
-  value: string | undefined,
-  isDisabled: boolean,
-  onClear: () => void,
-) => {
-  if (!value) return null;
-
-  return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      className="h-7 px-2 text-xs text-muted-foreground"
-      onClick={onClear}
-      disabled={isDisabled}
-    >
-      Clear
-    </Button>
-  );
 };
 
 const canSubmitForm = (

@@ -171,6 +171,52 @@ describe('categorySchema', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('accepts empty string icon as optional', () => {
+    const result = categorySchema.safeParse({
+      name: 'Food',
+      color: '#FF5733',
+      icon: '',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects invalid hex color format', () => {
+    expect(
+      categorySchema.safeParse({ name: 'Food', color: '#GGG' }).success,
+    ).toBe(false);
+    expect(
+      categorySchema.safeParse({ name: 'Food', color: 'red' }).success,
+    ).toBe(false);
+    expect(
+      categorySchema.safeParse({ name: 'Food', color: '#FFF' }).success,
+    ).toBe(false);
+  });
+
+  it('accepts valid 6-digit hex colors', () => {
+    expect(
+      categorySchema.safeParse({ name: 'Food', color: '#ff5733' }).success,
+    ).toBe(true);
+    expect(
+      categorySchema.safeParse({ name: 'Food', color: '#000000' }).success,
+    ).toBe(true);
+    expect(
+      categorySchema.safeParse({ name: 'Food', color: '#FFFFFF' }).success,
+    ).toBe(true);
+  });
+
+  it('rejects empty name', () => {
+    expect(
+      categorySchema.safeParse({ name: '', color: '#FF5733' }).success,
+    ).toBe(false);
+  });
+
+  it('rejects name over 50 characters', () => {
+    expect(
+      categorySchema.safeParse({ name: 'a'.repeat(51), color: '#FF5733' })
+        .success,
+    ).toBe(false);
+  });
 });
 
 describe('recurringExpenseSchema', () => {

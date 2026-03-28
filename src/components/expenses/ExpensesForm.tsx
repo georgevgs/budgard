@@ -338,11 +338,7 @@ const ExpensesForm = ({
                       {categories.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
                           <div className="flex items-center gap-2">
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: category.color }}
-                              aria-hidden="true"
-                            />
+                            {renderCategoryIndicator(category)}
                             {category.name}
                           </div>
                         </SelectItem>
@@ -626,12 +622,30 @@ const renderSuggestionMeta = (suggestion: Expense) => {
 
   return (
     <span className="flex items-center gap-1.5 shrink-0 text-xs text-muted-foreground">
-      <span
-        className="w-2 h-2 rounded-full"
-        style={{ backgroundColor: suggestion.category.color }}
-      />
+      {suggestion.category.icon ? (
+        <span className="text-xs">{suggestion.category.icon}</span>
+      ) : (
+        <span
+          className="w-2 h-2 rounded-full"
+          style={{ backgroundColor: suggestion.category.color }}
+        />
+      )}
       {suggestion.category.name}
     </span>
+  );
+};
+
+const renderCategoryIndicator = (category: Category) => {
+  if (category.icon) {
+    return <span className="text-sm">{category.icon}</span>;
+  }
+
+  return (
+    <div
+      className="w-3 h-3 rounded-full shrink-0"
+      style={{ backgroundColor: category.color }}
+      aria-hidden="true"
+    />
   );
 };
 
