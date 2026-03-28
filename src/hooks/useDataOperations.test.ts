@@ -46,6 +46,8 @@ const mockUpdateExpense = vi.fn();
 const mockDeleteExpense = vi.fn();
 const mockCreateCategory = vi.fn();
 const mockCreateTag = vi.fn();
+const mockUpdateCategory = vi.fn();
+const mockDeleteCategory = vi.fn();
 const mockCreateRecurring = vi.fn();
 const mockUpdateRecurring = vi.fn();
 const mockDeleteRecurring = vi.fn();
@@ -57,6 +59,8 @@ vi.mock('@/services/dataService', () => ({
     updateExpense: (...args: unknown[]) => mockUpdateExpense(...args),
     deleteExpense: (...args: unknown[]) => mockDeleteExpense(...args),
     createCategory: (...args: unknown[]) => mockCreateCategory(...args),
+    updateCategory: (...args: unknown[]) => mockUpdateCategory(...args),
+    deleteCategory: (...args: unknown[]) => mockDeleteCategory(...args),
     createTag: (...args: unknown[]) => mockCreateTag(...args),
     createRecurringExpense: (...args: unknown[]) =>
       mockCreateRecurring(...args),
@@ -198,6 +202,81 @@ describe('useDataOperations', () => {
 
     // Optimistic add + rollback
     expect(mockSetCategories).toHaveBeenCalledTimes(2);
+  });
+
+  // --- Category Update ---
+  it('updates a category with optimistic update and sorts by name', async () => {
+    const saved = {
+      id: 'c1',
+      name: 'Groceries',
+      color: '#0F0',
+      icon: null,
+      user_id: 'u1',
+      created_at: '',
+    };
+    mockUpdateCategory.mockResolvedValue(saved);
+
+    const { result } = renderHook(() => useDataOperations());
+
+    await act(async () => {
+      await result.current.handleCategoryUpdate('c1', {
+        name: 'Groceries',
+        color: '#0F0',
+      });
+    });
+
+    expect(mockUpdateCategory).toHaveBeenCalledWith('c1', {
+      name: 'Groceries',
+      color: '#0F0',
+    });
+    // Optimistic update + server confirm
+    expect(mockSetCategories).toHaveBeenCalledTimes(2);
+  });
+
+  it('rolls back category update on failure', async () => {
+    mockUpdateCategory.mockRejectedValue(new Error('fail'));
+
+    const { result } = renderHook(() => useDataOperations());
+
+    await expect(
+      act(async () => {
+        await result.current.handleCategoryUpdate('c1', { name: 'Bad' });
+      }),
+    ).rejects.toThrow();
+
+    // Optimistic update + rollback
+    expect(mockSetCategories).toHaveBeenCalledTimes(2);
+  });
+
+  // --- Category Delete ---
+  it('deletes a category and nulls out affected expenses', async () => {
+    mockDeleteCategory.mockResolvedValue(undefined);
+
+    const { result } = renderHook(() => useDataOperations());
+
+    await act(async () => {
+      await result.current.handleCategoryDelete('c1');
+    });
+
+    expect(mockDeleteCategory).toHaveBeenCalledWith('c1');
+    expect(mockSetCategories).toHaveBeenCalled();
+    expect(mockSetExpenses).toHaveBeenCalled();
+  });
+
+  it('rolls back category delete on failure and refreshes expenses', async () => {
+    mockDeleteCategory.mockRejectedValue(new Error('fail'));
+
+    const { result } = renderHook(() => useDataOperations());
+
+    await expect(
+      act(async () => {
+        await result.current.handleCategoryDelete('c1');
+      }),
+    ).rejects.toThrow();
+
+    // Rollback categories and refresh expenses
+    expect(mockSetCategories).toHaveBeenCalledTimes(2);
+    expect(mockRefreshExpenses).toHaveBeenCalled();
   });
 
   // --- Tag Create ---

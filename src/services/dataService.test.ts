@@ -161,6 +161,55 @@ describe('dataService', () => {
     expect(result).toEqual(cat);
   });
 
+  // --- updateCategory ---
+  it('updates a category by id', async () => {
+    const updated = { id: 'c1', name: 'Groceries', color: '#0F0' };
+    const chain = mockChain(updated);
+    vi.mocked(supabase.from).mockReturnValue(chain as never);
+
+    const result = await dataService.updateCategory('c1', {
+      name: 'Groceries',
+      color: '#0F0',
+    });
+    expect(supabase.from).toHaveBeenCalledWith('categories');
+    expect(chain.update).toHaveBeenCalledWith({
+      name: 'Groceries',
+      color: '#0F0',
+    });
+    expect(chain.eq).toHaveBeenCalledWith('id', 'c1');
+    expect(chain.single).toHaveBeenCalled();
+    expect(result).toEqual(updated);
+  });
+
+  it('throws on category update error', async () => {
+    const chain = mockChain(null, { message: 'update failed' });
+    vi.mocked(supabase.from).mockReturnValue(chain as never);
+
+    await expect(
+      dataService.updateCategory('c1', { name: 'Bad' }),
+    ).rejects.toEqual({ message: 'update failed' });
+  });
+
+  // --- deleteCategory ---
+  it('deletes a category by id', async () => {
+    const chain = mockChain(null, null);
+    vi.mocked(supabase.from).mockReturnValue(chain as never);
+
+    await dataService.deleteCategory('c1');
+    expect(supabase.from).toHaveBeenCalledWith('categories');
+    expect(chain.delete).toHaveBeenCalled();
+    expect(chain.eq).toHaveBeenCalledWith('id', 'c1');
+  });
+
+  it('throws on category delete error', async () => {
+    const chain = mockChain(null, { message: 'delete failed' });
+    vi.mocked(supabase.from).mockReturnValue(chain as never);
+
+    await expect(dataService.deleteCategory('c1')).rejects.toEqual({
+      message: 'delete failed',
+    });
+  });
+
   // --- getRecurringExpenses ---
   it('fetches recurring expenses with category join', async () => {
     const chain = mockChain([{ id: 'r1' }]);

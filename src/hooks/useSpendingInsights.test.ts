@@ -6,11 +6,19 @@ import type { Category } from '@/types/Category';
 import { enUS } from 'date-fns/locale';
 
 const categories: Category[] = [
-  { id: 'cat-1', name: 'Food', color: '#F00', user_id: 'u1', created_at: '' },
+  {
+    id: 'cat-1',
+    name: 'Food',
+    color: '#F00',
+    icon: null,
+    user_id: 'u1',
+    created_at: '',
+  },
   {
     id: 'cat-2',
     name: 'Transport',
     color: '#0F0',
+    icon: null,
     user_id: 'u1',
     created_at: '',
   },
@@ -18,6 +26,7 @@ const categories: Category[] = [
     id: 'cat-3',
     name: 'Entertainment',
     color: '#00F',
+    icon: null,
     user_id: 'u1',
     created_at: '',
   },
@@ -205,6 +214,52 @@ describe('useSpendingInsights', () => {
     const insight = result.current.find((i) => i.id === 'spendingStable');
     expect(insight).toBeDefined();
     expect(insight!.variant).toBe('positive');
+  });
+
+  // --- Logging Streak ---
+  it('shows logging streak when 3+ consecutive days ending today', () => {
+    const expenses = [
+      makeExpense('2026-03-15', 10), // today
+      makeExpense('2026-03-14', 20), // yesterday
+      makeExpense('2026-03-13', 30), // 2 days ago
+    ];
+    const { result } = render({ expenses });
+    const insight = result.current.find((i) => i.id === 'loggingStreak');
+    expect(insight).toBeDefined();
+    expect(insight!.variant).toBe('positive');
+  });
+
+  it('shows logging streak starting from yesterday when today has no expense', () => {
+    const expenses = [
+      makeExpense('2026-03-14', 20), // yesterday
+      makeExpense('2026-03-13', 30), // 2 days ago
+      makeExpense('2026-03-12', 40), // 3 days ago
+    ];
+    const { result } = render({ expenses });
+    const insight = result.current.find((i) => i.id === 'loggingStreak');
+    expect(insight).toBeDefined();
+    expect(insight!.variant).toBe('positive');
+  });
+
+  it('does not show logging streak when streak is less than 3 days', () => {
+    const expenses = [
+      makeExpense('2026-03-15', 10), // today
+      makeExpense('2026-03-14', 20), // yesterday
+    ];
+    const { result } = render({ expenses });
+    const insight = result.current.find((i) => i.id === 'loggingStreak');
+    expect(insight).toBeUndefined();
+  });
+
+  it('does not show logging streak when there are gaps in dates', () => {
+    const expenses = [
+      makeExpense('2026-03-15', 10), // today
+      makeExpense('2026-03-13', 20), // 2 days ago (gap on 14th)
+      makeExpense('2026-03-12', 30), // 3 days ago
+    ];
+    const { result } = render({ expenses });
+    const insight = result.current.find((i) => i.id === 'loggingStreak');
+    expect(insight).toBeUndefined();
   });
 
   // --- Weekend vs Weekday ---
