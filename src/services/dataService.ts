@@ -131,6 +131,27 @@ export const dataService = {
     return data as Category;
   },
 
+  async updateCategory(categoryId: string, categoryData: Partial<Category>) {
+    const { data, error } = await supabase
+      .from('categories')
+      .update(categoryData)
+      .eq('id', categoryId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Category;
+  },
+
+  async deleteCategory(categoryId: string) {
+    const { error } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', categoryId);
+
+    if (error) throw error;
+  },
+
   async getRecurringExpenses(signal?: AbortSignal) {
     let query = supabase
       .from('recurring_expenses')

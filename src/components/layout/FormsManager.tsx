@@ -4,7 +4,7 @@ import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import type { ReceiptOptions } from '@/hooks/useDataOperations';
 import ExpensesForm from '@/components/expenses/ExpensesForm';
-import CategoryForm from '@/components/categories/CategoryForm';
+import { CategoryManager } from '@/components/categories/CategoryManager';
 import { useData } from '@/contexts/DataContext';
 
 export const FORM_TYPES = {
@@ -74,14 +74,14 @@ const FormsManager = ({
 
       <Dialog open={isCategoryForm} onOpenChange={onClose}>
         <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0"
+          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
           aria-describedby="category-form-description"
           onOpenChange={onClose}
         >
           <div id="category-form-description" className="sr-only">
             {t('forms.categoryDescription')}
           </div>
-          {renderCategoryForm(isCategoryForm, onClose)}
+          {renderCategoryManager(isCategoryForm)}
         </DialogContent>
       </Dialog>
     </>
@@ -115,8 +115,8 @@ const renderExpenseForm = (
   );
 };
 
-const renderCategoryForm = (isOpen: boolean, onClose: () => void) => {
+const renderCategoryManager = (isOpen: boolean) => {
   if (!isOpen) return null;
 
-  return <CategoryForm onBack={onClose} onClose={onClose} />;
+  return <CategoryManager />;
 };

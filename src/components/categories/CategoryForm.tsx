@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Session } from '@supabase/supabase-js';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -23,6 +24,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { useData } from '@/contexts/DataContext';
 import { categorySchema, type CategoryFormData } from '@/lib/validations';
+import type { Category } from '@/types/Category';
+
+// Common expense-related emojis for quick category identification
+export const CATEGORY_ICONS = [
+  '🍔', '🛒', '🏠', '🚗', '🎬', '💊', '👕', '💡',
+  '🎮', '✈️', '📱', '🎓', '💇', '🐾', '🎁', '☕',
+] as const;
 
 // Tailwind 500-weight palette — vivid enough to pop at small sizes,
 // refined enough to look modern across light and dark themes.
@@ -47,21 +55,26 @@ export const CATEGORY_COLORS = [
 
 export const DEFAULT_CATEGORY_COLOR = '#6366f1';
 
-interface CategoryFormProps {
+type Props = {
+  category?: Category;
   onBack: () => void;
   onClose: () => void;
-}
+};
 
-const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
+const CategoryForm = ({ category, onBack, onClose }: Props) => {
+  const { t } = useTranslation();
   const { session } = useAuth();
-  const { handleCategoryAdd } = useDataOperations();
+  const { handleCategoryAdd, handleCategoryUpdate } = useDataOperations();
   const { isInitialized } = useData();
+
+  const isEditing = !!category;
 
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
-      name: '',
-      color: DEFAULT_CATEGORY_COLOR,
+      name: category?.name ?? '',
+      color: category?.color ?? DEFAULT_CATEGORY_COLOR,
+      icon: category?.icon ?? undefined,
     },
   });
 
@@ -75,14 +88,23 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
     }
 
     try {
-      await handleCategoryAdd({
-        name: values.name,
-        color: values.color,
-        user_id: session.user.id,
-      });
+      if (isEditing) {
+        await handleCategoryUpdate(category.id, {
+          name: values.name,
+          color: values.color,
+          icon: values.icon ?? null,
+        });
+      } else {
+        await handleCategoryAdd({
+          name: values.name,
+          color: values.color,
+          icon: values.icon ?? null,
+          user_id: session.user.id,
+        });
+      }
       onClose();
     } catch (error) {
-      console.error('Error adding category:', error);
+      console.error('Error saving category:', error);
     }
   };
 
@@ -90,7 +112,6 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
     form.formState.isSubmitting,
     isInitialized,
   );
-  const submitButtonText = getSubmitButtonText(form.formState.isSubmitting);
 
   return (
     <div className="flex flex-col max-h-full">
@@ -115,12 +136,18 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
               disabled={isDisabled}
             >
               <ArrowLeft className="h-4 w-4" />
-              <span className="sr-only">Go back</span>
+              <span className="sr-only">{t('common.cancel')}</span>
             </Button>
-            <DialogTitle className="text-xl">Add New Category</DialogTitle>
+            <DialogTitle className="text-xl">
+              {isEditing
+                ? t('categories.editCategory')
+                : t('categories.addCategory')}
+            </DialogTitle>
           </div>
           <DialogDescription>
-            Create a new category to organize your expenses
+            {isEditing
+              ? t('categories.editDescription')
+              : t('categories.addDescription')}
           </DialogDescription>
         </DialogHeader>
 
@@ -136,10 +163,10 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
                 <FormItem>
                   <FormControl>
                     <Input
-                      placeholder="Category Name"
+                      placeholder={t('categories.categoryName')}
                       {...field}
                       disabled={isDisabled}
-                      aria-label="Category name"
+                      aria-label={t('categories.categoryName')}
                     />
                   </FormControl>
                   <FormMessage />
@@ -152,7 +179,9 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
               name="color"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Color</FormLabel>
+                  <FormLabel className="text-sm font-medium">
+                    {t('categories.color')}
+                  </FormLabel>
                   <FormControl>
                     <div className="grid grid-cols-8 gap-2 pt-1">
                       {CATEGORY_COLORS.map((color) => (
@@ -192,6 +221,44 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="icon"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">
+                    {t('categories.icon')}
+                  </FormLabel>
+                  <FormControl>
+                    <div className="grid grid-cols-8 gap-2 pt-1">
+                      {CATEGORY_ICONS.map((emoji) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() =>
+                            field.onChange(
+                              field.value === emoji ? undefined : emoji,
+                            )
+                          }
+                          disabled={isDisabled}
+                          aria-label={`Select icon ${emoji}`}
+                          className={cn(
+                            'w-9 h-9 rounded-full transition-all duration-150 flex items-center justify-center text-lg',
+                            field.value === emoji
+                              ? 'ring-2 ring-offset-2 ring-foreground bg-accent scale-110'
+                              : 'opacity-70 hover:opacity-100 hover:scale-105 hover:bg-accent/50',
+                          )}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="flex gap-3 justify-end pt-2 pb-2">
               <Button
                 type="button"
@@ -199,10 +266,10 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
                 onClick={onBack}
                 disabled={isDisabled}
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button type="submit" disabled={isDisabled}>
-                {submitButtonText}
+                {getSubmitButtonText(form.formState.isSubmitting, isEditing, t)}
               </Button>
             </div>
           </form>
@@ -212,8 +279,13 @@ const CategoryForm = ({ onBack, onClose }: CategoryFormProps) => {
   );
 };
 
+export default CategoryForm;
+
+// ─── Helper functions ────────────────────────────────────────────────────────
+
 const renderSwatchCheck = (isSelected: boolean) => {
   if (!isSelected) return null;
+
   return <Check className="h-3.5 w-3.5 text-white drop-shadow" />;
 };
 
@@ -247,12 +319,20 @@ const getIsFormDisabled = (
   return false;
 };
 
-const getSubmitButtonText = (isSubmitting: boolean): string => {
+type TFunc = (key: string, options?: Record<string, unknown>) => string;
+
+const getSubmitButtonText = (
+  isSubmitting: boolean,
+  isEditing: boolean,
+  t: TFunc,
+): string => {
   if (isSubmitting) {
-    return 'Adding...';
+    return t('common.saving');
   }
 
-  return 'Add Category';
-};
+  if (isEditing) {
+    return t('common.update');
+  }
 
-export default CategoryForm;
+  return t('common.add');
+};

@@ -22,17 +22,18 @@ const STEP_COUNT = 3;
 type PresetCategory = {
   name: string;
   color: string;
+  icon: string;
 };
 
 const PRESET_CATEGORIES: PresetCategory[] = [
-  { name: 'Food', color: '#22c55e' },
-  { name: 'Housing', color: '#6366f1' },
-  { name: 'Transport', color: '#3b82f6' },
-  { name: 'Entertainment', color: '#f97316' },
-  { name: 'Subscriptions', color: '#ec4899' },
-  { name: 'Health', color: '#14b8a6' },
-  { name: 'Shopping', color: '#8b5cf6' },
-  { name: 'Utilities', color: '#f59e0b' },
+  { name: 'Food', color: '#22c55e', icon: '🍔' },
+  { name: 'Housing', color: '#6366f1', icon: '🏠' },
+  { name: 'Transport', color: '#3b82f6', icon: '🚗' },
+  { name: 'Entertainment', color: '#f97316', icon: '🎬' },
+  { name: 'Subscriptions', color: '#ec4899', icon: '📱' },
+  { name: 'Health', color: '#14b8a6', icon: '💊' },
+  { name: 'Shopping', color: '#8b5cf6', icon: '👕' },
+  { name: 'Utilities', color: '#f59e0b', icon: '💡' },
 ];
 
 type Props = {
@@ -92,6 +93,7 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
           dataService.createCategory({
             name: cat.name,
             color: cat.color,
+            icon: cat.icon,
             user_id: session?.user?.id,
           }),
         ),
@@ -202,10 +204,7 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
                   : 'border-border/50 bg-card text-muted-foreground hover:border-border',
               )}
             >
-              <div
-                className="w-3 h-3 rounded-full shrink-0"
-                style={{ backgroundColor: cat.color }}
-              />
+              <span className="text-base shrink-0">{cat.icon}</span>
               <span className="flex-1 text-left">{cat.name}</span>
               {renderCheckIcon(isSelected)}
             </button>

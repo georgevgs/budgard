@@ -213,6 +213,78 @@ export function useDataOperations() {
     [isInitialized, setCategories, showErrorToast],
   );
 
+  const handleCategoryUpdate = useCallback(
+    async (categoryId: string, categoryData: Partial<Category>) => {
+      if (!isInitialized) {
+        return;
+      }
+
+      let previousCategories: Category[] = [];
+      setCategories((prev) => {
+        previousCategories = prev;
+
+        return prev
+          .map((c) => (c.id === categoryId ? { ...c, ...categoryData } : c))
+          .sort((a, b) => a.name.localeCompare(b.name));
+      });
+
+      try {
+        const saved = await dataService.updateCategory(
+          categoryId,
+          categoryData,
+        );
+        haptics.success();
+        setCategories((prev) =>
+          prev
+            .map((c) => (c.id === categoryId ? saved : c))
+            .sort((a, b) => a.name.localeCompare(b.name)),
+        );
+      } catch (error) {
+        haptics.error();
+        setCategories(previousCategories);
+        showErrorToast('Failed to update category');
+        throw error;
+      }
+    },
+    [isInitialized, setCategories, showErrorToast],
+  );
+
+  const handleCategoryDelete = useCallback(
+    async (categoryId: string) => {
+      if (!isInitialized) {
+        return;
+      }
+
+      let previousCategories: Category[] = [];
+      setCategories((prev) => {
+        previousCategories = prev;
+
+        return prev.filter((c) => c.id !== categoryId);
+      });
+
+      // Null out category on affected expenses
+      setExpenses((prev) =>
+        prev.map((e) =>
+          e.category_id === categoryId
+            ? { ...e, category_id: undefined, category: undefined }
+            : e,
+        ),
+      );
+
+      try {
+        await dataService.deleteCategory(categoryId);
+        haptics.success();
+      } catch (error) {
+        haptics.error();
+        setCategories(previousCategories);
+        refreshExpenses();
+        showErrorToast('Failed to delete category');
+        throw error;
+      }
+    },
+    [isInitialized, setCategories, setExpenses, refreshExpenses, showErrorToast],
+  );
+
   const handleRecurringExpenseSubmit = useCallback(
     async (expenseData: Partial<RecurringExpense>, expenseId?: string) => {
       if (!isInitialized) {
@@ -344,6 +416,8 @@ export function useDataOperations() {
     handleExpenseSubmit,
     handleExpenseDelete,
     handleCategoryAdd,
+    handleCategoryUpdate,
+    handleCategoryDelete,
     handleTagCreate,
     handleRecurringExpenseSubmit,
     handleRecurringExpenseDelete,

@@ -10,6 +10,7 @@ import {
   Receipt,
   PieChart,
   Activity,
+  Flame,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -422,11 +423,48 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
       return null;
     };
 
+    // 10. Logging streak — consecutive days with expenses
+    const loggingStreakInsight = (): Insight | null => {
+      if (expenses.length === 0) return null;
+
+      const expenseDates = new Set(
+        expenses.map((e) => format(parseISO(e.date), 'yyyy-MM-dd')),
+      );
+
+      let streak = 0;
+      const today = new Date();
+
+      // Check if today has an expense; if not, start from yesterday
+      const todayKey = format(today, 'yyyy-MM-dd');
+      const startOffset = expenseDates.has(todayKey) ? 0 : 1;
+
+      for (let i = startOffset; ; i++) {
+        const date = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate() - i,
+        );
+        const key = format(date, 'yyyy-MM-dd');
+        if (!expenseDates.has(key)) break;
+        streak++;
+      }
+
+      if (streak < 3) return null;
+
+      return {
+        id: 'loggingStreak',
+        icon: Flame,
+        text: t('analytics.insights.loggingStreak', { count: streak }),
+        variant: 'positive',
+      };
+    };
+
     insights.push(
       monthProjectionInsight(),
       categoryComparisonInsight(),
       peakDayInsight(),
       budgetStreakInsight(),
+      loggingStreakInsight(),
       inactivityInsight(),
       largestExpenseInsight(),
       weekendSpendingInsight(),

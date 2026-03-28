@@ -192,6 +192,7 @@ export const categorySchema = z.object({
     .transform((str) => str.trim())
     .refine((str) => str.length > 0, 'Category name cannot be empty'),
   color: z.string().regex(HEX_COLOR, 'Invalid color format'),
+  icon: z.string().max(4).optional(),
 });
 
 // Recurring expense validation schema

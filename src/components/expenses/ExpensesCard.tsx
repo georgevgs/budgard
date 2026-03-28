@@ -78,7 +78,7 @@ const ExpensesCard = ({
       <Card className="rounded-2xl transition-colors hover:bg-accent/50 border-border/40 overflow-hidden">
         <CardContent className="p-0">
           <div className="flex">
-            {renderCategoryAccent(expense)}
+            {renderCategoryIndicator(expense)}
             <div className="px-4 py-4 flex-1 min-w-0">
               <div className="flex items-center gap-3">
                 <div className="flex-1 w-0">
@@ -168,8 +168,22 @@ export default memo(ExpensesCard);
 
 // ─── Helper render functions ──────────────────────────────────────────────────
 
-const renderCategoryAccent = (expense: Expense) => {
+const renderCategoryIndicator = (expense: Expense) => {
   if (!expense.category) return null;
+
+  if (expense.category.icon) {
+    return (
+      <div className="flex items-center pl-4 shrink-0">
+        <div
+          className="w-9 h-9 rounded-full flex items-center justify-center text-base"
+          style={{ backgroundColor: `${expense.category.color}20` }}
+          aria-hidden="true"
+        >
+          {expense.category.icon}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

@@ -114,7 +114,13 @@
     "editCategory": "Edit Category",
     "deleteCategory": "Delete Category",
     "categoryName": "Category Name",
-    "color": "Color"
+    "color": "Color",
+    "icon": "Icon",
+    "noCategories": "No categories yet",
+    "manageDescription": "Add, edit, or remove your expense categories",
+    "addDescription": "Create a new category to organize your expenses",
+    "editDescription": "Update this category's name, color, or icon",
+    "deleteConfirmation": "Are you sure you want to delete \"{{name}}\"? Expenses in this category will become uncategorized. This action cannot be undone."
   },
   "budget": {
     "title": "Budget",
@@ -275,6 +281,7 @@
       "weekendHigher": "Weekend spending is {{percent}}% higher per transaction",
       "weekdayHigher": "Weekday spending is {{percent}}% higher per transaction",
       "categoryConcentration": "{{percent}}% of this month's spending is on {{name}}",
+      "loggingStreak": "You've logged expenses {{count}} days in a row!",
       "highVolatility": "Your monthly spending varies a lot — consider a consistent budget",
       "stableSpending": "Your spending has been consistent over the past months"
     },

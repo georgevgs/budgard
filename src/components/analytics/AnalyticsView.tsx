@@ -134,6 +134,7 @@ const AnalyticsView = () => {
           id: cat.id,
           name: cat.name,
           color: cat.color,
+          icon: cat.icon,
           amount,
           monthlyAmounts,
         };
@@ -573,6 +574,7 @@ type CategoryRow = {
   id: string;
   name: string;
   color: string;
+  icon: string | null;
   amount: number;
   monthlyAmounts: number[];
 };
@@ -604,10 +606,7 @@ const renderCategoryBreakdown = (
               onClick={() => onCategoryClick(cat)}
               className="flex items-center gap-4 px-5 py-3.5 w-full text-left transition-colors hover:bg-accent/50 active:bg-accent/70 cursor-pointer"
             >
-              <div
-                className="w-2.5 h-2.5 rounded-full shrink-0"
-                style={{ backgroundColor: cat.color }}
-              />
+              {renderCategoryIcon(cat)}
               <span className="flex-1 text-sm font-medium truncate min-w-0">
                 {cat.name}
               </span>
@@ -649,6 +648,19 @@ const renderCategoryDrillDown = (
       categoryColor={category.color}
       expenses={expenses}
       totalAmount={category.amount}
+    />
+  );
+};
+
+const renderCategoryIcon = (cat: CategoryRow) => {
+  if (cat.icon) {
+    return <span className="text-base shrink-0">{cat.icon}</span>;
+  }
+
+  return (
+    <div
+      className="w-2.5 h-2.5 rounded-full shrink-0"
+      style={{ backgroundColor: cat.color }}
     />
   );
 };
