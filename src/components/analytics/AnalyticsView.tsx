@@ -4,6 +4,7 @@ import { el, enUS } from 'date-fns/locale';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import Minus from 'lucide-react/dist/esm/icons/minus';
+import Share2 from 'lucide-react/dist/esm/icons/share-2';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -28,8 +29,11 @@ import SpendingInsights from '@/components/analytics/SpendingInsights';
 import CategorySparkline from '@/components/analytics/CategorySparkline';
 import { CategoryDrillDown } from '@/components/analytics/CategoryDrillDown';
 import { MonthDrillDown } from '@/components/analytics/MonthDrillDown';
+import MonthlyReportCard from '@/components/analytics/MonthlyReportCard';
+import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '@/lib/utils';
+import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
@@ -145,11 +149,32 @@ const AnalyticsView = () => {
     };
   }, [yearExpenses, categories, monthlyData, selectedYear]);
 
+  const animatedThisMonth = useAnimatedNumber(monthComparison.thisMonthAmount);
+  const animatedYearTotal = useAnimatedNumber(yearlyStats.totalSpent);
+
   const budgetUsedPercent = useMemo(() => {
     if (!monthlyBudget || monthlyBudget === 0) return null;
 
     return (monthComparison.thisMonthAmount / monthlyBudget) * 100;
   }, [monthComparison.thisMonthAmount, monthlyBudget]);
+
+  // ─── Report card state ──────────────────────────────────────────────────────
+
+  const [isReportOpen, setIsReportOpen] = useState(false);
+
+  const thisMonthExpensesByCategory = useMemo(() => {
+    const thisMonthKey = format(new Date(), 'yyyy-MM');
+    const thisMonthExpenses = expenses.filter(
+      (e) => format(parseISO(e.date), 'yyyy-MM') === thisMonthKey,
+    );
+    const map = new Map<string, number>();
+    for (const e of thisMonthExpenses) {
+      if (!e.category_id) continue;
+      map.set(e.category_id, (map.get(e.category_id) ?? 0) + e.amount);
+    }
+
+    return map;
+  }, [expenses]);
 
   // ─── Drill-down state ────────────────────────────────────────────────────────
 
@@ -204,12 +229,25 @@ const AnalyticsView = () => {
     <div className="container max-w-4xl mx-auto px-4 pt-4 pb-4 space-y-6">
       {/* Month snapshot */}
       <div className="rounded-2xl border border-border/50 bg-card p-5">
-        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-          {monthComparison.thisMonthLabel}
-        </p>
+        <div className="flex items-start justify-between mb-1">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">
+            {monthComparison.thisMonthLabel}
+          </p>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 -mt-1 -mr-1 text-muted-foreground hover:text-foreground"
+            onClick={(e) => {
+              (e.currentTarget as HTMLElement).blur();
+              setIsReportOpen(true);
+            }}
+          >
+            <Share2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
         <div className="flex items-baseline gap-3 flex-wrap">
           <p className="text-3xl font-bold tabular-nums">
-            {formatCurrency(monthComparison.thisMonthAmount)}
+            {formatCurrency(animatedThisMonth)}
           </p>
           {renderMonthChangeBadge(
             monthComparison.percentChange,
@@ -253,7 +291,7 @@ const AnalyticsView = () => {
             </SelectContent>
           </Select>
           {renderYearSummary(
-            yearlyStats.totalSpent,
+            animatedYearTotal,
             yearlyStats.monthlyAverage,
             yearlyStats.activeMonths,
             t,
@@ -376,6 +414,18 @@ const AnalyticsView = () => {
         categories,
         handleMonthDrillDownClose,
       )}
+
+      {/* Monthly report card */}
+      <MonthlyReportCard
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+        monthLabel={monthComparison.thisMonthLabel}
+        totalSpent={monthComparison.thisMonthAmount}
+        lastMonthAmount={monthComparison.lastMonthAmount}
+        monthlyBudget={monthlyBudget}
+        categories={categories}
+        expensesByCategory={thisMonthExpensesByCategory}
+      />
     </div>
   );
 };

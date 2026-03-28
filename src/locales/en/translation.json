@@ -213,6 +213,10 @@
     "more": "More",
     "page": "Page {{page}}"
   },
+  "dateGroup": {
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
   "forms": {
     "expenseDescription": "Form to {{action}} expense",
     "editExisting": "edit an existing",
@@ -283,6 +287,19 @@
       "topExpenses": "Top Expenses",
       "uncategorized": "Uncategorized"
     }
+  },
+  "report": {
+    "title": "Monthly Report",
+    "totalSpent": "Total Spent",
+    "budgetUsed": "{{percent}}% of budget",
+    "vsLastMonth": "vs {{amount}} last month",
+    "topCategories": "Top Categories",
+    "noBudget": "No budget set",
+    "saveImage": "Save as Image",
+    "share": "Share",
+    "overBudget": "Over budget",
+    "underBudget": "under budget",
+    "noExpenses": "No expenses this month"
   },
   "import": {
     "title": "Import Expenses",

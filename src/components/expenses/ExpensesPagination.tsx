@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { el, enUS } from 'date-fns/locale';
 import {
   Pagination,
   PaginationContent,
@@ -9,18 +10,19 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { groupExpensesByDate } from '@/lib/dateGrouping';
 import type { Expense } from '@/types/Expense';
 import ExpensesCard from '@/components/expenses/ExpensesCard';
 
-interface ExpensesPaginationProps {
+type Props = {
   expenses: Expense[];
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
   searchQuery?: string;
   showFullDate?: boolean;
-}
+};
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
 
 const ExpensesPagination = ({
   expenses,
@@ -28,8 +30,9 @@ const ExpensesPagination = ({
   onDelete,
   searchQuery,
   showFullDate,
-}: ExpensesPaginationProps) => {
-  const { t } = useTranslation();
+}: Props) => {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language === 'el' ? el : enUS;
   const [currentPage, setCurrentPage] = useState(1);
   const prevLengthRef = useRef(expenses.length);
 
@@ -40,13 +43,18 @@ const ExpensesPagination = ({
     }
   }, [expenses.length]);
 
-  // Calculate pagination
+  // Paginate first, then group
   const totalItems = expenses.length;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
   const safePage = Math.min(currentPage, Math.max(totalPages, 1));
   const startIndex = (safePage - 1) * ITEMS_PER_PAGE;
   const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
   const currentExpenses = expenses.slice(startIndex, endIndex);
+
+  const dateGroups = useMemo(
+    () => groupExpensesByDate(currentExpenses, dateLocale, t, showFullDate),
+    [currentExpenses, dateLocale, t, showFullDate],
+  );
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -57,6 +65,7 @@ const ExpensesPagination = ({
     const pages = [];
     if (totalPages <= 5) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
+
       return pages;
     }
 
@@ -87,25 +96,34 @@ const ExpensesPagination = ({
   };
 
   return (
-    <div className="space-y-4">
-      {/* Expenses List */}
-      <div className="grid gap-4">
-        {currentExpenses.map((expense, index) => (
-          <div
-            key={expense.id}
-            className="card-enter"
-            style={{ animationDelay: `${index * 40}ms` }}
-          >
-            <ExpensesCard
-              expense={expense}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              searchQuery={searchQuery}
-              showFullDate={showFullDate}
-            />
+    <div className="space-y-2">
+      {/* Date-grouped expenses */}
+      {dateGroups.map((group) => (
+        <div key={group.date}>
+          <div className="sticky top-0 z-10 -mx-1 px-1 py-2 bg-background/80 backdrop-blur-sm">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              {group.label}
+            </p>
           </div>
-        ))}
-      </div>
+          <div className="grid gap-3">
+            {group.expenses.map((expense, index) => (
+              <div
+                key={expense.id}
+                className="card-enter"
+                style={{ animationDelay: `${index * 40}ms` }}
+              >
+                <ExpensesCard
+                  expense={expense}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  searchQuery={searchQuery}
+                  showFullDate={showFullDate}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
 
       {/* Pagination Controls */}
       {totalItems > ITEMS_PER_PAGE && (

@@ -79,16 +79,16 @@ const ExpensesCard = ({
         <CardContent className="p-0">
           <div className="flex">
             {renderCategoryAccent(expense)}
-            <div className="px-4 py-5 flex-1 min-w-0">
+            <div className="px-4 py-4 flex-1 min-w-0">
               <div className="flex items-center gap-3">
                 <div className="flex-1 w-0">
                   <div className="flex items-center gap-1.5">
-                    <p className="font-medium text-base leading-tight truncate">
+                    <p className="font-medium text-sm leading-tight truncate">
                       {renderHighlightedText(expense.description, searchQuery)}
                     </p>
                     {renderRecurringIcon(expense)}
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1 truncate">
+                  <p className="text-xs text-muted-foreground mt-0.5 truncate">
                     {format(
                       parseISO(expense.date),
                       showFullDate ? 'MMM d, yyyy' : 'MMM d',
@@ -100,7 +100,7 @@ const ExpensesCard = ({
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <p className="text-lg font-semibold tabular-nums">
+                  <p className="text-lg font-bold tabular-nums tracking-tight">
                     {formatCurrency(expense.amount)}
                   </p>
 

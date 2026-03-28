@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import CalendarDays from 'lucide-react/dist/esm/icons/calendar-days';
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import { cn, formatCurrency } from '@/lib/utils';
+import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import type { Expense } from '@/types/Expense';
 
 type ExpensesMonthlyOverviewProps = {
@@ -32,6 +33,9 @@ const ExpensesMonthlyOverview = ({
 }: ExpensesMonthlyOverviewProps) => {
   const { t } = useTranslation();
 
+  const displayTotal = hasActiveFilters ? filteredTotal : monthlyTotal;
+  const animatedTotal = useAnimatedNumber(displayTotal);
+
   // Find most expensive expense
   const mostExpensive =
     expenses.length > 0
@@ -59,8 +63,8 @@ const ExpensesMonthlyOverview = ({
             ? t('expenses.filteredTotal')
             : t('expenses.monthlyTotal')}
         </p>
-        <p className="text-3xl font-bold tracking-tight">
-          {formatCurrency(hasActiveFilters ? filteredTotal : monthlyTotal)}
+        <p className="text-3xl font-bold tracking-tight tabular-nums">
+          {formatCurrency(animatedTotal)}
         </p>
         {hasActiveFilters && (
           <p className="text-xs text-muted-foreground mt-0.5">

@@ -213,6 +213,10 @@
     "page": "Σελίδα {{page}}",
     "more": "Περισσότερες σελίδες"
   },
+  "dateGroup": {
+    "today": "Σήμερα",
+    "yesterday": "Χθες"
+  },
   "forms": {
     "expenseDescription": "Φόρμα για {{action}} έξοδο",
     "editExisting": "επεξεργασία υπάρχοντος",
@@ -283,6 +287,19 @@
       "topExpenses": "Κορυφαία Έξοδα",
       "uncategorized": "Χωρίς κατηγορία"
     }
+  },
+  "report": {
+    "title": "Μηνιαία Αναφορά",
+    "totalSpent": "Σύνολο Εξόδων",
+    "budgetUsed": "{{percent}}% του προϋπολογισμού",
+    "vsLastMonth": "έναντι {{amount}} τον προηγ. μήνα",
+    "topCategories": "Κορυφαίες Κατηγορίες",
+    "noBudget": "Δεν έχει οριστεί προϋπολογισμός",
+    "saveImage": "Αποθήκευση ως Εικόνα",
+    "share": "Κοινοποίηση",
+    "overBudget": "Υπέρβαση προϋπολογισμού",
+    "underBudget": "κάτω του προϋπολογισμού",
+    "noExpenses": "Δεν υπάρχουν έξοδα αυτό τον μήνα"
   },
   "import": {
     "title": "Εισαγωγή Εξόδων",

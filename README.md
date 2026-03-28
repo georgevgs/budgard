@@ -20,19 +20,65 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 
 ## What it does
 
-- Log expenses with a category, amount, date, and optional receipt photo
-- Set up recurring expenses (rent, subscriptions, etc.) so you're not re-entering them every month
-- Tag expenses for finer-grained grouping beyond categories
-- See a monthly breakdown and spending charts in the analytics view
-- Set a monthly budget and track how you're doing against it
-- Filter by category, tag, or date range when you're hunting for something specific
-- English and Greek (Ελληνικά) — auto-detected from your browser
+**Expenses**
+- Log expenses with amount, description, date, category, tag, and optional receipt photo
+- Date-grouped feed with sticky headers (Today, Yesterday, or formatted date)
+- Filter and search by category, tag, date range, or keyword
+- Sort by date or amount, search across all months
+- CSV import and export
+- Animated number transitions on totals for a polished feel
+
+**Recurring Expenses**
+- Set up recurring expenses (weekly, biweekly, monthly, quarterly, yearly) with start/end dates
+- Automatic expense generation via Supabase Edge Function
+- Track next occurrence and overdue status
+- Toggle active/inactive without deleting
+
+**Analytics**
+- Monthly spending snapshot with month-over-month comparison
+- Interactive year-over-year area chart with clickable month drill-down
+- Category breakdown with sparkline trends and drill-down details
+- Budget progress indicator with color-coded alerts
+- Proactive spending insights: projections, peak spending days, category comparisons, budget streaks, weekend vs weekday patterns, spending volatility
+- Shareable monthly report card — export as PNG or share via native share sheet
+
+**Budget**
+- Set a monthly budget target
+- Real-time progress tracking with color-coded alerts at 75%, 90%, and 100%
+- Budget reference line on analytics chart
+
+**Categories and Tags**
+- Custom categories with user-chosen colors
+- Tags for finer-grained expense grouping
+- Filter by category or tag in the expense list
+
+**Receipts**
+- Photo capture with drag-and-drop or tap-to-upload
+- Client-side compression (WebP, max 5MB)
+- Inline preview and viewer
+
+**Other**
+- English and Greek (auto-detected from browser)
+- Dark, light, and Barbie themes
+- Guided onboarding for new users
+- Offline support with sync on reconnect
+- Installable as a PWA on iOS, Android, and desktop
 
 ## Tech
 
-React 19 + TypeScript + Vite on the frontend. Supabase handles auth (email OTP magic links), the Postgres database, file storage for receipts, and an Edge Function for recurring expense generation. Deployed on Netlify.
+React 19 + TypeScript + Vite on the frontend. Supabase handles auth (email OTP), the Postgres database, file storage for receipts, and an Edge Function for recurring expense generation. Deployed on Netlify.
 
-UI components are from shadcn/ui, charts from ApexCharts, forms from react-hook-form + Zod. State lives in React Context with optimistic updates so the UI never feels slow. Cloudflare Turnstile protects the auth flow from bots. Errors are monitored with Sentry (with sourcemap upload on every production deploy).
+UI components from shadcn/ui, charts from Recharts, forms from react-hook-form + Zod. State lives in React Context with optimistic updates via `useOptimistic` so the UI never feels slow. Cloudflare Turnstile protects the auth flow. Errors are monitored with Sentry.
+
+### Key architecture
+
+- **State**: Context API — `AuthContext` for sessions, `DataContext` for all user data
+- **Data**: All Supabase calls go through `services/dataService.ts`
+- **Mutations**: Optimistic updates with rollback in `hooks/useDataOperations.ts`
+- **Validation**: Zod schemas in `lib/validations.ts`, react-hook-form for forms
+- **Routing**: Lazy-loaded routes with `PrivateRoute` / `PublicRoute` guards
+- **Path alias**: `@/*` maps to `./src/*`
+- **i18n**: i18next with browser language detection
 
 ## Running locally
 
@@ -69,11 +115,26 @@ npm run dev
 
 App is at `http://localhost:5173`.
 
+## Scripts
+
 ```bash
 npm run dev          # dev server
-npm run build        # production build
+npm run build        # TypeScript compile + Vite production build
 npm run lint         # ESLint
-npm run typecheck    # TypeScript check
+npm run lint:fix     # ESLint with auto-fix
+npm run format       # Prettier format
+npm run typecheck    # TypeScript check without emit
+npm test             # Run tests (Vitest)
+```
+
+## Testing
+
+Tests use Vitest + React Testing Library with jsdom. Coverage targets `src/lib/`, `src/hooks/`, and `src/services/`.
+
+```bash
+npx vitest run              # run all tests
+npx vitest run --coverage   # with coverage report
+npx vitest                  # watch mode
 ```
 
 ## Contributing
