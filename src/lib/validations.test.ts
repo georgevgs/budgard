@@ -145,6 +145,32 @@ describe('categorySchema', () => {
       categorySchema.safeParse({ name: 'Φαγητό', color: '#FF5733' }).success,
     ).toBe(true);
   });
+
+  it('accepts category with icon emoji', () => {
+    const result = categorySchema.safeParse({
+      name: 'Food',
+      color: '#FF5733',
+      icon: '🍔',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts category without icon', () => {
+    const result = categorySchema.safeParse({
+      name: 'Food',
+      color: '#FF5733',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects icon longer than 4 characters', () => {
+    const result = categorySchema.safeParse({
+      name: 'Food',
+      color: '#FF5733',
+      icon: '🍔🍕🎮',
+    });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('recurringExpenseSchema', () => {

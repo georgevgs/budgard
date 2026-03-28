@@ -120,6 +120,8 @@
     "manageDescription": "Add, edit, or remove your expense categories",
     "addDescription": "Create a new category to organize your expenses",
     "editDescription": "Update this category's name, color, or icon",
+    "customColor": "Custom hex",
+    "customIcon": "Paste emoji",
     "deleteConfirmation": "Are you sure you want to delete \"{{name}}\"? Expenses in this category will become uncategorized. This action cannot be undone."
   },
   "budget": {

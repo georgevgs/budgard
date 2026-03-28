@@ -30,6 +30,7 @@ import type { Category } from '@/types/Category';
 export const CATEGORY_ICONS = [
   '🍔', '🛒', '🏠', '🚗', '🎬', '💊', '👕', '💡',
   '🎮', '✈️', '📱', '🎓', '💇', '🐾', '🎁', '☕',
+  '🍕', '🍺', '🏋️', '💼', '🎵', '📚', '🧹', '👶',
 ] as const;
 
 // Tailwind 500-weight palette — vivid enough to pop at small sizes,
@@ -44,13 +45,21 @@ export const CATEGORY_COLORS = [
   '#10b981', // emerald
   '#14b8a6', // teal
   '#06b6d4', // cyan
+  '#0ea5e9', // sky
   '#3b82f6', // blue
   '#6366f1', // indigo
   '#8b5cf6', // violet
   '#a855f7', // purple
+  '#d946ef', // fuchsia
   '#ec4899', // pink
+  '#f472b6', // pink-light
+  '#fb923c', // orange-light
   '#64748b', // slate
   '#78716c', // stone
+  '#a8a29e', // warm-gray
+  '#9ca3af', // cool-gray
+  '#1e293b', // dark-navy
+  '#334155', // slate-dark
 ] as const;
 
 export const DEFAULT_CATEGORY_COLOR = '#6366f1';
@@ -205,15 +214,25 @@ const CategoryForm = ({ category, onBack, onClose }: Props) => {
                     </div>
                   </FormControl>
 
-                  {/* Preview */}
-                  <div className="flex items-center gap-3 pt-2">
+                  {/* Custom color input */}
+                  <div className="flex items-center gap-2 pt-2">
                     <div
                       className="w-5 h-5 rounded-full shrink-0 transition-colors duration-150"
                       style={{ backgroundColor: field.value }}
                     />
-                    <span className="text-sm text-muted-foreground tabular-nums">
-                      {field.value}
-                    </span>
+                    <Input
+                      value={field.value}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value.match(/^#[0-9A-Fa-f]{0,6}$/)) {
+                          field.onChange(value);
+                        }
+                      }}
+                      disabled={isDisabled}
+                      className="h-7 w-24 text-xs font-mono tabular-nums px-2"
+                      maxLength={7}
+                      aria-label={t('categories.customColor')}
+                    />
                   </div>
 
                   <FormMessage />
@@ -230,28 +249,48 @@ const CategoryForm = ({ category, onBack, onClose }: Props) => {
                     {t('categories.icon')}
                   </FormLabel>
                   <FormControl>
-                    <div className="grid grid-cols-8 gap-2 pt-1">
-                      {CATEGORY_ICONS.map((emoji) => (
-                        <button
-                          key={emoji}
-                          type="button"
-                          onClick={() =>
-                            field.onChange(
-                              field.value === emoji ? undefined : emoji,
-                            )
-                          }
+                    <div>
+                      <div className="grid grid-cols-8 gap-2 pt-1">
+                        {CATEGORY_ICONS.map((emoji) => (
+                          <button
+                            key={emoji}
+                            type="button"
+                            onClick={() =>
+                              field.onChange(
+                                field.value === emoji ? undefined : emoji,
+                              )
+                            }
+                            disabled={isDisabled}
+                            aria-label={`Select icon ${emoji}`}
+                            className={cn(
+                              'w-9 h-9 rounded-full transition-all duration-150 flex items-center justify-center text-lg',
+                              field.value === emoji
+                                ? 'ring-2 ring-offset-2 ring-foreground bg-accent scale-110'
+                                : 'opacity-70 hover:opacity-100 hover:scale-105 hover:bg-accent/50',
+                            )}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                      {/* Custom emoji input */}
+                      <div className="flex items-center gap-2 pt-2">
+                        <Input
+                          value={field.value ?? ''}
+                          onChange={(e) => {
+                            const value = e.target.value.trim();
+                            field.onChange(value || undefined);
+                          }}
                           disabled={isDisabled}
-                          aria-label={`Select icon ${emoji}`}
-                          className={cn(
-                            'w-9 h-9 rounded-full transition-all duration-150 flex items-center justify-center text-lg',
-                            field.value === emoji
-                              ? 'ring-2 ring-offset-2 ring-foreground bg-accent scale-110'
-                              : 'opacity-70 hover:opacity-100 hover:scale-105 hover:bg-accent/50',
-                          )}
-                        >
-                          {emoji}
-                        </button>
-                      ))}
+                          placeholder={t('categories.customIcon')}
+                          className="h-7 w-32 text-sm px-2"
+                          maxLength={4}
+                          aria-label={t('categories.customIcon')}
+                        />
+                        {renderClearIconButton(field.value, isDisabled, () =>
+                          field.onChange(undefined),
+                        )}
+                      </div>
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -287,6 +326,27 @@ const renderSwatchCheck = (isSelected: boolean) => {
   if (!isSelected) return null;
 
   return <Check className="h-3.5 w-3.5 text-white drop-shadow" />;
+};
+
+const renderClearIconButton = (
+  value: string | undefined,
+  isDisabled: boolean,
+  onClear: () => void,
+) => {
+  if (!value) return null;
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      className="h-7 px-2 text-xs text-muted-foreground"
+      onClick={onClear}
+      disabled={isDisabled}
+    >
+      Clear
+    </Button>
+  );
 };
 
 const canSubmitForm = (
