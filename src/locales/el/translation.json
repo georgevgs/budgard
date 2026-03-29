@@ -371,7 +371,17 @@
     "doneDescription": "Ξεκινήστε να καταγράφετε τα έξοδά σας και πάρτε τον έλεγχο των οικονομικών σας.",
     "startTracking": "Ξεκινήστε",
     "skip": "Παράλειψη",
-    "next": "Συνέχεια"
+    "next": "Συνέχεια",
+    "presetCategories": {
+      "food": "Φαγητό",
+      "housing": "Στέγαση",
+      "transport": "Μεταφορές",
+      "entertainment": "Ψυχαγωγία",
+      "subscriptions": "Συνδρομές",
+      "health": "Υγεία",
+      "shopping": "Αγορές",
+      "utilities": "Λογαριασμοί"
+    }
   },
   "landing": {
     "hero": {

@@ -20,20 +20,20 @@ const ONBOARDED_KEY = 'budgard_onboarded';
 const STEP_COUNT = 3;
 
 type PresetCategory = {
-  name: string;
+  nameKey: string;
   color: string;
   icon: string;
 };
 
 const PRESET_CATEGORIES: PresetCategory[] = [
-  { name: 'Food', color: '#22c55e', icon: '🍔' },
-  { name: 'Housing', color: '#6366f1', icon: '🏠' },
-  { name: 'Transport', color: '#3b82f6', icon: '🚗' },
-  { name: 'Entertainment', color: '#f97316', icon: '🎬' },
-  { name: 'Subscriptions', color: '#ec4899', icon: '📱' },
-  { name: 'Health', color: '#14b8a6', icon: '💊' },
-  { name: 'Shopping', color: '#8b5cf6', icon: '👕' },
-  { name: 'Utilities', color: '#f59e0b', icon: '💡' },
+  { nameKey: 'food', color: '#22c55e', icon: '🍔' },
+  { nameKey: 'housing', color: '#6366f1', icon: '🏠' },
+  { nameKey: 'transport', color: '#3b82f6', icon: '🚗' },
+  { nameKey: 'entertainment', color: '#f97316', icon: '🎬' },
+  { nameKey: 'subscriptions', color: '#ec4899', icon: '📱' },
+  { nameKey: 'health', color: '#14b8a6', icon: '💊' },
+  { nameKey: 'shopping', color: '#8b5cf6', icon: '👕' },
+  { nameKey: 'utilities', color: '#f59e0b', icon: '💡' },
 ];
 
 type Props = {
@@ -91,7 +91,7 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
       const created = await Promise.all(
         toCreate.map((cat) =>
           dataService.createCategory({
-            name: cat.name,
+            name: t(`onboarding.presetCategories.${cat.nameKey}`),
             color: cat.color,
             icon: cat.icon,
             user_id: session?.user?.id,
@@ -194,7 +194,7 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
 
           return (
             <button
-              key={cat.name}
+              key={cat.nameKey}
               type="button"
               onClick={() => handleCategoryToggle(index)}
               className={cn(
@@ -205,7 +205,9 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
               )}
             >
               <span className="text-base shrink-0">{cat.icon}</span>
-              <span className="flex-1 text-left">{cat.name}</span>
+              <span className="flex-1 text-left">
+                {t(`onboarding.presetCategories.${cat.nameKey}`)}
+              </span>
               {renderCheckIcon(isSelected)}
             </button>
           );

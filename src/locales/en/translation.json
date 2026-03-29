@@ -371,7 +371,17 @@
     "doneDescription": "Start tracking your expenses and take control of your finances.",
     "startTracking": "Start Tracking",
     "skip": "Skip",
-    "next": "Continue"
+    "next": "Continue",
+    "presetCategories": {
+      "food": "Food",
+      "housing": "Housing",
+      "transport": "Transport",
+      "entertainment": "Entertainment",
+      "subscriptions": "Subscriptions",
+      "health": "Health",
+      "shopping": "Shopping",
+      "utilities": "Utilities"
+    }
   },
   "landing": {
     "hero": {
