@@ -33,7 +33,6 @@ import {
 import CalendarIcon from 'lucide-react/dist/esm/icons/calendar';
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import Tag from 'lucide-react/dist/esm/icons/tag';
-import X from 'lucide-react/dist/esm/icons/x';
 import { format, parseISO } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import type { Locale } from 'date-fns';
@@ -48,6 +47,7 @@ import { expenseSchema, type ExpenseFormData } from '@/lib/validations';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import ReceiptUpload from '@/components/expenses/ReceiptUpload';
+import { TagButtonContent, TagClearButton } from '@/components/expenses/TagPicker';
 
 // Preset colors cycled when auto-assigning a color to a new tag
 const TAG_COLORS = [
@@ -435,11 +435,8 @@ const ExpensesForm = ({
                                 !selectedTag && 'text-muted-foreground',
                               )}
                             >
-                              {renderTagButtonContent(selectedTag)}
-                              {renderTagClearButton(
-                                selectedTag,
-                                handleTagClear,
-                              )}
+                              <TagButtonContent selectedTag={selectedTag} />
+                              {renderTagClearIndicator(selectedTag, handleTagClear)}
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
@@ -524,6 +521,7 @@ const ExpensesForm = ({
 export default ExpensesForm;
 
 // ─── Helper render functions ──────────────────────────────────────────────────
+// Exported for testing
 
 type TranslateFunction = (
   key: string,
@@ -546,50 +544,13 @@ const renderDateValue = (
   return format(date, 'PPP', { locale });
 };
 
-const renderTagButtonContent = (
-  selectedTag: { name: string; color: string } | undefined,
-) => {
-  if (!selectedTag) {
-    return (
-      <span className="flex items-center gap-2">
-        <Tag className="h-4 w-4" />
-        No tag
-      </span>
-    );
-  }
-
-  return (
-    <span className="flex items-center gap-2">
-      <div
-        className="w-3 h-3 rounded-full"
-        style={{ backgroundColor: selectedTag.color }}
-      />
-      {selectedTag.name}
-    </span>
-  );
-};
-
-const renderTagClearButton = (
+const renderTagClearIndicator = (
   selectedTag: { name: string; color: string } | undefined,
   onClear: () => void,
 ) => {
   if (!selectedTag) return null;
 
-  const handleClick = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    onClear();
-  };
-
-  return (
-    <button
-      type="button"
-      aria-label="Clear tag"
-      className="ml-auto p-1 -mr-1 shrink-0 opacity-50 hover:opacity-100 rounded-full"
-      onClick={handleClick}
-    >
-      <X className="h-3.5 w-3.5" />
-    </button>
-  );
+  return <TagClearButton onClear={onClear} />;
 };
 
 const renderCreateTagOption = (
