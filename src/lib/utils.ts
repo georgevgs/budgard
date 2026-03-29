@@ -50,6 +50,18 @@ export function parseCurrencyInput(value: string): number {
   return parseFloat(cleaned) || 0;
 }
 
+export const dataUrlToBlob = (dataUrl: string): Blob => {
+  const [header, base64] = dataUrl.split(',');
+  const mime = header.match(/:(.*?);/)?.[1] || 'image/png';
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return new Blob([bytes], { type: mime });
+};
+
 // Strip non-emoji characters so the input only accepts emoji
 const EMOJI_PATTERN =
   /[\p{Emoji_Presentation}\p{Extended_Pictographic}\u{200D}\u{FE0F}]/gu;

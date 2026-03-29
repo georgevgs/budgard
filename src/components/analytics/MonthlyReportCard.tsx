@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, dataUrlToBlob } from '@/lib/utils';
 import type { Category } from '@/types/Category';
 
 type CategorySummary = {
@@ -82,7 +82,7 @@ const MonthlyReportCard = ({
 
       // Try native share on mobile, fallback to download
       if (navigator.share && navigator.canShare) {
-        const blob = await (await fetch(dataUrl)).blob();
+        const blob = dataUrlToBlob(dataUrl);
         const file = new File([blob], `budgard-${monthLabel}.png`, {
           type: 'image/png',
         });

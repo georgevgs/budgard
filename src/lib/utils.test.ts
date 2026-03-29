@@ -5,6 +5,7 @@ import {
   formatCurrencyInput,
   parseCurrencyInput,
   extractEmoji,
+  dataUrlToBlob,
 } from './utils';
 
 describe('cn', () => {
@@ -139,5 +140,41 @@ describe('extractEmoji', () => {
 
   it('strips whitespace and keeps only emoji', () => {
     expect(extractEmoji('  🏠  ')).toBe('🏠');
+  });
+});
+
+describe('dataUrlToBlob', () => {
+  it('returns a Blob with the correct MIME type', () => {
+    const bytes = new Uint8Array([137, 80, 78, 71]);
+    const base64 = btoa(String.fromCharCode(...bytes));
+    const blob = dataUrlToBlob(`data:image/png;base64,${base64}`);
+    expect(blob).toBeInstanceOf(Blob);
+    expect(blob.type).toBe('image/png');
+  });
+
+  it('produces a non-empty blob', () => {
+    const base64 = btoa('test');
+    const blob = dataUrlToBlob(`data:image/png;base64,${base64}`);
+    expect(blob.size).toBe(4);
+  });
+
+  it('handles jpeg data URLs', () => {
+    const base64 = btoa('jpeg-data');
+    const blob = dataUrlToBlob(`data:image/jpeg;base64,${base64}`);
+    expect(blob.type).toBe('image/jpeg');
+  });
+
+  it('defaults to image/png when MIME is missing', () => {
+    const base64 = btoa('x');
+    const blob = dataUrlToBlob(`data:;base64,${base64}`);
+    expect(blob.type).toBe('image/png');
+  });
+
+  it('preserves binary content correctly', () => {
+    const bytes = new Uint8Array([72, 101, 108, 108, 111]);
+    const base64 = btoa(String.fromCharCode(...bytes));
+    const blob = dataUrlToBlob(`data:application/octet-stream;base64,${base64}`);
+    expect(blob.size).toBe(5);
+    expect(blob.type).toBe('application/octet-stream');
   });
 });
