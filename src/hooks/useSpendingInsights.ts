@@ -383,7 +383,136 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
       return null;
     };
 
-    // 9. Month-over-month volatility
+    // 9. Largest expense this month
+    const largestExpenseInsight = (): Insight | null => {
+      const thisMonthExpenses = expenses.filter(
+        (e) => format(parseISO(e.date), 'yyyy-MM') === thisMonthKey,
+      );
+      if (thisMonthExpenses.length === 0) return null;
+
+      const largest = thisMonthExpenses.reduce((max, e) =>
+        e.amount > max.amount ? e : max,
+      );
+
+      return {
+        id: 'largestExpense',
+        icon: TrendingUp,
+        text: t('analytics.insights.largestExpense', {
+          amount: `${largest.amount.toFixed(2)} €`,
+          description: largest.description,
+        }),
+        variant: 'default',
+      };
+    };
+
+    // 10. Inactivity warning
+    const ONE_DAY_MS = 1000 * 60 * 60 * 24;
+
+    const inactivityInsight = (): Insight | null => {
+      if (expenses.length === 0) return null;
+
+      const lastDate = expenses
+        .map((e) => parseISO(e.date))
+        .reduce((latest, d) => (d > latest ? d : latest));
+
+      const daysSince = Math.floor(
+        (now.getTime() - lastDate.getTime()) / ONE_DAY_MS,
+      );
+
+      if (daysSince <= 3) return null;
+
+      return {
+        id: 'inactive',
+        icon: CalendarDays,
+        text: t('analytics.insights.inactive', { days: daysSince }),
+        variant: 'warning',
+      };
+    };
+
+    // 11. Peak spending day of week
+    const peakDayInsight = (): Insight | null => {
+      const thisMonthExpenses = expenses.filter(
+        (e) => format(parseISO(e.date), 'yyyy-MM') === thisMonthKey,
+      );
+
+      if (thisMonthExpenses.length < 5) return null;
+
+      const byDow = new Map<number, { total: number; count: number }>();
+      for (const e of thisMonthExpenses) {
+        const dow = getDay(parseISO(e.date));
+        const current = byDow.get(dow) ?? { total: 0, count: 0 };
+        byDow.set(dow, { total: current.total + e.amount, count: current.count + 1 });
+      }
+
+      if (byDow.size < 2) return null;
+
+      let peakDow = 0;
+      let peakAvg = 0;
+      for (const [dow, { total, count }] of byDow.entries()) {
+        const avg = total / count;
+        if (avg > peakAvg) {
+          peakAvg = avg;
+          peakDow = dow;
+        }
+      }
+
+      // Jan 1, 2023 was a Sunday (dow 0) — use as reference to get day names
+      const REFERENCE_SUNDAY = new Date(2023, 0, 1);
+      const dayDate = new Date(REFERENCE_SUNDAY.getTime() + peakDow * ONE_DAY_MS);
+      const dayName = format(dayDate, 'EEEE', { locale: dateLocale });
+
+      return {
+        id: 'peakDay',
+        icon: CalendarDays,
+        text: t('analytics.insights.peakDay', { day: dayName }),
+        variant: 'default',
+      };
+    };
+
+    // 12. Logging streak (3+ consecutive days ending today or yesterday)
+    const loggingStreakInsight = (): Insight | null => {
+      if (expenses.length === 0) return null;
+
+      const uniqueDates = [...new Set(expenses.map((e) => e.date))].sort(
+        (a, b) => b.localeCompare(a),
+      );
+
+      if (uniqueDates.length < 3) return null;
+
+      const today = format(now, 'yyyy-MM-dd');
+      const yesterday = format(
+        new Date(now.getTime() - ONE_DAY_MS),
+        'yyyy-MM-dd',
+      );
+
+      const startDate = uniqueDates[0];
+      if (startDate !== today && startDate !== yesterday) return null;
+
+      let streak = 1;
+      for (let i = 1; i < uniqueDates.length; i++) {
+        const prevDate = parseISO(uniqueDates[i - 1]);
+        const currDate = parseISO(uniqueDates[i]);
+        const diff = Math.round(
+          (prevDate.getTime() - currDate.getTime()) / ONE_DAY_MS,
+        );
+        if (diff === 1) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+
+      if (streak < 3) return null;
+
+      return {
+        id: 'loggingStreak',
+        icon: CalendarDays,
+        text: t('analytics.insights.loggingStreak', { count: streak }),
+        variant: 'positive',
+      };
+    };
+
+    // 13. Month-over-month volatility
     const spendingVolatilityInsight = (): Insight | null => {
       const monthTotals: number[] = [];
 
@@ -438,6 +567,10 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
       weekendSpendingInsight(),
       categoryConcentrationInsight(),
       spendingVolatilityInsight(),
+      largestExpenseInsight(),
+      inactivityInsight(),
+      peakDayInsight(),
+      loggingStreakInsight(),
     );
 
     return insights.filter((i): i is Insight => i !== null);

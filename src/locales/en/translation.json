@@ -298,7 +298,11 @@
       "weekdayHigher": "Weekday spending is {{percent}}% higher per transaction",
       "categoryConcentration": "{{percent}}% of this month's spending is on {{name}}",
       "highVolatility": "Your monthly spending varies a lot — consider a consistent budget",
-      "stableSpending": "Your spending has been consistent over the past months"
+      "stableSpending": "Your spending has been consistent over the past months",
+      "largestExpense": "Biggest expense this month: {{description}} at {{amount}}",
+      "inactive": "No expenses logged in {{days}} days — keep your records up to date",
+      "peakDay": "You tend to spend the most on {{day}}s",
+      "loggingStreak": "{{count}}-day logging streak — keep it up!"
     },
     "drillDown": {
       "categoryTotal": "{{amount}} across {{count}} expenses",
@@ -403,7 +407,9 @@
       "getStarted": "Get Started",
       "addToHomeScreen": "Add to Home Screen",
       "freeToUse": "Free to use · No credit card required",
-      "previewBudget": "{{percent}}% of {{amount}} budget"
+      "previewBudget": "{{percent}}% of {{amount}} budget",
+      "trustedPrivate": "Private",
+      "trustedFree": "Always free"
     },
     "install": {
       "title": "Add to Home Screen",
@@ -414,6 +420,9 @@
       "step4": "Tap <strong>Add</strong> in the top right corner"
     },
     "features": {
+      "sectionTag": "Features",
+      "sectionTitle": "Everything you need",
+      "sectionSubtitle": "Simple, powerful tools to take control of your finances",
       "easyTracking": {
         "title": "Easy Tracking",
         "description": "Record your expenses quickly and efficiently",

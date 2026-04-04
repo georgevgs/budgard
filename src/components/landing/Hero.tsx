@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import Download from 'lucide-react/dist/esm/icons/download';
-import Wallet from 'lucide-react/dist/esm/icons/wallet';
-import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
-import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
+import Lock from 'lucide-react/dist/esm/icons/lock';
+import Zap from 'lucide-react/dist/esm/icons/zap';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
@@ -40,74 +40,28 @@ const Hero = ({ onGetStarted }: HeroProps) => {
   };
 
   return (
-    <div className="relative overflow-hidden pb-24">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-grid-slate-100/50 [mask-image:radial-gradient(ellipse_at_center,black_70%,transparent_100%)] -z-10" />
+    <div className="relative overflow-hidden pt-8 pb-24">
+      {renderBackground()}
 
-      <div className="relative px-4 pt-4 mx-auto max-w-7xl">
-        <div className="text-center space-y-8 animate-fade-up">
-          {/* Floating Icon Badges */}
-          <div className="flex justify-center gap-4 mb-8">
-            <div className="animate-float delay-100 flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 shadow-lg">
-              <Wallet className="h-6 w-6 text-primary" />
-            </div>
-            <div className="animate-float delay-200 flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/15 border border-primary/25 shadow-xl">
-              <TrendingDown className="h-8 w-8 text-primary" />
-            </div>
-            <div className="animate-float delay-300 flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 shadow-lg">
-              <CreditCard className="h-6 w-6 text-primary" />
-            </div>
-          </div>
-
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-            {t('landing.hero.heading1')}
-            <span className="block mt-1 bg-gradient-to-r from-primary to-primary/50 bg-clip-text text-transparent">
-              {t('landing.hero.heading2')}
-            </span>
-          </h1>
-
-          <p className="max-w-2xl mx-auto text-base sm:text-lg text-muted-foreground">
-            {t('landing.hero.subtitle')}
-          </p>
-
-          <div className="flex flex-col gap-4 justify-center items-center pt-4 w-full max-w-[280px] mx-auto">
-            <Button
-              size="lg"
-              onClick={onGetStarted}
-              className="group w-full animate-fade-up delay-200"
-            >
-              {t('landing.hero.getStarted')}
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Button>
-            {showInstallButton && (
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={handleInstallClick}
-                className="group w-full animate-fade-up delay-200"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                {t('landing.hero.addToHomeScreen')}
-              </Button>
-            )}
-          </div>
-          <IosInstallModal open={showIosModal} onOpenChange={setShowIosModal} />
-
-          <p className="text-xs text-muted-foreground animate-fade-up delay-300">
-            {t('landing.hero.freeToUse')}
-          </p>
-
-          {/* App Preview Carousel */}
+      <div className="relative px-4 mx-auto max-w-4xl">
+        <div className="text-center space-y-6 animate-fade-up">
+          {renderBadgePill(t)}
+          {renderHeading(t)}
+          {renderSubtitle(t)}
+          {renderCTAs(onGetStarted, showInstallButton, handleInstallClick, t)}
+          {renderTrustRow(t)}
           <HeroPreview />
         </div>
       </div>
+
+      <IosInstallModal open={showIosModal} onOpenChange={setShowIosModal} />
     </div>
   );
 };
 
 export default Hero;
 
-// ─── Hero Preview Carousel ───────────────────────────────────────────────────
+// ─── Hero Preview Carousel ────────────────────────────────────────────────────
 
 const SLIDE_COUNT = 3;
 const SLIDE_INTERVAL_MS = 4000;
@@ -133,81 +87,216 @@ const HeroPreview = () => {
 
   return (
     <div
-      className="mt-4 mx-auto max-w-[300px] animate-fade-up"
+      className="mt-6 mx-auto max-w-sm animate-fade-up"
       style={{ animationDelay: '400ms' }}
     >
-      <div className="rounded-2xl border bg-card/90 backdrop-blur-sm shadow-2xl overflow-hidden text-left">
-        <div className="relative h-[210px]">
-          <div
-            className={cn(
-              'absolute inset-0 transition-opacity duration-300',
-              activeSlide === 0
-                ? 'opacity-100'
-                : 'opacity-0 pointer-events-none',
-            )}
-          >
-            {renderExpenseSlide(t)}
-          </div>
-          <div
-            className={cn(
-              'absolute inset-0 transition-opacity duration-300',
-              activeSlide === 1
-                ? 'opacity-100'
-                : 'opacity-0 pointer-events-none',
-            )}
-          >
-            {renderBudgetSlide(t)}
-          </div>
-          <div
-            className={cn(
-              'absolute inset-0 transition-opacity duration-300',
-              activeSlide === 2
-                ? 'opacity-100'
-                : 'opacity-0 pointer-events-none',
-            )}
-          >
-            {renderAnalyticsSlide()}
+      {/* Device frame */}
+      <div className="relative">
+        <div className="absolute -inset-1 rounded-3xl bg-gradient-to-b from-primary/20 to-primary/5 blur-md" />
+        <div className="relative rounded-2xl border border-border/60 bg-card/95 backdrop-blur-sm shadow-lg shadow-black/10 overflow-hidden text-left">
+          {renderMockStatusBar()}
+          <div className="relative h-[230px]">
+            <div
+              className={cn(
+                'absolute inset-0 transition-opacity duration-300',
+                activeSlide === 0
+                  ? 'opacity-100'
+                  : 'opacity-0 pointer-events-none',
+              )}
+            >
+              {renderExpenseSlide(t)}
+            </div>
+            <div
+              className={cn(
+                'absolute inset-0 transition-opacity duration-300',
+                activeSlide === 1
+                  ? 'opacity-100'
+                  : 'opacity-0 pointer-events-none',
+              )}
+            >
+              {renderBudgetSlide(t)}
+            </div>
+            <div
+              className={cn(
+                'absolute inset-0 transition-opacity duration-300',
+                activeSlide === 2
+                  ? 'opacity-100'
+                  : 'opacity-0 pointer-events-none',
+              )}
+            >
+              {renderAnalyticsSlide()}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Dot indicators */}
-      <div className="flex justify-center gap-1.5 mt-3">
+      <div className="flex justify-center gap-0 mt-4">
         {Array.from({ length: SLIDE_COUNT }, (_, i) => (
           <button
             key={i}
             type="button"
             onClick={() => setActiveSlide(i)}
-            className={cn(
-              'h-1.5 rounded-full transition-all duration-300',
-              activeSlide === i
-                ? 'w-4 bg-primary'
-                : 'w-1.5 bg-muted-foreground/30',
-            )}
             aria-label={`Slide ${i + 1}`}
-          />
+            className="group p-2 cursor-pointer rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
+            <div
+              className={cn(
+                'h-1.5 rounded-full transition-all duration-300',
+                activeSlide === i
+                  ? 'w-5 bg-primary'
+                  : 'w-1.5 bg-muted-foreground/30 group-hover:bg-muted-foreground/50',
+              )}
+            />
+          </button>
         ))}
       </div>
     </div>
   );
 };
 
-// ─── Slide render functions ──────────────────────────────────────────────────
+// ─── Render helpers ───────────────────────────────────────────────────────────
+
+const renderBackground = () => (
+  <>
+    <div
+      className="absolute -top-20 left-1/2 -translate-x-1/2 w-[500px] h-[300px] rounded-full pointer-events-none"
+      style={{
+        background:
+          'radial-gradient(ellipse at center, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
+        filter: 'blur(40px)',
+      }}
+    />
+    <div
+      className="absolute top-40 -left-40 w-72 h-72 rounded-full pointer-events-none"
+      style={{
+        background:
+          'radial-gradient(circle, hsl(var(--primary) / 0.08) 0%, transparent 70%)',
+        filter: 'blur(60px)',
+      }}
+    />
+    <div
+      className="absolute top-60 -right-40 w-80 h-80 rounded-full pointer-events-none"
+      style={{
+        background:
+          'radial-gradient(circle, hsl(var(--primary) / 0.06) 0%, transparent 70%)',
+        filter: 'blur(80px)',
+      }}
+    />
+  </>
+);
 
 type TranslateFn = (key: string, opts?: Record<string, unknown>) => string;
 
+const renderBadgePill = (t: TranslateFn) => (
+  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/25 bg-primary/10 text-xs font-medium text-primary animate-fade-up">
+    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shrink-0" />
+    {t('landing.hero.freeToUse')}
+  </div>
+);
+
+const renderHeading = (t: TranslateFn) => (
+  <h1
+    className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl"
+    style={{ lineHeight: '1.08' }}
+  >
+    {t('landing.hero.heading1')}
+    <span className="block mt-2 bg-gradient-to-r from-primary via-primary/85 to-primary/50 bg-clip-text text-transparent">
+      {t('landing.hero.heading2')}
+    </span>
+  </h1>
+);
+
+const renderSubtitle = (t: TranslateFn) => (
+  <p className="max-w-xl mx-auto text-base sm:text-lg text-muted-foreground leading-relaxed">
+    {t('landing.hero.subtitle')}
+  </p>
+);
+
+const renderInstallButton = (
+  showInstallButton: boolean,
+  handleInstallClick: () => void,
+  t: TranslateFn,
+) => {
+  if (!showInstallButton) return null;
+
+  return (
+    <Button
+      size="lg"
+      variant="outline"
+      onClick={handleInstallClick}
+      className="group w-full sm:w-auto"
+    >
+      <Download className="mr-2 h-4 w-4" />
+      {t('landing.hero.addToHomeScreen')}
+    </Button>
+  );
+};
+
+const renderCTAs = (
+  onGetStarted: () => void,
+  showInstallButton: boolean,
+  handleInstallClick: () => void,
+  t: TranslateFn,
+) => (
+  <div className="flex flex-col sm:flex-row gap-3 justify-center items-center pt-2">
+    <Button
+      size="lg"
+      onClick={onGetStarted}
+      className="group w-full sm:w-auto min-w-[160px] shadow-lg shadow-primary/20"
+    >
+      {t('landing.hero.getStarted')}
+      <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+    </Button>
+    {renderInstallButton(showInstallButton, handleInstallClick, t)}
+  </div>
+);
+
+const renderTrustRow = (t: TranslateFn) => (
+  <div className="flex items-center justify-center gap-5 pt-1">
+    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <Lock className="h-3 w-3" />
+      <span>{t('landing.hero.trustedPrivate')}</span>
+    </div>
+    <div className="w-px h-3 bg-border/60" />
+    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <Zap className="h-3 w-3" />
+      <span>{t('landing.hero.freeToUse').split('·')[0].trim()}</span>
+    </div>
+    <div className="w-px h-3 bg-border/60" />
+    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <Sparkles className="h-3 w-3" />
+      <span>{t('landing.hero.trustedFree')}</span>
+    </div>
+  </div>
+);
+
+const renderMockStatusBar = () => (
+  <div className="flex items-center justify-between px-4 py-2 border-b border-border/40 bg-muted/20">
+    <span className="text-[10px] font-medium text-muted-foreground">
+      budgard
+    </span>
+    <div className="flex items-center gap-1">
+      <div className="w-3 h-1.5 rounded-sm bg-muted-foreground/30" />
+      <div className="w-3 h-1.5 rounded-sm bg-muted-foreground/20" />
+    </div>
+  </div>
+);
+
+// ─── Slide render functions ───────────────────────────────────────────────────
+
 const renderExpenseSlide = (t: TranslateFn) => (
   <div>
-    <div className="px-4 pt-4 pb-3 border-b bg-muted/20">
-      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+    <div className="px-4 pt-4 pb-3 border-b border-border/40 bg-muted/10">
+      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
         {t('navigation.expenses')}
       </p>
-      <p className="text-xl font-bold tabular-nums mt-0.5">€1,058.49</p>
+      <p className="text-2xl font-bold tabular-nums mt-0.5">€1,058.49</p>
     </div>
-    <div className="p-2">
-      {renderPreviewExpense('Rent', 'Housing', '€800.00', '#6366f1')}
+    <div className="p-2 space-y-1">
+      {renderPreviewExpense('Rent', 'Housing', '€800.00', '#f97316')}
       {renderPreviewExpense('Groceries', 'Food', '€245.50', '#22c55e')}
-      {renderPreviewExpense('Netflix', 'Subscriptions', '€12.99', '#f97316')}
+      {renderPreviewExpense('Netflix', 'Subscriptions', '€12.99', '#3b82f6')}
     </div>
   </div>
 );
@@ -215,10 +304,10 @@ const renderExpenseSlide = (t: TranslateFn) => (
 const renderBudgetSlide = (t: TranslateFn) => (
   <div className="p-4 space-y-4">
     <div>
-      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
         {t('budget.monthlyBudget')}
       </p>
-      <p className="text-xl font-bold tabular-nums mt-0.5">€2,000.00</p>
+      <p className="text-2xl font-bold tabular-nums mt-0.5">€2,000.00</p>
     </div>
     <div className="space-y-2">
       <div className="flex justify-between text-xs text-muted-foreground">
@@ -226,19 +315,19 @@ const renderBudgetSlide = (t: TranslateFn) => (
           {t('landing.hero.previewBudget', { percent: 53, amount: '€2,000' })}
         </span>
       </div>
-      <div className="h-3 rounded-full bg-muted overflow-hidden">
+      <div className="h-2 rounded-full bg-muted overflow-hidden">
         <div
           className="h-full rounded-full bg-primary transition-all duration-1000"
           style={{ width: '53%' }}
         />
       </div>
     </div>
-    <div className="space-y-1.5">
-      {renderBudgetCategory('Housing', 40, '#6366f1')}
+    <div className="space-y-2">
+      {renderBudgetCategory('Housing', 40, '#f97316')}
       {renderBudgetCategory('Food', 23, '#22c55e')}
-      {renderBudgetCategory('Subscriptions', 12, '#f97316')}
-      {renderBudgetCategory('Transport', 15, '#3b82f6')}
-      {renderBudgetCategory('Other', 10, '#8b5cf6')}
+      {renderBudgetCategory('Subscriptions', 12, '#3b82f6')}
+      {renderBudgetCategory('Transport', 15, '#8b5cf6')}
+      {renderBudgetCategory('Other', 10, '#ec4899')}
     </div>
   </div>
 );
@@ -248,7 +337,7 @@ const renderAnalyticsSlide = () => {
   const max = Math.max(...sparkData);
   const points = sparkData
     .map((val, i) => {
-      const x = (i / (sparkData.length - 1)) * 260;
+      const x = (i / (sparkData.length - 1)) * 280;
       const y = 80 - (val / max) * 70;
 
       return `${x},${y}`;
@@ -257,14 +346,14 @@ const renderAnalyticsSlide = () => {
 
   return (
     <div className="p-4">
-      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
         Monthly Trends
       </p>
-      <p className="text-xl font-bold tabular-nums mt-0.5">€8,868</p>
+      <p className="text-2xl font-bold tabular-nums mt-0.5">€8,868</p>
       <p className="text-xs text-muted-foreground mt-0.5">12-month total</p>
       <svg
-        viewBox="0 0 260 90"
-        className="w-full mt-3"
+        viewBox="0 0 280 90"
+        className="w-full mt-4"
         preserveAspectRatio="none"
       >
         <defs>
@@ -272,17 +361,17 @@ const renderAnalyticsSlide = () => {
             <stop
               offset="0%"
               stopColor="hsl(var(--primary))"
-              stopOpacity="0.5"
+              stopOpacity="0.4"
             />
             <stop
               offset="100%"
               stopColor="hsl(var(--primary))"
-              stopOpacity="0.05"
+              stopOpacity="0.03"
             />
           </linearGradient>
         </defs>
         <polygon
-          points={`0,90 ${points} 260,90`}
+          points={`0,90 ${points} 280,90`}
           fill="url(#heroSparkGradient)"
         />
         <polyline
@@ -306,17 +395,22 @@ const renderPreviewExpense = (
 ) => (
   <div
     key={description}
-    className="flex items-center gap-3 px-2 py-2 rounded-lg"
+    className="flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-muted/30 transition-colors"
   >
     <div
-      className="w-1 h-8 rounded-full shrink-0"
-      style={{ backgroundColor: color }}
-    />
-    <div className="flex-1 min-w-0">
-      <p className="text-xs font-medium truncate">{description}</p>
-      <p className="text-xs text-muted-foreground">{category}</p>
+      className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center"
+      style={{ backgroundColor: `${color}18` }}
+    >
+      <div
+        className="w-2.5 h-2.5 rounded-full"
+        style={{ backgroundColor: color }}
+      />
     </div>
-    <p className="text-xs font-semibold tabular-nums">{amount}</p>
+    <div className="flex-1 min-w-0">
+      <p className="text-xs font-semibold truncate">{description}</p>
+      <p className="text-[10px] text-muted-foreground">{category}</p>
+    </div>
+    <p className="text-xs font-bold tabular-nums">{amount}</p>
   </div>
 );
 
@@ -327,7 +421,7 @@ const renderBudgetCategory = (name: string, percent: number, color: string) => (
       style={{ backgroundColor: color }}
     />
     <span className="text-xs flex-1 truncate">{name}</span>
-    <span className="text-xs text-muted-foreground tabular-nums">
+    <span className="text-xs font-medium tabular-nums text-muted-foreground">
       {percent}%
     </span>
   </div>
