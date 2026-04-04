@@ -55,7 +55,7 @@ export const ExpenseLoadingState = () => {
         </div>
 
         {/* Monthly overview card */}
-        <div className="rounded-lg border p-4 space-y-3">
+        <div className="rounded-2xl border border-border/50 p-4 space-y-3">
           <Skeleton className="h-3 w-24" />
           <Skeleton className="h-8 w-36" />
           <div className="grid grid-cols-2 gap-4 pt-2 border-t">
@@ -94,14 +94,11 @@ const renderSkeletonCards = () => {
       {SKELETON_ROWS.map((row, i) => (
         <div
           key={`skeleton-${i}`}
-          className="rounded-lg border overflow-hidden"
+          className="rounded-2xl border border-border/50 overflow-hidden"
         >
           <div className="flex">
             {/* Category accent strip */}
-            <Skeleton
-              className="w-1 rounded-none shrink-0"
-              style={{ height: 64 }}
-            />
+            <Skeleton className="w-1 h-16 rounded-none shrink-0" />
             <div className="p-4 flex-1 flex items-center justify-between gap-4">
               <div className="flex-1 space-y-2 min-w-0">
                 <div className="flex items-center gap-2">

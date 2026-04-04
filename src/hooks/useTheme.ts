@@ -20,6 +20,8 @@ const getInitialTheme = (): Theme => {
   }
 };
 
+const ACCENT_CSS_PROPS = ['--primary', '--primary-foreground', '--ring', '--chart-1'];
+
 const applyThemeToDocument = (theme: Theme): void => {
   const root = window.document.documentElement;
   root.setAttribute('data-theme', theme);
@@ -28,6 +30,12 @@ const applyThemeToDocument = (theme: Theme): void => {
     root.classList.add('dark');
   } else {
     root.classList.remove('dark');
+  }
+
+  // Barbie has a fixed palette — clear any inline accent overrides
+  // so the CSS-defined values take effect
+  if (theme === 'barbie') {
+    ACCENT_CSS_PROPS.forEach((prop) => root.style.removeProperty(prop));
   }
 
   // Update meta theme-color to match the current theme's background

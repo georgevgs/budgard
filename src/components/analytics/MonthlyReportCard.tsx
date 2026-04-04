@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { toPng } from 'html-to-image';
 import Share2 from 'lucide-react/dist/esm/icons/share-2';
 import Download from 'lucide-react/dist/esm/icons/download';
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import {
   Dialog,
   DialogContent,
@@ -159,7 +160,7 @@ const MonthlyReportCard = ({
             disabled={isExporting || totalSpent === 0}
             className="flex-1"
           >
-            {renderShareIcon()}
+            {renderShareButtonIcon(isExporting)}
             {renderShareLabel(t)}
           </Button>
           <Button
@@ -181,7 +182,11 @@ export default MonthlyReportCard;
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-const renderShareIcon = () => {
+const renderShareButtonIcon = (isExporting: boolean) => {
+  if (isExporting) {
+    return <Loader2 className="h-4 w-4 mr-2 animate-spin" />;
+  }
+
   return <Share2 className="h-4 w-4 mr-2" />;
 };
 

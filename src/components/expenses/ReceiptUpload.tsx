@@ -82,7 +82,7 @@ const ReceiptUpload = ({
 
   if (hasReceipt) {
     return (
-      <div className="flex items-center gap-3 rounded-md border border-border p-3">
+      <div className="flex items-center gap-3 rounded-2xl border border-border/50 p-3">
         {previewUrl ? (
           <img
             src={previewUrl}
@@ -138,7 +138,7 @@ const ReceiptUpload = ({
       }}
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
-      className="flex h-20 cursor-pointer items-center justify-center gap-2 rounded-md border-2 border-dashed border-muted-foreground/25 text-muted-foreground transition-colors hover:border-muted-foreground/50 hover:text-foreground"
+      className="flex h-20 cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-muted-foreground/25 text-muted-foreground transition-colors hover:border-muted-foreground/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <Camera className="h-5 w-5" />
       <span className="text-sm">{t('receipt.addReceipt')}</span>

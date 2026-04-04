@@ -339,7 +339,7 @@ const ExpensesList = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setIsImportDialogOpen(true)}
-                  className="text-muted-foreground"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   <Upload className="h-4 w-4 mr-2" />
                   {t('import.importCSV')}
@@ -444,7 +444,7 @@ const renderExportButton = (
       onClick={() =>
         downloadExpensesAsCSV({ expenses, categories, selectedMonth })
       }
-      className="text-muted-foreground"
+      className="text-muted-foreground hover:text-foreground"
     >
       <Download className="h-4 w-4 mr-2" />
       {t('expenses.exportCSV')}

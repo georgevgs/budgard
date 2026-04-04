@@ -237,6 +237,18 @@
     "dark": "Dark",
     "barbie": "Barbie"
   },
+  "accent": {
+    "pickColor": "Accent color",
+    "colors": {
+      "sunset": "Sunset",
+      "ocean": "Ocean",
+      "lavender": "Lavender",
+      "mint": "Mint",
+      "coral": "Coral",
+      "gold": "Gold",
+      "slate": "Slate"
+    }
+  },
   "speedDial": {
     "open": "Open actions menu",
     "close": "Close actions menu",
@@ -273,18 +285,18 @@
     "categoryTrends": "Category Breakdown",
     "insights": {
       "sectionTitle": "Spending Insights",
+      "dailyBudgetRemaining": "{{amount}}/day left for the next {{days}} days",
+      "budgetExceeded": "Over budget by {{amount}} — review remaining expenses",
+      "spendingPaceAhead": "Used {{budgetPercent}}% of budget but only {{timePercent}}% through the month",
+      "spendingPaceBehind": "Used {{budgetPercent}}% of budget with {{timePercent}}% of the month gone — on track",
       "monthProjection": "On track to spend ~{{amount}} this month",
       "categoryUp": "{{name}} is up {{percent}}% vs last month",
       "categoryDown": "{{name}} is down {{percent}}% vs last month",
-      "peakDay": "You tend to spend most on {{day}}s",
       "budgetStreak": "Under budget {{count}} months in a row",
-      "inactive": "No expenses logged in {{days}} days",
-      "largestExpense": "Biggest this month: {{amount}} ({{category}})",
-      "largestExpenseNoCategory": "Biggest this month: {{amount}}",
+      "recurringShare": "{{percent}}% of this month is recurring expenses",
       "weekendHigher": "Weekend spending is {{percent}}% higher per transaction",
       "weekdayHigher": "Weekday spending is {{percent}}% higher per transaction",
       "categoryConcentration": "{{percent}}% of this month's spending is on {{name}}",
-      "loggingStreak": "You've logged expenses {{count}} days in a row!",
       "highVolatility": "Your monthly spending varies a lot — consider a consistent budget",
       "stableSpending": "Your spending has been consistent over the past months"
     },

@@ -1,7 +1,9 @@
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import CalendarIcon from 'lucide-react/dist/esm/icons/calendar';
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import {
   DialogTitle,
   DialogHeader,
@@ -361,8 +363,16 @@ const renderSubmitLabel = (
   isSubmitting: boolean,
   isEditing: boolean,
   t: TranslateFunction,
-) => {
-  if (isSubmitting) return t('common.saving');
+): React.ReactNode => {
+  if (isSubmitting) {
+    return (
+      <>
+        <Loader2 className="h-4 w-4 animate-spin" />
+        {t('common.saving')}
+      </>
+    );
+  }
+
   if (isEditing) return t('recurring.update');
 
   return t('recurring.create');

@@ -8,6 +8,7 @@ import {
   parseCurrencyInput,
   formatCurrency,
 } from '@/lib/utils';
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -130,11 +131,7 @@ const BudgetForm = ({
                 {t('common.cancel')}
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting
-                  ? t('common.saving')
-                  : isEditing
-                    ? t('budget.updateButton')
-                    : t('budget.setButton')}
+                {renderSubmitContent(isSubmitting, isEditing, t)}
               </Button>
             </div>
           </form>
@@ -145,3 +142,29 @@ const BudgetForm = ({
 };
 
 export default BudgetForm;
+
+// ─── Helper render functions ──────────────────────────────────────────────────
+
+type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
+const renderSubmitContent = (
+  isSubmitting: boolean,
+  isEditing: boolean,
+  t: TranslateFunction,
+) => {
+  if (isSubmitting) {
+    return (
+      <>
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        {t('common.saving')}
+      </>
+    );
+  }
+
+  if (isEditing) return t('budget.updateButton');
+
+  return t('budget.setButton');
+};

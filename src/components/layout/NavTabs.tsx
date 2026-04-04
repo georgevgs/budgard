@@ -39,14 +39,14 @@ const NavTabs = () => {
             <NavLink
               key={tab.path}
               to={tab.path}
-              className="flex flex-1 flex-col items-center py-1.5"
+              className="flex flex-1 flex-col items-center py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset rounded-lg"
             >
               {({ isActive }) => (
                 <>
                   <div
                     className={cn(
                       'flex flex-col items-center gap-0.5 px-5 py-1.5 rounded-2xl transition-all duration-200',
-                      isActive ? 'bg-primary/10' : '',
+                      isActive ? 'bg-primary/10' : 'hover:bg-muted/50',
                     )}
                   >
                     <Icon

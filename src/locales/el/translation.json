@@ -237,6 +237,18 @@
     "dark": "Σκοτεινό",
     "barbie": "Barbie"
   },
+  "accent": {
+    "pickColor": "Χρώμα έμφασης",
+    "colors": {
+      "sunset": "Ηλιοβασίλεμα",
+      "ocean": "Ωκεανός",
+      "lavender": "Λεβάντα",
+      "mint": "Μέντα",
+      "coral": "Κοράλλι",
+      "gold": "Χρυσό",
+      "slate": "Γκρι"
+    }
+  },
   "speedDial": {
     "open": "Άνοιγμα μενού ενεργειών",
     "close": "Κλείσιμο μενού ενεργειών",
@@ -273,18 +285,18 @@
     "categoryTrends": "Ανάλυση Κατηγοριών",
     "insights": {
       "sectionTitle": "Αναλύσεις Δαπανών",
+      "dailyBudgetRemaining": "{{amount}}/ημέρα απομένουν για τις επόμενες {{days}} ημέρες",
+      "budgetExceeded": "Υπέρβαση κατά {{amount}} — ελέγξτε τα υπόλοιπα έξοδα",
+      "spendingPaceAhead": "{{budgetPercent}}% του προϋπολογισμού χρησιμοποιήθηκε ενώ μόνο {{timePercent}}% του μήνα πέρασε",
+      "spendingPaceBehind": "{{budgetPercent}}% του προϋπολογισμού με {{timePercent}}% του μήνα — σε καλό δρόμο",
       "monthProjection": "Εκτιμώμενες δαπάνες μήνα: ~{{amount}}",
       "categoryUp": "{{name}} +{{percent}}% σε σχέση με τον προηγ. μήνα",
       "categoryDown": "{{name}} -{{percent}}% σε σχέση με τον προηγ. μήνα",
-      "peakDay": "Ξοδεύετε περισσότερο {{day}}",
       "budgetStreak": "Εντός προϋπολογισμού {{count}} μήνες στη σειρά",
-      "inactive": "Δεν έχετε καταχωρίσει έξοδα εδώ και {{days}} ημέρες",
-      "largestExpense": "Μεγαλύτερο αυτό το μήνα: {{amount}} ({{category}})",
-      "largestExpenseNoCategory": "Μεγαλύτερο αυτό το μήνα: {{amount}}",
+      "recurringShare": "Το {{percent}}% του μήνα είναι επαναλαμβανόμενα έξοδα",
       "weekendHigher": "Τα Σ/Κ ξοδεύετε {{percent}}% περισσότερο ανά συναλλαγή",
       "weekdayHigher": "Τις καθημερινές ξοδεύετε {{percent}}% περισσότερο ανά συναλλαγή",
       "categoryConcentration": "Το {{percent}}% των εξόδων αυτό τον μήνα είναι στην κατηγορία {{name}}",
-      "loggingStreak": "Καταγράφετε έξοδα {{count}} ημέρες στη σειρά!",
       "highVolatility": "Οι μηνιαίες δαπάνες σας ποικίλλουν αρκετά — σκεφτείτε σταθερό προϋπολογισμό",
       "stableSpending": "Οι δαπάνες σας ήταν σταθερές τους τελευταίους μήνες"
     },

@@ -1,3 +1,4 @@
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Session } from '@supabase/supabase-js';
@@ -11,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import Check from 'lucide-react/dist/esm/icons/check';
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import {
   Form,
   FormControl,
@@ -372,9 +374,14 @@ const getSubmitButtonText = (
   isSubmitting: boolean,
   isEditing: boolean,
   t: TFunc,
-): string => {
+): React.ReactNode => {
   if (isSubmitting) {
-    return t('common.saving');
+    return (
+      <>
+        <Loader2 className="h-4 w-4 animate-spin" />
+        {t('common.saving')}
+      </>
+    );
   }
 
   if (isEditing) {

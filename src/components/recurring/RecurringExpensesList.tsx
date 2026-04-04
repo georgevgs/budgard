@@ -280,7 +280,7 @@ const renderEmptyState = (
   t: TranslateFunction,
 ) => {
   return (
-    <Card className="p-8 text-center overflow-hidden">
+    <Card className="border-border/50 rounded-2xl p-8 text-center overflow-hidden">
       <div className="flex flex-col items-center gap-3">
         <Repeat className="h-12 w-12 text-muted-foreground/50" />
         <div className="max-w-[260px]">

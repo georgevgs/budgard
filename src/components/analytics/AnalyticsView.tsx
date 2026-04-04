@@ -37,6 +37,8 @@ import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
+const BUDGET_LINE_COLOR = '#f59e0b'; // amber-500 — matches bg-amber-500 budget warning
+
 const AnalyticsView = () => {
   const { expenses, categories, monthlyBudget, isLoading } = useData();
   const { t, i18n } = useTranslation();
@@ -247,7 +249,7 @@ const AnalyticsView = () => {
           </Button>
         </div>
         <div className="flex items-baseline gap-3 flex-wrap">
-          <p className="text-3xl font-bold tabular-nums">
+          <p className="text-3xl font-bold tabular-nums tracking-tight">
             {formatCurrency(animatedThisMonth)}
           </p>
           {renderMonthChangeBadge(
@@ -299,7 +301,7 @@ const AnalyticsView = () => {
           )}
         </div>
 
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden border-border/50 rounded-2xl">
           <CardContent className="p-6">
             <div className="w-full">
               <ResponsiveContainer width="100%" height={280}>
@@ -357,14 +359,14 @@ const AnalyticsView = () => {
                   {monthlyBudget ? (
                     <ReferenceLine
                       y={monthlyBudget}
-                      stroke="#f59e0b"
+                      stroke={BUDGET_LINE_COLOR}
                       strokeDasharray="5 5"
                       label={{
                         value: t('analytics.budgetLabel', {
                           amount: monthlyBudget,
                         }),
                         position: 'right',
-                        fill: '#f59e0b',
+                        fill: BUDGET_LINE_COLOR,
                         fontSize: 11,
                       }}
                     />
@@ -595,7 +597,7 @@ const renderCategoryBreakdown = (
   }
 
   return (
-    <Card>
+    <Card className="border-border/50 rounded-2xl">
       <CardContent className="p-0 divide-y divide-border/50">
         {breakdown.map((cat) => {
           const pct = totalSpent > 0 ? (cat.amount / totalSpent) * 100 : 0;
@@ -604,7 +606,7 @@ const renderCategoryBreakdown = (
               key={cat.id}
               type="button"
               onClick={() => onCategoryClick(cat)}
-              className="flex items-center gap-4 px-5 py-3.5 w-full text-left transition-colors hover:bg-accent/50 active:bg-accent/70 cursor-pointer"
+              className="flex items-center gap-4 px-5 py-3.5 w-full text-left transition-colors hover:bg-accent/50 active:bg-accent/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset cursor-pointer"
             >
               {renderCategoryIcon(cat)}
               <span className="flex-1 text-sm font-medium truncate min-w-0">

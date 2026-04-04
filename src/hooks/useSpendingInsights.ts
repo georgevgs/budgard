@@ -1,16 +1,16 @@
 import { useMemo } from 'react';
-import { format, parseISO, getDaysInMonth, getDay, setDay } from 'date-fns';
+import { format, parseISO, getDaysInMonth, getDay } from 'date-fns';
 import type { Locale } from 'date-fns';
 import {
   TrendingUp,
   TrendingDown,
   CalendarDays,
   ShieldCheck,
-  AlertCircle,
-  Receipt,
   PieChart,
   Activity,
-  Flame,
+  Wallet,
+  Gauge,
+  Repeat,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -44,19 +44,20 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
     const lastMonthKey = format(lastMonthDate, 'yyyy-MM');
 
     const insights: (Insight | null)[] = [];
+    const dayOfMonth = now.getDate();
+    const daysInMonth = getDaysInMonth(now);
+    const MIN_DAYS_FOR_TRENDS = 7;
 
     // 1. Month Projection
     const monthProjectionInsight = (): Insight | null => {
       const { thisMonthAmount } = monthComparison;
       if (thisMonthAmount === 0) return null;
 
-      const dayOfMonth = now.getDate();
-      const daysInMonth = getDaysInMonth(now);
-
+      if (dayOfMonth < MIN_DAYS_FOR_TRENDS) return null;
       if (dayOfMonth >= daysInMonth - 1) return null;
 
       const dailyRate = thisMonthAmount / dayOfMonth;
-      const projected = dailyRate * daysInMonth;
+      const projected = Math.round(dailyRate * daysInMonth);
 
       if (projected <= thisMonthAmount * 1.05) return null;
 
@@ -134,41 +135,38 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
       };
     };
 
-    // 3. Peak Day of Week
-    const peakDayInsight = (): Insight | null => {
-      if (expenses.length < 14) return null;
+    // 3. Daily Budget Remaining
+    const dailyBudgetRemainingInsight = (): Insight | null => {
+      if (monthlyBudget === null || monthlyBudget === 0) return null;
 
-      const totals = new Array<number>(7).fill(0);
-      const uniqueDates = Array.from({ length: 7 }, () => new Set<string>());
+      const { thisMonthAmount } = monthComparison;
+      const daysRemaining = daysInMonth - dayOfMonth;
 
-      for (const e of expenses) {
-        const parsed = parseISO(e.date);
-        const dow = getDay(parsed);
-        totals[dow] += e.amount;
-        uniqueDates[dow].add(e.date);
+      if (daysRemaining <= 0) return null;
+
+      const remaining = monthlyBudget - thisMonthAmount;
+
+      if (remaining <= 0) {
+        return {
+          id: 'dailyBudgetRemaining',
+          icon: Wallet,
+          text: t('analytics.insights.budgetExceeded', {
+            amount: `${Math.abs(remaining).toFixed(2)} €`,
+          }),
+          variant: 'warning',
+        };
       }
 
-      const averages = totals.map((total, i) =>
-        uniqueDates[i].size > 0 ? total / uniqueDates[i].size : 0,
-      );
-
-      let peakDow = 0;
-      let peakAvg = 0;
-      for (let i = 0; i < 7; i++) {
-        if (averages[i] > peakAvg) {
-          peakAvg = averages[i];
-          peakDow = i;
-        }
-      }
-
-      const referenceDate = setDay(new Date(), peakDow);
-      const day = format(referenceDate, 'EEEE', { locale: dateLocale });
+      const dailyAllowance = remaining / daysRemaining;
 
       return {
-        id: 'peakDay',
-        icon: CalendarDays,
-        text: t('analytics.insights.peakDay', { day }),
-        variant: 'default',
+        id: 'dailyBudgetRemaining',
+        icon: Wallet,
+        text: t('analytics.insights.dailyBudgetRemaining', {
+          amount: `${dailyAllowance.toFixed(2)} €`,
+          days: daysRemaining,
+        }),
+        variant: dailyAllowance < 10 ? 'warning' : 'positive',
       };
     };
 
@@ -214,65 +212,72 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
       };
     };
 
-    // 5. Inactivity Nudge
-    const inactivityInsight = (): Insight | null => {
-      if (expenses.length === 0) return null;
+    // 5. Spending Pace (budget progress vs time progress)
+    const spendingPaceInsight = (): Insight | null => {
+      if (monthlyBudget === null || monthlyBudget === 0) return null;
+      if (dayOfMonth < MIN_DAYS_FOR_TRENDS) return null;
 
-      const sorted = [...expenses].sort(
-        (a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime(),
-      );
-      const latest = sorted[0];
+      const { thisMonthAmount } = monthComparison;
+      if (thisMonthAmount === 0) return null;
 
-      const daysDiff = Math.floor(
-        (Date.now() - parseISO(latest.date).getTime()) / 86400000,
-      );
+      const timeProgress = (dayOfMonth / daysInMonth) * 100;
+      const budgetProgress = (thisMonthAmount / monthlyBudget) * 100;
+      const difference = budgetProgress - timeProgress;
 
-      if (daysDiff <= 3 || daysDiff > 60) return null;
+      if (Math.abs(difference) < 5) return null;
 
-      return {
-        id: 'inactive',
-        icon: AlertCircle,
-        text: t('analytics.insights.inactive', { days: daysDiff }),
-        variant: 'warning',
-      };
-    };
-
-    // 6. Largest Single Expense This Month
-    const largestExpenseInsight = (): Insight | null => {
-      const thisMonthExpenses = expenses.filter(
-        (e) => format(parseISO(e.date), 'yyyy-MM') === thisMonthKey,
-      );
-
-      if (thisMonthExpenses.length === 0) return null;
-
-      const largest = thisMonthExpenses.reduce((prev, curr) =>
-        curr.amount > prev.amount ? curr : prev,
-      );
-
-      const formattedAmount = `${largest.amount.toFixed(2)} €`;
-      const category = largest.category_id
-        ? categories.find((c) => c.id === largest.category_id)
-        : null;
-
-      if (category) {
+      if (difference > 0) {
         return {
-          id: 'largestExpense',
-          icon: Receipt,
-          text: t('analytics.insights.largestExpense', {
-            amount: formattedAmount,
-            category: category.name,
+          id: 'spendingPace',
+          icon: Gauge,
+          text: t('analytics.insights.spendingPaceAhead', {
+            budgetPercent: Math.round(budgetProgress),
+            timePercent: Math.round(timeProgress),
           }),
-          variant: 'default',
+          variant: 'warning',
         };
       }
 
       return {
-        id: 'largestExpenseNoCategory',
-        icon: Receipt,
-        text: t('analytics.insights.largestExpenseNoCategory', {
-          amount: formattedAmount,
+        id: 'spendingPace',
+        icon: Gauge,
+        text: t('analytics.insights.spendingPaceBehind', {
+          budgetPercent: Math.round(budgetProgress),
+          timePercent: Math.round(timeProgress),
         }),
-        variant: 'default',
+        variant: 'positive',
+      };
+    };
+
+    // 6. Recurring Expenses Share
+    const recurringShareInsight = (): Insight | null => {
+      const thisMonthExpenses = expenses.filter(
+        (e) => format(parseISO(e.date), 'yyyy-MM') === thisMonthKey,
+      );
+
+      if (thisMonthExpenses.length < 3) return null;
+
+      const totalAmount = thisMonthExpenses.reduce(
+        (sum, e) => sum + e.amount,
+        0,
+      );
+      if (totalAmount === 0) return null;
+
+      const recurringAmount = thisMonthExpenses
+        .filter((e) => e.recurring_expense_id !== null && e.recurring_expense_id !== undefined)
+        .reduce((sum, e) => sum + e.amount, 0);
+
+      const recurringPercent = (recurringAmount / totalAmount) * 100;
+
+      if (recurringPercent < 10) return null;
+
+      return {
+        id: 'recurringShare',
+        icon: Repeat,
+        text: t('analytics.insights.recurringShare', {
+          percent: Math.round(recurringPercent),
+        }),
+        variant: recurringPercent > 70 ? 'warning' : 'default',
       };
     };
 
@@ -423,50 +428,13 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
       return null;
     };
 
-    // 10. Logging streak — consecutive days with expenses
-    const loggingStreakInsight = (): Insight | null => {
-      if (expenses.length === 0) return null;
-
-      const expenseDates = new Set(
-        expenses.map((e) => format(parseISO(e.date), 'yyyy-MM-dd')),
-      );
-
-      let streak = 0;
-      const today = new Date();
-
-      // Check if today has an expense; if not, start from yesterday
-      const todayKey = format(today, 'yyyy-MM-dd');
-      const startOffset = expenseDates.has(todayKey) ? 0 : 1;
-
-      for (let i = startOffset; ; i++) {
-        const date = new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          today.getDate() - i,
-        );
-        const key = format(date, 'yyyy-MM-dd');
-        if (!expenseDates.has(key)) break;
-        streak++;
-      }
-
-      if (streak < 3) return null;
-
-      return {
-        id: 'loggingStreak',
-        icon: Flame,
-        text: t('analytics.insights.loggingStreak', { count: streak }),
-        variant: 'positive',
-      };
-    };
-
     insights.push(
+      dailyBudgetRemainingInsight(),
+      spendingPaceInsight(),
       monthProjectionInsight(),
       categoryComparisonInsight(),
-      peakDayInsight(),
       budgetStreakInsight(),
-      loggingStreakInsight(),
-      inactivityInsight(),
-      largestExpenseInsight(),
+      recurringShareInsight(),
       weekendSpendingInsight(),
       categoryConcentrationInsight(),
       spendingVolatilityInsight(),

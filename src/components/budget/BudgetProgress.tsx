@@ -51,7 +51,7 @@ const BudgetProgress = ({
 
   const getProgressColor = () => {
     if (isOverBudget) return 'bg-destructive';
-    if (isWarning) return 'bg-yellow-500';
+    if (isWarning) return 'bg-amber-500';
     return 'bg-primary';
   };
 
@@ -97,7 +97,7 @@ const BudgetProgress = ({
             className={cn(
               'font-medium',
               isOverBudget && 'text-destructive',
-              isWarning && 'text-yellow-600 dark:text-yellow-500',
+              isWarning && 'text-amber-600 dark:text-amber-500',
             )}
           >
             {renderRemainingLabel(isOverBudget, remaining, t)}

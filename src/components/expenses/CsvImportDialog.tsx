@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import Upload from 'lucide-react/dist/esm/icons/upload';
-import FileText from 'lucide-react/dist/esm/icons/file-text';
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
 import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 import X from 'lucide-react/dist/esm/icons/x';
@@ -635,7 +635,7 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
           {/* Step 4: Importing */}
           {step === 'importing' && (
             <div className="py-8 text-center pb-4">
-              <FileText className="h-10 w-10 mx-auto mb-4 text-muted-foreground animate-pulse" />
+              <Loader2 className="h-10 w-10 mx-auto mb-4 text-muted-foreground animate-spin" />
               <p className="text-sm text-muted-foreground">
                 {t('import.importing', { count: validRows.length })}
               </p>

@@ -53,8 +53,8 @@ const ExpensesMonthlyOverview = ({
         disabled={!hasExpenses}
         aria-expanded={hasExpenses ? isExpanded : undefined}
         className={cn(
-          'w-full text-left transition-all',
-          hasExpenses && 'cursor-pointer hover:opacity-70',
+          'w-full text-left transition-all rounded-lg',
+          hasExpenses && 'cursor-pointer hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           !hasExpenses && 'cursor-default',
         )}
       >

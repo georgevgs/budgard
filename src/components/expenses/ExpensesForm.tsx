@@ -394,7 +394,7 @@ const ExpensesForm = ({
             <button
               type="button"
               onClick={() => setShowDetails((prev) => !prev)}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <ChevronDown
                 className={cn(
@@ -568,7 +568,7 @@ const renderCreateTagOption = (
   return (
     <button
       type="button"
-      className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left text-primary"
+      className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left text-primary disabled:opacity-50 disabled:pointer-events-none"
       onClick={onCreate}
       disabled={isCreatingTag}
     >
