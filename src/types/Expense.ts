@@ -12,6 +12,10 @@ export interface Expense {
   user_id: string;
   receipt_path?: string | null;
   created_at: string;
+  // Multi-currency: set when expense was logged in a foreign currency
+  original_amount?: number | null;
+  original_currency?: string | null;
+  exchange_rate?: number | null;
   category?: Category;
   tag?: Tag;
 }

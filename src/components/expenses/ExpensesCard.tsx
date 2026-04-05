@@ -24,7 +24,7 @@ import {
 import { format, parseISO } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import type { Expense } from '@/types/Expense';
-import { formatCurrency } from '@/lib/utils.ts';
+import { formatCurrency, formatForeignAmount } from '@/lib/utils.ts';
 
 type ExpenseCardProps = {
   expense: Expense;
@@ -100,9 +100,12 @@ const ExpensesCard = ({
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <p className="text-lg font-bold tabular-nums tracking-tight">
-                    {formatCurrency(expense.amount)}
-                  </p>
+                  <div className="text-right">
+                    <p className="text-lg font-bold tabular-nums tracking-tight">
+                      {formatCurrency(expense.amount)}
+                    </p>
+                    {renderOriginalCurrency(expense)}
+                  </div>
 
                   <DropdownMenu
                     open={dropdownOpen}
@@ -270,6 +273,16 @@ const renderDeleteDescription = (expense: Expense, t: TranslateFunction) => {
   }
 
   return `${confirmation}${actionUndone}`;
+};
+
+const renderOriginalCurrency = (expense: Expense) => {
+  if (!expense.original_currency || !expense.original_amount) return null;
+
+  return (
+    <p className="text-xs text-muted-foreground tabular-nums">
+      {formatForeignAmount(expense.original_amount, expense.original_currency)}
+    </p>
+  );
 };
 
 const renderReceiptViewer = (

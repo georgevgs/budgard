@@ -73,6 +73,12 @@
     "moreDetails": "Περισσότερες λεπτομέρειες",
     "lessDetails": "Λιγότερες λεπτομέρειες",
     "saveExpense": "Αποθήκευση Εξόδου",
+    "currency": {
+      "label": "Νόμισμα",
+      "fetchingRate": "Ανάκτηση ισοτιμίας...",
+      "rateError": "Αδυναμία ανάκτησης ισοτιμίας",
+      "convertedAmount": "≈ {{amount}}"
+    },
     "noExpensesMatchFilter": "Δεν βρέθηκαν έξοδα με τα τρέχοντα φίλτρα",
     "totalCount": "Σύνολο Εξόδων",
     "mostExpensive": "Μεγαλύτερο Έξοδο",

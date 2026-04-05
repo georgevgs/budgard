@@ -1,4 +1,4 @@
-import { useState, useMemo, useTransition } from 'react';
+import { useState, useMemo, useEffect, useTransition } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,6 +37,8 @@ import { format, parseISO } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import type { Locale } from 'date-fns';
 import { cn, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
+import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/lib/currencies';
+import { fetchExchangeRate } from '@/services/exchangeRateService';
 import { useAuth } from '@/hooks/useAuth';
 import { useData } from '@/contexts/DataContext';
 import {
@@ -94,13 +96,29 @@ const ExpensesForm = ({
   const [showDetails, setShowDetails] = useState(() =>
     Boolean(expense?.tag_id || expense?.receipt_path),
   );
+  const [selectedCurrency, setSelectedCurrency] = useState(
+    expense?.original_currency ?? 'EUR',
+  );
+  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
+  const [isFetchingRate, setIsFetchingRate] = useState(false);
+  const [rateError, setRateError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const initialAmount = expense
+    ? formatCurrencyInput(
+        (expense.original_currency && expense.original_currency !== 'EUR'
+          ? (expense.original_amount ?? expense.amount)
+          : expense.amount
+        )
+          .toString()
+          .replace('.', ','),
+      )
+    : '';
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
-      amount: expense
-        ? formatCurrencyInput(expense.amount.toString().replace('.', ','))
-        : '',
+      amount: initialAmount,
       description: expense?.description || '',
       category_id: expense?.category_id || 'none',
       tag_id: expense?.tag_id || undefined,
@@ -116,6 +134,52 @@ const ExpensesForm = ({
     const lower = tagSearch.toLowerCase();
     return tags.filter((t) => t.name.toLowerCase().includes(lower));
   }, [tags, tagSearch]);
+
+  const watchedAmount = form.watch('amount');
+  const watchedDate = form.watch('date');
+  const watchedDateStr = watchedDate ? format(watchedDate, 'yyyy-MM-dd') : '';
+
+  useEffect(() => {
+    if (selectedCurrency === 'EUR') {
+      setExchangeRate(null);
+      setRateError(false);
+      return;
+    }
+
+    if (!watchedDateStr) return;
+
+    const controller = new AbortController();
+
+    const fetchRate = async () => {
+      setIsFetchingRate(true);
+      setRateError(false);
+      try {
+        const rate = await fetchExchangeRate(
+          selectedCurrency,
+          watchedDateStr,
+          controller.signal,
+        );
+        if (!controller.signal.aborted) setExchangeRate(rate);
+      } catch {
+        if (!controller.signal.aborted) {
+          setRateError(true);
+          setExchangeRate(null);
+        }
+      } finally {
+        if (!controller.signal.aborted) setIsFetchingRate(false);
+      }
+    };
+
+    void fetchRate();
+    return () => controller.abort();
+  }, [selectedCurrency, watchedDateStr]);
+
+  const previewEurAmount = useMemo(() => {
+    if (selectedCurrency === 'EUR' || !exchangeRate) return null;
+    const raw = parseCurrencyInput(watchedAmount);
+    if (!raw) return null;
+    return Math.round(raw * exchangeRate * 100) / 100;
+  }, [exchangeRate, selectedCurrency, watchedAmount]);
 
   const descriptionValue = form.watch('description');
 
@@ -185,24 +249,55 @@ const ExpensesForm = ({
     });
   };
 
-  const handleSubmit = (values: ExpenseFormData) => {
+  const handleCurrencyChange = (value: string) => {
+    setSelectedCurrency(value);
+    setExchangeRate(null);
+    setRateError(false);
+  };
+
+  const handleSubmit = async (values: ExpenseFormData) => {
     if (!session?.user?.id) return;
 
-    const expenseData: Partial<Expense> = {
-      amount: parseCurrencyInput(values.amount),
-      description: values.description,
-      category_id: values.category_id === 'none' ? null : values.category_id,
-      tag_id: values.tag_id || null,
-      date: format(values.date, 'yyyy-MM-dd'),
-      user_id: session.user.id,
-    };
+    setIsSubmitting(true);
+    try {
+      const rawAmount = parseCurrencyInput(values.amount);
+      const dateStr = format(values.date, 'yyyy-MM-dd');
+      let finalAmount = rawAmount;
+      let originalAmount: number | null = null;
+      let originalCurrency: string | null = null;
+      let exchangeRateValue: number | null = null;
 
-    onSubmit(expenseData, expense?.id, {
-      receiptFile,
-      removeExistingReceipt,
-      existingReceiptPath: expense?.receipt_path ?? null,
-    });
-    onClose();
+      if (selectedCurrency !== 'EUR') {
+        const rate = exchangeRate ?? (await fetchExchangeRate(selectedCurrency, dateStr));
+        finalAmount = Math.round(rawAmount * rate * 100) / 100;
+        originalAmount = rawAmount;
+        originalCurrency = selectedCurrency;
+        exchangeRateValue = rate;
+      }
+
+      const expenseData: Partial<Expense> = {
+        amount: finalAmount,
+        original_amount: originalAmount,
+        original_currency: originalCurrency,
+        exchange_rate: exchangeRateValue,
+        description: values.description,
+        category_id: values.category_id === 'none' ? null : values.category_id,
+        tag_id: values.tag_id || null,
+        date: dateStr,
+        user_id: session.user.id,
+      };
+
+      onSubmit(expenseData, expense?.id, {
+        receiptFile,
+        removeExistingReceipt,
+        existingReceiptPath: expense?.receipt_path ?? null,
+      });
+      onClose();
+    } catch {
+      setRateError(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -234,26 +329,47 @@ const ExpensesForm = ({
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      €
-                    </span>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        pattern="[0-9,.]*"
-                        placeholder={t('expenses.amountPlaceholder')}
-                        value={field.value}
-                        onChange={(e) => {
-                          const formatted = formatCurrencyInput(e.target.value);
-                          field.onChange(formatted);
-                        }}
-                        className="pl-7"
-                        aria-label={t('expenses.amountLabel')}
-                      />
-                    </FormControl>
+                  <div className="flex gap-2">
+                    <Select
+                      value={selectedCurrency}
+                      onValueChange={handleCurrencyChange}
+                    >
+                      <SelectTrigger
+                        className="w-20 shrink-0"
+                        aria-label={t('expenses.currency.label')}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60">
+                        {SUPPORTED_CURRENCIES.map((c) => (
+                          <SelectItem key={c.code} value={c.code}>
+                            {c.code}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="relative flex-1">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        {getCurrencySymbol(selectedCurrency)}
+                      </span>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          inputMode="decimal"
+                          pattern="[0-9,.]*"
+                          placeholder={t('expenses.amountPlaceholder')}
+                          value={field.value}
+                          onChange={(e) => {
+                            const formatted = formatCurrencyInput(e.target.value);
+                            field.onChange(formatted);
+                          }}
+                          className="pl-7"
+                          aria-label={t('expenses.amountLabel')}
+                        />
+                      </FormControl>
+                    </div>
                   </div>
+                  {renderConversionPreview(isFetchingRate, rateError, previewEurAmount, selectedCurrency, t)}
                   <FormMessage />
                 </FormItem>
               )}
@@ -509,7 +625,9 @@ const ExpensesForm = ({
               <Button type="button" variant="outline" onClick={onClose}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit">{t('expenses.saveExpense')}</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? t('common.saving') : t('expenses.saveExpense')}
+              </Button>
             </div>
           </form>
         </Form>
@@ -527,6 +645,45 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const renderConversionPreview = (
+  isLoading: boolean,
+  hasError: boolean,
+  eurAmount: number | null,
+  currency: string,
+  t: TranslateFunction,
+) => {
+  if (currency === 'EUR') return null;
+
+  if (isLoading) {
+    return (
+      <p className="text-xs text-muted-foreground mt-1">
+        {t('expenses.currency.fetchingRate')}
+      </p>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <p className="text-xs text-destructive mt-1">
+        {t('expenses.currency.rateError')}
+      </p>
+    );
+  }
+
+  if (!eurAmount) return null;
+
+  return (
+    <p className="text-xs text-muted-foreground mt-1">
+      {t('expenses.currency.convertedAmount', {
+        amount: eurAmount.toLocaleString('de-DE', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }) + ' €',
+      })}
+    </p>
+  );
+};
 
 const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {
   if (isEditing) return t('expenses.editExpense');

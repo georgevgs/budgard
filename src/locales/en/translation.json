@@ -73,6 +73,12 @@
     "moreDetails": "More details",
     "lessDetails": "Less details",
     "saveExpense": "Save Expense",
+    "currency": {
+      "label": "Currency",
+      "fetchingRate": "Fetching rate...",
+      "rateError": "Could not fetch exchange rate",
+      "convertedAmount": "≈ {{amount}}"
+    },
     "noExpensesMatchFilter": "No expenses match your current filters",
     "totalCount": "Total Expenses",
     "mostExpensive": "Most Expensive",
