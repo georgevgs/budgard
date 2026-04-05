@@ -17,6 +17,12 @@ export function usePwaUpdate(): void {
       if (!registration) return;
       swRegistrationRef.current = registration;
 
+      // Check for an update immediately on registration.
+      // visibilitychange doesn't fire on a fresh iOS PWA open (page starts
+      // already visible), and the periodic interval hasn't fired yet —
+      // so without this call nothing would trigger a SW update check on open.
+      registration.update().catch(() => {});
+
       // Periodic update check — fetch the SW file with no-cache to detect
       // new deployments, then call update() if the server has a new version.
       setInterval(async () => {
