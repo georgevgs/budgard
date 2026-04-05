@@ -356,21 +356,7 @@ const AnalyticsView = () => {
                       strokeDasharray: '4 4',
                     }}
                   />
-                  {monthlyBudget ? (
-                    <ReferenceLine
-                      y={monthlyBudget}
-                      stroke={BUDGET_LINE_COLOR}
-                      strokeDasharray="5 5"
-                      label={{
-                        value: t('analytics.budgetLabel', {
-                          amount: monthlyBudget,
-                        }),
-                        position: 'right',
-                        fill: BUDGET_LINE_COLOR,
-                        fontSize: 11,
-                      }}
-                    />
-                  ) : null}
+                  {renderBudgetReferenceLine(monthlyBudget, t)}
                   <Area
                     type="monotone"
                     dataKey="amount"
@@ -569,6 +555,27 @@ const renderYearSummary = (
         {t('analytics.avgPerMonth', { amount: formatCurrency(monthlyAverage) })}
       </span>
     </div>
+  );
+};
+
+const renderBudgetReferenceLine = (
+  monthlyBudget: number | null,
+  t: TFunc,
+) => {
+  if (!monthlyBudget) return null;
+
+  return (
+    <ReferenceLine
+      y={monthlyBudget}
+      stroke={BUDGET_LINE_COLOR}
+      strokeDasharray="5 5"
+      label={{
+        value: t('analytics.budgetLabel', { amount: monthlyBudget }),
+        position: 'right',
+        fill: BUDGET_LINE_COLOR,
+        fontSize: 11,
+      }}
+    />
   );
 };
 

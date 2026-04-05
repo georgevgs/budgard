@@ -45,14 +45,7 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
 
   return (
     <>
-      {/* Overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-transparent z-40"
-          onClick={closeMenu}
-          role="presentation"
-        />
-      )}
+      {renderOverlay(isOpen, closeMenu)}
 
       <div className="fixed bottom-24 right-4 z-50 flex flex-col items-end gap-2 pb-safe-b pointer-events-none">
         {/* Action Buttons */}
@@ -125,7 +118,7 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
           aria-label={t(isOpen ? 'speedDial.close' : 'speedDial.open')}
           aria-expanded={isOpen}
         >
-          {isOpen ? <X className="h-6 w-6" /> : <Plus className="h-6 w-6" />}
+          {renderToggleIcon(isOpen)}
         </Button>
       </div>
     </>
@@ -133,3 +126,23 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
 };
 
 export default SpeedDial;
+
+// ─── Helper render functions ──────────────────────────────────────────────────
+
+const renderOverlay = (isOpen: boolean, onClose: () => void) => {
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 bg-transparent z-40"
+      onClick={onClose}
+      role="presentation"
+    />
+  );
+};
+
+const renderToggleIcon = (isOpen: boolean) => {
+  if (isOpen) return <X className="h-6 w-6" />;
+
+  return <Plus className="h-6 w-6" />;
+};

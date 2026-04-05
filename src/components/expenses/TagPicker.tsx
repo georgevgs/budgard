@@ -46,7 +46,7 @@ export const TagClearButton = ({ onClear }: TagClearButtonProps) => {
       role="button"
       tabIndex={0}
       aria-label="Clear tag"
-      className="ml-auto p-1 -mr-1 shrink-0 opacity-50 hover:opacity-100 rounded-full cursor-pointer"
+      className="ml-auto p-1 -mr-1 shrink-0 opacity-50 hover:opacity-100 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       onClick={handleClick}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {

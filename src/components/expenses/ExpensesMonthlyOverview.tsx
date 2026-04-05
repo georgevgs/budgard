@@ -44,6 +44,10 @@ const ExpensesMonthlyOverview = ({
         )
       : null;
 
+  const totalLabel = hasActiveFilters
+    ? t('expenses.filteredTotal')
+    : t('expenses.monthlyTotal');
+
   return (
     <div className="flex flex-col gap-4 bg-card border border-border/40 rounded-2xl p-5 shadow-sm">
       {/* Monthly Total */}
@@ -59,83 +63,137 @@ const ExpensesMonthlyOverview = ({
         )}
       >
         <p className="text-sm font-medium text-muted-foreground">
-          {hasActiveFilters
-            ? t('expenses.filteredTotal')
-            : t('expenses.monthlyTotal')}
+          {totalLabel}
         </p>
         <p className="text-3xl font-bold tracking-tight tabular-nums">
           {formatCurrency(animatedTotal)}
         </p>
-        {hasActiveFilters && (
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {t('expenses.ofMonthlyTotal', {
-              total: formatCurrency(monthlyTotal),
-            })}
-          </p>
-        )}
-        {hasExpenses && (
-          <div className="flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
-            <ChevronDown
-              className={cn(
-                'h-3 w-3 transition-transform duration-200',
-                isExpanded && 'rotate-180',
-              )}
-            />
-            <span>
-              {t(
-                isExpanded
-                  ? 'expenses.hideBreakdown'
-                  : 'expenses.showBreakdown',
-              )}
-            </span>
-          </div>
-        )}
+        {renderFilteredSubtotalNote(hasActiveFilters, monthlyTotal, t)}
+        {renderExpandHint(hasExpenses, isExpanded, t)}
       </button>
 
       {/* Statistics */}
-      {hasExpenses && (
-        <dl className="grid grid-cols-2 gap-4 pt-2 border-t">
-          {/* Number of Expenses */}
-          <div>
-            <dt className="text-sm text-muted-foreground">
-              {t('expenses.totalCount')}
-            </dt>
-            <dd className="text-lg font-semibold">{expenses.length}</dd>
-          </div>
-
-          {/* Most Expensive */}
-          {mostExpensive && (
-            <div>
-              <dt className="text-sm text-muted-foreground">
-                {t('expenses.mostExpensive')}
-              </dt>
-              <dd className="text-lg font-semibold">
-                {formatCurrency(mostExpensive.amount)}
-              </dd>
-              <dd className="text-xs text-muted-foreground truncate">
-                {mostExpensive.description}
-              </dd>
-            </div>
-          )}
-        </dl>
-      )}
+      {renderStats(hasExpenses, expenses, mostExpensive, t)}
 
       {/* Action Buttons */}
-      {selectedMonth !== currentMonth && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onCurrentMonthClick}
-            className="text-muted-foreground"
-          >
-            <CalendarDays className="h-4 w-4 mr-2" />
-            {t('navigation.today')}
-          </Button>
-        </div>
-      )}
+      {renderCurrentMonthButton(selectedMonth, currentMonth, onCurrentMonthClick, t)}
     </div>
   );
 };
 
 export default ExpensesMonthlyOverview;
+
+// ─── Helper render functions ──────────────────────────────────────────────────
+
+type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
+const renderFilteredSubtotalNote = (
+  hasActiveFilters: boolean,
+  monthlyTotal: number,
+  t: TranslateFunction,
+) => {
+  if (!hasActiveFilters) return null;
+
+  return (
+    <p className="text-xs text-muted-foreground mt-0.5">
+      {t('expenses.ofMonthlyTotal', {
+        total: formatCurrency(monthlyTotal),
+      })}
+    </p>
+  );
+};
+
+const renderExpandHint = (
+  hasExpenses: boolean,
+  isExpanded: boolean,
+  t: TranslateFunction,
+) => {
+  if (!hasExpenses) return null;
+
+  const breakdownLabel = isExpanded
+    ? t('expenses.hideBreakdown')
+    : t('expenses.showBreakdown');
+
+  return (
+    <div className="flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
+      <ChevronDown
+        className={cn(
+          'h-3 w-3 transition-transform duration-200',
+          isExpanded && 'rotate-180',
+        )}
+      />
+      <span>{breakdownLabel}</span>
+    </div>
+  );
+};
+
+const renderMostExpensive = (
+  mostExpensive: Expense | null,
+  t: TranslateFunction,
+) => {
+  if (!mostExpensive) return null;
+
+  return (
+    <div>
+      <dt className="text-sm text-muted-foreground">
+        {t('expenses.mostExpensive')}
+      </dt>
+      <dd className="text-lg font-semibold">
+        {formatCurrency(mostExpensive.amount)}
+      </dd>
+      <dd className="text-xs text-muted-foreground truncate">
+        {mostExpensive.description}
+      </dd>
+    </div>
+  );
+};
+
+const renderStats = (
+  hasExpenses: boolean,
+  expenses: Expense[],
+  mostExpensive: Expense | null,
+  t: TranslateFunction,
+) => {
+  if (!hasExpenses) return null;
+
+  return (
+    <dl className="grid grid-cols-2 gap-4 pt-2 border-t">
+      {/* Number of Expenses */}
+      <div>
+        <dt className="text-sm text-muted-foreground">
+          {t('expenses.totalCount')}
+        </dt>
+        <dd className="text-lg font-semibold">{expenses.length}</dd>
+      </div>
+
+      {/* Most Expensive */}
+      {renderMostExpensive(mostExpensive, t)}
+    </dl>
+  );
+};
+
+const renderCurrentMonthButton = (
+  selectedMonth: string,
+  currentMonth: string,
+  onCurrentMonthClick: () => void,
+  t: TranslateFunction,
+) => {
+  if (selectedMonth === currentMonth) return null;
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onCurrentMonthClick}
+        className="text-muted-foreground"
+      >
+        <CalendarDays className="h-4 w-4 mr-2" />
+        {t('navigation.today')}
+      </Button>
+    </div>
+  );
+};
