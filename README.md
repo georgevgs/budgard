@@ -21,7 +21,7 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 ## What it does
 
 **Expenses**
-- Log expenses with amount, description, date, category, tag, and optional receipt photo
+- Log expenses with amount, description, date, category, tag, currency, and optional receipt photo
 - Date-grouped feed with sticky headers (Today, Yesterday, or formatted date)
 - Filter and search by category, tag, date range, or keyword
 - Sort by date or amount, search across all months
@@ -54,7 +54,7 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 
 **Receipts**
 - Photo capture with drag-and-drop or tap-to-upload
-- Client-side compression (WebP, max 5MB)
+- Client-side compression to WebP (1MB target, 10MB max input)
 - Inline preview and viewer
 
 **Other**
@@ -68,7 +68,7 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 
 React 19 + TypeScript + Vite on the frontend. Supabase handles auth (email OTP), the Postgres database, file storage for receipts, and an Edge Function for recurring expense generation. Deployed on Netlify.
 
-UI components from shadcn/ui, charts from Recharts, forms from react-hook-form + Zod. State lives in React Context with optimistic updates via `useOptimistic` so the UI never feels slow. Cloudflare Turnstile protects the auth flow. Errors are monitored with Sentry.
+UI components from shadcn/ui, charts from Recharts, forms from react-hook-form + Zod. State lives in React Context with optimistic updates (custom rollback pattern) so the UI never feels slow. Cloudflare Turnstile protects the auth flow. Errors are monitored with Sentry.
 
 ### Key architecture
 
@@ -132,9 +132,9 @@ npm test             # Run tests (Vitest)
 Tests use Vitest + React Testing Library with jsdom. Coverage targets `src/lib/`, `src/hooks/`, and `src/services/`.
 
 ```bash
-npx vitest run              # run all tests
-npx vitest run --coverage   # with coverage report
-npx vitest                  # watch mode
+npm test                    # run all tests
+npm run test:coverage       # with coverage report
+npm run test:watch          # watch mode
 ```
 
 ## Contributing

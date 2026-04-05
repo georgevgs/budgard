@@ -104,7 +104,7 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
     }
     setIsSubmitting(false);
     setStep(2);
-  }, [selectedCategories, session?.user?.id, setCategories]);
+  }, [selectedCategories, session?.user?.id, setCategories, t]);
 
   const handleCategoryToggle = useCallback((index: number) => {
     setSelectedCategories((prev) => {

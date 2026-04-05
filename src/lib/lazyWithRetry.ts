@@ -18,7 +18,7 @@ const lazyWithRetry = <T extends ComponentType<unknown>>(
   lazy(async () => {
     try {
       return await importFn();
-    } catch (_error) {
+    } catch {
       const returnTo = encodeURIComponent(window.location.pathname);
       window.location.replace(`/reset?from=${returnTo}`);
 

@@ -74,9 +74,13 @@ export const dataUrlToBlob = (dataUrl: string): Blob => {
   return new Blob([bytes], { type: mime });
 };
 
-// Strip non-emoji characters so the input only accepts emoji
+// Strip non-emoji characters so the input only accepts emoji.
+// ZWJ (\u{200D}) and variation selectors (\u{FE0F}) are matched individually
+// so that join() reconstructs full emoji sequences (e.g. family emoji).
+/* eslint-disable no-misleading-character-class */
 const EMOJI_PATTERN =
   /[\p{Emoji_Presentation}\p{Extended_Pictographic}\u{200D}\u{FE0F}]/gu;
+/* eslint-enable no-misleading-character-class */
 
 export function extractEmoji(input: string): string {
   const matches = input.match(EMOJI_PATTERN);

@@ -179,7 +179,7 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
     setCategoryMappings(initialMappings);
 
     setStep('preview');
-  }, [csvContent, categories, columnMapping, skipIncome]);
+  }, [csvContent, categories, columnMapping, skipIncome, csvPreview]);
 
   const handleCategoryMapping = useCallback(
     (categoryName: string, categoryId: string | null) => {

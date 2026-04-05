@@ -19,7 +19,8 @@ describe('cn', () => {
   });
 
   it('handles conditional classes', () => {
-    expect(cn('base', false && 'hidden', 'end')).toBe('base end');
+    const condition = false;
+    expect(cn('base', condition && 'hidden', 'end')).toBe('base end');
   });
 });
 

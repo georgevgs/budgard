@@ -50,7 +50,7 @@ export const useSwipeToClose = ({
         setTranslateY(deltaY);
       }
     },
-    [isDragging, enabled, threshold],
+    [isDragging, enabled],
   );
 
   const handleTouchEnd = useCallback(() => {
