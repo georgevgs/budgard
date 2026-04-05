@@ -68,9 +68,12 @@ export const dataService = {
   },
 
   async updateExpense(expenseData: Partial<Expense>, expenseId: string) {
+    // Strip immutable fields — user_id, id, created_at must never be changed via update.
+    // RLS WITH CHECK also enforces this server-side, but stripping client-side is defence-in-depth.
+    const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = expenseData;
     const { data, error } = await supabase
       .from('expenses')
-      .update(expenseData)
+      .update(safeUpdate)
       .eq('id', expenseId)
       .select(
         `*, category:categories(*), tag:tags(*), recurring_expense:recurring_expenses(*)`,
@@ -132,9 +135,10 @@ export const dataService = {
   },
 
   async updateCategory(categoryId: string, categoryData: Partial<Category>) {
+    const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = categoryData;
     const { data, error } = await supabase
       .from('categories')
-      .update(categoryData)
+      .update(safeUpdate)
       .eq('id', categoryId)
       .select()
       .single();
@@ -185,9 +189,10 @@ export const dataService = {
     expenseData: Partial<RecurringExpense>,
     expenseId: string,
   ) {
+    const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = expenseData;
     const { data, error } = await supabase
       .from('recurring_expenses')
-      .update(expenseData)
+      .update(safeUpdate)
       .eq('id', expenseId)
       .select(`*, category:categories(*)`)
       .single();
