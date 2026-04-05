@@ -1,4 +1,5 @@
 import type { Category } from '@/types/Category';
+import { SAFE_STRING } from '@/lib/validations';
 
 export interface ParsedExpenseRow {
   date: string;
@@ -288,6 +289,16 @@ export function parseExpensesCsv(
         rowNumber,
         field: 'description',
         message: 'Description must be less than 100 characters',
+        rawValue: description,
+      });
+      continue;
+    }
+
+    if (!SAFE_STRING.test(trimmedDescription)) {
+      errors.push({
+        rowNumber,
+        field: 'description',
+        message: 'Description contains invalid characters',
         rawValue: description,
       });
       continue;
