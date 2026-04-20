@@ -109,7 +109,6 @@ const ExpensesList = () => {
     categories,
     expenses,
     tags,
-    isLoading,
     isInitialized,
     monthlyBudget,
     setMonthlyBudget,
