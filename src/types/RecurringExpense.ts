@@ -1,6 +1,6 @@
 import { Category } from '@/types/Category';
 
-export type RecurringExpenseFrequency =
+type RecurringExpenseFrequency =
   | 'weekly'
   | 'biweekly'
   | 'monthly'
@@ -20,13 +20,4 @@ export interface RecurringExpense {
   created_at: string;
   active: boolean;
   category?: Category;
-}
-
-export interface RecurringExpenseFormData {
-  amount: string;
-  description: string;
-  category_id: string;
-  frequency: RecurringExpenseFrequency;
-  start_date: Date;
-  end_date?: Date;
 }

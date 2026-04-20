@@ -20,7 +20,7 @@ export type AccentColorKey =
   | 'gold'
   | 'slate';
 
-export type AccentColorOption = {
+type AccentColorOption = {
   key: AccentColorKey;
   values: AccentValues;
 };

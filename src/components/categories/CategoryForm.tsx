@@ -29,7 +29,7 @@ import { categorySchema, type CategoryFormData } from '@/lib/validations';
 import type { Category } from '@/types/Category';
 
 // Common expense-related emojis for quick category identification
-export const CATEGORY_ICONS = [
+const CATEGORY_ICONS = [
   '🍔', '🛒', '🏠', '🚗', '🎬', '💊', '👕', '💡',
   '🎮', '✈️', '📱', '🎓', '💇', '🐾', '🎁', '☕',
   '🍕', '🍺', '🏋️', '💼', '🎵', '📚', '🧹', '👶',
@@ -37,7 +37,7 @@ export const CATEGORY_ICONS = [
 
 // Tailwind 500-weight palette — vivid enough to pop at small sizes,
 // refined enough to look modern across light and dark themes.
-export const CATEGORY_COLORS = [
+const CATEGORY_COLORS = [
   '#f43f5e', // rose
   '#f97316', // orange
   '#f59e0b', // amber
@@ -64,7 +64,7 @@ export const CATEGORY_COLORS = [
   '#334155', // slate-dark
 ] as const;
 
-export const DEFAULT_CATEGORY_COLOR = '#6366f1';
+const DEFAULT_CATEGORY_COLOR = '#6366f1';
 
 type Props = {
   category?: Category;

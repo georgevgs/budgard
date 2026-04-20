@@ -16,6 +16,11 @@ export interface ReceiptOptions {
   existingReceiptPath: string | null;
 }
 
+type ReceiptResult = {
+  receiptPath: string | null;
+  receiptFailed: boolean;
+};
+
 export function useDataOperations() {
   const {
     isInitialized,
@@ -49,37 +54,16 @@ export function useDataOperations() {
           ? await dataService.updateExpense(expenseData, expenseId)
           : await dataService.createExpense(expenseData);
 
-        // Handle receipt after expense is saved (we need the real ID)
         let receiptPath = savedExpense.receipt_path ?? null;
         let receiptFailed = false;
 
-        if (receiptOptions) {
-          const { receiptFile, removeExistingReceipt, existingReceiptPath } =
-            receiptOptions;
+        if (receiptOptions && expenseData.user_id) {
+          ({ receiptPath, receiptFailed } = await processReceipt(
+            savedExpense,
+            receiptOptions,
+            expenseData.user_id,
+          ));
 
-          // Upload new receipt first, then delete old one to prevent data loss
-          if (receiptFile && expenseData.user_id) {
-            try {
-              receiptPath = await uploadReceipt(
-                receiptFile,
-                expenseData.user_id,
-                savedExpense.id,
-              );
-              // Clean up old receipt after successful upload
-              if (existingReceiptPath) {
-                deleteReceipt(existingReceiptPath).catch(() => {});
-              }
-            } catch {
-              receiptFailed = true;
-            }
-          } else if (removeExistingReceipt) {
-            receiptPath = null;
-            if (existingReceiptPath) {
-              deleteReceipt(existingReceiptPath).catch(() => {});
-            }
-          }
-
-          // Update expense with receipt_path if changed
           if (
             !receiptFailed &&
             receiptPath !== (savedExpense.receipt_path ?? null)
@@ -424,3 +408,35 @@ export function useDataOperations() {
     handleRecurringExpenseToggle,
   };
 }
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+// Upload new receipt first, then remove old one to prevent data loss.
+const processReceipt = async (
+  savedExpense: Expense,
+  receiptOptions: ReceiptOptions,
+  userId: string,
+): Promise<ReceiptResult> => {
+  const { receiptFile, removeExistingReceipt, existingReceiptPath } =
+    receiptOptions;
+  let receiptPath = savedExpense.receipt_path ?? null;
+  let receiptFailed = false;
+
+  if (receiptFile) {
+    try {
+      receiptPath = await uploadReceipt(receiptFile, userId, savedExpense.id);
+      if (existingReceiptPath) {
+        deleteReceipt(existingReceiptPath).catch(() => {});
+      }
+    } catch {
+      receiptFailed = true;
+    }
+  } else if (removeExistingReceipt) {
+    receiptPath = null;
+    if (existingReceiptPath) {
+      deleteReceipt(existingReceiptPath).catch(() => {});
+    }
+  }
+
+  return { receiptPath, receiptFailed };
+};

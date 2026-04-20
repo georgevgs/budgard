@@ -24,7 +24,7 @@ export interface CsvPreviewData {
   hasNegativeAmounts: boolean; // True if CSV contains negative values (bank statement format)
 }
 
-export interface CsvParseResult {
+interface CsvParseResult {
   validRows: ParsedExpenseRow[];
   errors: CsvParseError[];
   unmatchedCategories: string[];
@@ -214,17 +214,11 @@ export function parseExpensesCsv(
   const unmatchedCategoriesSet = new Set<string>();
   let skippedIncomeCount = 0;
 
-  // Create category lookup map (case-insensitive)
   const categoryMap = new Map(
     categories.map((cat) => [cat.name.toLowerCase(), cat]),
   );
-
-  // Auto-detect delimiter from first line
   const delimiter = lines.length > 0 ? detectDelimiter(lines[0]) : ',';
-
-  // Skip header row if present
   const startIndex = isHeaderRow(lines[0]) ? 1 : 0;
-
   const { dateColumn, descriptionColumn, amountColumn, categoryColumn } =
     columnMapping;
   const minColumns =
@@ -237,122 +231,28 @@ export function parseExpensesCsv(
 
     const rowNumber = i + 1;
     const fields = parseCsvLine(line, delimiter);
-
-    if (fields.length < minColumns) {
-      errors.push({
-        rowNumber,
-        field: 'row',
-        message: `Row must have at least ${minColumns} columns`,
-        rawValue: line,
-      });
-      continue;
-    }
-
-    // Extract fields based on column mapping
-    const dateStr = fields[dateColumn];
-    const description = fields[descriptionColumn];
-    const amountStr = fields[amountColumn];
-    const categoryName = categoryColumn !== null ? fields[categoryColumn] : '';
-
-    // Skip empty/metadata rows (common at end of bank exports)
-    const trimmedDate = dateStr.trim().replace(/^["']+|["']+$/g, ''); // Remove quotes
-    if (!trimmedDate || trimmedDate === '') {
-      continue;
-    }
-
-    // Validate date
-    const date = parseDate(trimmedDate);
-    if (!date) {
-      errors.push({
-        rowNumber,
-        field: 'date',
-        message: 'Invalid date format. Expected yyyy-MM-dd or dd/MM/yyyy',
-        rawValue: dateStr,
-      });
-      continue;
-    }
-
-    // Validate description
-    const trimmedDescription = description.trim();
-    if (!trimmedDescription) {
-      errors.push({
-        rowNumber,
-        field: 'description',
-        message: 'Description is required',
-        rawValue: description,
-      });
-      continue;
-    }
-
-    if (trimmedDescription.length > 100) {
-      errors.push({
-        rowNumber,
-        field: 'description',
-        message: 'Description must be less than 100 characters',
-        rawValue: description,
-      });
-      continue;
-    }
-
-    if (!SAFE_STRING.test(trimmedDescription)) {
-      errors.push({
-        rowNumber,
-        field: 'description',
-        message: 'Description contains invalid characters',
-        rawValue: description,
-      });
-      continue;
-    }
-
-    // Validate amount
-    // If CSV has negative amounts, treat positive as income (bank statement convention)
-    const { amount, isIncome } = parseAmount(
-      amountStr.trim(),
+    const outcome = processRow(
+      fields,
+      line,
+      rowNumber,
+      columnMapping,
+      minColumns,
+      categoryMap,
       hasNegativeAmounts,
+      skipIncomeTransactions,
     );
 
-    // Skip income transactions if enabled (for bank statements)
-    if (skipIncomeTransactions && isIncome) {
+    if (outcome.kind === 'income') {
       skippedIncomeCount++;
-      continue;
+    } else if (outcome.kind === 'error') {
+      errors.push(outcome.error);
+    } else if (outcome.kind === 'valid') {
+      if (outcome.unmatchedCategory) {
+        unmatchedCategoriesSet.add(outcome.unmatchedCategory);
+      }
+      validRows.push(outcome.row);
     }
-
-    if (amount === null || amount <= 0) {
-      errors.push({
-        rowNumber,
-        field: 'amount',
-        message: 'Invalid amount. Must be a positive number',
-        rawValue: amountStr,
-      });
-      continue;
-    }
-
-    if (amount > 1000000) {
-      errors.push({
-        rowNumber,
-        field: 'amount',
-        message: 'Amount must be less than 1,000,000',
-        rawValue: amountStr,
-      });
-      continue;
-    }
-
-    // Check category (allow empty/Uncategorized)
-    const trimmedCategory = categoryName.trim();
-    const isUncategorized =
-      !trimmedCategory || trimmedCategory.toLowerCase() === 'uncategorized';
-
-    if (!isUncategorized && !categoryMap.has(trimmedCategory.toLowerCase())) {
-      unmatchedCategoriesSet.add(trimmedCategory);
-    }
-
-    validRows.push({
-      date,
-      description: trimmedDescription,
-      categoryName: isUncategorized ? '' : trimmedCategory,
-      amount,
-      rowNumber,
-    });
+    // 'empty' → do nothing
   }
 
   return {
@@ -401,6 +301,159 @@ export function mapRowsToExpenses(
     };
   });
 }
+
+/**
+ * Reads a file and returns its content as text
+ */
+export function readFileAsText(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsText(file);
+  });
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+type RowOutcome =
+  | { kind: 'valid'; row: ParsedExpenseRow; unmatchedCategory: string | null }
+  | { kind: 'error'; error: CsvParseError }
+  | { kind: 'empty' }
+  | { kind: 'income' };
+
+const processRow = (
+  fields: string[],
+  rawLine: string,
+  rowNumber: number,
+  columnMapping: ColumnMapping,
+  minColumns: number,
+  categoryMap: Map<string, Category>,
+  hasNegativeAmounts: boolean,
+  skipIncomeTransactions: boolean,
+): RowOutcome => {
+  const { dateColumn, descriptionColumn, amountColumn, categoryColumn } =
+    columnMapping;
+
+  if (fields.length < minColumns) {
+    return {
+      kind: 'error',
+      error: {
+        rowNumber,
+        field: 'row',
+        message: `Row must have at least ${minColumns} columns`,
+        rawValue: rawLine,
+      },
+    };
+  }
+
+  const dateStr = fields[dateColumn];
+  const description = fields[descriptionColumn];
+  const amountStr = fields[amountColumn];
+  const categoryName = categoryColumn !== null ? fields[categoryColumn] : '';
+
+  // Skip empty/metadata rows (common at end of bank exports)
+  const trimmedDate = dateStr.trim().replace(/^["']+|["']+$/g, '');
+  if (!trimmedDate) return { kind: 'empty' };
+
+  const date = parseDate(trimmedDate);
+  if (!date) {
+    return {
+      kind: 'error',
+      error: {
+        rowNumber,
+        field: 'date',
+        message: 'Invalid date format. Expected yyyy-MM-dd or dd/MM/yyyy',
+        rawValue: dateStr,
+      },
+    };
+  }
+
+  const descriptionError = validateDescription(description, rowNumber);
+  if (descriptionError) return { kind: 'error', error: descriptionError };
+  const trimmedDescription = description.trim();
+
+  const { amount, isIncome } = parseAmount(amountStr.trim(), hasNegativeAmounts);
+
+  if (skipIncomeTransactions && isIncome) return { kind: 'income' };
+
+  if (amount === null || amount <= 0) {
+    return {
+      kind: 'error',
+      error: {
+        rowNumber,
+        field: 'amount',
+        message: 'Invalid amount. Must be a positive number',
+        rawValue: amountStr,
+      },
+    };
+  }
+
+  const MAX_AMOUNT = 1_000_000;
+  if (amount > MAX_AMOUNT) {
+    return {
+      kind: 'error',
+      error: {
+        rowNumber,
+        field: 'amount',
+        message: 'Amount must be less than 1,000,000',
+        rawValue: amountStr,
+      },
+    };
+  }
+
+  const trimmedCategory = categoryName.trim();
+  const isUncategorized =
+    !trimmedCategory || trimmedCategory.toLowerCase() === 'uncategorized';
+  const unmatchedCategory =
+    !isUncategorized && !categoryMap.has(trimmedCategory.toLowerCase())
+      ? trimmedCategory
+      : null;
+
+  return {
+    kind: 'valid',
+    row: {
+      date,
+      description: trimmedDescription,
+      categoryName: isUncategorized ? '' : trimmedCategory,
+      amount,
+      rowNumber,
+    },
+    unmatchedCategory,
+  };
+};
+
+const validateDescription = (
+  raw: string,
+  rowNumber: number,
+): CsvParseError | null => {
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return {
+      rowNumber,
+      field: 'description',
+      message: 'Description is required',
+      rawValue: raw,
+    };
+  }
+  if (trimmed.length > 100) {
+    return {
+      rowNumber,
+      field: 'description',
+      message: 'Description must be less than 100 characters',
+      rawValue: raw,
+    };
+  }
+  if (!SAFE_STRING.test(trimmed)) {
+    return {
+      rowNumber,
+      field: 'description',
+      message: 'Description contains invalid characters',
+      rawValue: raw,
+    };
+  }
+  return null;
+};
 
 /**
  * Checks if a line looks like a header row
@@ -514,7 +567,7 @@ function isValidDate(year: number, month: number, day: number): boolean {
   );
 }
 
-export interface AmountParseResult {
+interface AmountParseResult {
   amount: number | null;
   isIncome: boolean;
 }
@@ -574,16 +627,4 @@ function parseAmount(
     amount: Math.round(amount * 100) / 100,
     isIncome,
   };
-}
-
-/**
- * Reads a file and returns its content as text
- */
-export function readFileAsText(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(new Error('Failed to read file'));
-    reader.readAsText(file);
-  });
 }
