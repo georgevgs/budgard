@@ -259,7 +259,7 @@ const ExpensesList = () => {
     setFormType(FORM_TYPES.EDIT_EXPENSE);
   }, []);
 
-  if (!isInitialized || isLoading) {
+  if (!isInitialized) {
     return <ExpenseLoadingState />;
   }
 
