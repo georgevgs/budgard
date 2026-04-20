@@ -58,6 +58,7 @@ const FormsManager = ({
           className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
           aria-describedby="expense-form-description"
           onOpenChange={onClose}
+          onFocusOutside={(e) => e.preventDefault()}
         >
           <div id="expense-form-description" className="sr-only">
             {t('forms.expenseDescription', {
