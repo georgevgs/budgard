@@ -33,10 +33,12 @@ const FormsManager = ({
   onExpenseSubmit,
 }: FormsManagerProps) => {
   const { t } = useTranslation();
-  const { categories, isInitialized, isLoading } = useData();
+  const { categories, isInitialized } = useData();
 
-  // Don't show forms until data is ready
-  if (!isInitialized || isLoading) {
+  // Don't show forms until data is ready (isInitialized is sufficient —
+  // checking isLoading here would unmount an open form during background refreshes,
+  // destroying any input the user has already typed).
+  if (!isInitialized) {
     return null;
   }
 
