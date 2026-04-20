@@ -3,11 +3,13 @@ import { useRegisterSW } from 'virtual:pwa-register/react';
 import { useToast } from '@/hooks/useToast';
 
 const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
+const MIN_VISIBILITY_CHECK_INTERVAL_MS = 30 * 60 * 1000;
 
 export function usePwaUpdate(): void {
   const { toast } = useToast();
   const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const needRefreshRef = useRef(false);
+  const lastUpdateCheckRef = useRef<number>(0);
 
   const {
     needRefresh: [needRefresh],
@@ -21,6 +23,7 @@ export function usePwaUpdate(): void {
       // visibilitychange doesn't fire on a fresh iOS PWA open (page starts
       // already visible), and the periodic interval hasn't fired yet —
       // so without this call nothing would trigger a SW update check on open.
+      lastUpdateCheckRef.current = Date.now();
       registration.update().catch(() => {});
 
       // Periodic update check — fetch the SW file with no-cache to detect
@@ -90,12 +93,19 @@ export function usePwaUpdate(): void {
 
       if (needRefreshRef.current) {
         showUpdateToast();
-
         return;
       }
 
       const registration = swRegistrationRef.current;
       if (!registration) return;
+
+      // Rate-limit update checks on visibility change to avoid iOS triggering
+      // spurious SW re-installs on every app focus event.
+      const now = Date.now();
+      if (now - lastUpdateCheckRef.current < MIN_VISIBILITY_CHECK_INTERVAL_MS) {
+        return;
+      }
+      lastUpdateCheckRef.current = now;
 
       registration.update().catch(() => {
         // SW script fetch can fail (offline, server error) — non-critical
