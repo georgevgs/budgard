@@ -220,7 +220,7 @@ export default ExpensesFilter;
 
 // ─── Helper render functions ──────────────────────────────────────────────────
 
-const renderCategoryIcon = (category: { icon?: string; color: string }) => {
+const renderCategoryIcon = (category: { icon?: string | null; color: string }) => {
   if (category.icon) {
     return <span className="text-sm">{category.icon}</span>;
   }
