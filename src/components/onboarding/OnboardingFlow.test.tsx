@@ -10,32 +10,30 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ session: mockSession }),
 }));
 
-// Mock useData
-const mockSetMonthlyBudget = vi.fn();
-const mockSetCategories = vi.fn();
-vi.mock('@/contexts/DataContext', () => ({
-  useData: () => ({
-    setMonthlyBudget: mockSetMonthlyBudget,
-    setCategories: mockSetCategories,
+// Mock useDataOperations
+const mockHandleBudgetUpdate = vi.fn();
+const mockHandleCategoriesAddBulk = vi.fn();
+vi.mock('@/hooks/useDataOperations', () => ({
+  useDataOperations: () => ({
+    handleBudgetUpdate: mockHandleBudgetUpdate,
+    handleCategoriesAddBulk: mockHandleCategoriesAddBulk,
+    handleExpenseSubmit: vi.fn(),
+    handleExpenseDelete: vi.fn(),
+    handleCategoryAdd: vi.fn(),
+    handleCategoryUpdate: vi.fn(),
+    handleCategoryDelete: vi.fn(),
+    handleTagCreate: vi.fn(),
+    handleRecurringExpenseSubmit: vi.fn(),
+    handleRecurringExpenseDelete: vi.fn(),
+    handleRecurringExpenseToggle: vi.fn(),
+    handleBulkExpenseImport: vi.fn(),
   }),
-}));
-
-// Mock dataService
-const mockCreateCategory = vi.fn();
-const mockUpsertBudget = vi.fn();
-vi.mock('@/services/dataService', () => ({
-  dataService: {
-    createCategory: (...args: unknown[]) => mockCreateCategory(...args),
-    upsertBudget: (...args: unknown[]) => mockUpsertBudget(...args),
-  },
 }));
 
 beforeEach(() => {
   localStorage.clear();
-  mockCreateCategory.mockReset();
-  mockUpsertBudget.mockReset();
-  mockSetMonthlyBudget.mockReset();
-  mockSetCategories.mockReset();
+  mockHandleBudgetUpdate.mockReset();
+  mockHandleCategoriesAddBulk.mockReset();
 });
 
 // ─── shouldShowOnboarding ────────────────────────────────────────────────────
@@ -118,29 +116,24 @@ describe('OnboardingFlow', () => {
   });
 
   it('creates categories with translated names on continue', async () => {
-    const mockCategory = {
-      id: 'cat-1',
-      name: 'onboarding.presetCategories.food',
-      color: '#22c55e',
-      icon: '🍔',
-    };
-    mockCreateCategory.mockResolvedValue(mockCategory);
+    mockHandleCategoriesAddBulk.mockResolvedValue(undefined);
 
     render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
     fireEvent.click(screen.getByText('onboarding.skip'));
-
     fireEvent.click(screen.getByText('onboarding.next'));
 
     await waitFor(() => {
-      expect(mockCreateCategory).toHaveBeenCalled();
+      expect(mockHandleCategoriesAddBulk).toHaveBeenCalled();
     });
 
-    // Verify translated name key is passed (mock t() returns the key as-is)
-    const firstCall = mockCreateCategory.mock.calls[0][0];
-    expect(firstCall.name).toBe('onboarding.presetCategories.food');
-    expect(firstCall.color).toBe('#22c55e');
-    expect(firstCall.icon).toBe('🍔');
-    expect(firstCall.user_id).toBe('user-123');
+    const categories: { name: string; color: string; icon: string; user_id: string }[] =
+      mockHandleCategoriesAddBulk.mock.calls[0][0];
+    const foodCategory = categories.find((c) => c.name.includes('food'));
+
+    expect(foodCategory?.name).toBe('onboarding.presetCategories.food');
+    expect(foodCategory?.color).toBe('#22c55e');
+    expect(foodCategory?.icon).toBe('🍔');
+    expect(foodCategory?.user_id).toBe('user-123');
   });
 
   it('skips category creation when none selected', async () => {
@@ -162,7 +155,7 @@ describe('OnboardingFlow', () => {
       expect(screen.getByText('onboarding.doneTitle')).toBeInTheDocument();
     });
 
-    expect(mockCreateCategory).not.toHaveBeenCalled();
+    expect(mockHandleCategoriesAddBulk).not.toHaveBeenCalled();
   });
 
   it('sets onboarded flag and calls onComplete on final step', () => {
