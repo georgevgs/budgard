@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
-interface ExportOptions {
+type ExportOptions = {
   expenses: Expense[];
   categories: Category[];
   selectedMonth: string; // Format: "yyyy-MM"

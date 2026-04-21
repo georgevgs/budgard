@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-interface UseSwipeToCloseOptions {
+type UseSwipeToCloseOptions = {
   onClose: () => void;
   threshold?: number; // Distance in pixels to trigger close
   enabled?: boolean; // Allow disabling on desktop

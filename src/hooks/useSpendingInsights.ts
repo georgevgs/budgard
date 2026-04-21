@@ -17,14 +17,14 @@ import { useTranslation } from 'react-i18next';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
-export interface Insight {
+export type Insight = {
   id: string;
   icon: LucideIcon;
   text: string;
   variant: 'default' | 'warning' | 'positive';
 }
 
-export interface SpendingInsightsParams {
+export type SpendingInsightsParams = {
   expenses: Expense[];
   monthlyBudget: number | null;
   monthComparison: { thisMonthAmount: number; lastMonthAmount: number };

@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
@@ -191,14 +191,7 @@ const RecurringExpenseForm = ({
                       {categories.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
                           <div className="flex items-center gap-2">
-                            {category.icon ? (
-                              <span className="text-sm">{category.icon}</span>
-                            ) : (
-                              <div
-                                className="w-3 h-3 rounded-full shrink-0"
-                                style={{ backgroundColor: category.color }}
-                              />
-                            )}
+                            {renderCategoryIcon(category)}
                             {category.name}
                           </div>
                         </SelectItem>
@@ -353,6 +346,19 @@ type TranslateFunction = (
   options?: Record<string, unknown>,
 ) => string;
 
+const renderCategoryIcon = (category: { icon?: string; color: string }) => {
+  if (category.icon) {
+    return <span className="text-sm">{category.icon}</span>;
+  }
+
+  return (
+    <div
+      className="w-3 h-3 rounded-full shrink-0"
+      style={{ backgroundColor: category.color }}
+    />
+  );
+};
+
 const renderDateValue = (date: Date | undefined, placeholder: string) => {
   if (!date) return <span>{placeholder}</span>;
 
@@ -363,7 +369,7 @@ const renderSubmitLabel = (
   isSubmitting: boolean,
   isEditing: boolean,
   t: TranslateFunction,
-): React.ReactNode => {
+): ReactNode => {
   if (isSubmitting) {
     return (
       <>

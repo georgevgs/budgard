@@ -12,9 +12,7 @@ import Upload from 'lucide-react/dist/esm/icons/upload';
 import { FORM_TYPES, type FormType } from '@/components/layout/FormsManager';
 import { useData } from '@/contexts/DataContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
-import { dataService } from '@/services/dataService';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/useToast';
 import { downloadExpensesAsCSV } from '@/lib/csvExport';
 import { Button } from '@/components/ui/button';
 import FormsManager from '@/components/layout/FormsManager';
@@ -111,10 +109,8 @@ const ExpensesList = () => {
     tags,
     isInitialized,
     monthlyBudget,
-    setMonthlyBudget,
   } = useData();
   const operations = useDataOperations();
-  const { toast } = useToast();
   const [optimisticExpenses, addOptimisticExpense] = useOptimistic(
     expenses,
     expensesReducer,
@@ -203,28 +199,6 @@ const ExpensesList = () => {
       });
     },
     [addOptimisticExpense, categories, tags, optimisticExpenses, operations],
-  );
-
-  const handleBudgetUpdate = useCallback(
-    async (amount: number) => {
-      const previousBudget = monthlyBudget;
-      setMonthlyBudget(amount);
-
-      try {
-        await dataService.upsertBudget(amount);
-      } catch (error) {
-        setMonthlyBudget(previousBudget);
-        toast({
-          title: t('common.error'),
-          description: t('budget.updateError', {
-            defaultValue: 'Failed to update budget',
-          }),
-          variant: 'destructive',
-        });
-        throw error;
-      }
-    },
-    [monthlyBudget, setMonthlyBudget, toast, t],
   );
 
   const monthlyTotal = useMemo(
@@ -328,7 +302,7 @@ const ExpensesList = () => {
               <BudgetProgress
                 monthlyBudget={monthlyBudget}
                 monthlySpent={monthlyTotal}
-                onBudgetUpdate={handleBudgetUpdate}
+                onBudgetUpdate={operations.handleBudgetUpdate}
               />
 
               {renderDashboard(filteredExpenses, categories)}

@@ -2,7 +2,7 @@ import type { ReactElement, CSSProperties } from 'react';
 import { cn } from '@/lib/utils.ts';
 import type { Category } from '@/types/Category.ts';
 
-interface CategoryBadgeProps {
+type CategoryBadgeProps = {
   category: Category;
   className?: string;
 }

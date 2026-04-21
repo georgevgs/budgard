@@ -1,4 +1,4 @@
-interface CategorySparklineProps {
+type CategorySparklineProps = {
   values: number[];
   color: string;
 }

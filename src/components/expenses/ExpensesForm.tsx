@@ -518,9 +518,7 @@ const ExpensesForm = ({
                   showDetails && 'rotate-180',
                 )}
               />
-              {showDetails
-                ? t('expenses.lessDetails')
-                : t('expenses.moreDetails')}
+              {renderDetailsToggleLabel(showDetails, t)}
             </button>
 
             <div
@@ -626,7 +624,7 @@ const ExpensesForm = ({
                 {t('common.cancel')}
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? t('common.saving') : t('expenses.saveExpense')}
+                {renderSaveButtonLabel(isSubmitting, t)}
               </Button>
             </div>
           </form>
@@ -645,6 +643,21 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const renderDetailsToggleLabel = (
+  showDetails: boolean,
+  t: TranslateFunction,
+) => {
+  if (showDetails) return t('expenses.lessDetails');
+
+  return t('expenses.moreDetails');
+};
+
+const renderSaveButtonLabel = (isSubmitting: boolean, t: TranslateFunction) => {
+  if (isSubmitting) return t('common.saving');
+
+  return t('expenses.saveExpense');
+};
 
 const renderConversionPreview = (
   isLoading: boolean,

@@ -17,8 +17,8 @@ const Header = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-    } catch (error) {
-      console.error('Error signing out:', error);
+    } catch {
+      // Supabase clears local session even on network failure
     }
   };
 

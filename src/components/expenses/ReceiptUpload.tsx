@@ -9,7 +9,7 @@ import {
 } from '@/lib/validations';
 import { useToast } from '@/hooks/useToast';
 
-interface ReceiptUploadProps {
+type ReceiptUploadProps = {
   currentReceiptPath?: string | null;
   selectedFile: File | null;
   isRemoving: boolean;

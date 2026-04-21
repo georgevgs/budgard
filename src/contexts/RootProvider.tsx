@@ -2,7 +2,7 @@ import type { ReactNode, ReactElement } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext.tsx';
 import { DataProvider } from '@/contexts/DataContext.tsx';
 
-interface RootProviderProps {
+type RootProviderProps = {
   children: ReactNode;
 }
 

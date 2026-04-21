@@ -61,40 +61,6 @@ const ExpensesPagination = ({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const getVisiblePages = () => {
-    const pages = [];
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
-
-      return pages;
-    }
-
-    if (currentPage <= 3) {
-      return [1, 2, 3, 4, 'ellipsis', totalPages];
-    }
-
-    if (currentPage >= totalPages - 2) {
-      return [
-        1,
-        'ellipsis',
-        totalPages - 3,
-        totalPages - 2,
-        totalPages - 1,
-        totalPages,
-      ];
-    }
-
-    return [
-      1,
-      'ellipsis',
-      currentPage - 1,
-      currentPage,
-      currentPage + 1,
-      'ellipsis',
-      totalPages,
-    ];
-  };
-
   return (
     <div className="space-y-2">
       {/* Date-grouped expenses */}
@@ -125,63 +91,137 @@ const ExpensesPagination = ({
         </div>
       ))}
 
-      {/* Pagination Controls */}
-      {totalItems > ITEMS_PER_PAGE && (
-        <div className="py-4">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  className={
-                    currentPage <= 1
-                      ? 'pointer-events-none opacity-50'
-                      : 'cursor-pointer'
-                  }
-                  aria-label={t('pagination.previous')}
-                >
-                  {t('pagination.previous')}
-                </PaginationPrevious>
-              </PaginationItem>
-
-              {getVisiblePages().map((page, index) => (
-                <PaginationItem
-                  key={page === 'ellipsis' ? `ellipsis-${index}` : page}
-                >
-                  {page === 'ellipsis' ? (
-                    <PaginationEllipsis aria-label={t('pagination.more')} />
-                  ) : (
-                    <PaginationLink
-                      onClick={() => handlePageChange(page as number)}
-                      isActive={safePage === page}
-                      className="cursor-pointer"
-                      aria-label={t('pagination.page', { page })}
-                    >
-                      {page}
-                    </PaginationLink>
-                  )}
-                </PaginationItem>
-              ))}
-
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  className={
-                    currentPage >= totalPages
-                      ? 'pointer-events-none opacity-50'
-                      : 'cursor-pointer'
-                  }
-                  aria-label={t('pagination.next')}
-                >
-                  {t('pagination.next')}
-                </PaginationNext>
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
+      {renderPaginationControls(
+        totalItems,
+        currentPage,
+        totalPages,
+        safePage,
+        handlePageChange,
+        t,
       )}
     </div>
   );
 };
 
 export default ExpensesPagination;
+
+// ─── Helper render functions ──────────────────────────────────────────────────
+
+type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
+const getVisiblePages = (
+  currentPage: number,
+  totalPages: number,
+): (number | 'ellipsis')[] => {
+  const pages: (number | 'ellipsis')[] = [];
+  if (totalPages <= 5) {
+    for (let i = 1; i <= totalPages; i++) pages.push(i);
+
+    return pages;
+  }
+
+  if (currentPage <= 3) {
+    return [1, 2, 3, 4, 'ellipsis', totalPages];
+  }
+
+  if (currentPage >= totalPages - 2) {
+    return [
+      1,
+      'ellipsis',
+      totalPages - 3,
+      totalPages - 2,
+      totalPages - 1,
+      totalPages,
+    ];
+  }
+
+  return [
+    1,
+    'ellipsis',
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+    'ellipsis',
+    totalPages,
+  ];
+};
+
+const renderPageItem = (
+  page: number | 'ellipsis',
+  safePage: number,
+  handlePageChange: (page: number) => void,
+  t: TranslateFunction,
+) => {
+  if (page === 'ellipsis') {
+    return <PaginationEllipsis aria-label={t('pagination.more')} />;
+  }
+
+  return (
+    <PaginationLink
+      onClick={() => handlePageChange(page)}
+      isActive={safePage === page}
+      className="cursor-pointer"
+      aria-label={t('pagination.page', { page })}
+    >
+      {page}
+    </PaginationLink>
+  );
+};
+
+const renderPaginationControls = (
+  totalItems: number,
+  currentPage: number,
+  totalPages: number,
+  safePage: number,
+  handlePageChange: (page: number) => void,
+  t: TranslateFunction,
+) => {
+  if (totalItems <= ITEMS_PER_PAGE) return null;
+
+  return (
+    <div className="py-4">
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              onClick={() => handlePageChange(currentPage - 1)}
+              className={
+                currentPage <= 1
+                  ? 'pointer-events-none opacity-50'
+                  : 'cursor-pointer'
+              }
+              aria-label={t('pagination.previous')}
+            >
+              {t('pagination.previous')}
+            </PaginationPrevious>
+          </PaginationItem>
+
+          {getVisiblePages(currentPage, totalPages).map((page, index) => (
+            <PaginationItem
+              key={page === 'ellipsis' ? `ellipsis-${index}` : page}
+            >
+              {renderPageItem(page, safePage, handlePageChange, t)}
+            </PaginationItem>
+          ))}
+
+          <PaginationItem>
+            <PaginationNext
+              onClick={() => handlePageChange(currentPage + 1)}
+              className={
+                currentPage >= totalPages
+                  ? 'pointer-events-none opacity-50'
+                  : 'cursor-pointer'
+              }
+              aria-label={t('pagination.next')}
+            >
+              {t('pagination.next')}
+            </PaginationNext>
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    </div>
+  );
+};

@@ -3,7 +3,7 @@ import type { ExternalToast } from 'sonner';
 
 type ToastVariant = 'default' | 'destructive' | 'success';
 
-interface ToastParams {
+type ToastParams = {
   title?: string;
   description?: string;
   variant?: ToastVariant;

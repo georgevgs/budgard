@@ -5,7 +5,7 @@ import { formatCurrency } from '@/lib/utils';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
-interface ExpensesDashboardProps {
+type ExpensesDashboardProps = {
   expenses: Expense[];
   categories: Category[];
 }
@@ -43,6 +43,7 @@ const ExpensesDashboard = ({
         const percentage = total > 0 ? (amount / total) * 100 : 0;
 
         return {
+          id: category.id,
           name: category.name,
           amount,
           percentage,
@@ -69,7 +70,7 @@ const ExpensesDashboard = ({
         <div className="w-full space-y-1">
           {categoryData.map((category) => (
             <div
-              key={category.name}
+              key={category.id}
               className="py-2"
               aria-label={t('dashboard.categoryBreakdown', {
                 name: category.name,

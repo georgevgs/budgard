@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Session } from '@supabase/supabase-js';
@@ -114,8 +114,8 @@ const CategoryForm = ({ category, onBack, onClose }: Props) => {
         });
       }
       onClose();
-    } catch (error) {
-      console.error('Error saving category:', error);
+    } catch {
+      // Hook already shows error toast via useDataOperations
     }
   };
 
@@ -290,18 +290,12 @@ const CategoryForm = ({ category, onBack, onClose }: Props) => {
                       maxLength={4}
                       aria-label={t('categories.customIcon')}
                     />
-                    {field.value ? (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2 text-xs text-muted-foreground"
-                        onClick={() => field.onChange(undefined)}
-                        disabled={isDisabled}
-                      >
-                        {t('common.clear')}
-                      </Button>
-                    ) : null}
+                    {renderClearIconButton(
+                      field.value,
+                      () => field.onChange(undefined),
+                      isDisabled,
+                      t,
+                    )}
                   </div>
                   <FormMessage />
                 </FormItem>
@@ -332,10 +326,37 @@ export default CategoryForm;
 
 // ─── Helper functions ────────────────────────────────────────────────────────
 
+type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
 const renderSwatchCheck = (isSelected: boolean) => {
   if (!isSelected) return null;
 
   return <Check className="h-3.5 w-3.5 text-white drop-shadow" />;
+};
+
+const renderClearIconButton = (
+  value: string | undefined,
+  onClear: () => void,
+  isDisabled: boolean,
+  t: TranslateFunction,
+) => {
+  if (!value) return null;
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      className="h-7 px-2 text-xs text-muted-foreground"
+      onClick={onClear}
+      disabled={isDisabled}
+    >
+      {t('common.clear')}
+    </Button>
+  );
 };
 
 const canSubmitForm = (
@@ -374,7 +395,7 @@ const getSubmitButtonText = (
   isSubmitting: boolean,
   isEditing: boolean,
   t: TFunc,
-): React.ReactNode => {
+): ReactNode => {
   if (isSubmitting) {
     return (
       <>

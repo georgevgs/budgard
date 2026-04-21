@@ -1,7 +1,7 @@
 import type { Category } from '@/types/Category';
 import { SAFE_STRING } from '@/lib/validations';
 
-export interface ParsedExpenseRow {
+export type ParsedExpenseRow = {
   date: string;
   description: string;
   categoryName: string;
@@ -9,14 +9,14 @@ export interface ParsedExpenseRow {
   rowNumber: number;
 }
 
-export interface ColumnMapping {
+export type ColumnMapping = {
   dateColumn: number;
   descriptionColumn: number;
   amountColumn: number;
   categoryColumn: number | null; // Optional
 }
 
-export interface CsvPreviewData {
+export type CsvPreviewData = {
   headers: string[];
   sampleRows: string[][];
   delimiter: string;
@@ -24,14 +24,14 @@ export interface CsvPreviewData {
   hasNegativeAmounts: boolean; // True if CSV contains negative values (bank statement format)
 }
 
-interface CsvParseResult {
+type CsvParseResult = {
   validRows: ParsedExpenseRow[];
   errors: CsvParseError[];
   unmatchedCategories: string[];
   skippedIncomeCount: number;
 }
 
-export interface CsvParseError {
+export type CsvParseError = {
   rowNumber: number;
   field: string;
   message: string;
@@ -567,7 +567,7 @@ function isValidDate(year: number, month: number, day: number): boolean {
   );
 }
 
-interface AmountParseResult {
+type AmountParseResult = {
   amount: number | null;
   isIncome: boolean;
 }

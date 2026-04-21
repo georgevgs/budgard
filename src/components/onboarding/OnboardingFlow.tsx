@@ -12,8 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { cn, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
-import { dataService } from '@/services/dataService';
-import { useData } from '@/contexts/DataContext';
+import { useDataOperations } from '@/hooks/useDataOperations';
 import { useAuth } from '@/hooks/useAuth';
 
 const ONBOARDED_KEY = 'budgard_onboarded';
@@ -44,7 +43,7 @@ type Props = {
 export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
   const { t } = useTranslation();
   const { session } = useAuth();
-  const { setMonthlyBudget, setCategories } = useData();
+  const operations = useDataOperations();
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -66,15 +65,14 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
     if (amount > 0) {
       setIsSubmitting(true);
       try {
-        await dataService.upsertBudget(amount);
-        setMonthlyBudget(amount);
+        await operations.handleBudgetUpdate(amount);
       } catch {
         // non-critical, continue onboarding
       }
       setIsSubmitting(false);
     }
     setStep(1);
-  }, [budgetInput, setMonthlyBudget]);
+  }, [budgetInput, operations]);
 
   const handleCategoriesNext = useCallback(async () => {
     if (selectedCategories.size === 0) {
@@ -85,26 +83,19 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
 
     setIsSubmitting(true);
     try {
-      const toCreate = Array.from(selectedCategories).map(
-        (i) => PRESET_CATEGORIES[i],
-      );
-      const created = await Promise.all(
-        toCreate.map((cat) =>
-          dataService.createCategory({
-            name: t(`onboarding.presetCategories.${cat.nameKey}`),
-            color: cat.color,
-            icon: cat.icon,
-            user_id: session?.user?.id,
-          }),
-        ),
-      );
-      setCategories(created);
+      const toCreate = Array.from(selectedCategories).map((i) => ({
+        name: t(`onboarding.presetCategories.${PRESET_CATEGORIES[i].nameKey}`),
+        color: PRESET_CATEGORIES[i].color,
+        icon: PRESET_CATEGORIES[i].icon,
+        user_id: session?.user?.id,
+      }));
+      await operations.handleCategoriesAddBulk(toCreate);
     } catch {
       // non-critical, continue
     }
     setIsSubmitting(false);
     setStep(2);
-  }, [selectedCategories, session?.user?.id, setCategories, t]);
+  }, [selectedCategories, session?.user?.id, operations, t]);
 
   const handleCategoryToggle = useCallback((index: number) => {
     setSelectedCategories((prev) => {
@@ -123,7 +114,7 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
     <div className="flex justify-center gap-1.5 mb-6">
       {Array.from({ length: STEP_COUNT }, (_, i) => (
         <div
-          key={i}
+          key={`step-${i}`}
           className={cn(
             'h-1.5 rounded-full transition-all duration-300',
             i === step ? 'w-6 bg-primary' : 'w-1.5 bg-muted-foreground/30',

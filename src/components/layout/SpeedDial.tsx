@@ -7,7 +7,7 @@ import Tag from 'lucide-react/dist/esm/icons/tag';
 import X from 'lucide-react/dist/esm/icons/x';
 import { cn } from '@/lib/utils';
 
-interface SpeedDialProps {
+type SpeedDialProps = {
   onAddExpense: () => void;
   onAddCategory: () => void;
 }

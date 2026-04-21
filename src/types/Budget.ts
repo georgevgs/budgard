@@ -1,4 +1,4 @@
-export interface Budget {
+export type Budget = {
   id: string;
   user_id: string;
   monthly_amount: number;
@@ -6,6 +6,6 @@ export interface Budget {
   updated_at: string;
 }
 
-export interface BudgetFormData {
+export type BudgetFormData = {
   amount: string;
 }

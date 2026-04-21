@@ -10,7 +10,14 @@ import { uploadReceipt, deleteReceipt } from '@/services/receiptService';
 import { haptics } from '@/lib/haptics';
 import { offlineQueue } from '@/lib/offlineQueue';
 
-export interface ReceiptOptions {
+type BulkExpenseRow = {
+  date: string;
+  description: string;
+  amount: number;
+  category_id: string | null;
+};
+
+export type ReceiptOptions = {
   receiptFile: File | null;
   removeExistingReceipt: boolean;
   existingReceiptPath: string | null;
@@ -29,6 +36,8 @@ export function useDataOperations() {
     setTags,
     setRecurringExpenses,
     refreshExpenses,
+    monthlyBudget,
+    setMonthlyBudget,
   } = useData();
   const { toast } = useToast();
 
@@ -396,6 +405,52 @@ export function useDataOperations() {
     [setTags, showErrorToast],
   );
 
+  const handleBudgetUpdate = useCallback(
+    async (amount: number) => {
+      const previousBudget = monthlyBudget;
+      setMonthlyBudget(amount);
+
+      try {
+        await dataService.upsertBudget(amount);
+      } catch (error) {
+        haptics.error();
+        setMonthlyBudget(previousBudget);
+        showErrorToast('Failed to update budget');
+        throw error;
+      }
+    },
+    [monthlyBudget, setMonthlyBudget, showErrorToast],
+  );
+
+  const handleCategoriesAddBulk = useCallback(
+    async (categoriesData: Partial<Category>[]) => {
+      if (!isInitialized) return;
+
+      try {
+        const created = await Promise.all(
+          categoriesData.map((cat) => dataService.createCategory(cat)),
+        );
+        haptics.success();
+        setCategories(created);
+      } catch (error) {
+        haptics.error();
+        showErrorToast('Failed to create categories');
+        throw error;
+      }
+    },
+    [isInitialized, setCategories, showErrorToast],
+  );
+
+  const handleBulkExpenseImport = useCallback(
+    async (expensesData: BulkExpenseRow[]) => {
+      if (!isInitialized) return;
+
+      await dataService.createExpensesBulk(expensesData);
+      await refreshExpenses();
+    },
+    [isInitialized, refreshExpenses],
+  );
+
   return {
     handleExpenseSubmit,
     handleExpenseDelete,
@@ -406,6 +461,9 @@ export function useDataOperations() {
     handleRecurringExpenseSubmit,
     handleRecurringExpenseDelete,
     handleRecurringExpenseToggle,
+    handleBudgetUpdate,
+    handleCategoriesAddBulk,
+    handleBulkExpenseImport,
   };
 }
 

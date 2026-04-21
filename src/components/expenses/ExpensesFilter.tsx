@@ -136,14 +136,7 @@ const ExpensesFilter = ({
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   <div className="flex items-center gap-2">
-                    {category.icon ? (
-                      <span className="text-sm">{category.icon}</span>
-                    ) : (
-                      <div
-                        className="w-3 h-3 rounded-full shrink-0"
-                        style={{ backgroundColor: category.color }}
-                      />
-                    )}
+                    {renderCategoryIcon(category)}
                     {category.name}
                   </div>
                 </SelectItem>
@@ -226,6 +219,19 @@ const ExpensesFilter = ({
 export default ExpensesFilter;
 
 // ─── Helper render functions ──────────────────────────────────────────────────
+
+const renderCategoryIcon = (category: { icon?: string; color: string }) => {
+  if (category.icon) {
+    return <span className="text-sm">{category.icon}</span>;
+  }
+
+  return (
+    <div
+      className="w-3 h-3 rounded-full shrink-0"
+      style={{ backgroundColor: category.color }}
+    />
+  );
+};
 
 type TranslateFunction = (
   key: string,

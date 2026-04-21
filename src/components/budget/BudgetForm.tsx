@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-interface BudgetFormProps {
+type BudgetFormProps = {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (amount: number) => Promise<void>;
@@ -119,11 +119,7 @@ const BudgetForm = ({
                   autoComplete="off"
                 />
               </div>
-              {errors.amount && (
-                <p className="text-sm text-destructive">
-                  {errors.amount.message}
-                </p>
-              )}
+              {renderAmountError(errors.amount?.message)}
             </div>
 
             <div className="flex justify-end gap-2">
@@ -149,6 +145,12 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const renderAmountError = (message: string | undefined) => {
+  if (!message) return null;
+
+  return <p className="text-sm text-destructive">{message}</p>;
+};
 
 const renderSubmitContent = (
   isSubmitting: boolean,

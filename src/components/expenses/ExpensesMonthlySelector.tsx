@@ -18,7 +18,7 @@ import {
 import { el, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
-interface ExpensesMonthlySelectorProps {
+type ExpensesMonthlySelectorProps = {
   selectedMonth: string; // Format: "yyyy-MM"
   onMonthChange: (month: string) => void;
 }
@@ -102,7 +102,7 @@ const ExpensesMonthlySelector = ({
           <div className="grid grid-cols-3 gap-2 p-2">
             {Array.from({ length: 12 }, (_, index) => (
               <Button
-                key={index}
+                key={`month-${index}`}
                 variant="ghost"
                 size="sm"
                 className={cn(

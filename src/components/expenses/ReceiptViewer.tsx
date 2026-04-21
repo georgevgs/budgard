@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { getReceiptUrl } from '@/services/receiptService';
 
-interface ReceiptViewerProps {
+type ReceiptViewerProps = {
   receiptPath: string;
   open: boolean;
   onClose: () => void;
@@ -66,24 +66,9 @@ const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
           </DialogHeader>
 
           <div className="flex items-center justify-center min-h-[200px] mt-4">
-            {loading && (
-              <div className="animate-spin">
-                <Loader2 className="h-8 w-8 text-muted-foreground" />
-              </div>
-            )}
-            {error && (
-              <p className="text-sm text-destructive">
-                {t('receipt.loadError')}
-              </p>
-            )}
-            {url && !error && (
-              <img
-                src={url}
-                alt={t('receipt.receiptImage')}
-                className="max-h-[70vh] w-full object-contain rounded"
-                onError={() => setError(true)}
-              />
-            )}
+            {renderLoadingState(loading)}
+            {renderErrorState(error, t)}
+            {renderReceiptImage(url, error, () => setError(true), t)}
           </div>
         </div>
       </DialogContent>
@@ -92,3 +77,43 @@ const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
 };
 
 export default ReceiptViewer;
+
+// ─── Helper render functions ──────────────────────────────────────────────────
+
+type TranslateFunction = (key: string) => string;
+
+const renderLoadingState = (loading: boolean) => {
+  if (!loading) return null;
+
+  return (
+    <div className="animate-spin">
+      <Loader2 className="h-8 w-8 text-muted-foreground" />
+    </div>
+  );
+};
+
+const renderErrorState = (error: boolean, t: TranslateFunction) => {
+  if (!error) return null;
+
+  return (
+    <p className="text-sm text-destructive">{t('receipt.loadError')}</p>
+  );
+};
+
+const renderReceiptImage = (
+  url: string | null,
+  error: boolean,
+  onError: () => void,
+  t: TranslateFunction,
+) => {
+  if (!url || error) return null;
+
+  return (
+    <img
+      src={url}
+      alt={t('receipt.receiptImage')}
+      className="max-h-[70vh] w-full object-contain rounded"
+      onError={onError}
+    />
+  );
+};

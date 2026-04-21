@@ -123,11 +123,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
               aria-invalid={!!state.error}
               aria-describedby={state.error ? 'email-error' : undefined}
             />
-            {state.error && (
-              <p id="email-error" className="text-sm text-destructive">
-                {state.error}
-              </p>
-            )}
+            {renderEmailError(state.error)}
 
             {/* Honeypot field — visually hidden text input for bot detection */}
             <div
@@ -217,15 +213,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
           </InputOTP>
         </div>
 
-        {state.error && (
-          <p
-            id="otp-error"
-            className="text-sm text-destructive text-center"
-            role="alert"
-          >
-            {state.error}
-          </p>
-        )}
+        {renderOtpError(state.error)}
 
         <div className="space-y-2">
           <FormSubmitButton
@@ -255,3 +243,25 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
 };
 
 export default OtpForm;
+
+// ─── Helper render functions ──────────────────────────────────────────────────
+
+const renderEmailError = (error: string | null) => {
+  if (!error) return null;
+
+  return (
+    <p id="email-error" className="text-sm text-destructive">
+      {error}
+    </p>
+  );
+};
+
+const renderOtpError = (error: string | null) => {
+  if (!error) return null;
+
+  return (
+    <p id="otp-error" className="text-sm text-destructive text-center" role="alert">
+      {error}
+    </p>
+  );
+};

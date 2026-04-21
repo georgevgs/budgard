@@ -7,7 +7,7 @@ type RecurringExpenseFrequency =
   | 'quarterly'
   | 'yearly';
 
-export interface RecurringExpense {
+export type RecurringExpense = {
   id: string;
   user_id: string;
   amount: number;

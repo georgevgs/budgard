@@ -1,7 +1,7 @@
 import { Category } from '@/types/Category.ts';
 import { Tag } from '@/types/Tag.ts';
 
-export interface Expense {
+export type Expense = {
   id: string;
   amount: number;
   description: string;
