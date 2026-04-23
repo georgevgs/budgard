@@ -306,7 +306,7 @@ const SettingsView = () => {
               <span className="text-sm text-muted-foreground">
                 {t('settings.about.version')}
               </span>
-              <span className="text-sm tabular-nums">1.2.1</span>
+              <span className="text-sm tabular-nums">{__APP_VERSION__}</span>
             </div>
           </CardContent>
         </Card>
