@@ -76,7 +76,7 @@ const SettingsView = () => {
     async (enabled: boolean) => {
       // Default to 9:00 local time when enabling
       const utcHour = enabled
-        ? Math.round((9 - new Date().getTimezoneOffset() / 60 + 24) % 24)
+        ? localToUtcHour(9)
         : null;
 
       try {
@@ -94,7 +94,7 @@ const SettingsView = () => {
 
   const handleDailyReminderTimeChange = useCallback(
     async (localHour: number) => {
-      const utcHour = Math.round((localHour - new Date().getTimezoneOffset() / 60 + 24) % 24);
+      const utcHour = localToUtcHour(localHour);
 
       try {
         await dataService.updateDailyReminderHour(utcHour);
@@ -505,15 +505,22 @@ const renderNotificationToggle = (
 
 const REMINDER_HOURS = Array.from({ length: 24 }, (_, i) => i);
 
+const localToUtcHour = (localHour: number): number => {
+  const d = new Date();
+  d.setHours(localHour, 0, 0, 0);
+
+  return d.getUTCHours();
+};
+
 const utcToLocalHour = (utcHour: number): number => {
-  return Math.round((utcHour + new Date().getTimezoneOffset() / -60 + 24) % 24);
+  const d = new Date();
+  d.setUTCHours(utcHour, 0, 0, 0);
+
+  return d.getHours();
 };
 
 const formatHour = (hour: number): string => {
-  const period = hour >= 12 ? 'PM' : 'AM';
-  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-
-  return `${displayHour}:00 ${period}`;
+  return `${hour.toString().padStart(2, '0')}:00`;
 };
 
 const renderDailyReminder = (
