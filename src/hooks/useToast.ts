@@ -12,13 +12,18 @@ type ToastParams = {
     label: string;
     onClick: () => void;
   };
+  onDismiss?: () => void;
 }
 
-function toast({ variant, title, description, duration, action }: ToastParams) {
+function toast({ variant, title, description, duration, action, onDismiss }: ToastParams) {
   const message = title ?? description ?? '';
   const opts: ExternalToast = {};
   if (title && description) opts.description = description;
   if (duration !== undefined) opts.duration = duration;
+  if (onDismiss) {
+    opts.onDismiss = () => onDismiss();
+    opts.onAutoClose = () => onDismiss();
+  }
   if (action) {
     opts.action = { label: action.label, onClick: action.onClick };
     // Ensure action toasts stay visible long enough to interact with

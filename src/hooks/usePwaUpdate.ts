@@ -10,6 +10,7 @@ export function usePwaUpdate(): void {
   const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const needRefreshRef = useRef(false);
   const lastUpdateCheckRef = useRef<number>(0);
+  const toastDismissedRef = useRef(false);
 
   const {
     needRefresh: [needRefresh],
@@ -26,27 +27,14 @@ export function usePwaUpdate(): void {
       lastUpdateCheckRef.current = Date.now();
       registration.update().catch(() => {});
 
-      // Periodic update check — fetch the SW file with no-cache to detect
-      // new deployments, then call update() if the server has a new version.
-      setInterval(async () => {
-        try {
-          if (registration.installing || !navigator) return;
-          if ('connection' in navigator && !navigator.onLine) return;
+      // Periodic update check — registration.update() fetches the SW file
+      // and does a byte-for-byte comparison. Chrome 68+ bypasses HTTP cache
+      // for SW files automatically; no manual fetch needed.
+      setInterval(() => {
+        if (registration.installing || !navigator) return;
+        if ('connection' in navigator && !navigator.onLine) return;
 
-          const resp = await fetch(_swUrl, {
-            cache: 'no-store',
-            headers: {
-              cache: 'no-store',
-              'cache-control': 'no-cache',
-            },
-          });
-
-          if (resp?.status === 200) {
-            await registration.update();
-          }
-        } catch {
-          // Network failures are expected (offline, flaky connection)
-        }
+        registration.update().catch(() => {});
       }, UPDATE_CHECK_INTERVAL_MS);
     },
     onRegisterError() {
@@ -59,6 +47,7 @@ export function usePwaUpdate(): void {
   }, [updateServiceWorker]);
 
   const showUpdateToast = useCallback((): void => {
+    toastDismissedRef.current = false;
     toast({
       title: 'Update available',
       description: 'A new version is ready.',
@@ -66,6 +55,9 @@ export function usePwaUpdate(): void {
       action: {
         label: 'Update',
         onClick: applyUpdate,
+      },
+      onDismiss() {
+        toastDismissedRef.current = true;
       },
     });
   }, [toast, applyUpdate]);
@@ -75,9 +67,17 @@ export function usePwaUpdate(): void {
     needRefreshRef.current = needRefresh;
   }, [needRefresh]);
 
-  // Show toast immediately when an update is first detected
+  // Show toast when an update is first detected.
+  // Only fires on a genuine false → true transition of needRefresh.
+  // If the user already dismissed the toast for this update, skip.
   useEffect(() => {
-    if (!needRefresh) return;
+    if (!needRefresh) {
+      // needRefresh went back to false — reset dismissal so a future
+      // new update will show the toast again.
+      toastDismissedRef.current = false;
+      return;
+    }
+    if (toastDismissedRef.current) return;
     showUpdateToast();
   }, [needRefresh, showUpdateToast]);
 
@@ -85,16 +85,12 @@ export function usePwaUpdate(): void {
   // iOS freezes the web view when backgrounded and doesn't automatically
   // check for SW updates on resume. visibilitychange is the most reliable
   // event that fires when a standalone PWA is foregrounded.
-  // Also re-shows the update toast if a pending update was previously
-  // dismissed, so the user gets another chance to apply it.
   useEffect(() => {
     const handleVisibilityChange = (): void => {
       if (document.visibilityState !== 'visible') return;
 
-      if (needRefreshRef.current) {
-        showUpdateToast();
-        return;
-      }
+      // If an update is already pending, don't re-check or re-show toast.
+      if (needRefreshRef.current) return;
 
       const registration = swRegistrationRef.current;
       if (!registration) return;
@@ -117,5 +113,5 @@ export function usePwaUpdate(): void {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [showUpdateToast]);
+  }, []);
 }
