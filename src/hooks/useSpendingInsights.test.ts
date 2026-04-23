@@ -74,6 +74,7 @@ describe('useSpendingInsights', () => {
         monthComparison: { thisMonthAmount: 0, lastMonthAmount: 0 },
         categories,
         dateLocale: enUS,
+        defaultCurrency: 'EUR',
         ...overrides,
       }),
     );
