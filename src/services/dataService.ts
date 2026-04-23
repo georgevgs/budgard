@@ -302,6 +302,24 @@ export const dataService = {
     return data as Budget;
   },
 
+  async updateDailyReminderHour(hour: number | null) {
+    const user = await this.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('user_budgets')
+      .upsert(
+        { user_id: user.id, daily_reminder_hour: hour },
+        { onConflict: 'user_id' },
+      )
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+
+    return data as Budget;
+  },
+
   async deleteAccount() {
     const {
       data: { session },

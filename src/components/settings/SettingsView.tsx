@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,6 +39,7 @@ import {
 } from '@/hooks/useAccentColor';
 import { SUPPORTED_CURRENCIES } from '@/lib/currencies';
 import { signOut } from '@/lib/auth';
+import { dataService } from '@/services/dataService';
 import { useToast } from '@/hooks/useToast';
 
 type Theme = 'light' | 'dark' | 'barbie';
@@ -60,6 +61,53 @@ const SettingsView = () => {
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [dailyReminderHour, setDailyReminderHour] = useState<number | null>(null);
+
+  // Fetch daily reminder preference on mount
+  useEffect(() => {
+    dataService.getBudget().then((budget) => {
+      if (budget) {
+        setDailyReminderHour(budget.daily_reminder_hour);
+      }
+    });
+  }, []);
+
+  const handleDailyReminderToggle = useCallback(
+    async (enabled: boolean) => {
+      // Default to 9:00 local time when enabling
+      const utcHour = enabled
+        ? Math.round((9 - new Date().getTimezoneOffset() / 60 + 24) % 24)
+        : null;
+
+      try {
+        await dataService.updateDailyReminderHour(utcHour);
+        setDailyReminderHour(utcHour);
+      } catch {
+        toast({
+          variant: 'destructive',
+          description: t('settings.currency.updateFailed'),
+        });
+      }
+    },
+    [toast, t],
+  );
+
+  const handleDailyReminderTimeChange = useCallback(
+    async (localHour: number) => {
+      const utcHour = Math.round((localHour - new Date().getTimezoneOffset() / 60 + 24) % 24);
+
+      try {
+        await dataService.updateDailyReminderHour(utcHour);
+        setDailyReminderHour(utcHour);
+      } catch {
+        toast({
+          variant: 'destructive',
+          description: t('settings.currency.updateFailed'),
+        });
+      }
+    },
+    [toast, t],
+  );
 
   const handleSignOut = async () => {
     try {
@@ -212,8 +260,15 @@ const SettingsView = () => {
           {t('settings.notifications.title')}
         </p>
         <Card className="border-border/50 rounded-2xl">
-          <CardContent className="p-4">
+          <CardContent className="p-4 space-y-4">
             {renderNotificationToggle(pushState, pushSubscribe, pushUnsubscribe, t)}
+            {renderDailyReminder(
+              pushState,
+              dailyReminderHour,
+              handleDailyReminderToggle,
+              handleDailyReminderTimeChange,
+              t,
+            )}
           </CardContent>
         </Card>
       </section>
@@ -444,6 +499,83 @@ const renderNotificationToggle = (
         disabled={state === 'loading'}
         onCheckedChange={handleToggle}
       />
+    </div>
+  );
+};
+
+const REMINDER_HOURS = Array.from({ length: 24 }, (_, i) => i);
+
+const utcToLocalHour = (utcHour: number): number => {
+  return Math.round((utcHour + new Date().getTimezoneOffset() / -60 + 24) % 24);
+};
+
+const formatHour = (hour: number): string => {
+  const period = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+
+  return `${displayHour}:00 ${period}`;
+};
+
+const renderDailyReminder = (
+  pushState: PushState,
+  reminderHour: number | null,
+  onToggle: (enabled: boolean) => void,
+  onTimeChange: (localHour: number) => void,
+  t: TFunc,
+) => {
+  // Only show daily reminder if push notifications are enabled
+  if (pushState !== 'subscribed') return null;
+
+  const isEnabled = reminderHour !== null;
+  const localHour = isEnabled ? utcToLocalHour(reminderHour) : 9;
+
+  return (
+    <div className="border-t border-border/50 pt-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm">{t('settings.notifications.dailyReminderLabel')}</p>
+          <p className="text-xs text-muted-foreground">
+            {t('settings.notifications.dailyReminderDescription')}
+          </p>
+        </div>
+        <Switch
+          checked={isEnabled}
+          onCheckedChange={onToggle}
+        />
+      </div>
+      {renderReminderTimePicker(isEnabled, localHour, onTimeChange, t)}
+    </div>
+  );
+};
+
+const renderReminderTimePicker = (
+  isEnabled: boolean,
+  localHour: number,
+  onTimeChange: (localHour: number) => void,
+  t: TFunc,
+) => {
+  if (!isEnabled) return null;
+
+  return (
+    <div className="flex items-center justify-between">
+      <p className="text-sm text-muted-foreground">
+        {t('settings.notifications.dailyReminderTime')}
+      </p>
+      <Select
+        value={localHour.toString()}
+        onValueChange={(value) => onTimeChange(parseInt(value))}
+      >
+        <SelectTrigger className="w-[120px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="max-h-60">
+          {REMINDER_HOURS.map((hour) => (
+            <SelectItem key={hour} value={hour.toString()}>
+              {formatHour(hour)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 };

@@ -19,6 +19,10 @@ type InactiveUser = {
   user_id: string;
 };
 
+type DailyReminderUser = {
+  user_id: string;
+};
+
 type PushSubscription = {
   endpoint: string;
   p256dh: string;
@@ -128,6 +132,36 @@ Deno.serve(async (req) => {
             title: 'Budgard',
             body: "You haven't logged expenses in 3 days. Stay on track!",
             tag: 'inactivity-nudge',
+            data: { url: '/expenses' },
+          },
+        });
+      }
+    }
+
+    // ── Daily reminder (user-selected hour) ────────────────────────────
+
+    const currentUtcHour = new Date().getUTCHours();
+
+    const { data: reminderUsers, error: reminderError } = await adminClient
+      .from('user_budgets')
+      .select('user_id')
+      .eq('daily_reminder_hour', currentUtcHour);
+
+    if (!reminderError && reminderUsers) {
+      for (const user of reminderUsers as DailyReminderUser[]) {
+        // Skip if we already have a notification queued for this user
+        // (e.g., recurring reminder already covers today)
+        const alreadyQueued = notifications.some(
+          (n) => n.user_id === user.user_id,
+        );
+        if (alreadyQueued) continue;
+
+        notifications.push({
+          user_id: user.user_id,
+          payload: {
+            title: 'Budgard',
+            body: "Don't forget to log your expenses today!",
+            tag: 'daily-reminder',
             data: { url: '/expenses' },
           },
         });
