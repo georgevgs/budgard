@@ -308,10 +308,8 @@ export const dataService = {
 
     const { data, error } = await supabase
       .from('user_budgets')
-      .upsert(
-        { user_id: user.id, daily_reminder_hour: hour },
-        { onConflict: 'user_id' },
-      )
+      .update({ daily_reminder_hour: hour })
+      .eq('user_id', user.id)
       .select()
       .maybeSingle();
 

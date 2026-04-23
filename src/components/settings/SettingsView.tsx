@@ -85,7 +85,7 @@ const SettingsView = () => {
       } catch {
         toast({
           variant: 'destructive',
-          description: t('settings.currency.updateFailed'),
+          description: t('settings.notifications.dailyReminderFailed'),
         });
       }
     },
@@ -102,7 +102,7 @@ const SettingsView = () => {
       } catch {
         toast({
           variant: 'destructive',
-          description: t('settings.currency.updateFailed'),
+          description: t('settings.notifications.dailyReminderFailed'),
         });
       }
     },

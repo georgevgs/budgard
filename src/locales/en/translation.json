@@ -243,7 +243,8 @@
       "denied": "Notifications blocked. Enable them in your browser settings.",
       "dailyReminderLabel": "Daily Reminder",
       "dailyReminderDescription": "Get a daily nudge to log your expenses",
-      "dailyReminderTime": "Reminder time"
+      "dailyReminderTime": "Reminder time",
+      "dailyReminderFailed": "Failed to update daily reminder"
     },
     "data": {
       "title": "Data Management",
