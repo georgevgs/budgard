@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { getCurrencySymbol } from '@/lib/currencies';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -17,14 +18,13 @@ export function formatForeignAmount(amount: number, currencyCode: string): strin
   }
 }
 
-export function formatCurrency(amount: number): string {
-  // Format number to European style (1.234,56)
-  return (
-    amount.toLocaleString('de-DE', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }) + '€'
-  );
+export function formatCurrency(amount: number, currencyCode: string = 'EUR'): string {
+  const formatted = amount.toLocaleString('de-DE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  return formatted + getCurrencySymbol(currencyCode);
 }
 
 export function formatCurrencyInput(value: string): string {

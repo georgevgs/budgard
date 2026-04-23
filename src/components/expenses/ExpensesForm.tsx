@@ -36,7 +36,7 @@ import Tag from 'lucide-react/dist/esm/icons/tag';
 import { format, parseISO } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import type { Locale } from 'date-fns';
-import { cn, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
+import { cn, formatCurrency, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/lib/currencies';
 import { fetchExchangeRate } from '@/services/exchangeRateService';
 import { useAuth } from '@/hooks/useAuth';
@@ -84,7 +84,7 @@ const ExpensesForm = ({
 }: ExpensesFormProps) => {
   const { t, i18n } = useTranslation();
   const { session } = useAuth();
-  const { tags, expenses: allExpenses } = useData();
+  const { tags, expenses: allExpenses, defaultCurrency } = useData();
   const { handleTagCreate } = useDataOperations();
   const dateLocale = i18n.language === 'el' ? el : enUS;
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
@@ -97,7 +97,7 @@ const ExpensesForm = ({
     Boolean(expense?.tag_id || expense?.receipt_path),
   );
   const [selectedCurrency, setSelectedCurrency] = useState(
-    expense?.original_currency ?? 'EUR',
+    expense?.original_currency ?? defaultCurrency,
   );
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [isFetchingRate, setIsFetchingRate] = useState(false);
@@ -106,7 +106,7 @@ const ExpensesForm = ({
 
   const initialAmount = expense
     ? formatCurrencyInput(
-        (expense.original_currency && expense.original_currency !== 'EUR'
+        (expense.original_currency && expense.original_currency !== defaultCurrency
           ? (expense.original_amount ?? expense.amount)
           : expense.amount
         )
@@ -140,7 +140,7 @@ const ExpensesForm = ({
   const watchedDateStr = watchedDate ? format(watchedDate, 'yyyy-MM-dd') : '';
 
   useEffect(() => {
-    if (selectedCurrency === 'EUR') {
+    if (selectedCurrency === defaultCurrency) {
       setExchangeRate(null);
       setRateError(false);
       return;
@@ -158,6 +158,7 @@ const ExpensesForm = ({
           selectedCurrency,
           watchedDateStr,
           controller.signal,
+          defaultCurrency,
         );
         if (!controller.signal.aborted) setExchangeRate(rate);
       } catch {
@@ -172,14 +173,15 @@ const ExpensesForm = ({
 
     void fetchRate();
     return () => controller.abort();
-  }, [selectedCurrency, watchedDateStr]);
+  }, [selectedCurrency, watchedDateStr, defaultCurrency]);
 
-  const previewEurAmount = useMemo(() => {
-    if (selectedCurrency === 'EUR' || !exchangeRate) return null;
+  const previewConvertedAmount = useMemo(() => {
+    if (selectedCurrency === defaultCurrency || !exchangeRate) return null;
     const raw = parseCurrencyInput(watchedAmount);
     if (!raw) return null;
+
     return Math.round(raw * exchangeRate * 100) / 100;
-  }, [exchangeRate, selectedCurrency, watchedAmount]);
+  }, [exchangeRate, selectedCurrency, watchedAmount, defaultCurrency]);
 
   const descriptionValue = form.watch('description');
 
@@ -267,8 +269,8 @@ const ExpensesForm = ({
       let originalCurrency: string | null = null;
       let exchangeRateValue: number | null = null;
 
-      if (selectedCurrency !== 'EUR') {
-        const rate = exchangeRate ?? (await fetchExchangeRate(selectedCurrency, dateStr));
+      if (selectedCurrency !== defaultCurrency) {
+        const rate = exchangeRate ?? (await fetchExchangeRate(selectedCurrency, dateStr, undefined, defaultCurrency));
         finalAmount = Math.round(rawAmount * rate * 100) / 100;
         originalAmount = rawAmount;
         originalCurrency = selectedCurrency;
@@ -369,7 +371,7 @@ const ExpensesForm = ({
                       </FormControl>
                     </div>
                   </div>
-                  {renderConversionPreview(isFetchingRate, rateError, previewEurAmount, selectedCurrency, t)}
+                  {renderConversionPreview(isFetchingRate, rateError, previewConvertedAmount, selectedCurrency, defaultCurrency, t)}
                   <FormMessage />
                 </FormItem>
               )}
@@ -662,11 +664,12 @@ const renderSaveButtonLabel = (isSubmitting: boolean, t: TranslateFunction) => {
 const renderConversionPreview = (
   isLoading: boolean,
   hasError: boolean,
-  eurAmount: number | null,
+  convertedAmount: number | null,
   currency: string,
+  targetCurrency: string,
   t: TranslateFunction,
 ) => {
-  if (currency === 'EUR') return null;
+  if (currency === targetCurrency) return null;
 
   if (isLoading) {
     return (
@@ -684,15 +687,12 @@ const renderConversionPreview = (
     );
   }
 
-  if (!eurAmount) return null;
+  if (!convertedAmount) return null;
 
   return (
     <p className="text-xs text-muted-foreground mt-1">
       {t('expenses.currency.convertedAmount', {
-        amount: eurAmount.toLocaleString('de-DE', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }) + ' €',
+        amount: formatCurrency(convertedAmount, targetCurrency),
       })}
     </p>
   );

@@ -10,6 +10,7 @@ type SpendingInsightsProps = {
   monthComparison: { thisMonthAmount: number; lastMonthAmount: number };
   categories: Category[];
   dateLocale: Locale;
+  defaultCurrency: string;
 };
 
 const SpendingInsights = (props: SpendingInsightsProps) => {

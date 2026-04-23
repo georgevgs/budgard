@@ -16,6 +16,7 @@ import type { LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
+import { getCurrencySymbol } from '@/lib/currencies';
 
 export type Insight = {
   id: string;
@@ -30,10 +31,11 @@ export type SpendingInsightsParams = {
   monthComparison: { thisMonthAmount: number; lastMonthAmount: number };
   categories: Category[];
   dateLocale: Locale;
+  defaultCurrency: string;
 }
 
 export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
-  const { expenses, monthlyBudget, monthComparison, categories, dateLocale } =
+  const { expenses, monthlyBudget, monthComparison, categories, dateLocale, defaultCurrency } =
     params;
   const { t } = useTranslation();
 
@@ -61,7 +63,7 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
 
       if (projected <= thisMonthAmount * 1.05) return null;
 
-      const formattedAmount = `${projected.toFixed(2)} €`;
+      const formattedAmount = `${projected.toFixed(2)} ${getCurrencySymbol(defaultCurrency)}`;
       return {
         id: 'monthProjection',
         icon: TrendingUp,
@@ -151,7 +153,7 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
           id: 'dailyBudgetRemaining',
           icon: Wallet,
           text: t('analytics.insights.budgetExceeded', {
-            amount: `${Math.abs(remaining).toFixed(2)} €`,
+            amount: `${Math.abs(remaining).toFixed(2)} ${getCurrencySymbol(defaultCurrency)}`,
           }),
           variant: 'warning',
         };
@@ -163,7 +165,7 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
         id: 'dailyBudgetRemaining',
         icon: Wallet,
         text: t('analytics.insights.dailyBudgetRemaining', {
-          amount: `${dailyAllowance.toFixed(2)} €`,
+          amount: `${dailyAllowance.toFixed(2)} ${getCurrencySymbol(defaultCurrency)}`,
           days: daysRemaining,
         }),
         variant: dailyAllowance < 10 ? 'warning' : 'positive',
@@ -398,7 +400,7 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
         id: 'largestExpense',
         icon: TrendingUp,
         text: t('analytics.insights.largestExpense', {
-          amount: `${largest.amount.toFixed(2)} €`,
+          amount: `${largest.amount.toFixed(2)} ${getCurrencySymbol(defaultCurrency)}`,
           description: largest.description,
         }),
         variant: 'default',
@@ -574,5 +576,5 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
     );
 
     return insights.filter((i): i is Insight => i !== null);
-  }, [expenses, monthlyBudget, monthComparison, categories, dateLocale, t]);
+  }, [expenses, monthlyBudget, monthComparison, categories, dateLocale, defaultCurrency, t]);
 }

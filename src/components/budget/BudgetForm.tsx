@@ -8,6 +8,7 @@ import {
   parseCurrencyInput,
   formatCurrency,
 } from '@/lib/utils';
+import { getCurrencySymbol } from '@/lib/currencies';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +26,7 @@ type BudgetFormProps = {
   onClose: () => void;
   onSubmit: (amount: number) => Promise<void>;
   currentBudget: number | null;
+  currencyCode?: string;
 }
 
 const BudgetForm = ({
@@ -32,6 +34,7 @@ const BudgetForm = ({
   onClose,
   onSubmit,
   currentBudget,
+  currencyCode = 'EUR',
 }: BudgetFormProps) => {
   const { t } = useTranslation();
 
@@ -96,7 +99,7 @@ const BudgetForm = ({
             <DialogDescription>
               {isEditing
                 ? t('budget.updateDescription', {
-                    amount: formatCurrency(currentBudget),
+                    amount: formatCurrency(currentBudget, currencyCode),
                   })
                 : t('budget.setDescription')}
             </DialogDescription>
@@ -107,7 +110,7 @@ const BudgetForm = ({
               <Label htmlFor="budget-amount">{t('budget.amountLabel')}</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  &euro;
+                  {getCurrencySymbol(currencyCode)}
                 </span>
                 <Input
                   id="budget-amount"

@@ -1,11 +1,9 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { signOut } from '@/lib/auth';
-import LogOut from 'lucide-react/dist/esm/icons/log-out';
+import Settings from 'lucide-react/dist/esm/icons/settings';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
-import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
-import ThemeToggle from '@/components/layout/ThemeToggle';
 
 const Header = () => {
   const { session } = useAuth();
@@ -13,14 +11,6 @@ const Header = () => {
 
   // Initialize theme on mount (applies to document + meta theme-color)
   useTheme();
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch {
-      // Supabase clears local session even on network failure
-    }
-  };
 
   if (!session) {
     return null;
@@ -38,19 +28,16 @@ const Header = () => {
           />
           <span className="text-lg font-semibold tracking-tight">Budgard</span>
         </div>
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-          <ThemeToggle />
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleSignOut}
-            className="text-muted-foreground gap-2 font-normal"
-            aria-label={t('auth.signOut')}
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-10 h-10 p-0 text-muted-foreground"
+          asChild
+        >
+          <Link to="/settings" aria-label={t('navigation.settings')}>
+            <Settings className="h-4 w-4" />
+          </Link>
+        </Button>
       </div>
     </header>
   );

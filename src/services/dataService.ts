@@ -284,4 +284,49 @@ export const dataService = {
     if (error) throw error;
     return data as Budget;
   },
+
+  async updateDefaultCurrency(currency: string) {
+    const user = await this.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('user_budgets')
+      .upsert(
+        { user_id: user.id, default_currency: currency },
+        { onConflict: 'user_id' },
+      )
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+    return data as Budget;
+  },
+
+  async deleteAccount() {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      throw new Error('Not authenticated');
+    }
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to delete account');
+    }
+
+    return response.json() as Promise<{ success: boolean }>;
+  },
 };

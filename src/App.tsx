@@ -37,6 +37,9 @@ const AnalyticsView = lazyWithRetry(
 const RecurringExpensesList = lazyWithRetry(
   () => import('@/components/recurring/RecurringExpensesList'),
 );
+const SettingsView = lazyWithRetry(
+  () => import('@/components/settings/SettingsView'),
+);
 const LandingPage = lazyWithRetry(() => import('@/pages/LandingPage'));
 
 // ============================================================================
@@ -231,6 +234,14 @@ const App = () => {
                   element={
                     <Suspense fallback={<AnalyticsLoadingState />}>
                       <AnalyticsView />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <SettingsView />
                     </Suspense>
                   }
                 />

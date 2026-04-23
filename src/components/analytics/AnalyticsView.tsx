@@ -33,6 +33,7 @@ import MonthlyReportCard from '@/components/analytics/MonthlyReportCard';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '@/lib/utils';
+import { getCurrencySymbol } from '@/lib/currencies';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
@@ -40,9 +41,10 @@ import type { Category } from '@/types/Category';
 const BUDGET_LINE_COLOR = '#f59e0b'; // amber-500 — matches bg-amber-500 budget warning
 
 const AnalyticsView = () => {
-  const { expenses, categories, monthlyBudget, isLoading } = useData();
+  const { expenses, categories, monthlyBudget, defaultCurrency, isLoading } = useData();
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'el' ? el : enUS;
+  const currencySymbol = getCurrencySymbol(defaultCurrency);
 
   const availableYears = useMemo(() => {
     const years = new Set(expenses.map((e) => getYear(parseISO(e.date))));
@@ -250,7 +252,7 @@ const AnalyticsView = () => {
         </div>
         <div className="flex items-baseline gap-3 flex-wrap">
           <p className="text-3xl font-bold tabular-nums tracking-tight">
-            {formatCurrency(animatedThisMonth)}
+            {formatCurrency(animatedThisMonth, defaultCurrency)}
           </p>
           {renderMonthChangeBadge(
             monthComparison.percentChange,
@@ -262,8 +264,9 @@ const AnalyticsView = () => {
           monthComparison.lastMonthAmount,
           monthComparison.lastMonthLabel,
           t,
+          defaultCurrency,
         )}
-        {renderBudgetProgress(budgetUsedPercent, monthlyBudget, t)}
+        {renderBudgetProgress(budgetUsedPercent, monthlyBudget, t, defaultCurrency)}
       </div>
 
       {/* Spending insights */}
@@ -273,6 +276,7 @@ const AnalyticsView = () => {
         monthComparison={monthComparison}
         categories={categories}
         dateLocale={dateLocale}
+        defaultCurrency={defaultCurrency}
       />
 
       {/* Year overview */}
@@ -298,6 +302,7 @@ const AnalyticsView = () => {
             yearlyStats.monthlyAverage,
             yearlyStats.activeMonths,
             t,
+            defaultCurrency,
           )}
         </div>
 
@@ -346,17 +351,17 @@ const AnalyticsView = () => {
                       fill: 'hsl(var(--muted-foreground))',
                       fontSize: 12,
                     }}
-                    tickFormatter={(val: number) => `${Math.round(val)} €`}
+                    tickFormatter={(val: number) => `${Math.round(val)} ${currencySymbol}`}
                     domain={[0, yAxisMax ?? 'auto']}
                   />
                   <Tooltip
-                    content={<ChartTooltip />}
+                    content={<ChartTooltip currency={defaultCurrency} />}
                     cursor={{
                       stroke: 'hsl(var(--border))',
                       strokeDasharray: '4 4',
                     }}
                   />
-                  {renderBudgetReferenceLine(monthlyBudget, t)}
+                  {renderBudgetReferenceLine(monthlyBudget, t, defaultCurrency)}
                   <Area
                     type="monotone"
                     dataKey="amount"
@@ -388,6 +393,7 @@ const AnalyticsView = () => {
           selectedYear,
           t,
           handleCategoryClick,
+          defaultCurrency,
         )}
       </div>
 
@@ -431,9 +437,10 @@ type TooltipPayloadEntry = {
 type ChartTooltipProps = {
   active?: boolean;
   payload?: TooltipPayloadEntry[];
+  currency?: string;
 };
 
-const ChartTooltip = ({ active, payload }: ChartTooltipProps) => {
+const ChartTooltip = ({ active, payload, currency = 'EUR' }: ChartTooltipProps) => {
   if (!active || !payload?.length) return null;
 
   const { value, payload: data } = payload[0];
@@ -442,7 +449,7 @@ const ChartTooltip = ({ active, payload }: ChartTooltipProps) => {
     <div className="rounded-lg border bg-card px-3 py-2 shadow-md">
       <p className="text-xs text-muted-foreground">{data.fullMonth}</p>
       <p className="text-sm font-semibold tabular-nums">
-        {formatCurrency(value)}
+        {formatCurrency(value, currency)}
       </p>
     </div>
   );
@@ -489,13 +496,14 @@ const renderLastMonthContext = (
   lastMonthAmount: number,
   lastMonthLabel: string,
   t: TFunc,
+  currency: string,
 ) => {
   if (lastMonthAmount === 0) return null;
 
   return (
     <p className="text-xs text-muted-foreground mt-1.5">
       {t('analytics.vsLastMonthContext', {
-        amount: formatCurrency(lastMonthAmount),
+        amount: formatCurrency(lastMonthAmount, currency),
         month: lastMonthLabel,
       })}
     </p>
@@ -506,6 +514,7 @@ const renderBudgetProgress = (
   budgetUsedPercent: number | null,
   monthlyBudget: number | null,
   t: TFunc,
+  currency: string,
 ) => {
   if (budgetUsedPercent === null || monthlyBudget === null) return null;
 
@@ -526,7 +535,7 @@ const renderBudgetProgress = (
             percent: Math.round(budgetUsedPercent),
           })}
         </span>
-        <span>{formatCurrency(monthlyBudget)}</span>
+        <span>{formatCurrency(monthlyBudget, currency)}</span>
       </div>
       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
         <div
@@ -543,16 +552,17 @@ const renderYearSummary = (
   monthlyAverage: number,
   activeMonths: number,
   t: TFunc,
+  currency: string,
 ) => {
   if (activeMonths === 0) return null;
 
   return (
     <div className="text-right">
       <span className="text-sm font-semibold tabular-nums">
-        {formatCurrency(totalSpent)}
+        {formatCurrency(totalSpent, currency)}
       </span>
       <span className="text-xs text-muted-foreground ml-2">
-        {t('analytics.avgPerMonth', { amount: formatCurrency(monthlyAverage) })}
+        {t('analytics.avgPerMonth', { amount: formatCurrency(monthlyAverage, currency) })}
       </span>
     </div>
   );
@@ -561,6 +571,7 @@ const renderYearSummary = (
 const renderBudgetReferenceLine = (
   monthlyBudget: number | null,
   t: TFunc,
+  currency: string,
 ) => {
   if (!monthlyBudget) return null;
 
@@ -570,7 +581,7 @@ const renderBudgetReferenceLine = (
       stroke={BUDGET_LINE_COLOR}
       strokeDasharray="5 5"
       label={{
-        value: t('analytics.budgetLabel', { amount: monthlyBudget }),
+        value: t('analytics.budgetLabel', { amount: formatCurrency(monthlyBudget, currency) }),
         position: 'right',
         fill: BUDGET_LINE_COLOR,
         fontSize: 11,
@@ -594,6 +605,7 @@ const renderCategoryBreakdown = (
   selectedYear: number,
   t: TFunc,
   onCategoryClick: (cat: CategoryRow) => void,
+  currency: string,
 ) => {
   if (breakdown.length === 0) {
     return (
@@ -629,7 +641,7 @@ const renderCategoryBreakdown = (
                 className="text-sm font-semibold tabular-nums shrink-0"
                 style={{ color: cat.color }}
               >
-                {formatCurrency(cat.amount)}
+                {formatCurrency(cat.amount, currency)}
               </span>
               <span className="text-xs text-muted-foreground tabular-nums w-8 text-right shrink-0">
                 {Math.round(pct)}%

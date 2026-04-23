@@ -10,6 +10,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { formatCurrency } from '@/lib/utils';
+import { useData } from '@/contexts/DataContext';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
@@ -29,6 +30,7 @@ export const MonthDrillDown = ({
   categories,
 }: Props) => {
   const { t, i18n } = useTranslation();
+  const { defaultCurrency } = useData();
   const dateLocale = i18n.language === 'el' ? el : enUS;
 
   const monthExpenses = useMemo(
@@ -84,15 +86,15 @@ export const MonthDrillDown = ({
           <DialogTitle className="capitalize">{monthLabel}</DialogTitle>
           <DialogDescription>
             {t('analytics.drillDown.monthTotal', {
-              amount: formatCurrency(totalAmount),
+              amount: formatCurrency(totalAmount, defaultCurrency),
               count: monthExpenses.length,
             })}
           </DialogDescription>
         </DialogHeader>
 
         <div className="overflow-y-auto max-h-[60vh] px-6 pb-6">
-          {renderCategoryBreakdown(categoryBreakdown, totalAmount, t)}
-          {renderTopExpenses(topExpenses, dateLocale, t)}
+          {renderCategoryBreakdown(categoryBreakdown, totalAmount, t, defaultCurrency)}
+          {renderTopExpenses(topExpenses, dateLocale, t, defaultCurrency)}
         </div>
       </DialogContent>
     </Dialog>
@@ -113,6 +115,7 @@ const renderCategoryBreakdown = (
   }[],
   totalAmount: number,
   t: TFunc,
+  currency: string,
 ) => {
   if (breakdown.length === 0) return null;
 
@@ -133,7 +136,7 @@ const renderCategoryBreakdown = (
               />
               <span className="text-sm flex-1 truncate">{cat.name}</span>
               <span className="text-sm font-semibold tabular-nums shrink-0">
-                {formatCurrency(cat.amount)}
+                {formatCurrency(cat.amount, currency)}
               </span>
               <span className="text-xs text-muted-foreground tabular-nums w-8 text-right shrink-0">
                 {Math.round(pct)}%
@@ -150,6 +153,7 @@ const renderTopExpenses = (
   expenses: Expense[],
   dateLocale: typeof enUS,
   t: TFunc,
+  currency: string,
 ) => {
   if (expenses.length === 0) return null;
 
@@ -179,7 +183,7 @@ const renderTopExpenses = (
               </p>
             </div>
             <span className="text-sm font-semibold tabular-nums shrink-0 ml-3">
-              {formatCurrency(expense.amount)}
+              {formatCurrency(expense.amount, currency)}
             </span>
           </div>
         ))}

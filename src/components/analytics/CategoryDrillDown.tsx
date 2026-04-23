@@ -10,6 +10,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { formatCurrency } from '@/lib/utils';
+import { useData } from '@/contexts/DataContext';
 import type { Expense } from '@/types/Expense';
 
 type Props = {
@@ -30,6 +31,7 @@ export const CategoryDrillDown = ({
   totalAmount,
 }: Props) => {
   const { t, i18n } = useTranslation();
+  const { defaultCurrency } = useData();
   const dateLocale = i18n.language === 'el' ? el : enUS;
 
   const sortedExpenses = useMemo(
@@ -68,21 +70,21 @@ export const CategoryDrillDown = ({
           </div>
           <DialogDescription>
             {t('analytics.drillDown.categoryTotal', {
-              amount: formatCurrency(totalAmount),
+              amount: formatCurrency(totalAmount, defaultCurrency),
               count: expenses.length,
             })}
           </DialogDescription>
         </DialogHeader>
 
         <div className="overflow-y-auto max-h-[60vh] px-6 pb-6">
-          {renderMonthlyBreakdown(monthlyBreakdown, categoryColor, t)}
+          {renderMonthlyBreakdown(monthlyBreakdown, categoryColor, t, defaultCurrency)}
 
           <p className="text-xs text-muted-foreground uppercase tracking-wide mt-5 mb-2">
             {t('analytics.drillDown.allExpenses')}
           </p>
           <div className="space-y-1">
             {sortedExpenses.map((expense) =>
-              renderExpenseRow(expense, dateLocale),
+              renderExpenseRow(expense, dateLocale, defaultCurrency),
             )}
           </div>
         </div>
@@ -99,6 +101,7 @@ const renderMonthlyBreakdown = (
   months: { label: string; amount: number }[],
   color: string,
   t: TFunc,
+  currency: string,
 ) => {
   if (months.length <= 1) return null;
 
@@ -125,7 +128,7 @@ const renderMonthlyBreakdown = (
                 />
               </div>
               <span className="text-xs font-medium tabular-nums w-20 text-right shrink-0">
-                {formatCurrency(month.amount)}
+                {formatCurrency(month.amount, currency)}
               </span>
             </div>
           );
@@ -135,7 +138,7 @@ const renderMonthlyBreakdown = (
   );
 };
 
-const renderExpenseRow = (expense: Expense, dateLocale: Locale) => {
+const renderExpenseRow = (expense: Expense, dateLocale: Locale, currency: string) => {
   return (
     <div
       key={expense.id}
@@ -151,7 +154,7 @@ const renderExpenseRow = (expense: Expense, dateLocale: Locale) => {
         </p>
       </div>
       <span className="text-sm font-semibold tabular-nums shrink-0 ml-3">
-        {formatCurrency(expense.amount)}
+        {formatCurrency(expense.amount, currency)}
       </span>
     </div>
   );

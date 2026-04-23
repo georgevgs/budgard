@@ -4,6 +4,7 @@ import CalendarDays from 'lucide-react/dist/esm/icons/calendar-days';
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
+import { useData } from '@/contexts/DataContext';
 import type { Expense } from '@/types/Expense';
 
 type ExpensesMonthlyOverviewProps = {
@@ -32,6 +33,7 @@ const ExpensesMonthlyOverview = ({
   onMonthlyTotalClick,
 }: ExpensesMonthlyOverviewProps) => {
   const { t } = useTranslation();
+  const { defaultCurrency } = useData();
 
   const displayTotal = hasActiveFilters ? filteredTotal : monthlyTotal;
   const animatedTotal = useAnimatedNumber(displayTotal);
@@ -66,14 +68,14 @@ const ExpensesMonthlyOverview = ({
           {totalLabel}
         </p>
         <p className="text-3xl font-bold tracking-tight tabular-nums">
-          {formatCurrency(animatedTotal)}
+          {formatCurrency(animatedTotal, defaultCurrency)}
         </p>
-        {renderFilteredSubtotalNote(hasActiveFilters, monthlyTotal, t)}
+        {renderFilteredSubtotalNote(hasActiveFilters, monthlyTotal, t, defaultCurrency)}
         {renderExpandHint(hasExpenses, isExpanded, t)}
       </button>
 
       {/* Statistics */}
-      {renderStats(hasExpenses, expenses, mostExpensive, t)}
+      {renderStats(hasExpenses, expenses, mostExpensive, t, defaultCurrency)}
 
       {/* Action Buttons */}
       {renderCurrentMonthButton(selectedMonth, currentMonth, onCurrentMonthClick, t)}
@@ -94,13 +96,14 @@ const renderFilteredSubtotalNote = (
   hasActiveFilters: boolean,
   monthlyTotal: number,
   t: TranslateFunction,
+  currency: string,
 ) => {
   if (!hasActiveFilters) return null;
 
   return (
     <p className="text-xs text-muted-foreground mt-0.5">
       {t('expenses.ofMonthlyTotal', {
-        total: formatCurrency(monthlyTotal),
+        total: formatCurrency(monthlyTotal, currency),
       })}
     </p>
   );
@@ -133,6 +136,7 @@ const renderExpandHint = (
 const renderMostExpensive = (
   mostExpensive: Expense | null,
   t: TranslateFunction,
+  currency: string,
 ) => {
   if (!mostExpensive) return null;
 
@@ -142,7 +146,7 @@ const renderMostExpensive = (
         {t('expenses.mostExpensive')}
       </dt>
       <dd className="text-lg font-semibold">
-        {formatCurrency(mostExpensive.amount)}
+        {formatCurrency(mostExpensive.amount, currency)}
       </dd>
       <dd className="text-xs text-muted-foreground truncate">
         {mostExpensive.description}
@@ -156,6 +160,7 @@ const renderStats = (
   expenses: Expense[],
   mostExpensive: Expense | null,
   t: TranslateFunction,
+  currency: string,
 ) => {
   if (!hasExpenses) return null;
 
@@ -170,7 +175,7 @@ const renderStats = (
       </div>
 
       {/* Most Expensive */}
-      {renderMostExpensive(mostExpensive, t)}
+      {renderMostExpensive(mostExpensive, t, currency)}
     </dl>
   );
 };

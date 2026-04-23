@@ -48,7 +48,7 @@ type ImportStep = 'upload' | 'mapping' | 'preview' | 'importing';
 
 const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
   const { t } = useTranslation();
-  const { categories } = useData();
+  const { categories, defaultCurrency } = useData();
   const { toast } = useToast();
   const { handleBulkExpenseImport } = useDataOperations();
 
@@ -293,6 +293,7 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
             handleBackToMapping,
             importError,
             t,
+            defaultCurrency,
           )}
           {renderImportingStep(step === 'importing', validRows.length, t)}
         </div>
@@ -563,6 +564,7 @@ const renderMoreRowsNote = (total: number, t: TranslateFunction) => {
 const renderValidRowsTable = (
   validRows: ParsedExpenseRow[],
   t: TranslateFunction,
+  currency: string,
 ) => {
   if (validRows.length === 0) return null;
 
@@ -585,7 +587,7 @@ const renderValidRowsTable = (
                 <td className="px-2 py-1">{row.date}</td>
                 <td className="px-2 py-1 truncate max-w-[150px]">{row.description}</td>
                 <td className="px-2 py-1 truncate max-w-[100px]">{row.categoryName || '-'}</td>
-                <td className="px-2 py-1 text-right">{formatCurrency(row.amount)}</td>
+                <td className="px-2 py-1 text-right">{formatCurrency(row.amount, currency)}</td>
               </tr>
             ))}
           </tbody>
@@ -651,6 +653,7 @@ const renderPreviewStep = (
   onBack: () => void,
   importError: string | null,
   t: TranslateFunction,
+  currency: string,
 ) => {
   if (!isCurrentStep) return null;
 
@@ -666,7 +669,7 @@ const renderPreviewStep = (
         {renderErrorCount(errors.length, t)}
       </div>
       {renderUnmatchedCategories(unmatchedCategories, categories, categoryMappings, onCategoryMap, t)}
-      {renderValidRowsTable(validRows, t)}
+      {renderValidRowsTable(validRows, t, currency)}
       {renderErrorsList(errors, t)}
       <div className="flex gap-2 justify-end pt-2 border-t">
         <Button variant="outline" onClick={onBack}>{t('import.back')}</Button>

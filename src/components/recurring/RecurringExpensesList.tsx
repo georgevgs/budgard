@@ -98,7 +98,7 @@ const RecurringExpensesList = () => {
   const [selectedExpense, setSelectedExpense] = useState<
     RecurringExpense | undefined
   >(undefined);
-  const { recurringExpenses, categories, isLoading } = useData();
+  const { recurringExpenses, categories, defaultCurrency, isLoading } = useData();
   const { session } = useAuth();
   const {
     handleRecurringExpenseSubmit: submitRecurringExpense,
@@ -176,7 +176,7 @@ const RecurringExpensesList = () => {
             <h2 className="text-lg font-semibold">
               {t('recurring.expensesTitle')}
             </h2>
-            {renderMonthlySummary(activeExpenses.length, monthlyTotal, t)}
+            {renderMonthlySummary(activeExpenses.length, monthlyTotal, t, defaultCurrency)}
           </div>
           <Button
             onClick={() => setIsFormOpen(true)}
@@ -232,13 +232,14 @@ const renderMonthlySummary = (
   activeCount: number,
   monthlyTotal: number,
   t: TranslateFunction,
+  currency: string,
 ) => {
   if (activeCount === 0) return null;
 
   return (
     <p className="text-sm text-muted-foreground">
       {t('recurring.monthlyFrom', {
-        amount: formatCurrency(monthlyTotal),
+        amount: formatCurrency(monthlyTotal, currency),
         count: activeCount,
       })}
     </p>

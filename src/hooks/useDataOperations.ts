@@ -38,6 +38,8 @@ export function useDataOperations() {
     refreshExpenses,
     monthlyBudget,
     setMonthlyBudget,
+    defaultCurrency,
+    setDefaultCurrency,
   } = useData();
   const { toast } = useToast();
 
@@ -441,6 +443,33 @@ export function useDataOperations() {
     [isInitialized, setCategories, showErrorToast],
   );
 
+  const handleCurrencyUpdate = useCallback(
+    async (currency: string) => {
+      const previousCurrency = defaultCurrency;
+      setDefaultCurrency(currency);
+
+      try {
+        await dataService.updateDefaultCurrency(currency);
+      } catch (error) {
+        haptics.error();
+        setDefaultCurrency(previousCurrency);
+        showErrorToast('Failed to update currency');
+        throw error;
+      }
+    },
+    [defaultCurrency, setDefaultCurrency, showErrorToast],
+  );
+
+  const handleDeleteAccount = useCallback(async () => {
+    try {
+      await dataService.deleteAccount();
+    } catch (error) {
+      haptics.error();
+      showErrorToast('Failed to delete account');
+      throw error;
+    }
+  }, [showErrorToast]);
+
   const handleBulkExpenseImport = useCallback(
     async (expensesData: BulkExpenseRow[]) => {
       if (!isInitialized) return;
@@ -462,6 +491,8 @@ export function useDataOperations() {
     handleRecurringExpenseDelete,
     handleRecurringExpenseToggle,
     handleBudgetUpdate,
+    handleCurrencyUpdate,
+    handleDeleteAccount,
     handleCategoriesAddBulk,
     handleBulkExpenseImport,
   };

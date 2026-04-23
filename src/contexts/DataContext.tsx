@@ -24,6 +24,7 @@ type DataState = {
   recurringExpenses: RecurringExpense[];
   tags: Tag[];
   monthlyBudget: number | null;
+  defaultCurrency: string;
   isLoading: boolean;
   isInitialized: boolean;
 };
@@ -36,6 +37,7 @@ type DataContextType = DataState & {
   setRecurringExpenses: Dispatch<SetStateAction<RecurringExpense[]>>;
   setTags: Dispatch<SetStateAction<Tag[]>>;
   setMonthlyBudget: Dispatch<SetStateAction<number | null>>;
+  setDefaultCurrency: Dispatch<SetStateAction<string>>;
 };
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -53,6 +55,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   >([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [monthlyBudget, setMonthlyBudget] = useState<number | null>(null);
+  const [defaultCurrency, setDefaultCurrency] = useState<string>('EUR');
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   // Tracks the AbortController for the current in-flight fetchData call so we
@@ -93,6 +96,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setRecurringExpenses(recurringExpensesData);
       setTags(tagsData);
       setMonthlyBudget(budgetData?.monthly_amount ?? null);
+      setDefaultCurrency(budgetData?.default_currency ?? 'EUR');
       setIsInitialized(true);
       setIsLoading(false);
     } catch (error) {
@@ -146,6 +150,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setRecurringExpenses([]);
       setTags([]);
       setMonthlyBudget(null);
+      setDefaultCurrency('EUR');
       setIsInitialized(false);
       setIsLoading(false);
     }
@@ -180,6 +185,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     recurringExpenses,
     tags,
     monthlyBudget,
+    defaultCurrency,
     isLoading,
     isInitialized,
     refreshData,
@@ -189,6 +195,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setRecurringExpenses,
     setTags,
     setMonthlyBudget,
+    setDefaultCurrency,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

@@ -25,6 +25,7 @@ import { format, parseISO } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import type { Expense } from '@/types/Expense';
 import { formatCurrency, formatForeignAmount } from '@/lib/utils.ts';
+import { useData } from '@/contexts/DataContext';
 
 type ExpenseCardProps = {
   expense: Expense;
@@ -42,6 +43,7 @@ const ExpensesCard = ({
   showFullDate,
 }: ExpenseCardProps) => {
   const { t, i18n } = useTranslation();
+  const { defaultCurrency } = useData();
   const dateLocale = i18n.language === 'el' ? el : enUS;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -102,7 +104,7 @@ const ExpensesCard = ({
                 <div className="flex items-center gap-2 shrink-0">
                   <div className="text-right">
                     <p className="text-lg font-bold tabular-nums tracking-tight">
-                      {formatCurrency(expense.amount)}
+                      {formatCurrency(expense.amount, defaultCurrency)}
                     </p>
                     {renderOriginalCurrency(expense)}
                   </div>

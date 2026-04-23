@@ -210,10 +210,53 @@
     "update": "Update",
     "toggleLabel": "Toggle {{description}}"
   },
+  "settings": {
+    "title": "Settings",
+    "profile": {
+      "title": "Profile",
+      "email": "Email",
+      "signOut": "Sign Out",
+      "signOutConfirmTitle": "Sign Out",
+      "signOutConfirmDescription": "Are you sure you want to sign out?"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "theme": "Theme",
+      "accentColor": "Accent Color"
+    },
+    "language": {
+      "title": "Language",
+      "select": "Select language"
+    },
+    "currency": {
+      "title": "Currency",
+      "default": "Default Currency",
+      "defaultDescription": "Used for new expenses and display formatting",
+      "updated": "Currency updated",
+      "updateFailed": "Failed to update currency"
+    },
+    "data": {
+      "title": "Data Management",
+      "exportData": "Export Data",
+      "deleteAccount": "Delete Account",
+      "deleteAccountDescription": "Permanently delete your account and all associated data. This action cannot be undone.",
+      "deleteAccountConfirmTitle": "Delete Account",
+      "deleteAccountConfirmDescription": "This will permanently delete your account and all your data including expenses, categories, tags, and recurring expenses. This action cannot be undone.",
+      "deleteAccountConfirmButton": "Delete My Account",
+      "deleteAccountSuccess": "Account deleted successfully",
+      "deleteAccountFailed": "Failed to delete account"
+    },
+    "about": {
+      "title": "About",
+      "version": "Version",
+      "madeWith": "Made with care"
+    }
+  },
   "navigation": {
     "expenses": "Expenses",
     "recurring": "Recurring",
     "analytics": "Analytics",
+    "settings": "Settings",
     "ariaLabel": "Main navigation",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
@@ -285,7 +328,7 @@
     "vsLastMonthDown": "-{{percent}}% vs last month",
     "vsLastMonthContext": "vs {{amount}} in {{month}}",
     "sameAsLastMonth": "Same as last month",
-    "budgetLabel": "Budget: {{amount}} €",
+    "budgetLabel": "Budget: {{amount}}",
     "budgetUsed": "{{percent}}% of budget used",
     "avgPerMonth": "avg {{amount}}/mo",
     "categoryTrends": "Category Breakdown",

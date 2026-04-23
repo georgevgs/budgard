@@ -210,10 +210,53 @@
     "update": "Ενημέρωση",
     "toggleLabel": "Εναλλαγή {{description}}"
   },
+  "settings": {
+    "title": "Ρυθμίσεις",
+    "profile": {
+      "title": "Προφίλ",
+      "email": "Email",
+      "signOut": "Αποσύνδεση",
+      "signOutConfirmTitle": "Αποσύνδεση",
+      "signOutConfirmDescription": "Είστε βέβαιοι ότι θέλετε να αποσυνδεθείτε;"
+    },
+    "appearance": {
+      "title": "Εμφάνιση",
+      "theme": "Θέμα",
+      "accentColor": "Χρώμα Έμφασης"
+    },
+    "language": {
+      "title": "Γλώσσα",
+      "select": "Επιλογή γλώσσας"
+    },
+    "currency": {
+      "title": "Νόμισμα",
+      "default": "Προεπιλεγμένο Νόμισμα",
+      "defaultDescription": "Χρησιμοποιείται για νέα έξοδα και μορφοποίηση εμφάνισης",
+      "updated": "Το νόμισμα ενημερώθηκε",
+      "updateFailed": "Αποτυχία ενημέρωσης νομίσματος"
+    },
+    "data": {
+      "title": "Διαχείριση Δεδομένων",
+      "exportData": "Εξαγωγή Δεδομένων",
+      "deleteAccount": "Διαγραφή Λογαριασμού",
+      "deleteAccountDescription": "Μόνιμη διαγραφή του λογαριασμού σας και όλων των σχετικών δεδομένων. Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.",
+      "deleteAccountConfirmTitle": "Διαγραφή Λογαριασμού",
+      "deleteAccountConfirmDescription": "Αυτό θα διαγράψει μόνιμα τον λογαριασμό σας και όλα τα δεδομένα σας, συμπεριλαμβανομένων εξόδων, κατηγοριών, ετικετών και επαναλαμβανόμενων εξόδων. Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.",
+      "deleteAccountConfirmButton": "Διαγραφή Λογαριασμού Μου",
+      "deleteAccountSuccess": "Ο λογαριασμός διαγράφηκε επιτυχώς",
+      "deleteAccountFailed": "Αποτυχία διαγραφής λογαριασμού"
+    },
+    "about": {
+      "title": "Σχετικά",
+      "version": "Έκδοση",
+      "madeWith": "Φτιαγμένο με φροντίδα"
+    }
+  },
   "navigation": {
     "expenses": "Έξοδα",
     "recurring": "Επαναλαμβανόμενα",
     "analytics": "Αναλύσεις",
+    "settings": "Ρυθμίσεις",
     "ariaLabel": "Κύρια πλοήγηση",
     "previousMonth": "Προηγούμενος μήνας",
     "nextMonth": "Επόμενος μήνας",
@@ -285,7 +328,7 @@
     "vsLastMonthDown": "-{{percent}}% σε σχέση με τον προηγούμενο μήνα",
     "vsLastMonthContext": "έναντι {{amount}} τον {{month}}",
     "sameAsLastMonth": "Ίδιο με τον προηγούμενο μήνα",
-    "budgetLabel": "Προϋπολογισμός: {{amount}} €",
+    "budgetLabel": "Προϋπολογισμός: {{amount}}",
     "budgetUsed": "{{percent}}% του προϋπολογισμού χρησιμοποιήθηκε",
     "avgPerMonth": "μέσος {{amount}}/μήνα",
     "categoryTrends": "Ανάλυση Κατηγοριών",

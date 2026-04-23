@@ -10,12 +10,14 @@ type BudgetProgressProps = {
   monthlyBudget: number | null;
   monthlySpent: number;
   onBudgetUpdate: (amount: number) => Promise<void>;
+  currencyCode?: string;
 };
 
 const BudgetProgress = ({
   monthlyBudget,
   monthlySpent,
   onBudgetUpdate,
+  currencyCode = 'EUR',
 }: BudgetProgressProps) => {
   const { t } = useTranslation();
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -39,6 +41,7 @@ const BudgetProgress = ({
           onClose={() => setIsFormOpen(false)}
           onSubmit={onBudgetUpdate}
           currentBudget={null}
+          currencyCode={currencyCode}
         />
       </>
     );
@@ -80,8 +83,8 @@ const BudgetProgress = ({
           className="h-2"
           indicatorClassName={getProgressColor()}
           aria-label={t('budget.budgetProgress', {
-            current: formatCurrency(monthlySpent),
-            total: formatCurrency(monthlyBudget),
+            current: formatCurrency(monthlySpent, currencyCode),
+            total: formatCurrency(monthlyBudget, currencyCode),
           })}
         />
 
@@ -89,8 +92,8 @@ const BudgetProgress = ({
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium">
             {t('budget.budgetProgress', {
-              current: formatCurrency(monthlySpent),
-              total: formatCurrency(monthlyBudget),
+              current: formatCurrency(monthlySpent, currencyCode),
+              total: formatCurrency(monthlyBudget, currencyCode),
             })}
           </span>
           <span
@@ -100,7 +103,7 @@ const BudgetProgress = ({
               isWarning && 'text-amber-600 dark:text-amber-500',
             )}
           >
-            {renderRemainingLabel(isOverBudget, remaining, t)}
+            {renderRemainingLabel(isOverBudget, remaining, t, currencyCode)}
           </span>
         </div>
       </div>
@@ -110,6 +113,7 @@ const BudgetProgress = ({
         onClose={() => setIsFormOpen(false)}
         onSubmit={onBudgetUpdate}
         currentBudget={monthlyBudget}
+        currencyCode={currencyCode}
       />
     </>
   );
@@ -128,8 +132,9 @@ const renderRemainingLabel = (
   isOverBudget: boolean,
   remaining: number,
   t: TranslateFunction,
+  currency: string,
 ) => {
   if (isOverBudget) return t('budget.overBudget');
 
-  return `${formatCurrency(remaining)} ${t('budget.remaining')}`;
+  return `${formatCurrency(remaining, currency)} ${t('budget.remaining')}`;
 };

@@ -109,6 +109,7 @@ const ExpensesList = () => {
     tags,
     isInitialized,
     monthlyBudget,
+    defaultCurrency,
   } = useData();
   const operations = useDataOperations();
   const [optimisticExpenses, addOptimisticExpense] = useOptimistic(
@@ -210,6 +211,7 @@ const ExpensesList = () => {
   useBudgetAlerts({
     monthlyBudget,
     monthlySpent: selectedMonth === currentMonth ? monthlyTotal : 0,
+    defaultCurrency,
   });
 
   const filteredTotal = useMemo(
@@ -303,6 +305,7 @@ const ExpensesList = () => {
                 monthlyBudget={monthlyBudget}
                 monthlySpent={monthlyTotal}
                 onBudgetUpdate={operations.handleBudgetUpdate}
+                currencyCode={defaultCurrency}
               />
 
               {renderDashboard(filteredExpenses, categories)}

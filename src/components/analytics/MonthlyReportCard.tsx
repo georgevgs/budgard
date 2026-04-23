@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, dataUrlToBlob } from '@/lib/utils';
+import { useData } from '@/contexts/DataContext';
 import type { Category } from '@/types/Category';
 
 type CategorySummary = {
@@ -45,6 +46,7 @@ const MonthlyReportCard = ({
   expensesByCategory,
 }: Props) => {
   const { t } = useTranslation();
+  const { defaultCurrency } = useData();
   const cardRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -133,17 +135,17 @@ const MonthlyReportCard = ({
             {monthLabel}
           </p>
           <p className="text-4xl font-bold tabular-nums tracking-tight">
-            {formatCurrency(totalSpent)}
+            {formatCurrency(totalSpent, defaultCurrency)}
           </p>
 
           {/* Budget bar */}
-          {renderBudgetSection(budgetPercent, monthlyBudget, t)}
+          {renderBudgetSection(budgetPercent, monthlyBudget, t, defaultCurrency)}
 
           {/* vs Last month */}
-          {renderLastMonthComparison(lastMonthAmount, t)}
+          {renderLastMonthComparison(lastMonthAmount, t, defaultCurrency)}
 
           {/* Top categories */}
-          {renderTopCategories(topCategories, t)}
+          {renderTopCategories(topCategories, t, defaultCurrency)}
 
           {/* Branding */}
           <div className="mt-5 pt-3 border-t border-border/30">
@@ -202,6 +204,7 @@ const renderBudgetSection = (
   budgetPercent: number | null,
   monthlyBudget: number | null,
   t: TFunc,
+  currency: string,
 ) => {
   if (budgetPercent === null || monthlyBudget === null) {
     return (
@@ -220,7 +223,7 @@ const renderBudgetSection = (
     <div className="mt-3">
       <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
         <span>{t('report.budgetUsed', { percent: budgetPercent })}</span>
-        <span>{formatCurrency(monthlyBudget)}</span>
+        <span>{formatCurrency(monthlyBudget, currency)}</span>
       </div>
       <div className="h-2 bg-muted rounded-full overflow-hidden">
         <div
@@ -232,12 +235,12 @@ const renderBudgetSection = (
   );
 };
 
-const renderLastMonthComparison = (lastMonthAmount: number, t: TFunc) => {
+const renderLastMonthComparison = (lastMonthAmount: number, t: TFunc, currency: string) => {
   if (lastMonthAmount === 0) return null;
 
   return (
     <p className="text-xs text-muted-foreground mt-2">
-      {t('report.vsLastMonth', { amount: formatCurrency(lastMonthAmount) })}
+      {t('report.vsLastMonth', { amount: formatCurrency(lastMonthAmount, currency) })}
     </p>
   );
 };
@@ -245,6 +248,7 @@ const renderLastMonthComparison = (lastMonthAmount: number, t: TFunc) => {
 const renderTopCategories = (
   topCategories: CategorySummary[],
   t: TFunc,
+  currency: string,
 ) => {
   if (topCategories.length === 0) return null;
 
@@ -262,7 +266,7 @@ const renderTopCategories = (
             />
             <span className="text-sm flex-1 truncate">{cat.name}</span>
             <span className="text-sm font-semibold tabular-nums">
-              {formatCurrency(cat.amount)}
+              {formatCurrency(cat.amount, currency)}
             </span>
             <span className="text-xs text-muted-foreground tabular-nums w-8 text-right">
               {Math.round(cat.percent)}%

@@ -10,11 +10,13 @@ const BUDGET_EXCEEDED_THRESHOLD = 100;
 type UseBudgetAlertsProps = {
   monthlyBudget: number | null;
   monthlySpent: number;
+  defaultCurrency: string;
 };
 
 export const useBudgetAlerts = ({
   monthlyBudget,
   monthlySpent,
+  defaultCurrency,
 }: UseBudgetAlertsProps): void => {
   const { t } = useTranslation();
   const shownWarning = useRef(false);
@@ -63,8 +65,8 @@ export const useBudgetAlerts = ({
         variant: 'destructive',
         title: t('budget.alerts.exceeded'),
         description: t('budget.alerts.exceededDescription', {
-          spent: formatCurrency(monthlySpent),
-          budget: formatCurrency(monthlyBudget),
+          spent: formatCurrency(monthlySpent, defaultCurrency),
+          budget: formatCurrency(monthlyBudget, defaultCurrency),
         }),
       });
 
@@ -84,9 +86,9 @@ export const useBudgetAlerts = ({
         title: t('budget.alerts.warning'),
         description: t('budget.alerts.warningDescription', {
           percent: Math.round(percentage),
-          remaining: formatCurrency(remaining),
+          remaining: formatCurrency(remaining, defaultCurrency),
         }),
       });
     }
-  }, [monthlySpent, monthlyBudget, t]);
+  }, [monthlySpent, monthlyBudget, defaultCurrency, t]);
 };

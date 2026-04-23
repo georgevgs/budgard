@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
+import { useData } from '@/contexts/DataContext';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
@@ -15,6 +16,7 @@ const ExpensesDashboard = ({
   categories,
 }: ExpensesDashboardProps) => {
   const { t } = useTranslation();
+  const { defaultCurrency } = useData();
 
   const categoryData = useMemo(() => {
     const categoryExpenses = expenses.reduce<Record<string, Expense[]>>(
@@ -74,7 +76,7 @@ const ExpensesDashboard = ({
               className="py-2"
               aria-label={t('dashboard.categoryBreakdown', {
                 name: category.name,
-                amount: formatCurrency(category.amount),
+                amount: formatCurrency(category.amount, defaultCurrency),
                 percent: formatPercentage(category.percentage),
               })}
             >
@@ -91,7 +93,7 @@ const ExpensesDashboard = ({
                   className="text-sm font-semibold shrink-0 tabular-nums"
                   style={{ color: category.color }}
                 >
-                  {formatCurrency(category.amount)}
+                  {formatCurrency(category.amount, defaultCurrency)}
                 </span>
                 <span className="text-xs text-muted-foreground shrink-0 w-8 text-right tabular-nums">
                   {formatPercentage(category.percentage)}

@@ -11,15 +11,16 @@ export const fetchExchangeRate = async (
   fromCurrency: string,
   date: string, // 'yyyy-MM-dd'
   signal?: AbortSignal,
+  toCurrency: string = 'EUR',
 ): Promise<number> => {
-  if (fromCurrency === 'EUR') return 1;
+  if (fromCurrency === toCurrency) return 1;
 
-  const cacheKey = `${fromCurrency}-${date}`;
+  const cacheKey = `${fromCurrency}-${toCurrency}-${date}`;
   const cached = rateCache.get(cacheKey);
   if (cached !== undefined) return cached;
 
   const today = new Date().toISOString().slice(0, 10);
-  const params = new URLSearchParams({ base: fromCurrency, quotes: 'EUR' });
+  const params = new URLSearchParams({ base: fromCurrency, quotes: toCurrency });
   if (date < today) params.set('date', date);
   const url = `${BASE_URL}/rates?${params.toString()}`;
 
@@ -27,8 +28,8 @@ export const fetchExchangeRate = async (
   if (!response.ok) throw new Error(`Exchange rate fetch failed: ${response.status}`);
 
   const data = (await response.json()) as RateEntry[];
-  const entry = data.find((r) => r.quote === 'EUR');
-  if (!entry) throw new Error('EUR rate missing from response');
+  const entry = data.find((r) => r.quote === toCurrency);
+  if (!entry) throw new Error(`${toCurrency} rate missing from response`);
 
   rateCache.set(cacheKey, entry.rate);
   return entry.rate;

@@ -17,24 +17,24 @@ vi.mock('@/lib/haptics', () => ({
 describe('useBudgetAlerts', () => {
   it('does nothing when no budget is set', () => {
     renderHook(() =>
-      useBudgetAlerts({ monthlyBudget: null, monthlySpent: 500 }),
+      useBudgetAlerts({ monthlyBudget: null, monthlySpent: 500, defaultCurrency: 'EUR' }),
     );
     expect(mockToast).not.toHaveBeenCalled();
   });
 
   it('does nothing when budget is zero', () => {
-    renderHook(() => useBudgetAlerts({ monthlyBudget: 0, monthlySpent: 500 }));
+    renderHook(() => useBudgetAlerts({ monthlyBudget: 0, monthlySpent: 500, defaultCurrency: 'EUR' }));
     expect(mockToast).not.toHaveBeenCalled();
   });
 
   it('does nothing when spent is zero', () => {
-    renderHook(() => useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: 0 }));
+    renderHook(() => useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: 0, defaultCurrency: 'EUR' }));
     expect(mockToast).not.toHaveBeenCalled();
   });
 
   it('does not alert on first render (prevents page-load toasts)', () => {
     renderHook(() =>
-      useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: 900 }),
+      useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: 900, defaultCurrency: 'EUR' }),
     );
     expect(mockToast).not.toHaveBeenCalled();
   });
@@ -42,7 +42,7 @@ describe('useBudgetAlerts', () => {
   it('shows warning toast when crossing 80% threshold upward', () => {
     const { rerender } = renderHook(
       ({ spent }) =>
-        useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: spent }),
+        useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: spent, defaultCurrency: 'EUR' }),
       { initialProps: { spent: 700 } },
     );
 
@@ -58,7 +58,7 @@ describe('useBudgetAlerts', () => {
   it('shows exceeded toast when crossing 100% threshold', () => {
     const { rerender } = renderHook(
       ({ spent }) =>
-        useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: spent }),
+        useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: spent, defaultCurrency: 'EUR' }),
       { initialProps: { spent: 900 } },
     );
 
@@ -72,7 +72,7 @@ describe('useBudgetAlerts', () => {
   it('does not re-alert after already showing warning', () => {
     const { rerender } = renderHook(
       ({ spent }) =>
-        useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: spent }),
+        useBudgetAlerts({ monthlyBudget: 1000, monthlySpent: spent, defaultCurrency: 'EUR' }),
       { initialProps: { spent: 700 } },
     );
 
@@ -85,7 +85,7 @@ describe('useBudgetAlerts', () => {
   it('resets alerts when budget amount changes', () => {
     const { rerender } = renderHook(
       ({ budget, spent }: { budget: number; spent: number }) =>
-        useBudgetAlerts({ monthlyBudget: budget, monthlySpent: spent }),
+        useBudgetAlerts({ monthlyBudget: budget, monthlySpent: spent, defaultCurrency: 'EUR' }),
       { initialProps: { budget: 1000, spent: 700 } },
     );
 
