@@ -25,9 +25,12 @@ import Check from 'lucide-react/dist/esm/icons/check';
 import Moon from 'lucide-react/dist/esm/icons/moon';
 import Sun from 'lucide-react/dist/esm/icons/sun';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import Bell from 'lucide-react/dist/esm/icons/bell';
+import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useTheme } from '@/hooks/useTheme';
 import {
   ACCENT_COLORS,
@@ -53,6 +56,7 @@ const SettingsView = () => {
   const { theme, setTheme } = useTheme();
   const { accent, setAccent } = useAccentColor();
   const { toast } = useToast();
+  const { state: pushState, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePushNotifications();
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -198,6 +202,18 @@ const SettingsView = () => {
                 ))}
               </SelectContent>
             </Select>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Notifications */}
+      <section className="space-y-2">
+        <p className="text-xs text-muted-foreground uppercase tracking-wide">
+          {t('settings.notifications.title')}
+        </p>
+        <Card className="border-border/50 rounded-2xl">
+          <CardContent className="p-4">
+            {renderNotificationToggle(pushState, pushSubscribe, pushUnsubscribe, t)}
           </CardContent>
         </Card>
       </section>
@@ -368,5 +384,66 @@ const renderAccentCheck = (isSelected: boolean) => {
 
   return (
     <Check className="absolute inset-0 m-auto h-3.5 w-3.5 text-white drop-shadow-sm" />
+  );
+};
+
+type PushState = 'loading' | 'unsupported' | 'denied' | 'subscribed' | 'unsubscribed';
+
+const renderNotificationToggle = (
+  state: PushState,
+  subscribe: () => Promise<void>,
+  unsubscribe: () => Promise<void>,
+  t: TFunc,
+) => {
+  if (state === 'unsupported') {
+    return (
+      <div className="flex items-center gap-3">
+        <Bell className="h-4 w-4 text-muted-foreground shrink-0" />
+        <p className="text-sm text-muted-foreground">
+          {t('settings.notifications.unsupported')}
+        </p>
+      </div>
+    );
+  }
+
+  if (state === 'denied') {
+    return (
+      <div className="flex items-center gap-3">
+        <Bell className="h-4 w-4 text-muted-foreground shrink-0" />
+        <div>
+          <p className="text-sm">{t('settings.notifications.pushLabel')}</p>
+          <p className="text-xs text-muted-foreground">
+            {t('settings.notifications.denied')}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleToggle = (checked: boolean) => {
+    if (checked) {
+      subscribe();
+    } else {
+      unsubscribe();
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <Bell className="h-4 w-4 text-muted-foreground shrink-0" />
+        <div>
+          <p className="text-sm">{t('settings.notifications.pushLabel')}</p>
+          <p className="text-xs text-muted-foreground">
+            {t('settings.notifications.pushDescription')}
+          </p>
+        </div>
+      </div>
+      <Switch
+        checked={state === 'subscribed'}
+        disabled={state === 'loading'}
+        onCheckedChange={handleToggle}
+      />
+    </div>
   );
 };

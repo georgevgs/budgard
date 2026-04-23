@@ -235,6 +235,13 @@
       "updated": "Currency updated",
       "updateFailed": "Failed to update currency"
     },
+    "notifications": {
+      "title": "Notifications",
+      "pushLabel": "Push Notifications",
+      "pushDescription": "Reminders for upcoming bills and activity nudges",
+      "unsupported": "Push notifications are not supported on this device",
+      "denied": "Notifications blocked. Enable them in your browser settings."
+    },
     "data": {
       "title": "Data Management",
       "exportData": "Export Data",

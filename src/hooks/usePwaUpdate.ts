@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { useToast } from '@/hooks/useToast';
+import { swRegistration } from '@/lib/swRegistration';
 
 const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
 const MIN_VISIBILITY_CHECK_INTERVAL_MS = 30 * 60 * 1000;
 
 export function usePwaUpdate(): void {
   const { toast } = useToast();
-  const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const needRefreshRef = useRef(false);
   const lastUpdateCheckRef = useRef<number>(0);
   const toastDismissedRef = useRef(false);
@@ -18,7 +18,7 @@ export function usePwaUpdate(): void {
   } = useRegisterSW({
     onRegisteredSW(_swUrl, registration) {
       if (!registration) return;
-      swRegistrationRef.current = registration;
+      swRegistration.set(registration);
 
       // Check for an update immediately on registration.
       // visibilitychange doesn't fire on a fresh iOS PWA open (page starts
@@ -92,8 +92,8 @@ export function usePwaUpdate(): void {
       // If an update is already pending, don't re-check or re-show toast.
       if (needRefreshRef.current) return;
 
-      const registration = swRegistrationRef.current;
-      if (!registration) return;
+      const reg = swRegistration.get();
+      if (!reg) return;
 
       // Rate-limit update checks on visibility change to avoid iOS triggering
       // spurious SW re-installs on every app focus event.
@@ -103,7 +103,7 @@ export function usePwaUpdate(): void {
       }
       lastUpdateCheckRef.current = now;
 
-      registration.update().catch(() => {
+      reg.update().catch(() => {
         // SW script fetch can fail (offline, server error) — non-critical
       });
     };

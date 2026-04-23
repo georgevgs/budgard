@@ -1,0 +1,25 @@
+-- Enable pg_net for HTTP requests from SQL.
+-- pg_cron is already enabled on this project.
+CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
+
+-- Daily push notification cron job at 08:00 UTC.
+-- Calls the send-push-notifications Edge Function via pg_net.
+-- The CRON_SECRET was set via `supabase secrets set` and configured
+-- directly in the cron.job entry via the Supabase SQL editor.
+--
+-- To recreate this cron job, run:
+--
+-- SELECT cron.schedule(
+--   'send-push-notifications',
+--   '0 8 * * *',
+--   $$
+--   SELECT net.http_post(
+--     url := 'https://htamokfphaqudeivpowr.supabase.co/functions/v1/send-push-notifications',
+--     headers := jsonb_build_object(
+--       'Authorization', 'Bearer <YOUR_CRON_SECRET>',
+--       'Content-Type', 'application/json'
+--     ),
+--     body := '{}'::jsonb
+--   );
+--   $$
+-- );
