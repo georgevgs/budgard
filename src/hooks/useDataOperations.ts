@@ -6,6 +6,7 @@ import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Tag } from '@/types/Tag';
+import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 import { uploadReceipt, deleteReceipt } from '@/services/receiptService';
 import { haptics } from '@/lib/haptics';
 import { offlineQueue } from '@/lib/offlineQueue';
@@ -34,6 +35,7 @@ export function useDataOperations() {
     setExpenses,
     setCategories,
     setTags,
+    setTemplates,
     setRecurringExpenses,
     refreshExpenses,
     monthlyBudget,
@@ -470,6 +472,57 @@ export function useDataOperations() {
     }
   }, [showErrorToast]);
 
+  const handleTemplateCreate = useCallback(
+    async (templateData: Partial<ExpenseTemplate>) => {
+      if (!isInitialized) return;
+
+      const optimisticTemplate = {
+        ...templateData,
+        id: `temp-${Date.now()}`,
+        created_at: new Date().toISOString(),
+      } as ExpenseTemplate;
+
+      setTemplates((prev) => [optimisticTemplate, ...prev]);
+
+      try {
+        const saved = await dataService.createTemplate(templateData);
+        haptics.success();
+        setTemplates((prev) =>
+          prev.map((t) => (t.id === optimisticTemplate.id ? saved : t)),
+        );
+        toast({ variant: 'success', title: 'Template saved' });
+      } catch (error) {
+        haptics.error();
+        setTemplates((prev) =>
+          prev.filter((t) => t.id !== optimisticTemplate.id),
+        );
+        showErrorToast('Failed to save template');
+        throw error;
+      }
+    },
+    [isInitialized, setTemplates, showErrorToast, toast],
+  );
+
+  const handleTemplateDelete = useCallback(
+    async (templateId: string) => {
+      if (!isInitialized) return;
+
+      haptics.warning();
+      setTemplates((prev) => prev.filter((t) => t.id !== templateId));
+
+      try {
+        await dataService.deleteTemplate(templateId);
+        haptics.success();
+      } catch (error) {
+        haptics.error();
+        // Rollback — re-fetch is simpler since we don't keep prev reference
+        showErrorToast('Failed to delete template');
+        throw error;
+      }
+    },
+    [isInitialized, setTemplates, showErrorToast],
+  );
+
   const handleBulkExpenseImport = useCallback(
     async (expensesData: BulkExpenseRow[]) => {
       if (!isInitialized) return;
@@ -495,6 +548,8 @@ export function useDataOperations() {
     handleDeleteAccount,
     handleCategoriesAddBulk,
     handleBulkExpenseImport,
+    handleTemplateCreate,
+    handleTemplateDelete,
   };
 }
 

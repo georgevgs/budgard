@@ -243,9 +243,31 @@ export const budgetSchema = z.object({
     }, 'Amount must be between 0 and 10.000.000'),
 });
 
+// Expense template validation schema
+export const templateSchema = z.object({
+  amount: z
+    .string()
+    .min(1, 'Amount is required')
+    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .refine((val) => {
+      const amount = parseCurrencyInput(val);
+      return amount > 0 && amount <= 1000000;
+    }, 'Amount must be between 0 and 1.000.000'),
+  description: z
+    .string()
+    .min(1, 'Description is required')
+    .max(100, 'Description must be less than 100 characters')
+    .regex(SAFE_STRING, 'Description contains invalid characters')
+    .transform((str) => str.trim())
+    .refine((str) => str.length > 0, 'Description cannot be empty'),
+  category_id: z.string().optional(),
+  tag_id: z.string().optional(),
+});
+
 // Types
 export type ExpenseFormData = z.infer<typeof expenseSchema>;
 export type CategoryFormData = z.infer<typeof categorySchema>;
 export type TagFormData = z.infer<typeof tagSchema>;
 export type RecurringExpenseFormData = z.infer<typeof recurringExpenseSchema>;
 export type BudgetFormData = z.infer<typeof budgetSchema>;
+export type TemplateFormData = z.infer<typeof templateSchema>;

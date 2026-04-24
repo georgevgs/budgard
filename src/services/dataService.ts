@@ -4,6 +4,7 @@ import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Tag } from '@/types/Tag';
+import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 
 export const dataService = {
   async getUser() {
@@ -316,6 +317,40 @@ export const dataService = {
     if (error) throw error;
 
     return data as Budget;
+  },
+
+  async getTemplates(signal?: AbortSignal) {
+    let query = supabase
+      .from('expense_templates')
+      .select(`*, category:categories(*), tag:tags(*)`)
+      .order('created_at', { ascending: false });
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return data as ExpenseTemplate[];
+  },
+
+  async createTemplate(templateData: Partial<ExpenseTemplate>) {
+    const { data, error } = await supabase
+      .from('expense_templates')
+      .insert(templateData)
+      .select(`*, category:categories(*), tag:tags(*)`)
+      .single();
+
+    if (error) throw error;
+
+    return data as ExpenseTemplate;
+  },
+
+  async deleteTemplate(templateId: string) {
+    const { error } = await supabase
+      .from('expense_templates')
+      .delete()
+      .eq('id', templateId);
+
+    if (error) throw error;
   },
 
   async deleteAccount() {

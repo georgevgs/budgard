@@ -309,6 +309,18 @@
       "slate": "Slate"
     }
   },
+  "templates": {
+    "title": "Templates",
+    "saveAsTemplate": "Save as template",
+    "saved": "Template saved",
+    "used": "Expense added from template",
+    "deleteTitle": "Delete Template",
+    "deleteConfirmation": "Are you sure you want to delete this template?",
+    "empty": "Save an expense as a template for one-tap reuse",
+    "manage": "Manage",
+    "done": "Done",
+    "useTemplate": "Use template: {{description}}"
+  },
   "speedDial": {
     "open": "Open actions menu",
     "close": "Close actions menu",

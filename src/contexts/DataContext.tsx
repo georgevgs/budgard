@@ -16,6 +16,7 @@ import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Tag } from '@/types/Tag';
+import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 import { useToast } from '@/hooks/useToast';
 
 type DataState = {
@@ -23,6 +24,7 @@ type DataState = {
   expenses: Expense[];
   recurringExpenses: RecurringExpense[];
   tags: Tag[];
+  templates: ExpenseTemplate[];
   monthlyBudget: number | null;
   defaultCurrency: string;
   isLoading: boolean;
@@ -36,6 +38,7 @@ type DataContextType = DataState & {
   setExpenses: Dispatch<SetStateAction<Expense[]>>;
   setRecurringExpenses: Dispatch<SetStateAction<RecurringExpense[]>>;
   setTags: Dispatch<SetStateAction<Tag[]>>;
+  setTemplates: Dispatch<SetStateAction<ExpenseTemplate[]>>;
   setMonthlyBudget: Dispatch<SetStateAction<number | null>>;
   setDefaultCurrency: Dispatch<SetStateAction<string>>;
 };
@@ -54,6 +57,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     RecurringExpense[]
   >([]);
   const [tags, setTags] = useState<Tag[]>([]);
+  const [templates, setTemplates] = useState<ExpenseTemplate[]>([]);
   const [monthlyBudget, setMonthlyBudget] = useState<number | null>(null);
   const [defaultCurrency, setDefaultCurrency] = useState<string>('EUR');
   const [isLoading, setIsLoading] = useState(true);
@@ -82,12 +86,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
         recurringExpensesData,
         budgetData,
         tagsData,
+        templatesData,
       ] = await Promise.all([
         dataService.getCategories(controller.signal),
         dataService.getExpenses(controller.signal),
         dataService.getRecurringExpenses(controller.signal),
         dataService.getBudget(controller.signal),
         dataService.getTags(controller.signal),
+        dataService.getTemplates(controller.signal),
       ]);
 
       // React 18+ automatically batches these state updates
@@ -95,6 +101,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setExpenses(expensesData);
       setRecurringExpenses(recurringExpensesData);
       setTags(tagsData);
+      setTemplates(templatesData);
       setMonthlyBudget(budgetData?.monthly_amount ?? null);
       setDefaultCurrency(budgetData?.default_currency ?? 'EUR');
       setIsInitialized(true);
@@ -149,6 +156,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setExpenses([]);
       setRecurringExpenses([]);
       setTags([]);
+      setTemplates([]);
       setMonthlyBudget(null);
       setDefaultCurrency('EUR');
       setIsInitialized(false);
@@ -184,6 +192,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     expenses,
     recurringExpenses,
     tags,
+    templates,
     monthlyBudget,
     defaultCurrency,
     isLoading,
@@ -194,6 +203,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setExpenses,
     setRecurringExpenses,
     setTags,
+    setTemplates,
     setMonthlyBudget,
     setDefaultCurrency,
   };

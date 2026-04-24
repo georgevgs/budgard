@@ -12,13 +12,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import Bookmark from 'lucide-react/dist/esm/icons/bookmark';
 import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
+import Pencil from 'lucide-react/dist/esm/icons/pencil';
+import Receipt from 'lucide-react/dist/esm/icons/receipt';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
+import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import ReceiptViewer from '@/components/expenses/ReceiptViewer';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { format, parseISO } from 'date-fns';
@@ -31,6 +36,7 @@ type ExpenseCardProps = {
   expense: Expense;
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
+  onSaveAsTemplate?: (expense: Expense) => void;
   searchQuery?: string;
   showFullDate?: boolean;
 };
@@ -39,6 +45,7 @@ const ExpensesCard = ({
   expense,
   onEdit,
   onDelete,
+  onSaveAsTemplate,
   searchQuery,
   showFullDate,
 }: ExpenseCardProps) => {
@@ -46,7 +53,7 @@ const ExpensesCard = ({
   const { defaultCurrency } = useData();
   const dateLocale = i18n.language === 'el' ? el : enUS;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
 
   const blurActiveElement = () => {
@@ -57,19 +64,27 @@ const ExpensesCard = ({
 
   const handleDeleteClick = () => {
     blurActiveElement();
-    setDropdownOpen(false);
+    setMenuOpen(false);
     setTimeout(() => setShowDeleteDialog(true), 0);
   };
 
   const handleEditClick = () => {
     blurActiveElement();
-    setDropdownOpen(false);
+    setMenuOpen(false);
     setTimeout(() => onEdit(expense), 0);
   };
 
   const handleConfirmDelete = () => {
     onDelete(expense.id);
     setShowDeleteDialog(false);
+  };
+
+  const handleSaveAsTemplate = () => {
+    blurActiveElement();
+    setMenuOpen(false);
+    if (onSaveAsTemplate) {
+      setTimeout(() => onSaveAsTemplate(expense), 0);
+    }
   };
 
   const handleReceiptOpen = () => setShowReceipt(true);
@@ -110,8 +125,8 @@ const ExpensesCard = ({
                   </div>
 
                   <DropdownMenu
-                    open={dropdownOpen}
-                    onOpenChange={setDropdownOpen}
+                    open={menuOpen}
+                    onOpenChange={setMenuOpen}
                   >
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -123,13 +138,16 @@ const ExpensesCard = ({
                         <span className="sr-only">{t('common.openMenu')}</span>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-32">
+                    <DropdownMenuContent align="end">
                       {renderEditMenuItem(expense, t, handleEditClick)}
+                      {renderTemplateMenuItem(onSaveAsTemplate, t, handleSaveAsTemplate)}
                       {renderReceiptMenuItem(expense, t, handleReceiptOpen)}
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={handleDeleteClick}
                         className="text-destructive focus:text-destructive"
                       >
+                        <Trash2 className="h-4 w-4" />
                         {t('common.delete')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -240,6 +258,36 @@ const renderRecurringIcon = (expense: Expense) => {
   return <Repeat className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />;
 };
 
+const renderEditMenuItem = (
+  expense: Expense,
+  t: TranslateFunction,
+  onClick: () => void,
+) => {
+  if (expense.recurring_expense_id) return null;
+
+  return (
+    <DropdownMenuItem onClick={onClick}>
+      <Pencil className="h-4 w-4" />
+      {t('common.edit')}
+    </DropdownMenuItem>
+  );
+};
+
+const renderTemplateMenuItem = (
+  onSaveAsTemplate: ((expense: Expense) => void) | undefined,
+  t: TranslateFunction,
+  onClick: () => void,
+) => {
+  if (!onSaveAsTemplate) return null;
+
+  return (
+    <DropdownMenuItem onClick={onClick}>
+      <Bookmark className="h-4 w-4" />
+      {t('templates.saveAsTemplate')}
+    </DropdownMenuItem>
+  );
+};
+
 const renderReceiptMenuItem = (
   expense: Expense,
   t: TranslateFunction,
@@ -249,20 +297,9 @@ const renderReceiptMenuItem = (
 
   return (
     <DropdownMenuItem onClick={onClick}>
+      <Receipt className="h-4 w-4" />
       {t('receipt.receipt')}
     </DropdownMenuItem>
-  );
-};
-
-const renderEditMenuItem = (
-  expense: Expense,
-  t: TranslateFunction,
-  onClick: () => void,
-) => {
-  if (expense.recurring_expense_id) return null;
-
-  return (
-    <DropdownMenuItem onClick={onClick}>{t('common.edit')}</DropdownMenuItem>
   );
 };
 

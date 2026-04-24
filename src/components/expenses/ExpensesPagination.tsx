@@ -18,6 +18,7 @@ type Props = {
   expenses: Expense[];
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
+  onSaveAsTemplate?: (expense: Expense) => void;
   searchQuery?: string;
   showFullDate?: boolean;
 };
@@ -28,6 +29,7 @@ const ExpensesPagination = ({
   expenses,
   onEdit,
   onDelete,
+  onSaveAsTemplate,
   searchQuery,
   showFullDate,
 }: Props) => {
@@ -82,6 +84,7 @@ const ExpensesPagination = ({
                   expense={expense}
                   onEdit={onEdit}
                   onDelete={onDelete}
+                  onSaveAsTemplate={onSaveAsTemplate}
                   searchQuery={searchQuery}
                   showFullDate={showFullDate}
                 />

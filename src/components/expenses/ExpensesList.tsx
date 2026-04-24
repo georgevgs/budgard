@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import Download from 'lucide-react/dist/esm/icons/download';
 import Upload from 'lucide-react/dist/esm/icons/upload';
 import { FORM_TYPES, type FormType } from '@/components/layout/FormsManager';
+import { useAuth } from '@/hooks/useAuth';
 import { useData } from '@/contexts/DataContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { cn } from '@/lib/utils';
@@ -31,6 +32,8 @@ import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import type { ReceiptOptions } from '@/hooks/useDataOperations';
 import ExpensesEmpty from '@/components/expenses/ExpensesEmpty';
+import TemplatesBar from '@/components/expenses/TemplatesBar';
+import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 
 // ============================================================================
 // Extracted Components for Readability
@@ -47,6 +50,7 @@ type ExpensesContentProps = {
   onAddClick: () => void;
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
+  onSaveAsTemplate: (expense: Expense) => void;
   onClearFilters: () => void;
 };
 
@@ -61,6 +65,7 @@ const ExpensesContent = ({
   onAddClick,
   onEdit,
   onDelete,
+  onSaveAsTemplate,
   onClearFilters,
 }: ExpensesContentProps) => {
   // Has expenses - show paginated list
@@ -70,6 +75,7 @@ const ExpensesContent = ({
         expenses={expenses}
         onEdit={onEdit}
         onDelete={onDelete}
+        onSaveAsTemplate={onSaveAsTemplate}
         searchQuery={searchQuery}
         showFullDate={showFullDate}
       />
@@ -103,10 +109,12 @@ const ExpensesContent = ({
 
 const ExpensesList = () => {
   const { t } = useTranslation();
+  const { session } = useAuth();
   const {
     categories,
     expenses,
     tags,
+    templates,
     isInitialized,
     monthlyBudget,
     defaultCurrency,
@@ -223,6 +231,59 @@ const ExpensesList = () => {
   const baseTotal =
     isSearchingAllMonths || dateRangePreset ? filteredTotal : monthlyTotal;
 
+  const handleSaveAsTemplate = useCallback(
+    (expense: Expense) => {
+      operations.handleTemplateCreate({
+        amount: expense.amount,
+        description: expense.description,
+        category_id: expense.category_id ?? null,
+        tag_id: expense.tag_id ?? null,
+        original_currency: expense.original_currency ?? null,
+      });
+    },
+    [operations],
+  );
+
+  const handleUseTemplate = useCallback(
+    (template: ExpenseTemplate) => {
+      if (!session?.user?.id) return;
+
+      const userId = session.user.id;
+      const today = format(new Date(), 'yyyy-MM-dd');
+      const category = categories.find((c) => c.id === template.category_id);
+      const tag = tags.find((t) => t.id === template.tag_id);
+
+      startTransition(async () => {
+        addOptimisticExpense({
+          type: 'add',
+          expense: {
+            id: `temp-${Date.now()}`,
+            user_id: userId,
+            amount: template.amount,
+            description: template.description,
+            date: today,
+            category_id: template.category_id,
+            tag_id: template.tag_id,
+            category,
+            tag,
+            receipt_path: null,
+            created_at: new Date().toISOString(),
+          },
+        });
+
+        await operations.handleExpenseSubmit({
+          amount: template.amount,
+          description: template.description,
+          category_id: template.category_id,
+          tag_id: template.tag_id,
+          date: today,
+          user_id: userId,
+        });
+      });
+    },
+    [session?.user?.id, addOptimisticExpense, categories, tags, operations],
+  );
+
   const handleFormClose = useCallback(() => {
     setFormType(null);
     setSelectedExpense(undefined);
@@ -331,6 +392,14 @@ const ExpensesList = () => {
           </div>
         </div>
 
+        {/* Templates Bar */}
+        <TemplatesBar
+          templates={templates}
+          defaultCurrency={defaultCurrency}
+          onUse={handleUseTemplate}
+          onDelete={operations.handleTemplateDelete}
+        />
+
         {/* Expenses List Section */}
         <div className="flex-1">
           <ExpensesContent
@@ -344,6 +413,7 @@ const ExpensesList = () => {
             onAddClick={() => setFormType(FORM_TYPES.NEW_EXPENSE)}
             onEdit={handleExpenseEdit}
             onDelete={handleExpenseDelete}
+            onSaveAsTemplate={handleSaveAsTemplate}
             onClearFilters={handleClearFilters}
           />
         </div>
