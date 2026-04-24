@@ -47,7 +47,7 @@ export const useExpensesFilter = ({
   expenses,
   selectedMonth,
 }: UseExpensesFilterProps): UseExpensesFilterReturn => {
-  const [search, setSearch] = useState('');
+  const [search, setSearchRaw] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null,
@@ -56,6 +56,16 @@ export const useExpensesFilter = ({
   const [sortOrder, setSortOrder] = useState<SortOrder>('date-desc');
   const [isSearchingAllMonths, setIsSearchingAllMonths] = useState(false);
   const [dateRangePreset, setDateRangePreset] = useState<DateRangePreset>(null);
+
+  // Auto-switch to all months when user types a search query, revert when cleared
+  const setSearch = (value: string) => {
+    setSearchRaw(value);
+    if (value.length > 0) {
+      setIsSearchingAllMonths(true);
+    } else {
+      setIsSearchingAllMonths(false);
+    }
+  };
 
   const hasActiveFilters =
     search.length > 0 || !!selectedCategoryId || selectedTagId !== null;
