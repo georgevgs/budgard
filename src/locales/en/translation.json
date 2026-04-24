@@ -460,6 +460,8 @@
     "startTracking": "Start Tracking",
     "skip": "Skip",
     "next": "Continue",
+    "budgetSaveFailed": "Could not save budget. You can set it later in settings.",
+    "categoriesSaveFailed": "Could not save categories. You can add them later.",
     "presetCategories": {
       "food": "Food",
       "housing": "Housing",

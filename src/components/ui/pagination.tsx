@@ -39,15 +39,17 @@ PaginationItem.displayName = 'PaginationItem';
 type PaginationLinkProps = {
   isActive?: boolean;
 } & Pick<ButtonProps, 'size'> &
-  React.ComponentProps<'a'>;
+  React.ComponentProps<'button'>;
 
 const PaginationLink = ({
   className,
   isActive,
   size = 'icon',
+  type = 'button',
   ...props
 }: PaginationLinkProps) => (
-  <a
+  <button
+    type={type}
     aria-current={isActive ? 'page' : undefined}
     className={cn(
       buttonVariants({
@@ -66,7 +68,6 @@ const PaginationPrevious = ({
   ...props
 }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    aria-label="Go to previous page"
     size="icon"
     className={cn('', className)}
     {...props}
@@ -81,7 +82,6 @@ const PaginationNext = ({
   ...props
 }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    aria-label="Go to next page"
     size="icon"
     className={cn('', className)}
     {...props}
@@ -97,7 +97,7 @@ const PaginationEllipsis = ({
 }: React.ComponentProps<'span'>) => (
   <span
     aria-hidden
-    className={cn('flex h-9 w-9 items-center justify-center', className)}
+    className={cn('flex h-11 w-11 items-center justify-center', className)}
     {...props}
   >
     <MoreHorizontal className="h-4 w-4" />

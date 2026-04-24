@@ -12,8 +12,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { cn, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
+import { getCurrencySymbol } from '@/lib/currencies';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { useAuth } from '@/hooks/useAuth';
+import { useData } from '@/contexts/DataContext';
+import { useToast } from '@/hooks/useToast';
 
 const ONBOARDED_KEY = 'budgard_onboarded';
 const STEP_COUNT = 3;
@@ -43,9 +46,12 @@ type Props = {
 export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
   const { t } = useTranslation();
   const { session } = useAuth();
+  const { defaultCurrency } = useData();
   const operations = useDataOperations();
+  const { toast } = useToast();
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const currencySymbol = getCurrencySymbol(defaultCurrency || 'EUR');
 
   // Step 1: Budget
   const [budgetInput, setBudgetInput] = useState('');
@@ -67,12 +73,12 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
       try {
         await operations.handleBudgetUpdate(amount);
       } catch {
-        // non-critical, continue onboarding
+        toast({ variant: 'destructive', description: t('onboarding.budgetSaveFailed') });
       }
       setIsSubmitting(false);
     }
     setStep(1);
-  }, [budgetInput, operations]);
+  }, [budgetInput, operations, toast, t]);
 
   const handleCategoriesNext = useCallback(async () => {
     if (selectedCategories.size === 0) {
@@ -91,11 +97,11 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
       }));
       await operations.handleCategoriesAddBulk(toCreate);
     } catch {
-      // non-critical, continue
+      toast({ variant: 'destructive', description: t('onboarding.categoriesSaveFailed') });
     }
     setIsSubmitting(false);
     setStep(2);
-  }, [selectedCategories, session?.user?.id, operations, t]);
+  }, [selectedCategories, session?.user?.id, operations, t, toast]);
 
   const handleCategoryToggle = useCallback((index: number) => {
     setSelectedCategories((prev) => {
@@ -138,7 +144,7 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
 
       <div className="relative">
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-lg">
-          &euro;
+          {currencySymbol}
         </span>
         <Input
           type="text"
@@ -248,10 +254,10 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => handleComplete()}>
+    <Dialog open={isOpen} onOpenChange={() => onComplete()}>
       <DialogContent
         className="sm:max-w-[420px] p-0 gap-0"
-        onOpenChange={() => handleComplete()}
+        onOpenChange={() => onComplete()}
       >
         {/* Mobile drag handle */}
         <div

@@ -197,6 +197,8 @@ const renderPaginationControls = (
                   : 'cursor-pointer'
               }
               aria-label={t('pagination.previous')}
+              aria-disabled={currentPage <= 1}
+              tabIndex={currentPage <= 1 ? -1 : undefined}
             >
               {t('pagination.previous')}
             </PaginationPrevious>
@@ -219,6 +221,8 @@ const renderPaginationControls = (
                   : 'cursor-pointer'
               }
               aria-label={t('pagination.next')}
+              aria-disabled={currentPage >= totalPages}
+              tabIndex={currentPage >= totalPages ? -1 : undefined}
             >
               {t('pagination.next')}
             </PaginationNext>

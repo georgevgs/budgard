@@ -61,6 +61,7 @@ const SettingsView = () => {
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isCurrencyUpdating, setIsCurrencyUpdating] = useState(false);
   const [dailyReminderHour, setDailyReminderHour] = useState<number | null>(null);
 
   // Fetch daily reminder preference on mount
@@ -118,6 +119,7 @@ const SettingsView = () => {
   };
 
   const handleCurrencyChange = async (currency: string) => {
+    setIsCurrencyUpdating(true);
     try {
       await handleCurrencyUpdate(currency);
       toast({
@@ -128,6 +130,8 @@ const SettingsView = () => {
         title: t('settings.currency.updateFailed'),
         variant: 'destructive',
       });
+    } finally {
+      setIsCurrencyUpdating(false);
     }
   };
 
@@ -148,7 +152,7 @@ const SettingsView = () => {
   };
 
   return (
-    <div className="container max-w-lg mx-auto p-4 space-y-6">
+    <div className="container max-w-lg mx-auto p-4 space-y-8">
       <h2 className="text-lg font-semibold">{t('settings.title')}</h2>
 
       {/* Profile */}
@@ -168,7 +172,7 @@ const SettingsView = () => {
             </div>
             <Button
               variant="outline"
-              className="w-full justify-start text-muted-foreground"
+              className="w-full justify-start text-destructive hover:text-destructive"
               onClick={() => setShowSignOutDialog(true)}
             >
               <LogOut className="h-4 w-4 mr-2" />
@@ -187,7 +191,7 @@ const SettingsView = () => {
           <CardContent className="p-4 space-y-4">
             <div>
               <p className="text-sm mb-2">{t('settings.appearance.theme')}</p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {renderThemeButton('light', theme, setTheme, t)}
                 {renderThemeButton('dark', theme, setTheme, t)}
                 {renderThemeButton('barbie', theme, setTheme, t)}
@@ -238,6 +242,7 @@ const SettingsView = () => {
             <Select
               value={defaultCurrency}
               onValueChange={handleCurrencyChange}
+              disabled={isCurrencyUpdating}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -420,7 +425,7 @@ const renderAccentPicker = (
               key={color.key}
               type="button"
               onClick={() => setAccent(color.key)}
-              className="relative h-7 w-7 rounded-full transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="relative h-9 w-9 rounded-full transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[44px] min-w-[44px]"
               style={{ backgroundColor: color.values.swatch }}
               aria-label={t(`accent.colors.${color.key}`)}
               aria-pressed={isSelected}
@@ -498,6 +503,7 @@ const renderNotificationToggle = (
         checked={state === 'subscribed'}
         disabled={state === 'loading'}
         onCheckedChange={handleToggle}
+        aria-label={t('settings.notifications.pushLabel')}
       />
     </div>
   );
@@ -548,6 +554,7 @@ const renderDailyReminder = (
         <Switch
           checked={isEnabled}
           onCheckedChange={onToggle}
+          aria-label={t('settings.notifications.dailyReminderLabel')}
         />
       </div>
       {renderReminderTimePicker(isEnabled, localHour, onTimeChange, t)}
