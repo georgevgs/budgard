@@ -2,6 +2,11 @@ import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import Check from 'lucide-react/dist/esm/icons/check';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
+import FileText from 'lucide-react/dist/esm/icons/file-text';
+import Repeat from 'lucide-react/dist/esm/icons/repeat';
+import BarChart from 'lucide-react/dist/esm/icons/bar-chart';
+import Camera from 'lucide-react/dist/esm/icons/camera';
+import Wallet from 'lucide-react/dist/esm/icons/wallet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -19,7 +24,7 @@ import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/hooks/useToast';
 
 const ONBOARDED_KEY = 'budgard_onboarded';
-const STEP_COUNT = 3;
+const STEP_COUNT = 4;
 
 type PresetCategory = {
   nameKey: string;
@@ -36,6 +41,13 @@ const PRESET_CATEGORIES: PresetCategory[] = [
   { nameKey: 'health', color: '#14b8a6', icon: '💊' },
   { nameKey: 'shopping', color: '#8b5cf6', icon: '👕' },
   { nameKey: 'utilities', color: '#f59e0b', icon: '💡' },
+];
+
+const FEATURES = [
+  { titleKey: 'featureExpenses', descKey: 'featureExpensesDesc', Icon: FileText },
+  { titleKey: 'featureRecurring', descKey: 'featureRecurringDesc', Icon: Repeat },
+  { titleKey: 'featureAnalytics', descKey: 'featureAnalyticsDesc', Icon: BarChart },
+  { titleKey: 'featureReceipts', descKey: 'featureReceiptsDesc', Icon: Camera },
 ];
 
 type Props = {
@@ -77,12 +89,12 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
       }
       setIsSubmitting(false);
     }
-    setStep(1);
+    setStep(2);
   }, [budgetInput, operations, toast, t]);
 
   const handleCategoriesNext = useCallback(async () => {
     if (selectedCategories.size === 0) {
-      setStep(2);
+      setStep(3);
 
       return;
     }
@@ -100,7 +112,7 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
       toast({ variant: 'destructive', description: t('onboarding.categoriesSaveFailed') });
     }
     setIsSubmitting(false);
-    setStep(2);
+    setStep(3);
   }, [selectedCategories, session?.user?.id, operations, t, toast]);
 
   const handleCategoryToggle = useCallback((index: number) => {
@@ -128,6 +140,28 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
           )}
         />
       ))}
+    </div>
+  );
+
+  const renderWelcomeStep = () => (
+    <div className="space-y-6 text-center">
+      <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+        <Wallet className="h-8 w-8 text-primary" />
+      </div>
+
+      <DialogHeader>
+        <DialogTitle className="text-xl">
+          {t('onboarding.welcomeTitle')}
+        </DialogTitle>
+        <DialogDescription>
+          {t('onboarding.welcomeDescription')}
+        </DialogDescription>
+      </DialogHeader>
+
+      <Button className="w-full" size="lg" onClick={() => setStep(1)}>
+        {t('onboarding.getStarted')}
+        <ChevronRight className="ml-1 h-4 w-4" />
+      </Button>
     </div>
   );
 
@@ -159,7 +193,7 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
       </div>
 
       <div className="flex gap-3">
-        <Button variant="ghost" className="flex-1" onClick={() => setStep(1)}>
+        <Button variant="ghost" className="flex-1" onClick={() => setStep(2)}>
           {t('onboarding.skip')}
         </Button>
         <Button
@@ -212,7 +246,7 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
       </div>
 
       <div className="flex gap-3">
-        <Button variant="ghost" className="flex-1" onClick={() => setStep(2)}>
+        <Button variant="ghost" className="flex-1" onClick={() => setStep(3)}>
           {t('onboarding.skip')}
         </Button>
         <Button
@@ -227,18 +261,37 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
     </div>
   );
 
-  const renderDoneStep = () => (
-    <div className="space-y-6 text-center">
-      <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-        <Check className="h-8 w-8 text-primary" />
-      </div>
-
+  const renderFeaturesStep = () => (
+    <div className="space-y-6">
       <DialogHeader>
         <DialogTitle className="text-xl">
-          {t('onboarding.doneTitle')}
+          {t('onboarding.featuresTitle')}
         </DialogTitle>
-        <DialogDescription>{t('onboarding.doneDescription')}</DialogDescription>
+        <DialogDescription>
+          {t('onboarding.featuresDescription')}
+        </DialogDescription>
       </DialogHeader>
+
+      <div className="space-y-3">
+        {FEATURES.map((feature) => (
+          <div
+            key={feature.titleKey}
+            className="flex items-start gap-3 rounded-xl border border-border/50 bg-card p-3"
+          >
+            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              <feature.Icon className="h-4.5 w-4.5 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground">
+                {t(`onboarding.${feature.titleKey}`)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t(`onboarding.${feature.descKey}`)}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <Button className="w-full" size="lg" onClick={handleComplete}>
         {t('onboarding.startTracking')}
@@ -247,10 +300,11 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
   );
 
   const renderCurrentStep = () => {
-    if (step === 0) return renderBudgetStep();
-    if (step === 1) return renderCategoriesStep();
+    if (step === 0) return renderWelcomeStep();
+    if (step === 1) return renderBudgetStep();
+    if (step === 2) return renderCategoriesStep();
 
-    return renderDoneStep();
+    return renderFeaturesStep();
   };
 
   return (

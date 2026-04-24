@@ -416,7 +416,7 @@ const renderAccentPicker = (
   return (
     <div>
       <p className="text-sm mb-2">{t('settings.appearance.accentColor')}</p>
-      <div className="flex gap-2">
+      <div className="flex justify-between">
         {ACCENT_COLORS.map((color) => {
           const isSelected = color.key === accent;
 
@@ -425,7 +425,7 @@ const renderAccentPicker = (
               key={color.key}
               type="button"
               onClick={() => setAccent(color.key)}
-              className="relative h-9 w-9 rounded-full transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[44px] min-w-[44px]"
+              className="relative h-10 w-10 rounded-full transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               style={{ backgroundColor: color.values.swatch }}
               aria-label={t(`accent.colors.${color.key}`)}
               aria-pressed={isSelected}

@@ -10,6 +10,11 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ session: mockSession }),
 }));
 
+// Mock useData
+vi.mock('@/contexts/DataContext', () => ({
+  useData: () => ({ defaultCurrency: 'EUR' }),
+}));
+
 // Mock useDataOperations
 const mockHandleBudgetUpdate = vi.fn();
 const mockHandleCategoriesAddBulk = vi.fn();
@@ -72,19 +77,30 @@ describe('shouldShowOnboarding', () => {
 // ─── OnboardingFlow ──────────────────────────────────────────────────────────
 
 describe('OnboardingFlow', () => {
-  it('renders the budget step first', () => {
+  it('renders the welcome step first', () => {
     render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
+    expect(screen.getByText('onboarding.welcomeTitle')).toBeInTheDocument();
+  });
+
+  it('navigates to budget step from welcome', () => {
+    render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
+    fireEvent.click(screen.getByText('onboarding.getStarted'));
     expect(screen.getByText('onboarding.budgetTitle')).toBeInTheDocument();
   });
 
   it('navigates to categories step when skipping budget', () => {
     render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
+    // Welcome -> Budget
+    fireEvent.click(screen.getByText('onboarding.getStarted'));
+    // Budget -> Categories (skip)
     fireEvent.click(screen.getByText('onboarding.skip'));
     expect(screen.getByText('onboarding.categoriesTitle')).toBeInTheDocument();
   });
 
   it('renders category buttons with translation keys', () => {
     render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
+    // Welcome -> Budget -> Categories
+    fireEvent.click(screen.getByText('onboarding.getStarted'));
     fireEvent.click(screen.getByText('onboarding.skip'));
 
     expect(
@@ -100,6 +116,8 @@ describe('OnboardingFlow', () => {
 
   it('toggles category selection on click', () => {
     render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
+    // Welcome -> Budget -> Categories
+    fireEvent.click(screen.getByText('onboarding.getStarted'));
     fireEvent.click(screen.getByText('onboarding.skip'));
 
     const foodButton = screen
@@ -119,6 +137,8 @@ describe('OnboardingFlow', () => {
     mockHandleCategoriesAddBulk.mockResolvedValue(undefined);
 
     render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
+    // Welcome -> Budget -> Categories
+    fireEvent.click(screen.getByText('onboarding.getStarted'));
     fireEvent.click(screen.getByText('onboarding.skip'));
     fireEvent.click(screen.getByText('onboarding.next'));
 
@@ -138,6 +158,8 @@ describe('OnboardingFlow', () => {
 
   it('skips category creation when none selected', async () => {
     render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
+    // Welcome -> Budget -> Categories
+    fireEvent.click(screen.getByText('onboarding.getStarted'));
     fireEvent.click(screen.getByText('onboarding.skip'));
 
     // Deselect the 4 default-selected categories (indices 0-3)
@@ -152,19 +174,33 @@ describe('OnboardingFlow', () => {
     fireEvent.click(screen.getByText('onboarding.next'));
 
     await waitFor(() => {
-      expect(screen.getByText('onboarding.doneTitle')).toBeInTheDocument();
+      expect(screen.getByText('onboarding.featuresTitle')).toBeInTheDocument();
     });
 
     expect(mockHandleCategoriesAddBulk).not.toHaveBeenCalled();
+  });
+
+  it('shows feature highlights on the final step', () => {
+    render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
+    // Welcome -> Budget -> Categories -> Features
+    fireEvent.click(screen.getByText('onboarding.getStarted'));
+    fireEvent.click(screen.getByText('onboarding.skip'));
+    fireEvent.click(screen.getByText('onboarding.skip'));
+
+    expect(screen.getByText('onboarding.featuresTitle')).toBeInTheDocument();
+    expect(screen.getByText('onboarding.featureExpenses')).toBeInTheDocument();
+    expect(screen.getByText('onboarding.featureRecurring')).toBeInTheDocument();
+    expect(screen.getByText('onboarding.featureAnalytics')).toBeInTheDocument();
+    expect(screen.getByText('onboarding.featureReceipts')).toBeInTheDocument();
   });
 
   it('sets onboarded flag and calls onComplete on final step', () => {
     const onComplete = vi.fn();
     render(<OnboardingFlow isOpen onComplete={onComplete} />);
 
-    // Skip to categories
+    // Welcome -> Budget -> Categories -> Features
+    fireEvent.click(screen.getByText('onboarding.getStarted'));
     fireEvent.click(screen.getByText('onboarding.skip'));
-    // Skip to done
     fireEvent.click(screen.getByText('onboarding.skip'));
 
     // Click start tracking

@@ -48,6 +48,8 @@ const AnalyticsView = () => {
 
   const availableYears = useMemo(() => {
     const years = new Set(expenses.map((e) => getYear(parseISO(e.date))));
+    years.add(new Date().getFullYear());
+
     return Array.from(years).sort().reverse();
   }, [expenses]);
 
