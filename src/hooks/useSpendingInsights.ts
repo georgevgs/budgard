@@ -189,8 +189,9 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
 
       let year = currentYear;
       let month = now.getMonth() - 1;
+      const minYear = currentYear - 5;
 
-      while (true) {
+      while (year >= minYear) {
         if (month < 0) {
           month = 11;
           year--;

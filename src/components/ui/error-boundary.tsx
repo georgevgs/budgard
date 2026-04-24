@@ -41,7 +41,7 @@ export class ErrorBoundary extends Component<Props, State> {
       if (attempts < 1) {
         sessionStorage.setItem(SW_RELOAD_KEY, String(attempts + 1));
         // Use href assignment to force a full navigation, bypassing iOS PWA bfcache.
-        window.location.href = window.location.href;
+        window.location.assign(window.location.href);
       }
     }
   }
@@ -52,7 +52,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   handleReload = () => {
     // Use href assignment to force a full navigation, bypassing iOS PWA bfcache.
-    window.location.href = window.location.href;
+    window.location.assign(window.location.href);
   };
 
   render() {

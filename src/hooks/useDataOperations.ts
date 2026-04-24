@@ -435,7 +435,9 @@ export function useDataOperations() {
           categoriesData.map((cat) => dataService.createCategory(cat)),
         );
         haptics.success();
-        setCategories(created);
+        setCategories((prev) =>
+          [...prev, ...created].sort((a, b) => a.name.localeCompare(b.name)),
+        );
       } catch (error) {
         haptics.error();
         showErrorToast('Failed to create categories');
@@ -508,14 +510,19 @@ export function useDataOperations() {
       if (!isInitialized) return;
 
       haptics.warning();
-      setTemplates((prev) => prev.filter((t) => t.id !== templateId));
+      let previousTemplates: ExpenseTemplate[] = [];
+      setTemplates((prev) => {
+        previousTemplates = prev;
+
+        return prev.filter((t) => t.id !== templateId);
+      });
 
       try {
         await dataService.deleteTemplate(templateId);
         haptics.success();
       } catch (error) {
         haptics.error();
-        // Rollback — re-fetch is simpler since we don't keep prev reference
+        setTemplates(previousTemplates);
         showErrorToast('Failed to delete template');
         throw error;
       }

@@ -44,12 +44,13 @@ export const useBudgetAlerts = ({
     }
 
     const percentage = (monthlySpent / monthlyBudget) * 100;
-    const prevPercentage = (prevSpent.current / monthlyBudget) * 100;
+    const prevValue = prevSpent.current;
+    const prevPercentage = (prevValue / monthlyBudget) * 100;
     prevSpent.current = monthlySpent;
 
     // Only alert when spending crosses a threshold upward
     // (not on deletions that lower the amount)
-    if (monthlySpent <= prevSpent.current && percentage <= prevPercentage) {
+    if (monthlySpent <= prevValue) {
       return;
     }
 

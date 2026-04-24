@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import CalendarIcon from 'lucide-react/dist/esm/icons/calendar';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import {
@@ -75,8 +75,8 @@ const RecurringExpenseForm = ({
       description: expense?.description || '',
       category_id: expense?.category_id || 'none',
       frequency: expense?.frequency || 'monthly',
-      start_date: expense ? new Date(expense.start_date) : new Date(),
-      end_date: expense?.end_date ? new Date(expense.end_date) : undefined,
+      start_date: expense ? parseISO(expense.start_date) : new Date(),
+      end_date: expense?.end_date ? parseISO(expense.end_date) : undefined,
     },
   });
 

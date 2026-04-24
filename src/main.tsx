@@ -38,7 +38,7 @@ if (reloadAttempts < 1) {
       if (isChunkLoadError) {
         sessionStorage.setItem(SW_RELOAD_KEY, String(reloadAttempts + 1));
         // Use href assignment to force a full navigation, bypassing iOS PWA bfcache.
-        window.location.href = window.location.href;
+        window.location.assign(window.location.href);
       }
     },
   );
