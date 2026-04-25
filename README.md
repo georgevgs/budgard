@@ -5,8 +5,9 @@
 A personal expense tracker that actually fits in your pocket.
 
 [![Live App](https://img.shields.io/badge/Live-budgard.com-black?style=flat-square)](https://budgard.com)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?style=flat-square)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=flat-square)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square)](https://reactjs.org/)
+[![License](https://img.shields.io/badge/License-Proprietary-red?style=flat-square)](#license)
 
 </div>
 
@@ -21,18 +22,22 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 ## What it does
 
 **Expenses**
-- Log expenses with amount, description, date, category, tag, currency, and optional receipt photo
+- Log expenses with amount, description, date, category, tag, and currency
+- Attach receipt photos with drag-and-drop or tap-to-upload (compressed to WebP)
+- Save expense templates for quick re-entry of frequent purchases
 - Date-grouped feed with sticky headers (Today, Yesterday, or formatted date)
 - Filter and search by category, tag, date range, or keyword
 - Sort by date or amount, search across all months
 - CSV import and export
-- Animated number transitions on totals for a polished feel
+- Multi-currency support with live exchange rates
+- Animated number transitions on totals
 
 **Recurring Expenses**
 - Set up recurring expenses (weekly, biweekly, monthly, quarterly, yearly) with start/end dates
 - Automatic expense generation via Supabase Edge Function
 - Track next occurrence and overdue status
 - Toggle active/inactive without deleting
+- Preview estimated monthly cost
 
 **Analytics**
 - Monthly spending snapshot with month-over-month comparison
@@ -48,27 +53,34 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Budget reference line on analytics chart
 
 **Categories and Tags**
-- Custom categories with user-chosen colors
+- Custom categories with user-chosen colors and emoji icons
 - Tags for finer-grained expense grouping
 - Filter by category or tag in the expense list
 
-**Receipts**
-- Photo capture with drag-and-drop or tap-to-upload
-- Client-side compression to WebP (1MB target, 10MB max input)
-- Inline preview and viewer
+**Notifications**
+- Push notifications for recurring expenses due tomorrow
+- Inactivity nudge when no expenses are logged for 3 days
+- Configurable daily reminder to log expenses
+- Works across mobile and desktop
+
+**Customization**
+- Three themes: dark, light, and Barbie
+- Seven accent colors: Sunset, Ocean, Lavender, Mint, Coral, Gold, Slate
+- English and Greek (auto-detected from browser)
+- Default currency setting
 
 **Other**
-- English and Greek (auto-detected from browser)
-- Dark, light, and Barbie themes
 - Guided onboarding for new users
 - Offline support with sync on reconnect
-- Installable as a PWA on iOS, Android, and desktop
+- PWA update detection with in-app prompt
+- Installable on iOS, Android, and desktop
+- Account deletion from settings
 
 ## Tech
 
-React 19 + TypeScript + Vite on the frontend. Supabase handles auth (email OTP), the Postgres database, file storage for receipts, and an Edge Function for recurring expense generation. Deployed on Netlify.
+React 19 + TypeScript + Vite on the frontend. Supabase handles auth (email OTP), the Postgres database, file storage for receipts, and Edge Functions for recurring expense generation and push notifications. Deployed on Netlify.
 
-UI components from shadcn/ui, charts from Recharts, forms from react-hook-form + Zod. State lives in React Context with optimistic updates (custom rollback pattern) so the UI never feels slow. Cloudflare Turnstile protects the auth flow. Errors are monitored with Sentry.
+UI components from shadcn/ui, charts from Recharts, forms from react-hook-form + Zod. State lives in React Context with optimistic updates (custom rollback pattern) so the UI never feels slow. Cloudflare Turnstile protects the auth flow. Errors are monitored with Sentry. Push notifications use the Web Push API with VAPID authentication.
 
 ### Key architecture
 
@@ -79,41 +91,7 @@ UI components from shadcn/ui, charts from Recharts, forms from react-hook-form +
 - **Routing**: Lazy-loaded routes with `PrivateRoute` / `PublicRoute` guards
 - **Path alias**: `@/*` maps to `./src/*`
 - **i18n**: i18next with browser language detection
-
-## Running locally
-
-You'll need Node.js 18+ and a Supabase project.
-
-```bash
-git clone https://github.com/georgevgs/budgard.git
-cd budgard
-npm install
-cp .env.example .env
-```
-
-Add your credentials to `.env`:
-
-```env
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_TURNSTILE_SITE_KEY=your_turnstile_site_key  # optional, skips bot check if absent
-
-# Sentry (optional — only needed for production error monitoring)
-VITE_SENTRY_DSN=your_sentry_dsn
-SENTRY_ORG=your_sentry_org
-SENTRY_PROJECT=your_sentry_project
-SENTRY_AUTH_TOKEN=your_sentry_auth_token         # enables sourcemap upload on build
-```
-
-Push the database migrations and start the dev server:
-
-```bash
-npx supabase link --project-ref your-project-ref
-npx supabase db push
-npm run dev
-```
-
-App is at `http://localhost:5173`.
+- **Offline**: Queued mutations with automatic sync on reconnect
 
 ## Scripts
 
@@ -124,22 +102,16 @@ npm run lint         # ESLint
 npm run lint:fix     # ESLint with auto-fix
 npm run format       # Prettier format
 npm run typecheck    # TypeScript check without emit
-npm test             # Run tests (Vitest)
+npm test             # run all tests (Vitest)
+npm run test:coverage # with coverage report
+npm run test:watch   # watch mode
 ```
 
-## Testing
+## License
 
-Tests use Vitest + React Testing Library with jsdom. Coverage targets `src/lib/`, `src/hooks/`, and `src/services/`.
+This project is **proprietary software**. The source code is available for reference and transparency, but copying, modifying, distributing, or using this software — in whole or in part — is not permitted without explicit authorization.
 
-```bash
-npm test                    # run all tests
-npm run test:coverage       # with coverage report
-npm run test:watch          # watch mode
-```
-
-## Contributing
-
-PRs are welcome. For bigger changes, open an issue first so we can talk through the approach.
+See [LICENSE](LICENSE) for full terms.
 
 ---
 
