@@ -2,7 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import webpush from 'npm:web-push';
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://budgard.com',
   'Access-Control-Allow-Headers':
     'authorization, x-client-info, apikey, content-type',
 };
@@ -229,8 +229,10 @@ Deno.serve(async (req) => {
       },
     );
   } catch (err) {
+    console.error('send-push-notifications error:', err);
+
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: String(err) }),
+      JSON.stringify({ error: 'Internal server error' }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

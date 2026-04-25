@@ -52,6 +52,9 @@
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.25.76"
   },
+  "overrides": {
+    "serialize-javascript": "7.0.5"
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@sentry/vite-plugin": "^5.2.0",
