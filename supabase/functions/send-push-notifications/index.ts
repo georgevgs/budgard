@@ -104,8 +104,8 @@ Deno.serve(async (req) => {
         notifications.push({
           user_id: expense.user_id,
           payload: {
-            title: 'Upcoming Expense',
-            body: `${expense.description} (${formatted}) is due tomorrow`,
+            title: 'Heads up!',
+            body: `${expense.description} (${formatted}) is coming for your wallet tomorrow.`,
             tag: `recurring-${expense.recurring_expense_id}`,
             data: { url: '/recurring' },
           },
@@ -129,10 +129,10 @@ Deno.serve(async (req) => {
         notifications.push({
           user_id: user.user_id,
           payload: {
-            title: 'Budgard',
-            body: "You haven't logged expenses in 3 days. Stay on track!",
+            title: 'Where did you go?',
+            body: "3 days with no expenses? Either you're on a no-spend streak or you forgot about me.",
             tag: 'inactivity-nudge',
-            data: { url: '/expenses' },
+            data: { url: '/expenses?action=add' },
           },
         });
       }
@@ -159,10 +159,10 @@ Deno.serve(async (req) => {
         notifications.push({
           user_id: user.user_id,
           payload: {
-            title: 'Budgard',
-            body: "Don't forget to log your expenses today!",
+            title: 'Cha-ching!',
+            body: "Your wallet called — it wants receipts. Let's log today's expenses.",
             tag: 'daily-reminder',
-            data: { url: '/expenses' },
+            data: { url: '/expenses?action=add' },
           },
         });
       }

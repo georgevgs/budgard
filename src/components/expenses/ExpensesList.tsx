@@ -1,10 +1,12 @@
 import {
   useState,
   useCallback,
+  useEffect,
   useMemo,
   useOptimistic,
   useTransition,
 } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import Download from 'lucide-react/dist/esm/icons/download';
@@ -126,12 +128,22 @@ const ExpensesList = () => {
   );
   const [, startTransition] = useTransition();
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
   const [formType, setFormType] = useState<FormType>(null);
   const [isDashboardVisible, setIsDashboardVisible] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const currentMonth = format(new Date(), 'yyyy-MM');
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+
+  // Open add-expense form when navigated with ?action=add (e.g. from push notification)
+  useEffect(() => {
+    if (!isInitialized) return;
+    if (searchParams.get('action') !== 'add') return;
+
+    setFormType(FORM_TYPES.NEW_EXPENSE);
+    setSearchParams({}, { replace: true });
+  }, [isInitialized, searchParams, setSearchParams]);
 
   // Use the filter hook — pass optimistic list so deletes reflect immediately
   const {
