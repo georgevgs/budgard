@@ -68,12 +68,12 @@ describe('SpendingInsights', () => {
     expect(hero?.className).toContain('amber');
   });
 
-  it('applies green background when hero variant is positive', () => {
+  it('applies income background when hero variant is positive', () => {
     mockInsights = [insight('a', 'positive', 'Hero')];
     const { container } = render(<SpendingInsights {...baseProps} />);
 
     const hero = container.querySelector('.rounded-2xl');
-    expect(hero?.className).toContain('green');
+    expect(hero?.className).toContain('income');
   });
 
   it('applies primary background when hero variant is default', () => {
