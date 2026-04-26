@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react';
 import { supabase } from '@/lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
@@ -76,11 +77,22 @@ supabase.auth.onAuthStateChange((event, session) => {
             _lastKnownSession = data.session;
             notify({ session: data.session, isLoading: false });
           } else {
+            // Only report when online — offline refreshes fail expectedly
+            if (error && navigator.onLine) {
+              Sentry.captureException(error, {
+                tags: { operation: 'refreshSession', context: 'recovery' },
+              });
+            }
             _lastKnownSession = null;
             notify({ session: null, isLoading: false });
           }
         })
-        .catch(() => {
+        .catch((err) => {
+          if (navigator.onLine) {
+            Sentry.captureException(err, {
+              tags: { operation: 'refreshSession', context: 'recovery' },
+            });
+          }
           _lastKnownSession = null;
           notify({ session: null, isLoading: false });
         });

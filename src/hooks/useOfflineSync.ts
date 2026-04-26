@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react';
+import * as Sentry from '@sentry/react';
 import { useTranslation } from 'react-i18next';
 import { offlineQueue, type QueuedMutation } from '@/lib/offlineQueue';
 import { dataService } from '@/services/dataService';
@@ -32,7 +33,13 @@ export const useOfflineSync = (): void => {
         }
 
         return true;
-      } catch {
+      } catch (error) {
+        // Don't capture if offline — that's the expected reason syncs fail
+        if (navigator.onLine) {
+          Sentry.captureException(error, {
+            tags: { operation: 'offlineSync', mutationType: mutation.type },
+          });
+        }
         return false;
       }
     },
@@ -70,7 +77,11 @@ export const useOfflineSync = (): void => {
         title: t('offline.syncSuccess', { count: successCount }),
       });
       // Refresh to get server state
-      refreshExpenses().catch(() => {});
+      refreshExpenses().catch((err) => {
+        Sentry.captureException(err, {
+          tags: { operation: 'refreshExpenses', context: 'afterOfflineSync' },
+        });
+      });
     }
 
     if (failCount > 0) {

@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import * as Sentry from '@sentry/react';
 import { useToast } from '@/hooks/useToast';
 import { dataService } from '@/services/dataService';
 import { useData } from '@/contexts/DataContext';
@@ -126,6 +127,9 @@ export function useDataOperations() {
           return;
         }
         haptics.error();
+        Sentry.captureException(error, {
+          tags: { operation: expenseId ? 'updateExpense' : 'createExpense' },
+        });
         showErrorToast(`Failed to ${expenseId ? 'update' : 'add'} expense`);
         throw error;
       }
@@ -153,7 +157,11 @@ export function useDataOperations() {
 
         // Fire-and-forget receipt cleanup
         if (receiptPath) {
-          deleteReceipt(receiptPath).catch(() => {});
+          deleteReceipt(receiptPath).catch((err) => {
+            Sentry.captureException(err, {
+              tags: { operation: 'deleteReceipt', context: 'afterExpenseDelete' },
+            });
+          });
         }
       } catch (error) {
         if (!navigator.onLine) {
@@ -168,6 +176,7 @@ export function useDataOperations() {
           return;
         }
         haptics.error();
+        Sentry.captureException(error, { tags: { operation: 'deleteExpense' } });
         showErrorToast('Failed to delete expense');
         throw error;
       }
@@ -203,6 +212,7 @@ export function useDataOperations() {
         setCategories((prev) =>
           prev.filter((c) => c.id !== optimisticCategory.id),
         );
+        Sentry.captureException(error, { tags: { operation: 'createCategory' } });
         showErrorToast('Failed to add category');
         throw error;
       }
@@ -239,6 +249,7 @@ export function useDataOperations() {
       } catch (error) {
         haptics.error();
         setCategories(previousCategories);
+        Sentry.captureException(error, { tags: { operation: 'updateCategory' } });
         showErrorToast('Failed to update category');
         throw error;
       }
@@ -275,6 +286,7 @@ export function useDataOperations() {
         haptics.error();
         setCategories(previousCategories);
         refreshExpenses();
+        Sentry.captureException(error, { tags: { operation: 'deleteCategory' } });
         showErrorToast('Failed to delete category');
         throw error;
       }
@@ -307,6 +319,13 @@ export function useDataOperations() {
         );
       } catch (error) {
         haptics.error();
+        Sentry.captureException(error, {
+          tags: {
+            operation: expenseId
+              ? 'updateRecurringExpense'
+              : 'createRecurringExpense',
+          },
+        });
         showErrorToast(
           `Failed to ${expenseId ? 'update' : 'add'} recurring expense`,
         );
@@ -331,11 +350,28 @@ export function useDataOperations() {
         await dataService.deleteRecurringExpense(expenseId);
         haptics.success();
         // Refresh expenses to remove any orphaned generated expenses
-        refreshExpenses().catch(() => {});
+        refreshExpenses().catch((err) => {
+          Sentry.captureException(err, {
+            tags: {
+              operation: 'refreshExpenses',
+              context: 'afterRecurringExpenseDelete',
+            },
+          });
+        });
       } catch (error) {
         haptics.error();
         // Rollback — re-fetch to restore the deleted item
-        refreshExpenses().catch(() => {});
+        refreshExpenses().catch((err) => {
+          Sentry.captureException(err, {
+            tags: {
+              operation: 'refreshExpenses',
+              context: 'recurringExpenseDeleteRollback',
+            },
+          });
+        });
+        Sentry.captureException(error, {
+          tags: { operation: 'deleteRecurringExpense' },
+        });
         showErrorToast('Failed to delete recurring expense');
         throw error;
       }
@@ -369,6 +405,9 @@ export function useDataOperations() {
         setRecurringExpenses((prev) =>
           prev.map((e) => (e.id === expenseId ? { ...e, active: !active } : e)),
         );
+        Sentry.captureException(error, {
+          tags: { operation: 'toggleRecurringExpense' },
+        });
         showErrorToast('Failed to update recurring expense status');
         throw error;
       }
@@ -402,6 +441,7 @@ export function useDataOperations() {
       } catch (error) {
         haptics.error();
         setTags((prev) => prev.filter((t) => t.id !== optimisticTag.id));
+        Sentry.captureException(error, { tags: { operation: 'createTag' } });
         showErrorToast('Failed to create tag');
         throw error;
       }
@@ -419,6 +459,7 @@ export function useDataOperations() {
       } catch (error) {
         haptics.error();
         setMonthlyBudget(previousBudget);
+        Sentry.captureException(error, { tags: { operation: 'upsertBudget' } });
         showErrorToast('Failed to update budget');
         throw error;
       }
@@ -440,6 +481,9 @@ export function useDataOperations() {
         );
       } catch (error) {
         haptics.error();
+        Sentry.captureException(error, {
+          tags: { operation: 'createCategoriesBulk' },
+        });
         showErrorToast('Failed to create categories');
         throw error;
       }
@@ -457,6 +501,9 @@ export function useDataOperations() {
       } catch (error) {
         haptics.error();
         setDefaultCurrency(previousCurrency);
+        Sentry.captureException(error, {
+          tags: { operation: 'updateDefaultCurrency' },
+        });
         showErrorToast('Failed to update currency');
         throw error;
       }
@@ -469,6 +516,7 @@ export function useDataOperations() {
       await dataService.deleteAccount();
     } catch (error) {
       haptics.error();
+      Sentry.captureException(error, { tags: { operation: 'deleteAccount' } });
       showErrorToast('Failed to delete account');
       throw error;
     }
@@ -498,6 +546,9 @@ export function useDataOperations() {
         setTemplates((prev) =>
           prev.filter((t) => t.id !== optimisticTemplate.id),
         );
+        Sentry.captureException(error, {
+          tags: { operation: 'createTemplate' },
+        });
         showErrorToast('Failed to save template');
         throw error;
       }
@@ -523,6 +574,9 @@ export function useDataOperations() {
       } catch (error) {
         haptics.error();
         setTemplates(previousTemplates);
+        Sentry.captureException(error, {
+          tags: { operation: 'deleteTemplate' },
+        });
         showErrorToast('Failed to delete template');
         throw error;
       }
@@ -577,15 +631,24 @@ const processReceipt = async (
     try {
       receiptPath = await uploadReceipt(receiptFile, userId, savedExpense.id);
       if (existingReceiptPath) {
-        deleteReceipt(existingReceiptPath).catch(() => {});
+        deleteReceipt(existingReceiptPath).catch((err) => {
+          Sentry.captureException(err, {
+            tags: { operation: 'deleteReceipt', context: 'afterReplaceUpload' },
+          });
+        });
       }
-    } catch {
+    } catch (error) {
+      Sentry.captureException(error, { tags: { operation: 'uploadReceipt' } });
       receiptFailed = true;
     }
   } else if (removeExistingReceipt) {
     receiptPath = null;
     if (existingReceiptPath) {
-      deleteReceipt(existingReceiptPath).catch(() => {});
+      deleteReceipt(existingReceiptPath).catch((err) => {
+        Sentry.captureException(err, {
+          tags: { operation: 'deleteReceipt', context: 'removeExisting' },
+        });
+      });
     }
   }
 

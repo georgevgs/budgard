@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import * as Sentry from '@sentry/react';
 import { useTranslation } from 'react-i18next';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import {
@@ -35,7 +36,10 @@ const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
 
     getReceiptUrl(receiptPath)
       .then(setUrl)
-      .catch(() => setError(true))
+      .catch((err) => {
+        Sentry.captureException(err, { tags: { operation: 'getReceiptUrl' } });
+        setError(true);
+      })
       .finally(() => setLoading(false));
 
     return () => {
