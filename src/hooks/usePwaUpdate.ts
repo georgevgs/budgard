@@ -13,7 +13,7 @@ export function usePwaUpdate(): void {
   const toastDismissedRef = useRef(false);
 
   const {
-    needRefresh: [needRefresh],
+    needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(_swUrl, registration) {
@@ -43,8 +43,19 @@ export function usePwaUpdate(): void {
   });
 
   const applyUpdate = useCallback((): void => {
+    const reg = swRegistration.get();
+    // iOS PWA can leave needRefresh=true with no waiting SW after a
+    // same-content reinstall. Calling updateServiceWorker(true) here would
+    // silently no-op (no SKIP_WAITING target → no controllerchange → no
+    // reload), so the toast would just close and return on next app open.
+    // Clear the flag instead.
+    if (!reg?.waiting) {
+      setNeedRefresh(false);
+      return;
+    }
+
     updateServiceWorker(true);
-  }, [updateServiceWorker]);
+  }, [updateServiceWorker, setNeedRefresh]);
 
   const showUpdateToast = useCallback((): void => {
     toastDismissedRef.current = false;
@@ -77,9 +88,19 @@ export function usePwaUpdate(): void {
       toastDismissedRef.current = false;
       return;
     }
+
+    // Guard against phantom needRefresh on iOS: useRegisterSW can flip the
+    // flag without a real waiting worker (same-content SW reinstall). Without
+    // this check the toast fires on every app open and Update does nothing.
+    const reg = swRegistration.get();
+    if (!reg?.waiting) {
+      setNeedRefresh(false);
+      return;
+    }
+
     if (toastDismissedRef.current) return;
     showUpdateToast();
-  }, [needRefresh, showUpdateToast]);
+  }, [needRefresh, showUpdateToast, setNeedRefresh]);
 
   // Check for SW updates when the app returns to foreground.
   // iOS freezes the web view when backgrounded and doesn't automatically
