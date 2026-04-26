@@ -19,5 +19,6 @@ export type RecurringExpense = {
   last_generated_date?: string;
   created_at: string;
   active: boolean;
+  type?: 'expense' | 'income';
   category?: Category;
 }

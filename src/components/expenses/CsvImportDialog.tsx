@@ -48,7 +48,7 @@ type ImportStep = 'upload' | 'mapping' | 'preview' | 'importing';
 
 const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
   const { t } = useTranslation();
-  const { categories, defaultCurrency } = useData();
+  const { expenseCategories: categories, defaultCurrency } = useData();
   const { toast } = useToast();
   const { handleBulkExpenseImport } = useDataOperations();
 
@@ -662,7 +662,7 @@ const renderPreviewStep = (
       {renderImportErrorBanner(importError)}
       <div className="flex flex-wrap gap-4">
         <div className="flex items-center gap-2 text-sm">
-          <CheckCircle2 className="h-4 w-4 text-green-500" />
+          <CheckCircle2 className="h-4 w-4 text-income" />
           <span>{t('import.validRows', { count: validRows.length })}</span>
         </div>
         {renderSkippedCount(skippedIncomeCount, t)}

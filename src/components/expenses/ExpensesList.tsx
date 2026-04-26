@@ -113,7 +113,7 @@ const ExpensesList = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const {
-    categories,
+    expenseCategories: categories,
     expenses,
     tags,
     templates,

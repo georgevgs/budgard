@@ -2,7 +2,13 @@ const DB_NAME = 'budgard-offline';
 const DB_VERSION = 1;
 const STORE_NAME = 'mutations';
 
-export type MutationType = 'createExpense' | 'updateExpense' | 'deleteExpense';
+export type MutationType =
+  | 'createExpense'
+  | 'updateExpense'
+  | 'deleteExpense'
+  | 'createIncome'
+  | 'updateIncome'
+  | 'deleteIncome';
 
 export type QueuedMutation = {
   id: number;

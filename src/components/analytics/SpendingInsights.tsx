@@ -25,10 +25,10 @@ const SpendingInsights = (props: SpendingInsightsProps) => {
   const [hero, ...rest] = insights;
 
   return (
-    <div className="space-y-2">
-      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+    <div className="space-y-3">
+      <h3 className="text-base font-semibold text-foreground">
         {t('analytics.insights.sectionTitle')}
-      </p>
+      </h3>
       {renderHeroCard(hero)}
       {renderSecondaryCards(rest)}
     </div>
@@ -67,14 +67,13 @@ const renderSecondaryCards = (insights: Insight[]) => {
     <div className="grid gap-2">
       {insights.map((insight) => {
         const Icon = insight.icon;
-        const iconClass = getIconClass(insight.variant);
 
         return (
           <div
             key={insight.id}
             className="rounded-2xl border border-border/40 bg-card px-3.5 py-3 shadow-sm flex items-center gap-3"
           >
-            <Icon className={`h-4 w-4 shrink-0 ${iconClass}`} />
+            <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">{insight.text}</p>
           </div>
         );
@@ -85,7 +84,7 @@ const renderSecondaryCards = (insights: Insight[]) => {
 
 const getIconClass = (variant: Insight['variant']): string => {
   if (variant === 'warning') return 'text-amber-500';
-  if (variant === 'positive') return 'text-green-500';
+  if (variant === 'positive') return 'text-income';
 
   return 'text-primary';
 };
@@ -94,14 +93,14 @@ const getHeroBgClass = (variant: Insight['variant']): string => {
   if (variant === 'warning')
     return 'bg-amber-500/10 border border-amber-500/20';
   if (variant === 'positive')
-    return 'bg-green-500/10 border border-green-500/20';
+    return 'bg-income/10 border border-income/20';
 
   return 'bg-primary/10 border border-primary/20';
 };
 
 const getIconBgClass = (variant: Insight['variant']): string => {
   if (variant === 'warning') return 'bg-amber-500/15';
-  if (variant === 'positive') return 'bg-green-500/15';
+  if (variant === 'positive') return 'bg-income/15';
 
   return 'bg-primary/15';
 };

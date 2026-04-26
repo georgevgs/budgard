@@ -33,7 +33,7 @@ const FormsManager = ({
   onExpenseSubmit,
 }: FormsManagerProps) => {
   const { t } = useTranslation();
-  const { categories, isInitialized } = useData();
+  const { expenseCategories: categories, isInitialized } = useData();
 
   // Don't show forms until data is ready (isInitialized is sufficient —
   // checking isLoading here would unmount an open form during background refreshes,

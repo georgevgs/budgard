@@ -58,6 +58,7 @@ export const dataService = {
                recurring_expense:recurring_expenses(*)
            `,
       )
+      .eq('type', 'expense')
       .order('date', { ascending: false })
       .order('created_at', { ascending: false });
     if (signal) query = query.abortSignal(signal);
@@ -66,6 +67,60 @@ export const dataService = {
     if (error) throw error;
 
     return data as (Expense & { recurring_expense: RecurringExpense | null })[];
+  },
+
+  async getIncomes(signal?: AbortSignal) {
+    let query = supabase
+      .from('expenses')
+      .select(
+        `
+               *,
+               category:categories(*),
+               recurring_expense:recurring_expenses(*)
+           `,
+      )
+      .eq('type', 'income')
+      .order('date', { ascending: false })
+      .order('created_at', { ascending: false });
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return data as (Expense & { recurring_expense: RecurringExpense | null })[];
+  },
+
+  async createIncome(incomeData: Partial<Expense>) {
+    const { data, error } = await supabase
+      .from('expenses')
+      .insert({ ...incomeData, type: 'income' })
+      .select(`*, category:categories(*), recurring_expense:recurring_expenses(*)`)
+      .single();
+
+    if (error) throw error;
+    return data as Expense;
+  },
+
+  async updateIncome(incomeData: Partial<Expense>, incomeId: string) {
+    const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = incomeData;
+    const { data, error } = await supabase
+      .from('expenses')
+      .update(safeUpdate)
+      .eq('id', incomeId)
+      .select(`*, category:categories(*), recurring_expense:recurring_expenses(*)`)
+      .single();
+
+    if (error) throw error;
+    return data as Expense;
+  },
+
+  async deleteIncome(incomeId: string) {
+    const { error } = await supabase
+      .from('expenses')
+      .delete()
+      .eq('id', incomeId);
+
+    if (error) throw error;
   },
 
   async updateExpense(expenseData: Partial<Expense>, expenseId: string) {
@@ -166,6 +221,7 @@ export const dataService = {
                category:categories(*)
            `,
       )
+      .eq('type', 'expense')
       .order('created_at', { ascending: false });
     if (signal) query = query.abortSignal(signal);
     const { data, error } = await query;
@@ -173,6 +229,68 @@ export const dataService = {
     if (error) throw error;
 
     return data as RecurringExpense[];
+  },
+
+  async getRecurringIncomes(signal?: AbortSignal) {
+    let query = supabase
+      .from('recurring_expenses')
+      .select(`*, category:categories(*)`)
+      .eq('type', 'income')
+      .order('created_at', { ascending: false });
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return data as RecurringExpense[];
+  },
+
+  async createRecurringIncome(incomeData: Partial<RecurringExpense>) {
+    const { data, error } = await supabase
+      .from('recurring_expenses')
+      .insert({ ...incomeData, type: 'income' })
+      .select(`*, category:categories(*)`)
+      .single();
+
+    if (error) throw error;
+    return data as RecurringExpense;
+  },
+
+  async updateRecurringIncome(
+    incomeData: Partial<RecurringExpense>,
+    incomeId: string,
+  ) {
+    const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = incomeData;
+    const { data, error } = await supabase
+      .from('recurring_expenses')
+      .update(safeUpdate)
+      .eq('id', incomeId)
+      .select(`*, category:categories(*)`)
+      .single();
+
+    if (error) throw error;
+    return data as RecurringExpense;
+  },
+
+  async deleteRecurringIncome(incomeId: string) {
+    const { error } = await supabase
+      .from('recurring_expenses')
+      .delete()
+      .eq('id', incomeId);
+
+    if (error) throw error;
+  },
+
+  async toggleRecurringIncome(incomeId: string, active: boolean) {
+    const { data, error } = await supabase
+      .from('recurring_expenses')
+      .update({ active })
+      .eq('id', incomeId)
+      .select(`*, category:categories(*)`)
+      .single();
+
+    if (error) throw error;
+    return data as RecurringExpense;
   },
 
   async createRecurringExpense(expenseData: Partial<RecurringExpense>) {
@@ -294,6 +412,23 @@ export const dataService = {
       .from('user_budgets')
       .upsert(
         { user_id: user.id, default_currency: currency },
+        { onConflict: 'user_id' },
+      )
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+    return data as Budget;
+  },
+
+  async updateDefaultSavingsPct(pct: number | null) {
+    const user = await this.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('user_budgets')
+      .upsert(
+        { user_id: user.id, default_savings_pct: pct },
         { onConflict: 'user_id' },
       )
       .select()

@@ -34,15 +34,20 @@ export function useDataOperations() {
   const {
     isInitialized,
     setExpenses,
+    setIncomes,
     setCategories,
     setTags,
     setTemplates,
     setRecurringExpenses,
+    setRecurringIncomes,
     refreshExpenses,
+    refreshIncomes,
     monthlyBudget,
     setMonthlyBudget,
     defaultCurrency,
     setDefaultCurrency,
+    defaultSavingsPct,
+    setDefaultSavingsPct,
   } = useData();
   const { toast } = useToast();
 
@@ -511,6 +516,26 @@ export function useDataOperations() {
     [defaultCurrency, setDefaultCurrency, showErrorToast],
   );
 
+  const handleSavingsPctUpdate = useCallback(
+    async (pct: number | null) => {
+      const previous = defaultSavingsPct;
+      setDefaultSavingsPct(pct);
+
+      try {
+        await dataService.updateDefaultSavingsPct(pct);
+      } catch (error) {
+        haptics.error();
+        setDefaultSavingsPct(previous);
+        Sentry.captureException(error, {
+          tags: { operation: 'updateDefaultSavingsPct' },
+        });
+        showErrorToast('Failed to update savings rate');
+        throw error;
+      }
+    },
+    [defaultSavingsPct, setDefaultSavingsPct, showErrorToast],
+  );
+
   const handleDeleteAccount = useCallback(async () => {
     try {
       await dataService.deleteAccount();
@@ -594,9 +619,209 @@ export function useDataOperations() {
     [isInitialized, refreshExpenses],
   );
 
+  const handleIncomeSubmit = useCallback(
+    async (
+      incomeData: Partial<Expense>,
+      incomeId?: string,
+    ): Promise<Expense | null> => {
+      if (!isInitialized) {
+        return null;
+      }
+
+      try {
+        const savedIncome = incomeId
+          ? await dataService.updateIncome(incomeData, incomeId)
+          : await dataService.createIncome(incomeData);
+
+        haptics.success();
+        setIncomes((prev) =>
+          incomeId
+            ? prev.map((e) => (e.id === incomeId ? savedIncome : e))
+            : [savedIncome, ...prev],
+        );
+        toast({
+          variant: 'success',
+          title: incomeId ? 'Income updated' : 'Income added',
+        });
+
+        return savedIncome;
+      } catch (error) {
+        if (!navigator.onLine) {
+          const mutationType = incomeId ? 'updateIncome' : 'createIncome';
+          await offlineQueue.enqueue(mutationType, {
+            ...incomeData,
+            ...(incomeId ? { id: incomeId } : {}),
+          } as Record<string, unknown>);
+          haptics.success();
+          toast({
+            variant: 'success',
+            title: 'Income queued',
+            description: 'Will sync when back online',
+          });
+
+          return null;
+        }
+        haptics.error();
+        Sentry.captureException(error, {
+          tags: { operation: incomeId ? 'updateIncome' : 'createIncome' },
+        });
+        showErrorToast(`Failed to ${incomeId ? 'update' : 'add'} income`);
+        throw error;
+      }
+    },
+    [isInitialized, setIncomes, showErrorToast, toast],
+  );
+
+  const handleIncomeDelete = useCallback(
+    async (incomeId: string) => {
+      if (!isInitialized) {
+        return;
+      }
+
+      haptics.warning();
+      try {
+        await dataService.deleteIncome(incomeId);
+        setIncomes((prev) => prev.filter((e) => e.id !== incomeId));
+      } catch (error) {
+        if (!navigator.onLine) {
+          await offlineQueue.enqueue('deleteIncome', { id: incomeId });
+          haptics.success();
+          toast({
+            variant: 'success',
+            title: 'Delete queued',
+            description: 'Will sync when back online',
+          });
+
+          return;
+        }
+        haptics.error();
+        Sentry.captureException(error, { tags: { operation: 'deleteIncome' } });
+        showErrorToast('Failed to delete income');
+        throw error;
+      }
+    },
+    [isInitialized, setIncomes, showErrorToast, toast],
+  );
+
+  const handleRecurringIncomeSubmit = useCallback(
+    async (incomeData: Partial<RecurringExpense>, incomeId?: string) => {
+      if (!isInitialized) {
+        return;
+      }
+
+      try {
+        const saved = incomeId
+          ? await dataService.updateRecurringIncome(incomeData, incomeId)
+          : await dataService.createRecurringIncome(incomeData);
+
+        haptics.success();
+        toast({
+          variant: 'success',
+          title: incomeId
+            ? 'Recurring income updated'
+            : 'Recurring income added',
+        });
+        setRecurringIncomes((prev) =>
+          incomeId
+            ? prev.map((e) => (e.id === incomeId ? saved : e))
+            : [saved, ...prev],
+        );
+      } catch (error) {
+        haptics.error();
+        Sentry.captureException(error, {
+          tags: {
+            operation: incomeId
+              ? 'updateRecurringIncome'
+              : 'createRecurringIncome',
+          },
+        });
+        showErrorToast(
+          `Failed to ${incomeId ? 'update' : 'add'} recurring income`,
+        );
+        throw error;
+      }
+    },
+    [isInitialized, setRecurringIncomes, showErrorToast, toast],
+  );
+
+  const handleRecurringIncomeDelete = useCallback(
+    async (incomeId: string) => {
+      if (!isInitialized) {
+        return;
+      }
+
+      haptics.warning();
+      setRecurringIncomes((prev) => prev.filter((e) => e.id !== incomeId));
+
+      try {
+        await dataService.deleteRecurringIncome(incomeId);
+        haptics.success();
+        refreshIncomes().catch((err) => {
+          Sentry.captureException(err, {
+            tags: {
+              operation: 'refreshIncomes',
+              context: 'afterRecurringIncomeDelete',
+            },
+          });
+        });
+      } catch (error) {
+        haptics.error();
+        refreshIncomes().catch((err) => {
+          Sentry.captureException(err, {
+            tags: {
+              operation: 'refreshIncomes',
+              context: 'recurringIncomeDeleteRollback',
+            },
+          });
+        });
+        Sentry.captureException(error, {
+          tags: { operation: 'deleteRecurringIncome' },
+        });
+        showErrorToast('Failed to delete recurring income');
+        throw error;
+      }
+    },
+    [isInitialized, setRecurringIncomes, refreshIncomes, showErrorToast],
+  );
+
+  const handleRecurringIncomeToggle = useCallback(
+    async (incomeId: string, active: boolean) => {
+      if (!isInitialized) {
+        return;
+      }
+
+      setRecurringIncomes((prev) =>
+        prev.map((e) => (e.id === incomeId ? { ...e, active } : e)),
+      );
+
+      try {
+        const saved = await dataService.toggleRecurringIncome(incomeId, active);
+        haptics.success();
+        setRecurringIncomes((prev) =>
+          prev.map((e) => (e.id === incomeId ? saved : e)),
+        );
+      } catch (error) {
+        haptics.error();
+        setRecurringIncomes((prev) =>
+          prev.map((e) =>
+            e.id === incomeId ? { ...e, active: !active } : e,
+          ),
+        );
+        Sentry.captureException(error, {
+          tags: { operation: 'toggleRecurringIncome' },
+        });
+        showErrorToast('Failed to update recurring income status');
+        throw error;
+      }
+    },
+    [isInitialized, setRecurringIncomes, showErrorToast],
+  );
+
   return {
     handleExpenseSubmit,
     handleExpenseDelete,
+    handleIncomeSubmit,
+    handleIncomeDelete,
     handleCategoryAdd,
     handleCategoryUpdate,
     handleCategoryDelete,
@@ -604,8 +829,12 @@ export function useDataOperations() {
     handleRecurringExpenseSubmit,
     handleRecurringExpenseDelete,
     handleRecurringExpenseToggle,
+    handleRecurringIncomeSubmit,
+    handleRecurringIncomeDelete,
+    handleRecurringIncomeToggle,
     handleBudgetUpdate,
     handleCurrencyUpdate,
+    handleSavingsPctUpdate,
     handleDeleteAccount,
     handleCategoriesAddBulk,
     handleBulkExpenseImport,

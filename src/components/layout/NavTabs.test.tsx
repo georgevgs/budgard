@@ -11,10 +11,11 @@ const renderAt = (path: string) =>
   );
 
 describe('NavTabs', () => {
-  it('renders three tabs with localized labels', () => {
+  it('renders four tabs with localized labels', () => {
     renderAt('/expenses');
 
     expect(screen.getByText('navigation.expenses')).toBeInTheDocument();
+    expect(screen.getByText('navigation.income')).toBeInTheDocument();
     expect(screen.getByText('navigation.recurring')).toBeInTheDocument();
     expect(screen.getByText('navigation.analytics')).toBeInTheDocument();
   });
@@ -24,15 +25,16 @@ describe('NavTabs', () => {
     const links = screen.getAllByRole('link');
 
     expect(links[0]).toHaveAttribute('href', '/expenses');
-    expect(links[1]).toHaveAttribute('href', '/recurring');
-    expect(links[2]).toHaveAttribute('href', '/analytics');
+    expect(links[1]).toHaveAttribute('href', '/income');
+    expect(links[2]).toHaveAttribute('href', '/recurring');
+    expect(links[3]).toHaveAttribute('href', '/analytics');
   });
 
   it('marks the current tab active via NavLink', () => {
     renderAt('/analytics');
     const links = screen.getAllByRole('link');
 
-    expect(links[2].className).toContain('active');
+    expect(links[3].className).toContain('active');
   });
 
   it('exposes an aria-label on the nav landmark', () => {

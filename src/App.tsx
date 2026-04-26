@@ -31,6 +31,9 @@ import { lazyWithRetry } from '@/lib/lazyWithRetry';
 const ExpensesList = lazyWithRetry(
   () => import('@/components/expenses/ExpensesList'),
 );
+const IncomeList = lazyWithRetry(
+  () => import('@/components/income/IncomeList'),
+);
 const AnalyticsView = lazyWithRetry(
   () => import('@/components/analytics/AnalyticsView'),
 );
@@ -218,6 +221,14 @@ const App = () => {
                   element={
                     <Suspense fallback={<ExpenseLoadingState />}>
                       <ExpensesList />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/income"
+                  element={
+                    <Suspense fallback={<ExpenseLoadingState />}>
+                      <IncomeList />
                     </Suspense>
                   }
                 />

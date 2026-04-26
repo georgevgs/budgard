@@ -53,6 +53,7 @@ const frequencyValues = [
 type RecurringExpenseFormProps = {
   expense?: RecurringExpense;
   categories: Category[];
+  type?: 'expense' | 'income';
   onSubmit: (values: RecurringExpenseFormData) => Promise<void>;
   onClose: () => void;
 };
@@ -60,6 +61,7 @@ type RecurringExpenseFormProps = {
 const RecurringExpenseForm = ({
   expense,
   categories,
+  type = 'expense',
   onSubmit,
   onClose,
 }: RecurringExpenseFormProps) => {
@@ -95,9 +97,13 @@ const RecurringExpenseForm = ({
     await onSubmit(values);
   };
 
+  const isIncome = type === 'income';
+  const titleSuffix = isIncome
+    ? t('recurring.income.suffix')
+    : t('recurring.expensesTitle');
   const formTitle = expense
-    ? t('recurring.formTitle', { action: t('recurring.formEdit') })
-    : t('recurring.formTitle', { action: t('recurring.formAdd') });
+    ? `${t('recurring.formEdit')} — ${titleSuffix}`
+    : `${t('recurring.formAdd')} — ${titleSuffix}`;
 
   return (
     <div className="flex flex-col max-h-full">

@@ -26,12 +26,22 @@ import CategoryForm from '@/components/categories/CategoryForm';
 
 type View = { type: 'list' } | { type: 'form'; category?: Category };
 
-export const CategoryManager = () => {
+type CategoryManagerProps = {
+  // Filters the list and the type of newly created categories. Defaults to 'expense'.
+  categoryType?: 'expense' | 'income';
+};
+
+export const CategoryManager = ({
+  categoryType = 'expense',
+}: CategoryManagerProps = {}) => {
   const { t } = useTranslation();
-  const { categories } = useData();
+  const { expenseCategories, incomeCategories } = useData();
   const { handleCategoryDelete } = useDataOperations();
   const [view, setView] = useState<View>({ type: 'list' });
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
+
+  const categories =
+    categoryType === 'income' ? incomeCategories : expenseCategories;
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -48,6 +58,7 @@ export const CategoryManager = () => {
     return (
       <CategoryForm
         category={view.category}
+        categoryType={categoryType}
         onBack={() => setView({ type: 'list' })}
         onClose={() => setView({ type: 'list' })}
       />
@@ -68,10 +79,14 @@ export const CategoryManager = () => {
       <div className="px-4 sm:px-6 pt-2 sm:pt-4 pb-2 shrink-0">
         <DialogHeader data-draggable-area>
           <DialogTitle className="text-xl">
-            {t('categories.title')}
+            {categoryType === 'income'
+              ? t('income.manageSources')
+              : t('categories.title')}
           </DialogTitle>
           <DialogDescription>
-            {t('categories.manageDescription')}
+            {categoryType === 'income'
+              ? t('income.manageDescription')
+              : t('categories.manageDescription')}
           </DialogDescription>
         </DialogHeader>
       </div>
@@ -93,7 +108,9 @@ export const CategoryManager = () => {
           onClick={() => setView({ type: 'form' })}
         >
           <Plus className="h-4 w-4 mr-2" />
-          {t('categories.addCategory')}
+          {categoryType === 'income'
+            ? t('income.addSource')
+            : t('categories.addCategory')}
         </Button>
       </div>
 

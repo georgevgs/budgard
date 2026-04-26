@@ -39,6 +39,8 @@
     --chart-3: 43 74% 56%;
     --chart-4: 280 65% 55%;
     --chart-5: 12 76% 61%;
+    --income: 160 70% 38%;
+    --income-foreground: 0 0% 100%;
     --radius: 0.875rem;
   }
 
@@ -67,6 +69,8 @@
     --chart-3: 43 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 12 76% 61%;
+    --income: 160 65% 50%;
+    --income-foreground: 160 70% 8%;
   }
 
   [data-theme='barbie'] {
@@ -94,6 +98,8 @@
     --chart-3: 326 93% 75%;
     --chart-4: 326 100% 85%;
     --chart-5: 326 100% 95%;
+    --income: 160 60% 42%;
+    --income-foreground: 0 0% 100%;
     --radius: 1rem;
   }
 }

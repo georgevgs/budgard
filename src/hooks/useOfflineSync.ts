@@ -9,7 +9,7 @@ import type { Expense } from '@/types/Expense';
 
 export const useOfflineSync = (): void => {
   const { t } = useTranslation();
-  const { refreshExpenses } = useData();
+  const { refreshExpenses, refreshIncomes } = useData();
   const isSyncing = useRef(false);
 
   const processMutation = useCallback(
@@ -29,6 +29,18 @@ export const useOfflineSync = (): void => {
             break;
           case 'deleteExpense':
             await dataService.deleteExpense(payload.id as string);
+            break;
+          case 'createIncome':
+            await dataService.createIncome(payload as Partial<Expense>);
+            break;
+          case 'updateIncome':
+            await dataService.updateIncome(
+              payload as Partial<Expense>,
+              payload.id as string,
+            );
+            break;
+          case 'deleteIncome':
+            await dataService.deleteIncome(payload.id as string);
             break;
         }
 
@@ -76,10 +88,15 @@ export const useOfflineSync = (): void => {
         variant: 'success',
         title: t('offline.syncSuccess', { count: successCount }),
       });
-      // Refresh to get server state
+      // Refresh to get server state for both expenses and incomes
       refreshExpenses().catch((err) => {
         Sentry.captureException(err, {
           tags: { operation: 'refreshExpenses', context: 'afterOfflineSync' },
+        });
+      });
+      refreshIncomes().catch((err) => {
+        Sentry.captureException(err, {
+          tags: { operation: 'refreshIncomes', context: 'afterOfflineSync' },
         });
       });
     }
@@ -90,7 +107,7 @@ export const useOfflineSync = (): void => {
         title: t('offline.syncFailed', { count: failCount }),
       });
     }
-  }, [processMutation, refreshExpenses, t]);
+  }, [processMutation, refreshExpenses, refreshIncomes, t]);
 
   // Sync when coming back online
   useEffect(() => {

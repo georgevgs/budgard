@@ -4,8 +4,12 @@ import { useOfflineSync } from './useOfflineSync';
 
 // Mock dependencies
 const mockRefreshExpenses = vi.fn().mockResolvedValue(undefined);
+const mockRefreshIncomes = vi.fn().mockResolvedValue(undefined);
 vi.mock('@/contexts/DataContext', () => ({
-  useData: () => ({ refreshExpenses: mockRefreshExpenses }),
+  useData: () => ({
+    refreshExpenses: mockRefreshExpenses,
+    refreshIncomes: mockRefreshIncomes,
+  }),
 }));
 
 const mockToast = vi.fn();

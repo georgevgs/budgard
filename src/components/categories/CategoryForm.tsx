@@ -66,13 +66,39 @@ const CATEGORY_COLORS = [
 
 const DEFAULT_CATEGORY_COLOR = '#6366f1';
 
+const KIND_OPTIONS = [
+  {
+    value: 'need' as const,
+    targetPct: 50,
+    activeClasses: 'bg-blue-500/15 text-blue-700 dark:text-blue-300',
+  },
+  {
+    value: 'want' as const,
+    targetPct: 30,
+    activeClasses: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
+  },
+  {
+    value: 'savings' as const,
+    targetPct: 20,
+    activeClasses: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
+  },
+];
+
 type Props = {
   category?: Category;
+  // For new categories: what type to create. Defaults to 'expense'.
+  // For existing categories: ignored (we preserve the row's original type).
+  categoryType?: 'expense' | 'income';
   onBack: () => void;
   onClose: () => void;
 };
 
-const CategoryForm = ({ category, onBack, onClose }: Props) => {
+const CategoryForm = ({
+  category,
+  categoryType = 'expense',
+  onBack,
+  onClose,
+}: Props) => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const { handleCategoryAdd, handleCategoryUpdate } = useDataOperations();
@@ -80,12 +106,23 @@ const CategoryForm = ({ category, onBack, onClose }: Props) => {
 
   const isEditing = !!category;
 
+  const isIncomeCategory =
+    category?.type === 'income' || (!category && categoryType === 'income');
+
+  const editableKind =
+    category?.kind === 'need' ||
+    category?.kind === 'want' ||
+    category?.kind === 'savings'
+      ? category.kind
+      : undefined;
+
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: category?.name ?? '',
       color: category?.color ?? DEFAULT_CATEGORY_COLOR,
       icon: category?.icon ?? undefined,
+      kind: editableKind,
     },
   });
 
@@ -100,17 +137,30 @@ const CategoryForm = ({ category, onBack, onClose }: Props) => {
 
     try {
       if (isEditing) {
-        await handleCategoryUpdate(category.id, {
-          name: values.name,
-          color: values.color,
-          icon: values.icon ?? null,
-        });
+        // For income categories: don't touch kind (it's 'income' by convention).
+        // For expense categories: persist whatever the user picked (or null).
+        const updatePayload = isIncomeCategory
+          ? {
+              name: values.name,
+              color: values.color,
+              icon: values.icon ?? null,
+            }
+          : {
+              name: values.name,
+              color: values.color,
+              icon: values.icon ?? null,
+              kind: values.kind ?? null,
+            };
+
+        await handleCategoryUpdate(category.id, updatePayload);
       } else {
         await handleCategoryAdd({
           name: values.name,
           color: values.color,
           icon: values.icon ?? null,
           user_id: session.user.id,
+          type: isIncomeCategory ? 'income' : 'expense',
+          kind: isIncomeCategory ? 'income' : (values.kind ?? null),
         });
       }
       onClose();
@@ -302,6 +352,13 @@ const CategoryForm = ({ category, onBack, onClose }: Props) => {
               )}
             />
 
+            {renderKindSelector(
+              isIncomeCategory,
+              isDisabled,
+              form.control,
+              t,
+            )}
+
             <div className="flex gap-3 justify-end pt-2 pb-2">
               <Button
                 type="button"
@@ -330,6 +387,64 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+type FormControlType = ReturnType<typeof useForm<CategoryFormData>>['control'];
+
+const renderKindSelector = (
+  isIncomeCategory: boolean,
+  isDisabled: boolean,
+  control: FormControlType,
+  t: TranslateFunction,
+) => {
+  if (isIncomeCategory) return null;
+
+  return (
+    <FormField
+      control={control}
+      name="kind"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel className="text-sm font-medium">
+            {t('categories.kind.label')}
+          </FormLabel>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {t('categories.kind.helpText')}
+          </p>
+          <FormControl>
+            <div className="grid grid-cols-3 gap-2 pt-1">
+              {KIND_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() =>
+                    field.onChange(
+                      field.value === option.value ? undefined : option.value,
+                    )
+                  }
+                  disabled={isDisabled}
+                  className={cn(
+                    'rounded-xl py-2.5 px-3 border text-sm transition-colors',
+                    field.value === option.value
+                      ? `${option.activeClasses} border-transparent`
+                      : 'border-border/60 text-muted-foreground hover:bg-accent/50',
+                  )}
+                >
+                  <div className="font-medium">
+                    {t(`categories.kind.${option.value}`)}
+                  </div>
+                  <div className="text-xs opacity-80 mt-0.5">
+                    {option.targetPct}%
+                  </div>
+                </button>
+              ))}
+            </div>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+};
 
 const renderSwatchCheck = (isSelected: boolean) => {
   if (!isSelected) return null;

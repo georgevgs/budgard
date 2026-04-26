@@ -1,6 +1,8 @@
 import { Category } from '@/types/Category.ts';
 import { Tag } from '@/types/Tag.ts';
 
+export type TransactionType = 'expense' | 'income';
+
 export type Expense = {
   id: string;
   amount: number;
@@ -16,6 +18,10 @@ export type Expense = {
   original_amount?: number | null;
   original_currency?: string | null;
   exchange_rate?: number | null;
+  // Discriminator: 'expense' (outflow) or 'income' (inflow). DB default is 'expense'.
+  type?: TransactionType;
+  // Savings nudge: portion of an income row earmarked as savings.
+  savings_allocation_amount?: number | null;
   category?: Category;
   tag?: Tag;
 }

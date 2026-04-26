@@ -93,25 +93,41 @@ function getMonthlyAmount(expense: RecurringExpense): number {
   }
 }
 
+type RecurringMode = 'expense' | 'income';
+
 const RecurringExpensesList = () => {
+  const [mode, setMode] = useState<RecurringMode>('expense');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<
     RecurringExpense | undefined
   >(undefined);
-  const { recurringExpenses, categories, defaultCurrency, isLoading } = useData();
+  const {
+    recurringExpenses,
+    recurringIncomes,
+    expenseCategories,
+    incomeCategories,
+    defaultCurrency,
+    isLoading,
+  } = useData();
   const { session } = useAuth();
   const {
     handleRecurringExpenseSubmit: submitRecurringExpense,
     handleRecurringExpenseDelete: deleteRecurringExpense,
     handleRecurringExpenseToggle: toggleRecurringExpense,
+    handleRecurringIncomeSubmit: submitRecurringIncome,
+    handleRecurringIncomeDelete: deleteRecurringIncome,
+    handleRecurringIncomeToggle: toggleRecurringIncome,
   } = useDataOperations();
   const { t } = useTranslation();
+
+  const items = mode === 'income' ? recurringIncomes : recurringExpenses;
+  const categories = mode === 'income' ? incomeCategories : expenseCategories;
 
   const handleSubmit = async (values: RecurringExpenseFormData) => {
     if (!session?.user?.id) return;
 
     try {
-      const expenseData: Partial<RecurringExpense> = {
+      const data: Partial<RecurringExpense> = {
         amount: parseCurrencyInput(values.amount),
         description: values.description,
         category_id: values.category_id === 'none' ? null : values.category_id,
@@ -123,7 +139,11 @@ const RecurringExpensesList = () => {
         user_id: session.user.id,
       };
 
-      await submitRecurringExpense(expenseData, selectedExpense?.id);
+      if (mode === 'income') {
+        await submitRecurringIncome(data, selectedExpense?.id);
+      } else {
+        await submitRecurringExpense(data, selectedExpense?.id);
+      }
 
       setIsFormOpen(false);
       setSelectedExpense(undefined);
@@ -137,17 +157,25 @@ const RecurringExpensesList = () => {
     setIsFormOpen(true);
   };
 
-  const handleDelete = async (expenseId: string) => {
+  const handleDelete = async (id: string) => {
     try {
-      await deleteRecurringExpense(expenseId);
+      if (mode === 'income') {
+        await deleteRecurringIncome(id);
+      } else {
+        await deleteRecurringExpense(id);
+      }
     } catch {
       // Error handling is done in the hook
     }
   };
 
-  const handleToggle = async (expenseId: string, active: boolean) => {
+  const handleToggle = async (id: string, active: boolean) => {
     try {
-      await toggleRecurringExpense(expenseId, active);
+      if (mode === 'income') {
+        await toggleRecurringIncome(id, active);
+      } else {
+        await toggleRecurringExpense(id, active);
+      }
     } catch {
       // Error handling is done in the hook
     }
@@ -158,9 +186,9 @@ const RecurringExpensesList = () => {
     setSelectedExpense(undefined);
   };
 
-  const activeExpenses = recurringExpenses.filter((e) => e.active);
-  const monthlyTotal = activeExpenses.reduce(
-    (sum, expense) => sum + getMonthlyAmount(expense),
+  const activeItems = items.filter((e) => e.active);
+  const monthlyTotal = activeItems.reduce(
+    (sum, item) => sum + getMonthlyAmount(item),
     0,
   );
 
@@ -174,9 +202,17 @@ const RecurringExpensesList = () => {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h2 className="text-lg font-semibold">
-              {t('recurring.expensesTitle')}
+              {mode === 'income'
+                ? t('recurring.income.title')
+                : t('recurring.expensesTitle')}
             </h2>
-            {renderMonthlySummary(activeExpenses.length, monthlyTotal, t, defaultCurrency)}
+            {renderMonthlySummary(
+              activeItems.length,
+              monthlyTotal,
+              mode,
+              t,
+              defaultCurrency,
+            )}
           </div>
           <Button
             onClick={() => setIsFormOpen(true)}
@@ -185,15 +221,44 @@ const RecurringExpensesList = () => {
           >
             <Plus className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">
-              {t('recurring.addRecurring')}
+              {mode === 'income'
+                ? t('recurring.income.addRecurring')
+                : t('recurring.addRecurring')}
             </span>
           </Button>
+        </div>
+
+        {/* Mode toggle */}
+        <div className="inline-flex rounded-full bg-muted p-0.5 self-start">
+          <button
+            type="button"
+            onClick={() => setMode('expense')}
+            className={`text-xs px-4 py-1.5 rounded-full transition-colors ${
+              mode === 'expense'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground'
+            }`}
+          >
+            {t('expenses.title')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('income')}
+            className={`text-xs px-4 py-1.5 rounded-full transition-colors ${
+              mode === 'income'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground'
+            }`}
+          >
+            {t('income.title')}
+          </button>
         </div>
       </div>
 
       <div className="grid gap-4">
         {renderExpensesList(
-          recurringExpenses,
+          items,
+          mode,
           handleEditExpense,
           handleDelete,
           handleToggle,
@@ -210,6 +275,7 @@ const RecurringExpensesList = () => {
           <RecurringExpenseForm
             expense={selectedExpense}
             categories={categories}
+            type={mode}
             onSubmit={handleSubmit}
             onClose={handleFormClose}
           />
@@ -231,14 +297,18 @@ type TranslateFunction = (
 const renderMonthlySummary = (
   activeCount: number,
   monthlyTotal: number,
+  mode: RecurringMode,
   t: TranslateFunction,
   currency: string,
 ) => {
   if (activeCount === 0) return null;
 
+  const key =
+    mode === 'income' ? 'recurring.income.monthlyFrom' : 'recurring.monthlyFrom';
+
   return (
     <p className="text-sm text-muted-foreground">
-      {t('recurring.monthlyFrom', {
+      {t(key, {
         amount: formatCurrency(monthlyTotal, currency),
         count: activeCount,
       })}
@@ -248,6 +318,7 @@ const renderMonthlySummary = (
 
 const renderExpensesList = (
   expenses: RecurringExpense[],
+  mode: RecurringMode,
   onEdit: (expense: RecurringExpense) => void,
   onDelete: (id: string) => void,
   onToggle: (id: string, active: boolean) => void,
@@ -255,7 +326,7 @@ const renderExpensesList = (
   t: TranslateFunction,
 ) => {
   if (expenses.length === 0) {
-    return renderEmptyState(onOpenForm, t);
+    return renderEmptyState(mode, onOpenForm, t);
   }
 
   return expenses.map((expense) => {
@@ -277,18 +348,27 @@ const renderExpensesList = (
 };
 
 const renderEmptyState = (
+  mode: RecurringMode,
   onOpenForm: (open: boolean) => void,
   t: TranslateFunction,
 ) => {
+  const titleKey = mode === 'income' ? 'recurring.income.empty' : 'recurring.noRecurring';
+  const descKey =
+    mode === 'income'
+      ? 'recurring.income.emptyDescription'
+      : 'recurring.noRecurringDescription';
+  const ctaKey =
+    mode === 'income'
+      ? 'recurring.income.addFirstRecurring'
+      : 'recurring.addFirstRecurring';
+
   return (
     <Card className="border-border/50 rounded-2xl p-8 text-center overflow-hidden">
       <div className="flex flex-col items-center gap-3">
         <Repeat className="h-12 w-12 text-muted-foreground/50" />
         <div className="max-w-[260px]">
-          <p className="font-medium">{t('recurring.noRecurring')}</p>
-          <p className="text-sm text-muted-foreground">
-            {t('recurring.noRecurringDescription')}
-          </p>
+          <p className="font-medium">{t(titleKey)}</p>
+          <p className="text-sm text-muted-foreground">{t(descKey)}</p>
         </div>
         <Button
           onClick={() => onOpenForm(true)}
@@ -297,7 +377,7 @@ const renderEmptyState = (
           className="mt-2 max-w-full"
         >
           <Plus className="h-4 w-4 mr-2 shrink-0" />
-          <span className="truncate">{t('recurring.addFirstRecurring')}</span>
+          <span className="truncate">{t(ctaKey)}</span>
         </Button>
       </div>
     </Card>

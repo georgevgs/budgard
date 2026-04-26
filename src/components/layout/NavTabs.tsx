@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import FileText from 'lucide-react/dist/esm/icons/file-text';
 import BarChart from 'lucide-react/dist/esm/icons/bar-chart';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
+import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 
 const NavTabs = () => {
   const { t } = useTranslation();
@@ -13,6 +14,11 @@ const NavTabs = () => {
       name: t('navigation.expenses'),
       path: '/expenses',
       icon: FileText,
+    },
+    {
+      name: t('navigation.income'),
+      path: '/income',
+      icon: TrendingUp,
     },
     {
       name: t('navigation.recurring'),

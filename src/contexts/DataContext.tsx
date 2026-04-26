@@ -3,6 +3,7 @@ import {
   useContext,
   useState,
   useEffect,
+  useMemo,
   useRef,
   type Dispatch,
   type SetStateAction,
@@ -21,12 +22,19 @@ import { useToast } from '@/hooks/useToast';
 
 type DataState = {
   categories: Category[];
+  // Derived: categories.type === 'expense' (or null/undefined for legacy rows)
+  expenseCategories: Category[];
+  // Derived: categories.type === 'income'
+  incomeCategories: Category[];
   expenses: Expense[];
+  incomes: Expense[];
   recurringExpenses: RecurringExpense[];
+  recurringIncomes: RecurringExpense[];
   tags: Tag[];
   templates: ExpenseTemplate[];
   monthlyBudget: number | null;
   defaultCurrency: string;
+  defaultSavingsPct: number | null;
   isLoading: boolean;
   isInitialized: boolean;
 };
@@ -34,13 +42,17 @@ type DataState = {
 type DataContextType = DataState & {
   refreshData: () => Promise<void>;
   refreshExpenses: () => Promise<void>;
+  refreshIncomes: () => Promise<void>;
   setCategories: Dispatch<SetStateAction<Category[]>>;
   setExpenses: Dispatch<SetStateAction<Expense[]>>;
+  setIncomes: Dispatch<SetStateAction<Expense[]>>;
   setRecurringExpenses: Dispatch<SetStateAction<RecurringExpense[]>>;
+  setRecurringIncomes: Dispatch<SetStateAction<RecurringExpense[]>>;
   setTags: Dispatch<SetStateAction<Tag[]>>;
   setTemplates: Dispatch<SetStateAction<ExpenseTemplate[]>>;
   setMonthlyBudget: Dispatch<SetStateAction<number | null>>;
   setDefaultCurrency: Dispatch<SetStateAction<string>>;
+  setDefaultSavingsPct: Dispatch<SetStateAction<number | null>>;
 };
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -53,15 +65,33 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [incomes, setIncomes] = useState<Expense[]>([]);
   const [recurringExpenses, setRecurringExpenses] = useState<
     RecurringExpense[]
   >([]);
+  const [recurringIncomes, setRecurringIncomes] = useState<RecurringExpense[]>(
+    [],
+  );
   const [tags, setTags] = useState<Tag[]>([]);
   const [templates, setTemplates] = useState<ExpenseTemplate[]>([]);
   const [monthlyBudget, setMonthlyBudget] = useState<number | null>(null);
   const [defaultCurrency, setDefaultCurrency] = useState<string>('EUR');
+  const [defaultSavingsPct, setDefaultSavingsPct] = useState<number | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // Categories without an explicit 'income' type belong to expenses (back-compat).
+  const expenseCategories = useMemo(
+    () => categories.filter((c) => c.type !== 'income'),
+    [categories],
+  );
+
+  const incomeCategories = useMemo(
+    () => categories.filter((c) => c.type === 'income'),
+    [categories],
+  );
   // Tracks the AbortController for the current in-flight fetchData call so we
   // can cancel proactively when the app is backgrounded on iOS.
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -83,14 +113,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const [
         categoriesData,
         expensesData,
+        incomesData,
         recurringExpensesData,
+        recurringIncomesData,
         budgetData,
         tagsData,
         templatesData,
       ] = await Promise.all([
         dataService.getCategories(controller.signal),
         dataService.getExpenses(controller.signal),
+        dataService.getIncomes(controller.signal),
         dataService.getRecurringExpenses(controller.signal),
+        dataService.getRecurringIncomes(controller.signal),
         dataService.getBudget(controller.signal),
         dataService.getTags(controller.signal),
         dataService.getTemplates(controller.signal),
@@ -99,11 +133,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
       // React 18+ automatically batches these state updates
       setCategories(categoriesData);
       setExpenses(expensesData);
+      setIncomes(incomesData);
       setRecurringExpenses(recurringExpensesData);
+      setRecurringIncomes(recurringIncomesData);
       setTags(tagsData);
       setTemplates(templatesData);
       setMonthlyBudget(budgetData?.monthly_amount ?? null);
       setDefaultCurrency(budgetData?.default_currency ?? 'EUR');
+      setDefaultSavingsPct(budgetData?.default_savings_pct ?? null);
       setIsInitialized(true);
       setIsLoading(false);
     } catch (error) {
@@ -140,6 +177,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const refreshIncomes = useCallback(async () => {
+    try {
+      const incomesData = await dataService.getIncomes();
+      setIncomes(incomesData);
+    } catch (error) {
+      Sentry.captureException(error, { tags: { context: 'refreshIncomes' } });
+      console.error('Failed to refresh incomes:', error);
+    }
+  }, []);
+
   useEffect(() => {
     if (isAuthLoading) {
       return;
@@ -154,11 +201,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
       abortControllerRef.current?.abort();
       setCategories([]);
       setExpenses([]);
+      setIncomes([]);
       setRecurringExpenses([]);
+      setRecurringIncomes([]);
       setTags([]);
       setTemplates([]);
       setMonthlyBudget(null);
       setDefaultCurrency('EUR');
+      setDefaultSavingsPct(null);
       setIsInitialized(false);
       setIsLoading(false);
     }
@@ -189,23 +239,32 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const value = {
     categories,
+    expenseCategories,
+    incomeCategories,
     expenses,
+    incomes,
     recurringExpenses,
+    recurringIncomes,
     tags,
     templates,
     monthlyBudget,
     defaultCurrency,
+    defaultSavingsPct,
     isLoading,
     isInitialized,
     refreshData,
     refreshExpenses,
+    refreshIncomes,
     setCategories,
     setExpenses,
+    setIncomes,
     setRecurringExpenses,
+    setRecurringIncomes,
     setTags,
     setTemplates,
     setMonthlyBudget,
     setDefaultCurrency,
+    setDefaultSavingsPct,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

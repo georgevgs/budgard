@@ -30,6 +30,7 @@ import CategorySparkline from '@/components/analytics/CategorySparkline';
 import { CategoryDrillDown } from '@/components/analytics/CategoryDrillDown';
 import { MonthDrillDown } from '@/components/analytics/MonthDrillDown';
 import MonthlyReportCard from '@/components/analytics/MonthlyReportCard';
+import CashFlowSection from '@/components/analytics/CashFlowSection';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '@/lib/utils';
@@ -41,7 +42,13 @@ import type { Category } from '@/types/Category';
 const BUDGET_LINE_COLOR = '#f59e0b'; // amber-500 — matches bg-amber-500 budget warning
 
 const AnalyticsView = () => {
-  const { expenses, categories, monthlyBudget, defaultCurrency, isLoading } = useData();
+  const {
+    expenses,
+    expenseCategories: categories,
+    monthlyBudget,
+    defaultCurrency,
+    isLoading,
+  } = useData();
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'el' ? el : enUS;
   const currencySymbol = getCurrencySymbol(defaultCurrency);
@@ -235,41 +242,48 @@ const AnalyticsView = () => {
   return (
     <div className="container max-w-4xl mx-auto px-4 pt-4 pb-4 space-y-6">
       {/* Month snapshot */}
-      <div className="rounded-2xl border border-border/50 bg-card p-5">
-        <div className="flex items-start justify-between mb-1">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide">
-            {monthComparison.thisMonthLabel}
-          </p>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 -mt-1 -mr-1 text-muted-foreground hover:text-foreground"
-            onClick={(e) => {
-              (e.currentTarget as HTMLElement).blur();
-              setIsReportOpen(true);
-            }}
-          >
-            <Share2 className="h-3.5 w-3.5" />
-          </Button>
-        </div>
-        <div className="flex items-baseline gap-3 flex-wrap">
-          <p className="text-3xl font-bold tabular-nums tracking-tight">
-            {formatCurrency(animatedThisMonth, defaultCurrency)}
-          </p>
-          {renderMonthChangeBadge(
-            monthComparison.percentChange,
-            monthComparison.delta,
+      <Card>
+        <CardContent className="p-5">
+          <div className="flex items-start justify-between mb-1">
+            <p className="text-sm text-muted-foreground">
+              {monthComparison.thisMonthLabel}
+            </p>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 -mt-1 -mr-1 text-muted-foreground hover:text-foreground"
+              onClick={(e) => {
+                (e.currentTarget as HTMLElement).blur();
+                setIsReportOpen(true);
+              }}
+            >
+              <Share2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+          <div className="flex items-baseline gap-3 flex-wrap">
+            <p className="text-3xl font-bold tabular-nums tracking-tight">
+              {formatCurrency(animatedThisMonth, defaultCurrency)}
+            </p>
+            {renderMonthChangeBadge(
+              monthComparison.percentChange,
+              monthComparison.delta,
+              t,
+            )}
+          </div>
+          {renderLastMonthContext(
+            monthComparison.lastMonthAmount,
+            monthComparison.lastMonthLabel,
             t,
+            defaultCurrency,
           )}
-        </div>
-        {renderLastMonthContext(
-          monthComparison.lastMonthAmount,
-          monthComparison.lastMonthLabel,
-          t,
-          defaultCurrency,
-        )}
-        {renderBudgetProgress(budgetUsedPercent, monthlyBudget, t, defaultCurrency)}
-      </div>
+          {renderBudgetProgress(
+            budgetUsedPercent,
+            monthlyBudget,
+            t,
+            defaultCurrency,
+          )}
+        </CardContent>
+      </Card>
 
       {/* Spending insights */}
       <SpendingInsights
@@ -284,11 +298,14 @@ const AnalyticsView = () => {
       {/* Year overview */}
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-4">
+          <h3 className="text-base font-semibold text-foreground">
+            {t('analytics.yearOverview')}
+          </h3>
           <Select
             value={selectedYear.toString()}
             onValueChange={(value) => setSelectedYear(parseInt(value))}
           >
-            <SelectTrigger className="w-[130px]">
+            <SelectTrigger className="w-[110px] h-8">
               <SelectValue placeholder={t('analytics.selectYear')} />
             </SelectTrigger>
             <SelectContent>
@@ -299,17 +316,18 @@ const AnalyticsView = () => {
               ))}
             </SelectContent>
           </Select>
-          {renderYearSummary(
-            animatedYearTotal,
-            yearlyStats.monthlyAverage,
-            yearlyStats.activeMonths,
-            t,
-            defaultCurrency,
-          )}
         </div>
 
-        <Card className="overflow-hidden border-border/50 rounded-2xl">
-          <CardContent className="p-6">
+        {renderYearSummary(
+          animatedYearTotal,
+          yearlyStats.monthlyAverage,
+          yearlyStats.activeMonths,
+          t,
+          defaultCurrency,
+        )}
+
+        <Card className="overflow-hidden">
+          <CardContent className="p-5">
             <div className="w-full">
               <ResponsiveContainer width="100%" height={280}>
                 <AreaChart
@@ -353,7 +371,7 @@ const AnalyticsView = () => {
                       fill: 'hsl(var(--muted-foreground))',
                       fontSize: 12,
                     }}
-                    tickFormatter={(val: number) => `${Math.round(val)} ${currencySymbol}`}
+                    tickFormatter={(val: number) => `${Math.round(val)}${currencySymbol}`}
                     domain={[0, yAxisMax ?? 'auto']}
                   />
                   <Tooltip
@@ -384,11 +402,14 @@ const AnalyticsView = () => {
         </Card>
       </div>
 
+      {/* Cash flow (income vs expense, year view) */}
+      <CashFlowSection selectedYear={selectedYear} />
+
       {/* Category breakdown */}
-      <div>
-        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">
+      <div className="space-y-3">
+        <h3 className="text-base font-semibold text-foreground">
           {t('analytics.categoryTrends')}
-        </p>
+        </h3>
         {renderCategoryBreakdown(
           yearlyStats.categoryBreakdown,
           yearlyStats.totalSpent,
@@ -477,7 +498,7 @@ const renderMonthChangeBadge = (
 
   if (delta < 0) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400 bg-green-500/10 rounded-full px-2.5 py-0.5">
+      <span className="inline-flex items-center gap-1 text-xs font-medium text-income bg-income/10 rounded-full px-2.5 py-0.5">
         <TrendingDown className="h-3 w-3" />
         {t('analytics.vsLastMonthDown', {
           percent: Math.abs(percentChange).toFixed(1),
@@ -559,14 +580,17 @@ const renderYearSummary = (
   if (activeMonths === 0) return null;
 
   return (
-    <div className="text-right">
-      <span className="text-sm font-semibold tabular-nums">
+    <p className="text-sm text-muted-foreground -mt-1">
+      <span className="font-semibold tabular-nums text-foreground">
         {formatCurrency(totalSpent, currency)}
       </span>
-      <span className="text-xs text-muted-foreground ml-2">
-        {t('analytics.avgPerMonth', { amount: formatCurrency(monthlyAverage, currency) })}
+      <span className="mx-2">·</span>
+      <span>
+        {t('analytics.avgPerMonth', {
+          amount: formatCurrency(monthlyAverage, currency),
+        })}
       </span>
-    </div>
+    </p>
   );
 };
 
@@ -618,8 +642,8 @@ const renderCategoryBreakdown = (
   }
 
   return (
-    <Card className="border-border/50 rounded-2xl">
-      <CardContent className="p-0 divide-y divide-border/50">
+    <Card>
+      <CardContent className="p-0 divide-y divide-border/40">
         {breakdown.map((cat) => {
           const pct = totalSpent > 0 ? (cat.amount / totalSpent) * 100 : 0;
           return (
