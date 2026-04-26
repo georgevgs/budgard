@@ -16,7 +16,6 @@ import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
-import ArrowDownLeft from 'lucide-react/dist/esm/icons/arrow-down-left';
 import PiggyBank from 'lucide-react/dist/esm/icons/piggy-bank';
 import {
   DropdownMenu,
@@ -96,9 +95,8 @@ const IncomeCard = ({ income, onEdit, onDelete, showFullDate }: IncomeCardProps)
 
                 <div className="flex items-center gap-2 shrink-0">
                   <div className="text-right">
-                    <p className="text-lg font-bold tabular-nums tracking-tight flex items-center gap-1 justify-end text-income">
-                      <ArrowDownLeft className="h-3.5 w-3.5" />
-                      <span>+{formatCurrency(income.amount, defaultCurrency)}</span>
+                    <p className="text-lg font-bold tabular-nums tracking-tight text-income">
+                      +{formatCurrency(income.amount, defaultCurrency)}
                     </p>
                     {renderOriginalCurrency(income)}
                   </div>

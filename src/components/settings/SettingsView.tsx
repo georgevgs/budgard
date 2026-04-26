@@ -175,7 +175,7 @@ const SettingsView = () => {
   };
 
   return (
-    <div className="container max-w-lg mx-auto p-4 space-y-8">
+    <div className="container max-w-lg mx-auto p-4 pb-12 space-y-8">
       <h2 className="text-lg font-semibold">{t('settings.title')}</h2>
 
       {/* Profile */}
