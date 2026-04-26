@@ -41,6 +41,7 @@ import { SUPPORTED_CURRENCIES } from '@/lib/currencies';
 import { signOut } from '@/lib/auth';
 import { dataService } from '@/services/dataService';
 import { useToast } from '@/hooks/useToast';
+import { haptics, hapticsSettings } from '@/lib/haptics';
 
 type Theme = 'light' | 'dark' | 'barbie';
 
@@ -63,6 +64,28 @@ const SettingsView = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isCurrencyUpdating, setIsCurrencyUpdating] = useState(false);
   const [dailyReminderHour, setDailyReminderHour] = useState<number | null>(null);
+  const [hapticsEnabled, setHapticsEnabled] = useState<boolean>(() =>
+    hapticsSettings.isEnabled(),
+  );
+  const isHapticsSupported = hapticsSettings.isSupported();
+
+  const handleHapticsToggle = (enabled: boolean) => {
+    hapticsSettings.setEnabled(enabled);
+    setHapticsEnabled(enabled);
+    if (enabled) {
+      haptics.success();
+    }
+  };
+
+  const handleThemeSelect = (next: Theme) => {
+    haptics.selection();
+    setTheme(next);
+  };
+
+  const handleAccentSelect = (key: AccentColorKey) => {
+    haptics.selection();
+    setAccent(key);
+  };
 
   // Fetch daily reminder preference on mount
   useEffect(() => {
@@ -192,12 +215,18 @@ const SettingsView = () => {
             <div>
               <p className="text-sm mb-2">{t('settings.appearance.theme')}</p>
               <div className="flex flex-wrap gap-2">
-                {renderThemeButton('light', theme, setTheme, t)}
-                {renderThemeButton('dark', theme, setTheme, t)}
-                {renderThemeButton('barbie', theme, setTheme, t)}
+                {renderThemeButton('light', theme, handleThemeSelect, t)}
+                {renderThemeButton('dark', theme, handleThemeSelect, t)}
+                {renderThemeButton('barbie', theme, handleThemeSelect, t)}
               </div>
             </div>
-            {renderAccentPicker(theme === 'barbie', accent, setAccent, t)}
+            {renderAccentPicker(theme === 'barbie', accent, handleAccentSelect, t)}
+            {renderHapticsToggle(
+              isHapticsSupported,
+              hapticsEnabled,
+              handleHapticsToggle,
+              t,
+            )}
           </CardContent>
         </Card>
       </section>
@@ -444,6 +473,31 @@ const renderAccentCheck = (isSelected: boolean) => {
 
   return (
     <Check className="absolute inset-0 m-auto h-3.5 w-3.5 text-white drop-shadow-sm" />
+  );
+};
+
+const renderHapticsToggle = (
+  isSupported: boolean,
+  enabled: boolean,
+  onToggle: (enabled: boolean) => void,
+  t: TFunc,
+) => {
+  if (!isSupported) return null;
+
+  return (
+    <div className="flex items-center justify-between border-t border-border/50 pt-4">
+      <div>
+        <p className="text-sm">{t('settings.appearance.haptics')}</p>
+        <p className="text-xs text-muted-foreground">
+          {t('settings.appearance.hapticsDescription')}
+        </p>
+      </div>
+      <Switch
+        checked={enabled}
+        onCheckedChange={onToggle}
+        aria-label={t('settings.appearance.haptics')}
+      />
+    </div>
   );
 };
 

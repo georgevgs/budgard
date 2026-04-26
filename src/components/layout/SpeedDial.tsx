@@ -6,6 +6,7 @@ import Receipt from 'lucide-react/dist/esm/icons/receipt';
 import Tag from 'lucide-react/dist/esm/icons/tag';
 import X from 'lucide-react/dist/esm/icons/x';
 import { cn } from '@/lib/utils';
+import { haptics } from '@/lib/haptics';
 
 type SpeedDialProps = {
   onAddExpense: () => void;
@@ -16,11 +17,15 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
+  const toggleMenu = () => {
+    haptics.light();
+    setIsOpen(!isOpen);
+  };
 
   const closeMenu = useCallback(() => setIsOpen(false), []);
 
   const handleAction = (callback: () => void) => {
+    haptics.light();
     closeMenu();
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();

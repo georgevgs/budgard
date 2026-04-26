@@ -222,7 +222,9 @@
     "appearance": {
       "title": "Appearance",
       "theme": "Theme",
-      "accentColor": "Accent Color"
+      "accentColor": "Accent Color",
+      "haptics": "Haptic feedback",
+      "hapticsDescription": "Subtle vibrations on key actions"
     },
     "language": {
       "title": "Language",
