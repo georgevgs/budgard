@@ -590,7 +590,7 @@
         "title": "Free",
         "subtitle": "Everything to get a real handle on your spending.",
         "cta": "Start free",
-        "feature1": "Track expenses and recurring bills",
+        "feature1": "Track expenses and recurring bills in 23 currencies",
         "feature2": "Monthly budget with category breakdown",
         "feature3": "Custom categories and emoji",
         "feature4": "PWA on iOS, Android, and desktop",
@@ -604,9 +604,8 @@
         "feature2": "Unlimited tags and recurring rules",
         "feature3": "Full analytics history (all-time)",
         "feature4": "CSV export of every transaction",
-        "feature5": "Multi-currency support",
-        "feature6": "Priority email support",
-        "feature7": "Early access to new features"
+        "feature5": "Priority email support",
+        "feature6": "Early access to new features"
       }
     },
     "faq": {
@@ -618,7 +617,7 @@
       },
       "q2": {
         "question": "What's actually different on Pro?",
-        "answer": "Unlimited tags and recurring rules, full all-time analytics, CSV export, multi-currency, priority support, and early access to new features. The full list is in the pricing card above."
+        "answer": "Unlimited tags and recurring rules, full all-time analytics, CSV export, priority support, and early access to new features. The full list is in the pricing card above."
       },
       "q3": {
         "question": "Can I cancel anytime?",
