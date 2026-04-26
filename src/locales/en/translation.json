@@ -487,16 +487,27 @@
     }
   },
   "landing": {
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "faq": "FAQ",
+      "signIn": "Sign in",
+      "getStarted": "Get started"
+    },
     "hero": {
-      "heading1": "Track expenses with",
-      "heading2": "simplicity and ease",
-      "subtitle": "A minimal and intuitive expense tracker that helps you manage your finances without the complexity. Start organizing your spending today.",
-      "getStarted": "Get Started",
-      "addToHomeScreen": "Add to Home Screen",
-      "freeToUse": "Free to use · No credit card required",
-      "previewBudget": "{{percent}}% of {{amount}} budget",
-      "trustedPrivate": "Private",
-      "trustedFree": "Always free"
+      "headingLine1": "Know where",
+      "headingLine2": "every euro goes.",
+      "subtitle": "Budgard turns spending into clarity. Track expenses, set budgets, and see exactly where your money lands — without spreadsheets, ads, or surveillance.",
+      "primaryCta": "Start free",
+      "installCta": "Add to Home Screen",
+      "trust": "Built in the EU · No ads · No tracking · Yours to keep",
+      "previewMonthLabel": "This month",
+      "cat": {
+        "housing": "Housing",
+        "food": "Food",
+        "subs": "Subscriptions",
+        "transport": "Transport"
+      }
     },
     "install": {
       "title": "Add to Home Screen",
@@ -506,24 +517,147 @@
       "step3": "Tap <strong>Add to Home Screen</strong>",
       "step4": "Tap <strong>Add</strong> in the top right corner"
     },
-    "features": {
-      "sectionTag": "Features",
-      "sectionTitle": "Everything you need",
-      "sectionSubtitle": "Simple, powerful tools to take control of your finances",
-      "easyTracking": {
-        "title": "Easy Tracking",
-        "description": "Record your expenses quickly and efficiently",
-        "iconAlt": "Money bag"
+    "analytics": {
+      "eyebrow": "Clarity, monthly",
+      "heading": "See where your money lands.",
+      "body": "Twelve months of spending in one calm chart. No filters to fuss with, no dashboards to build. Just a clean read on where things are going.",
+      "cardLabel": "Last 12 months",
+      "cardSub": "Total spent",
+      "legendStart": "May",
+      "legendEnd": "Apr"
+    },
+    "budget": {
+      "eyebrow": "Stay on plan",
+      "heading": "A budget that breathes with your month.",
+      "body": "Set a monthly cap. Watch your categories fill up in real time. Budgard nudges quietly when you're close — no shame, no spam.",
+      "cardLabel": "Monthly budget",
+      "spent": "Spent so far",
+      "cats": {
+        "housing": "Housing",
+        "food": "Food",
+        "transport": "Transport",
+        "subs": "Subscriptions"
+      }
+    },
+    "categories": {
+      "eyebrow": "Made for the way you spend",
+      "heading": "Categories and tags that fit your life.",
+      "body": "Start with a sensible default set. Bend it however you like. Tag a coffee, a date night, a rent payment — find them all again in seconds.",
+      "point1": "Custom categories with colors and emoji",
+      "point2": "Tags for one-off context — vacation, gift, work",
+      "point3": "Recurring expenses tracked automatically",
+      "tile": {
+        "housing": "Housing",
+        "food": "Food",
+        "transport": "Transport",
+        "subs": "Subscriptions",
+        "health": "Health",
+        "fun": "Fun",
+        "travel": "Travel",
+        "gifts": "Gifts",
+        "pets": "Pets"
+      }
+    },
+    "privacy": {
+      "eyebrow": "Privacy by default",
+      "heading": "Your money, your data, your business.",
+      "body": "Budgard is built quietly. Your finances aren't a product we sell, and they never will be.",
+      "pillar1": {
+        "title": "Hosted in the EU",
+        "body": "Stored on Supabase servers in the European Union. GDPR-compliant by construction."
       },
-      "clearOverview": {
-        "title": "Clear Overview",
-        "description": "See where your money goes at a glance",
-        "iconAlt": "Bar chart"
+      "pillar2": {
+        "title": "No ads, no tracking",
+        "body": "We don't run ads. We don't share your data with brokers. We don't watch you spend."
       },
-      "secureData": {
-        "title": "Secure Data",
-        "description": "Your financial data is always protected",
-        "iconAlt": "Shield"
+      "pillar3": {
+        "title": "Yours to keep",
+        "body": "Export every transaction to CSV. Cancel any time. Your data stays portable."
+      }
+    },
+    "pricing": {
+      "eyebrow": "Pricing",
+      "heading": "Simple plans, fair prices.",
+      "body": "Start free. Upgrade when you want more. No hidden fees, no annual rituals.",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "save": "−17%",
+      "perMonth": "/ month",
+      "billedYearly": "Billed {{price}} once a year",
+      "forever": "forever",
+      "recommended": "Recommended",
+      "free": {
+        "title": "Free",
+        "subtitle": "Everything to get a real handle on your spending.",
+        "cta": "Start free",
+        "feature1": "Track expenses and recurring bills",
+        "feature2": "Monthly budget with category breakdown",
+        "feature3": "Custom categories and emoji",
+        "feature4": "PWA on iOS, Android, and desktop",
+        "feature5": "EU-hosted, encrypted, ad-free"
+      },
+      "pro": {
+        "title": "Pro",
+        "subtitle": "For people who want the full picture.",
+        "cta": "Get Pro",
+        "feature1": "Everything in Free",
+        "feature2": "Unlimited tags and recurring rules",
+        "feature3": "Full analytics history (all-time)",
+        "feature4": "CSV export of every transaction",
+        "feature5": "Multi-currency support",
+        "feature6": "Priority email support",
+        "feature7": "Early access to new features"
+      }
+    },
+    "faq": {
+      "eyebrow": "Questions",
+      "heading": "Things people usually ask.",
+      "q1": {
+        "question": "Is the free plan really free, forever?",
+        "answer": "Yes. The free plan gives you the core of Budgard — expenses, budgets, categories, recurring bills — and we have no plan to take that away. Pro is for people who want more, not a barrier to using the app."
+      },
+      "q2": {
+        "question": "What's actually different on Pro?",
+        "answer": "Unlimited tags and recurring rules, full all-time analytics, CSV export, multi-currency, priority support, and early access to new features. The full list is in the pricing card above."
+      },
+      "q3": {
+        "question": "Can I cancel anytime?",
+        "answer": "Yes. Cancel from settings in two taps. Your data stays — you just drop back to the free plan at the end of your billing period."
+      },
+      "q4": {
+        "question": "Where is my data stored?",
+        "answer": "On Supabase servers in the European Union. Encrypted in transit and at rest. We don't sell, share, or analyze your transactions."
+      },
+      "q5": {
+        "question": "Can I export my data?",
+        "answer": "Yes. CSV export is available on Pro for your full history. Either way, your data is yours and stays portable."
+      },
+      "q6": {
+        "question": "Do you have an iOS or Android app?",
+        "answer": "Budgard is a Progressive Web App. Add it to your Home Screen on iOS or install it on Android — it behaves like a native app, without the App Store middlemen."
+      }
+    },
+    "finalCta": {
+      "heading": "Spend with intention.",
+      "body": "Start free. Add it to your Home Screen. See where your money actually goes — usually within a week.",
+      "cta": "Get Budgard"
+    },
+    "footer": {
+      "tagline": "A calm expense tracker for people who'd rather think in plans than in numbers.",
+      "language": "Language",
+      "builtIn": "Built in the EU",
+      "copyright": "© {{year}} Budgard. All rights reserved.",
+      "product": {
+        "title": "Product",
+        "features": "Features",
+        "pricing": "Pricing",
+        "faq": "FAQ"
+      },
+      "company": {
+        "title": "Company",
+        "privacy": "Privacy",
+        "terms": "Terms",
+        "contact": "Contact"
       }
     }
   }
