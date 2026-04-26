@@ -590,22 +590,24 @@
         "title": "Free",
         "subtitle": "Everything to get a real handle on your spending.",
         "cta": "Start free",
-        "feature1": "Track expenses and recurring bills in 23 currencies",
-        "feature2": "Monthly budget with category breakdown",
-        "feature3": "Custom categories and emoji",
-        "feature4": "PWA on iOS, Android, and desktop",
-        "feature5": "EU-hosted, encrypted, ad-free"
+        "feature1": "Unlimited expenses in 23 currencies",
+        "feature2": "Monthly total budget",
+        "feature3": "Up to 3 recurring expenses",
+        "feature4": "Last 3 months of analytics",
+        "feature5": "PWA on iOS, Android, and desktop",
+        "feature6": "EU-hosted, encrypted, ad-free"
       },
       "pro": {
         "title": "Pro",
         "subtitle": "For people who want the full picture.",
         "cta": "Get Pro",
         "feature1": "Everything in Free",
-        "feature2": "Unlimited tags and recurring rules",
-        "feature3": "Full analytics history (all-time)",
-        "feature4": "CSV export of every transaction",
-        "feature5": "Priority email support",
-        "feature6": "Early access to new features"
+        "feature2": "Per-category budgets",
+        "feature3": "Savings goals",
+        "feature4": "Unlimited recurring expenses & multiple tags per expense",
+        "feature5": "Full analytics history with year-over-year trends",
+        "feature6": "CSV + PDF exports",
+        "feature7": "Early access to new features"
       }
     },
     "faq": {
@@ -613,11 +615,11 @@
       "heading": "Things people usually ask.",
       "q1": {
         "question": "Is the free plan really free, forever?",
-        "answer": "Yes. The free plan gives you the core of Budgard — expenses, budgets, categories, recurring bills — and we have no plan to take that away. Pro is for people who want more, not a barrier to using the app."
+        "answer": "Yes. The free plan gives you the core of Budgard — expenses, a monthly budget, categories, and a few recurring bills — and we have no plan to take that away. Pro is for people who want more, not a barrier to using the app."
       },
       "q2": {
         "question": "What's actually different on Pro?",
-        "answer": "Unlimited tags and recurring rules, full all-time analytics, CSV export, priority support, and early access to new features. The full list is in the pricing card above."
+        "answer": "Per-category budgets, savings goals, unlimited recurring expenses, multiple tags per expense, full all-time analytics with year-over-year trends, and CSV + PDF exports. The full list is in the pricing card above."
       },
       "q3": {
         "question": "Can I cancel anytime?",
@@ -629,7 +631,7 @@
       },
       "q5": {
         "question": "Can I export my data?",
-        "answer": "Yes. CSV export is available on Pro for your full history. Either way, your data is yours and stays portable."
+        "answer": "Yes. CSV and PDF exports are available on Pro for your full history. Either way, your data is yours and stays portable."
       },
       "q6": {
         "question": "Do you have an iOS or Android app?",

@@ -53,15 +53,15 @@ describe('Pricing', () => {
     expect(onGetStarted).toHaveBeenCalledTimes(2);
   });
 
-  it('lists 5 free features and 6 pro features', () => {
+  it('lists 6 free features and 7 pro features', () => {
     render(<Pricing onGetStarted={vi.fn()} />);
 
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 6; i++) {
       expect(
         screen.getByText(`landing.pricing.free.feature${i}`),
       ).toBeInTheDocument();
     }
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= 7; i++) {
       expect(
         screen.getByText(`landing.pricing.pro.feature${i}`),
       ).toBeInTheDocument();
