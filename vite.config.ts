@@ -104,8 +104,8 @@ export default defineConfig({
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
     coverage: {
       provider: 'v8',
-      include: ['src/lib/**', 'src/hooks/**', 'src/services/**'],
-      exclude: ['src/lib/supabase.ts', 'src/lib/i18n.ts', 'src/hooks/usePwaUpdate.ts', 'src/**/*.d.ts'],
+      include: ['src/lib/**', 'src/hooks/**', 'src/services/**', 'src/components/**'],
+      exclude: ['src/lib/supabase.ts', 'src/lib/i18n.ts', 'src/hooks/usePwaUpdate.ts', 'src/**/*.d.ts', 'src/components/ui/**'],
     },
   },
 });
