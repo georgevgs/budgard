@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
+import FolderOpen from 'lucide-react/dist/esm/icons/folder-open';
 import { Button } from '@/components/ui/button';
 import {
   DialogTitle,
@@ -25,10 +26,10 @@ import type { Category } from '@/types/Category';
 import CategoryForm from '@/components/categories/CategoryForm';
 
 type View = { type: 'list' } | { type: 'form'; category?: Category };
+type CategoryType = 'expense' | 'income';
 
 type CategoryManagerProps = {
-  // Filters the list and the type of newly created categories. Defaults to 'expense'.
-  categoryType?: 'expense' | 'income';
+  categoryType?: CategoryType;
 };
 
 export const CategoryManager = ({
@@ -40,8 +41,11 @@ export const CategoryManager = ({
   const [view, setView] = useState<View>({ type: 'list' });
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
 
-  const categories =
-    categoryType === 'income' ? incomeCategories : expenseCategories;
+  const categories = pickCategories(
+    categoryType,
+    expenseCategories,
+    incomeCategories,
+  );
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -67,7 +71,6 @@ export const CategoryManager = ({
 
   return (
     <>
-      {/* Mobile drag handle */}
       <div
         className="flex justify-center pt-3 pb-2 sm:hidden shrink-0"
         data-drag-handle
@@ -75,31 +78,30 @@ export const CategoryManager = ({
         <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
       </div>
 
-      {/* Header — fixed */}
       <div className="px-4 sm:px-6 pt-2 sm:pt-4 pb-2 shrink-0">
         <DialogHeader data-draggable-area>
           <DialogTitle className="text-xl">
-            {categoryType === 'income'
-              ? t('income.manageSources')
-              : t('categories.title')}
+            {renderManagerTitle(categoryType, t)}
           </DialogTitle>
           <DialogDescription>
-            {categoryType === 'income'
-              ? t('income.manageDescription')
-              : t('categories.manageDescription')}
+            {renderManagerDescription(categoryType, t)}
           </DialogDescription>
         </DialogHeader>
       </div>
 
-      {/* Scrollable list */}
       <div
         className="overflow-y-auto flex-1 min-h-0 px-4 sm:px-6 overscroll-contain"
         style={{ touchAction: 'pan-y' }}
       >
-        {renderCategoryList(categories, t, setView, setDeleteTarget)}
+        {renderCategoryList(
+          categories,
+          categoryType,
+          t,
+          setView,
+          setDeleteTarget,
+        )}
       </div>
 
-      {/* Footer — fixed */}
       <div className="px-4 sm:px-6 py-3 shrink-0 border-t border-border/50">
         <Button
           variant="outline"
@@ -108,9 +110,7 @@ export const CategoryManager = ({
           onClick={() => setView({ type: 'form' })}
         >
           <Plus className="h-4 w-4 mr-2" />
-          {categoryType === 'income'
-            ? t('income.addSource')
-            : t('categories.addCategory')}
+          {renderAddButtonLabel(categoryType, t)}
         </Button>
       </div>
 
@@ -151,22 +151,47 @@ export const CategoryManager = ({
   );
 };
 
-// ─── Helper render functions ─────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
+const pickCategories = (
+  type: CategoryType,
+  expenseCategories: Category[],
+  incomeCategories: Category[],
+) => {
+  if (type === 'income') return incomeCategories;
+
+  return expenseCategories;
+};
+
+const renderManagerTitle = (type: CategoryType, t: TFunc) => {
+  if (type === 'income') return t('income.manageSources');
+
+  return t('categories.title');
+};
+
+const renderManagerDescription = (type: CategoryType, t: TFunc) => {
+  if (type === 'income') return t('income.manageDescription');
+
+  return t('categories.manageDescription');
+};
+
+const renderAddButtonLabel = (type: CategoryType, t: TFunc) => {
+  if (type === 'income') return t('income.addSource');
+
+  return t('categories.addCategory');
+};
+
 const renderCategoryList = (
   categories: Category[],
+  type: CategoryType,
   t: TFunc,
   setView: (view: View) => void,
   setDeleteTarget: (category: Category) => void,
 ) => {
   if (categories.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground text-center py-6">
-        {t('categories.noCategories')}
-      </p>
-    );
+    return renderEmptyState(type, t);
   }
 
   return (
@@ -202,6 +227,33 @@ const renderCategoryList = (
       ))}
     </div>
   );
+};
+
+const renderEmptyState = (type: CategoryType, t: TFunc) => {
+  return (
+    <div className="flex flex-col items-center text-center py-12 px-4">
+      <FolderOpen
+        className="h-10 w-10 text-muted-foreground/40 mb-3"
+        aria-hidden="true"
+      />
+      <p className="text-sm font-medium">{renderEmptyTitle(type, t)}</p>
+      <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
+        {renderEmptyHelp(type, t)}
+      </p>
+    </div>
+  );
+};
+
+const renderEmptyTitle = (type: CategoryType, t: TFunc) => {
+  if (type === 'income') return t('income.noSources');
+
+  return t('categories.noCategories');
+};
+
+const renderEmptyHelp = (type: CategoryType, t: TFunc) => {
+  if (type === 'income') return t('income.emptySourcesHelp');
+
+  return t('categories.emptyHelp');
 };
 
 const renderCategoryIndicator = (category: Category) => {

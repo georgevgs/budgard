@@ -214,15 +214,16 @@ const IncomeList = () => {
       {renderSavingsNudge(nudgeIncome, handleNudgeClose)}
 
       {/* FAB */}
-      <Button
-        size="icon"
-        onClick={handleAddClick}
-        className="fixed bottom-24 right-4 z-50 h-14 w-14 rounded-full shadow-lg shadow-income/30 pb-safe-b bg-income text-income-foreground hover:bg-income/90"
-        aria-label={t('income.addIncome')}
-        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
+      <div className="fixed bottom-24 right-4 z-50 pb-safe-b">
+        <Button
+          size="icon"
+          onClick={handleAddClick}
+          className="h-14 w-14 rounded-full shadow-lg shadow-income/30 bg-income text-income-foreground hover:bg-income/90"
+          aria-label={t('income.addIncome')}
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      </div>
     </div>
   );
 };

@@ -11,7 +11,6 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
-import Check from 'lucide-react/dist/esm/icons/check';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import {
   Form,
@@ -21,68 +20,19 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { cn, extractEmoji } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { useData } from '@/contexts/DataContext';
 import { categorySchema, type CategoryFormData } from '@/lib/validations';
 import type { Category } from '@/types/Category';
-
-// Common expense-related emojis for quick category identification
-const CATEGORY_ICONS = [
-  '🍔', '🛒', '🏠', '🚗', '🎬', '💊', '👕', '💡',
-  '🎮', '✈️', '📱', '🎓', '💇', '🐾', '🎁', '☕',
-  '🍕', '🍺', '🏋️', '💼', '🎵', '📚', '🧹', '👶',
-] as const;
-
-// Tailwind 500-weight palette — vivid enough to pop at small sizes,
-// refined enough to look modern across light and dark themes.
-const CATEGORY_COLORS = [
-  '#f43f5e', // rose
-  '#f97316', // orange
-  '#f59e0b', // amber
-  '#eab308', // yellow
-  '#84cc16', // lime
-  '#22c55e', // green
-  '#10b981', // emerald
-  '#14b8a6', // teal
-  '#06b6d4', // cyan
-  '#0ea5e9', // sky
-  '#3b82f6', // blue
-  '#6366f1', // indigo
-  '#8b5cf6', // violet
-  '#a855f7', // purple
-  '#d946ef', // fuchsia
-  '#ec4899', // pink
-  '#f472b6', // pink-light
-  '#fb923c', // orange-light
-  '#64748b', // slate
-  '#78716c', // stone
-  '#a8a29e', // warm-gray
-  '#9ca3af', // cool-gray
-  '#1e293b', // dark-navy
-  '#334155', // slate-dark
-] as const;
+import CategoryColorPicker from '@/components/categories/CategoryColorPicker';
+import CategoryIconPicker from '@/components/categories/CategoryIconPicker';
+import CategoryKindSelector, {
+  type CategoryKind,
+} from '@/components/categories/CategoryKindSelector';
 
 const DEFAULT_CATEGORY_COLOR = '#6366f1';
-
-const KIND_OPTIONS = [
-  {
-    value: 'need' as const,
-    targetPct: 50,
-    activeClasses: 'bg-blue-500/15 text-blue-700 dark:text-blue-300',
-  },
-  {
-    value: 'want' as const,
-    targetPct: 30,
-    activeClasses: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
-  },
-  {
-    value: 'savings' as const,
-    targetPct: 20,
-    activeClasses: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
-  },
-];
+const DEFAULT_INCOME_COLOR = '#10b981';
 
 type Props = {
   category?: Category;
@@ -104,65 +54,34 @@ const CategoryForm = ({
   const { handleCategoryAdd, handleCategoryUpdate } = useDataOperations();
   const { isInitialized } = useData();
 
-  const isEditing = !!category;
-
-  const isIncomeCategory =
-    category?.type === 'income' || (!category && categoryType === 'income');
-
-  const editableKind =
-    category?.kind === 'need' ||
-    category?.kind === 'want' ||
-    category?.kind === 'savings'
-      ? category.kind
-      : undefined;
+  const isEditing = Boolean(category);
+  const isIncomeCategory = getIsIncomeCategory(category, categoryType);
+  const editableKind = getEditableKind(category);
+  const defaultColor = getDefaultColor(isIncomeCategory);
 
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: category?.name ?? '',
-      color: category?.color ?? DEFAULT_CATEGORY_COLOR,
+      color: category?.color ?? defaultColor,
       icon: category?.icon ?? undefined,
       kind: editableKind,
     },
   });
 
   const handleSubmit = async (values: CategoryFormData) => {
-    if (!canSubmitForm(session, isInitialized)) {
-      return;
-    }
-
-    if (!session) {
-      return;
-    }
+    if (!canSubmitForm(session, isInitialized)) return;
+    if (!session) return;
 
     try {
-      if (isEditing) {
-        // For income categories: don't touch kind (it's 'income' by convention).
-        // For expense categories: persist whatever the user picked (or null).
-        const updatePayload = isIncomeCategory
-          ? {
-              name: values.name,
-              color: values.color,
-              icon: values.icon ?? null,
-            }
-          : {
-              name: values.name,
-              color: values.color,
-              icon: values.icon ?? null,
-              kind: values.kind ?? null,
-            };
-
-        await handleCategoryUpdate(category.id, updatePayload);
-      } else {
-        await handleCategoryAdd({
-          name: values.name,
-          color: values.color,
-          icon: values.icon ?? null,
-          user_id: session.user.id,
-          type: isIncomeCategory ? 'income' : 'expense',
-          kind: isIncomeCategory ? 'income' : (values.kind ?? null),
-        });
-      }
+      await persistCategory(
+        category,
+        values,
+        isIncomeCategory,
+        session.user.id,
+        handleCategoryAdd,
+        handleCategoryUpdate,
+      );
       onClose();
     } catch {
       // Hook already shows error toast via useDataOperations
@@ -175,15 +94,16 @@ const CategoryForm = ({
   );
 
   return (
-    <div className="flex flex-col max-h-full">
-      {/* Mobile drag handle */}
-      <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
+    <div className="flex flex-col flex-1 min-h-0">
+      <div
+        className="flex justify-center pt-3 pb-2 sm:hidden shrink-0"
+        data-drag-handle
+      >
         <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
       </div>
 
-      {/* Scrollable content */}
       <div
-        className="overflow-y-auto flex-1 px-4 sm:px-6 py-4 sm:py-2 overscroll-contain"
+        className="overflow-y-auto flex-1 min-h-0 px-4 sm:px-6 py-4 sm:py-2 overscroll-contain"
         style={{ touchAction: 'pan-y' }}
       >
         <DialogHeader className="pb-4" data-draggable-area>
@@ -200,15 +120,11 @@ const CategoryForm = ({
               <span className="sr-only">{t('common.cancel')}</span>
             </Button>
             <DialogTitle className="text-xl">
-              {isEditing
-                ? t('categories.editCategory')
-                : t('categories.addCategory')}
+              {renderFormTitle(isEditing, isIncomeCategory, t)}
             </DialogTitle>
           </div>
           <DialogDescription>
-            {isEditing
-              ? t('categories.editDescription')
-              : t('categories.addDescription')}
+            {renderFormDescription(isEditing, isIncomeCategory, t)}
           </DialogDescription>
         </DialogHeader>
 
@@ -224,10 +140,10 @@ const CategoryForm = ({
                 <FormItem>
                   <FormControl>
                     <Input
-                      placeholder={t('categories.categoryName')}
+                      placeholder={renderNamePlaceholder(isIncomeCategory, t)}
                       {...field}
                       disabled={isDisabled}
-                      aria-label={t('categories.categoryName')}
+                      aria-label={renderNamePlaceholder(isIncomeCategory, t)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -244,49 +160,12 @@ const CategoryForm = ({
                     {t('categories.color')}
                   </FormLabel>
                   <FormControl>
-                    <div className="grid grid-cols-8 gap-2 pt-1">
-                      {CATEGORY_COLORS.map((color) => (
-                        <button
-                          key={color}
-                          type="button"
-                          onClick={() => field.onChange(color)}
-                          disabled={isDisabled}
-                          aria-label={`Select color ${color}`}
-                          className={cn(
-                            'w-9 h-9 rounded-full transition-all duration-150 flex items-center justify-center',
-                            field.value === color
-                              ? 'ring-2 ring-offset-2 ring-foreground scale-110'
-                              : 'opacity-70 hover:opacity-100 hover:scale-105',
-                          )}
-                          style={{ backgroundColor: color }}
-                        >
-                          {renderSwatchCheck(field.value === color)}
-                        </button>
-                      ))}
-                    </div>
-                  </FormControl>
-
-                  {/* Custom color input */}
-                  <div className="flex items-center gap-2 pt-2">
-                    <div
-                      className="w-5 h-5 rounded-full shrink-0 transition-colors duration-150"
-                      style={{ backgroundColor: field.value }}
-                    />
-                    <Input
+                    <CategoryColorPicker
                       value={field.value}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value.match(/^#[0-9A-Fa-f]{0,6}$/)) {
-                          field.onChange(value);
-                        }
-                      }}
+                      onChange={field.onChange}
                       disabled={isDisabled}
-                      className="h-7 w-24 text-xs font-mono tabular-nums px-2"
-                      maxLength={7}
-                      aria-label={t('categories.customColor')}
                     />
-                  </div>
-
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -301,63 +180,18 @@ const CategoryForm = ({
                     {t('categories.icon')}
                   </FormLabel>
                   <FormControl>
-                    <div className="grid grid-cols-8 gap-2 pt-1">
-                      {CATEGORY_ICONS.map((emoji) => (
-                        <button
-                          key={emoji}
-                          type="button"
-                          onClick={() =>
-                            field.onChange(
-                              field.value === emoji ? undefined : emoji,
-                            )
-                          }
-                          disabled={isDisabled}
-                          aria-label={`Select icon ${emoji}`}
-                          className={cn(
-                            'w-9 h-9 rounded-full transition-all duration-150 flex items-center justify-center text-lg',
-                            field.value === emoji
-                              ? 'ring-2 ring-offset-2 ring-foreground bg-accent scale-110'
-                              : 'opacity-70 hover:opacity-100 hover:scale-105 hover:bg-accent/50',
-                          )}
-                        >
-                          {emoji}
-                        </button>
-                      ))}
-                    </div>
-                  </FormControl>
-                  {/* Custom emoji input — outside FormControl to avoid Radix event issues */}
-                  <div className="flex items-center gap-2 pt-1">
-                    <Input
-                      value={field.value ?? ''}
-                      onChange={(e) => {
-                        const raw = e.target.value;
-                        const emoji = extractEmoji(raw);
-                        field.onChange(emoji || undefined);
-                      }}
+                    <CategoryIconPicker
+                      value={field.value}
+                      onChange={field.onChange}
                       disabled={isDisabled}
-                      placeholder={t('categories.customIcon')}
-                      className="h-7 w-32 text-sm px-2"
-                      maxLength={4}
-                      aria-label={t('categories.customIcon')}
                     />
-                    {renderClearIconButton(
-                      field.value,
-                      () => field.onChange(undefined),
-                      isDisabled,
-                      t,
-                    )}
-                  </div>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {renderKindSelector(
-              isIncomeCategory,
-              isDisabled,
-              form.control,
-              t,
-            )}
+            {renderKindField(isIncomeCategory, isDisabled, form)}
 
             <div className="flex gap-3 justify-end pt-2 pb-2">
               <Button
@@ -368,7 +202,11 @@ const CategoryForm = ({
               >
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" disabled={isDisabled}>
+              <Button
+                type="submit"
+                disabled={isDisabled}
+                className={getSubmitButtonClass(isIncomeCategory)}
+              >
                 {getSubmitButtonText(form.formState.isSubmitting, isEditing, t)}
               </Button>
             </div>
@@ -381,63 +219,99 @@ const CategoryForm = ({
 
 export default CategoryForm;
 
-// ─── Helper functions ────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
 
-type FormControlType = ReturnType<typeof useForm<CategoryFormData>>['control'];
+type CategoryFormReturn = ReturnType<typeof useForm<CategoryFormData>>;
 
-const renderKindSelector = (
+const getIsIncomeCategory = (
+  category: Category | undefined,
+  categoryType: 'expense' | 'income',
+): boolean => {
+  if (category?.type === 'income') return true;
+  if (!category && categoryType === 'income') return true;
+
+  return false;
+};
+
+const getEditableKind = (category: Category | undefined): CategoryKind | undefined => {
+  if (category?.kind === 'need') return 'need';
+  if (category?.kind === 'want') return 'want';
+  if (category?.kind === 'savings') return 'savings';
+
+  return undefined;
+};
+
+const getDefaultColor = (isIncomeCategory: boolean) => {
+  if (isIncomeCategory) return DEFAULT_INCOME_COLOR;
+
+  return DEFAULT_CATEGORY_COLOR;
+};
+
+const getSubmitButtonClass = (isIncomeCategory: boolean) => {
+  if (isIncomeCategory) {
+    return 'bg-income text-income-foreground hover:bg-income/90';
+  }
+
+  return '';
+};
+
+const renderFormTitle = (
+  isEditing: boolean,
+  isIncomeCategory: boolean,
+  t: TranslateFunction,
+) => {
+  if (isIncomeCategory && isEditing) return t('income.editSource');
+  if (isIncomeCategory) return t('income.addSource');
+  if (isEditing) return t('categories.editCategory');
+
+  return t('categories.addCategory');
+};
+
+const renderFormDescription = (
+  isEditing: boolean,
+  isIncomeCategory: boolean,
+  t: TranslateFunction,
+) => {
+  if (isIncomeCategory && isEditing) return t('income.editSourceDescription');
+  if (isIncomeCategory) return t('income.addSourceDescription');
+  if (isEditing) return t('categories.editDescription');
+
+  return t('categories.addDescription');
+};
+
+const renderNamePlaceholder = (
+  isIncomeCategory: boolean,
+  t: TranslateFunction,
+) => {
+  if (isIncomeCategory) return t('income.sourceName');
+
+  return t('categories.categoryName');
+};
+
+const renderKindField = (
   isIncomeCategory: boolean,
   isDisabled: boolean,
-  control: FormControlType,
-  t: TranslateFunction,
+  form: CategoryFormReturn,
 ) => {
   if (isIncomeCategory) return null;
 
   return (
     <FormField
-      control={control}
+      control={form.control}
       name="kind"
       render={({ field }) => (
         <FormItem>
-          <FormLabel className="text-sm font-medium">
-            {t('categories.kind.label')}
-          </FormLabel>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {t('categories.kind.helpText')}
-          </p>
           <FormControl>
-            <div className="grid grid-cols-3 gap-2 pt-1">
-              {KIND_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() =>
-                    field.onChange(
-                      field.value === option.value ? undefined : option.value,
-                    )
-                  }
-                  disabled={isDisabled}
-                  className={cn(
-                    'rounded-xl py-2.5 px-3 border text-sm transition-colors',
-                    field.value === option.value
-                      ? `${option.activeClasses} border-transparent`
-                      : 'border-border/60 text-muted-foreground hover:bg-accent/50',
-                  )}
-                >
-                  <div className="font-medium">
-                    {t(`categories.kind.${option.value}`)}
-                  </div>
-                  <div className="text-xs opacity-80 mt-0.5">
-                    {option.targetPct}%
-                  </div>
-                </button>
-              ))}
-            </div>
+            <CategoryKindSelector
+              value={field.value as CategoryKind | undefined}
+              onChange={field.onChange}
+              disabled={isDisabled}
+            />
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -446,45 +320,12 @@ const renderKindSelector = (
   );
 };
 
-const renderSwatchCheck = (isSelected: boolean) => {
-  if (!isSelected) return null;
-
-  return <Check className="h-3.5 w-3.5 text-white drop-shadow" />;
-};
-
-const renderClearIconButton = (
-  value: string | undefined,
-  onClear: () => void,
-  isDisabled: boolean,
-  t: TranslateFunction,
-) => {
-  if (!value) return null;
-
-  return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      className="h-7 px-2 text-xs text-muted-foreground"
-      onClick={onClear}
-      disabled={isDisabled}
-    >
-      {t('common.clear')}
-    </Button>
-  );
-};
-
 const canSubmitForm = (
   session: Session | null,
   isInitialized: boolean,
 ): boolean => {
-  if (!session?.user?.id) {
-    return false;
-  }
-
-  if (!isInitialized) {
-    return false;
-  }
+  if (!session?.user?.id) return false;
+  if (!isInitialized) return false;
 
   return true;
 };
@@ -493,23 +334,16 @@ const getIsFormDisabled = (
   isSubmitting: boolean,
   isInitialized: boolean,
 ): boolean => {
-  if (isSubmitting) {
-    return true;
-  }
-
-  if (!isInitialized) {
-    return true;
-  }
+  if (isSubmitting) return true;
+  if (!isInitialized) return true;
 
   return false;
 };
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
 const getSubmitButtonText = (
   isSubmitting: boolean,
   isEditing: boolean,
-  t: TFunc,
+  t: TranslateFunction,
 ): ReactNode => {
   if (isSubmitting) {
     return (
@@ -520,9 +354,85 @@ const getSubmitButtonText = (
     );
   }
 
-  if (isEditing) {
-    return t('common.update');
-  }
+  if (isEditing) return t('common.update');
 
   return t('common.add');
+};
+
+type CategoryAddPayload = {
+  name: string;
+  color: string;
+  icon: string | null;
+  user_id: string;
+  type: 'expense' | 'income';
+  kind: CategoryKind | 'income' | null;
+};
+
+type CategoryUpdatePayload = {
+  name: string;
+  color: string;
+  icon: string | null;
+  kind?: CategoryKind | null;
+};
+
+const persistCategory = async (
+  existing: Category | undefined,
+  values: CategoryFormData,
+  isIncomeCategory: boolean,
+  userId: string,
+  handleAdd: (payload: CategoryAddPayload) => Promise<unknown>,
+  handleUpdate: (id: string, payload: CategoryUpdatePayload) => Promise<unknown>,
+) => {
+  if (existing) {
+    await handleUpdate(existing.id, buildUpdatePayload(values, isIncomeCategory));
+    return;
+  }
+
+  await handleAdd(buildAddPayload(values, isIncomeCategory, userId));
+};
+
+const buildAddPayload = (
+  values: CategoryFormData,
+  isIncomeCategory: boolean,
+  userId: string,
+): CategoryAddPayload => {
+  if (isIncomeCategory) {
+    return {
+      name: values.name,
+      color: values.color,
+      icon: values.icon ?? null,
+      user_id: userId,
+      type: 'income',
+      kind: 'income',
+    };
+  }
+
+  return {
+    name: values.name,
+    color: values.color,
+    icon: values.icon ?? null,
+    user_id: userId,
+    type: 'expense',
+    kind: values.kind ?? null,
+  };
+};
+
+const buildUpdatePayload = (
+  values: CategoryFormData,
+  isIncomeCategory: boolean,
+): CategoryUpdatePayload => {
+  if (isIncomeCategory) {
+    return {
+      name: values.name,
+      color: values.color,
+      icon: values.icon ?? null,
+    };
+  }
+
+  return {
+    name: values.name,
+    color: values.color,
+    icon: values.icon ?? null,
+    kind: values.kind ?? null,
+  };
 };

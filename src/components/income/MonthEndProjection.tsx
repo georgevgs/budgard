@@ -133,7 +133,7 @@ export default MonthEndProjection;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const monthlyEquivalent = (r: RecurringExpense): number => {
+export const monthlyEquivalent = (r: RecurringExpense): number => {
   switch (r.frequency) {
     case 'weekly':
       return r.amount * WEEKS_PER_MONTH;
@@ -149,7 +149,7 @@ const monthlyEquivalent = (r: RecurringExpense): number => {
 };
 
 // Use recurring as the floor; extrapolate actuals only when we have meaningful signal.
-const projectAmount = (
+export const projectAmount = (
   actual: number,
   progress: number,
   recurringMonthly: number,

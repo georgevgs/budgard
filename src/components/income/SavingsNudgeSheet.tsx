@@ -43,8 +43,7 @@ const SavingsNudgeSheet = ({ income, open, onClose }: Props) => {
     }
   }, [open, defaultSavingsPct]);
 
-  const allocation =
-    pct > 0 ? Math.round(((income.amount * pct) / 100) * 100) / 100 : 0;
+  const allocation = calculateAllocation(income.amount, pct);
 
   const handleAllocate = async () => {
     setIsSaving(true);
@@ -200,6 +199,12 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+export const calculateAllocation = (amount: number, pct: number): number => {
+  if (pct <= 0) return 0;
+
+  return Math.round(((amount * pct) / 100) * 100) / 100;
+};
 
 const renderAllocateLabel = (isSaving: boolean, t: TranslateFunction) => {
   if (isSaving) return t('common.saving');

@@ -479,7 +479,11 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
               <Button type="button" variant="outline" onClick={() => onClose()}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-income text-income-foreground hover:bg-income/90"
+              >
                 {renderSaveButtonLabel(isSubmitting, t)}
               </Button>
             </div>
