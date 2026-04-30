@@ -73,7 +73,14 @@ const DialogContent = React.forwardRef<
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
-          onOpenAutoFocus={(e) => e.preventDefault()}
+          onOpenAutoFocus={(e) => {
+            // Don't auto-focus the first input (would pop the mobile keyboard),
+            // but still move focus into the dialog so a11y libs don't trip the
+            // "aria-hidden on focused element's ancestor" warning when Radix
+            // marks the rest of the page aria-hidden.
+            e.preventDefault();
+            (e.currentTarget as HTMLElement).focus();
+          }}
           className={cn(
             'fixed z-50 grid w-full gap-4 border border-border/40 bg-card shadow-lg duration-200',
             // Mobile: drawer from bottom with rounded top corners
