@@ -397,4 +397,59 @@ describe('dataService', () => {
       message: 'not authenticated',
     });
   });
+
+  // --- deleteAccount ---
+  it('calls the delete-account edge function with the auth token', async () => {
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: { access_token: 'jwt-abc' } },
+    } as never);
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ success: true }),
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const result = await dataService.deleteAccount();
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/functions/v1/delete-account'),
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          Authorization: 'Bearer jwt-abc',
+        }),
+      }),
+    );
+    expect(result).toEqual({ success: true });
+
+    vi.unstubAllGlobals();
+  });
+
+  it('throws when deleteAccount called without a session', async () => {
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: null },
+    } as never);
+
+    await expect(dataService.deleteAccount()).rejects.toThrow(
+      'Not authenticated',
+    );
+  });
+
+  it('surfaces the edge function error message on failure', async () => {
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: { access_token: 'tok' } },
+    } as never);
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        json: () => Promise.resolve({ error: 'Unauthorized' }),
+      }),
+    );
+
+    await expect(dataService.deleteAccount()).rejects.toThrow('Unauthorized');
+    vi.unstubAllGlobals();
+  });
 });

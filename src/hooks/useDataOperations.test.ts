@@ -52,6 +52,7 @@ const mockCreateRecurring = vi.fn();
 const mockUpdateRecurring = vi.fn();
 const mockDeleteRecurring = vi.fn();
 const mockToggleRecurring = vi.fn();
+const mockDeleteAccount = vi.fn();
 
 vi.mock('@/services/dataService', () => ({
   dataService: {
@@ -70,7 +71,13 @@ vi.mock('@/services/dataService', () => ({
       mockDeleteRecurring(...args),
     toggleRecurringExpense: (...args: unknown[]) =>
       mockToggleRecurring(...args),
+    deleteAccount: (...args: unknown[]) => mockDeleteAccount(...args),
   },
+}));
+
+const mockSignOut = vi.fn();
+vi.mock('@/lib/auth', () => ({
+  signOut: (...args: unknown[]) => mockSignOut(...args),
 }));
 
 vi.mock('@/services/receiptService', () => ({
@@ -406,5 +413,39 @@ describe('useDataOperations', () => {
 
     // Optimistic + rollback
     expect(mockSetRecurringExpenses).toHaveBeenCalledTimes(2);
+  });
+
+  // --- Delete Account ---
+  it('signs out after a successful account delete so the route guard redirects', async () => {
+    mockDeleteAccount.mockResolvedValue({ success: true });
+    mockSignOut.mockResolvedValue({ error: null });
+
+    const { result } = renderHook(() => useDataOperations());
+
+    await act(async () => {
+      await result.current.handleDeleteAccount();
+    });
+
+    expect(mockDeleteAccount).toHaveBeenCalledOnce();
+    expect(mockSignOut).toHaveBeenCalledOnce();
+    // signOut must run after deleteAccount, otherwise the JWT would be cleared
+    // before the edge function got to use it.
+    const deleteOrder = mockDeleteAccount.mock.invocationCallOrder[0];
+    const signOutOrder = mockSignOut.mock.invocationCallOrder[0];
+    expect(signOutOrder).toBeGreaterThan(deleteOrder);
+  });
+
+  it('does not sign out if account deletion fails', async () => {
+    mockDeleteAccount.mockRejectedValue(new Error('Failed to delete account'));
+
+    const { result } = renderHook(() => useDataOperations());
+
+    await expect(
+      act(async () => {
+        await result.current.handleDeleteAccount();
+      }),
+    ).rejects.toThrow('Failed to delete account');
+
+    expect(mockSignOut).not.toHaveBeenCalled();
   });
 });

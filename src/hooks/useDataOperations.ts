@@ -11,6 +11,7 @@ import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 import { uploadReceipt, deleteReceipt } from '@/services/receiptService';
 import { haptics } from '@/lib/haptics';
 import { offlineQueue } from '@/lib/offlineQueue';
+import { signOut } from '@/lib/auth';
 
 type BulkExpenseRow = {
   date: string;
@@ -539,6 +540,10 @@ export function useDataOperations() {
   const handleDeleteAccount = useCallback(async () => {
     try {
       await dataService.deleteAccount();
+      // Drop the (now-invalid) JWT so the route guard redirects to the landing
+      // page. The auth user is already gone, so the server-side logout call
+      // will 401 — supabase-js still clears local storage in that case.
+      await signOut();
     } catch (error) {
       haptics.error();
       Sentry.captureException(error, { tags: { operation: 'deleteAccount' } });
