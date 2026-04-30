@@ -64,7 +64,9 @@ Deno.serve(async (req) => {
       JSON.stringify({ success: true }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
-  } catch {
+  } catch (err) {
+    console.error('delete-account error:', err);
+
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },

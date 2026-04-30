@@ -1,10 +1,37 @@
 /// <reference types="vitest/config" />
 import path from "path";
+import { readdir, rm } from "node:fs/promises";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig, type PluginOption } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import pkg from "./package.json" with { type: "json" };
+
+// Belt-and-braces: Sentry's plugin deletes maps after upload, but only when
+// SENTRY_AUTH_TOKEN is set. A deploy without the token (e.g. preview build)
+// would otherwise ship .map files alongside the JS bundle, leaking source.
+const stripSourceMaps = (): PluginOption => ({
+  name: "strip-source-maps",
+  apply: "build",
+  enforce: "post",
+  closeBundle: async () => {
+    const dist = path.resolve(__dirname, "dist");
+
+    const walk = async (dir: string): Promise<void> => {
+      const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
+      for (const entry of entries) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          await walk(full);
+        } else if (entry.name.endsWith(".map")) {
+          await rm(full, { force: true });
+        }
+      }
+    };
+
+    await walk(dist);
+  },
+});
 
 export default defineConfig({
   define: {
@@ -50,6 +77,7 @@ export default defineConfig({
       // Only upload during CI/CD builds (skip if no auth token)
       disable: !process.env.SENTRY_AUTH_TOKEN,
     }),
+    stripSourceMaps(),
   ],
   resolve: {
     alias: {

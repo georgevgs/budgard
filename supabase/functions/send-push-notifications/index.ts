@@ -39,6 +39,16 @@ type NotificationPayload = {
   };
 };
 
+const constantTimeEqual = (a: string, b: string): boolean => {
+  if (a.length !== b.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i++) {
+    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+
+  return mismatch === 0;
+};
+
 const formatAmount = (amount: number, currency: string): string => {
   try {
     return new Intl.NumberFormat('en', {
@@ -58,10 +68,10 @@ Deno.serve(async (req) => {
 
   try {
     // Authenticate via cron secret (not user JWT — called by pg_cron)
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get('Authorization') ?? '';
     const cronSecret = Deno.env.get('CRON_SECRET');
 
-    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+    if (!cronSecret || !constantTimeEqual(authHeader, `Bearer ${cronSecret}`)) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         {
