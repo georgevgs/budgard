@@ -42,10 +42,31 @@ Deno.serve(async (req) => {
     // Use the service role client to delete user data and auth record
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Delete receipt images from storage. Account deletion via the auth
+    // cascade only removes DB rows, not storage objects, so without this the
+    // user's images would persist indefinitely (GDPR right-to-erasure).
+    // Paginated in case a user has more than the default 100-entry page.
+    const STORAGE_PAGE_SIZE = 1000;
+    let storagePageOffset = 0;
+    while (true) {
+      const { data: files } = await adminClient.storage
+        .from('receipts')
+        .list(user.id, { limit: STORAGE_PAGE_SIZE, offset: storagePageOffset });
+      if (!files || files.length === 0) break;
+
+      await adminClient.storage
+        .from('receipts')
+        .remove(files.map((f) => `${user.id}/${f.name}`));
+
+      if (files.length < STORAGE_PAGE_SIZE) break;
+      storagePageOffset += STORAGE_PAGE_SIZE;
+    }
+
     // Delete user data from all tables (cascading FKs handle most of this)
     // Order: child tables first, then parent tables
     await adminClient.from('expenses').delete().eq('user_id', user.id);
     await adminClient.from('recurring_expenses').delete().eq('user_id', user.id);
+    await adminClient.from('expense_templates').delete().eq('user_id', user.id);
     await adminClient.from('categories').delete().eq('user_id', user.id);
     await adminClient.from('tags').delete().eq('user_id', user.id);
     await adminClient.from('user_budgets').delete().eq('user_id', user.id);
