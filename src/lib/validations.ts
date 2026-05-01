@@ -422,6 +422,73 @@ export const accountBalanceSchema = z.object({
     .optional(),
 });
 
+// Debt validation schema. current_balance becomes original_principal in the DB
+// at create time (most users only know what they owe today, not what they
+// originally borrowed).
+export const debtSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Name is required')
+    .max(80, 'Name must be less than 80 characters')
+    .regex(SAFE_STRING, 'Name contains invalid characters')
+    .transform((s) => s.trim())
+    .refine((s) => s.length > 0, 'Name cannot be empty'),
+  kind: z.enum([
+    'credit_card',
+    'student_loan',
+    'mortgage',
+    'auto_loan',
+    'personal_loan',
+    'medical',
+    'other',
+  ] as const),
+  current_balance: z
+    .string()
+    .min(1, 'Balance is required')
+    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .refine((val) => {
+      const amount = parseCurrencyInput(val);
+      return amount > 0 && amount <= 100000000;
+    }, 'Amount must be between 0 and 100.000.000'),
+  apr: z
+    .string()
+    .min(1, 'APR is required')
+    .refine((val) => {
+      const num = Number(val.replace(',', '.'));
+      return !Number.isNaN(num) && num >= 0 && num <= 100;
+    }, 'APR must be between 0 and 100'),
+  minimum_payment: z
+    .string()
+    .min(1, 'Minimum payment is required')
+    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .refine((val) => {
+      const amount = parseCurrencyInput(val);
+      return amount >= 0 && amount <= 100000000;
+    }, 'Amount must be between 0 and 100.000.000'),
+  currency: z.string().length(3, 'Pick a currency'),
+  payoff_target_date: z.date().optional(),
+  icon: z.string().min(1).max(40),
+  color: z.string().regex(HEX_COLOR, 'Invalid color format'),
+});
+
+// Debt payment schema (creates an expense linked to the debt).
+export const debtPaymentSchema = z.object({
+  amount: z
+    .string()
+    .min(1, 'Amount is required')
+    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .refine((val) => {
+      const amount = parseCurrencyInput(val);
+      return amount > 0 && amount <= 100000000;
+    }, 'Amount must be between 0 and 100.000.000'),
+  date: z.date({ required_error: 'Date is required' }),
+  description: z
+    .string()
+    .max(200, 'Description must be less than 200 characters')
+    .regex(SAFE_STRING, 'Description contains invalid characters')
+    .optional(),
+});
+
 // Types
 export type ExpenseFormData = z.infer<typeof expenseSchema>;
 export type IncomeFormData = z.infer<typeof incomeSchema>;
@@ -434,3 +501,5 @@ export type TemplateFormData = z.infer<typeof templateSchema>;
 export type GoalFormData = z.infer<typeof goalSchema>;
 export type AccountFormData = z.infer<typeof accountSchema>;
 export type AccountBalanceFormData = z.infer<typeof accountBalanceSchema>;
+export type DebtFormData = z.infer<typeof debtSchema>;
+export type DebtPaymentFormData = z.infer<typeof debtPaymentSchema>;

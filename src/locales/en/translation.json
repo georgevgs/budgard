@@ -364,6 +364,7 @@
     "income": "Income",
     "goals": "Goals",
     "networth": "Net worth",
+    "debts": "Debts",
     "recurring": "Recurring",
     "analytics": "Analytics",
     "settings": "Settings",
@@ -537,6 +538,100 @@
     },
     "chart": {
       "title": "Over time"
+    }
+  },
+  "debts": {
+    "title": "Debts",
+    "addDebt": "Add debt",
+    "totalLabel": "Total balance",
+    "monthlyMinimumsLabel": "Monthly minimums",
+    "avgAprLabel": "Avg APR",
+    "debtFreeIn": "Debt-free in",
+    "monthsCount_one": "{{count}} month",
+    "monthsCount_other": "{{count}} months",
+    "percentPaid": "{{percent}}% paid",
+    "cleared": "Paid off",
+    "archive": "Archive",
+    "archiveTitle": "Archive debt",
+    "archiveConfirmation": "Archive \"{{name}}\"? Its payment history stays in your expenses.",
+    "unpayableShort": "Minimum doesn't cover interest",
+    "formDescription": "Track what you owe with APR and minimum payment so we can project a payoff date.",
+    "tabs": {
+      "list": "Debts",
+      "plan": "Payoff plan"
+    },
+    "kind": {
+      "credit_card": "Credit card",
+      "student_loan": "Student loan",
+      "mortgage": "Mortgage",
+      "auto_loan": "Auto loan",
+      "personal_loan": "Personal loan",
+      "medical": "Medical",
+      "other": "Other"
+    },
+    "empty": {
+      "title": "No debts tracked",
+      "description": "Add anything you owe — credit cards, loans, mortgages — to see how fast you can pay them off.",
+      "cta": "Add your first debt"
+    },
+    "form": {
+      "addTitle": "Add debt",
+      "editTitle": "Edit debt",
+      "save": "Save",
+      "nameLabel": "Debt name",
+      "namePlaceholder": "e.g. Visa Gold, Auto Loan",
+      "kindLabel": "Debt type",
+      "currencyLabel": "Currency",
+      "currentBalanceLabel": "Current balance",
+      "currentBalancePlaceholder": "What you owe today",
+      "currentBalanceHint": "Enter what you currently owe — we'll track payments from here.",
+      "aprLabel": "APR (%)",
+      "minPaymentLabel": "Min payment"
+    },
+    "payment": {
+      "title": "Log payment · {{name}}",
+      "description": "Logs as a regular expense linked to this debt — your balance updates automatically.",
+      "amountLabel": "Payment amount",
+      "amountPlaceholder": "Amount",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Optional note (defaults to debt name)",
+      "pickDate": "Pick a date",
+      "save": "Log payment"
+    },
+    "detail": {
+      "currentBalance": "Current balance",
+      "minPayment": "Min payment",
+      "payoffIn": "Payoff in",
+      "totalInterest": "Future interest",
+      "history": "Payment history",
+      "logPayment": "Log payment",
+      "noHistory": "No payments yet — log one to start tracking progress.",
+      "deletePaymentTitle": "Delete payment",
+      "deletePaymentDescription": "Remove this payment? Your debt balance will recompute."
+    },
+    "unpayable": {
+      "title": "Minimum doesn't cover interest",
+      "description": "At this APR, your minimum payment is less than the monthly interest — the balance grows each month. Increase the payment to start making progress."
+    },
+    "payoff": {
+      "empty": "Add a debt to see a payoff plan.",
+      "extraLabel": "Extra each month",
+      "extraHint": "How much can you put toward debt above the minimums? Even a small amount cuts months and interest.",
+      "avalanche": "Avalanche",
+      "avalancheHint": "Highest APR first — saves the most money",
+      "snowball": "Snowball",
+      "snowballHint": "Smallest balance first — quick wins for motivation",
+      "usingStrategy": "Using {{strategy}} strategy",
+      "debtFreeIn": "Debt-free in",
+      "payoffDate": "Payoff date",
+      "totalInterest": "Total interest",
+      "totalPaid": "Total paid",
+      "comparisonTitle": "Strategy comparison",
+      "savingsHint": "Avalanche saves about {{amount}} in interest vs Snowball.",
+      "orderTitle": "Payoff order",
+      "paidInMonth": "Month {{month}}",
+      "unpayableTitle": "Payoff not reachable",
+      "unpayableDescription": "With current minimums and extra payment, at least one debt's interest outpaces the payment. Increase your monthly extra to find a workable plan."
     }
   },
   "templates": {

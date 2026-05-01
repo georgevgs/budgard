@@ -27,6 +27,7 @@ import RecurringLoadingState from '@/components/recurring/RecurringLoading';
 import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
 import GoalsLoadingState from '@/components/goals/GoalsLoading';
 import NetWorthLoadingState from '@/components/networth/NetWorthLoading';
+import DebtsLoadingState from '@/components/debts/DebtsLoading';
 import { lazyWithRetry } from '@/lib/lazyWithRetry';
 
 // Lazy load route-level components with retry on chunk failure
@@ -47,6 +48,9 @@ const GoalsList = lazyWithRetry(
 );
 const NetWorthView = lazyWithRetry(
   () => import('@/components/networth/NetWorthView'),
+);
+const DebtsView = lazyWithRetry(
+  () => import('@/components/debts/DebtsView'),
 );
 const SettingsView = lazyWithRetry(
   () => import('@/components/settings/SettingsView'),
@@ -269,6 +273,14 @@ const App = () => {
                   element={
                     <Suspense fallback={<NetWorthLoadingState />}>
                       <NetWorthView />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/debts"
+                  element={
+                    <Suspense fallback={<DebtsLoadingState />}>
+                      <DebtsView />
                     </Suspense>
                   }
                 />

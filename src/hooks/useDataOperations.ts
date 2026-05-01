@@ -11,6 +11,7 @@ import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 import type { Goal } from '@/types/Goal';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
+import type { Debt } from '@/types/Debt';
 import { uploadReceipt, deleteReceipt } from '@/services/receiptService';
 import { haptics } from '@/lib/haptics';
 import { offlineQueue } from '@/lib/offlineQueue';
@@ -47,9 +48,11 @@ export function useDataOperations() {
     setRecurringIncomes,
     setAccounts,
     setAccountBalances,
+    setDebts,
     refreshExpenses,
     refreshIncomes,
     refreshAccounts,
+    refreshDebts,
     monthlyBudget,
     setMonthlyBudget,
     defaultCurrency,
@@ -106,11 +109,29 @@ export function useDataOperations() {
         const finalExpense = { ...savedExpense, receipt_path: receiptPath };
 
         haptics.success();
-        setExpenses((prev) =>
-          expenseId
-            ? prev.map((e) => (e.id === expenseId ? finalExpense : e))
-            : [finalExpense, ...prev],
-        );
+
+        let previousDebtId: string | null = null;
+        setExpenses((prev) => {
+          if (expenseId) {
+            previousDebtId =
+              prev.find((e) => e.id === expenseId)?.debt_id ?? null;
+
+            return prev.map((e) => (e.id === expenseId ? finalExpense : e));
+          }
+
+          return [finalExpense, ...prev];
+        });
+
+        // The DB trigger recomputes debts.current_balance whenever a payment
+        // is written. Refresh debts on the client if either the saved row
+        // or the row it replaced is linked to a debt.
+        if (finalExpense.debt_id || previousDebtId) {
+          refreshDebts().catch((err) => {
+            Sentry.captureException(err, {
+              tags: { context: 'afterExpenseSubmitDebt' },
+            });
+          });
+        }
 
         if (receiptFailed) {
           toast({
@@ -147,7 +168,7 @@ export function useDataOperations() {
         throw error;
       }
     },
-    [isInitialized, setExpenses, showErrorToast, toast],
+    [isInitialized, setExpenses, refreshDebts, showErrorToast, toast],
   );
 
   const handleExpenseDelete = useCallback(
@@ -162,11 +183,21 @@ export function useDataOperations() {
 
         // Read receipt path and update state atomically
         let receiptPath: string | null = null;
+        let deletedDebtId: string | null = null;
         setExpenses((prev) => {
-          receiptPath =
-            prev.find((e) => e.id === expenseId)?.receipt_path ?? null;
+          const existing = prev.find((e) => e.id === expenseId);
+          receiptPath = existing?.receipt_path ?? null;
+          deletedDebtId = existing?.debt_id ?? null;
           return prev.filter((e) => e.id !== expenseId);
         });
+
+        if (deletedDebtId) {
+          refreshDebts().catch((err) => {
+            Sentry.captureException(err, {
+              tags: { context: 'afterExpenseDeleteDebt' },
+            });
+          });
+        }
 
         // Fire-and-forget receipt cleanup
         if (receiptPath) {
@@ -194,7 +225,7 @@ export function useDataOperations() {
         throw error;
       }
     },
-    [isInitialized, setExpenses, showErrorToast, toast],
+    [isInitialized, setExpenses, refreshDebts, showErrorToast, toast],
   );
 
   const handleCategoryAdd = useCallback(
@@ -855,6 +886,71 @@ export function useDataOperations() {
     [isInitialized, setAccounts, setAccountBalances, showErrorToast],
   );
 
+  const handleDebtSubmit = useCallback(
+    async (
+      debtData: Partial<Debt>,
+      debtId?: string,
+    ): Promise<Debt | null> => {
+      if (!isInitialized) return null;
+
+      try {
+        const saved = debtId
+          ? await dataService.updateDebt(debtId, debtData)
+          : await dataService.createDebt(debtData);
+
+        haptics.success();
+        setDebts((prev) =>
+          debtId
+            ? prev.map((d) => (d.id === debtId ? saved : d))
+            : [...prev, saved],
+        );
+
+        toast({
+          variant: 'success',
+          title: debtId ? 'Debt updated' : 'Debt added',
+        });
+
+        return saved;
+      } catch (error) {
+        haptics.error();
+        Sentry.captureException(error, {
+          tags: { operation: debtId ? 'updateDebt' : 'createDebt' },
+        });
+        showErrorToast(`Failed to ${debtId ? 'update' : 'add'} debt`);
+        throw error;
+      }
+    },
+    [isInitialized, setDebts, showErrorToast, toast],
+  );
+
+  const handleDebtArchive = useCallback(
+    async (debtId: string) => {
+      if (!isInitialized) return;
+
+      haptics.warning();
+      let previousDebts: Debt[] = [];
+      setDebts((prev) => {
+        previousDebts = prev;
+
+        return prev.filter((d) => d.id !== debtId);
+      });
+
+      try {
+        await dataService.archiveDebt(debtId);
+        haptics.success();
+      } catch (error) {
+        haptics.error();
+        setDebts(previousDebts);
+        Sentry.captureException(error, {
+          tags: { operation: 'archiveDebt' },
+        });
+        showErrorToast('Failed to archive debt');
+        throw error;
+      }
+    },
+    [isInitialized, setDebts, showErrorToast],
+  );
+
   const handleBulkExpenseImport = useCallback(
     async (expensesData: BulkExpenseRow[]) => {
       if (!isInitialized) return;
@@ -1093,6 +1189,8 @@ export function useDataOperations() {
     handleAccountArchive,
     handleSnapshotCreate,
     handleSnapshotDelete,
+    handleDebtSubmit,
+    handleDebtArchive,
   };
 }
 

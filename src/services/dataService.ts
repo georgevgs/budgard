@@ -8,6 +8,7 @@ import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 import type { Goal } from '@/types/Goal';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
+import type { Debt } from '@/types/Debt';
 
 export const dataService = {
   async getUser() {
@@ -667,6 +668,87 @@ export const dataService = {
 
     if (error) throw error;
     return data as Account;
+  },
+
+  async getDebts(signal?: AbortSignal) {
+    let query = supabase
+      .from('debts')
+      .select('*')
+      .eq('is_archived', false)
+      .order('created_at', { ascending: true });
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return data as Debt[];
+  },
+
+  async getDebtById(debtId: string, signal?: AbortSignal) {
+    let query = supabase.from('debts').select('*').eq('id', debtId);
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query.single();
+
+    if (error) throw error;
+    return data as Debt;
+  },
+
+  async createDebt(debtData: Partial<Debt>) {
+    // Most users only know what they currently owe, not the original loan
+    // amount. We treat the entered current_balance as both original_principal
+    // and current_balance — the recompute trigger will keep current_balance
+    // correct from there as payments are logged.
+    const { data, error } = await supabase
+      .from('debts')
+      .insert({
+        ...debtData,
+        original_principal: debtData.current_balance,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Debt;
+  },
+
+  async updateDebt(debtId: string, debtData: Partial<Debt>) {
+    const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = debtData;
+    const { data, error } = await supabase
+      .from('debts')
+      .update(safeUpdate)
+      .eq('id', debtId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Debt;
+  },
+
+  async archiveDebt(debtId: string) {
+    const { data, error } = await supabase
+      .from('debts')
+      .update({ is_archived: true })
+      .eq('id', debtId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Debt;
+  },
+
+  async getDebtPayments(debtId: string, signal?: AbortSignal) {
+    let query = supabase
+      .from('expenses')
+      .select(`*, category:categories(*)`)
+      .eq('debt_id', debtId)
+      .order('date', { ascending: false })
+      .order('created_at', { ascending: false });
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return data as Expense[];
   },
 
   async deleteAccount() {

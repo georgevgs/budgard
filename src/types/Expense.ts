@@ -1,4 +1,5 @@
 import { Category } from '@/types/Category.ts';
+import { Debt } from '@/types/Debt.ts';
 import { Tag } from '@/types/Tag.ts';
 
 export type TransactionType = 'expense' | 'income';
@@ -11,6 +12,7 @@ export type Expense = {
   category_id?: string | null;
   recurring_expense_id?: string | null;
   tag_id?: string | null;
+  debt_id?: string | null;
   user_id: string;
   receipt_path?: string | null;
   created_at: string;
@@ -24,4 +26,5 @@ export type Expense = {
   savings_allocation_amount?: number | null;
   category?: Category;
   tag?: Tag;
+  debt?: Debt;
 }

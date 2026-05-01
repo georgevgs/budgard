@@ -21,6 +21,11 @@ const mockSetGoals = vi.fn((updater) => {
   if (typeof updater === 'function') updater([]);
 });
 
+const mockSetDebts = vi.fn((updater) => {
+  if (typeof updater === 'function') updater([]);
+});
+const mockRefreshDebts = vi.fn().mockResolvedValue(undefined);
+
 vi.mock('@/contexts/DataContext', () => ({
   useData: () => ({
     isInitialized: true,
@@ -29,7 +34,9 @@ vi.mock('@/contexts/DataContext', () => ({
     setTags: mockSetTags,
     setRecurringExpenses: mockSetRecurringExpenses,
     setGoals: mockSetGoals,
+    setDebts: mockSetDebts,
     refreshExpenses: mockRefreshExpenses,
+    refreshDebts: mockRefreshDebts,
   }),
 }));
 
@@ -61,6 +68,9 @@ const mockDeleteAccount = vi.fn();
 const mockCreateGoal = vi.fn();
 const mockUpdateGoal = vi.fn();
 const mockDeleteGoal = vi.fn();
+const mockCreateDebt = vi.fn();
+const mockUpdateDebt = vi.fn();
+const mockArchiveDebt = vi.fn();
 
 vi.mock('@/services/dataService', () => ({
   dataService: {
@@ -83,6 +93,9 @@ vi.mock('@/services/dataService', () => ({
     createGoal: (...args: unknown[]) => mockCreateGoal(...args),
     updateGoal: (...args: unknown[]) => mockUpdateGoal(...args),
     deleteGoal: (...args: unknown[]) => mockDeleteGoal(...args),
+    createDebt: (...args: unknown[]) => mockCreateDebt(...args),
+    updateDebt: (...args: unknown[]) => mockUpdateDebt(...args),
+    archiveDebt: (...args: unknown[]) => mockArchiveDebt(...args),
   },
 }));
 
@@ -546,6 +559,129 @@ describe('useDataOperations', () => {
 
       // Optimistic remove + rollback = 2+ calls
       expect(mockSetGoals.mock.calls.length).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  // ────────────────────────────────────────────────────────────────────────
+  // Debts
+  // ────────────────────────────────────────────────────────────────────────
+  describe('Debts', () => {
+    beforeEach(() => {
+      mockSetDebts.mockClear();
+      mockRefreshDebts.mockClear();
+      mockCreateDebt.mockReset();
+      mockUpdateDebt.mockReset();
+      mockArchiveDebt.mockReset();
+    });
+
+    it('creates a new debt and updates state', async () => {
+      const saved = { id: 'd1', name: 'Card', current_balance: 5000 };
+      mockCreateDebt.mockResolvedValue(saved);
+
+      const { result } = renderHook(() => useDataOperations());
+
+      await act(async () => {
+        await result.current.handleDebtSubmit({
+          name: 'Card',
+          current_balance: 5000,
+        });
+      });
+
+      expect(mockCreateDebt).toHaveBeenCalledWith({
+        name: 'Card',
+        current_balance: 5000,
+      });
+      expect(mockSetDebts).toHaveBeenCalled();
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({ variant: 'success', title: 'Debt added' }),
+      );
+    });
+
+    it('updates an existing debt when id is provided', async () => {
+      const saved = { id: 'd1', name: 'Renamed' };
+      mockUpdateDebt.mockResolvedValue(saved);
+
+      const { result } = renderHook(() => useDataOperations());
+
+      await act(async () => {
+        await result.current.handleDebtSubmit({ name: 'Renamed' }, 'd1');
+      });
+
+      expect(mockUpdateDebt).toHaveBeenCalledWith('d1', { name: 'Renamed' });
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Debt updated' }),
+      );
+    });
+
+    it('shows an error toast and rethrows on debt-create failure', async () => {
+      mockCreateDebt.mockRejectedValue(new Error('boom'));
+      const { result } = renderHook(() => useDataOperations());
+
+      await expect(
+        act(async () => {
+          await result.current.handleDebtSubmit({ name: 'X' });
+        }),
+      ).rejects.toThrow('boom');
+
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({ variant: 'destructive' }),
+      );
+    });
+
+    it('archives a debt with optimistic removal', async () => {
+      mockArchiveDebt.mockResolvedValue(undefined);
+      const { result } = renderHook(() => useDataOperations());
+
+      await act(async () => {
+        await result.current.handleDebtArchive('d1');
+      });
+
+      expect(mockArchiveDebt).toHaveBeenCalledWith('d1');
+      // Optimistic filter — only one setDebts call on the success path
+      expect(mockSetDebts).toHaveBeenCalled();
+    });
+
+    it('rolls back debt archive on failure', async () => {
+      mockArchiveDebt.mockRejectedValue(new Error('rls denied'));
+      const { result } = renderHook(() => useDataOperations());
+
+      await expect(
+        act(async () => {
+          await result.current.handleDebtArchive('d1');
+        }),
+      ).rejects.toThrow('rls denied');
+
+      // Optimistic remove + rollback
+      expect(mockSetDebts.mock.calls.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('refreshes debts after creating an expense linked to a debt', async () => {
+      const saved = { id: 'e1', amount: 200, debt_id: 'd1' };
+      mockCreateExpense.mockResolvedValue(saved);
+
+      const { result } = renderHook(() => useDataOperations());
+
+      await act(async () => {
+        await result.current.handleExpenseSubmit({
+          amount: 200,
+          debt_id: 'd1',
+        });
+      });
+
+      expect(mockRefreshDebts).toHaveBeenCalled();
+    });
+
+    it('does not refresh debts when expense has no debt_id', async () => {
+      const saved = { id: 'e1', amount: 50 };
+      mockCreateExpense.mockResolvedValue(saved);
+
+      const { result } = renderHook(() => useDataOperations());
+
+      await act(async () => {
+        await result.current.handleExpenseSubmit({ amount: 50 });
+      });
+
+      expect(mockRefreshDebts).not.toHaveBeenCalled();
     });
   });
 });

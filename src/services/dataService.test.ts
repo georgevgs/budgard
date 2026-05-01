@@ -452,4 +452,107 @@ describe('dataService', () => {
     await expect(dataService.deleteAccount()).rejects.toThrow('Unauthorized');
     vi.unstubAllGlobals();
   });
+
+  // --- getDebts ---
+  it('fetches active (non-archived) debts ordered by created_at', async () => {
+    const debts = [{ id: 'd1', name: 'Card' }];
+    const chain = mockChain(debts);
+    vi.mocked(supabase.from).mockReturnValue(chain as never);
+
+    const result = await dataService.getDebts();
+    expect(supabase.from).toHaveBeenCalledWith('debts');
+    expect(chain.eq).toHaveBeenCalledWith('is_archived', false);
+    expect(chain.order).toHaveBeenCalledWith('created_at', {
+      ascending: true,
+    });
+    expect(result).toEqual(debts);
+  });
+
+  // --- createDebt ---
+  it('creates a debt mirroring current_balance into original_principal', async () => {
+    const created = {
+      id: 'd1',
+      name: 'Card',
+      current_balance: 5000,
+      original_principal: 5000,
+    };
+    const chain = mockChain(created);
+    vi.mocked(supabase.from).mockReturnValue(chain as never);
+
+    const result = await dataService.createDebt({
+      name: 'Card',
+      kind: 'credit_card',
+      current_balance: 5000,
+      apr: 18,
+      minimum_payment: 150,
+      currency: 'EUR',
+      icon: 'credit-card',
+      color: '#f97316',
+    });
+
+    expect(chain.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        current_balance: 5000,
+        original_principal: 5000,
+      }),
+    );
+    expect(result).toEqual(created);
+  });
+
+  // --- updateDebt ---
+  it('strips immutable fields on debt update', async () => {
+    const updated = { id: 'd1', name: 'Renamed' };
+    const chain = mockChain(updated);
+    vi.mocked(supabase.from).mockReturnValue(chain as never);
+
+    await dataService.updateDebt('d1', {
+      name: 'Renamed',
+      user_id: 'shouldnt-leak',
+      id: 'shouldnt-leak',
+      created_at: 'shouldnt-leak',
+    });
+
+    const updatePayload = chain.update.mock.calls[0][0];
+    expect(updatePayload).toEqual({ name: 'Renamed' });
+    expect(updatePayload).not.toHaveProperty('user_id');
+    expect(updatePayload).not.toHaveProperty('id');
+    expect(updatePayload).not.toHaveProperty('created_at');
+    expect(chain.eq).toHaveBeenCalledWith('id', 'd1');
+  });
+
+  // --- archiveDebt ---
+  it('archives a debt by setting is_archived=true', async () => {
+    const archived = { id: 'd1', is_archived: true };
+    const chain = mockChain(archived);
+    vi.mocked(supabase.from).mockReturnValue(chain as never);
+
+    const result = await dataService.archiveDebt('d1');
+    expect(chain.update).toHaveBeenCalledWith({ is_archived: true });
+    expect(chain.eq).toHaveBeenCalledWith('id', 'd1');
+    expect(result).toEqual(archived);
+  });
+
+  // --- getDebtPayments ---
+  it('fetches expenses linked to a debt with category join', async () => {
+    const payments = [{ id: 'e1', amount: 100, debt_id: 'd1' }];
+    const chain = mockChain(payments);
+    vi.mocked(supabase.from).mockReturnValue(chain as never);
+
+    const result = await dataService.getDebtPayments('d1');
+    expect(supabase.from).toHaveBeenCalledWith('expenses');
+    expect(chain.eq).toHaveBeenCalledWith('debt_id', 'd1');
+    expect(result).toEqual(payments);
+  });
+
+  // --- getDebtById ---
+  it('fetches a single debt by id', async () => {
+    const debt = { id: 'd1', name: 'Card' };
+    const chain = mockChain(debt);
+    vi.mocked(supabase.from).mockReturnValue(chain as never);
+
+    const result = await dataService.getDebtById('d1');
+    expect(chain.eq).toHaveBeenCalledWith('id', 'd1');
+    expect(chain.single).toHaveBeenCalled();
+    expect(result).toEqual(debt);
+  });
 });
