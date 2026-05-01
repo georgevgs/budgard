@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import type { Goal } from '@/types/Goal';
 import type { Category } from '@/types/Category';
