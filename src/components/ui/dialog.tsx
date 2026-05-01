@@ -100,7 +100,7 @@ const DialogContent = React.forwardRef<
             className,
           )}
           style={{
-            ...dragStyle,
+            ...(isMobile ? dragStyle : {}),
             ...style,
           }}
           {...props}
