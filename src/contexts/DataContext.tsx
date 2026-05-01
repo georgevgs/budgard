@@ -95,6 +95,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Tracks the AbortController for the current in-flight fetchData call so we
   // can cancel proactively when the app is backgrounded on iOS.
   const abortControllerRef = useRef<AbortController | null>(null);
+  // Timestamp of the last successful full fetch and whether the most recent
+  // fetch was aborted. Used by the visibility handler to skip redundant
+  // refetches when the user briefly alt-tabs.
+  const lastFetchAtRef = useRef<number>(0);
+  const wasAbortedRef = useRef<boolean>(false);
 
   const fetchData = useCallback(async () => {
     if (!session?.user?.id) {
@@ -143,12 +148,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setDefaultSavingsPct(budgetData?.default_savings_pct ?? null);
       setIsInitialized(true);
       setIsLoading(false);
+      lastFetchAtRef.current = Date.now();
+      wasAbortedRef.current = false;
     } catch (error) {
       // iOS PWA aborts in-flight requests when the app is backgrounded. The
       // AbortError may be a raw DOMException or wrapped by Supabase into an
       // object with { message: "AbortError: ..." }. Silently ignore both —
       // the visibilitychange listener retries when the app comes to foreground.
       if (isAbortError(error)) {
+        wasAbortedRef.current = true;
         setIsLoading(false);
         return;
       }
@@ -218,15 +226,29 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // On iOS PWA the OS aborts network requests mid-flight when the app is
   // backgrounded. By owning the abort ourselves we get a clean, intentional
   // cancellation before the OS does it uncontrollably, and we retry as soon
-  // as the user brings the app back.
+  // as the user brings the app back — but only when the data is actually
+  // stale or the previous fetch was cancelled. Otherwise quick alt-tabs
+  // would trigger a full refetch storm.
   useEffect(() => {
+    // Skip refetch on foreground if last fetch was within this window AND
+    // the previous fetch wasn't cancelled. Tuned for "quick alt-tab" use.
+    const FRESH_WINDOW_MS = 30_000;
+
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         abortControllerRef.current?.abort();
         return;
       }
 
-      if (session?.user?.id) {
+      if (!session?.user?.id) {
+        return;
+      }
+
+      const sinceLastFetch = Date.now() - lastFetchAtRef.current;
+      const needsRefetch =
+        wasAbortedRef.current || sinceLastFetch >= FRESH_WINDOW_MS;
+
+      if (needsRefetch) {
         fetchData();
       }
     };
@@ -235,37 +257,58 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [session?.user?.id, isInitialized, fetchData]);
+  }, [session?.user?.id, fetchData]);
 
-  const value = {
-    categories,
-    expenseCategories,
-    incomeCategories,
-    expenses,
-    incomes,
-    recurringExpenses,
-    recurringIncomes,
-    tags,
-    templates,
-    monthlyBudget,
-    defaultCurrency,
-    defaultSavingsPct,
-    isLoading,
-    isInitialized,
-    refreshData,
-    refreshExpenses,
-    refreshIncomes,
-    setCategories,
-    setExpenses,
-    setIncomes,
-    setRecurringExpenses,
-    setRecurringIncomes,
-    setTags,
-    setTemplates,
-    setMonthlyBudget,
-    setDefaultCurrency,
-    setDefaultSavingsPct,
-  };
+  const value = useMemo(
+    () => ({
+      categories,
+      expenseCategories,
+      incomeCategories,
+      expenses,
+      incomes,
+      recurringExpenses,
+      recurringIncomes,
+      tags,
+      templates,
+      monthlyBudget,
+      defaultCurrency,
+      defaultSavingsPct,
+      isLoading,
+      isInitialized,
+      refreshData,
+      refreshExpenses,
+      refreshIncomes,
+      setCategories,
+      setExpenses,
+      setIncomes,
+      setRecurringExpenses,
+      setRecurringIncomes,
+      setTags,
+      setTemplates,
+      setMonthlyBudget,
+      setDefaultCurrency,
+      setDefaultSavingsPct,
+    }),
+    [
+      categories,
+      expenseCategories,
+      incomeCategories,
+      expenses,
+      incomes,
+      recurringExpenses,
+      recurringIncomes,
+      tags,
+      templates,
+      monthlyBudget,
+      defaultCurrency,
+      defaultSavingsPct,
+      isLoading,
+      isInitialized,
+      refreshData,
+      refreshExpenses,
+      refreshIncomes,
+    ],
+  );
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }

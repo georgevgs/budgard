@@ -50,14 +50,7 @@ export const dataService = {
   async getExpenses(signal?: AbortSignal) {
     let query = supabase
       .from('expenses')
-      .select(
-        `
-               *,
-               category:categories(*),
-               tag:tags(*),
-               recurring_expense:recurring_expenses(*)
-           `,
-      )
+      .select(`*, category:categories(*), tag:tags(*)`)
       .eq('type', 'expense')
       .order('date', { ascending: false })
       .order('created_at', { ascending: false });
@@ -66,19 +59,13 @@ export const dataService = {
 
     if (error) throw error;
 
-    return data as (Expense & { recurring_expense: RecurringExpense | null })[];
+    return data as Expense[];
   },
 
   async getIncomes(signal?: AbortSignal) {
     let query = supabase
       .from('expenses')
-      .select(
-        `
-               *,
-               category:categories(*),
-               recurring_expense:recurring_expenses(*)
-           `,
-      )
+      .select(`*, category:categories(*)`)
       .eq('type', 'income')
       .order('date', { ascending: false })
       .order('created_at', { ascending: false });
@@ -87,14 +74,14 @@ export const dataService = {
 
     if (error) throw error;
 
-    return data as (Expense & { recurring_expense: RecurringExpense | null })[];
+    return data as Expense[];
   },
 
   async createIncome(incomeData: Partial<Expense>) {
     const { data, error } = await supabase
       .from('expenses')
       .insert({ ...incomeData, type: 'income' })
-      .select(`*, category:categories(*), recurring_expense:recurring_expenses(*)`)
+      .select(`*, category:categories(*)`)
       .single();
 
     if (error) throw error;
@@ -107,7 +94,7 @@ export const dataService = {
       .from('expenses')
       .update(safeUpdate)
       .eq('id', incomeId)
-      .select(`*, category:categories(*), recurring_expense:recurring_expenses(*)`)
+      .select(`*, category:categories(*)`)
       .single();
 
     if (error) throw error;
@@ -131,9 +118,7 @@ export const dataService = {
       .from('expenses')
       .update(safeUpdate)
       .eq('id', expenseId)
-      .select(
-        `*, category:categories(*), tag:tags(*), recurring_expense:recurring_expenses(*)`,
-      )
+      .select(`*, category:categories(*), tag:tags(*)`)
       .single();
 
     if (error) throw error;
@@ -144,9 +129,7 @@ export const dataService = {
     const { data, error } = await supabase
       .from('expenses')
       .insert(expenseData)
-      .select(
-        `*, category:categories(*), tag:tags(*), recurring_expense:recurring_expenses(*)`,
-      )
+      .select(`*, category:categories(*), tag:tags(*)`)
       .single();
 
     if (error) throw error;

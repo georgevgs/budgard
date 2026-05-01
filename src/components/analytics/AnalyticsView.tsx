@@ -125,31 +125,39 @@ const AnalyticsView = () => {
   }, [expenses, dateLocale]);
 
   const yearlyStats = useMemo(() => {
-    const totalSpent = yearExpenses.reduce((sum, e) => sum + e.amount, 0);
+    // Single pass: bucket each expense by category and by month index.
+    type Bucket = { total: number; monthly: number[] };
+    const byCat = new Map<string, Bucket>();
+    let totalSpent = 0;
+
+    for (const e of yearExpenses) {
+      totalSpent += e.amount;
+      if (!e.category_id) continue;
+      let slot = byCat.get(e.category_id);
+      if (!slot) {
+        slot = { total: 0, monthly: new Array(12).fill(0) };
+        byCat.set(e.category_id, slot);
+      }
+      const monthIdx = parseISO(e.date).getMonth();
+      slot.total += e.amount;
+      slot.monthly[monthIdx] += e.amount;
+    }
+
     const monthsWithExpenses = monthlyData.filter((m) => m.amount > 0).length;
     const monthlyAverage =
       monthsWithExpenses > 0 ? totalSpent / monthsWithExpenses : 0;
 
     const categoryBreakdown = categories
       .map((cat) => {
-        const catExpenses = yearExpenses.filter(
-          (e) => e.category_id === cat.id,
-        );
-        const amount = catExpenses.reduce((sum, e) => sum + e.amount, 0);
-        const monthlyAmounts = Array.from({ length: 12 }, (_, i) => {
-          const month = (i + 1).toString().padStart(2, '0');
-          const key = `${selectedYear}-${month}`;
-          return catExpenses
-            .filter((e) => format(parseISO(e.date), 'yyyy-MM') === key)
-            .reduce((sum, e) => sum + e.amount, 0);
-        });
+        const slot = byCat.get(cat.id);
+
         return {
           id: cat.id,
           name: cat.name,
           color: cat.color,
           icon: cat.icon,
-          amount,
-          monthlyAmounts,
+          amount: slot?.total ?? 0,
+          monthlyAmounts: slot?.monthly ?? new Array(12).fill(0),
         };
       })
       .filter((cat) => cat.amount > 0)
@@ -161,7 +169,7 @@ const AnalyticsView = () => {
       categoryBreakdown,
       activeMonths: monthsWithExpenses,
     };
-  }, [yearExpenses, categories, monthlyData, selectedYear]);
+  }, [yearExpenses, categories, monthlyData]);
 
   const animatedThisMonth = useAnimatedNumber(monthComparison.thisMonthAmount);
   const animatedYearTotal = useAnimatedNumber(yearlyStats.totalSpent);
