@@ -364,6 +364,64 @@ export const goalSchema = z
     path: ['tag_id'],
   });
 
+// Account validation schema
+export const accountSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Name is required')
+    .max(60, 'Name must be less than 60 characters')
+    .regex(SAFE_STRING, 'Name contains invalid characters')
+    .transform((s) => s.trim())
+    .refine((s) => s.length > 0, 'Name cannot be empty'),
+  kind: z.enum([
+    'cash',
+    'bank',
+    'credit_card',
+    'loan',
+    'investment',
+    'other',
+  ] as const),
+  default_currency: z.string().length(3, 'Pick a currency'),
+  initial_balance: z
+    .string()
+    .min(1, 'Starting balance is required')
+    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .refine((val) => {
+      const amount = parseCurrencyInput(val);
+      return amount >= 0 && amount <= 100000000;
+    }, 'Amount must be between 0 and 100.000.000'),
+  color: z.string().regex(HEX_COLOR, 'Invalid color format'),
+});
+
+// Balance snapshot schema. balance is the new current value;
+// contribution_delta is meaningful only for investment accounts
+// (signed: positive = deposit, negative = withdrawal).
+export const accountBalanceSchema = z.object({
+  balance: z
+    .string()
+    .min(1, 'Balance is required')
+    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .refine((val) => {
+      const amount = parseCurrencyInput(val);
+      return amount >= 0 && amount <= 100000000;
+    }, 'Amount must be between 0 and 100.000.000'),
+  contribution_delta: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || AMOUNT_PATTERN.test(val.replace(/^-/, '')),
+      'Invalid amount format',
+    ),
+  recorded_at: z.date({
+    required_error: 'Date is required',
+  }),
+  note: z
+    .string()
+    .max(200, 'Note must be less than 200 characters')
+    .regex(SAFE_STRING, 'Note contains invalid characters')
+    .optional(),
+});
+
 // Types
 export type ExpenseFormData = z.infer<typeof expenseSchema>;
 export type IncomeFormData = z.infer<typeof incomeSchema>;
@@ -374,3 +432,5 @@ export type RecurringIncomeFormData = z.infer<typeof recurringIncomeSchema>;
 export type BudgetFormData = z.infer<typeof budgetSchema>;
 export type TemplateFormData = z.infer<typeof templateSchema>;
 export type GoalFormData = z.infer<typeof goalSchema>;
+export type AccountFormData = z.infer<typeof accountSchema>;
+export type AccountBalanceFormData = z.infer<typeof accountBalanceSchema>;

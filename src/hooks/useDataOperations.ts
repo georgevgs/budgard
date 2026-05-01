@@ -9,6 +9,8 @@ import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Tag } from '@/types/Tag';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 import type { Goal } from '@/types/Goal';
+import type { Account } from '@/types/Account';
+import type { AccountBalance } from '@/types/AccountBalance';
 import { uploadReceipt, deleteReceipt } from '@/services/receiptService';
 import { haptics } from '@/lib/haptics';
 import { offlineQueue } from '@/lib/offlineQueue';
@@ -43,8 +45,11 @@ export function useDataOperations() {
     setGoals,
     setRecurringExpenses,
     setRecurringIncomes,
+    setAccounts,
+    setAccountBalances,
     refreshExpenses,
     refreshIncomes,
+    refreshAccounts,
     monthlyBudget,
     setMonthlyBudget,
     defaultCurrency,
@@ -702,6 +707,154 @@ export function useDataOperations() {
     [isInitialized, setGoals, showErrorToast],
   );
 
+  const handleAccountSubmit = useCallback(
+    async (
+      accountData: Partial<Account> & { initial_balance?: number },
+      accountId?: string,
+    ): Promise<Account | null> => {
+      if (!isInitialized) return null;
+
+      try {
+        const saved = accountId
+          ? await dataService.updateAccount(accountId, accountData)
+          : await dataService.createAccount(accountData);
+
+        haptics.success();
+        setAccounts((prev) =>
+          accountId
+            ? prev.map((a) => (a.id === accountId ? saved : a))
+            : [...prev, saved],
+        );
+
+        // Creating an account seeds an opening snapshot — refresh balances so
+        // the chart and detail sheet pick it up without a full reload.
+        if (!accountId) {
+          refreshAccounts().catch((err) => {
+            Sentry.captureException(err, {
+              tags: { context: 'afterAccountCreate' },
+            });
+          });
+        }
+
+        toast({
+          variant: 'success',
+          title: accountId ? 'Account updated' : 'Account added',
+        });
+
+        return saved;
+      } catch (error) {
+        haptics.error();
+        Sentry.captureException(error, {
+          tags: { operation: accountId ? 'updateAccount' : 'createAccount' },
+        });
+        showErrorToast(`Failed to ${accountId ? 'update' : 'add'} account`);
+        throw error;
+      }
+    },
+    [isInitialized, setAccounts, refreshAccounts, showErrorToast, toast],
+  );
+
+  const handleAccountArchive = useCallback(
+    async (accountId: string) => {
+      if (!isInitialized) return;
+
+      haptics.warning();
+      let previousAccounts: Account[] = [];
+      setAccounts((prev) => {
+        previousAccounts = prev;
+
+        return prev.filter((a) => a.id !== accountId);
+      });
+
+      try {
+        await dataService.archiveAccount(accountId);
+        haptics.success();
+      } catch (error) {
+        haptics.error();
+        setAccounts(previousAccounts);
+        Sentry.captureException(error, {
+          tags: { operation: 'archiveAccount' },
+        });
+        showErrorToast('Failed to archive account');
+        throw error;
+      }
+    },
+    [isInitialized, setAccounts, showErrorToast],
+  );
+
+  const handleSnapshotCreate = useCallback(
+    async (snapshot: Partial<AccountBalance>) => {
+      if (!isInitialized) return null;
+
+      try {
+        const saved = await dataService.upsertAccountBalance(snapshot);
+        haptics.success();
+
+        // The DB trigger updated current_balance / cost_basis. Refetch the
+        // account row + replace the snapshot in local state.
+        const accountId = saved.account_id;
+        const updatedAccount = await dataService.getAccountById(accountId);
+
+        setAccountBalances((prev) => {
+          // Upsert: replace any existing snapshot for the same (account, date).
+          const filtered = prev.filter(
+            (b) =>
+              !(b.account_id === accountId && b.recorded_at === saved.recorded_at),
+          );
+          return [...filtered, saved].sort((a, b) =>
+            a.recorded_at.localeCompare(b.recorded_at),
+          );
+        });
+        setAccounts((prev) =>
+          prev.map((a) => (a.id === accountId ? updatedAccount : a)),
+        );
+
+        toast({ variant: 'success', title: 'Balance updated' });
+        return saved;
+      } catch (error) {
+        haptics.error();
+        Sentry.captureException(error, {
+          tags: { operation: 'createAccountBalance' },
+        });
+        showErrorToast('Failed to update balance');
+        throw error;
+      }
+    },
+    [isInitialized, setAccounts, setAccountBalances, showErrorToast, toast],
+  );
+
+  const handleSnapshotDelete = useCallback(
+    async (snapshotId: string, accountId: string) => {
+      if (!isInitialized) return;
+
+      haptics.warning();
+      let previousBalances: AccountBalance[] = [];
+      setAccountBalances((prev) => {
+        previousBalances = prev;
+
+        return prev.filter((b) => b.id !== snapshotId);
+      });
+
+      try {
+        await dataService.deleteAccountBalance(snapshotId);
+        const updatedAccount = await dataService.getAccountById(accountId);
+        setAccounts((prev) =>
+          prev.map((a) => (a.id === accountId ? updatedAccount : a)),
+        );
+        haptics.success();
+      } catch (error) {
+        haptics.error();
+        setAccountBalances(previousBalances);
+        Sentry.captureException(error, {
+          tags: { operation: 'deleteAccountBalance' },
+        });
+        showErrorToast('Failed to delete snapshot');
+        throw error;
+      }
+    },
+    [isInitialized, setAccounts, setAccountBalances, showErrorToast],
+  );
+
   const handleBulkExpenseImport = useCallback(
     async (expensesData: BulkExpenseRow[]) => {
       if (!isInitialized) return;
@@ -936,6 +1089,10 @@ export function useDataOperations() {
     handleGoalCreate,
     handleGoalUpdate,
     handleGoalDelete,
+    handleAccountSubmit,
+    handleAccountArchive,
+    handleSnapshotCreate,
+    handleSnapshotDelete,
   };
 }
 

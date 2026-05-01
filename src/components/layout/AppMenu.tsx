@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import MoreHorizontal from 'lucide-react/dist/esm/icons/more-horizontal';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
+import Wallet from 'lucide-react/dist/esm/icons/wallet';
 
 const AppMenu = () => {
   const { t } = useTranslation();
@@ -27,6 +28,10 @@ const AppMenu = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={() => navigate('/networth')}>
+          <Wallet className="h-4 w-4" />
+          {t('navigation.networth')}
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate('/recurring')}>
           <Repeat className="h-4 w-4" />
           {t('navigation.recurring')}

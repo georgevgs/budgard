@@ -6,6 +6,8 @@ import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Tag } from '@/types/Tag';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 import type { Goal } from '@/types/Goal';
+import type { Account } from '@/types/Account';
+import type { AccountBalance } from '@/types/AccountBalance';
 
 export const dataService = {
   async getUser() {
@@ -513,6 +515,158 @@ export const dataService = {
     const { error } = await supabase.from('goals').delete().eq('id', goalId);
 
     if (error) throw error;
+  },
+
+  async getAccounts(signal?: AbortSignal) {
+    let query = supabase
+      .from('accounts')
+      .select('*')
+      .eq('is_archived', false)
+      .order('created_at', { ascending: true });
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return data as Account[];
+  },
+
+  async createAccount(
+    accountData: Partial<Account> & { initial_balance?: number },
+  ) {
+    const { initial_balance, ...accountFields } = accountData;
+    const { data: created, error } = await supabase
+      .from('accounts')
+      .insert(accountFields)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Seed an initial snapshot so the trigger keeps current_balance accurate
+    // and the time-series chart has a starting point.
+    if (initial_balance !== undefined && initial_balance !== null) {
+      const { error: snapshotError } = await supabase
+        .from('account_balances')
+        .insert({
+          account_id: (created as Account).id,
+          balance: initial_balance,
+          contribution_delta:
+            (created as Account).kind === 'investment'
+              ? initial_balance
+              : null,
+        });
+      if (snapshotError) throw snapshotError;
+    }
+
+    // Re-read so we get the trigger-updated current_balance / cost_basis.
+    const { data: refreshed, error: refreshError } = await supabase
+      .from('accounts')
+      .select('*')
+      .eq('id', (created as Account).id)
+      .single();
+    if (refreshError) throw refreshError;
+
+    return refreshed as Account;
+  },
+
+  async updateAccount(accountId: string, accountData: Partial<Account>) {
+    const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = accountData;
+    const { data, error } = await supabase
+      .from('accounts')
+      .update(safeUpdate)
+      .eq('id', accountId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Account;
+  },
+
+  async archiveAccount(accountId: string) {
+    const { data, error } = await supabase
+      .from('accounts')
+      .update({ is_archived: true })
+      .eq('id', accountId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Account;
+  },
+
+  async getAccountBalances(accountId: string, signal?: AbortSignal) {
+    let query = supabase
+      .from('account_balances')
+      .select('*')
+      .eq('account_id', accountId)
+      .order('recorded_at', { ascending: false })
+      .order('created_at', { ascending: false });
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return data as AccountBalance[];
+  },
+
+  async getAllAccountBalances(signal?: AbortSignal) {
+    let query = supabase
+      .from('account_balances')
+      .select('*')
+      .order('recorded_at', { ascending: true });
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return data as AccountBalance[];
+  },
+
+  async createAccountBalance(snapshot: Partial<AccountBalance>) {
+    const { data, error } = await supabase
+      .from('account_balances')
+      .insert(snapshot)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as AccountBalance;
+  },
+
+  async upsertAccountBalance(snapshot: Partial<AccountBalance>) {
+    // The (account_id, recorded_at) unique constraint means logging a second
+    // snapshot on the same day overwrites the first. Use upsert so the form
+    // succeeds either way.
+    const { data, error } = await supabase
+      .from('account_balances')
+      .upsert(snapshot, { onConflict: 'account_id,recorded_at' })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as AccountBalance;
+  },
+
+  async deleteAccountBalance(snapshotId: string) {
+    const { error } = await supabase
+      .from('account_balances')
+      .delete()
+      .eq('id', snapshotId);
+
+    if (error) throw error;
+  },
+
+  async getAccountById(accountId: string, signal?: AbortSignal) {
+    let query = supabase
+      .from('accounts')
+      .select('*')
+      .eq('id', accountId);
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query.single();
+
+    if (error) throw error;
+    return data as Account;
   },
 
   async deleteAccount() {

@@ -19,6 +19,8 @@ import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Tag } from '@/types/Tag';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 import type { Goal } from '@/types/Goal';
+import type { Account } from '@/types/Account';
+import type { AccountBalance } from '@/types/AccountBalance';
 import { useToast } from '@/hooks/useToast';
 
 type DataState = {
@@ -34,6 +36,8 @@ type DataState = {
   tags: Tag[];
   templates: ExpenseTemplate[];
   goals: Goal[];
+  accounts: Account[];
+  accountBalances: AccountBalance[];
   monthlyBudget: number | null;
   defaultCurrency: string;
   defaultSavingsPct: number | null;
@@ -45,6 +49,7 @@ type DataContextType = DataState & {
   refreshData: () => Promise<void>;
   refreshExpenses: () => Promise<void>;
   refreshIncomes: () => Promise<void>;
+  refreshAccounts: () => Promise<void>;
   setCategories: Dispatch<SetStateAction<Category[]>>;
   setExpenses: Dispatch<SetStateAction<Expense[]>>;
   setIncomes: Dispatch<SetStateAction<Expense[]>>;
@@ -53,6 +58,8 @@ type DataContextType = DataState & {
   setTags: Dispatch<SetStateAction<Tag[]>>;
   setTemplates: Dispatch<SetStateAction<ExpenseTemplate[]>>;
   setGoals: Dispatch<SetStateAction<Goal[]>>;
+  setAccounts: Dispatch<SetStateAction<Account[]>>;
+  setAccountBalances: Dispatch<SetStateAction<AccountBalance[]>>;
   setMonthlyBudget: Dispatch<SetStateAction<number | null>>;
   setDefaultCurrency: Dispatch<SetStateAction<string>>;
   setDefaultSavingsPct: Dispatch<SetStateAction<number | null>>;
@@ -78,6 +85,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [tags, setTags] = useState<Tag[]>([]);
   const [templates, setTemplates] = useState<ExpenseTemplate[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [accountBalances, setAccountBalances] = useState<AccountBalance[]>([]);
   const [monthlyBudget, setMonthlyBudget] = useState<number | null>(null);
   const [defaultCurrency, setDefaultCurrency] = useState<string>('EUR');
   const [defaultSavingsPct, setDefaultSavingsPct] = useState<number | null>(
@@ -129,6 +138,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         tagsData,
         templatesData,
         goalsData,
+        accountsData,
+        accountBalancesData,
       ] = await Promise.all([
         dataService.getCategories(controller.signal),
         dataService.getExpenses(controller.signal),
@@ -139,6 +150,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         dataService.getTags(controller.signal),
         dataService.getTemplates(controller.signal),
         dataService.getGoals(controller.signal),
+        dataService.getAccounts(controller.signal),
+        dataService.getAllAccountBalances(controller.signal),
       ]);
 
       // React 18+ automatically batches these state updates
@@ -150,6 +163,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setTags(tagsData);
       setTemplates(templatesData);
       setGoals(goalsData);
+      setAccounts(accountsData);
+      setAccountBalances(accountBalancesData);
       setMonthlyBudget(budgetData?.monthly_amount ?? null);
       setDefaultCurrency(budgetData?.default_currency ?? 'EUR');
       setDefaultSavingsPct(budgetData?.default_savings_pct ?? null);
@@ -202,6 +217,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const refreshAccounts = useCallback(async () => {
+    try {
+      const [accountsData, balancesData] = await Promise.all([
+        dataService.getAccounts(),
+        dataService.getAllAccountBalances(),
+      ]);
+      setAccounts(accountsData);
+      setAccountBalances(balancesData);
+    } catch (error) {
+      Sentry.captureException(error, { tags: { context: 'refreshAccounts' } });
+      console.error('Failed to refresh accounts:', error);
+    }
+  }, []);
+
   useEffect(() => {
     if (isAuthLoading) {
       return;
@@ -222,6 +251,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setTags([]);
       setTemplates([]);
       setGoals([]);
+      setAccounts([]);
+      setAccountBalances([]);
       setMonthlyBudget(null);
       setDefaultCurrency('EUR');
       setDefaultSavingsPct(null);
@@ -279,6 +310,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       tags,
       templates,
       goals,
+      accounts,
+      accountBalances,
       monthlyBudget,
       defaultCurrency,
       defaultSavingsPct,
@@ -287,6 +320,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       refreshData,
       refreshExpenses,
       refreshIncomes,
+      refreshAccounts,
       setCategories,
       setExpenses,
       setIncomes,
@@ -295,6 +329,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setTags,
       setTemplates,
       setGoals,
+      setAccounts,
+      setAccountBalances,
       setMonthlyBudget,
       setDefaultCurrency,
       setDefaultSavingsPct,
@@ -310,6 +346,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       tags,
       templates,
       goals,
+      accounts,
+      accountBalances,
       monthlyBudget,
       defaultCurrency,
       defaultSavingsPct,
@@ -318,6 +356,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       refreshData,
       refreshExpenses,
       refreshIncomes,
+      refreshAccounts,
     ],
   );
 

@@ -363,6 +363,7 @@
     "expenses": "Expenses",
     "income": "Income",
     "goals": "Goals",
+    "networth": "Net worth",
     "recurring": "Recurring",
     "analytics": "Analytics",
     "settings": "Settings",
@@ -462,6 +463,80 @@
       "title": "No goals yet",
       "description": "Set a target — vacation, emergency fund, paying down debt — and watch progress build from your existing entries.",
       "cta": "Create your first goal"
+    }
+  },
+  "networth": {
+    "title": "Net worth",
+    "addAccount": "Add account",
+    "totalLabel": "Net worth",
+    "assetsLabel": "Assets",
+    "liabilitiesLabel": "Liabilities",
+    "investmentLabel": "Investments",
+    "lastUpdated": "Updated {{date}}",
+    "notUpdated": "Not updated yet",
+    "archive": "Archive",
+    "archiveTitle": "Archive account",
+    "archiveConfirmation": "Archive \"{{name}}\"? It will be hidden from net worth and won't affect past totals.",
+    "formDescription": "An account holds a balance — cash, a card, a brokerage. You'll log new balances as they change.",
+    "kind": {
+      "cash": "Cash",
+      "bank": "Bank",
+      "credit_card": "Credit card",
+      "loan": "Loan",
+      "investment": "Investment",
+      "other": "Other"
+    },
+    "groups": {
+      "assets": "Assets",
+      "liabilities": "Liabilities",
+      "investments": "Investments"
+    },
+    "empty": {
+      "title": "No accounts yet",
+      "description": "Track checking, savings, cards, and investments to see your net worth grow.",
+      "cta": "Add your first account"
+    },
+    "form": {
+      "addTitle": "Add account",
+      "editTitle": "Edit account",
+      "save": "Save",
+      "nameLabel": "Account name",
+      "namePlaceholder": "e.g. Checking, Vanguard, Mortgage",
+      "kindLabel": "Account type",
+      "currencyLabel": "Currency",
+      "initialBalanceLabel": "Starting balance",
+      "initialValueLabel": "Current value"
+    },
+    "snapshot": {
+      "title": "Update {{name}}",
+      "description": "Log the current balance — we'll keep history so you can see growth over time.",
+      "descriptionInvestment": "Log the current value, plus any deposits or withdrawals since your last update.",
+      "balanceLabel": "Current balance",
+      "balancePlaceholder": "Current balance",
+      "valueLabel": "Current value",
+      "valuePlaceholder": "Current value",
+      "contributionLabel": "Net contribution since last update",
+      "contributionPlaceholder": "Deposits − withdrawals (signed)",
+      "contributionHint": "Use a minus sign for withdrawals. Leave blank if none.",
+      "noteLabel": "Note",
+      "notePlaceholder": "Optional note",
+      "pickDate": "Pick a date",
+      "save": "Save snapshot"
+    },
+    "detail": {
+      "currentBalance": "Current balance",
+      "history": "History",
+      "addSnapshot": "Update",
+      "noHistory": "No snapshots yet — add one to start tracking history.",
+      "deleteSnapshotTitle": "Delete snapshot",
+      "deleteSnapshotDescription": "Remove this balance entry? Earlier history is unaffected.",
+      "costBasis": "Cost basis",
+      "gain": "Gain",
+      "contribDeposit": "+{{amount}} in",
+      "contribWithdraw": "−{{amount}} out"
+    },
+    "chart": {
+      "title": "Over time"
     }
   },
   "templates": {

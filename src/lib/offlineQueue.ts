@@ -8,7 +8,12 @@ export type MutationType =
   | 'deleteExpense'
   | 'createIncome'
   | 'updateIncome'
-  | 'deleteIncome';
+  | 'deleteIncome'
+  | 'createAccount'
+  | 'updateAccount'
+  | 'archiveAccount'
+  | 'createAccountBalance'
+  | 'deleteAccountBalance';
 
 export type QueuedMutation = {
   id: number;
