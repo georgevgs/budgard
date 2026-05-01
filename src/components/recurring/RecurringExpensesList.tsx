@@ -5,7 +5,7 @@ import Plus from 'lucide-react/dist/esm/icons/plus';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
 import { useData } from '@/contexts/DataContext';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { format, addWeeks, addMonths, addYears } from 'date-fns';
+import { format } from 'date-fns';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { RecurringExpenseFormData } from '@/lib/validations';
 import RecurringExpenseForm from '@/components/recurring/RecurringExpenseForm';
@@ -13,85 +13,9 @@ import RecurringExpenseCard from '@/components/recurring/RecurringExpenseCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { formatCurrency, parseCurrencyInput } from '@/lib/utils';
+import { calculateNextOccurrence, getMonthlyAmount } from '@/lib/recurring';
 import RecurringLoadingState from '@/components/recurring/RecurringLoading';
 import { useTranslation } from 'react-i18next';
-
-const WEEKS_PER_MONTH = 4.33;
-const BIWEEKLY_PERIODS_PER_MONTH = 2.17;
-
-function calculateNextOccurrence(expense: RecurringExpense): Date | null {
-  if (!expense.active) return null;
-  if (expense.end_date && new Date(expense.end_date) < new Date()) return null;
-
-  const startDate = new Date(expense.start_date);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  // If there's a last_generated_date, compute next from that
-  if (expense.last_generated_date) {
-    const fromDate = new Date(expense.last_generated_date);
-
-    switch (expense.frequency) {
-      case 'weekly':
-        return addWeeks(fromDate, 1);
-      case 'biweekly':
-        return addWeeks(fromDate, 2);
-      case 'monthly':
-        return addMonths(fromDate, 1);
-      case 'quarterly':
-        return addMonths(fromDate, 3);
-      case 'yearly':
-        return addYears(fromDate, 1);
-      default:
-        return addMonths(fromDate, 1);
-    }
-  }
-
-  // No last_generated_date — advance from start_date until we reach today or future
-  if (startDate >= today) {
-    return startDate;
-  }
-
-  let next = new Date(startDate);
-  while (next < today) {
-    switch (expense.frequency) {
-      case 'weekly':
-        next = addWeeks(next, 1);
-        break;
-      case 'biweekly':
-        next = addWeeks(next, 2);
-        break;
-      case 'monthly':
-        next = addMonths(next, 1);
-        break;
-      case 'quarterly':
-        next = addMonths(next, 3);
-        break;
-      case 'yearly':
-        next = addYears(next, 1);
-        break;
-      default:
-        next = addMonths(next, 1);
-    }
-  }
-
-  return next;
-}
-
-function getMonthlyAmount(expense: RecurringExpense): number {
-  switch (expense.frequency) {
-    case 'weekly':
-      return expense.amount * WEEKS_PER_MONTH;
-    case 'biweekly':
-      return expense.amount * BIWEEKLY_PERIODS_PER_MONTH;
-    case 'quarterly':
-      return expense.amount / 3;
-    case 'yearly':
-      return expense.amount / 12;
-    default:
-      return expense.amount;
-  }
-}
 
 type RecurringMode = 'expense' | 'income';
 

@@ -17,6 +17,10 @@ const mockSetRecurringExpenses = vi.fn((updater) => {
 });
 const mockRefreshExpenses = vi.fn().mockResolvedValue(undefined);
 
+const mockSetGoals = vi.fn((updater) => {
+  if (typeof updater === 'function') updater([]);
+});
+
 vi.mock('@/contexts/DataContext', () => ({
   useData: () => ({
     isInitialized: true,
@@ -24,6 +28,7 @@ vi.mock('@/contexts/DataContext', () => ({
     setCategories: mockSetCategories,
     setTags: mockSetTags,
     setRecurringExpenses: mockSetRecurringExpenses,
+    setGoals: mockSetGoals,
     refreshExpenses: mockRefreshExpenses,
   }),
 }));
@@ -53,6 +58,9 @@ const mockUpdateRecurring = vi.fn();
 const mockDeleteRecurring = vi.fn();
 const mockToggleRecurring = vi.fn();
 const mockDeleteAccount = vi.fn();
+const mockCreateGoal = vi.fn();
+const mockUpdateGoal = vi.fn();
+const mockDeleteGoal = vi.fn();
 
 vi.mock('@/services/dataService', () => ({
   dataService: {
@@ -72,6 +80,9 @@ vi.mock('@/services/dataService', () => ({
     toggleRecurringExpense: (...args: unknown[]) =>
       mockToggleRecurring(...args),
     deleteAccount: (...args: unknown[]) => mockDeleteAccount(...args),
+    createGoal: (...args: unknown[]) => mockCreateGoal(...args),
+    updateGoal: (...args: unknown[]) => mockUpdateGoal(...args),
+    deleteGoal: (...args: unknown[]) => mockDeleteGoal(...args),
   },
 }));
 
@@ -447,5 +458,94 @@ describe('useDataOperations', () => {
     ).rejects.toThrow('Failed to delete account');
 
     expect(mockSignOut).not.toHaveBeenCalled();
+  });
+
+  describe('goals', () => {
+    it('creates a goal optimistically and replaces with server-saved row', async () => {
+      const saved = { id: 'g-real', name: 'Vacation', target_amount: 1000 };
+      mockCreateGoal.mockResolvedValue(saved);
+      const { result } = renderHook(() => useDataOperations());
+
+      await act(async () => {
+        await result.current.handleGoalCreate({
+          name: 'Vacation',
+          target_amount: 1000,
+          source_type: 'net_delta',
+          user_id: 'u1',
+        });
+      });
+
+      expect(mockCreateGoal).toHaveBeenCalledOnce();
+      // Optimistic insert + final replace = at least 2 setGoals calls
+      expect(mockSetGoals.mock.calls.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('rolls back the optimistic insert when create fails', async () => {
+      mockCreateGoal.mockRejectedValue(new Error('Boom'));
+      const { result } = renderHook(() => useDataOperations());
+
+      await expect(
+        act(async () => {
+          await result.current.handleGoalCreate({
+            name: 'Vacation',
+            target_amount: 1000,
+            source_type: 'net_delta',
+            user_id: 'u1',
+          });
+        }),
+      ).rejects.toThrow('Boom');
+
+      // Optimistic insert + rollback filter = 2+ setGoals calls
+      expect(mockSetGoals.mock.calls.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('updates an existing goal', async () => {
+      mockUpdateGoal.mockResolvedValue({ id: 'g1', name: 'Renamed' });
+      const { result } = renderHook(() => useDataOperations());
+
+      await act(async () => {
+        await result.current.handleGoalUpdate('g1', { name: 'Renamed' });
+      });
+
+      expect(mockUpdateGoal).toHaveBeenCalledWith('g1', { name: 'Renamed' });
+    });
+
+    it('rolls back optimistic update when service call fails', async () => {
+      mockUpdateGoal.mockRejectedValue(new Error('nope'));
+      const { result } = renderHook(() => useDataOperations());
+
+      await expect(
+        act(async () => {
+          await result.current.handleGoalUpdate('g1', { name: 'X' });
+        }),
+      ).rejects.toThrow('nope');
+
+      expect(mockSetGoals).toHaveBeenCalled();
+    });
+
+    it('deletes a goal', async () => {
+      mockDeleteGoal.mockResolvedValue(undefined);
+      const { result } = renderHook(() => useDataOperations());
+
+      await act(async () => {
+        await result.current.handleGoalDelete('g1');
+      });
+
+      expect(mockDeleteGoal).toHaveBeenCalledWith('g1');
+    });
+
+    it('rolls back optimistic delete on failure', async () => {
+      mockDeleteGoal.mockRejectedValue(new Error('locked'));
+      const { result } = renderHook(() => useDataOperations());
+
+      await expect(
+        act(async () => {
+          await result.current.handleGoalDelete('g1');
+        }),
+      ).rejects.toThrow('locked');
+
+      // Optimistic remove + rollback = 2+ calls
+      expect(mockSetGoals.mock.calls.length).toBeGreaterThanOrEqual(2);
+    });
   });
 });

@@ -5,6 +5,7 @@ import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Tag } from '@/types/Tag';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
+import type { Goal } from '@/types/Goal';
 
 export const dataService = {
   async getUser() {
@@ -467,6 +468,49 @@ export const dataService = {
       .from('expense_templates')
       .delete()
       .eq('id', templateId);
+
+    if (error) throw error;
+  },
+
+  async getGoals(signal?: AbortSignal) {
+    let query = supabase
+      .from('goals')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return data as Goal[];
+  },
+
+  async createGoal(goalData: Partial<Goal>) {
+    const { data, error } = await supabase
+      .from('goals')
+      .insert(goalData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Goal;
+  },
+
+  async updateGoal(goalId: string, goalData: Partial<Goal>) {
+    const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = goalData;
+    const { data, error } = await supabase
+      .from('goals')
+      .update(safeUpdate)
+      .eq('id', goalId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Goal;
+  },
+
+  async deleteGoal(goalId: string) {
+    const { error } = await supabase.from('goals').delete().eq('id', goalId);
 
     if (error) throw error;
   },

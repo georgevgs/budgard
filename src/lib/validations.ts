@@ -327,6 +327,43 @@ export const recurringIncomeSchema = z
 // Income category validation schema — same shape as category
 export const incomeCategorySchema = categorySchema;
 
+// Goal validation schema
+export const goalSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, 'Name is required')
+      .max(80, 'Name must be less than 80 characters')
+      .regex(SAFE_STRING, 'Name contains invalid characters')
+      .transform((s) => s.trim())
+      .refine((s) => s.length > 0, 'Name cannot be empty'),
+    target_amount: z
+      .string()
+      .min(1, 'Target is required')
+      .regex(AMOUNT_PATTERN, 'Invalid amount format')
+      .refine((val) => {
+        const amount = parseCurrencyInput(val);
+        return amount > 0 && amount <= 10000000;
+      }, 'Target must be between 0 and 10.000.000'),
+    deadline: z.date().optional(),
+    source_type: z.enum(['category', 'tag', 'net_delta'] as const),
+    category_id: z.string().optional(),
+    tag_id: z.string().optional(),
+    icon: z.string().min(1).max(40),
+    color: z.string().regex(HEX_COLOR, 'Invalid color format'),
+  })
+  .refine(
+    (data) => data.source_type !== 'category' || !!data.category_id,
+    {
+      message: 'Pick a category to track',
+      path: ['category_id'],
+    },
+  )
+  .refine((data) => data.source_type !== 'tag' || !!data.tag_id, {
+    message: 'Pick a tag to track',
+    path: ['tag_id'],
+  });
+
 // Types
 export type ExpenseFormData = z.infer<typeof expenseSchema>;
 export type IncomeFormData = z.infer<typeof incomeSchema>;
@@ -336,3 +373,4 @@ export type RecurringExpenseFormData = z.infer<typeof recurringExpenseSchema>;
 export type RecurringIncomeFormData = z.infer<typeof recurringIncomeSchema>;
 export type BudgetFormData = z.infer<typeof budgetSchema>;
 export type TemplateFormData = z.infer<typeof templateSchema>;
+export type GoalFormData = z.infer<typeof goalSchema>;

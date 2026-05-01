@@ -30,20 +30,30 @@ describe('layout/Header', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders branding and a settings link when authenticated', () => {
-    session = { user: { id: 'u1' } } as Session;
+  it('renders branding when authenticated', () => {
+    session = { user: { id: 'u1', email: 'jane@example.com' } } as Session;
     renderHeader();
 
     expect(screen.getByText('Budgard')).toBeInTheDocument();
-    const settingsLink = screen.getByRole('link', { name: 'navigation.settings' });
-    expect(settingsLink).toHaveAttribute('href', '/settings');
   });
 
   it('shows the logo with the localized alt text', () => {
-    session = { user: { id: 'u1' } } as Session;
+    session = { user: { id: 'u1', email: 'jane@example.com' } } as Session;
     renderHeader();
 
     const logo = screen.getByAltText('common.logoAlt');
     expect(logo).toHaveAttribute('src', '/icon-512x512.png');
+  });
+
+  it('renders both profile and app menu triggers', () => {
+    session = { user: { id: 'u1', email: 'jane@example.com' } } as Session;
+    renderHeader();
+
+    expect(
+      screen.getByRole('button', { name: 'navigation.openProfileMenu' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'navigation.openAppMenu' }),
+    ).toBeInTheDocument();
   });
 });

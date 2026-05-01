@@ -8,6 +8,7 @@ import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Tag } from '@/types/Tag';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
+import type { Goal } from '@/types/Goal';
 import { uploadReceipt, deleteReceipt } from '@/services/receiptService';
 import { haptics } from '@/lib/haptics';
 import { offlineQueue } from '@/lib/offlineQueue';
@@ -39,6 +40,7 @@ export function useDataOperations() {
     setCategories,
     setTags,
     setTemplates,
+    setGoals,
     setRecurringExpenses,
     setRecurringIncomes,
     refreshExpenses,
@@ -614,6 +616,92 @@ export function useDataOperations() {
     [isInitialized, setTemplates, showErrorToast],
   );
 
+  const handleGoalCreate = useCallback(
+    async (goalData: Partial<Goal>) => {
+      if (!isInitialized) return;
+
+      const optimisticGoal = {
+        ...goalData,
+        id: `temp-${Date.now()}`,
+        is_completed: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as Goal;
+
+      setGoals((prev) => [optimisticGoal, ...prev]);
+
+      try {
+        const saved = await dataService.createGoal(goalData);
+        haptics.success();
+        setGoals((prev) =>
+          prev.map((g) => (g.id === optimisticGoal.id ? saved : g)),
+        );
+        toast({ variant: 'success', title: 'Goal created' });
+      } catch (error) {
+        haptics.error();
+        setGoals((prev) => prev.filter((g) => g.id !== optimisticGoal.id));
+        Sentry.captureException(error, { tags: { operation: 'createGoal' } });
+        showErrorToast('Failed to create goal');
+        throw error;
+      }
+    },
+    [isInitialized, setGoals, showErrorToast, toast],
+  );
+
+  const handleGoalUpdate = useCallback(
+    async (goalId: string, goalData: Partial<Goal>) => {
+      if (!isInitialized) return;
+
+      let previousGoals: Goal[] = [];
+      setGoals((prev) => {
+        previousGoals = prev;
+
+        return prev.map((g) =>
+          g.id === goalId ? ({ ...g, ...goalData } as Goal) : g,
+        );
+      });
+
+      try {
+        const saved = await dataService.updateGoal(goalId, goalData);
+        haptics.success();
+        setGoals((prev) => prev.map((g) => (g.id === goalId ? saved : g)));
+      } catch (error) {
+        haptics.error();
+        setGoals(previousGoals);
+        Sentry.captureException(error, { tags: { operation: 'updateGoal' } });
+        showErrorToast('Failed to update goal');
+        throw error;
+      }
+    },
+    [isInitialized, setGoals, showErrorToast],
+  );
+
+  const handleGoalDelete = useCallback(
+    async (goalId: string) => {
+      if (!isInitialized) return;
+
+      haptics.warning();
+      let previousGoals: Goal[] = [];
+      setGoals((prev) => {
+        previousGoals = prev;
+
+        return prev.filter((g) => g.id !== goalId);
+      });
+
+      try {
+        await dataService.deleteGoal(goalId);
+        haptics.success();
+      } catch (error) {
+        haptics.error();
+        setGoals(previousGoals);
+        Sentry.captureException(error, { tags: { operation: 'deleteGoal' } });
+        showErrorToast('Failed to delete goal');
+        throw error;
+      }
+    },
+    [isInitialized, setGoals, showErrorToast],
+  );
+
   const handleBulkExpenseImport = useCallback(
     async (expensesData: BulkExpenseRow[]) => {
       if (!isInitialized) return;
@@ -845,6 +933,9 @@ export function useDataOperations() {
     handleBulkExpenseImport,
     handleTemplateCreate,
     handleTemplateDelete,
+    handleGoalCreate,
+    handleGoalUpdate,
+    handleGoalDelete,
   };
 }
 

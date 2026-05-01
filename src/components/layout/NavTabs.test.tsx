@@ -16,7 +16,7 @@ describe('NavTabs', () => {
 
     expect(screen.getByText('navigation.expenses')).toBeInTheDocument();
     expect(screen.getByText('navigation.income')).toBeInTheDocument();
-    expect(screen.getByText('navigation.recurring')).toBeInTheDocument();
+    expect(screen.getByText('navigation.goals')).toBeInTheDocument();
     expect(screen.getByText('navigation.analytics')).toBeInTheDocument();
   });
 
@@ -26,7 +26,7 @@ describe('NavTabs', () => {
 
     expect(links[0]).toHaveAttribute('href', '/expenses');
     expect(links[1]).toHaveAttribute('href', '/income');
-    expect(links[2]).toHaveAttribute('href', '/recurring');
+    expect(links[2]).toHaveAttribute('href', '/goals');
     expect(links[3]).toHaveAttribute('href', '/analytics');
   });
 
@@ -35,6 +35,13 @@ describe('NavTabs', () => {
     const links = screen.getAllByRole('link');
 
     expect(links[3].className).toContain('active');
+  });
+
+  it('does not include Recurring or Settings tabs (moved to header menus)', () => {
+    renderAt('/expenses');
+
+    expect(screen.queryByText('navigation.recurring')).not.toBeInTheDocument();
+    expect(screen.queryByText('navigation.settings')).not.toBeInTheDocument();
   });
 
   it('exposes an aria-label on the nav landmark', () => {

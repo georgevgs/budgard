@@ -1,9 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import Settings from 'lucide-react/dist/esm/icons/settings';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
+import ProfileMenu from '@/components/layout/ProfileMenu';
+import AppMenu from '@/components/layout/AppMenu';
 
 const Header = () => {
   const { session } = useAuth();
@@ -18,8 +17,11 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl pt-safe-t">
-      <div className="container flex h-14 items-center justify-between px-4">
-        <div className="flex items-center gap-2">
+      <div className="container grid grid-cols-3 items-center h-16 px-4 pt-1">
+        <div className="justify-self-start">
+          <ProfileMenu />
+        </div>
+        <div className="justify-self-center flex items-center gap-2">
           <img
             src="/icon-512x512.png"
             alt={t('common.logoAlt')}
@@ -28,16 +30,9 @@ const Header = () => {
           />
           <span className="text-lg font-semibold tracking-tight">Budgard</span>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-10 h-10 p-0 text-muted-foreground"
-          asChild
-        >
-          <Link to="/settings" aria-label={t('navigation.settings')}>
-            <Settings className="h-4 w-4" />
-          </Link>
-        </Button>
+        <div className="justify-self-end">
+          <AppMenu />
+        </div>
       </div>
     </header>
   );

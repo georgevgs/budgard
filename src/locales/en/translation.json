@@ -362,9 +362,13 @@
   "navigation": {
     "expenses": "Expenses",
     "income": "Income",
+    "goals": "Goals",
     "recurring": "Recurring",
     "analytics": "Analytics",
     "settings": "Settings",
+    "openProfileMenu": "Open profile menu",
+    "openAppMenu": "Open menu",
+    "signedInAs": "Signed in as",
     "ariaLabel": "Main navigation",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
@@ -404,6 +408,60 @@
       "coral": "Coral",
       "gold": "Gold",
       "slate": "Slate"
+    }
+  },
+  "goals": {
+    "title": "Goals",
+    "addGoal": "Add Goal",
+    "subtitle": "{{count}} active",
+    "createTitle": "Create goal",
+    "editTitle": "Edit goal",
+    "create": "Create",
+    "deleteTitle": "Delete goal",
+    "deleteConfirmation": "Delete \"{{name}}\"? This won't affect your transactions.",
+    "formDescription": "Set a target and how progress is tracked.",
+    "nameLabel": "Goal name",
+    "namePlaceholder": "e.g. Vacation, Emergency fund",
+    "targetLabel": "Target amount",
+    "deadlineFieldLabel": "Deadline (optional)",
+    "noDeadline": "No deadline",
+    "colorLabel": "Color",
+    "sourceTypeLabel": "Track via",
+    "categoryLabel": "Category",
+    "selectCategory": "Pick a category",
+    "tagLabel": "Tag",
+    "selectTag": "Pick a tag",
+    "deadlineLabel": "By {{date}}",
+    "daysLeft": "{{days}}d left",
+    "overdue": "Overdue",
+    "onTrack": "On track",
+    "behind": "Behind",
+    "reached": "Reached",
+    "percentComplete": "{{percent}}% done",
+    "overachieved": "{{percent}}% — over target",
+    "sources": {
+      "category": {
+        "label": "Spending in a category",
+        "description": "Track money flowing into one category (e.g. Savings)"
+      },
+      "tag": {
+        "label": "Spending with a tag",
+        "description": "Track entries you've tagged"
+      },
+      "net_delta": {
+        "label": "Net surplus",
+        "description": "Income minus expenses since the goal started"
+      }
+    },
+    "sourceLabel": {
+      "category": "Tracked by category · {{name}}",
+      "tag": "Tracked by tag · {{name}}",
+      "netDelta": "Tracked by net surplus"
+    },
+    "empty": {
+      "title": "No goals yet",
+      "description": "Set a target — vacation, emergency fund, paying down debt — and watch progress build from your existing entries.",
+      "cta": "Create your first goal"
     }
   },
   "templates": {

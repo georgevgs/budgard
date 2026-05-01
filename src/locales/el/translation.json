@@ -362,9 +362,13 @@
   "navigation": {
     "expenses": "Έξοδα",
     "income": "Έσοδα",
+    "goals": "Στόχοι",
     "recurring": "Επαναλαμβανόμενα",
     "analytics": "Αναλύσεις",
     "settings": "Ρυθμίσεις",
+    "openProfileMenu": "Άνοιγμα μενού προφίλ",
+    "openAppMenu": "Άνοιγμα μενού",
+    "signedInAs": "Συνδεδεμένος ως",
     "ariaLabel": "Κύρια πλοήγηση",
     "previousMonth": "Προηγούμενος μήνας",
     "nextMonth": "Επόμενος μήνας",
@@ -404,6 +408,60 @@
       "coral": "Κοράλλι",
       "gold": "Χρυσό",
       "slate": "Γκρι"
+    }
+  },
+  "goals": {
+    "title": "Στόχοι",
+    "addGoal": "Νέος στόχος",
+    "subtitle": "{{count}} ενεργοί",
+    "createTitle": "Δημιουργία στόχου",
+    "editTitle": "Επεξεργασία στόχου",
+    "create": "Δημιουργία",
+    "deleteTitle": "Διαγραφή στόχου",
+    "deleteConfirmation": "Διαγραφή του «{{name}}»; Δεν επηρεάζει τις κινήσεις σου.",
+    "formDescription": "Όρισε έναν στόχο και πώς υπολογίζεται η πρόοδος.",
+    "nameLabel": "Όνομα στόχου",
+    "namePlaceholder": "π.χ. Διακοπές, Ταμείο εκτάκτων",
+    "targetLabel": "Ποσό στόχου",
+    "deadlineFieldLabel": "Προθεσμία (προαιρετικό)",
+    "noDeadline": "Χωρίς προθεσμία",
+    "colorLabel": "Χρώμα",
+    "sourceTypeLabel": "Παρακολούθηση από",
+    "categoryLabel": "Κατηγορία",
+    "selectCategory": "Επίλεξε κατηγορία",
+    "tagLabel": "Ετικέτα",
+    "selectTag": "Επίλεξε ετικέτα",
+    "deadlineLabel": "Έως {{date}}",
+    "daysLeft": "{{days}} ημέρες ακόμα",
+    "overdue": "Έληξε",
+    "onTrack": "Σε καλό δρόμο",
+    "behind": "Πίσω από τον στόχο",
+    "reached": "Επιτεύχθηκε",
+    "percentComplete": "{{percent}}% ολοκλήρωση",
+    "overachieved": "{{percent}}% — πάνω από τον στόχο",
+    "sources": {
+      "category": {
+        "label": "Έξοδα σε μία κατηγορία",
+        "description": "Παρακολούθηση μιας κατηγορίας (π.χ. Αποταμίευση)"
+      },
+      "tag": {
+        "label": "Έξοδα με ετικέτα",
+        "description": "Παρακολούθηση εγγραφών με ετικέτα"
+      },
+      "net_delta": {
+        "label": "Καθαρό πλεόνασμα",
+        "description": "Έσοδα μείον έξοδα από την έναρξη"
+      }
+    },
+    "sourceLabel": {
+      "category": "Κατηγορία · {{name}}",
+      "tag": "Ετικέτα · {{name}}",
+      "netDelta": "Καθαρό πλεόνασμα"
+    },
+    "empty": {
+      "title": "Δεν έχεις στόχους ακόμα",
+      "description": "Όρισε έναν στόχο — διακοπές, ταμείο εκτάκτων, αποπληρωμή χρέους — και δες την πρόοδο να χτίζεται μόνη της από τις εγγραφές σου.",
+      "cta": "Δημιούργησε τον πρώτο σου στόχο"
     }
   },
   "templates": {

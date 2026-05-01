@@ -18,6 +18,7 @@ import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Tag } from '@/types/Tag';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
+import type { Goal } from '@/types/Goal';
 import { useToast } from '@/hooks/useToast';
 
 type DataState = {
@@ -32,6 +33,7 @@ type DataState = {
   recurringIncomes: RecurringExpense[];
   tags: Tag[];
   templates: ExpenseTemplate[];
+  goals: Goal[];
   monthlyBudget: number | null;
   defaultCurrency: string;
   defaultSavingsPct: number | null;
@@ -50,6 +52,7 @@ type DataContextType = DataState & {
   setRecurringIncomes: Dispatch<SetStateAction<RecurringExpense[]>>;
   setTags: Dispatch<SetStateAction<Tag[]>>;
   setTemplates: Dispatch<SetStateAction<ExpenseTemplate[]>>;
+  setGoals: Dispatch<SetStateAction<Goal[]>>;
   setMonthlyBudget: Dispatch<SetStateAction<number | null>>;
   setDefaultCurrency: Dispatch<SetStateAction<string>>;
   setDefaultSavingsPct: Dispatch<SetStateAction<number | null>>;
@@ -74,6 +77,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   );
   const [tags, setTags] = useState<Tag[]>([]);
   const [templates, setTemplates] = useState<ExpenseTemplate[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [monthlyBudget, setMonthlyBudget] = useState<number | null>(null);
   const [defaultCurrency, setDefaultCurrency] = useState<string>('EUR');
   const [defaultSavingsPct, setDefaultSavingsPct] = useState<number | null>(
@@ -124,6 +128,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         budgetData,
         tagsData,
         templatesData,
+        goalsData,
       ] = await Promise.all([
         dataService.getCategories(controller.signal),
         dataService.getExpenses(controller.signal),
@@ -133,6 +138,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         dataService.getBudget(controller.signal),
         dataService.getTags(controller.signal),
         dataService.getTemplates(controller.signal),
+        dataService.getGoals(controller.signal),
       ]);
 
       // React 18+ automatically batches these state updates
@@ -143,6 +149,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setRecurringIncomes(recurringIncomesData);
       setTags(tagsData);
       setTemplates(templatesData);
+      setGoals(goalsData);
       setMonthlyBudget(budgetData?.monthly_amount ?? null);
       setDefaultCurrency(budgetData?.default_currency ?? 'EUR');
       setDefaultSavingsPct(budgetData?.default_savings_pct ?? null);
@@ -214,6 +221,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setRecurringIncomes([]);
       setTags([]);
       setTemplates([]);
+      setGoals([]);
       setMonthlyBudget(null);
       setDefaultCurrency('EUR');
       setDefaultSavingsPct(null);
@@ -270,6 +278,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       recurringIncomes,
       tags,
       templates,
+      goals,
       monthlyBudget,
       defaultCurrency,
       defaultSavingsPct,
@@ -285,6 +294,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setRecurringIncomes,
       setTags,
       setTemplates,
+      setGoals,
       setMonthlyBudget,
       setDefaultCurrency,
       setDefaultSavingsPct,
@@ -299,6 +309,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       recurringIncomes,
       tags,
       templates,
+      goals,
       monthlyBudget,
       defaultCurrency,
       defaultSavingsPct,
