@@ -311,7 +311,7 @@ const ExpensesForm = ({
 
       {/* Scrollable content */}
       <div
-        className="overflow-y-auto flex-1 px-4 sm:px-6 overscroll-contain"
+        className="overflow-y-auto flex-1 px-4 sm:px-6 sm:pt-8 overscroll-contain"
         style={{ touchAction: 'pan-y' }}
       >
         <DialogHeader className="pb-4" data-draggable-area>
