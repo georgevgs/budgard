@@ -445,12 +445,6 @@
     "today": "Today",
     "yesterday": "Yesterday"
   },
-  "forms": {
-    "expenseDescription": "Form to {{action}} expense",
-    "editExisting": "edit an existing",
-    "addNew": "add a new",
-    "categoryDescription": "Form to add a new expense category"
-  },
   "theme": {
     "light": "Light",
     "dark": "Dark",

@@ -62,17 +62,11 @@ Deno.serve(async (req) => {
       storagePageOffset += STORAGE_PAGE_SIZE;
     }
 
-    // Delete user data from all tables (cascading FKs handle most of this)
-    // Order: child tables first, then parent tables
-    await adminClient.from('expenses').delete().eq('user_id', user.id);
-    await adminClient.from('recurring_expenses').delete().eq('user_id', user.id);
-    await adminClient.from('expense_templates').delete().eq('user_id', user.id);
-    await adminClient.from('categories').delete().eq('user_id', user.id);
-    await adminClient.from('tags').delete().eq('user_id', user.id);
-    await adminClient.from('user_budgets').delete().eq('user_id', user.id);
-    await adminClient.from('push_subscriptions').delete().eq('user_id', user.id);
-
-    // Delete the auth user
+    // Delete the auth user. All public.* tables that reference auth.users.id
+    // are configured with ON DELETE CASCADE, so the user's rows in expenses,
+    // categories, tags, recurring_expenses, expense_templates, user_budgets,
+    // accounts, account_balances, debts, goals, category_budgets, and
+    // push_subscriptions all delete automatically.
     const { error: deleteError } = await adminClient.auth.admin.deleteUser(user.id);
     if (deleteError) {
       return new Response(

@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
@@ -32,7 +31,6 @@ const FormsManager = ({
   selectedExpense,
   onExpenseSubmit,
 }: FormsManagerProps) => {
-  const { t } = useTranslation();
   const { expenseCategories: categories, isInitialized } = useData();
 
   // Don't show forms until data is ready (isInitialized is sufficient —
@@ -46,25 +44,19 @@ const FormsManager = ({
     formType === FORM_TYPES.NEW_EXPENSE || formType === FORM_TYPES.EDIT_EXPENSE;
   const isCategoryForm = formType === FORM_TYPES.NEW_CATEGORY;
   const isEditingExpense = formType === FORM_TYPES.EDIT_EXPENSE;
-  const expenseActionKey = isEditingExpense
-    ? 'forms.editExisting'
-    : 'forms.addNew';
-  const expenseForEdit = isEditingExpense ? selectedExpense : undefined;
+  let expenseForEdit: Expense | undefined;
+  if (isEditingExpense) {
+    expenseForEdit = selectedExpense;
+  }
 
   return (
     <>
       <Dialog open={isExpenseForm} onOpenChange={onClose}>
         <DialogContent
           className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
-          aria-describedby="expense-form-description"
           onOpenChange={onClose}
           onFocusOutside={(e) => e.preventDefault()}
         >
-          <div id="expense-form-description" className="sr-only">
-            {t('forms.expenseDescription', {
-              action: t(expenseActionKey),
-            })}
-          </div>
           {renderExpenseForm(
             isExpenseForm,
             expenseForEdit,
@@ -78,12 +70,8 @@ const FormsManager = ({
       <Dialog open={isCategoryForm} onOpenChange={onClose}>
         <DialogContent
           className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
-          aria-describedby="category-form-description"
           onOpenChange={onClose}
         >
-          <div id="category-form-description" className="sr-only">
-            {t('forms.categoryDescription')}
-          </div>
           {renderCategoryManager(isCategoryForm)}
         </DialogContent>
       </Dialog>

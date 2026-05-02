@@ -445,12 +445,6 @@
     "today": "Σήμερα",
     "yesterday": "Χθες"
   },
-  "forms": {
-    "expenseDescription": "Φόρμα για {{action}} έξοδο",
-    "editExisting": "επεξεργασία υπάρχοντος",
-    "addNew": "προσθήκη νέου",
-    "categoryDescription": "Φόρμα για προσθήκη νέας κατηγορίας εξόδων"
-  },
   "theme": {
     "light": "Φωτεινό",
     "dark": "Σκοτεινό",

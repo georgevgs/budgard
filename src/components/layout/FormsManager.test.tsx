@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
@@ -9,14 +10,27 @@ vi.mock('@/contexts/DataContext', () => ({
   useData: () => dataState,
 }));
 
+// Mocks render DialogTitle/DialogDescription (sr-only) so Radix's runtime
+// a11y check inside DialogContent finds them — the real components include
+// these in their DialogHeader, so this keeps the mock contract aligned.
 vi.mock('@/components/expenses/ExpensesForm', () => ({
   default: ({ expense }: { expense?: Expense }) => (
-    <div data-testid="expense-form" data-expense-id={expense?.id ?? ''} />
+    <>
+      <DialogTitle className="sr-only">Expense form</DialogTitle>
+      <DialogDescription className="sr-only">Expense form</DialogDescription>
+      <div data-testid="expense-form" data-expense-id={expense?.id ?? ''} />
+    </>
   ),
 }));
 
 vi.mock('@/components/categories/CategoryManager', () => ({
-  CategoryManager: () => <div data-testid="category-manager" />,
+  CategoryManager: () => (
+    <>
+      <DialogTitle className="sr-only">Category manager</DialogTitle>
+      <DialogDescription className="sr-only">Category manager</DialogDescription>
+      <div data-testid="category-manager" />
+    </>
+  ),
 }));
 
 import FormsManager, { FORM_TYPES } from './FormsManager';
