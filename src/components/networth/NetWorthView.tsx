@@ -11,6 +11,7 @@ import NetWorthHeader from '@/components/networth/NetWorthHeader';
 import NetWorthEmpty from '@/components/networth/NetWorthEmpty';
 import NetWorthLoadingState from '@/components/networth/NetWorthLoading';
 import NetWorthChart from '@/components/networth/NetWorthChart';
+import InvestmentAllocationCard from '@/components/networth/InvestmentAllocationCard';
 import AccountGroup from '@/components/networth/AccountGroup';
 import AccountForm from '@/components/networth/AccountForm';
 import AccountDetailSheet from '@/components/networth/AccountDetailSheet';
@@ -165,6 +166,7 @@ const renderBody = (
         latestSnapshotByAccount={latestSnapshotByAccount}
         onAccountClick={onAccountClick}
       />
+      <InvestmentAllocationCard accounts={grouped.investments} />
       <AccountGroup
         title={t('networth.groups.investments')}
         accounts={grouped.investments}

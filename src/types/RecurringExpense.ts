@@ -17,6 +17,7 @@ export type RecurringExpense = {
   start_date: string;
   end_date?: string | null;
   last_generated_date?: string;
+  linked_account_id?: string | null;
   created_at: string;
   active: boolean;
   type?: 'expense' | 'income';

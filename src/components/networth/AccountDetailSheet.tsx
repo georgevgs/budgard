@@ -31,11 +31,15 @@ import Plus from 'lucide-react/dist/esm/icons/plus';
 import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import { cn, formatCurrency } from '@/lib/utils';
+import { computeAccountXirr } from '@/lib/xirr';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { useAccountBalances } from '@/hooks/useAccountBalances';
 import { type Account, isLiability } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
-import BalanceSnapshotForm from '@/components/networth/BalanceSnapshotForm';
+import BalanceSnapshotForm, {
+  type SnapshotMode,
+} from '@/components/networth/BalanceSnapshotForm';
+import AccountHistoryChart from '@/components/networth/AccountHistoryChart';
 
 type Props = {
   account: Account;
@@ -56,7 +60,7 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
     open,
     account.updated_at,
   );
-  const [isSnapshotOpen, setIsSnapshotOpen] = useState(false);
+  const [snapshotMode, setSnapshotMode] = useState<SnapshotMode | null>(null);
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const [snapshotToDelete, setSnapshotToDelete] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -162,7 +166,7 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
                   account.default_currency,
                 )}
               </p>
-              {renderInvestmentDetail(account, isInvestment, t)}
+              {renderInvestmentDetail(account, isInvestment, snapshots, t)}
             </div>
           </DialogHeader>
 
@@ -171,18 +175,23 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
             style={{ touchAction: 'pan-y' }}
             id="account-detail-description"
           >
-            <div className="flex items-center justify-between pt-2 pb-2">
+            <AccountHistoryChart account={account} snapshots={snapshots} />
+
+            <div className="flex items-center justify-between pt-2 pb-2 gap-2">
               <h3 className="text-sm font-medium">
                 {t('networth.detail.history')}
               </h3>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setIsSnapshotOpen(true)}
-              >
-                <Plus className="h-3.5 w-3.5 mr-1" />
-                {t('networth.detail.addSnapshot')}
-              </Button>
+              <div className="flex items-center gap-2">
+                {renderContributionButton(isInvestment, setSnapshotMode, t)}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setSnapshotMode('value')}
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" />
+                  {renderUpdateLabel(isInvestment, t)}
+                </Button>
+              </div>
             </div>
 
             {renderHistoryList(
@@ -197,16 +206,18 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isSnapshotOpen} onOpenChange={() => setIsSnapshotOpen(false)}>
+      <Dialog
+        open={snapshotMode !== null}
+        onOpenChange={() => setSnapshotMode(null)}
+      >
         <DialogContent
           className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
-          onOpenChange={() => setIsSnapshotOpen(false)}
+          onOpenChange={() => setSnapshotMode(null)}
           onFocusOutside={(e) => e.preventDefault()}
         >
-          <BalanceSnapshotForm
-            account={account}
-            onClose={() => setIsSnapshotOpen(false)}
-          />
+          {renderSnapshotForm(account, snapshotMode, () =>
+            setSnapshotMode(null),
+          )}
         </DialogContent>
       </Dialog>
 
@@ -280,9 +291,52 @@ type TranslateFunction = (
   options?: Record<string, unknown>,
 ) => string;
 
+const renderUpdateLabel = (
+  isInvestment: boolean,
+  t: TranslateFunction,
+) => {
+  if (isInvestment) {
+    return t('networth.detail.updateValue');
+  }
+
+  return t('networth.detail.addSnapshot');
+};
+
+const renderContributionButton = (
+  isInvestment: boolean,
+  setMode: (mode: SnapshotMode) => void,
+  t: TranslateFunction,
+) => {
+  if (!isInvestment) return null;
+
+  return (
+    <Button
+      size="sm"
+      variant="ghost"
+      onClick={() => setMode('contribution')}
+    >
+      <Plus className="h-3.5 w-3.5 mr-1" />
+      {t('networth.detail.logContribution')}
+    </Button>
+  );
+};
+
+const renderSnapshotForm = (
+  account: Account,
+  mode: SnapshotMode | null,
+  onClose: () => void,
+) => {
+  if (mode === null) return null;
+
+  return (
+    <BalanceSnapshotForm account={account} onClose={onClose} mode={mode} />
+  );
+};
+
 const renderInvestmentDetail = (
   account: Account,
   isInvestment: boolean,
+  snapshots: AccountBalance[],
   t: TranslateFunction,
 ) => {
   if (!isInvestment) return null;
@@ -293,9 +347,10 @@ const renderInvestmentDetail = (
   if (account.cost_basis > 0) {
     returnPct = (gain / account.cost_basis) * 100;
   }
+  const annualized = computeAccountXirr(account, snapshots);
 
   return (
-    <div className="flex items-center gap-4 pt-2 text-xs">
+    <div className="flex flex-wrap items-start gap-x-4 gap-y-2 pt-2 text-xs">
       <div>
         <p className="text-muted-foreground">{t('networth.detail.costBasis')}</p>
         <p className="font-medium tabular-nums">
@@ -316,6 +371,34 @@ const renderInvestmentDetail = (
           {returnPct.toFixed(1)}%)
         </p>
       </div>
+      {renderAnnualized(annualized, t)}
+    </div>
+  );
+};
+
+const renderAnnualized = (
+  annualized: number | null,
+  t: TranslateFunction,
+) => {
+  if (annualized == null) return null;
+
+  const isPositive = annualized >= 0;
+  const pct = annualized * 100;
+
+  return (
+    <div>
+      <p className="text-muted-foreground">
+        {t('networth.detail.annualized')}
+      </p>
+      <p
+        className={cn(
+          'font-medium tabular-nums',
+          getGainClass(isPositive),
+        )}
+      >
+        {renderGainSign(isPositive)}
+        {pct.toFixed(1)}%
+      </p>
     </div>
   );
 };

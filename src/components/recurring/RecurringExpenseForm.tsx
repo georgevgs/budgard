@@ -40,6 +40,7 @@ import {
 } from '@/lib/validations';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Category } from '@/types/Category';
+import type { Account } from '@/types/Account';
 import { useTranslation } from 'react-i18next';
 
 const frequencyValues = [
@@ -61,6 +62,7 @@ type RecurringExpenseFormProps = {
   expense?: RecurringExpense;
   prefill?: RecurringExpensePrefill;
   categories: Category[];
+  investmentAccounts?: Account[];
   type?: 'expense' | 'income';
   onSubmit: (values: RecurringExpenseFormData) => Promise<void>;
   onClose: () => void;
@@ -70,6 +72,7 @@ const RecurringExpenseForm = ({
   expense,
   prefill,
   categories,
+  investmentAccounts = [],
   type = 'expense',
   onSubmit,
   onClose,
@@ -87,8 +90,12 @@ const RecurringExpenseForm = ({
       frequency: expense?.frequency ?? prefill?.frequency ?? 'monthly',
       start_date: expense ? parseISO(expense.start_date) : new Date(),
       end_date: expense?.end_date ? parseISO(expense.end_date) : undefined,
+      linked_account_id: expense?.linked_account_id ?? null,
     },
   });
+
+  const isExpense = type === 'expense';
+  const showLinkedAccount = isExpense && investmentAccounts.length > 0;
 
   const isStartDateDisabled = (date: Date) => {
     if (expense) return false;
@@ -252,6 +259,8 @@ const RecurringExpenseForm = ({
               )}
             />
 
+            {renderLinkedAccountField(form, showLinkedAccount, investmentAccounts, t)}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -373,6 +382,64 @@ const resolveAmountDefault = (
   }
 
   return '';
+};
+
+import type { UseFormReturn } from 'react-hook-form';
+
+const NO_LINKED_ACCOUNT = 'none';
+
+const renderLinkedAccountField = (
+  form: UseFormReturn<RecurringExpenseFormData>,
+  show: boolean,
+  accounts: Account[],
+  t: TranslateFunction,
+) => {
+  if (!show) return null;
+
+  return (
+    <FormField
+      control={form.control}
+      name="linked_account_id"
+      render={({ field }) => (
+        <FormItem>
+          <Label>{t('recurring.linkedAccountLabel')}</Label>
+          <Select
+            onValueChange={(value) => {
+              if (value === NO_LINKED_ACCOUNT) {
+                field.onChange(null);
+
+                return;
+              }
+              field.onChange(value);
+            }}
+            defaultValue={field.value ?? NO_LINKED_ACCOUNT}
+          >
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={t('recurring.linkedAccountPlaceholder')}
+                />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              <SelectItem value={NO_LINKED_ACCOUNT}>
+                {t('recurring.noLinkedAccount')}
+              </SelectItem>
+              {accounts.map((account) => (
+                <SelectItem key={account.id} value={account.id}>
+                  {account.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            {t('recurring.linkedAccountHint')}
+          </p>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
 };
 
 const renderCategoryIcon = (category: { icon?: string | null; color: string }) => {

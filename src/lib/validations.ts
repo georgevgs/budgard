@@ -226,6 +226,7 @@ export const recurringExpenseSchema = z
       required_error: 'Start date is required',
     }),
     end_date: z.date().optional(),
+    linked_account_id: z.string().nullable().optional(),
   })
   .refine((data) => !data.end_date || data.end_date >= data.start_date, {
     message: 'End date must be after start date',

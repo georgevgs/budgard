@@ -39,22 +39,33 @@ import {
 } from '@/lib/validations';
 import type { Account } from '@/types/Account';
 
+export type SnapshotMode = 'value' | 'contribution';
+
 type Props = {
   account: Account;
   onClose: () => void;
+  mode?: SnapshotMode;
 }
 
-const BalanceSnapshotForm = ({ account, onClose }: Props) => {
+const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
   const { t, i18n } = useTranslation();
   const dateLocale: Locale = i18n.language === 'el' ? el : enUS;
   const { handleSnapshotCreate } = useDataOperations();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isInvestment = account.kind === 'investment';
+  const isContributionMode = isInvestment && mode === 'contribution';
+
+  let balanceDefault = '';
+  if (isContributionMode) {
+    // Hidden in contribution mode but the schema requires it; we replace
+    // it with current_balance + contribution at submit.
+    balanceDefault = formatCurrencyInput(String(account.current_balance));
+  }
 
   const form = useForm<AccountBalanceFormData>({
     resolver: zodResolver(accountBalanceSchema),
     defaultValues: {
-      balance: '',
+      balance: balanceDefault,
       contribution_delta: '',
       recorded_at: new Date(),
       note: '',
@@ -64,7 +75,6 @@ const BalanceSnapshotForm = ({ account, onClose }: Props) => {
   const handleSubmit = async (values: AccountBalanceFormData) => {
     setIsSubmitting(true);
     try {
-      const balance = parseCurrencyInput(values.balance);
       const recordedAt = format(values.recorded_at, 'yyyy-MM-dd');
 
       let contribution: number | null = null;
@@ -75,6 +85,23 @@ const BalanceSnapshotForm = ({ account, onClose }: Props) => {
           contribution =
             sign * parseCurrencyInput(trimmed.replace(/^-/, ''));
         }
+      }
+
+      if (isContributionMode && (contribution == null || contribution === 0)) {
+        form.setError('contribution_delta', {
+          type: 'required',
+          message: t('networth.snapshot.contributionRequired'),
+        });
+        setIsSubmitting(false);
+
+        return;
+      }
+
+      let balance: number;
+      if (isContributionMode) {
+        balance = account.current_balance + (contribution ?? 0);
+      } else {
+        balance = parseCurrencyInput(values.balance);
       }
 
       await handleSnapshotCreate({
@@ -112,52 +139,23 @@ const BalanceSnapshotForm = ({ account, onClose }: Props) => {
           >
             <DialogHeader className="pb-4" data-draggable-area>
               <DialogTitle className="text-xl">
-                {t('networth.snapshot.title', { name: account.name })}
+                {renderTitle(isContributionMode, account.name, t)}
               </DialogTitle>
               <DialogDescription>
-                {renderSnapshotDescription(isInvestment, t)}
+                {renderSnapshotDescription(isInvestment, isContributionMode, t)}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 pb-4">
-            <FormField
-              control={form.control}
-              name="balance"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      {getCurrencySymbol(account.default_currency)}
-                    </span>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        pattern="[0-9,.]*"
-                        placeholder={
-                          isInvestment
-                            ? t('networth.snapshot.valuePlaceholder')
-                            : t('networth.snapshot.balancePlaceholder')
-                        }
-                        value={field.value}
-                        onChange={(e) =>
-                          field.onChange(formatCurrencyInput(e.target.value))
-                        }
-                        className="pl-7"
-                        aria-label={
-                          isInvestment
-                            ? t('networth.snapshot.valueLabel')
-                            : t('networth.snapshot.balanceLabel')
-                        }
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {renderBalanceField(form, account, isInvestment, isContributionMode, t)}
 
-            {renderContributionField(form, isInvestment, account.default_currency, t)}
+            {renderContributionField(
+              form,
+              isInvestment,
+              isContributionMode,
+              account.default_currency,
+              t,
+            )}
 
             <FormField
               control={form.control}
@@ -242,10 +240,26 @@ type TranslateFunction = (
 
 import type { UseFormReturn } from 'react-hook-form';
 
-const renderSnapshotDescription = (
-  isInvestment: boolean,
+const renderTitle = (
+  isContributionMode: boolean,
+  name: string,
   t: TranslateFunction,
 ) => {
+  if (isContributionMode) {
+    return t('networth.snapshot.contributionTitle', { name });
+  }
+
+  return t('networth.snapshot.title', { name });
+};
+
+const renderSnapshotDescription = (
+  isInvestment: boolean,
+  isContributionMode: boolean,
+  t: TranslateFunction,
+) => {
+  if (isContributionMode) {
+    return t('networth.snapshot.descriptionContribution');
+  }
   if (isInvestment) return t('networth.snapshot.descriptionInvestment');
 
   return t('networth.snapshot.description');
@@ -257,13 +271,69 @@ const renderSubmitLabel = (isSubmitting: boolean, t: TranslateFunction) => {
   return t('networth.snapshot.save');
 };
 
+const renderBalanceField = (
+  form: UseFormReturn<AccountBalanceFormData>,
+  account: Account,
+  isInvestment: boolean,
+  isContributionMode: boolean,
+  t: TranslateFunction,
+) => {
+  if (isContributionMode) return null;
+
+  let placeholder = t('networth.snapshot.balancePlaceholder');
+  let label = t('networth.snapshot.balanceLabel');
+  if (isInvestment) {
+    placeholder = t('networth.snapshot.valuePlaceholder');
+    label = t('networth.snapshot.valueLabel');
+  }
+
+  return (
+    <FormField
+      control={form.control}
+      name="balance"
+      render={({ field }) => (
+        <FormItem>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+              {getCurrencySymbol(account.default_currency)}
+            </span>
+            <FormControl>
+              <Input
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9,.]*"
+                placeholder={placeholder}
+                value={field.value}
+                onChange={(e) =>
+                  field.onChange(formatCurrencyInput(e.target.value))
+                }
+                className="pl-7"
+                aria-label={label}
+              />
+            </FormControl>
+          </div>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
 const renderContributionField = (
   form: UseFormReturn<AccountBalanceFormData>,
   isInvestment: boolean,
+  isContributionMode: boolean,
   currency: string,
   t: TranslateFunction,
 ) => {
   if (!isInvestment) return null;
+
+  let placeholder = t('networth.snapshot.contributionPlaceholder');
+  let hint = t('networth.snapshot.contributionHint');
+  if (isContributionMode) {
+    placeholder = t('networth.snapshot.contributionOnlyPlaceholder');
+    hint = t('networth.snapshot.contributionOnlyHint');
+  }
 
   return (
     <FormField
@@ -280,7 +350,7 @@ const renderContributionField = (
                 type="text"
                 inputMode="decimal"
                 pattern="-?[0-9,.]*"
-                placeholder={t('networth.snapshot.contributionPlaceholder')}
+                placeholder={placeholder}
                 value={field.value ?? ''}
                 onChange={(e) => field.onChange(e.target.value)}
                 className="pl-7"
@@ -288,9 +358,7 @@ const renderContributionField = (
               />
             </FormControl>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {t('networth.snapshot.contributionHint')}
-          </p>
+          <p className="text-xs text-muted-foreground">{hint}</p>
           <FormMessage />
         </FormItem>
       )}

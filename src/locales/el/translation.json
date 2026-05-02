@@ -306,6 +306,10 @@
     "frequency": "Συχνότητα",
     "startDate": "Ημερομηνία Έναρξης",
     "endDate": "Ημερομηνία Λήξης",
+    "linkedAccountLabel": "Καταγραφή ως εισφορά σε",
+    "linkedAccountPlaceholder": "Διάλεξε επενδυτικό λογαριασμό",
+    "linkedAccountHint": "Κάθε δημιουργούμενο έξοδο θα καταγράφεται και ως εισφορά σε αυτόν τον λογαριασμό.",
+    "noLinkedAccount": "Χωρίς σύνδεση με λογαριασμό",
     "frequencies": {
       "weekly": "Εβδομαδιαία",
       "biweekly": "Κάθε 2 εβδομάδες",
@@ -579,6 +583,8 @@
       "title": "Ενημέρωση {{name}}",
       "description": "Κατέγραψε το τρέχον υπόλοιπο — θα κρατήσουμε ιστορικό για να βλέπεις την εξέλιξη.",
       "descriptionInvestment": "Κατέγραψε την τρέχουσα αξία και τυχόν καταθέσεις ή αναλήψεις από την τελευταία ενημέρωση.",
+      "descriptionContribution": "Κατέγραψε μόνο μια κατάθεση ή ανάληψη — θα κρατήσουμε την τελευταία γνωστή αξία.",
+      "contributionTitle": "Καταχώρηση εισφοράς σε {{name}}",
       "balanceLabel": "Τρέχον υπόλοιπο",
       "balancePlaceholder": "Τρέχον υπόλοιπο",
       "valueLabel": "Τρέχουσα αξία",
@@ -586,6 +592,9 @@
       "contributionLabel": "Καθαρή εισφορά από την τελευταία ενημέρωση",
       "contributionPlaceholder": "Καταθέσεις − αναλήψεις (με πρόσημο)",
       "contributionHint": "Χρησιμοποίησε σύμβολο μείον για αναλήψεις. Άφησε κενό αν δεν υπάρχουν.",
+      "contributionOnlyPlaceholder": "Ποσό (− για ανάληψη)",
+      "contributionOnlyHint": "Χρησιμοποίησε σύμβολο μείον για ανάληψη.",
+      "contributionRequired": "Δώσε ποσό διάφορο του μηδενός.",
       "noteLabel": "Σημείωση",
       "notePlaceholder": "Προαιρετική σημείωση",
       "pickDate": "Διάλεξε ημερομηνία",
@@ -600,11 +609,19 @@
       "deleteSnapshotDescription": "Να αφαιρεθεί αυτή η εγγραφή υπολοίπου; Το προγενέστερο ιστορικό δεν θα επηρεαστεί.",
       "costBasis": "Κόστος βάσης",
       "gain": "Κέρδος",
+      "annualized": "Ετησιοποιημένη",
+      "updateValue": "Νέα αξία",
+      "logContribution": "Νέα εισφορά",
       "contribDeposit": "+{{amount}} είσοδος",
       "contribWithdraw": "−{{amount}} έξοδος"
     },
     "chart": {
-      "title": "Στον χρόνο"
+      "title": "Στον χρόνο",
+      "balance": "Υπόλοιπο",
+      "value": "Αξία"
+    },
+    "allocation": {
+      "title": "Κατανομή επενδύσεων"
     }
   },
   "debts": {

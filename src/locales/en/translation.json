@@ -306,6 +306,10 @@
     "frequency": "Frequency",
     "startDate": "Start Date",
     "endDate": "End Date",
+    "linkedAccountLabel": "Track as contribution to",
+    "linkedAccountPlaceholder": "Select an investment account",
+    "linkedAccountHint": "Each generated expense will also log a contribution on this account.",
+    "noLinkedAccount": "Don't link to an account",
     "frequencies": {
       "weekly": "Weekly",
       "biweekly": "Every 2 weeks",
@@ -577,8 +581,10 @@
     },
     "snapshot": {
       "title": "Update {{name}}",
+      "contributionTitle": "Log contribution to {{name}}",
       "description": "Log the current balance — we'll keep history so you can see growth over time.",
       "descriptionInvestment": "Log the current value, plus any deposits or withdrawals since your last update.",
+      "descriptionContribution": "Just record a deposit or withdrawal — we'll keep the latest known value.",
       "balanceLabel": "Current balance",
       "balancePlaceholder": "Current balance",
       "valueLabel": "Current value",
@@ -586,6 +592,9 @@
       "contributionLabel": "Net contribution since last update",
       "contributionPlaceholder": "Deposits − withdrawals (signed)",
       "contributionHint": "Use a minus sign for withdrawals. Leave blank if none.",
+      "contributionOnlyPlaceholder": "Amount (− for withdrawal)",
+      "contributionOnlyHint": "Use a minus sign for a withdrawal.",
+      "contributionRequired": "Enter a non-zero amount.",
       "noteLabel": "Note",
       "notePlaceholder": "Optional note",
       "pickDate": "Pick a date",
@@ -600,11 +609,19 @@
       "deleteSnapshotDescription": "Remove this balance entry? Earlier history is unaffected.",
       "costBasis": "Cost basis",
       "gain": "Gain",
+      "annualized": "Annualized",
+      "updateValue": "Update value",
+      "logContribution": "Log contribution",
       "contribDeposit": "+{{amount}} in",
       "contribWithdraw": "−{{amount}} out"
     },
     "chart": {
-      "title": "Over time"
+      "title": "Over time",
+      "balance": "Balance",
+      "value": "Value"
+    },
+    "allocation": {
+      "title": "Investment allocation"
     }
   },
   "debts": {

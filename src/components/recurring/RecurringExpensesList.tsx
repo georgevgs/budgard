@@ -40,6 +40,7 @@ const RecurringExpensesList = () => {
     expenseCategories,
     incomeCategories,
     expenses,
+    accounts,
     defaultCurrency,
     isLoading,
   } = useData();
@@ -64,6 +65,10 @@ const RecurringExpensesList = () => {
     categories = incomeCategories;
   }
 
+  const investmentAccounts = accounts.filter(
+    (a) => a.kind === 'investment' && !a.is_archived,
+  );
+
   const handleSubmit = async (values: RecurringExpenseFormData) => {
     if (!session?.user?.id) return;
 
@@ -87,6 +92,10 @@ const RecurringExpensesList = () => {
         end_date: endDate,
         user_id: session.user.id,
       };
+
+      if (mode === 'expense') {
+        data.linked_account_id = values.linked_account_id ?? null;
+      }
 
       if (mode === 'income') {
         await submitRecurringIncome(data, selectedExpense?.id);
@@ -222,6 +231,7 @@ const RecurringExpensesList = () => {
             expense={selectedExpense}
             prefill={prefill}
             categories={categories}
+            investmentAccounts={investmentAccounts}
             type={mode}
             onSubmit={handleSubmit}
             onClose={handleFormClose}
