@@ -161,6 +161,50 @@ describe('buildCsv', () => {
 
     expect(csv).toBe('x,y\r\n,');
   });
+
+  it('defuses formula triggers (=, +, -, @, tab, CR) with a leading apostrophe', () => {
+    const csv = buildCsv(['x'], [
+      ['=SUM(A1:A2)'],
+      ['+1+1'],
+      ['-2+3'],
+      ['@cmd'],
+      ['\tleading-tab'],
+      ['\rleading-cr'],
+    ]);
+    const lines = csv.split('\r\n');
+
+    expect(lines[1]).toBe("'=SUM(A1:A2)");
+    expect(lines[2]).toBe("'+1+1");
+    expect(lines[3]).toBe("'-2+3");
+    expect(lines[4]).toBe("'@cmd");
+    // Tab doesn't trigger RFC-4180 quoting; CR does.
+    expect(lines[5]).toBe("'\tleading-tab");
+    expect(lines[6]).toBe('"\'\rleading-cr"');
+  });
+
+  it('combines formula defuse with comma-quoting when both apply', () => {
+    const csv = buildCsv(['x'], [['=A1, B2']]);
+    const lines = csv.split('\r\n');
+
+    expect(lines[1]).toBe('"\'=A1, B2"');
+  });
+
+  it('leaves benign strings starting with letters or digits unchanged', () => {
+    const csv = buildCsv(['x'], [['Coffee'], ['12.50']]);
+    const lines = csv.split('\r\n');
+
+    expect(lines[1]).toBe('Coffee');
+    expect(lines[2]).toBe('12.50');
+  });
+
+  it('preserves plain negative numbers so amount columns stay summable', () => {
+    const csv = buildCsv(['x'], [['-3.50'], ['-1200'], ['-0.99']]);
+    const lines = csv.split('\r\n');
+
+    expect(lines[1]).toBe('-3.50');
+    expect(lines[2]).toBe('-1200');
+    expect(lines[3]).toBe('-0.99');
+  });
 });
 
 describe('buildTransactionsCsv', () => {

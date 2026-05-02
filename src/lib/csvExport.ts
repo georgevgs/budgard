@@ -162,10 +162,21 @@ const generateMonthCsv = (
   return buildCsv(headers, rows);
 };
 
+// Defuse Excel/Numbers/LibreOffice formula evaluation when a cell starts with
+// =, +, -, @, tab, or CR. The leading apostrophe is the standard mitigation
+// for OWASP CSV Injection. Plain numbers (e.g. negative amounts like -3.50)
+// are kept as-is so spreadsheets can still sum the Amount column.
+const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
+const PLAIN_NUMBER = /^-?\d+(?:\.\d+)?$/;
+
 const escapeCsvField = (cell: CsvCell): string => {
   if (cell === null || cell === undefined) return '';
 
-  const str = String(cell);
+  let str = String(cell);
+  if (FORMULA_TRIGGERS.test(str) && !PLAIN_NUMBER.test(str)) {
+    str = `'${str}`;
+  }
+
   if (
     str.includes(',') ||
     str.includes('"') ||
