@@ -36,6 +36,7 @@ import { useDataOperations } from '@/hooks/useDataOperations';
 import { useDebtProgress } from '@/hooks/useDebtProgress';
 import { useDebtPayments } from '@/hooks/useDebtPayments';
 import type { Debt } from '@/types/Debt';
+import type { Expense } from '@/types/Expense';
 import DebtPaymentForm from '@/components/debts/DebtPaymentForm';
 import DebtProgressBar from '@/components/debts/DebtProgressBar';
 

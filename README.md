@@ -39,6 +39,13 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Toggle active/inactive without deleting
 - Preview estimated monthly cost
 
+**Income**
+- Log one-off and recurring income alongside expenses
+- Net cash flow card (income − expenses) with month-end projection
+- 50/30/20 ring (needs / wants / savings) computed live from your data
+- Savings nudge sheet that suggests a target based on the current month
+- Stored in a single transactions table with a `type` discriminator
+
 **Analytics**
 - Monthly spending snapshot with month-over-month comparison
 - Interactive year-over-year area chart with clickable month drill-down
@@ -48,9 +55,27 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Shareable monthly report card — export as PNG or share via native share sheet
 
 **Budget**
-- Set a monthly budget target
+- Set a monthly total budget target
+- Per-category budgets with their own 80% / 100% alerts
 - Real-time progress tracking with color-coded alerts at 75%, 90%, and 100%
 - Budget reference line on analytics chart
+
+**Savings Goals**
+- Create goals with a target amount and optional deadline
+- Visual progress bar with on-track / behind status
+- Edit, contribute, or delete from a single goal card
+
+**Net Worth**
+- Manual accounts (checking, savings, cash, investment-lite, other)
+- Snapshot-based balance history per account
+- Net worth chart with month-over-month delta
+- Account groups roll up totals by category
+
+**Debt Tracker**
+- Track debts with balance, APR, and minimum payment
+- Snowball or avalanche payoff plan with payoff date estimate
+- Log payments as linked expenses; balance auto-updates via DB trigger
+- Per-debt progress bar and detail sheet
 
 **Categories and Tags**
 - Custom categories with user-chosen colors and emoji icons
