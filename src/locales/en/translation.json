@@ -180,6 +180,31 @@
       "note": "Based on actuals so far plus active recurring."
     }
   },
+  "annualExport": {
+    "title": "Export {{year}}",
+    "description": "Download a CSV with every {{year}} transaction — handy for tax season or keeping personal records.",
+    "transactionCount_one": "{{count}} transaction logged in {{year}}",
+    "transactionCount_other": "{{count}} transactions logged in {{year}}",
+    "exportTransactions": "All transactions",
+    "exportSummary": "Category summary",
+    "exportedTitle": "Export ready",
+    "exportedDescription_one": "Downloaded {{count}} transaction from {{year}}.",
+    "exportedDescription_other": "Downloaded {{count}} transactions from {{year}}.",
+    "exportedSummaryDescription": "Downloaded the {{year}} category summary.",
+    "csv": {
+      "date": "Date",
+      "type": "Type",
+      "amount": "Amount",
+      "category": "Category",
+      "description": "Description",
+      "tag": "Tag",
+      "total": "Total",
+      "count": "Transactions",
+      "income": "Income",
+      "expense": "Expense",
+      "uncategorized": "Uncategorized"
+    }
+  },
   "cashFlow": {
     "title": "Cash Flow",
     "yearNet": "{{year}} net",

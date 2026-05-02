@@ -180,6 +180,31 @@
       "note": "Βασίζεται στα πραγματικά έως τώρα συν τα ενεργά επαναλαμβανόμενα."
     }
   },
+  "annualExport": {
+    "title": "Εξαγωγή {{year}}",
+    "description": "Κατεβάστε ένα CSV με όλες τις συναλλαγές του {{year}} — βολικό για τη φορολογική περίοδο ή το προσωπικό σας αρχείο.",
+    "transactionCount_one": "{{count}} συναλλαγή το {{year}}",
+    "transactionCount_other": "{{count}} συναλλαγές το {{year}}",
+    "exportTransactions": "Όλες οι συναλλαγές",
+    "exportSummary": "Σύνοψη ανά κατηγορία",
+    "exportedTitle": "Η εξαγωγή είναι έτοιμη",
+    "exportedDescription_one": "Λήψη {{count}} συναλλαγής για το {{year}}.",
+    "exportedDescription_other": "Λήψη {{count}} συναλλαγών για το {{year}}.",
+    "exportedSummaryDescription": "Λήψη σύνοψης κατηγοριών για το {{year}}.",
+    "csv": {
+      "date": "Ημερομηνία",
+      "type": "Τύπος",
+      "amount": "Ποσό",
+      "category": "Κατηγορία",
+      "description": "Περιγραφή",
+      "tag": "Ετικέτα",
+      "total": "Σύνολο",
+      "count": "Συναλλαγές",
+      "income": "Έσοδο",
+      "expense": "Έξοδο",
+      "uncategorized": "Χωρίς κατηγορία"
+    }
+  },
   "cashFlow": {
     "title": "Ταμειακή Ροή",
     "yearNet": "Καθαρό {{year}}",

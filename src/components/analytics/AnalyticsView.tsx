@@ -31,6 +31,7 @@ import { CategoryDrillDown } from '@/components/analytics/CategoryDrillDown';
 import { MonthDrillDown } from '@/components/analytics/MonthDrillDown';
 import MonthlyReportCard from '@/components/analytics/MonthlyReportCard';
 import CashFlowSection from '@/components/analytics/CashFlowSection';
+import AnnualExportCard from '@/components/analytics/AnnualExportCard';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '@/lib/utils';
@@ -412,6 +413,9 @@ const AnalyticsView = () => {
 
       {/* Cash flow (income vs expense, year view) */}
       <CashFlowSection selectedYear={selectedYear} />
+
+      {/* Annual export (CSV download for tax/records) */}
+      <AnnualExportCard selectedYear={selectedYear} />
 
       {/* Category breakdown */}
       <div className="space-y-3">
