@@ -90,126 +90,152 @@ const DebtPaymentForm = ({ debt, onClose }: Props) => {
   };
 
   return (
-    <div className="flex flex-col max-h-full">
-      <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
+    <>
+      <div
+        className="flex justify-center pt-3 pb-2 sm:hidden shrink-0"
+        data-drag-handle
+      >
         <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
       </div>
 
-      <div
-        className="overflow-y-auto flex-1 px-4 sm:px-6 overscroll-contain"
-        style={{ touchAction: 'pan-y' }}
-      >
-        <DialogHeader className="pb-4" data-draggable-area>
-          <DialogTitle className="text-xl">
-            {t('debts.payment.title', { name: debt.name })}
-          </DialogTitle>
-          <DialogDescription>
-            {t('debts.payment.description')}
-          </DialogDescription>
-        </DialogHeader>
-
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4 pb-4"
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="flex flex-col flex-1 min-h-0"
+        >
+          <div
+            className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 overscroll-contain"
+            style={{ touchAction: 'pan-y' }}
           >
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      {getCurrencySymbol(debt.currency)}
-                    </span>
+            <DialogHeader className="pb-4" data-draggable-area>
+              <DialogTitle className="text-xl">
+                {t('debts.payment.title', { name: debt.name })}
+              </DialogTitle>
+              <DialogDescription>
+                {t('debts.payment.description')}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 pb-4">
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        {getCurrencySymbol(debt.currency)}
+                      </span>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          inputMode="decimal"
+                          pattern="[0-9,.]*"
+                          placeholder={t('debts.payment.amountPlaceholder')}
+                          value={field.value}
+                          onChange={(e) =>
+                            field.onChange(formatCurrencyInput(e.target.value))
+                          }
+                          className="pl-7"
+                          aria-label={t('debts.payment.amountLabel')}
+                        />
+                      </FormControl>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <Popover modal={false}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className={cn(
+                              'w-full justify-start text-left font-normal',
+                              !field.value && 'text-muted-foreground',
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {renderDateLabel(field.value, dateLocale, t)}
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          locale={dateLocale}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
                     <FormControl>
                       <Input
-                        type="text"
-                        inputMode="decimal"
-                        pattern="[0-9,.]*"
-                        placeholder={t('debts.payment.amountPlaceholder')}
-                        value={field.value}
-                        onChange={(e) =>
-                          field.onChange(formatCurrencyInput(e.target.value))
-                        }
-                        className="pl-7"
-                        aria-label={t('debts.payment.amountLabel')}
+                        {...field}
+                        placeholder={t('debts.payment.descriptionPlaceholder')}
+                        autoComplete="off"
+                        aria-label={t('debts.payment.descriptionLabel')}
                       />
                     </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <Popover modal={false}>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className={cn(
-                            'w-full justify-start text-left font-normal',
-                            !field.value && 'text-muted-foreground',
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {field.value
-                            ? format(field.value, 'PPP', { locale: dateLocale })
-                            : t('debts.payment.pickDate')}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        locale={dateLocale}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder={t('debts.payment.descriptionPlaceholder')}
-                      autoComplete="off"
-                      aria-label={t('debts.payment.descriptionLabel')}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex gap-3 justify-end pt-2 pb-2">
-              <Button type="button" variant="outline" onClick={onClose}>
-                {t('common.cancel')}
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? t('common.saving') : t('debts.payment.save')}
-              </Button>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-          </form>
-        </Form>
-      </div>
-    </div>
+          </div>
+
+          <div className="flex gap-3 justify-end px-4 sm:px-6 py-3 border-t border-border/50 shrink-0">
+            <Button type="button" variant="outline" onClick={onClose}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {renderSubmitLabel(isSubmitting, t)}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
   );
 }
+
+// --- Helpers ---
+
+type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
+const renderDateLabel = (
+  value: Date | undefined,
+  locale: Locale,
+  t: TranslateFunction,
+) => {
+  if (!value) return t('debts.payment.pickDate');
+
+  return format(value, 'PPP', { locale });
+};
+
+const renderSubmitLabel = (isSubmitting: boolean, t: TranslateFunction) => {
+  if (isSubmitting) return t('common.saving');
+
+  return t('debts.payment.save');
+};
 
 export default DebtPaymentForm;

@@ -113,29 +113,33 @@ const AccountForm = ({ account, onClose }: Props) => {
   };
 
   return (
-    <div className="flex flex-col max-h-full">
-      <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
+    <>
+      <div
+        className="flex justify-center pt-3 pb-2 sm:hidden shrink-0"
+        data-drag-handle
+      >
         <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
       </div>
 
-      <div
-        className="overflow-y-auto flex-1 px-4 sm:px-6 overscroll-contain"
-        style={{ touchAction: 'pan-y' }}
-      >
-        <DialogHeader className="pb-4" data-draggable-area>
-          <DialogTitle className="text-xl">
-            {isEditing
-              ? t('networth.form.editTitle')
-              : t('networth.form.addTitle')}
-          </DialogTitle>
-          <DialogDescription>{t('networth.formDescription')}</DialogDescription>
-        </DialogHeader>
-
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4 pb-4"
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="flex flex-col flex-1 min-h-0"
+        >
+          <div
+            className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 overscroll-contain"
+            style={{ touchAction: 'pan-y' }}
           >
+            <DialogHeader className="pb-4" data-draggable-area>
+              <DialogTitle className="text-xl">
+                {renderFormTitle(isEditing, t)}
+              </DialogTitle>
+              <DialogDescription>
+                {t('networth.formDescription')}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 pb-4">
             <FormField
               control={form.control}
               name="name"
@@ -234,20 +238,20 @@ const AccountForm = ({ account, onClose }: Props) => {
               )}
             />
 
-            <div className="flex gap-3 justify-end pt-2 pb-2">
-              <Button type="button" variant="outline" onClick={onClose}>
-                {t('common.cancel')}
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting
-                  ? t('common.saving')
-                  : t('networth.form.save')}
-              </Button>
             </div>
-          </form>
-        </Form>
-      </div>
-    </div>
+          </div>
+
+          <div className="flex gap-3 justify-end px-4 sm:px-6 py-3 border-t border-border/50 shrink-0">
+            <Button type="button" variant="outline" onClick={onClose}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {renderSubmitLabel(isSubmitting, t)}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
   );
 }
 
@@ -261,6 +265,18 @@ type TranslateFunction = (
 ) => string;
 
 import type { UseFormReturn } from 'react-hook-form';
+
+const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {
+  if (isEditing) return t('networth.form.editTitle');
+
+  return t('networth.form.addTitle');
+};
+
+const renderSubmitLabel = (isSubmitting: boolean, t: TranslateFunction) => {
+  if (isSubmitting) return t('common.saving');
+
+  return t('networth.form.save');
+};
 
 const renderInitialBalanceField = (
   form: UseFormReturn<AccountFormData>,

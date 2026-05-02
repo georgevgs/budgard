@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { cn, formatCurrency, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
 import { useDebtPayoffPlan } from '@/hooks/useDebtPayoffPlan';
@@ -77,33 +76,18 @@ const DebtPayoffPlan = ({ debts, defaultCurrency }: Props) => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-2 gap-2">
-        <Button
-          type="button"
-          variant={strategy === 'avalanche' ? 'default' : 'outline'}
-          onClick={() => setStrategy('avalanche')}
-          className="h-auto py-3 flex-col items-start gap-1"
+      <div className="space-y-2">
+        <div
+          role="tablist"
+          aria-label={t('debts.payoff.strategyAriaLabel')}
+          className="bg-muted rounded-xl p-1 grid grid-cols-2 gap-1"
         >
-          <span className="font-semibold">
-            {t('debts.payoff.avalanche')}
-          </span>
-          <span className="text-[11px] font-normal opacity-80 text-left">
-            {t('debts.payoff.avalancheHint')}
-          </span>
-        </Button>
-        <Button
-          type="button"
-          variant={strategy === 'snowball' ? 'default' : 'outline'}
-          onClick={() => setStrategy('snowball')}
-          className="h-auto py-3 flex-col items-start gap-1"
-        >
-          <span className="font-semibold">
-            {t('debts.payoff.snowball')}
-          </span>
-          <span className="text-[11px] font-normal opacity-80 text-left">
-            {t('debts.payoff.snowballHint')}
-          </span>
-        </Button>
+          {renderStrategyTab('avalanche', strategy, setStrategy, t)}
+          {renderStrategyTab('snowball', strategy, setStrategy, t)}
+        </div>
+        <p className="text-xs text-muted-foreground px-1">
+          {pickStrategyHint(strategy, t)}
+        </p>
       </div>
 
       {renderResultCard(chosen, defaultCurrency, strategy, t)}
@@ -121,6 +105,82 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const renderStrategyTab = (
+  value: PayoffStrategy,
+  current: PayoffStrategy,
+  onChange: (next: PayoffStrategy) => void,
+  t: TranslateFunction,
+) => {
+  const isActive = current === value;
+
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={isActive}
+      onClick={() => onChange(value)}
+      className={cn(
+        'rounded-lg py-2 px-3 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        pickStrategyTabClass(isActive),
+      )}
+    >
+      {t(`debts.payoff.${value}`)}
+    </button>
+  );
+};
+
+const pickStrategyTabClass = (isActive: boolean) => {
+  if (isActive) return 'bg-card text-foreground shadow-sm';
+
+  return 'text-muted-foreground hover:text-foreground';
+};
+
+const pickStrategyHint = (
+  strategy: PayoffStrategy,
+  t: TranslateFunction,
+) => {
+  if (strategy === 'avalanche') return t('debts.payoff.avalancheHint');
+
+  return t('debts.payoff.snowballHint');
+};
+
+const renderPayoffOrderRow = (
+  entry: { debt: Debt; month: number },
+  index: number,
+  t: TranslateFunction,
+) => {
+  return (
+    <li
+      key={entry.debt.id}
+      className="flex items-center gap-3 px-3 py-2 rounded-lg border border-border/40 bg-card/50"
+    >
+      <div
+        className={cn(
+          'h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0',
+          pickRankClass(index),
+        )}
+      >
+        {index + 1}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium truncate">{entry.debt.name}</p>
+        <p className="text-xs text-muted-foreground">
+          {entry.debt.apr.toFixed(2)}% APR
+        </p>
+      </div>
+      <p className="text-xs text-muted-foreground tabular-nums shrink-0">
+        {t('debts.payoff.paidInMonth', { month: entry.month })}
+      </p>
+    </li>
+  );
+};
+
+const pickRankClass = (index: number) => {
+  if (index === 0) return 'bg-primary text-primary-foreground';
+
+  return 'bg-muted text-muted-foreground';
+};
 
 const renderResultCard = (
   result: SimResult,
@@ -148,47 +208,50 @@ const renderResultCard = (
 
   return (
     <Card className="border-primary/30 rounded-2xl bg-primary/5">
-      <CardContent className="p-5 space-y-2">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Sparkles className="h-3.5 w-3.5" />
-          <span>
+      <CardContent className="p-5 space-y-3">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
+          <Sparkles className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate">
             {t('debts.payoff.usingStrategy', {
               strategy: t(`debts.payoff.${strategy}`),
             })}
           </span>
         </div>
-        <p className="text-2xl font-bold tabular-nums">
+        <p className="text-xl sm:text-2xl font-bold tabular-nums leading-tight break-words">
           {t('debts.payoff.debtFreeIn')}{' '}
           <span className="text-primary">
             {t('debts.monthsCount', { count: result.monthsToPayoff })}
           </span>
         </p>
-        <div className="flex items-center justify-between text-xs pt-1">
-          <span className="text-muted-foreground">
-            {t('debts.payoff.payoffDate')}
-          </span>
-          <span className="font-medium tabular-nums">{result.payoffDate}</span>
-        </div>
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">
-            {t('debts.payoff.totalInterest')}
-          </span>
-          <span className="font-medium tabular-nums">
-            {formatCurrency(result.totalInterestPaid, currency)}
-          </span>
-        </div>
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">
-            {t('debts.payoff.totalPaid')}
-          </span>
-          <span className="font-medium tabular-nums">
-            {formatCurrency(result.totalPaid, currency)}
-          </span>
+        <div className="space-y-1.5 pt-1">
+          {renderResultRow(
+            t('debts.payoff.payoffDate'),
+            result.payoffDate,
+          )}
+          {renderResultRow(
+            t('debts.payoff.totalInterest'),
+            formatCurrency(result.totalInterestPaid, currency),
+          )}
+          {renderResultRow(
+            t('debts.payoff.totalPaid'),
+            formatCurrency(result.totalPaid, currency),
+          )}
         </div>
       </CardContent>
     </Card>
   );
 }
+
+const renderResultRow = (label: string, value: string) => {
+  return (
+    <div className="flex items-baseline justify-between gap-3 text-xs">
+      <span className="text-muted-foreground shrink-0">{label}</span>
+      <span className="font-medium tabular-nums text-right break-all">
+        {value}
+      </span>
+    </div>
+  );
+};
 
 const renderComparison = (
   snowball: SimResult,
@@ -210,21 +273,25 @@ const renderComparison = (
         </div>
 
         <div className="grid grid-cols-2 gap-3 text-xs">
-          <div className="space-y-1.5">
-            <p className="font-semibold text-sm">{t('debts.payoff.avalanche')}</p>
-            <p className="text-muted-foreground">
+          <div className="space-y-1.5 min-w-0">
+            <p className="font-semibold text-sm truncate">
+              {t('debts.payoff.avalanche')}
+            </p>
+            <p className="text-muted-foreground truncate">
               {t('debts.monthsCount', { count: avalanche.monthsToPayoff })}
             </p>
-            <p className="tabular-nums">
+            <p className="tabular-nums break-all">
               {formatCurrency(avalanche.totalInterestPaid, currency)}
             </p>
           </div>
-          <div className="space-y-1.5">
-            <p className="font-semibold text-sm">{t('debts.payoff.snowball')}</p>
-            <p className="text-muted-foreground">
+          <div className="space-y-1.5 min-w-0">
+            <p className="font-semibold text-sm truncate">
+              {t('debts.payoff.snowball')}
+            </p>
+            <p className="text-muted-foreground truncate">
               {t('debts.monthsCount', { count: snowball.monthsToPayoff })}
             </p>
-            <p className="tabular-nums">
+            <p className="tabular-nums break-all">
               {formatCurrency(snowball.totalInterestPaid, currency)}
             </p>
           </div>
@@ -277,30 +344,9 @@ const renderPayoffOrder = (
           {t('debts.payoff.orderTitle')}
         </p>
         <ol className="space-y-2">
-          {ordered.map((entry, index) => (
-            <li
-              key={entry.debt.id}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg border border-border/40 bg-card/50"
-            >
-              <div
-                className={cn(
-                  'h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0',
-                  index === 0 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
-                )}
-              >
-                {index + 1}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium truncate">{entry.debt.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {entry.debt.apr.toFixed(2)}% APR
-                </p>
-              </div>
-              <p className="text-xs text-muted-foreground tabular-nums shrink-0">
-                {t('debts.payoff.paidInMonth', { month: entry.month })}
-              </p>
-            </li>
-          ))}
+          {ordered.map((entry, index) =>
+            renderPayoffOrderRow(entry, index, t),
+          )}
         </ol>
       </CardContent>
     </Card>

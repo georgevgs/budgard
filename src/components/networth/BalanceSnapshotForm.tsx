@@ -93,31 +93,33 @@ const BalanceSnapshotForm = ({ account, onClose }: Props) => {
   };
 
   return (
-    <div className="flex flex-col max-h-full">
-      <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
+    <>
+      <div
+        className="flex justify-center pt-3 pb-2 sm:hidden shrink-0"
+        data-drag-handle
+      >
         <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
       </div>
 
-      <div
-        className="overflow-y-auto flex-1 px-4 sm:px-6 overscroll-contain"
-        style={{ touchAction: 'pan-y' }}
-      >
-        <DialogHeader className="pb-4" data-draggable-area>
-          <DialogTitle className="text-xl">
-            {t('networth.snapshot.title', { name: account.name })}
-          </DialogTitle>
-          <DialogDescription>
-            {isInvestment
-              ? t('networth.snapshot.descriptionInvestment')
-              : t('networth.snapshot.description')}
-          </DialogDescription>
-        </DialogHeader>
-
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4 pb-4"
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="flex flex-col flex-1 min-h-0"
+        >
+          <div
+            className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 overscroll-contain"
+            style={{ touchAction: 'pan-y' }}
           >
+            <DialogHeader className="pb-4" data-draggable-area>
+              <DialogTitle className="text-xl">
+                {t('networth.snapshot.title', { name: account.name })}
+              </DialogTitle>
+              <DialogDescription>
+                {renderSnapshotDescription(isInvestment, t)}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 pb-4">
             <FormField
               control={form.control}
               name="balance"
@@ -212,18 +214,20 @@ const BalanceSnapshotForm = ({ account, onClose }: Props) => {
               )}
             />
 
-            <div className="flex gap-3 justify-end pt-2 pb-2">
-              <Button type="button" variant="outline" onClick={onClose}>
-                {t('common.cancel')}
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? t('common.saving') : t('networth.snapshot.save')}
-              </Button>
             </div>
-          </form>
-        </Form>
-      </div>
-    </div>
+          </div>
+
+          <div className="flex gap-3 justify-end px-4 sm:px-6 py-3 border-t border-border/50 shrink-0">
+            <Button type="button" variant="outline" onClick={onClose}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {renderSubmitLabel(isSubmitting, t)}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
   );
 }
 
@@ -237,6 +241,21 @@ type TranslateFunction = (
 ) => string;
 
 import type { UseFormReturn } from 'react-hook-form';
+
+const renderSnapshotDescription = (
+  isInvestment: boolean,
+  t: TranslateFunction,
+) => {
+  if (isInvestment) return t('networth.snapshot.descriptionInvestment');
+
+  return t('networth.snapshot.description');
+};
+
+const renderSubmitLabel = (isSubmitting: boolean, t: TranslateFunction) => {
+  if (isSubmitting) return t('common.saving');
+
+  return t('networth.snapshot.save');
+};
 
 const renderContributionField = (
   form: UseFormReturn<AccountBalanceFormData>,

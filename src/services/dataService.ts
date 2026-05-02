@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { Budget } from '@/types/Budget';
+import type { CategoryBudget } from '@/types/CategoryBudget';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
@@ -423,6 +424,50 @@ export const dataService = {
 
     if (error) throw error;
     return data as Budget;
+  },
+
+  async getCategoryBudgets(signal?: AbortSignal) {
+    let query = supabase.from('category_budgets').select('*');
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return data as CategoryBudget[];
+  },
+
+  async upsertCategoryBudget(categoryId: string, monthlyAmount: number) {
+    const user = await this.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('category_budgets')
+      .upsert(
+        {
+          user_id: user.id,
+          category_id: categoryId,
+          monthly_amount: monthlyAmount,
+        },
+        { onConflict: 'user_id,category_id' },
+      )
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as CategoryBudget;
+  },
+
+  async deleteCategoryBudget(categoryId: string) {
+    const user = await this.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { error } = await supabase
+      .from('category_budgets')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('category_id', categoryId);
+
+    if (error) throw error;
   },
 
   async updateDailyReminderHour(hour: number | null) {

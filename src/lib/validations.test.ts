@@ -6,6 +6,7 @@ import {
   categorySchema,
   recurringExpenseSchema,
   budgetSchema,
+  categoryBudgetSchema,
   RECEIPT_ALLOWED_TYPES,
   RECEIPT_MAX_FILE_SIZE,
 } from './validations';
@@ -277,6 +278,53 @@ describe('budgetSchema', () => {
     expect(budgetSchema.safeParse({ amount: '10.000.001' }).success).toBe(
       false,
     );
+  });
+});
+
+describe('categoryBudgetSchema', () => {
+  it('accepts a valid per-category budget', () => {
+    expect(
+      categoryBudgetSchema.safeParse({
+        category_id: 'cat-1',
+        amount: '500',
+      }).success,
+    ).toBe(true);
+  });
+
+  it('rejects zero amount', () => {
+    expect(
+      categoryBudgetSchema.safeParse({
+        category_id: 'cat-1',
+        amount: '0',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejects empty amount', () => {
+    expect(
+      categoryBudgetSchema.safeParse({
+        category_id: 'cat-1',
+        amount: '',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejects empty category_id', () => {
+    expect(
+      categoryBudgetSchema.safeParse({
+        category_id: '',
+        amount: '100',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejects amount over 10 million', () => {
+    expect(
+      categoryBudgetSchema.safeParse({
+        category_id: 'cat-1',
+        amount: '10.000.001',
+      }).success,
+    ).toBe(false);
   });
 });
 

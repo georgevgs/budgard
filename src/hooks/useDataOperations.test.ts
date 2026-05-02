@@ -26,6 +26,10 @@ const mockSetDebts = vi.fn((updater) => {
 });
 const mockRefreshDebts = vi.fn().mockResolvedValue(undefined);
 
+const mockSetCategoryBudgets = vi.fn((updater) => {
+  if (typeof updater === 'function') updater([]);
+});
+
 vi.mock('@/contexts/DataContext', () => ({
   useData: () => ({
     isInitialized: true,
@@ -35,6 +39,7 @@ vi.mock('@/contexts/DataContext', () => ({
     setRecurringExpenses: mockSetRecurringExpenses,
     setGoals: mockSetGoals,
     setDebts: mockSetDebts,
+    setCategoryBudgets: mockSetCategoryBudgets,
     refreshExpenses: mockRefreshExpenses,
     refreshDebts: mockRefreshDebts,
   }),
@@ -71,6 +76,8 @@ const mockDeleteGoal = vi.fn();
 const mockCreateDebt = vi.fn();
 const mockUpdateDebt = vi.fn();
 const mockArchiveDebt = vi.fn();
+const mockUpsertCategoryBudget = vi.fn();
+const mockDeleteCategoryBudget = vi.fn();
 
 vi.mock('@/services/dataService', () => ({
   dataService: {
@@ -96,6 +103,10 @@ vi.mock('@/services/dataService', () => ({
     createDebt: (...args: unknown[]) => mockCreateDebt(...args),
     updateDebt: (...args: unknown[]) => mockUpdateDebt(...args),
     archiveDebt: (...args: unknown[]) => mockArchiveDebt(...args),
+    upsertCategoryBudget: (...args: unknown[]) =>
+      mockUpsertCategoryBudget(...args),
+    deleteCategoryBudget: (...args: unknown[]) =>
+      mockDeleteCategoryBudget(...args),
   },
 }));
 
@@ -682,6 +693,77 @@ describe('useDataOperations', () => {
       });
 
       expect(mockRefreshDebts).not.toHaveBeenCalled();
+    });
+  });
+
+  // --- Category Budget upsert ---
+  describe('handleCategoryBudgetUpsert', () => {
+    it('upserts a category budget with optimistic update', async () => {
+      const saved = {
+        id: 'b1',
+        user_id: 'u1',
+        category_id: 'c1',
+        monthly_amount: 200,
+        created_at: '',
+        updated_at: '',
+      };
+      mockUpsertCategoryBudget.mockResolvedValue(saved);
+
+      const { result } = renderHook(() => useDataOperations());
+
+      await act(async () => {
+        await result.current.handleCategoryBudgetUpsert('c1', 200);
+      });
+
+      expect(mockUpsertCategoryBudget).toHaveBeenCalledWith('c1', 200);
+      // Optimistic + server confirm
+      expect(mockSetCategoryBudgets).toHaveBeenCalledTimes(2);
+    });
+
+    it('rolls back on failure', async () => {
+      mockUpsertCategoryBudget.mockRejectedValue(new Error('fail'));
+
+      const { result } = renderHook(() => useDataOperations());
+
+      await expect(
+        act(async () => {
+          await result.current.handleCategoryBudgetUpsert('c1', 200);
+        }),
+      ).rejects.toThrow();
+
+      // Optimistic + rollback
+      expect(mockSetCategoryBudgets).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  // --- Category Budget delete ---
+  describe('handleCategoryBudgetDelete', () => {
+    it('deletes a category budget with optimistic update', async () => {
+      mockDeleteCategoryBudget.mockResolvedValue(undefined);
+
+      const { result } = renderHook(() => useDataOperations());
+
+      await act(async () => {
+        await result.current.handleCategoryBudgetDelete('c1');
+      });
+
+      expect(mockDeleteCategoryBudget).toHaveBeenCalledWith('c1');
+      expect(mockSetCategoryBudgets).toHaveBeenCalled();
+    });
+
+    it('rolls back on failure', async () => {
+      mockDeleteCategoryBudget.mockRejectedValue(new Error('fail'));
+
+      const { result } = renderHook(() => useDataOperations());
+
+      await expect(
+        act(async () => {
+          await result.current.handleCategoryBudgetDelete('c1');
+        }),
+      ).rejects.toThrow();
+
+      // Optimistic + rollback
+      expect(mockSetCategoryBudgets).toHaveBeenCalledTimes(2);
     });
   });
 });

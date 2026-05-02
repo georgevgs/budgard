@@ -22,6 +22,7 @@ import type { Goal } from '@/types/Goal';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import type { Debt } from '@/types/Debt';
+import type { CategoryBudget } from '@/types/CategoryBudget';
 import { useToast } from '@/hooks/useToast';
 
 type DataState = {
@@ -40,6 +41,7 @@ type DataState = {
   accounts: Account[];
   accountBalances: AccountBalance[];
   debts: Debt[];
+  categoryBudgets: CategoryBudget[];
   monthlyBudget: number | null;
   defaultCurrency: string;
   defaultSavingsPct: number | null;
@@ -64,6 +66,7 @@ type DataContextType = DataState & {
   setAccounts: Dispatch<SetStateAction<Account[]>>;
   setAccountBalances: Dispatch<SetStateAction<AccountBalance[]>>;
   setDebts: Dispatch<SetStateAction<Debt[]>>;
+  setCategoryBudgets: Dispatch<SetStateAction<CategoryBudget[]>>;
   setMonthlyBudget: Dispatch<SetStateAction<number | null>>;
   setDefaultCurrency: Dispatch<SetStateAction<string>>;
   setDefaultSavingsPct: Dispatch<SetStateAction<number | null>>;
@@ -92,6 +95,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [accountBalances, setAccountBalances] = useState<AccountBalance[]>([]);
   const [debts, setDebts] = useState<Debt[]>([]);
+  const [categoryBudgets, setCategoryBudgets] = useState<CategoryBudget[]>([]);
   const [monthlyBudget, setMonthlyBudget] = useState<number | null>(null);
   const [defaultCurrency, setDefaultCurrency] = useState<string>('EUR');
   const [defaultSavingsPct, setDefaultSavingsPct] = useState<number | null>(
@@ -146,6 +150,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         accountsData,
         accountBalancesData,
         debtsData,
+        categoryBudgetsData,
       ] = await Promise.all([
         dataService.getCategories(controller.signal),
         dataService.getExpenses(controller.signal),
@@ -159,6 +164,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         dataService.getAccounts(controller.signal),
         dataService.getAllAccountBalances(controller.signal),
         dataService.getDebts(controller.signal),
+        dataService.getCategoryBudgets(controller.signal),
       ]);
 
       // React 18+ automatically batches these state updates
@@ -173,6 +179,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setAccounts(accountsData);
       setAccountBalances(accountBalancesData);
       setDebts(debtsData);
+      setCategoryBudgets(categoryBudgetsData);
       setMonthlyBudget(budgetData?.monthly_amount ?? null);
       setDefaultCurrency(budgetData?.default_currency ?? 'EUR');
       setDefaultSavingsPct(budgetData?.default_savings_pct ?? null);
@@ -272,6 +279,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setAccounts([]);
       setAccountBalances([]);
       setDebts([]);
+      setCategoryBudgets([]);
       setMonthlyBudget(null);
       setDefaultCurrency('EUR');
       setDefaultSavingsPct(null);
@@ -332,6 +340,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       accounts,
       accountBalances,
       debts,
+      categoryBudgets,
       monthlyBudget,
       defaultCurrency,
       defaultSavingsPct,
@@ -353,6 +362,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setAccounts,
       setAccountBalances,
       setDebts,
+      setCategoryBudgets,
       setMonthlyBudget,
       setDefaultCurrency,
       setDefaultSavingsPct,
@@ -371,6 +381,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       accounts,
       accountBalances,
       debts,
+      categoryBudgets,
       monthlyBudget,
       defaultCurrency,
       defaultSavingsPct,

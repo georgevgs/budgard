@@ -118,129 +118,73 @@ const DebtForm = ({ debt, onClose }: Props) => {
   };
 
   return (
-    <div className="flex flex-col max-h-full">
-      <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
+    <>
+      <div
+        className="flex justify-center pt-3 pb-2 sm:hidden shrink-0"
+        data-drag-handle
+      >
         <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
       </div>
 
-      <div
-        className="overflow-y-auto flex-1 px-4 sm:px-6 overscroll-contain"
-        style={{ touchAction: 'pan-y' }}
-      >
-        <DialogHeader className="pb-4" data-draggable-area>
-          <DialogTitle className="text-xl">
-            {isEditing
-              ? t('debts.form.editTitle')
-              : t('debts.form.addTitle')}
-          </DialogTitle>
-          <DialogDescription>{t('debts.formDescription')}</DialogDescription>
-        </DialogHeader>
-
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4 pb-4"
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="flex flex-col flex-1 min-h-0"
+        >
+          <div
+            className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 overscroll-contain"
+            style={{ touchAction: 'pan-y' }}
           >
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder={t('debts.form.namePlaceholder')}
-                      autoComplete="off"
-                      aria-label={t('debts.form.nameLabel')}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <DialogHeader className="pb-4" data-draggable-area>
+              <DialogTitle className="text-xl">
+                {renderFormTitle(isEditing, t)}
+              </DialogTitle>
+              <DialogDescription>
+                {t('debts.formDescription')}
+              </DialogDescription>
+            </DialogHeader>
 
-            <FormField
-              control={form.control}
-              name="kind"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger aria-label={t('debts.form.kindLabel')}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DEBT_KINDS.map((k) => (
-                          <SelectItem key={k} value={k}>
-                            {t(`debts.kind.${k}`)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="space-y-4 pb-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder={t('debts.form.namePlaceholder')}
+                        autoComplete="off"
+                        aria-label={t('debts.form.nameLabel')}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="currency"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger
-                        aria-label={t('debts.form.currencyLabel')}
+              <FormField
+                control={form.control}
+                name="kind"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
                       >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-60">
-                        {SUPPORTED_CURRENCIES.map((c) => (
-                          <SelectItem key={c.code} value={c.code}>
-                            {c.code} — {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {renderBalanceField(form, isEditing, selectedCurrency, t)}
-
-            <div className="grid grid-cols-2 gap-3">
-              <FormField
-                control={form.control}
-                name="apr"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs text-muted-foreground">
-                      {t('debts.form.aprLabel')}
-                    </FormLabel>
-                    <div className="relative">
-                      <FormControl>
-                        <Input
-                          type="text"
-                          inputMode="decimal"
-                          pattern="[0-9.,]*"
-                          placeholder="0.00"
-                          {...field}
-                          className="pr-7"
-                        />
-                      </FormControl>
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                        %
-                      </span>
-                    </div>
+                        <SelectTrigger aria-label={t('debts.form.kindLabel')}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DEBT_KINDS.map((k) => (
+                            <SelectItem key={k} value={k}>
+                              {t(`debts.kind.${k}`)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -248,66 +192,127 @@ const DebtForm = ({ debt, onClose }: Props) => {
 
               <FormField
                 control={form.control}
-                name="minimum_payment"
+                name="currency"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs text-muted-foreground">
-                      {t('debts.form.minPaymentLabel')}
-                    </FormLabel>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                        {getCurrencySymbol(selectedCurrency)}
-                      </span>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          inputMode="decimal"
-                          pattern="[0-9,.]*"
-                          placeholder="0"
-                          value={field.value}
-                          onChange={(e) =>
-                            field.onChange(formatCurrencyInput(e.target.value))
-                          }
-                          className="pl-7"
-                        />
-                      </FormControl>
-                    </div>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger
+                          aria-label={t('debts.form.currencyLabel')}
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60">
+                          {SUPPORTED_CURRENCIES.map((c) => (
+                            <SelectItem key={c.code} value={c.code}>
+                              {c.code} — {c.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {renderBalanceField(form, isEditing, selectedCurrency, t)}
+
+              <div className="grid grid-cols-2 gap-3">
+                <FormField
+                  control={form.control}
+                  name="apr"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs text-muted-foreground">
+                        {t('debts.form.aprLabel')}
+                      </FormLabel>
+                      <div className="relative">
+                        <FormControl>
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            pattern="[0-9.,]*"
+                            placeholder="0.00"
+                            {...field}
+                            className="pr-7"
+                          />
+                        </FormControl>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                          %
+                        </span>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="minimum_payment"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs text-muted-foreground">
+                        {t('debts.form.minPaymentLabel')}
+                      </FormLabel>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                          {getCurrencySymbol(selectedCurrency)}
+                        </span>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            pattern="[0-9,.]*"
+                            placeholder="0"
+                            value={field.value}
+                            onChange={(e) =>
+                              field.onChange(
+                                formatCurrencyInput(e.target.value),
+                              )
+                            }
+                            className="pl-7"
+                          />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="color"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <CategoryColorPicker
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+          </div>
 
-            <FormField
-              control={form.control}
-              name="color"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <CategoryColorPicker
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex gap-3 justify-end pt-2 pb-2">
-              <Button type="button" variant="outline" onClick={onClose}>
-                {t('common.cancel')}
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting
-                  ? t('common.saving')
-                  : t('debts.form.save')}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </div>
-    </div>
+          <div className="flex gap-3 justify-end px-4 sm:px-6 py-3 border-t border-border/50 shrink-0">
+            <Button type="button" variant="outline" onClick={onClose}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {renderSubmitLabel(isSubmitting, t)}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
   );
 }
 
@@ -321,6 +326,18 @@ type TranslateFunction = (
 ) => string;
 
 import type { UseFormReturn } from 'react-hook-form';
+
+const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {
+  if (isEditing) return t('debts.form.editTitle');
+
+  return t('debts.form.addTitle');
+};
+
+const renderSubmitLabel = (isSubmitting: boolean, t: TranslateFunction) => {
+  if (isSubmitting) return t('common.saving');
+
+  return t('debts.form.save');
+};
 
 const renderBalanceField = (
   form: UseFormReturn<DebtFormData>,

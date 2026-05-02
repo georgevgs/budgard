@@ -30,6 +30,8 @@ import ExpensesFilter from '@/components/expenses/ExpensesFilter';
 import CsvImportDialog from '@/components/expenses/CsvImportDialog';
 import { useExpensesFilter } from '@/hooks/useExpensesFilter';
 import { useBudgetAlerts } from '@/hooks/useBudgetAlerts';
+import { useCategoryBudgetAlerts } from '@/hooks/useCategoryBudgetAlerts';
+import { useCurrentMonthSpendingByCategory } from '@/hooks/useCurrentMonthSpendingByCategory';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import type { ReceiptOptions } from '@/hooks/useDataOperations';
@@ -120,6 +122,7 @@ const ExpensesList = () => {
     isInitialized,
     monthlyBudget,
     defaultCurrency,
+    categoryBudgets,
   } = useData();
   const operations = useDataOperations();
   const [optimisticExpenses, addOptimisticExpense] = useOptimistic(
@@ -232,6 +235,33 @@ const ExpensesList = () => {
     monthlyBudget,
     monthlySpent: selectedMonth === currentMonth ? monthlyTotal : 0,
     defaultCurrency,
+  });
+
+  // Per-category alerts read directly from the live `expenses` list because
+  // the optimistic copy doesn't include reverted-but-not-yet-purged items.
+  const spendingByCategory = useCurrentMonthSpendingByCategory(expenses);
+  const categoryAlertInputs = useMemo(() => {
+    const byCategoryId = new Map(categories.map((c) => [c.id, c]));
+
+    return categoryBudgets
+      .map((budget) => {
+        const category = byCategoryId.get(budget.category_id);
+        if (!category) return null;
+
+        return {
+          categoryId: category.id,
+          categoryName: category.name,
+          cap: budget.monthly_amount,
+          spent: spendingByCategory.get(category.id) ?? 0,
+        };
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+  }, [categoryBudgets, categories, spendingByCategory]);
+
+  useCategoryBudgetAlerts({
+    alerts: categoryAlertInputs,
+    defaultCurrency,
+    enabled: selectedMonth === currentMonth,
   });
 
   const filteredTotal = useMemo(

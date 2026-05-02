@@ -240,6 +240,30 @@
       "warningDescription": "You've used {{percent}}% of your budget. {{remaining}} remaining.",
       "exceeded": "Budget Exceeded",
       "exceededDescription": "You've spent {{spent}} against a {{budget}} budget."
+    },
+    "categoryBudgets": {
+      "title": "Category Budgets",
+      "description": "Set a monthly cap for individual categories. Leave blank for no cap.",
+      "sectionTitle": "Category budgets",
+      "manage": "Manage",
+      "add": "Add",
+      "emptyHint": "Set caps for individual categories",
+      "noCategories": "No categories yet",
+      "noCategoriesHelp": "Create a category from Categories to set a budget for it.",
+      "noCap": "No cap",
+      "amountAriaLabel": "Monthly cap for {{category}}",
+      "clearAriaLabel": "Clear cap for {{category}}",
+      "savedTitle": "Category budgets saved",
+      "allocated": "{{count}} of {{total}} budgeted",
+      "overGlobal": "Allocated more than your monthly budget.",
+      "invalidAmount": "One or more amounts are invalid.",
+      "progressAria": "{{category}} is at {{percent}}% of its cap"
+    },
+    "categoryAlerts": {
+      "warning": "{{category}} budget warning",
+      "warningDescription": "You've used {{percent}}% of {{category}}. {{remaining}} remaining.",
+      "exceeded": "{{category}} over budget",
+      "exceededDescription": "You've spent {{spent}} against a {{cap}} cap for {{category}}."
     }
   },
   "recurring": {
@@ -617,6 +641,7 @@
       "empty": "Add a debt to see a payoff plan.",
       "extraLabel": "Extra each month",
       "extraHint": "How much can you put toward debt above the minimums? Even a small amount cuts months and interest.",
+      "strategyAriaLabel": "Payoff strategy",
       "avalanche": "Avalanche",
       "avalancheHint": "Highest APR first — saves the most money",
       "snowball": "Snowball",

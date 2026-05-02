@@ -7,6 +7,23 @@ vi.mock('@/components/budget/BudgetForm', () => ({
     isOpen ? <div data-testid="budget-form" /> : null,
 }));
 
+vi.mock('@/components/budget/CategoryBudgetsManager', () => ({
+  default: ({ isOpen }: { isOpen: boolean }) =>
+    isOpen ? <div data-testid="category-budgets-manager" /> : null,
+}));
+
+vi.mock('@/contexts/DataContext', () => ({
+  useData: () => ({
+    expenseCategories: [],
+    categoryBudgets: [],
+    expenses: [],
+  }),
+}));
+
+vi.mock('@/hooks/useCurrentMonthSpendingByCategory', () => ({
+  useCurrentMonthSpendingByCategory: () => new Map<string, number>(),
+}));
+
 describe('BudgetProgress', () => {
   it('shows the set-budget CTA when no budget exists', () => {
     render(

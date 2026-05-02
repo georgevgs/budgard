@@ -244,6 +244,21 @@ export const budgetSchema = z.object({
     }, 'Amount must be between 0 and 10.000.000'),
 });
 
+// Per-category budget validation schema. Empty string is treated as
+// "no cap for this category" by the caller (we delete the row instead of
+// inserting); this schema only validates non-empty inputs.
+export const categoryBudgetSchema = z.object({
+  category_id: z.string().min(1, 'Category is required'),
+  amount: z
+    .string()
+    .min(1, 'Amount is required')
+    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .refine((val) => {
+      const amount = parseCurrencyInput(val);
+      return amount > 0 && amount <= 10000000;
+    }, 'Amount must be between 0 and 10.000.000'),
+});
+
 // Expense template validation schema
 export const templateSchema = z.object({
   amount: z
@@ -497,6 +512,7 @@ export type TagFormData = z.infer<typeof tagSchema>;
 export type RecurringExpenseFormData = z.infer<typeof recurringExpenseSchema>;
 export type RecurringIncomeFormData = z.infer<typeof recurringIncomeSchema>;
 export type BudgetFormData = z.infer<typeof budgetSchema>;
+export type CategoryBudgetFormData = z.infer<typeof categoryBudgetSchema>;
 export type TemplateFormData = z.infer<typeof templateSchema>;
 export type GoalFormData = z.infer<typeof goalSchema>;
 export type AccountFormData = z.infer<typeof accountSchema>;
