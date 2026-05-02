@@ -30,6 +30,7 @@ import CategorySparkline from '@/components/analytics/CategorySparkline';
 import { CategoryDrillDown } from '@/components/analytics/CategoryDrillDown';
 import { MonthDrillDown } from '@/components/analytics/MonthDrillDown';
 import MonthlyReportCard from '@/components/analytics/MonthlyReportCard';
+import YearInReviewCard from '@/components/analytics/YearInReviewCard';
 import CashFlowSection from '@/components/analytics/CashFlowSection';
 import AnnualExportCard from '@/components/analytics/AnnualExportCard';
 import { Button } from '@/components/ui/button';
@@ -184,6 +185,7 @@ const AnalyticsView = () => {
   // ─── Report card state ──────────────────────────────────────────────────────
 
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [isYearReviewOpen, setIsYearReviewOpen] = useState(false);
 
   const thisMonthExpensesByCategory = useMemo(() => {
     const thisMonthKey = format(new Date(), 'yyyy-MM');
@@ -310,21 +312,35 @@ const AnalyticsView = () => {
           <h3 className="text-base font-semibold text-foreground">
             {t('analytics.yearOverview')}
           </h3>
-          <Select
-            value={selectedYear.toString()}
-            onValueChange={(value) => setSelectedYear(parseInt(value))}
-          >
-            <SelectTrigger className="w-[110px] h-8">
-              <SelectValue placeholder={t('analytics.selectYear')} />
-            </SelectTrigger>
-            <SelectContent>
-              {availableYears.map((year) => (
-                <SelectItem key={year} value={year.toString()}>
-                  {year}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+              onClick={(e) => {
+                (e.currentTarget as HTMLElement).blur();
+                setIsYearReviewOpen(true);
+              }}
+              aria-label={t('yearInReview.title')}
+            >
+              <Share2 className="h-3.5 w-3.5" />
+            </Button>
+            <Select
+              value={selectedYear.toString()}
+              onValueChange={(value) => setSelectedYear(parseInt(value))}
+            >
+              <SelectTrigger className="w-[110px] h-8">
+                <SelectValue placeholder={t('analytics.selectYear')} />
+              </SelectTrigger>
+              <SelectContent>
+                {availableYears.map((year) => (
+                  <SelectItem key={year} value={year.toString()}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {renderYearSummary(
@@ -455,6 +471,13 @@ const AnalyticsView = () => {
         monthlyBudget={monthlyBudget}
         categories={categories}
         expensesByCategory={thisMonthExpensesByCategory}
+      />
+
+      {/* Year in Review card */}
+      <YearInReviewCard
+        isOpen={isYearReviewOpen}
+        onClose={() => setIsYearReviewOpen(false)}
+        year={selectedYear}
       />
     </div>
   );

@@ -7,9 +7,15 @@ import { useData } from '@/contexts/DataContext';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import type { RecurringExpense } from '@/types/RecurringExpense';
+import type { Expense } from '@/types/Expense';
 import type { RecurringExpenseFormData } from '@/lib/validations';
-import RecurringExpenseForm from '@/components/recurring/RecurringExpenseForm';
+import RecurringExpenseForm, {
+  type RecurringExpensePrefill,
+} from '@/components/recurring/RecurringExpenseForm';
 import RecurringExpenseCard from '@/components/recurring/RecurringExpenseCard';
+import SubscriptionAuditCard, {
+  type RecurringPrefill,
+} from '@/components/recurring/SubscriptionAuditCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { formatCurrency, parseCurrencyInput } from '@/lib/utils';
@@ -25,11 +31,15 @@ const RecurringExpensesList = () => {
   const [selectedExpense, setSelectedExpense] = useState<
     RecurringExpense | undefined
   >(undefined);
+  const [prefill, setPrefill] = useState<RecurringExpensePrefill | undefined>(
+    undefined,
+  );
   const {
     recurringExpenses,
     recurringIncomes,
     expenseCategories,
     incomeCategories,
+    expenses,
     defaultCurrency,
     isLoading,
   } = useData();
@@ -123,6 +133,13 @@ const RecurringExpensesList = () => {
   const handleFormClose = () => {
     setIsFormOpen(false);
     setSelectedExpense(undefined);
+    setPrefill(undefined);
+  };
+
+  const handleAddDetected = (next: RecurringPrefill) => {
+    setPrefill(next);
+    setSelectedExpense(undefined);
+    setIsFormOpen(true);
   };
 
   const activeItems = items.filter((e) => e.active);
@@ -182,6 +199,8 @@ const RecurringExpensesList = () => {
         </div>
       </div>
 
+      {renderAudit(mode, recurringExpenses, expenses, handleToggle, handleAddDetected)}
+
       <div className="grid gap-4">
         {renderExpensesList(
           items,
@@ -201,6 +220,7 @@ const RecurringExpensesList = () => {
         >
           <RecurringExpenseForm
             expense={selectedExpense}
+            prefill={prefill}
             categories={categories}
             type={mode}
             onSubmit={handleSubmit}
@@ -220,6 +240,25 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const renderAudit = (
+  mode: RecurringMode,
+  recurringExpenses: RecurringExpense[],
+  expenses: Expense[],
+  onToggle: (id: string, active: boolean) => void,
+  onAddDetected: (prefill: RecurringPrefill) => void,
+) => {
+  if (mode !== 'expense') return null;
+
+  return (
+    <SubscriptionAuditCard
+      recurringExpenses={recurringExpenses}
+      expenses={expenses}
+      onToggle={onToggle}
+      onAddDetected={onAddDetected}
+    />
+  );
+};
 
 const renderModeTitle = (mode: RecurringMode, t: TranslateFunction): string => {
   if (mode === 'income') {

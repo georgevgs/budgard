@@ -38,6 +38,7 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Track next occurrence and overdue status
 - Toggle active/inactive without deleting
 - Preview estimated monthly cost
+- Subscription audit — surface monthly + yearly cost of all active subs, flag the largest, toggle off in one tap
 
 **Income**
 - Log one-off and recurring income alongside expenses
@@ -53,6 +54,7 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Budget progress indicator with color-coded alerts
 - Proactive spending insights: projections, peak spending days, category comparisons, budget streaks, weekend vs weekday patterns, spending volatility
 - Shareable monthly report card — export as PNG or share via native share sheet
+- Year in Review — annual share card with total spent, top categories, biggest expense, income, and net for any year
 
 **Budget**
 - Set a monthly total budget target

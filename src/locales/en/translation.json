@@ -358,6 +358,23 @@
       "empty": "No recurring income set up yet",
       "emptyDescription": "Add salary, dividends, or any income that arrives on a schedule",
       "addFirstRecurring": "Add Your First Recurring Income"
+    },
+    "audit": {
+      "title": "Subscription audit",
+      "perMonth": "/ mo",
+      "perYear": "{{amount}} / year",
+      "activeCount": "{{count}} active",
+      "topLabel": "Top by monthly cost",
+      "largestHint": "{{name}} is {{percent}}% of your subscription spend — worth a second look.",
+      "nextOn": "next {{date}}",
+      "driftUp": "Up {{percent}}% vs configured price",
+      "driftDown": "Down {{percent}}% vs configured price",
+      "detectedTitle": "Detected subscriptions",
+      "detectedSubtitle_one": "{{count}} repeat charge looks like a subscription you haven't logged.",
+      "detectedSubtitle_other": "{{count}} repeat charges look like subscriptions you haven't logged.",
+      "detectedOccurrences_one": "{{count}} charge",
+      "detectedOccurrences_other": "{{count}} charges",
+      "addAsRecurring": "Add"
     }
   },
   "settings": {
@@ -762,6 +779,19 @@
       "topExpenses": "Top Expenses",
       "uncategorized": "Uncategorized"
     }
+  },
+  "yearInReview": {
+    "title": "Year in Review",
+    "label": "Year {{year}}",
+    "spentSubtitle": "Total spent this year",
+    "vsLastYear": "{{verb}} {{percent}}% vs last year ({{amount}})",
+    "more": "Up",
+    "less": "Down",
+    "income": "Income",
+    "net": "Net",
+    "transactions": "Transactions",
+    "biggest": "Biggest expense",
+    "topCategories": "Top categories"
   },
   "report": {
     "title": "Monthly Report",

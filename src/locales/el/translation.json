@@ -358,6 +358,23 @@
       "empty": "Δεν έχει οριστεί κανένα επαναλαμβανόμενο έσοδο",
       "emptyDescription": "Προσθέστε μισθό, μερίσματα, ή οποιοδήποτε έσοδο φτάνει με πρόγραμμα",
       "addFirstRecurring": "Προσθέστε το Πρώτο Επαναλαμβανόμενο Έσοδο"
+    },
+    "audit": {
+      "title": "Έλεγχος συνδρομών",
+      "perMonth": "/ μήνα",
+      "perYear": "{{amount}} / έτος",
+      "activeCount": "{{count}} ενεργές",
+      "topLabel": "Κορυφαίες κατά μηνιαίο κόστος",
+      "largestHint": "Η συνδρομή {{name}} είναι το {{percent}}% των συνδρομών σου — αξίζει μια δεύτερη ματιά.",
+      "nextOn": "επόμενη {{date}}",
+      "driftUp": "Πάνω {{percent}}% από την καθορισμένη τιμή",
+      "driftDown": "Κάτω {{percent}}% από την καθορισμένη τιμή",
+      "detectedTitle": "Εντοπισμένες συνδρομές",
+      "detectedSubtitle_one": "{{count}} επαναλαμβανόμενη χρέωση μοιάζει με συνδρομή που δεν έχεις καταγράψει.",
+      "detectedSubtitle_other": "{{count}} επαναλαμβανόμενες χρεώσεις μοιάζουν με συνδρομές που δεν έχεις καταγράψει.",
+      "detectedOccurrences_one": "{{count}} χρέωση",
+      "detectedOccurrences_other": "{{count}} χρεώσεις",
+      "addAsRecurring": "Προσθήκη"
     }
   },
   "settings": {
@@ -762,6 +779,19 @@
       "topExpenses": "Κορυφαία Έξοδα",
       "uncategorized": "Χωρίς κατηγορία"
     }
+  },
+  "yearInReview": {
+    "title": "Ανασκόπηση Έτους",
+    "label": "Έτος {{year}}",
+    "spentSubtitle": "Συνολικά έξοδα φέτος",
+    "vsLastYear": "{{verb}} {{percent}}% σε σχέση με πέρσι ({{amount}})",
+    "more": "Πάνω",
+    "less": "Κάτω",
+    "income": "Έσοδα",
+    "net": "Καθαρό",
+    "transactions": "Συναλλαγές",
+    "biggest": "Μεγαλύτερο έξοδο",
+    "topCategories": "Κορυφαίες κατηγορίες"
   },
   "report": {
     "title": "Μηνιαία Αναφορά",
