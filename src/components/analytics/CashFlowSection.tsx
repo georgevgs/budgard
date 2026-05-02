@@ -29,7 +29,10 @@ type Props = {
 const CashFlowSection = ({ selectedYear }: Props) => {
   const { t, i18n } = useTranslation();
   const { expenses, incomes, defaultCurrency } = useData();
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  let dateLocale = enUS;
+  if (i18n.language === 'el') {
+    dateLocale = el;
+  }
   const currencySymbol = getCurrencySymbol(defaultCurrency);
 
   const monthlyData = useMemo(() => {
@@ -67,11 +70,16 @@ const CashFlowSection = ({ selectedYear }: Props) => {
     const totalIncome = monthlyData.reduce((s, m) => s + m.income, 0);
     const totalExpense = monthlyData.reduce((s, m) => s - m.expense, 0);
 
+    let avgNet = 0;
+    if (monthlyData.length > 0) {
+      avgNet = (totalIncome - totalExpense) / 12;
+    }
+
     return {
       totalIncome,
       totalExpense,
       net: totalIncome - totalExpense,
-      avgNet: monthlyData.length > 0 ? (totalIncome - totalExpense) / 12 : 0,
+      avgNet,
     };
   }, [monthlyData]);
 
@@ -96,10 +104,10 @@ const CashFlowSection = ({ selectedYear }: Props) => {
               <p
                 className={cn(
                   'text-3xl font-bold tabular-nums tracking-tight',
-                  yearTotals.net >= 0 ? 'text-income' : 'text-destructive',
+                  getNetClass(yearTotals.net),
                 )}
               >
-                {yearTotals.net >= 0 ? '+' : ''}
+                {renderNetSign(yearTotals.net)}
                 {formatCurrency(yearTotals.net, defaultCurrency)}
               </p>
             </div>
@@ -144,6 +152,22 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const getNetClass = (net: number): string => {
+  if (net >= 0) {
+    return 'text-income';
+  }
+
+  return 'text-destructive';
+};
+
+const renderNetSign = (net: number): string => {
+  if (net >= 0) {
+    return '+';
+  }
+
+  return '';
+};
 
 const renderAvgNet = (
   avgNet: number,
@@ -232,10 +256,10 @@ const renderChart = (
                     <span
                       className={cn(
                         'tabular-nums font-semibold',
-                        point.net >= 0 ? 'text-income' : 'text-destructive',
+                        getNetClass(point.net),
                       )}
                     >
-                      {point.net >= 0 ? '+' : ''}
+                      {renderNetSign(point.net)}
                       {formatCurrency(point.net, currency)}
                     </span>
                   </div>

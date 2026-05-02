@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { getSession, onAuthStateChange } from '@/lib/auth';
 
-export function useAuth() {
+export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -43,4 +43,4 @@ export function useAuth() {
     isLoading,
     isAuthenticated: !!session?.user,
   };
-}
+};

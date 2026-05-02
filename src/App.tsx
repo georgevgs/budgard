@@ -157,8 +157,12 @@ const PublicRoute = () => {
 
 const CatchAllRedirect = () => {
   const { session } = useAuth();
+  let target = '/';
+  if (session) {
+    target = '/expenses';
+  }
 
-  return <Navigate to={session ? '/expenses' : '/'} replace />;
+  return <Navigate to={target} replace />;
 };
 
 // ============================================================================

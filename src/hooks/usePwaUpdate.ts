@@ -6,7 +6,7 @@ import { swRegistration } from '@/lib/swRegistration';
 const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
 const MIN_VISIBILITY_CHECK_INTERVAL_MS = 30 * 60 * 1000;
 
-export function usePwaUpdate(): void {
+export const usePwaUpdate = (): void => {
   const { toast } = useToast();
   const needRefreshRef = useRef(false);
   const lastUpdateCheckRef = useRef<number>(0);
@@ -135,4 +135,4 @@ export function usePwaUpdate(): void {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
-}
+};

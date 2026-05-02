@@ -106,7 +106,7 @@ const TemplatesBar = ({
                   template.original_currency ?? defaultCurrency,
                 )}
               </span>
-              {renderDeleteButton(isManaging, template, handleDeleteClick)}
+              {renderDeleteButton(isManaging, template, handleDeleteClick, t)}
             </button>
           ))}
         </div>
@@ -165,15 +165,18 @@ const renderDeleteButton = (
   isManaging: boolean,
   template: ExpenseTemplate,
   onClick: (e: React.MouseEvent, template: ExpenseTemplate) => void,
+  t: (key: string, options?: Record<string, unknown>) => string,
 ) => {
-  if (!isManaging) return null;
+  if (!isManaging) {
+    return null;
+  }
 
   return (
     <button
       type="button"
       onClick={(e) => onClick(e, template)}
       className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
-      aria-label={`Delete ${template.description}`}
+      aria-label={t('expenses.deleteTemplate', { name: template.description })}
     >
       <X className="h-3 w-3" />
     </button>

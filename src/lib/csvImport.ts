@@ -41,16 +41,20 @@ export type CsvParseError = {
 /**
  * Detects the delimiter used in a CSV file (comma or semicolon)
  */
-function detectDelimiter(firstLine: string): string {
+const detectDelimiter = (firstLine: string): string => {
   const commaCount = (firstLine.match(/,/g) || []).length;
   const semicolonCount = (firstLine.match(/;/g) || []).length;
-  return semicolonCount > commaCount ? ';' : ',';
-}
+  if (semicolonCount > commaCount) {
+    return ';';
+  }
+
+  return ',';
+};
 
 /**
  * Gets preview data from CSV for column mapping UI
  */
-export function getCsvPreviewData(csvContent: string): CsvPreviewData {
+export const getCsvPreviewData = (csvContent: string): CsvPreviewData => {
   const lines = csvContent.trim().split(/\r?\n/);
   const delimiter = lines.length > 0 ? detectDelimiter(lines[0]) : ',';
 
@@ -87,12 +91,12 @@ export function getCsvPreviewData(csvContent: string): CsvPreviewData {
     totalRows,
     hasNegativeAmounts,
   };
-}
+};
 
 /**
  * Suggests column mapping based on header names and content
  */
-export function suggestColumnMapping(preview: CsvPreviewData): ColumnMapping {
+export const suggestColumnMapping = (preview: CsvPreviewData): ColumnMapping => {
   const { headers, sampleRows } = preview;
 
   let dateColumn = 0;
@@ -189,7 +193,7 @@ export function suggestColumnMapping(preview: CsvPreviewData): ColumnMapping {
     amountColumn,
     categoryColumn,
   };
-}
+};
 
 /**
  * Parses a CSV string into expense data using column mapping
@@ -201,13 +205,13 @@ export function suggestColumnMapping(preview: CsvPreviewData): ColumnMapping {
  * @param hasNegativeAmounts - If true, CSV uses bank statement convention
  *   where negative = expense, positive = income
  */
-export function parseExpensesCsv(
+export const parseExpensesCsv = (
   csvContent: string,
   categories: Category[],
   columnMapping: ColumnMapping,
   skipIncomeTransactions: boolean = true,
   hasNegativeAmounts: boolean = false,
-): CsvParseResult {
+): CsvParseResult => {
   const lines = csvContent.trim().split(/\r?\n/);
   const validRows: ParsedExpenseRow[] = [];
   const errors: CsvParseError[] = [];
@@ -261,12 +265,12 @@ export function parseExpensesCsv(
     unmatchedCategories: Array.from(unmatchedCategoriesSet),
     skippedIncomeCount,
   };
-}
+};
 
 /**
  * Maps parsed rows to expense data ready for insertion
  */
-export function mapRowsToExpenses(
+export const mapRowsToExpenses = (
   rows: ParsedExpenseRow[],
   categories: Category[],
   categoryMappings: Map<string, string | null>, // Maps category name to category_id or null
@@ -275,7 +279,7 @@ export function mapRowsToExpenses(
   description: string;
   amount: number;
   category_id: string | null;
-}> {
+}> => {
   const categoryMap = new Map(
     categories.map((cat) => [cat.name.toLowerCase(), cat.id]),
   );
@@ -300,19 +304,19 @@ export function mapRowsToExpenses(
       category_id: categoryId,
     };
   });
-}
+};
 
 /**
  * Reads a file and returns its content as text
  */
-export function readFileAsText(file: File): Promise<string> {
+export const readFileAsText = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = () => reject(new Error('Failed to read file'));
     reader.readAsText(file);
   });
-}
+};
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -458,7 +462,7 @@ const validateDescription = (
 /**
  * Checks if a line looks like a header row
  */
-function isHeaderRow(line: string): boolean {
+const isHeaderRow = (line: string): boolean => {
   const lower = line.toLowerCase();
   // English headers
   const hasEnglishHeaders =
@@ -472,12 +476,12 @@ function isHeaderRow(line: string): boolean {
     lower.includes('ποσο');
 
   return hasEnglishHeaders || hasGreekHeaders;
-}
+};
 
 /**
  * Parses a CSV line, handling quoted fields
  */
-function parseCsvLine(line: string, delimiter: string = ','): string[] {
+const parseCsvLine = (line: string, delimiter: string = ','): string[] => {
   const fields: string[] = [];
   let current = '';
   let inQuotes = false;
@@ -515,12 +519,12 @@ function parseCsvLine(line: string, delimiter: string = ','): string[] {
   fields.push(current);
 
   return fields;
-}
+};
 
 /**
  * Parses a date string in various formats
  */
-function parseDate(dateStr: string): string | null {
+const parseDate = (dateStr: string): string | null => {
   // Try yyyy-MM-dd format first (exported format)
   const isoMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (isoMatch) {
@@ -549,12 +553,12 @@ function parseDate(dateStr: string): string | null {
   }
 
   return null;
-}
+};
 
 /**
  * Validates a date
  */
-function isValidDate(year: number, month: number, day: number): boolean {
+const isValidDate = (year: number, month: number, day: number): boolean => {
   if (month < 1 || month > 12) return false;
   if (day < 1 || day > 31) return false;
   if (year < 2000 || year > 2100) return false;
@@ -565,7 +569,7 @@ function isValidDate(year: number, month: number, day: number): boolean {
     date.getMonth() === month - 1 &&
     date.getDate() === day
   );
-}
+};
 
 type AmountParseResult = {
   amount: number | null;
@@ -581,10 +585,10 @@ type AmountParseResult = {
  *   This should be true for bank statements that use -/+ convention.
  *   If false, only explicit + prefix is treated as income.
  */
-function parseAmount(
+const parseAmount = (
   amountStr: string,
   treatPositiveAsIncome: boolean,
-): AmountParseResult {
+): AmountParseResult => {
   // Remove currency symbols and whitespace
   let cleaned = amountStr.replace(/[€$£¥\s]/g, '');
 
@@ -627,4 +631,4 @@ function parseAmount(
     amount: Math.round(amount * 100) / 100,
     isIncome,
   };
-}
+};

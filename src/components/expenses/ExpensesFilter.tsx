@@ -61,22 +61,37 @@ const ExpensesFilter = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const handleCategoryChange = (categoryId: string) => {
-    onCategoryChange(categoryId === 'all' ? null : categoryId);
+    if (categoryId === 'all') {
+      onCategoryChange(null);
+      return;
+    }
+
+    onCategoryChange(categoryId);
   };
 
   const handleTagSelectChange = (value: string) => {
-    onTagChange(value === 'all' ? null : value);
+    if (value === 'all') {
+      onTagChange(null);
+      return;
+    }
+
+    onTagChange(value);
   };
 
   const handleDateRangeChange = (value: string) => {
-    onDateRangeChange(value === 'none' ? null : (value as DateRangePreset));
+    if (value === 'none') {
+      onDateRangeChange(null);
+      return;
+    }
+
+    onDateRangeChange(value as DateRangePreset);
   };
 
   const activeFilterCount =
-    (search ? 1 : 0) +
-    (selectedCategoryId ? 1 : 0) +
-    (selectedTagId ? 1 : 0) +
-    (dateRangePreset ? 1 : 0);
+    countActive(search) +
+    countActive(selectedCategoryId) +
+    countActive(selectedTagId) +
+    countActive(dateRangePreset);
 
   return (
     <div>
@@ -113,9 +128,7 @@ const ExpensesFilter = ({
       <div
         className={cn(
           'grid transition-all duration-200',
-          isOpen
-            ? 'grid-rows-[1fr] opacity-100 mt-2'
-            : 'grid-rows-[0fr] opacity-0',
+          getDrawerClass(isOpen),
         )}
       >
         <div className="overflow-hidden space-y-3">
@@ -253,9 +266,7 @@ const renderSearchScopeToggle = (
         onClick={() => onScopeChange(false)}
         className={cn(
           'text-xs px-3 py-1 rounded-full transition-colors',
-          !isSearchingAllMonths
-            ? 'bg-background text-foreground shadow-sm'
-            : 'text-muted-foreground',
+          getScopeButtonClass(!isSearchingAllMonths),
         )}
       >
         {t('expenses.search.thisMonth')}
@@ -265,9 +276,7 @@ const renderSearchScopeToggle = (
         onClick={() => onScopeChange(true)}
         className={cn(
           'text-xs px-3 py-1 rounded-full transition-colors',
-          isSearchingAllMonths
-            ? 'bg-background text-foreground shadow-sm'
-            : 'text-muted-foreground',
+          getScopeButtonClass(isSearchingAllMonths),
         )}
       >
         {t('expenses.search.allMonths')}
@@ -416,10 +425,11 @@ const renderCategoryFilterBadge = (
 ) => {
   if (!selectedCategoryId) return null;
 
-  const categoryName =
-    selectedCategoryId === UNCATEGORIZED_VALUE
-      ? t('expenses.noCategory')
-      : categories.find((c) => c.id === selectedCategoryId)?.name;
+  const categoryName = resolveCategoryName(
+    selectedCategoryId,
+    categories,
+    t,
+  );
 
   return (
     <Badge variant="secondary" className="text-xs gap-1">
@@ -497,4 +507,40 @@ const renderDateRangeBadge = (
       </button>
     </Badge>
   );
+};
+
+const countActive = (value: unknown): number => {
+  if (value) {
+    return 1;
+  }
+
+  return 0;
+};
+
+const getDrawerClass = (isOpen: boolean): string => {
+  if (isOpen) {
+    return 'grid-rows-[1fr] opacity-100 mt-2';
+  }
+
+  return 'grid-rows-[0fr] opacity-0';
+};
+
+const getScopeButtonClass = (active: boolean): string => {
+  if (active) {
+    return 'bg-background text-foreground shadow-sm';
+  }
+
+  return 'text-muted-foreground';
+};
+
+const resolveCategoryName = (
+  selectedCategoryId: string,
+  categories: Category[],
+  t: TranslateFunction,
+): string | undefined => {
+  if (selectedCategoryId === UNCATEGORIZED_VALUE) {
+    return t('expenses.noCategory');
+  }
+
+  return categories.find((c) => c.id === selectedCategoryId)?.name;
 };

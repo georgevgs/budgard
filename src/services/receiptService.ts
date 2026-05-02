@@ -10,24 +10,24 @@ const COMPRESSION_OPTIONS = {
 
 const SKIP_COMPRESSION_THRESHOLD = 500 * 1024; // 500KB
 
-export async function compressImage(file: File): Promise<File> {
-  const options =
-    file.size <= SKIP_COMPRESSION_THRESHOLD
-      ? { ...COMPRESSION_OPTIONS, maxSizeMB: Infinity }
-      : COMPRESSION_OPTIONS;
+export const compressImage = async (file: File): Promise<File> => {
+  let options = COMPRESSION_OPTIONS;
+  if (file.size <= SKIP_COMPRESSION_THRESHOLD) {
+    options = { ...COMPRESSION_OPTIONS, maxSizeMB: Infinity };
+  }
 
   const compressed = await imageCompression(file, options);
 
   return new File([compressed], file.name.replace(/\.[^.]+$/, '.webp'), {
     type: 'image/webp',
   });
-}
+};
 
-export async function uploadReceipt(
+export const uploadReceipt = async (
   file: File,
   userId: string,
   expenseId: string,
-): Promise<string> {
+): Promise<string> => {
   const compressed = await compressImage(file);
   const path = `${userId}/${expenseId}_${Date.now()}.webp`;
 
@@ -38,21 +38,29 @@ export async function uploadReceipt(
       upsert: false,
     });
 
-  if (error) throw error;
-  return path;
-}
+  if (error) {
+    throw error;
+  }
 
-export async function getReceiptUrl(path: string): Promise<string> {
+  return path;
+};
+
+export const getReceiptUrl = async (path: string): Promise<string> => {
   const { data, error } = await supabase.storage
     .from('receipts')
     .download(path);
 
-  if (error) throw error;
-  return URL.createObjectURL(data);
-}
+  if (error) {
+    throw error;
+  }
 
-export async function deleteReceipt(path: string): Promise<void> {
+  return URL.createObjectURL(data);
+};
+
+export const deleteReceipt = async (path: string): Promise<void> => {
   const { error } = await supabase.storage.from('receipts').remove([path]);
 
-  if (error) throw error;
-}
+  if (error) {
+    throw error;
+  }
+};

@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import type { Locale } from 'date-fns';
-import * as Sentry from '@sentry/react';
 import {
   Dialog,
   DialogContent,
@@ -33,7 +32,7 @@ import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useDataOperations } from '@/hooks/useDataOperations';
-import { dataService } from '@/services/dataService';
+import { useAccountBalances } from '@/hooks/useAccountBalances';
 import { type Account, isLiability } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import BalanceSnapshotForm from '@/components/networth/BalanceSnapshotForm';
@@ -47,40 +46,20 @@ type Props = {
 
 const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
   const { t, i18n } = useTranslation();
-  const dateLocale: Locale = i18n.language === 'el' ? el : enUS;
+  let dateLocale: Locale = enUS;
+  if (i18n.language === 'el') {
+    dateLocale = el;
+  }
   const { handleAccountArchive, handleSnapshotDelete } = useDataOperations();
-  const [snapshots, setSnapshots] = useState<AccountBalance[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { snapshots, isLoading, removeSnapshot } = useAccountBalances(
+    account.id,
+    open,
+    account.updated_at,
+  );
   const [isSnapshotOpen, setIsSnapshotOpen] = useState(false);
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const [snapshotToDelete, setSnapshotToDelete] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-
-    let cancelled = false;
-    setIsLoading(true);
-
-    (async () => {
-      try {
-        const data = await dataService.getAccountBalances(account.id);
-        if (cancelled) return;
-        setSnapshots(data);
-      } catch (error) {
-        Sentry.captureException(error, {
-          tags: { context: 'AccountDetailSheet.loadSnapshots' },
-        });
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-    // Re-fetch when account.updated_at changes (after a new snapshot)
-  }, [account.id, account.updated_at, open]);
 
   const liability = isLiability(account.kind);
   const isInvestment = account.kind === 'investment';
@@ -106,12 +85,15 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
   };
 
   const handleSnapshotDeleteConfirm = async () => {
-    if (!snapshotToDelete) return;
+    if (!snapshotToDelete) {
+      return;
+    }
+
     const id = snapshotToDelete;
     setSnapshotToDelete(null);
     try {
       await handleSnapshotDelete(id, account.id);
-      setSnapshots((prev) => prev.filter((s) => s.id !== id));
+      removeSnapshot(id);
     } catch {
       // toast already shown
     }
@@ -171,10 +153,10 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
               <p
                 className={cn(
                   'text-2xl font-bold tabular-nums',
-                  liability ? 'text-destructive' : 'text-foreground',
+                  getBalanceClass(liability),
                 )}
               >
-                {liability ? '−' : ''}
+                {renderLiabilitySign(liability)}
                 {formatCurrency(
                   account.current_balance,
                   account.default_currency,
@@ -307,8 +289,10 @@ const renderInvestmentDetail = (
 
   const gain = account.current_balance - account.cost_basis;
   const isPositive = gain >= 0;
-  const returnPct =
-    account.cost_basis > 0 ? (gain / account.cost_basis) * 100 : 0;
+  let returnPct = 0;
+  if (account.cost_basis > 0) {
+    returnPct = (gain / account.cost_basis) * 100;
+  }
 
   return (
     <div className="flex items-center gap-4 pt-2 text-xs">
@@ -323,18 +307,50 @@ const renderInvestmentDetail = (
         <p
           className={cn(
             'font-medium tabular-nums',
-            isPositive ? 'text-income' : 'text-destructive',
+            getGainClass(isPositive),
           )}
         >
-          {isPositive ? '+' : ''}
+          {renderGainSign(isPositive)}
           {formatCurrency(gain, account.default_currency)} (
-          {isPositive ? '+' : ''}
+          {renderGainSign(isPositive)}
           {returnPct.toFixed(1)}%)
         </p>
       </div>
     </div>
   );
-}
+};
+
+const getBalanceClass = (liability: boolean): string => {
+  if (liability) {
+    return 'text-destructive';
+  }
+
+  return 'text-foreground';
+};
+
+const renderLiabilitySign = (liability: boolean): string => {
+  if (liability) {
+    return '−';
+  }
+
+  return '';
+};
+
+const getGainClass = (isPositive: boolean): string => {
+  if (isPositive) {
+    return 'text-income';
+  }
+
+  return 'text-destructive';
+};
+
+const renderGainSign = (isPositive: boolean): string => {
+  if (isPositive) {
+    return '+';
+  }
+
+  return '';
+};
 
 const renderHistoryList = (
   isLoading: boolean,

@@ -6,7 +6,9 @@ describe('TagClearButton', () => {
   it('renders a span, not a button, to avoid nested button issues', () => {
     const { container } = render(<TagClearButton onClear={vi.fn()} />);
 
-    const clearElement = container.querySelector('[aria-label="Clear tag"]');
+    const clearElement = container.querySelector(
+      '[aria-label="expenses.clearTag"]',
+    );
     expect(clearElement).not.toBeNull();
     expect(clearElement!.tagName).toBe('SPAN');
     expect(clearElement!.getAttribute('role')).toBe('button');
@@ -17,7 +19,7 @@ describe('TagClearButton', () => {
     const onClear = vi.fn();
     render(<TagClearButton onClear={onClear} />);
 
-    fireEvent.click(screen.getByLabelText('Clear tag'));
+    fireEvent.click(screen.getByLabelText('expenses.clearTag'));
     expect(onClear).toHaveBeenCalledOnce();
   });
 
@@ -25,7 +27,9 @@ describe('TagClearButton', () => {
     const onClear = vi.fn();
     render(<TagClearButton onClear={onClear} />);
 
-    fireEvent.keyDown(screen.getByLabelText('Clear tag'), { key: 'Enter' });
+    fireEvent.keyDown(screen.getByLabelText('expenses.clearTag'), {
+      key: 'Enter',
+    });
     expect(onClear).toHaveBeenCalledOnce();
   });
 
@@ -33,7 +37,7 @@ describe('TagClearButton', () => {
     const onClear = vi.fn();
     render(<TagClearButton onClear={onClear} />);
 
-    fireEvent.keyDown(screen.getByLabelText('Clear tag'), { key: ' ' });
+    fireEvent.keyDown(screen.getByLabelText('expenses.clearTag'), { key: ' ' });
     expect(onClear).toHaveBeenCalledOnce();
   });
 
@@ -41,7 +45,9 @@ describe('TagClearButton', () => {
     const onClear = vi.fn();
     render(<TagClearButton onClear={onClear} />);
 
-    fireEvent.keyDown(screen.getByLabelText('Clear tag'), { key: 'Tab' });
+    fireEvent.keyDown(screen.getByLabelText('expenses.clearTag'), {
+      key: 'Tab',
+    });
     expect(onClear).not.toHaveBeenCalled();
   });
 });
@@ -49,7 +55,7 @@ describe('TagClearButton', () => {
 describe('TagButtonContent', () => {
   it('renders placeholder when no tag selected', () => {
     render(<TagButtonContent selectedTag={undefined} />);
-    expect(screen.getByText('No tag')).toBeInTheDocument();
+    expect(screen.getByText('expenses.noTag')).toBeInTheDocument();
   });
 
   it('renders tag name and color dot when tag is selected', () => {

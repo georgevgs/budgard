@@ -15,7 +15,7 @@ type ToastParams = {
   onDismiss?: () => void;
 }
 
-function toast({ variant, title, description, duration, action, onDismiss }: ToastParams) {
+const toast = ({ variant, title, description, duration, action, onDismiss }: ToastParams) => {
   const message = title ?? description ?? '';
   const opts: ExternalToast = {};
   if (title && description) opts.description = description;
@@ -38,10 +38,10 @@ function toast({ variant, title, description, duration, action, onDismiss }: Toa
   }
 
   return sonnerToast(message, opts);
-}
+};
 
-function useToast() {
+const useToast = () => {
   return { toast };
-}
+};
 
 export { useToast, toast };

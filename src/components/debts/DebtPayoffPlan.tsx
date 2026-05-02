@@ -66,7 +66,7 @@ const DebtPayoffPlan = ({ debts, defaultCurrency }: Props) => {
               type="text"
               inputMode="decimal"
               pattern="[0-9,.]*"
-              placeholder="0"
+              placeholder={t('common.amountZero')}
               value={extraInput}
               onChange={(e) => setExtraInput(formatCurrencyInput(e.target.value))}
               className="pl-7"

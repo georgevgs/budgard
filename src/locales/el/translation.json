@@ -16,7 +16,10 @@
     "success": "Επιτυχία",
     "update": "Ενημέρωση",
     "create": "Δημιουργία",
-    "clear": "Καθαρισμός"
+    "clear": "Καθαρισμός",
+    "amountZero": "0,00",
+    "percentZero": "0,00",
+    "integerZero": "0"
   },
   "auth": {
     "signIn": "Σύνδεση",
@@ -69,6 +72,10 @@
     "descriptionLabel": "Περιγραφή",
     "selectCategory": "Επιλέξτε κατηγορία",
     "noCategory": "Χωρίς κατηγορία",
+    "noTag": "Χωρίς ετικέτα",
+    "tagSearchPlaceholder": "Αναζήτηση ή δημιουργία ετικέτας...",
+    "clearTag": "Καθαρισμός ετικέτας",
+    "deleteTemplate": "Διαγραφή {{name}}",
     "pickDate": "Επιλέξτε ημερομηνία",
     "moreDetails": "Περισσότερες λεπτομέρειες",
     "lessDetails": "Λιγότερες λεπτομέρειες",

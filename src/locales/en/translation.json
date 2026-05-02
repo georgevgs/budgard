@@ -16,7 +16,10 @@
     "success": "Success",
     "update": "Update",
     "create": "Create",
-    "clear": "Clear"
+    "clear": "Clear",
+    "amountZero": "0,00",
+    "percentZero": "0.00",
+    "integerZero": "0"
   },
   "auth": {
     "signIn": "Sign In",
@@ -69,6 +72,10 @@
     "descriptionLabel": "Description",
     "selectCategory": "Select a category",
     "noCategory": "No category",
+    "noTag": "No tag",
+    "tagSearchPlaceholder": "Search or create tag...",
+    "clearTag": "Clear tag",
+    "deleteTemplate": "Delete {{name}}",
     "pickDate": "Pick a date",
     "moreDetails": "More details",
     "lessDetails": "Less details",

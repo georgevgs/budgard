@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import type { Locale } from 'date-fns';
-import * as Sentry from '@sentry/react';
 import {
   Dialog,
   DialogContent,
@@ -35,9 +34,8 @@ import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import { formatCurrency } from '@/lib/utils';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { useDebtProgress } from '@/hooks/useDebtProgress';
-import { dataService } from '@/services/dataService';
+import { useDebtPayments } from '@/hooks/useDebtPayments';
 import type { Debt } from '@/types/Debt';
-import type { Expense } from '@/types/Expense';
 import DebtPaymentForm from '@/components/debts/DebtPaymentForm';
 import DebtProgressBar from '@/components/debts/DebtProgressBar';
 
@@ -53,37 +51,15 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
   const dateLocale: Locale = i18n.language === 'el' ? el : enUS;
   const { handleDebtArchive, handleExpenseDelete } = useDataOperations();
   const progress = useDebtProgress(debt);
-  const [payments, setPayments] = useState<Expense[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { payments, isLoading, removePayment } = useDebtPayments(
+    debt.id,
+    open,
+    debt.updated_at,
+  );
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const [paymentToDelete, setPaymentToDelete] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-
-    let cancelled = false;
-    setIsLoading(true);
-
-    (async () => {
-      try {
-        const data = await dataService.getDebtPayments(debt.id);
-        if (cancelled) return;
-        setPayments(data);
-      } catch (error) {
-        Sentry.captureException(error, {
-          tags: { context: 'DebtDetailSheet.loadPayments' },
-        });
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [debt.id, debt.updated_at, open]);
 
   const handleArchiveClick = () => {
     setMenuOpen(false);
@@ -106,12 +82,15 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
   };
 
   const handlePaymentDeleteConfirm = async () => {
-    if (!paymentToDelete) return;
+    if (!paymentToDelete) {
+      return;
+    }
+
     const id = paymentToDelete;
     setPaymentToDelete(null);
     try {
       await handleExpenseDelete(id);
-      setPayments((prev) => prev.filter((p) => p.id !== id));
+      removePayment(id);
     } catch {
       // toast already shown
     }

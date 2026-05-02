@@ -2,7 +2,7 @@ import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { markIntentionalSignOut } from '@/lib/authStore';
 
-export async function requestOTP(email: string, captchaToken?: string) {
+export const requestOTP = async (email: string, captchaToken?: string) => {
   return supabase.auth.signInWithOtp({
     email,
     options: {
@@ -10,27 +10,27 @@ export async function requestOTP(email: string, captchaToken?: string) {
       captchaToken,
     },
   });
-}
+};
 
-export async function signInWithOTP(email: string, token: string) {
+export const signInWithOTP = async (email: string, token: string) => {
   return supabase.auth.verifyOtp({
     email,
     token,
     type: 'email',
   });
-}
+};
 
-export async function signOut() {
+export const signOut = async () => {
   markIntentionalSignOut();
   return supabase.auth.signOut();
-}
+};
 
-export function getSession() {
+export const getSession = () => {
   return supabase.auth.getSession();
-}
+};
 
-export function onAuthStateChange(callback: (session: Session | null) => void) {
+export const onAuthStateChange = (callback: (session: Session | null) => void) => {
   return supabase.auth.onAuthStateChange((_event, session) => {
     callback(session);
   });
-}
+};

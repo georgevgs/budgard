@@ -1,5 +1,6 @@
 import Tag from 'lucide-react/dist/esm/icons/tag';
 import X from 'lucide-react/dist/esm/icons/x';
+import { useTranslation } from 'react-i18next';
 
 type TagInfo = {
   name: string;
@@ -11,11 +12,13 @@ type TagButtonContentProps = {
 };
 
 export const TagButtonContent = ({ selectedTag }: TagButtonContentProps) => {
+  const { t } = useTranslation();
+
   if (!selectedTag) {
     return (
       <span className="flex items-center gap-2">
         <Tag className="h-4 w-4" />
-        No tag
+        {t('expenses.noTag')}
       </span>
     );
   }
@@ -36,6 +39,8 @@ type TagClearButtonProps = {
 };
 
 export const TagClearButton = ({ onClear }: TagClearButtonProps) => {
+  const { t } = useTranslation();
+
   const handleClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     onClear();
@@ -45,7 +50,7 @@ export const TagClearButton = ({ onClear }: TagClearButtonProps) => {
     <span
       role="button"
       tabIndex={0}
-      aria-label="Clear tag"
+      aria-label={t('expenses.clearTag')}
       className="ml-auto p-1 -mr-1 shrink-0 opacity-50 hover:opacity-100 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       onClick={handleClick}
       onKeyDown={(event) => {

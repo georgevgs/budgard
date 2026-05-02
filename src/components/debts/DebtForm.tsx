@@ -236,7 +236,7 @@ const DebtForm = ({ debt, onClose }: Props) => {
                             type="text"
                             inputMode="decimal"
                             pattern="[0-9.,]*"
-                            placeholder="0.00"
+                            placeholder={t('common.percentZero')}
                             {...field}
                             className="pr-7"
                           />
@@ -267,7 +267,7 @@ const DebtForm = ({ debt, onClose }: Props) => {
                             type="text"
                             inputMode="decimal"
                             pattern="[0-9,.]*"
-                            placeholder="0"
+                            placeholder={t('common.amountZero')}
                             value={field.value}
                             onChange={(e) =>
                               field.onChange(

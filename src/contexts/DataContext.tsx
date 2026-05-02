@@ -45,6 +45,7 @@ type DataState = {
   monthlyBudget: number | null;
   defaultCurrency: string;
   defaultSavingsPct: number | null;
+  dailyReminderHour: number | null;
   isLoading: boolean;
   isInitialized: boolean;
 };
@@ -74,6 +75,7 @@ type DataActions = {
   setMonthlyBudget: Dispatch<SetStateAction<number | null>>;
   setDefaultCurrency: Dispatch<SetStateAction<string>>;
   setDefaultSavingsPct: Dispatch<SetStateAction<number | null>>;
+  setDailyReminderHour: Dispatch<SetStateAction<number | null>>;
 };
 
 // Slow-changing scalars that handlers need (mostly for optimistic rollback).
@@ -83,6 +85,7 @@ type DataConfig = {
   monthlyBudget: number | null;
   defaultCurrency: string;
   defaultSavingsPct: number | null;
+  dailyReminderHour: number | null;
 };
 
 type DataContextType = DataState & DataActions;
@@ -91,7 +94,7 @@ const DataContext = createContext<DataContextType | null>(null);
 const DataActionsContext = createContext<DataActions | null>(null);
 const DataConfigContext = createContext<DataConfig | null>(null);
 
-export function DataProvider({ children }: { children: ReactNode }) {
+export const DataProvider = ({ children }: { children: ReactNode }) => {
   const { session, isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
   const toastRef = useRef(toast);
@@ -116,6 +119,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [monthlyBudget, setMonthlyBudget] = useState<number | null>(null);
   const [defaultCurrency, setDefaultCurrency] = useState<string>('EUR');
   const [defaultSavingsPct, setDefaultSavingsPct] = useState<number | null>(
+    null,
+  );
+  const [dailyReminderHour, setDailyReminderHour] = useState<number | null>(
     null,
   );
   const [isLoading, setIsLoading] = useState(true);
@@ -209,6 +215,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setMonthlyBudget(budgetData?.monthly_amount ?? null);
       setDefaultCurrency(budgetData?.default_currency ?? 'EUR');
       setDefaultSavingsPct(budgetData?.default_savings_pct ?? null);
+      setDailyReminderHour(budgetData?.daily_reminder_hour ?? null);
       setIsInitialized(true);
       setIsLoading(false);
       lastFetchAtRef.current = Date.now();
@@ -400,6 +407,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setMonthlyBudget,
       setDefaultCurrency,
       setDefaultSavingsPct,
+      setDailyReminderHour,
     }),
     [refreshData, refreshExpenses, refreshIncomes, refreshAccounts, refreshDebts],
   );
@@ -410,8 +418,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
       monthlyBudget,
       defaultCurrency,
       defaultSavingsPct,
+      dailyReminderHour,
     }),
-    [isInitialized, monthlyBudget, defaultCurrency, defaultSavingsPct],
+    [
+      isInitialized,
+      monthlyBudget,
+      defaultCurrency,
+      defaultSavingsPct,
+      dailyReminderHour,
+    ],
   );
 
   const value = useMemo(
@@ -433,6 +448,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       monthlyBudget,
       defaultCurrency,
       defaultSavingsPct,
+      dailyReminderHour,
       isLoading,
       isInitialized,
       ...actions,
@@ -455,6 +471,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       monthlyBudget,
       defaultCurrency,
       defaultSavingsPct,
+      dailyReminderHour,
       isLoading,
       isInitialized,
       actions,
@@ -468,9 +485,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       </DataConfigContext.Provider>
     </DataActionsContext.Provider>
   );
-}
+};
 
-function isAbortError(error: unknown): boolean {
+const isAbortError = (error: unknown): boolean => {
   if (error instanceof DOMException && error.name === 'AbortError') return true;
   if (error instanceof Error && error.message.includes('AbortError'))
     return true;
@@ -482,9 +499,9 @@ function isAbortError(error: unknown): boolean {
   )
     return true;
   return false;
-}
+};
 
-export function useData() {
+export const useData = () => {
   const context = useContext(DataContext);
 
   if (!context) {
@@ -492,11 +509,11 @@ export function useData() {
   }
 
   return context;
-}
+};
 
 // Use this when a component only needs setters/refresh callbacks. Skips
 // re-renders triggered by data mutations.
-export function useDataActions() {
+export const useDataActions = () => {
   const context = useContext(DataActionsContext);
 
   if (!context) {
@@ -504,11 +521,11 @@ export function useDataActions() {
   }
 
   return context;
-}
+};
 
 // Use this for slow-changing scalars (init flag, monthly budget, default
 // currency, default savings pct). Skips re-renders triggered by data mutations.
-export function useDataConfig() {
+export const useDataConfig = () => {
   const context = useContext(DataConfigContext);
 
   if (!context) {
@@ -516,4 +533,4 @@ export function useDataConfig() {
   }
 
   return context;
-}
+};

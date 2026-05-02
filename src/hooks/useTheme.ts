@@ -64,7 +64,7 @@ const applyThemeToDocument = (theme: Theme): void => {
   });
 };
 
-export function useTheme() {
+export const useTheme = () => {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
   useEffect(() => {
@@ -77,4 +77,4 @@ export function useTheme() {
   }, [theme]);
 
   return { theme, setTheme };
-}
+};

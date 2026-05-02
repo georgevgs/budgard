@@ -44,22 +44,37 @@ const RecurringExpensesList = () => {
   } = useDataOperations();
   const { t } = useTranslation();
 
-  const items = mode === 'income' ? recurringIncomes : recurringExpenses;
-  const categories = mode === 'income' ? incomeCategories : expenseCategories;
+  let items = recurringExpenses;
+  if (mode === 'income') {
+    items = recurringIncomes;
+  }
+
+  let categories = expenseCategories;
+  if (mode === 'income') {
+    categories = incomeCategories;
+  }
 
   const handleSubmit = async (values: RecurringExpenseFormData) => {
     if (!session?.user?.id) return;
 
     try {
+      let categoryId: string | null = values.category_id;
+      if (values.category_id === 'none') {
+        categoryId = null;
+      }
+
+      let endDate: string | null = null;
+      if (values.end_date) {
+        endDate = format(values.end_date, 'yyyy-MM-dd');
+      }
+
       const data: Partial<RecurringExpense> = {
         amount: parseCurrencyInput(values.amount),
         description: values.description,
-        category_id: values.category_id === 'none' ? null : values.category_id,
+        category_id: categoryId,
         frequency: values.frequency,
         start_date: format(values.start_date, 'yyyy-MM-dd'),
-        end_date: values.end_date
-          ? format(values.end_date, 'yyyy-MM-dd')
-          : null,
+        end_date: endDate,
         user_id: session.user.id,
       };
 
@@ -126,9 +141,7 @@ const RecurringExpensesList = () => {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h2 className="text-lg font-semibold">
-              {mode === 'income'
-                ? t('recurring.income.title')
-                : t('recurring.expensesTitle')}
+              {renderModeTitle(mode, t)}
             </h2>
             {renderMonthlySummary(
               activeItems.length,
@@ -145,9 +158,7 @@ const RecurringExpensesList = () => {
           >
             <Plus className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">
-              {mode === 'income'
-                ? t('recurring.income.addRecurring')
-                : t('recurring.addRecurring')}
+              {renderAddCtaLabel(mode, t)}
             </span>
           </Button>
         </div>
@@ -157,22 +168,14 @@ const RecurringExpensesList = () => {
           <button
             type="button"
             onClick={() => setMode('expense')}
-            className={`text-xs px-4 py-1.5 rounded-full transition-colors ${
-              mode === 'expense'
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground'
-            }`}
+            className={`text-xs px-4 py-1.5 rounded-full transition-colors ${getModeButtonClass(mode === 'expense')}`}
           >
             {t('expenses.title')}
           </button>
           <button
             type="button"
             onClick={() => setMode('income')}
-            className={`text-xs px-4 py-1.5 rounded-full transition-colors ${
-              mode === 'income'
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground'
-            }`}
+            className={`text-xs px-4 py-1.5 rounded-full transition-colors ${getModeButtonClass(mode === 'income')}`}
           >
             {t('income.title')}
           </button>
@@ -218,6 +221,30 @@ type TranslateFunction = (
   options?: Record<string, unknown>,
 ) => string;
 
+const renderModeTitle = (mode: RecurringMode, t: TranslateFunction): string => {
+  if (mode === 'income') {
+    return t('recurring.income.title');
+  }
+
+  return t('recurring.expensesTitle');
+};
+
+const renderAddCtaLabel = (mode: RecurringMode, t: TranslateFunction): string => {
+  if (mode === 'income') {
+    return t('recurring.income.addRecurring');
+  }
+
+  return t('recurring.addRecurring');
+};
+
+const getModeButtonClass = (active: boolean): string => {
+  if (active) {
+    return 'bg-background text-foreground shadow-sm';
+  }
+
+  return 'text-muted-foreground';
+};
+
 const renderMonthlySummary = (
   activeCount: number,
   monthlyTotal: number,
@@ -225,10 +252,14 @@ const renderMonthlySummary = (
   t: TranslateFunction,
   currency: string,
 ) => {
-  if (activeCount === 0) return null;
+  if (activeCount === 0) {
+    return null;
+  }
 
-  const key =
-    mode === 'income' ? 'recurring.income.monthlyFrom' : 'recurring.monthlyFrom';
+  let key = 'recurring.monthlyFrom';
+  if (mode === 'income') {
+    key = 'recurring.income.monthlyFrom';
+  }
 
   return (
     <p className="text-sm text-muted-foreground">
@@ -276,15 +307,14 @@ const renderEmptyState = (
   onOpenForm: (open: boolean) => void,
   t: TranslateFunction,
 ) => {
-  const titleKey = mode === 'income' ? 'recurring.income.empty' : 'recurring.noRecurring';
-  const descKey =
-    mode === 'income'
-      ? 'recurring.income.emptyDescription'
-      : 'recurring.noRecurringDescription';
-  const ctaKey =
-    mode === 'income'
-      ? 'recurring.income.addFirstRecurring'
-      : 'recurring.addFirstRecurring';
+  let titleKey = 'recurring.noRecurring';
+  let descKey = 'recurring.noRecurringDescription';
+  let ctaKey = 'recurring.addFirstRecurring';
+  if (mode === 'income') {
+    titleKey = 'recurring.income.empty';
+    descKey = 'recurring.income.emptyDescription';
+    ctaKey = 'recurring.income.addFirstRecurring';
+  }
 
   return (
     <Card className="border-border/50 rounded-2xl p-8 text-center overflow-hidden">

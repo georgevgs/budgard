@@ -145,7 +145,7 @@ const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
                       <Input
                         type="text"
                         inputMode="decimal"
-                        placeholder="0,00"
+                        placeholder={t('common.amountZero')}
                         {...field}
                         onChange={(e) => {
                           const formatted = formatCurrencyInput(e.target.value);

@@ -36,9 +36,14 @@ type ReceiptResult = {
   receiptFailed: boolean;
 };
 
-export function useDataOperations() {
-  const { isInitialized, monthlyBudget, defaultCurrency, defaultSavingsPct } =
-    useDataConfig();
+export const useDataOperations = () => {
+  const {
+    isInitialized,
+    monthlyBudget,
+    defaultCurrency,
+    defaultSavingsPct,
+    dailyReminderHour,
+  } = useDataConfig();
   const {
     setExpenses,
     setIncomes,
@@ -59,6 +64,7 @@ export function useDataOperations() {
     setMonthlyBudget,
     setDefaultCurrency,
     setDefaultSavingsPct,
+    setDailyReminderHour,
   } = useDataActions();
   const { toast } = useToast();
 
@@ -652,6 +658,26 @@ export function useDataOperations() {
       }
     },
     [defaultCurrency, setDefaultCurrency, showErrorToast],
+  );
+
+  const handleDailyReminderHourUpdate = useCallback(
+    async (hour: number | null) => {
+      const previous = dailyReminderHour;
+      setDailyReminderHour(hour);
+
+      try {
+        await dataService.updateDailyReminderHour(hour);
+      } catch (error) {
+        haptics.error();
+        setDailyReminderHour(previous);
+        Sentry.captureException(error, {
+          tags: { operation: 'updateDailyReminderHour' },
+        });
+        showErrorToast('Failed to update daily reminder');
+        throw error;
+      }
+    },
+    [dailyReminderHour, setDailyReminderHour, showErrorToast],
   );
 
   const handleSavingsPctUpdate = useCallback(
@@ -1282,6 +1308,7 @@ export function useDataOperations() {
       handleCategoryBudgetDelete,
       handleCurrencyUpdate,
       handleSavingsPctUpdate,
+      handleDailyReminderHourUpdate,
       handleDeleteAccount,
       handleCategoriesAddBulk,
       handleBulkExpenseImport,
@@ -1317,6 +1344,7 @@ export function useDataOperations() {
       handleCategoryBudgetDelete,
       handleCurrencyUpdate,
       handleSavingsPctUpdate,
+      handleDailyReminderHourUpdate,
       handleDeleteAccount,
       handleCategoriesAddBulk,
       handleBulkExpenseImport,
@@ -1333,7 +1361,7 @@ export function useDataOperations() {
       handleDebtArchive,
     ],
   );
-}
+};
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

@@ -559,7 +559,7 @@ const ExpensesForm = ({
                         <PopoverContent className="w-full p-0" align="start">
                           <div className="p-2">
                             <Input
-                              placeholder="Search or create tag..."
+                              placeholder={t('expenses.tagSearchPlaceholder')}
                               value={tagSearch}
                               onChange={(e) => setTagSearch(e.target.value)}
                               onKeyDown={(e) => {

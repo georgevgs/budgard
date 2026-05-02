@@ -10,9 +10,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PiggyBank from 'lucide-react/dist/esm/icons/piggy-bank';
-import { dataService } from '@/services/dataService';
 import { useDataOperations } from '@/hooks/useDataOperations';
-import { useData } from '@/contexts/DataContext';
+import { useDataConfig } from '@/contexts/DataContext';
 import { formatCurrency, cn } from '@/lib/utils';
 import { haptics } from '@/lib/haptics';
 import type { Expense } from '@/types/Expense';
@@ -27,8 +26,8 @@ type Props = {
 
 const SavingsNudgeSheet = ({ income, open, onClose }: Props) => {
   const { t } = useTranslation();
-  const { defaultCurrency, defaultSavingsPct, setIncomes } = useData();
-  const { handleSavingsPctUpdate } = useDataOperations();
+  const { defaultCurrency, defaultSavingsPct } = useDataConfig();
+  const { handleSavingsPctUpdate, handleIncomeSubmit } = useDataOperations();
 
   const initialPct = defaultSavingsPct ?? 20;
   const [pct, setPct] = useState(initialPct);
@@ -48,23 +47,19 @@ const SavingsNudgeSheet = ({ income, open, onClose }: Props) => {
   const handleAllocate = async () => {
     setIsSaving(true);
     try {
-      const updated = await dataService.updateIncome(
+      await handleIncomeSubmit(
         { savings_allocation_amount: allocation },
         income.id,
       );
-
-      // Sync local state — the income row now has the savings allocation
-      setIncomes((prev) => prev.map((i) => (i.id === income.id ? updated : i)));
 
       // Optionally save as default
       if (setAsDefault && pct !== defaultSavingsPct) {
         await handleSavingsPctUpdate(pct);
       }
 
-      haptics.success();
       onClose();
     } catch {
-      haptics.error();
+      // useDataOperations handles haptics + toast on failure
     } finally {
       setIsSaving(false);
     }

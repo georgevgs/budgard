@@ -34,7 +34,7 @@ export type SpendingInsightsParams = {
   defaultCurrency: string;
 }
 
-export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
+export const useSpendingInsights = (params: SpendingInsightsParams): Insight[] => {
   const { expenses, monthlyBudget, monthComparison, categories, dateLocale, defaultCurrency } =
     params;
   const { t } = useTranslation();
@@ -578,4 +578,4 @@ export function useSpendingInsights(params: SpendingInsightsParams): Insight[] {
 
     return insights.filter((i): i is Insight => i !== null);
   }, [expenses, monthlyBudget, monthComparison, categories, dateLocale, defaultCurrency, t]);
-}
+};

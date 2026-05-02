@@ -34,7 +34,10 @@ const ExpensesPagination = ({
   showFullDate,
 }: Props) => {
   const { t, i18n } = useTranslation();
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  let dateLocale = enUS;
+  if (i18n.language === 'el') {
+    dateLocale = el;
+  }
   const [currentPage, setCurrentPage] = useState(1);
   const prevLengthRef = useRef(expenses.length);
 
@@ -191,14 +194,10 @@ const renderPaginationControls = (
           <PaginationItem>
             <PaginationPrevious
               onClick={() => handlePageChange(currentPage - 1)}
-              className={
-                currentPage <= 1
-                  ? 'pointer-events-none opacity-50'
-                  : 'cursor-pointer'
-              }
+              className={getStepNavClass(currentPage <= 1)}
               aria-label={t('pagination.previous')}
               aria-disabled={currentPage <= 1}
-              tabIndex={currentPage <= 1 ? -1 : undefined}
+              tabIndex={getStepNavTabIndex(currentPage <= 1)}
             >
               {t('pagination.previous')}
             </PaginationPrevious>
@@ -206,7 +205,7 @@ const renderPaginationControls = (
 
           {getVisiblePages(currentPage, totalPages).map((page, index) => (
             <PaginationItem
-              key={page === 'ellipsis' ? `ellipsis-${index}` : page}
+              key={getPageKey(page, index)}
             >
               {renderPageItem(page, safePage, handlePageChange, t)}
             </PaginationItem>
@@ -215,14 +214,10 @@ const renderPaginationControls = (
           <PaginationItem>
             <PaginationNext
               onClick={() => handlePageChange(currentPage + 1)}
-              className={
-                currentPage >= totalPages
-                  ? 'pointer-events-none opacity-50'
-                  : 'cursor-pointer'
-              }
+              className={getStepNavClass(currentPage >= totalPages)}
               aria-label={t('pagination.next')}
               aria-disabled={currentPage >= totalPages}
-              tabIndex={currentPage >= totalPages ? -1 : undefined}
+              tabIndex={getStepNavTabIndex(currentPage >= totalPages)}
             >
               {t('pagination.next')}
             </PaginationNext>
@@ -231,4 +226,28 @@ const renderPaginationControls = (
       </Pagination>
     </div>
   );
+};
+
+const getStepNavClass = (disabled: boolean): string => {
+  if (disabled) {
+    return 'pointer-events-none opacity-50';
+  }
+
+  return 'cursor-pointer';
+};
+
+const getStepNavTabIndex = (disabled: boolean): number | undefined => {
+  if (disabled) {
+    return -1;
+  }
+
+  return undefined;
+};
+
+const getPageKey = (page: number | 'ellipsis', index: number): string | number => {
+  if (page === 'ellipsis') {
+    return `ellipsis-${index}`;
+  }
+
+  return page;
 };

@@ -2,19 +2,25 @@ import * as Sentry from '@sentry/react';
 import { supabase } from '@/lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
-function readStoredSession(): Session | null {
+const readStoredSession = (): Session | null => {
   try {
     const key = Object.keys(localStorage).find(
       (k) => k.startsWith('sb-') && k.endsWith('-auth-token'),
     );
-    if (!key) return null;
+    if (!key) {
+      return null;
+    }
+
     const raw = localStorage.getItem(key);
-    if (!raw) return null;
+    if (!raw) {
+      return null;
+    }
+
     return JSON.parse(raw) as Session;
   } catch {
     return null;
   }
-}
+};
 
 type AuthSnapshot = { session: Session | null; isLoading: boolean };
 
@@ -33,10 +39,10 @@ let _snapshot: AuthSnapshot = {
 
 const listeners = new Set<() => void>();
 
-function notify(next: AuthSnapshot) {
+const notify = (next: AuthSnapshot) => {
   _snapshot = next;
   listeners.forEach((l) => l());
-}
+};
 
 // Track the last valid session so we can attempt recovery when iOS aborts
 // Supabase's internal token refresh (which fires a spurious SIGNED_OUT).
@@ -45,9 +51,9 @@ let _recoveryTimer: ReturnType<typeof setTimeout> | null = null;
 // Set to true before an explicit signOut() call so we don't try to recover.
 let _intentionalSignOut = false;
 
-export function markIntentionalSignOut() {
+export const markIntentionalSignOut = () => {
   _intentionalSignOut = true;
-}
+};
 
 supabase.auth.onAuthStateChange((event, session) => {
   if (_recoveryTimer !== null) {

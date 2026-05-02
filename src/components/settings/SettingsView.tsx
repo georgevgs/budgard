@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,7 +39,6 @@ import {
 } from '@/hooks/useAccentColor';
 import { SUPPORTED_CURRENCIES } from '@/lib/currencies';
 import { signOut } from '@/lib/auth';
-import { dataService } from '@/services/dataService';
 import { useToast } from '@/hooks/useToast';
 import { haptics, hapticsSettings } from '@/lib/haptics';
 
@@ -53,8 +52,12 @@ const LANGUAGES = [
 const SettingsView = () => {
   const { t, i18n } = useTranslation();
   const { session } = useAuth();
-  const { defaultCurrency } = useDataConfig();
-  const { handleCurrencyUpdate, handleDeleteAccount } = useDataOperations();
+  const { defaultCurrency, dailyReminderHour } = useDataConfig();
+  const {
+    handleCurrencyUpdate,
+    handleDeleteAccount,
+    handleDailyReminderHourUpdate,
+  } = useDataOperations();
   const { theme, setTheme } = useTheme();
   const { accent, setAccent } = useAccentColor();
   const { toast } = useToast();
@@ -63,7 +66,6 @@ const SettingsView = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isCurrencyUpdating, setIsCurrencyUpdating] = useState(false);
-  const [dailyReminderHour, setDailyReminderHour] = useState<number | null>(null);
   const [hapticsEnabled, setHapticsEnabled] = useState<boolean>(() =>
     hapticsSettings.isEnabled(),
   );
@@ -87,25 +89,16 @@ const SettingsView = () => {
     setAccent(key);
   };
 
-  // Fetch daily reminder preference on mount
-  useEffect(() => {
-    dataService.getBudget().then((budget) => {
-      if (budget) {
-        setDailyReminderHour(budget.daily_reminder_hour);
-      }
-    });
-  }, []);
-
   const handleDailyReminderToggle = useCallback(
     async (enabled: boolean) => {
       // Default to 9:00 local time when enabling
-      const utcHour = enabled
-        ? localToUtcHour(9)
-        : null;
+      let utcHour: number | null = null;
+      if (enabled) {
+        utcHour = localToUtcHour(9);
+      }
 
       try {
-        await dataService.updateDailyReminderHour(utcHour);
-        setDailyReminderHour(utcHour);
+        await handleDailyReminderHourUpdate(utcHour);
       } catch {
         toast({
           variant: 'destructive',
@@ -113,7 +106,7 @@ const SettingsView = () => {
         });
       }
     },
-    [toast, t],
+    [handleDailyReminderHourUpdate, toast, t],
   );
 
   const handleDailyReminderTimeChange = useCallback(
@@ -121,8 +114,7 @@ const SettingsView = () => {
       const utcHour = localToUtcHour(localHour);
 
       try {
-        await dataService.updateDailyReminderHour(utcHour);
-        setDailyReminderHour(utcHour);
+        await handleDailyReminderHourUpdate(utcHour);
       } catch {
         toast({
           variant: 'destructive',
@@ -130,7 +122,7 @@ const SettingsView = () => {
         });
       }
     },
-    [toast, t],
+    [handleDailyReminderHourUpdate, toast, t],
   );
 
   const handleSignOut = async () => {

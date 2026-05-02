@@ -2,11 +2,11 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { getCurrencySymbol } from '@/lib/currencies';
 
-export function cn(...inputs: ClassValue[]) {
+export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
-}
+};
 
-export function formatForeignAmount(amount: number, currencyCode: string): string {
+export const formatForeignAmount = (amount: number, currencyCode: string): string => {
   try {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -16,18 +16,18 @@ export function formatForeignAmount(amount: number, currencyCode: string): strin
   } catch {
     return `${amount.toFixed(2)} ${currencyCode}`;
   }
-}
+};
 
-export function formatCurrency(amount: number, currencyCode: string = 'EUR'): string {
+export const formatCurrency = (amount: number, currencyCode: string = 'EUR'): string => {
   const formatted = amount.toLocaleString('de-DE', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 
   return formatted + getCurrencySymbol(currencyCode);
-}
+};
 
-export function formatCurrencyInput(value: string): string {
+export const formatCurrencyInput = (value: string): string => {
   // Remove everything except digits and comma
   const cleaned = value.replace(/[^\d,]/g, '');
 
@@ -52,15 +52,15 @@ export function formatCurrencyInput(value: string): string {
   }
 
   return whole;
-}
+};
 
-export function parseCurrencyInput(value: string): number {
+export const parseCurrencyInput = (value: string): number => {
   // Convert from European format (1.234,56) to number
   const cleaned = value
     .replace(/\./g, '') // Remove thousand separators
     .replace(',', '.'); // Convert decimal comma to dot
   return parseFloat(cleaned) || 0;
-}
+};
 
 export const dataUrlToBlob = (dataUrl: string): Blob => {
   const [header, base64] = dataUrl.split(',');
@@ -82,9 +82,11 @@ const EMOJI_PATTERN =
   /[\p{Emoji_Presentation}\p{Extended_Pictographic}\u{200D}\u{FE0F}]/gu;
 /* eslint-enable no-misleading-character-class */
 
-export function extractEmoji(input: string): string {
+export const extractEmoji = (input: string): string => {
   const matches = input.match(EMOJI_PATTERN);
-  if (!matches) return '';
+  if (!matches) {
+    return '';
+  }
 
   return matches.join('').slice(0, 4);
-}
+};
