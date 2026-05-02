@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/select';
 import CategoryColorPicker from '@/components/categories/CategoryColorPicker';
 import { useAuth } from '@/contexts/AuthContext';
-import { useData } from '@/contexts/DataContext';
+import { useDataConfig } from '@/contexts/DataContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/lib/currencies';
 import {
@@ -54,7 +54,7 @@ type Props = {
 const AccountForm = ({ account, onClose }: Props) => {
   const { t } = useTranslation();
   const { session } = useAuth();
-  const { defaultCurrency } = useData();
+  const { defaultCurrency } = useDataConfig();
   const { handleAccountSubmit } = useDataOperations();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditing = Boolean(account);

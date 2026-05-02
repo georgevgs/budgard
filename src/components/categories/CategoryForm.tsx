@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/form';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
-import { useData } from '@/contexts/DataContext';
+import { useDataConfig } from '@/contexts/DataContext';
 import { categorySchema, type CategoryFormData } from '@/lib/validations';
 import type { Category } from '@/types/Category';
 import CategoryColorPicker from '@/components/categories/CategoryColorPicker';
@@ -52,7 +52,7 @@ const CategoryForm = ({
   const { t } = useTranslation();
   const { session } = useAuth();
   const { handleCategoryAdd, handleCategoryUpdate } = useDataOperations();
-  const { isInitialized } = useData();
+  const { isInitialized } = useDataConfig();
 
   const isEditing = Boolean(category);
   const isIncomeCategory = getIsIncomeCategory(category, categoryType);

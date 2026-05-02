@@ -3,13 +3,13 @@ import * as Sentry from '@sentry/react';
 import { useTranslation } from 'react-i18next';
 import { offlineQueue, type QueuedMutation } from '@/lib/offlineQueue';
 import { dataService } from '@/services/dataService';
-import { useData } from '@/contexts/DataContext';
+import { useDataActions } from '@/contexts/DataContext';
 import { toast } from '@/hooks/useToast';
 import type { Expense } from '@/types/Expense';
 
 export const useOfflineSync = (): void => {
   const { t } = useTranslation();
-  const { refreshExpenses, refreshIncomes } = useData();
+  const { refreshExpenses, refreshIncomes } = useDataActions();
   const isSyncing = useRef(false);
 
   const processMutation = useCallback(

@@ -97,13 +97,15 @@ export default defineConfig({
             '@radix-ui/react-toast',
             '@radix-ui/react-popover'
           ],
-          'chart-vendor': ['recharts'],
+          // recharts intentionally NOT manualChunked — it's only used by lazy
+          // routes (AnalyticsView, NetWorthChart). Letting Vite chunk it
+          // naturally keeps it out of the entry's modulepreload list.
           'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
           'date-vendor': ['date-fns', 'react-day-picker'],
         },
       },
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 500,
     minify: 'terser',
     terserOptions: {
       compress: {

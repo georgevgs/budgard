@@ -10,7 +10,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { formatCurrency } from '@/lib/utils';
-import { useData } from '@/contexts/DataContext';
+import { useDataConfig } from '@/contexts/DataContext';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
@@ -30,7 +30,7 @@ export const MonthDrillDown = ({
   categories,
 }: Props) => {
   const { t, i18n } = useTranslation();
-  const { defaultCurrency } = useData();
+  const { defaultCurrency } = useDataConfig();
   const dateLocale = i18n.language === 'el' ? el : enUS;
 
   const monthExpenses = useMemo(

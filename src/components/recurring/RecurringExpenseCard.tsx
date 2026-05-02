@@ -26,7 +26,7 @@ import { format } from 'date-fns';
 import type { Locale } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import { cn, formatCurrency } from '@/lib/utils';
-import { useData } from '@/contexts/DataContext';
+import { useDataConfig } from '@/contexts/DataContext';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import { useTranslation } from 'react-i18next';
 
@@ -50,7 +50,7 @@ const RecurringExpenseCard = ({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { t, i18n } = useTranslation();
-  const { defaultCurrency } = useData();
+  const { defaultCurrency } = useDataConfig();
   const dateLocale = i18n.language === 'el' ? el : enUS;
 
   const blurActiveElement = () => {

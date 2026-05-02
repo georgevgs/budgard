@@ -52,13 +52,19 @@ export const dataService = {
     return data as Tag;
   },
 
-  async getExpenses(signal?: AbortSignal) {
+  async getExpenses(
+    signal?: AbortSignal,
+    sinceDate?: string,
+    beforeDate?: string,
+  ) {
     let query = supabase
       .from('expenses')
       .select(`*, category:categories(*), tag:tags(*)`)
       .eq('type', 'expense')
       .order('date', { ascending: false })
       .order('created_at', { ascending: false });
+    if (sinceDate) query = query.gte('date', sinceDate);
+    if (beforeDate) query = query.lt('date', beforeDate);
     if (signal) query = query.abortSignal(signal);
     const { data, error } = await query;
 
@@ -67,13 +73,19 @@ export const dataService = {
     return data as Expense[];
   },
 
-  async getIncomes(signal?: AbortSignal) {
+  async getIncomes(
+    signal?: AbortSignal,
+    sinceDate?: string,
+    beforeDate?: string,
+  ) {
     let query = supabase
       .from('expenses')
       .select(`*, category:categories(*)`)
       .eq('type', 'income')
       .order('date', { ascending: false })
       .order('created_at', { ascending: false });
+    if (sinceDate) query = query.gte('date', sinceDate);
+    if (beforeDate) query = query.lt('date', beforeDate);
     if (signal) query = query.abortSignal(signal);
     const { data, error } = await query;
 

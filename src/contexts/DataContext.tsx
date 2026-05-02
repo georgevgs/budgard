@@ -49,7 +49,11 @@ type DataState = {
   isInitialized: boolean;
 };
 
-type DataContextType = DataState & {
+// Actions never change reference after mount (setters are stable, refresh
+// callbacks have stable deps). Splitting them into their own context lets
+// action-only consumers (forms, useDataOperations) skip re-renders triggered
+// by data mutations.
+type DataActions = {
   refreshData: () => Promise<void>;
   refreshExpenses: () => Promise<void>;
   refreshIncomes: () => Promise<void>;
@@ -72,7 +76,20 @@ type DataContextType = DataState & {
   setDefaultSavingsPct: Dispatch<SetStateAction<number | null>>;
 };
 
+// Slow-changing scalars that handlers need (mostly for optimistic rollback).
+// Carved out so consumers don't re-render on every expense/income mutation.
+type DataConfig = {
+  isInitialized: boolean;
+  monthlyBudget: number | null;
+  defaultCurrency: string;
+  defaultSavingsPct: number | null;
+};
+
+type DataContextType = DataState & DataActions;
+
 const DataContext = createContext<DataContextType | null>(null);
+const DataActionsContext = createContext<DataActions | null>(null);
+const DataConfigContext = createContext<DataConfig | null>(null);
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const { session, isLoading: isAuthLoading } = useAuth();
@@ -135,8 +152,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     setIsLoading(true);
 
+    // Two-stage expense/income fetch: load the last RECENT_MONTHS of history
+    // first so the user sees a working app fast, then top up older rows in
+    // the background. Search across all months still works once stage 2
+    // resolves; until then, "all months" search is limited to recent rows.
+    const RECENT_MONTHS = 12;
+    const recentCutoffDate = new Date();
+    recentCutoffDate.setMonth(recentCutoffDate.getMonth() - RECENT_MONTHS);
+    const recentCutoff = recentCutoffDate.toISOString().split('T')[0];
+
     try {
-      // Parallel fetch for better performance
+      // Stage 1: critical fetch — recent expenses/incomes + everything else.
       const [
         categoriesData,
         expensesData,
@@ -153,8 +179,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         categoryBudgetsData,
       ] = await Promise.all([
         dataService.getCategories(controller.signal),
-        dataService.getExpenses(controller.signal),
-        dataService.getIncomes(controller.signal),
+        dataService.getExpenses(controller.signal, recentCutoff),
+        dataService.getIncomes(controller.signal, recentCutoff),
         dataService.getRecurringExpenses(controller.signal),
         dataService.getRecurringIncomes(controller.signal),
         dataService.getBudget(controller.signal),
@@ -187,6 +213,33 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
       lastFetchAtRef.current = Date.now();
       wasAbortedRef.current = false;
+
+      // Stage 2: top up older expenses/incomes in the background. Append
+      // to whatever is in state now (which may include user mutations made
+      // during stage 2).
+      Promise.all([
+        dataService.getExpenses(controller.signal, undefined, recentCutoff),
+        dataService.getIncomes(controller.signal, undefined, recentCutoff),
+      ])
+        .then(([olderExpenses, olderIncomes]) => {
+          if (controller.signal.aborted) {
+            return;
+          }
+          if (olderExpenses.length > 0) {
+            setExpenses((prev) => [...prev, ...olderExpenses]);
+          }
+          if (olderIncomes.length > 0) {
+            setIncomes((prev) => [...prev, ...olderIncomes]);
+          }
+        })
+        .catch((error) => {
+          if (isAbortError(error)) {
+            return;
+          }
+          Sentry.captureException(error, {
+            tags: { context: 'fetchOlderTransactions' },
+          });
+        });
     } catch (error) {
       // iOS PWA aborts in-flight requests when the app is backgrounded. The
       // AbortError may be a raw DOMException or wrapped by Supabase into an
@@ -325,27 +378,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
   }, [session?.user?.id, fetchData]);
 
-  const value = useMemo(
+  const actions = useMemo<DataActions>(
     () => ({
-      categories,
-      expenseCategories,
-      incomeCategories,
-      expenses,
-      incomes,
-      recurringExpenses,
-      recurringIncomes,
-      tags,
-      templates,
-      goals,
-      accounts,
-      accountBalances,
-      debts,
-      categoryBudgets,
-      monthlyBudget,
-      defaultCurrency,
-      defaultSavingsPct,
-      isLoading,
-      isInitialized,
       refreshData,
       refreshExpenses,
       refreshIncomes,
@@ -367,6 +401,42 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setDefaultCurrency,
       setDefaultSavingsPct,
     }),
+    [refreshData, refreshExpenses, refreshIncomes, refreshAccounts, refreshDebts],
+  );
+
+  const config = useMemo<DataConfig>(
+    () => ({
+      isInitialized,
+      monthlyBudget,
+      defaultCurrency,
+      defaultSavingsPct,
+    }),
+    [isInitialized, monthlyBudget, defaultCurrency, defaultSavingsPct],
+  );
+
+  const value = useMemo(
+    () => ({
+      categories,
+      expenseCategories,
+      incomeCategories,
+      expenses,
+      incomes,
+      recurringExpenses,
+      recurringIncomes,
+      tags,
+      templates,
+      goals,
+      accounts,
+      accountBalances,
+      debts,
+      categoryBudgets,
+      monthlyBudget,
+      defaultCurrency,
+      defaultSavingsPct,
+      isLoading,
+      isInitialized,
+      ...actions,
+    }),
     [
       categories,
       expenseCategories,
@@ -387,15 +457,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
       defaultSavingsPct,
       isLoading,
       isInitialized,
-      refreshData,
-      refreshExpenses,
-      refreshIncomes,
-      refreshAccounts,
-      refreshDebts,
+      actions,
     ],
   );
 
-  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
+  return (
+    <DataActionsContext.Provider value={actions}>
+      <DataConfigContext.Provider value={config}>
+        <DataContext.Provider value={value}>{children}</DataContext.Provider>
+      </DataConfigContext.Provider>
+    </DataActionsContext.Provider>
+  );
 }
 
 function isAbortError(error: unknown): boolean {
@@ -417,6 +489,30 @@ export function useData() {
 
   if (!context) {
     throw new Error('useData must be used within a DataProvider');
+  }
+
+  return context;
+}
+
+// Use this when a component only needs setters/refresh callbacks. Skips
+// re-renders triggered by data mutations.
+export function useDataActions() {
+  const context = useContext(DataActionsContext);
+
+  if (!context) {
+    throw new Error('useDataActions must be used within a DataProvider');
+  }
+
+  return context;
+}
+
+// Use this for slow-changing scalars (init flag, monthly budget, default
+// currency, default savings pct). Skips re-renders triggered by data mutations.
+export function useDataConfig() {
+  const context = useContext(DataConfigContext);
+
+  if (!context) {
+    throw new Error('useDataConfig must be used within a DataProvider');
   }
 
   return context;

@@ -1,8 +1,8 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import * as Sentry from '@sentry/react';
 import { useToast } from '@/hooks/useToast';
 import { dataService } from '@/services/dataService';
-import { useData } from '@/contexts/DataContext';
+import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
@@ -37,8 +37,9 @@ type ReceiptResult = {
 };
 
 export function useDataOperations() {
+  const { isInitialized, monthlyBudget, defaultCurrency, defaultSavingsPct } =
+    useDataConfig();
   const {
-    isInitialized,
     setExpenses,
     setIncomes,
     setCategories,
@@ -55,13 +56,10 @@ export function useDataOperations() {
     refreshIncomes,
     refreshAccounts,
     refreshDebts,
-    monthlyBudget,
     setMonthlyBudget,
-    defaultCurrency,
     setDefaultCurrency,
-    defaultSavingsPct,
     setDefaultSavingsPct,
-  } = useData();
+  } = useDataActions();
   const { toast } = useToast();
 
   const showErrorToast = useCallback(
@@ -1260,41 +1258,81 @@ export function useDataOperations() {
     [isInitialized, setRecurringIncomes, showErrorToast],
   );
 
-  return {
-    handleExpenseSubmit,
-    handleExpenseDelete,
-    handleIncomeSubmit,
-    handleIncomeDelete,
-    handleCategoryAdd,
-    handleCategoryUpdate,
-    handleCategoryDelete,
-    handleTagCreate,
-    handleRecurringExpenseSubmit,
-    handleRecurringExpenseDelete,
-    handleRecurringExpenseToggle,
-    handleRecurringIncomeSubmit,
-    handleRecurringIncomeDelete,
-    handleRecurringIncomeToggle,
-    handleBudgetUpdate,
-    handleCategoryBudgetUpsert,
-    handleCategoryBudgetDelete,
-    handleCurrencyUpdate,
-    handleSavingsPctUpdate,
-    handleDeleteAccount,
-    handleCategoriesAddBulk,
-    handleBulkExpenseImport,
-    handleTemplateCreate,
-    handleTemplateDelete,
-    handleGoalCreate,
-    handleGoalUpdate,
-    handleGoalDelete,
-    handleAccountSubmit,
-    handleAccountArchive,
-    handleSnapshotCreate,
-    handleSnapshotDelete,
-    handleDebtSubmit,
-    handleDebtArchive,
-  };
+  // Memoize the return object so consumers passing the whole `operations`
+  // value into useCallback/useEffect deps don't get a fresh reference every
+  // parent render. Each handler is already stable via useCallback above.
+  return useMemo(
+    () => ({
+      handleExpenseSubmit,
+      handleExpenseDelete,
+      handleIncomeSubmit,
+      handleIncomeDelete,
+      handleCategoryAdd,
+      handleCategoryUpdate,
+      handleCategoryDelete,
+      handleTagCreate,
+      handleRecurringExpenseSubmit,
+      handleRecurringExpenseDelete,
+      handleRecurringExpenseToggle,
+      handleRecurringIncomeSubmit,
+      handleRecurringIncomeDelete,
+      handleRecurringIncomeToggle,
+      handleBudgetUpdate,
+      handleCategoryBudgetUpsert,
+      handleCategoryBudgetDelete,
+      handleCurrencyUpdate,
+      handleSavingsPctUpdate,
+      handleDeleteAccount,
+      handleCategoriesAddBulk,
+      handleBulkExpenseImport,
+      handleTemplateCreate,
+      handleTemplateDelete,
+      handleGoalCreate,
+      handleGoalUpdate,
+      handleGoalDelete,
+      handleAccountSubmit,
+      handleAccountArchive,
+      handleSnapshotCreate,
+      handleSnapshotDelete,
+      handleDebtSubmit,
+      handleDebtArchive,
+    }),
+    [
+      handleExpenseSubmit,
+      handleExpenseDelete,
+      handleIncomeSubmit,
+      handleIncomeDelete,
+      handleCategoryAdd,
+      handleCategoryUpdate,
+      handleCategoryDelete,
+      handleTagCreate,
+      handleRecurringExpenseSubmit,
+      handleRecurringExpenseDelete,
+      handleRecurringExpenseToggle,
+      handleRecurringIncomeSubmit,
+      handleRecurringIncomeDelete,
+      handleRecurringIncomeToggle,
+      handleBudgetUpdate,
+      handleCategoryBudgetUpsert,
+      handleCategoryBudgetDelete,
+      handleCurrencyUpdate,
+      handleSavingsPctUpdate,
+      handleDeleteAccount,
+      handleCategoriesAddBulk,
+      handleBulkExpenseImport,
+      handleTemplateCreate,
+      handleTemplateDelete,
+      handleGoalCreate,
+      handleGoalUpdate,
+      handleGoalDelete,
+      handleAccountSubmit,
+      handleAccountArchive,
+      handleSnapshotCreate,
+      handleSnapshotDelete,
+      handleDebtSubmit,
+      handleDebtArchive,
+    ],
+  );
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

@@ -28,7 +28,7 @@ import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import Bell from 'lucide-react/dist/esm/icons/bell';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
-import { useData } from '@/contexts/DataContext';
+import { useDataConfig } from '@/contexts/DataContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useTheme } from '@/hooks/useTheme';
@@ -53,7 +53,7 @@ const LANGUAGES = [
 const SettingsView = () => {
   const { t, i18n } = useTranslation();
   const { session } = useAuth();
-  const { defaultCurrency } = useData();
+  const { defaultCurrency } = useDataConfig();
   const { handleCurrencyUpdate, handleDeleteAccount } = useDataOperations();
   const { theme, setTheme } = useTheme();
   const { accent, setAccent } = useAccentColor();

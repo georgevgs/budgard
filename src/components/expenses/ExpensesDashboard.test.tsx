@@ -5,6 +5,12 @@ import type { Category } from '@/types/Category';
 
 vi.mock('@/contexts/DataContext', () => ({
   useData: () => ({ defaultCurrency: 'EUR' }),
+  useDataConfig: () => ({
+    isInitialized: true,
+    monthlyBudget: null,
+    defaultCurrency: 'EUR',
+    defaultSavingsPct: null,
+  }),
 }));
 
 import ExpensesDashboard from './ExpensesDashboard';

@@ -43,6 +43,23 @@ vi.mock('@/contexts/DataContext', () => ({
     refreshExpenses: mockRefreshExpenses,
     refreshDebts: mockRefreshDebts,
   }),
+  useDataConfig: () => ({
+    isInitialized: true,
+    monthlyBudget: null,
+    defaultCurrency: 'EUR',
+    defaultSavingsPct: null,
+  }),
+  useDataActions: () => ({
+    setExpenses: mockSetExpenses,
+    setCategories: mockSetCategories,
+    setTags: mockSetTags,
+    setRecurringExpenses: mockSetRecurringExpenses,
+    setGoals: mockSetGoals,
+    setDebts: mockSetDebts,
+    setCategoryBudgets: mockSetCategoryBudgets,
+    refreshExpenses: mockRefreshExpenses,
+    refreshDebts: mockRefreshDebts,
+  }),
 }));
 
 // Mock toast

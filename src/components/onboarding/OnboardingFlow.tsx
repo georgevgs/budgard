@@ -20,7 +20,7 @@ import { cn, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { useAuth } from '@/hooks/useAuth';
-import { useData } from '@/contexts/DataContext';
+import { useDataConfig } from '@/contexts/DataContext';
 import { useToast } from '@/hooks/useToast';
 
 const ONBOARDED_KEY = 'budgard_onboarded';
@@ -58,7 +58,7 @@ type Props = {
 export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
   const { t } = useTranslation();
   const { session } = useAuth();
-  const { defaultCurrency } = useData();
+  const { defaultCurrency } = useDataConfig();
   const operations = useDataOperations();
   const { toast } = useToast();
   const [step, setStep] = useState(0);

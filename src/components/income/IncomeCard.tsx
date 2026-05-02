@@ -28,7 +28,7 @@ import { format, parseISO } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
 import type { Expense } from '@/types/Expense';
 import { formatCurrency, formatForeignAmount } from '@/lib/utils';
-import { useData } from '@/contexts/DataContext';
+import { useDataConfig } from '@/contexts/DataContext';
 
 type IncomeCardProps = {
   income: Expense;
@@ -39,7 +39,7 @@ type IncomeCardProps = {
 
 const IncomeCard = ({ income, onEdit, onDelete, showFullDate }: IncomeCardProps) => {
   const { t, i18n } = useTranslation();
-  const { defaultCurrency } = useData();
+  const { defaultCurrency } = useDataConfig();
   const dateLocale = i18n.language === 'el' ? el : enUS;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);

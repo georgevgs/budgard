@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
-import { useData } from '@/contexts/DataContext';
+import { useDataConfig } from '@/contexts/DataContext';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
@@ -16,7 +16,7 @@ const ExpensesDashboard = ({
   categories,
 }: ExpensesDashboardProps) => {
   const { t } = useTranslation();
-  const { defaultCurrency } = useData();
+  const { defaultCurrency } = useDataConfig();
 
   const categoryData = useMemo(() => {
     const categoryExpenses = expenses.reduce<Record<string, Expense[]>>(

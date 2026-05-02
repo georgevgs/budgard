@@ -1,12 +1,24 @@
 import { useState, useMemo, useDeferredValue } from 'react';
-import {
-  format,
-  parseISO,
-  subDays,
-  startOfQuarter,
-  startOfYear,
-} from 'date-fns';
+import { format, subDays, startOfQuarter, startOfYear } from 'date-fns';
 import type { Expense } from '@/types/Expense';
+
+// ISO-8601 timestamps and YYYY-MM-DD dates sort lexicographically.
+// String comparison is ~10x faster than parseISO + getTime for hot paths.
+const compareExpensesDateDesc = (a: Expense, b: Expense): number => {
+  if (b.date !== a.date) {
+    return b.date < a.date ? -1 : 1;
+  }
+
+  if (b.created_at === a.created_at) {
+    return 0;
+  }
+
+  return b.created_at < a.created_at ? -1 : 1;
+};
+
+const compareExpensesDateAsc = (a: Expense, b: Expense): number => {
+  return -compareExpensesDateDesc(a, b);
+};
 
 export type SortOrder = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc';
 
@@ -70,22 +82,18 @@ export const useExpensesFilter = ({
   const hasActiveFilters =
     search.length > 0 || !!selectedCategoryId || selectedTagId !== null;
 
-  // Sort all expenses once for cross-month search
+  // Sort all expenses once for cross-month search.
+  // The DB returns expenses pre-sorted, but optimistic `add` actions prepend
+  // a freshly-created row that may break ordering — so we re-sort defensively.
   const allExpensesSorted = useMemo(() => {
-    return [...expenses].sort((a: Expense, b: Expense) => {
-      const dateDiff = parseISO(b.date).getTime() - parseISO(a.date).getTime();
-      if (dateDiff !== 0) return dateDiff;
-
-      return (
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-    });
+    return [...expenses].sort(compareExpensesDateDesc);
   }, [expenses]);
 
-  // Pre-filter expenses by month and sort once — order is preserved by filter()
+  // Pre-filter expenses by month — both date (YYYY-MM-DD) and selectedMonth
+  // (YYYY-MM) are ISO-formatted, so a prefix check beats parsing.
   const monthlyExpenses = useMemo(() => {
-    return allExpensesSorted.filter(
-      (expense) => format(parseISO(expense.date), 'yyyy-MM') === selectedMonth,
+    return allExpensesSorted.filter((expense) =>
+      expense.date.startsWith(selectedMonth),
     );
   }, [allExpensesSorted, selectedMonth]);
 
@@ -114,11 +122,9 @@ export const useExpensesFilter = ({
         break;
     }
 
-    const startTime = start.getTime();
+    const startISO = format(start, 'yyyy-MM-dd');
 
-    return allExpensesSorted.filter(
-      (expense) => parseISO(expense.date).getTime() >= startTime,
-    );
+    return allExpensesSorted.filter((expense) => expense.date >= startISO);
   }, [allExpensesSorted, dateRangePreset]);
 
   // Apply search/category/tag filters then sort
@@ -162,19 +168,15 @@ export const useExpensesFilter = ({
     // base expenses are already date-desc; skip copy+sort for the default case
     if (sortOrder === 'date-desc') return filtered;
 
-    return [...filtered].sort((a, b) => {
-      if (sortOrder === 'date-asc') {
-        const dateDiff =
-          parseISO(a.date).getTime() - parseISO(b.date).getTime();
-        if (dateDiff !== 0) return dateDiff;
+    if (sortOrder === 'date-asc') {
+      return [...filtered].sort(compareExpensesDateAsc);
+    }
 
-        return (
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        );
-      }
-      if (sortOrder === 'amount-desc') return b.amount - a.amount;
-      return a.amount - b.amount; // amount-asc
-    });
+    if (sortOrder === 'amount-desc') {
+      return [...filtered].sort((a, b) => b.amount - a.amount);
+    }
+
+    return [...filtered].sort((a, b) => a.amount - b.amount);
   }, [
     monthlyExpenses,
     allExpensesSorted,

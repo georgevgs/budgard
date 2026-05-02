@@ -4,7 +4,7 @@ import CalendarDays from 'lucide-react/dist/esm/icons/calendar-days';
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
-import { useData } from '@/contexts/DataContext';
+import { useDataConfig } from '@/contexts/DataContext';
 import type { Expense } from '@/types/Expense';
 
 type ExpensesMonthlyOverviewProps = {
@@ -33,7 +33,7 @@ const ExpensesMonthlyOverview = ({
   onMonthlyTotalClick,
 }: ExpensesMonthlyOverviewProps) => {
   const { t } = useTranslation();
-  const { defaultCurrency } = useData();
+  const { defaultCurrency } = useDataConfig();
 
   const displayTotal = hasActiveFilters ? filteredTotal : monthlyTotal;
   const animatedTotal = useAnimatedNumber(displayTotal);

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import { cn } from '@/lib/utils';
-import { useData } from '@/contexts/DataContext';
+import { useDataConfig } from '@/contexts/DataContext';
 import { useDebts } from '@/hooks/useDebts';
 import { useDebtPayoffPlan } from '@/hooks/useDebtPayoffPlan';
 import type { Debt } from '@/types/Debt';
@@ -20,7 +20,7 @@ type Tab = 'list' | 'plan';
 
 const DebtsView = () => {
   const { t } = useTranslation();
-  const { defaultCurrency, isInitialized } = useData();
+  const { defaultCurrency, isInitialized } = useDataConfig();
   const { debts, summary } = useDebts();
   const { avalanche } = useDebtPayoffPlan(debts, 0);
   const [tab, setTab] = useState<Tab>('list');

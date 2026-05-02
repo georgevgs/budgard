@@ -13,6 +13,12 @@ vi.mock('@/hooks/useAuth', () => ({
 // Mock useData
 vi.mock('@/contexts/DataContext', () => ({
   useData: () => ({ defaultCurrency: 'EUR' }),
+  useDataConfig: () => ({
+    isInitialized: true,
+    monthlyBudget: null,
+    defaultCurrency: 'EUR',
+    defaultSavingsPct: null,
+  }),
 }));
 
 // Mock useDataOperations

@@ -10,6 +10,10 @@ vi.mock('@/contexts/DataContext', () => ({
     refreshExpenses: mockRefreshExpenses,
     refreshIncomes: mockRefreshIncomes,
   }),
+  useDataActions: () => ({
+    refreshExpenses: mockRefreshExpenses,
+    refreshIncomes: mockRefreshIncomes,
+  }),
 }));
 
 const mockToast = vi.fn();

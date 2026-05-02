@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import * as Sentry from '@sentry/react';
 import { RootProvider } from '@/contexts/RootProvider';
 import App from '@/App';
-import './lib/i18n';
+import { i18nReady } from './lib/i18n';
 import './index.css';
 
 Sentry.init({
@@ -44,10 +44,12 @@ if (reloadAttempts < 1) {
   );
 }
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <RootProvider>
-      <App />
-    </RootProvider>
-  </StrictMode>,
-);
+i18nReady.then(() => {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <RootProvider>
+        <App />
+      </RootProvider>
+    </StrictMode>,
+  );
+});
