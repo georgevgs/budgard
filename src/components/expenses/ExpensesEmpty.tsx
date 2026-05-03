@@ -1,8 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
-import Plus from 'lucide-react/dist/esm/icons/plus';
 import { format } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
+import { EmptyStateCard } from '@/components/ui/empty-state-card';
 
 type ExpensesEmptyProps = {
   selectedMonth: string;
@@ -17,24 +16,21 @@ const ExpensesEmpty = ({ selectedMonth, onAddClick }: ExpensesEmptyProps) => {
   });
 
   return (
-    <div className="flex flex-col items-center text-center py-16 px-4">
-      <img
-        src="/icons/money-bag.png"
-        alt=""
-        className="w-20 h-20 mb-6 opacity-80 drop-shadow-sm"
-        aria-hidden="true"
-      />
-      <h3 className="text-base font-semibold mb-1">
-        {t('expenses.noExpensesFor', { month: monthLabel })}
-      </h3>
-      <p className="text-sm text-muted-foreground mb-6 max-w-[220px]">
-        {t('expenses.addFirstExpense')}
-      </p>
-      <Button onClick={onAddClick} variant="outline" size="sm">
-        <Plus className="h-4 w-4 mr-2" />
-        {t('expenses.addExpense')}
-      </Button>
-    </div>
+    <EmptyStateCard
+      variant="page"
+      media={
+        <img
+          src="/icons/money-bag.png"
+          alt=""
+          className="w-20 h-20 opacity-80 drop-shadow-sm"
+          aria-hidden="true"
+        />
+      }
+      title={t('expenses.noExpensesFor', { month: monthLabel })}
+      description={t('expenses.addFirstExpense')}
+      actionLabel={t('expenses.addExpense')}
+      onAction={onAddClick}
+    />
   );
 };
 
