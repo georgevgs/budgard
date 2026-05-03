@@ -89,17 +89,32 @@ export const usePwaUpdate = (): void => {
       return;
     }
 
-    // Guard against phantom needRefresh on iOS: useRegisterSW can flip the
-    // flag without a real waiting worker (same-content SW reinstall). Without
-    // this check the toast fires on every app open and Update does nothing.
+    // Fast path: a waiting worker is already observable, show immediately.
     const reg = swRegistration.get();
-    if (!reg?.waiting) {
-      setNeedRefresh(false);
+    if (reg?.waiting) {
+      if (toastDismissedRef.current) return;
+      showUpdateToast();
       return;
     }
 
-    if (toastDismissedRef.current) return;
-    showUpdateToast();
+    // Slow path: needRefresh fired but registration.waiting hasn't been
+    // populated yet. This happens via vite-plugin-pwa's `installed` +
+    // `isExternal` path (fires before the 200ms-confirmed `waiting` event),
+    // and on iOS PWA same-content reinstalls where the worker never reaches
+    // a true waiting state. Wait briefly, then re-check; if still no waiting
+    // worker, treat as a phantom and clear the flag.
+    const timer = setTimeout(() => {
+      const latest = swRegistration.get();
+      if (!latest?.waiting) {
+        setNeedRefresh(false);
+        return;
+      }
+
+      if (toastDismissedRef.current) return;
+      showUpdateToast();
+    }, 1500);
+
+    return () => clearTimeout(timer);
   }, [needRefresh, showUpdateToast, setNeedRefresh]);
 
   // Check for SW updates when the app returns to foreground.
