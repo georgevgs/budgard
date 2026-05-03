@@ -48,7 +48,7 @@ const DebtCard = ({ debt, onClick }: Props) => {
           <div className="min-w-0 flex-1">
             <p className="font-medium truncate">{debt.name}</p>
             <p className="text-xs text-muted-foreground truncate">
-              {t(`debts.kind.${debt.kind}`)} · {debt.apr.toFixed(2)}% APR
+              {t(`debts.kind.${debt.kind}`)} · {t('debts.aprSuffix', { apr: debt.apr.toFixed(2) })}
             </p>
           </div>
           <p className="text-base font-semibold tabular-nums shrink-0 text-destructive">

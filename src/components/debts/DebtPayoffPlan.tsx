@@ -166,7 +166,7 @@ const renderPayoffOrderRow = (
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium truncate">{entry.debt.name}</p>
         <p className="text-xs text-muted-foreground">
-          {entry.debt.apr.toFixed(2)}% APR
+          {t('debts.aprSuffix', { apr: entry.debt.apr.toFixed(2) })}
         </p>
       </div>
       <p className="text-xs text-muted-foreground tabular-nums shrink-0">

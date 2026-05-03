@@ -41,7 +41,7 @@ type TagClearButtonProps = {
 export const TagClearButton = ({ onClear }: TagClearButtonProps) => {
   const { t } = useTranslation();
 
-  const handleClick = (event: React.MouseEvent) => {
+  const handleActivate = (event: React.SyntheticEvent) => {
     event.stopPropagation();
     onClear();
   };
@@ -52,11 +52,11 @@ export const TagClearButton = ({ onClear }: TagClearButtonProps) => {
       tabIndex={0}
       aria-label={t('expenses.clearTag')}
       className="ml-auto p-1 -mr-1 shrink-0 opacity-50 hover:opacity-100 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      onClick={handleClick}
+      onClick={handleActivate}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          handleClick(event as unknown as React.MouseEvent);
+          handleActivate(event);
         }
       }}
     >

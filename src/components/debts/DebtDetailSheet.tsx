@@ -116,7 +116,7 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
                   {debt.name}
                 </DialogTitle>
                 <DialogDescription>
-                  {t(`debts.kind.${debt.kind}`)} · {debt.apr.toFixed(2)}% APR
+                  {t(`debts.kind.${debt.kind}`)} · {t('debts.aprSuffix', { apr: debt.apr.toFixed(2) })}
                 </DialogDescription>
               </div>
               <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>

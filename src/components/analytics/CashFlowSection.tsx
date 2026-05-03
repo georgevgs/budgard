@@ -275,14 +275,14 @@ const renderChart = (
             dataKey="income"
             stackId="cashflow"
             fill={INCOME_COLOR}
-            name={t('income.title') as string}
+            name={t('income.title')}
             radius={[6, 6, 0, 0]}
           />
           <Bar
             dataKey="expense"
             stackId="cashflow"
             fill={EXPENSE_COLOR}
-            name={t('expenses.title') as string}
+            name={t('expenses.title')}
             radius={[0, 0, 6, 6]}
           />
           <Line
@@ -292,7 +292,7 @@ const renderChart = (
             strokeWidth={2}
             dot={{ r: 3, fill: NET_COLOR }}
             activeDot={{ r: 4 }}
-            name={t('income.netCashFlow') as string}
+            name={t('income.netCashFlow')}
           />
         </ComposedChart>
       </ResponsiveContainer>

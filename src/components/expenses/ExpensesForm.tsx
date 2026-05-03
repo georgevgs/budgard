@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useTransition } from 'react';
+import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -598,10 +599,12 @@ const ExpensesForm = ({
                               isCreatingTag,
                               tagSearch,
                               handleTagCreateInline,
+                              t,
                             )}
                             {renderNoTagsMessage(
                               filteredTags.length,
                               showCreateOption,
+                              t,
                             )}
                           </div>
                         </PopoverContent>
@@ -728,12 +731,16 @@ const renderCreateTagOption = (
   isCreatingTag: boolean,
   tagSearch: string,
   onCreate: () => void,
+  t: TFunction,
 ) => {
   if (!showCreateOption) return null;
 
-  const label = isCreatingTag
-    ? 'Creating...'
-    : `Create tag: "${tagSearch.trim()}"`;
+  let label: string;
+  if (isCreatingTag) {
+    label = t('expenses.creatingTag');
+  } else {
+    label = t('expenses.createTagWithName', { name: tagSearch.trim() });
+  }
 
   return (
     <button
@@ -783,10 +790,13 @@ const renderCategoryIndicator = (category: Category) => {
 const renderNoTagsMessage = (
   filteredCount: number,
   showCreateOption: boolean,
+  t: TFunction,
 ) => {
   if (filteredCount > 0 || showCreateOption) return null;
 
   return (
-    <p className="px-3 py-2 text-sm text-muted-foreground">No tags found.</p>
+    <p className="px-3 py-2 text-sm text-muted-foreground">
+      {t('expenses.noTagsFound')}
+    </p>
   );
 };
