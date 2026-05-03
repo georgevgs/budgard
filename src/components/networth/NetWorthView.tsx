@@ -166,16 +166,31 @@ const renderBody = (
         latestSnapshotByAccount={latestSnapshotByAccount}
         onAccountClick={onAccountClick}
       />
-      <InvestmentAllocationCard accounts={grouped.investments} />
-      <AccountGroup
-        title={t('networth.groups.investments')}
-        accounts={grouped.investments}
-        latestSnapshotByAccount={latestSnapshotByAccount}
-        onAccountClick={onAccountClick}
-      />
+      {renderInvestmentsBlock(grouped.investments, latestSnapshotByAccount, onAccountClick, t)}
       <AccountGroup
         title={t('networth.groups.liabilities')}
         accounts={grouped.liabilities}
+        latestSnapshotByAccount={latestSnapshotByAccount}
+        onAccountClick={onAccountClick}
+      />
+    </>
+  );
+}
+
+const renderInvestmentsBlock = (
+  investments: Account[],
+  latestSnapshotByAccount: Map<string, AccountBalance>,
+  onAccountClick: (account: Account) => void,
+  t: TranslateFunction,
+) => {
+  if (investments.length === 0) return null;
+
+  return (
+    <>
+      <InvestmentAllocationCard accounts={investments} />
+      <AccountGroup
+        title={t('networth.groups.investments')}
+        accounts={investments}
         latestSnapshotByAccount={latestSnapshotByAccount}
         onAccountClick={onAccountClick}
       />

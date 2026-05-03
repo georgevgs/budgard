@@ -39,7 +39,7 @@ import {
 } from '@/lib/validations';
 import type { Account } from '@/types/Account';
 
-export type SnapshotMode = 'value' | 'contribution';
+export type SnapshotMode = 'value' | 'contribution' | 'withdrawal';
 
 type Props = {
   account: Account;
@@ -54,11 +54,13 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isInvestment = account.kind === 'investment';
   const isContributionMode = isInvestment && mode === 'contribution';
+  const isWithdrawalMode = isInvestment && mode === 'withdrawal';
+  const isCashflowMode = isContributionMode || isWithdrawalMode;
 
   let balanceDefault = '';
-  if (isContributionMode) {
-    // Hidden in contribution mode but the schema requires it; we replace
-    // it with current_balance + contribution at submit.
+  if (isCashflowMode) {
+    // Hidden in deposit/withdrawal modes but the schema requires it; we replace
+    // it with current_balance ± amount at submit.
     balanceDefault = formatCurrencyInput(String(account.current_balance));
   }
 
@@ -82,12 +84,18 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
         const trimmed = values.contribution_delta.trim();
         if (trimmed.length > 0) {
           const sign = trimmed.startsWith('-') ? -1 : 1;
-          contribution =
-            sign * parseCurrencyInput(trimmed.replace(/^-/, ''));
+          const magnitude = parseCurrencyInput(trimmed.replace(/^-/, ''));
+          if (isWithdrawalMode) {
+            contribution = -Math.abs(magnitude);
+          } else if (isContributionMode) {
+            contribution = Math.abs(magnitude);
+          } else {
+            contribution = sign * magnitude;
+          }
         }
       }
 
-      if (isContributionMode && (contribution == null || contribution === 0)) {
+      if (isCashflowMode && (contribution == null || contribution === 0)) {
         form.setError('contribution_delta', {
           type: 'required',
           message: t('networth.snapshot.contributionRequired'),
@@ -98,7 +106,7 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
       }
 
       let balance: number;
-      if (isContributionMode) {
+      if (isCashflowMode) {
         balance = account.current_balance + (contribution ?? 0);
       } else {
         balance = parseCurrencyInput(values.balance);
@@ -139,20 +147,21 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
           >
             <DialogHeader className="pb-4" data-draggable-area>
               <DialogTitle className="text-xl">
-                {renderTitle(isContributionMode, account.name, t)}
+                {renderTitle(mode, account.name, t)}
               </DialogTitle>
               <DialogDescription>
-                {renderSnapshotDescription(isInvestment, isContributionMode, t)}
+                {renderSnapshotDescription(isInvestment, mode, t)}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 pb-4">
-            {renderBalanceField(form, account, isInvestment, isContributionMode, t)}
+            {renderBalanceField(form, account, isInvestment, isCashflowMode, t)}
 
             {renderContributionField(
               form,
               isInvestment,
               isContributionMode,
+              isWithdrawalMode,
               account.default_currency,
               t,
             )}
@@ -241,12 +250,15 @@ type TranslateFunction = (
 import type { UseFormReturn } from 'react-hook-form';
 
 const renderTitle = (
-  isContributionMode: boolean,
+  mode: SnapshotMode,
   name: string,
   t: TranslateFunction,
 ) => {
-  if (isContributionMode) {
+  if (mode === 'contribution') {
     return t('networth.snapshot.contributionTitle', { name });
+  }
+  if (mode === 'withdrawal') {
+    return t('networth.snapshot.withdrawalTitle', { name });
   }
 
   return t('networth.snapshot.title', { name });
@@ -254,11 +266,14 @@ const renderTitle = (
 
 const renderSnapshotDescription = (
   isInvestment: boolean,
-  isContributionMode: boolean,
+  mode: SnapshotMode,
   t: TranslateFunction,
 ) => {
-  if (isContributionMode) {
+  if (mode === 'contribution') {
     return t('networth.snapshot.descriptionContribution');
+  }
+  if (mode === 'withdrawal') {
+    return t('networth.snapshot.descriptionWithdrawal');
   }
   if (isInvestment) return t('networth.snapshot.descriptionInvestment');
 
@@ -275,10 +290,10 @@ const renderBalanceField = (
   form: UseFormReturn<AccountBalanceFormData>,
   account: Account,
   isInvestment: boolean,
-  isContributionMode: boolean,
+  isCashflowMode: boolean,
   t: TranslateFunction,
 ) => {
-  if (isContributionMode) return null;
+  if (isCashflowMode) return null;
 
   let placeholder = t('networth.snapshot.balancePlaceholder');
   let label = t('networth.snapshot.balanceLabel');
@@ -323,16 +338,27 @@ const renderContributionField = (
   form: UseFormReturn<AccountBalanceFormData>,
   isInvestment: boolean,
   isContributionMode: boolean,
+  isWithdrawalMode: boolean,
   currency: string,
   t: TranslateFunction,
 ) => {
   if (!isInvestment) return null;
+  // "Update value" is now strictly about value — contributions go through the
+  // dedicated Add money / Withdraw modes, so we hide this field in value mode.
+  if (!isContributionMode && !isWithdrawalMode) return null;
 
   let placeholder = t('networth.snapshot.contributionPlaceholder');
   let hint = t('networth.snapshot.contributionHint');
+  let pattern = '-?[0-9,.]*';
   if (isContributionMode) {
     placeholder = t('networth.snapshot.contributionOnlyPlaceholder');
     hint = t('networth.snapshot.contributionOnlyHint');
+    pattern = '[0-9,.]*';
+  }
+  if (isWithdrawalMode) {
+    placeholder = t('networth.snapshot.withdrawalOnlyPlaceholder');
+    hint = t('networth.snapshot.withdrawalOnlyHint');
+    pattern = '[0-9,.]*';
   }
 
   return (
@@ -349,7 +375,7 @@ const renderContributionField = (
               <Input
                 type="text"
                 inputMode="decimal"
-                pattern="-?[0-9,.]*"
+                pattern={pattern}
                 placeholder={placeholder}
                 value={field.value ?? ''}
                 onChange={(e) => field.onChange(e.target.value)}

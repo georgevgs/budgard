@@ -693,12 +693,29 @@ export const dataService = {
   },
 
   async upsertAccountBalance(snapshot: Partial<AccountBalance>) {
-    // The (account_id, recorded_at) unique constraint means logging a second
-    // snapshot on the same day overwrites the first. Use upsert so the form
-    // succeeds either way.
+    // The (account_id, recorded_at) unique constraint means a second snapshot
+    // on the same day overwrites the first. When the new payload has no
+    // contribution (a pure "Update value"), preserve any contribution already
+    // logged that day — otherwise the upsert would wipe the cost basis.
+    let payload = snapshot;
+    const isMissingContribution =
+      snapshot.contribution_delta === null ||
+      snapshot.contribution_delta === undefined;
+    if (isMissingContribution && snapshot.account_id && snapshot.recorded_at) {
+      const { data: existing } = await supabase
+        .from('account_balances')
+        .select('contribution_delta')
+        .eq('account_id', snapshot.account_id)
+        .eq('recorded_at', snapshot.recorded_at)
+        .maybeSingle();
+      if (existing && existing.contribution_delta != null) {
+        payload = { ...snapshot, contribution_delta: existing.contribution_delta };
+      }
+    }
+
     const { data, error } = await supabase
       .from('account_balances')
-      .upsert(snapshot, { onConflict: 'account_id,recorded_at' })
+      .upsert(payload, { onConflict: 'account_id,recorded_at' })
       .select()
       .single();
 

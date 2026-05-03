@@ -74,12 +74,25 @@ const renderInvestmentRow = (
     return null;
   }
 
+  // Without a cost basis, "gain" and return % are undefined — show only the
+  // current value rather than a misleading +0%.
+  if (summary.investmentCostBasis <= 0) {
+    return (
+      <div className="flex items-center justify-between pt-2 border-t border-border/40">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <TrendingUp className="h-3.5 w-3.5" />
+          {t('networth.investmentLabel')}
+        </div>
+        <p className="text-sm font-semibold tabular-nums">
+          {formatCurrency(summary.investmentValue, defaultCurrency)}
+        </p>
+      </div>
+    );
+  }
+
   const gain = summary.investmentGain;
   const isPositive = gain >= 0;
-  const returnPct =
-    summary.investmentCostBasis > 0
-      ? (gain / summary.investmentCostBasis) * 100
-      : 0;
+  const returnPct = (gain / summary.investmentCostBasis) * 100;
 
   return (
     <div className="flex items-center justify-between pt-2 border-t border-border/40">
