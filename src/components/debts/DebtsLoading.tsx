@@ -1,23 +1,11 @@
 import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonStatCard } from '@/components/ui/skeleton-stat-card';
 
 const ROWS = ['w-2/5', 'w-1/2', 'w-1/3'] as const;
 
 const DebtsLoadingState = () => (
   <div className="container max-w-4xl mx-auto p-4 space-y-4">
-    <div className="rounded-2xl border border-border/40 bg-card p-5 space-y-3 shadow-sm">
-      <Skeleton className="h-4 w-32" />
-      <Skeleton className="h-9 w-48" />
-      <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border/40">
-        <div className="space-y-1.5">
-          <Skeleton className="h-3 w-16" />
-          <Skeleton className="h-5 w-24" />
-        </div>
-        <div className="space-y-1.5">
-          <Skeleton className="h-3 w-16" />
-          <Skeleton className="h-5 w-24" />
-        </div>
-      </div>
-    </div>
+    <SkeletonStatCard />
 
     <div className="space-y-3">
       {ROWS.map((width, i) => (
