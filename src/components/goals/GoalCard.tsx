@@ -28,6 +28,7 @@ import { useDateLocale } from '@/hooks/useDateLocale';
 import { useData } from '@/contexts/DataContext';
 import type { Goal } from '@/types/Goal';
 import { format, parseISO } from 'date-fns';
+import type { Locale } from 'date-fns';
 import type { GoalProgress } from '@/hooks/useGoalProgress';
 
 type Props = {

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
+import type { Locale } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -151,7 +152,7 @@ const renderCategoryBreakdown = (
 
 const renderTopExpenses = (
   expenses: Expense[],
-  dateLocale: typeof enUS,
+  dateLocale: Locale,
   t: TFunc,
   currency: string,
 ) => {

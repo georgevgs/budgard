@@ -32,6 +32,7 @@ import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import { formatCurrency } from '@/lib/utils';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { useDateLocale } from '@/hooks/useDateLocale';
+import type { Locale } from 'date-fns';
 import { useDebtProgress } from '@/hooks/useDebtProgress';
 import { useDebtPayments } from '@/hooks/useDebtPayments';
 import type { Debt } from '@/types/Debt';

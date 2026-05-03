@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
+import type { Locale } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -166,4 +167,3 @@ const renderTagInRow = (expense: Expense) => {
   return <> · {expense.tag.name}</>;
 };
 
-type Locale = typeof enUS;
