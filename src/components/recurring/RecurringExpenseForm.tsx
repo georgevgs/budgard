@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import {
@@ -148,24 +149,14 @@ const RecurringExpenseForm = ({
               render={({ field }) => (
                 <FormItem>
                   <Label>{t('recurring.amount')}</Label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      €
-                    </span>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder={t('common.amountZero')}
-                        {...field}
-                        onChange={(e) => {
-                          const formatted = formatCurrencyInput(e.target.value);
-                          field.onChange(formatted);
-                        }}
-                        className="pl-7"
-                      />
-                    </FormControl>
-                  </div>
+                  <FormControl>
+                    <CurrencyInput
+                      currency="EUR"
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      placeholder={t('common.amountZero')}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

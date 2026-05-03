@@ -33,7 +33,7 @@ import {
   formatCurrencyInput,
   parseCurrencyInput,
 } from '@/lib/utils';
-import { getCurrencySymbol } from '@/lib/currencies';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import {
   debtPaymentSchema,
   type DebtPaymentFormData,
@@ -122,25 +122,15 @@ const DebtPaymentForm = ({ debt, onClose }: Props) => {
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                        {getCurrencySymbol(debt.currency)}
-                      </span>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          inputMode="decimal"
-                          pattern="[0-9,.]*"
-                          placeholder={t('debts.payment.amountPlaceholder')}
-                          value={field.value}
-                          onChange={(e) =>
-                            field.onChange(formatCurrencyInput(e.target.value))
-                          }
-                          className="pl-7"
-                          aria-label={t('debts.payment.amountLabel')}
-                        />
-                      </FormControl>
-                    </div>
+                    <FormControl>
+                      <CurrencyInput
+                        currency={debt.currency}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder={t('debts.payment.amountPlaceholder')}
+                        aria-label={t('debts.payment.amountLabel')}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

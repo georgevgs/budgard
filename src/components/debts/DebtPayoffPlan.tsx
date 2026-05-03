@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { cn, formatCurrency, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
-import { getCurrencySymbol } from '@/lib/currencies';
+import { CurrencyInput } from '@/components/ui/currency-input';
+import { cn, formatCurrency, parseCurrencyInput } from '@/lib/utils';
 import { useDebtPayoffPlan } from '@/hooks/useDebtPayoffPlan';
 import type { Debt, PayoffStrategy } from '@/types/Debt';
 import type { SimResult } from '@/lib/debtPayoff';
@@ -58,21 +57,13 @@ const DebtPayoffPlan = ({ debts, defaultCurrency }: Props) => {
           <p className="text-xs text-muted-foreground">
             {t('debts.payoff.extraHint')}
           </p>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-              {getCurrencySymbol(defaultCurrency)}
-            </span>
-            <Input
-              type="text"
-              inputMode="decimal"
-              pattern="[0-9,.]*"
-              placeholder={t('common.amountZero')}
-              value={extraInput}
-              onChange={(e) => setExtraInput(formatCurrencyInput(e.target.value))}
-              className="pl-7"
-              aria-label={t('debts.payoff.extraLabel')}
-            />
-          </div>
+          <CurrencyInput
+            currency={defaultCurrency}
+            value={extraInput}
+            onChange={setExtraInput}
+            placeholder={t('common.amountZero')}
+            aria-label={t('debts.payoff.extraLabel')}
+          />
         </CardContent>
       </Card>
 

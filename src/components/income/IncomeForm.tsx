@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Calendar } from '@/components/ui/calendar';
 import { CategoryManager } from '@/components/categories/CategoryManager';
 import {
@@ -40,7 +41,7 @@ import {
   formatCurrencyInput,
   parseCurrencyInput,
 } from '@/lib/utils';
-import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/lib/currencies';
+import { SUPPORTED_CURRENCIES } from '@/lib/currencies';
 import { fetchExchangeRate } from '@/services/exchangeRateService';
 import { useAuth } from '@/hooks/useAuth';
 import { useData } from '@/contexts/DataContext';
@@ -288,28 +289,16 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
                         ))}
                       </SelectContent>
                     </Select>
-                    <div className="relative flex-1">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                        {getCurrencySymbol(selectedCurrency)}
-                      </span>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          inputMode="decimal"
-                          pattern="[0-9,.]*"
-                          placeholder={t('expenses.amountPlaceholder')}
-                          value={field.value}
-                          onChange={(e) => {
-                            const formatted = formatCurrencyInput(
-                              e.target.value,
-                            );
-                            field.onChange(formatted);
-                          }}
-                          className="pl-7"
-                          aria-label={t('income.amountLabel')}
-                        />
-                      </FormControl>
-                    </div>
+                    <FormControl>
+                      <CurrencyInput
+                        currency={selectedCurrency}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder={t('expenses.amountPlaceholder')}
+                        aria-label={t('income.amountLabel')}
+                        wrapperClassName="flex-1"
+                      />
+                    </FormControl>
                   </div>
                   {renderConversionPreview(
                     isFetchingRate,

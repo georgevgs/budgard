@@ -308,25 +308,15 @@ const renderBalanceField = (
       name="balance"
       render={({ field }) => (
         <FormItem>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-              {getCurrencySymbol(account.default_currency)}
-            </span>
-            <FormControl>
-              <Input
-                type="text"
-                inputMode="decimal"
-                pattern="[0-9,.]*"
-                placeholder={placeholder}
-                value={field.value}
-                onChange={(e) =>
-                  field.onChange(formatCurrencyInput(e.target.value))
-                }
-                className="pl-7"
-                aria-label={label}
-              />
-            </FormControl>
-          </div>
+          <FormControl>
+            <CurrencyInput
+              currency={account.default_currency}
+              value={field.value}
+              onChange={field.onChange}
+              placeholder={placeholder}
+              aria-label={label}
+            />
+          </FormControl>
           <FormMessage />
         </FormItem>
       )}
