@@ -181,6 +181,7 @@ const RecurringExpensesList = () => {
             onClick={() => setIsFormOpen(true)}
             size="sm"
             className="shrink-0"
+            aria-label={renderAddCtaLabel(mode, t)}
           >
             <Plus className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">
@@ -190,18 +191,25 @@ const RecurringExpensesList = () => {
         </div>
 
         {/* Mode toggle */}
-        <div className="inline-flex rounded-full bg-muted p-0.5 self-start">
+        <div
+          role="tablist"
+          className="inline-flex rounded-full bg-muted p-0.5 self-start"
+        >
           <button
             type="button"
+            role="tab"
+            aria-selected={mode === 'expense'}
             onClick={() => setMode('expense')}
-            className={`text-xs px-4 py-1.5 rounded-full transition-colors ${getModeButtonClass(mode === 'expense')}`}
+            className={`text-xs px-4 py-1.5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${getModeButtonClass(mode === 'expense')}`}
           >
             {t('expenses.title')}
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={mode === 'income'}
             onClick={() => setMode('income')}
-            className={`text-xs px-4 py-1.5 rounded-full transition-colors ${getModeButtonClass(mode === 'income')}`}
+            className={`text-xs px-4 py-1.5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${getModeButtonClass(mode === 'income')}`}
           >
             {t('income.title')}
           </button>
@@ -291,7 +299,7 @@ const getModeButtonClass = (active: boolean): string => {
     return 'bg-background text-foreground shadow-sm';
   }
 
-  return 'text-muted-foreground';
+  return 'text-muted-foreground hover:text-foreground';
 };
 
 const renderMonthlySummary = (

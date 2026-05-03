@@ -339,6 +339,7 @@ const renderDetectedRow = (
       variant="outline"
       size="sm"
       className="h-8 shrink-0"
+      aria-label={t('recurring.audit.addAsRecurring')}
       onClick={() =>
         onAddDetected({
           description: detection.description,

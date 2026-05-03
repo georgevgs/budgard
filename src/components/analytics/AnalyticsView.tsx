@@ -267,6 +267,7 @@ const AnalyticsView = () => {
                 (e.currentTarget as HTMLElement).blur();
                 setIsReportOpen(true);
               }}
+              aria-label={t('report.share')}
             >
               <Share2 className="h-3.5 w-3.5" />
             </Button>
