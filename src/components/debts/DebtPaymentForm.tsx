@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Calendar } from '@/components/ui/calendar';
 import {
   Form,
   FormControl,
@@ -20,20 +19,14 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import CalendarIcon from 'lucide-react/dist/esm/icons/calendar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import {
-  cn,
   formatCurrencyInput,
   parseCurrencyInput,
 } from '@/lib/utils';
 import { CurrencyInput } from '@/components/ui/currency-input';
+import { DatePickerField } from '@/components/ui/date-picker-field';
 import {
   debtPaymentSchema,
   type DebtPaymentFormData,
@@ -141,31 +134,12 @@ const DebtPaymentForm = ({ debt, onClose }: Props) => {
                 name="date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <Popover modal={false}>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className={cn(
-                              'w-full justify-start text-left font-normal',
-                              !field.value && 'text-muted-foreground',
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {renderDateLabel(field.value, dateLocale, t)}
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          locale={dateLocale}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <DatePickerField
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder={t('debts.payment.pickDate')}
+                      locale={dateLocale}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -211,16 +185,6 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
-
-const renderDateLabel = (
-  value: Date | undefined,
-  locale: Locale,
-  t: TranslateFunction,
-) => {
-  if (!value) return t('debts.payment.pickDate');
-
-  return format(value, 'PPP', { locale });
-};
 
 const renderSubmitLabel = (isSubmitting: boolean, t: TranslateFunction) => {
   if (isSubmitting) return t('common.saving');

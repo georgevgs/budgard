@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { format, parseISO } from 'date-fns';
-import CalendarIcon from 'lucide-react/dist/esm/icons/calendar';
+import { parseISO } from 'date-fns';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import {
   DialogTitle,
@@ -12,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CurrencyInput } from '@/components/ui/currency-input';
-import { Calendar } from '@/components/ui/calendar';
+import { DatePickerField } from '@/components/ui/date-picker-field';
 import { Label } from '@/components/ui/label';
 import {
   Form,
@@ -22,11 +21,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -34,7 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
-import { cn, formatCurrencyInput } from '@/lib/utils';
+import { formatCurrencyInput } from '@/lib/utils';
 import {
   recurringExpenseSchema,
   type RecurringExpenseFormData,
@@ -259,34 +253,12 @@ const RecurringExpenseForm = ({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <Label>{t('recurring.startDateLabel')}</Label>
-                    <Popover modal={false}>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className={cn(
-                              'w-full pl-3 text-left font-normal',
-                              !field.value && 'text-muted-foreground',
-                            )}
-                          >
-                            {renderDateValue(
-                              field.value,
-                              t('recurring.pickDate'),
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={isStartDateDisabled}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <DatePickerField
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder={t('recurring.pickDate')}
+                      disabled={isStartDateDisabled}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -298,34 +270,12 @@ const RecurringExpenseForm = ({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <Label>{t('recurring.endDateLabel')}</Label>
-                    <Popover modal={false}>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className={cn(
-                              'w-full pl-3 text-left font-normal',
-                              !field.value && 'text-muted-foreground',
-                            )}
-                          >
-                            {renderDateValue(
-                              field.value,
-                              t('recurring.noEndDate'),
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={isEndDateDisabled}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <DatePickerField
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder={t('recurring.noEndDate')}
+                      disabled={isEndDateDisabled}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -444,12 +394,6 @@ const renderCategoryIcon = (category: { icon?: string | null; color: string }) =
       style={{ backgroundColor: category.color }}
     />
   );
-};
-
-const renderDateValue = (date: Date | undefined, placeholder: string) => {
-  if (!date) return <span>{placeholder}</span>;
-
-  return format(date, 'MMM d, yyyy');
 };
 
 const renderSubmitLabel = (

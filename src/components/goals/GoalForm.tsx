@@ -1,9 +1,8 @@
 import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { format, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import CalendarIcon from 'lucide-react/dist/esm/icons/calendar';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import {
   DialogTitle,
@@ -12,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Calendar } from '@/components/ui/calendar';
+import { DatePickerField } from '@/components/ui/date-picker-field';
 import { Label } from '@/components/ui/label';
 import {
   Form,
@@ -21,11 +20,6 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -36,7 +30,7 @@ import {
 import CategoryColorPicker from '@/components/categories/CategoryColorPicker';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
-import { cn, formatCurrencyInput } from '@/lib/utils';
+import { formatCurrencyInput } from '@/lib/utils';
 import { goalSchema, type GoalFormData } from '@/lib/validations';
 import type { Goal, GoalSourceType } from '@/types/Goal';
 
@@ -207,34 +201,12 @@ const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <Label>{t('goals.deadlineFieldLabel')}</Label>
-                  <Popover modal={false}>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className={cn(
-                            'w-full pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground',
-                          )}
-                        >
-                          {renderDateValue(
-                            field.value,
-                            t('goals.noDeadline'),
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={isDeadlineDisabled}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <DatePickerField
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder={t('goals.noDeadline')}
+                    disabled={isDeadlineDisabled}
+                  />
                   <FormMessage />
                 </FormItem>
               )}
@@ -289,12 +261,6 @@ const renderTitle = (isEditing: boolean, t: TranslateFunction) => {
   if (isEditing) return t('goals.editTitle');
 
   return t('goals.createTitle');
-}
-
-const renderDateValue = (date: Date | undefined, placeholder: string) => {
-  if (!date) return <span>{placeholder}</span>;
-
-  return format(date, 'MMM d, yyyy');
 }
 
 const renderSubmitLabel = (

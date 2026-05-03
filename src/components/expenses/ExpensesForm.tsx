@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CurrencyInput } from '@/components/ui/currency-input';
-import { Calendar } from '@/components/ui/calendar';
+import { DatePickerField } from '@/components/ui/date-picker-field';
 import {
   Form,
   FormControl,
@@ -32,12 +32,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import CalendarIcon from 'lucide-react/dist/esm/icons/calendar';
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import Tag from 'lucide-react/dist/esm/icons/tag';
 import { format, parseISO } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
-import type { Locale } from 'date-fns';
 import { cn, formatCurrency, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 import { SUPPORTED_CURRENCIES } from '@/lib/currencies';
 import { fetchExchangeRate } from '@/services/exchangeRateService';
@@ -465,36 +463,12 @@ const ExpensesForm = ({
               name="date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <Popover modal={false}>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className={cn(
-                            'w-full justify-start text-left font-normal',
-                            !field.value && 'text-muted-foreground',
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {renderDateValue(
-                            field.value,
-                            dateLocale,
-                            t('expenses.pickDate'),
-                          )}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={false}
-                        locale={dateLocale}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <DatePickerField
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder={t('expenses.pickDate')}
+                    locale={dateLocale}
+                  />
                   <FormMessage />
                 </FormItem>
               )}
@@ -696,16 +670,6 @@ const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {
   if (isEditing) return t('expenses.editExpense');
 
   return t('expenses.addExpense');
-};
-
-const renderDateValue = (
-  date: Date | undefined,
-  locale: Locale,
-  placeholder: string,
-) => {
-  if (!date) return <span>{placeholder}</span>;
-
-  return format(date, 'PPP', { locale });
 };
 
 const renderTagClearIndicator = (

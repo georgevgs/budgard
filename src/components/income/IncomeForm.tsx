@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CurrencyInput } from '@/components/ui/currency-input';
-import { Calendar } from '@/components/ui/calendar';
+import { DatePickerField } from '@/components/ui/date-picker-field';
 import { CategoryManager } from '@/components/categories/CategoryManager';
 import {
   Form,
@@ -29,12 +29,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import CalendarIcon from 'lucide-react/dist/esm/icons/calendar';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
 import { format, parseISO } from 'date-fns';
 import { el, enUS } from 'date-fns/locale';
-import type { Locale } from 'date-fns';
 import {
   cn,
   formatCurrency,
@@ -430,35 +428,12 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
               name="date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <Popover modal={false}>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className={cn(
-                            'w-full justify-start text-left font-normal',
-                            !field.value && 'text-muted-foreground',
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {renderDateValue(
-                            field.value,
-                            dateLocale,
-                            t('expenses.pickDate'),
-                          )}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        locale={dateLocale}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <DatePickerField
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder={t('expenses.pickDate')}
+                    locale={dateLocale}
+                  />
                   <FormMessage />
                 </FormItem>
               )}
@@ -524,16 +499,6 @@ const renderSaveButtonLabel = (isSubmitting: boolean, t: TranslateFunction) => {
   if (isSubmitting) return t('common.saving');
 
   return t('income.saveIncome');
-};
-
-const renderDateValue = (
-  date: Date | undefined,
-  locale: Locale,
-  placeholder: string,
-) => {
-  if (!date) return <span>{placeholder}</span>;
-
-  return format(date, 'PPP', { locale });
 };
 
 const renderConversionPreview = (
