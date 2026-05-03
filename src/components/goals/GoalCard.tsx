@@ -24,11 +24,10 @@ import Target from 'lucide-react/dist/esm/icons/target';
 import Calendar from 'lucide-react/dist/esm/icons/calendar';
 import GoalProgressBar from '@/components/goals/GoalProgressBar';
 import { useGoalProgress } from '@/hooks/useGoalProgress';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import { useData } from '@/contexts/DataContext';
 import type { Goal } from '@/types/Goal';
 import { format, parseISO } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
-import type { Locale } from 'date-fns';
 import type { GoalProgress } from '@/hooks/useGoalProgress';
 
 type Props = {
@@ -40,10 +39,10 @@ type Props = {
 const GoalCard = ({ goal, onEdit, onDelete }: Props) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { categories, tags } = useData();
   const progress = useGoalProgress(goal);
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  const dateLocale = useDateLocale();
 
   const blurActiveElement = () => {
     if (document.activeElement instanceof HTMLElement) {

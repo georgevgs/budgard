@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -15,6 +14,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { cn, formatCurrency } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
 import type { NetWorthPoint } from '@/hooks/useNetWorth';
+import { useDateLocale } from '@/hooks/useDateLocale';
 
 const NET_COLOR = 'hsl(var(--primary))';
 
@@ -24,8 +24,8 @@ type Props = {
 }
 
 const NetWorthChart = ({ series, defaultCurrency }: Props) => {
-  const { t, i18n } = useTranslation();
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const currencySymbol = getCurrencySymbol(defaultCurrency);
 
   const data = useMemo(

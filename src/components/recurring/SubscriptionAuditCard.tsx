@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
 import type { Locale } from 'date-fns';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
@@ -11,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { useDataConfig } from '@/contexts/DataContext';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import { formatCurrency } from '@/lib/utils';
 import { calculateNextOccurrence, getMonthlyAmount } from '@/lib/recurring';
 import {
@@ -51,9 +51,9 @@ const SubscriptionAuditCard = ({
   onToggle,
   onAddDetected,
 }: Props) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  const dateLocale = useDateLocale();
 
   const audit = useMemo(() => {
     const subscriptionLike = recurringExpenses.filter((r) =>

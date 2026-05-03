@@ -2,7 +2,6 @@ import { useRef, useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO, getYear } from 'date-fns';
 import type { Locale } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
 import { toPng } from 'html-to-image';
 import Share2 from 'lucide-react/dist/esm/icons/share-2';
 import Download from 'lucide-react/dist/esm/icons/download';
@@ -16,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { formatCurrency, dataUrlToBlob } from '@/lib/utils';
 import { useData, useDataConfig } from '@/contexts/DataContext';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
 
 const TOP_CATEGORIES_LIMIT = 3;
@@ -28,8 +28,8 @@ type Props = {
 };
 
 const YearInReviewCard = ({ isOpen, onClose, year }: Props) => {
-  const { t, i18n } = useTranslation();
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const { defaultCurrency } = useDataConfig();
   const { expenses, incomes, expenseCategories } = useData();
   const cardRef = useRef<HTMLDivElement>(null);

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
 import type { Locale } from 'date-fns';
 import {
   Dialog,
@@ -39,6 +38,7 @@ import { computeAccountXirr } from '@/lib/xirr';
 import { computeAccountYtd, type YtdResult } from '@/lib/ytd';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { useAccountBalances } from '@/hooks/useAccountBalances';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import { type Account, isLiability } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import BalanceSnapshotForm, {
@@ -54,11 +54,8 @@ type Props = {
 }
 
 const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
-  const { t, i18n } = useTranslation();
-  let dateLocale: Locale = enUS;
-  if (i18n.language === 'el') {
-    dateLocale = el;
-  }
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const { handleAccountArchive, handleSnapshotDelete } = useDataOperations();
   const { snapshots, isLoading, removeSnapshot } = useAccountBalances(
     account.id,

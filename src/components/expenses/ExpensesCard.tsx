@@ -27,10 +27,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { format, parseISO } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
 import type { Expense } from '@/types/Expense';
 import { formatCurrency, formatForeignAmount } from '@/lib/utils.ts';
 import { useDataConfig } from '@/contexts/DataContext';
+import { useDateLocale } from '@/hooks/useDateLocale';
 
 type ExpenseCardProps = {
   expense: Expense;
@@ -49,9 +49,9 @@ const ExpensesCard = ({
   searchQuery,
   showFullDate,
 }: ExpenseCardProps) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  const dateLocale = useDateLocale();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);

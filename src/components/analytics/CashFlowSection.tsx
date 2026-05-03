@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -15,6 +14,7 @@ import {
 } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { useData } from '@/contexts/DataContext';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import { formatCurrency, cn } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
 
@@ -27,12 +27,9 @@ type Props = {
 };
 
 const CashFlowSection = ({ selectedYear }: Props) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { expenses, incomes, defaultCurrency } = useData();
-  let dateLocale = enUS;
-  if (i18n.language === 'el') {
-    dateLocale = el;
-  }
+  const dateLocale = useDateLocale();
   const currencySymbol = getCurrencySymbol(defaultCurrency);
 
   const monthlyData = useMemo(() => {

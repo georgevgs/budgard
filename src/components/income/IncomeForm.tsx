@@ -32,7 +32,6 @@ import {
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
 import { format, parseISO } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
 import {
   cn,
   formatCurrency,
@@ -42,6 +41,7 @@ import {
 import { SUPPORTED_CURRENCIES } from '@/lib/currencies';
 import { fetchExchangeRate } from '@/services/exchangeRateService';
 import { useAuth } from '@/hooks/useAuth';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import { useData } from '@/contexts/DataContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
 import { incomeSchema, type IncomeFormData } from '@/lib/validations';
@@ -54,11 +54,11 @@ type IncomeFormProps = {
 };
 
 const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { session } = useAuth();
   const { incomeCategories, defaultCurrency } = useData();
   const { handleIncomeSubmit, handleCategoryAdd } = useDataOperations();
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  const dateLocale = useDateLocale();
   const [categoryPopoverOpen, setCategoryPopoverOpen] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
   const [isCreatingCategory, startCategoryCreation] = useTransition();

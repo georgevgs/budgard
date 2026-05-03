@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import { format } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import { EmptyStateCard } from '@/components/ui/empty-state-card';
 
 type IncomeEmptyProps = {
@@ -10,8 +10,8 @@ type IncomeEmptyProps = {
 };
 
 const IncomeEmpty = ({ selectedMonth, onAddClick }: IncomeEmptyProps) => {
-  const { t, i18n } = useTranslation();
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const monthLabel = format(new Date(selectedMonth + '-01'), 'LLLL yyyy', {
     locale: dateLocale,
   });

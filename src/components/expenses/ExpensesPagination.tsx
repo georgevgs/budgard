@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { el, enUS } from 'date-fns/locale';
 import {
   Pagination,
   PaginationContent,
@@ -11,6 +10,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { groupExpensesByDate } from '@/lib/dateGrouping';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
 import ExpensesCard from '@/components/expenses/ExpensesCard';
 
@@ -33,11 +33,8 @@ const ExpensesPagination = ({
   searchQuery,
   showFullDate,
 }: Props) => {
-  const { t, i18n } = useTranslation();
-  let dateLocale = enUS;
-  if (i18n.language === 'el') {
-    dateLocale = el;
-  }
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const [currentPage, setCurrentPage] = useState(1);
   const prevLengthRef = useRef(expenses.length);
 

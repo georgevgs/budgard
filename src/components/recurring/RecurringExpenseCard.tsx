@@ -24,9 +24,9 @@ import Clock from 'lucide-react/dist/esm/icons/clock';
 import CategoryBadge from '@/components/categories/CategoryBadge';
 import { format } from 'date-fns';
 import type { Locale } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useDataConfig } from '@/contexts/DataContext';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import { useTranslation } from 'react-i18next';
 
@@ -49,9 +49,9 @@ const RecurringExpenseCard = ({
 }: RecurringExpenseCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  const dateLocale = useDateLocale();
 
   const blurActiveElement = () => {
     if (document.activeElement instanceof HTMLElement) {

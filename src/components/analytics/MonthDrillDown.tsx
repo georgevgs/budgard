@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -11,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { formatCurrency } from '@/lib/utils';
 import { useDataConfig } from '@/contexts/DataContext';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
@@ -29,9 +29,9 @@ export const MonthDrillDown = ({
   expenses,
   categories,
 }: Props) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  const dateLocale = useDateLocale();
 
   const monthExpenses = useMemo(
     () =>

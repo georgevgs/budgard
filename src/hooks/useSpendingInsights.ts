@@ -1,17 +1,15 @@
 import { useMemo } from 'react';
 import { format, parseISO, getDaysInMonth, getDay } from 'date-fns';
 import type { Locale } from 'date-fns';
-import {
-  TrendingUp,
-  TrendingDown,
-  CalendarDays,
-  ShieldCheck,
-  PieChart,
-  Activity,
-  Wallet,
-  Gauge,
-  Repeat,
-} from 'lucide-react';
+import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
+import CalendarDays from 'lucide-react/dist/esm/icons/calendar-days';
+import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
+import PieChart from 'lucide-react/dist/esm/icons/pie-chart';
+import Activity from 'lucide-react/dist/esm/icons/activity';
+import Wallet from 'lucide-react/dist/esm/icons/wallet';
+import Gauge from 'lucide-react/dist/esm/icons/gauge';
+import Repeat from 'lucide-react/dist/esm/icons/repeat';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Expense } from '@/types/Expense';

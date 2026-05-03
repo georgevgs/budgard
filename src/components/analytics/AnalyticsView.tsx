@@ -1,6 +1,5 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { format, parseISO, getYear } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import Minus from 'lucide-react/dist/esm/icons/minus';
@@ -38,6 +37,7 @@ import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
@@ -51,8 +51,8 @@ const AnalyticsView = () => {
     defaultCurrency,
     isLoading,
   } = useData();
-  const { t, i18n } = useTranslation();
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const currencySymbol = getCurrencySymbol(defaultCurrency);
 
   const availableYears = useMemo(() => {

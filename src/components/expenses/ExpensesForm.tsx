@@ -35,11 +35,11 @@ import {
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import Tag from 'lucide-react/dist/esm/icons/tag';
 import { format, parseISO } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
 import { cn, formatCurrency, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 import { SUPPORTED_CURRENCIES } from '@/lib/currencies';
 import { fetchExchangeRate } from '@/services/exchangeRateService';
 import { useAuth } from '@/hooks/useAuth';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import { useData } from '@/contexts/DataContext';
 import {
   useDataOperations,
@@ -82,11 +82,11 @@ const ExpensesForm = ({
   onClose,
   onSubmit,
 }: ExpensesFormProps) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { session } = useAuth();
   const { tags, expenses: allExpenses, defaultCurrency } = useData();
   const { handleTagCreate } = useDataOperations();
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  const dateLocale = useDateLocale();
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [removeExistingReceipt, setRemoveExistingReceipt] = useState(false);
   const [tagPopoverOpen, setTagPopoverOpen] = useState(false);

@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
-import type { Locale } from 'date-fns';
 import {
   Dialog,
   DialogContent,
@@ -33,6 +31,7 @@ import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import { formatCurrency } from '@/lib/utils';
 import { useDataOperations } from '@/hooks/useDataOperations';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import { useDebtProgress } from '@/hooks/useDebtProgress';
 import { useDebtPayments } from '@/hooks/useDebtPayments';
 import type { Debt } from '@/types/Debt';
@@ -48,8 +47,8 @@ type Props = {
 }
 
 const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
-  const { t, i18n } = useTranslation();
-  const dateLocale: Locale = i18n.language === 'el' ? el : enUS;
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const { handleDebtArchive, handleExpenseDelete } = useDataOperations();
   const progress = useDebtProgress(debt);
   const { payments, isLoading, removePayment } = useDebtPayments(

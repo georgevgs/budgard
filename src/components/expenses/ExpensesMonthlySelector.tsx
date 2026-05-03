@@ -15,7 +15,7 @@ import {
   setMonth,
   setYear,
 } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import { cn } from '@/lib/utils';
 
 type ExpensesMonthlySelectorProps = {
@@ -27,9 +27,9 @@ const ExpensesMonthlySelector = ({
   selectedMonth,
   onMonthChange,
 }: ExpensesMonthlySelectorProps) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const selectedDate = parseISO(`${selectedMonth}-01`);
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  const dateLocale = useDateLocale();
 
   const handleMonthChange = (direction: 'prev' | 'next') => {
     const newDate =

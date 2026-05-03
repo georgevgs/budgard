@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO, subMonths, subYears } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -15,6 +14,7 @@ import { cn, formatCurrency } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
+import { useDateLocale } from '@/hooks/useDateLocale';
 
 const VALUE_COLOR = 'hsl(var(--primary))';
 const BASIS_COLOR = 'hsl(var(--muted-foreground))';
@@ -35,11 +35,8 @@ type Point = {
 }
 
 const AccountHistoryChart = ({ account, snapshots }: Props) => {
-  const { t, i18n } = useTranslation();
-  let dateLocale = enUS;
-  if (i18n.language === 'el') {
-    dateLocale = el;
-  }
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const currencySymbol = getCurrencySymbol(account.default_currency);
   const isInvestment = account.kind === 'investment';
   const [range, setRange] = useState<RangeKey>('all');

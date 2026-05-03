@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn, formatCurrency } from '@/lib/utils';
 import { type Account, isLiability } from '@/types/Account';
@@ -12,6 +11,7 @@ import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import type { LucideIcon } from 'lucide-react';
 import type { AccountKind } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
+import { useDateLocale } from '@/hooks/useDateLocale';
 
 type Props = {
   account: Account;
@@ -20,8 +20,8 @@ type Props = {
 }
 
 const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
-  const { t, i18n } = useTranslation();
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const liability = isLiability(account.kind);
   const Icon = ICON_BY_KIND[account.kind];
 

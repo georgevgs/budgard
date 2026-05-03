@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import { EmptyStateCard } from '@/components/ui/empty-state-card';
 
 type ExpensesEmptyProps = {
@@ -9,8 +9,8 @@ type ExpensesEmptyProps = {
 };
 
 const ExpensesEmpty = ({ selectedMonth, onAddClick }: ExpensesEmptyProps) => {
-  const { t, i18n } = useTranslation();
-  const dateLocale = i18n.language === 'el' ? el : enUS;
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const monthLabel = format(new Date(selectedMonth + '-01'), 'LLLL yyyy', {
     locale: dateLocale,
   });

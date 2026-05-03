@@ -3,8 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
-import { el, enUS } from 'date-fns/locale';
-import type { Locale } from 'date-fns';
 import {
   DialogTitle,
   DialogHeader,
@@ -21,6 +19,7 @@ import {
 } from '@/components/ui/form';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDataOperations } from '@/hooks/useDataOperations';
+import { useDateLocale } from '@/hooks/useDateLocale';
 import {
   formatCurrencyInput,
   parseCurrencyInput,
@@ -39,8 +38,8 @@ type Props = {
 }
 
 const DebtPaymentForm = ({ debt, onClose }: Props) => {
-  const { t, i18n } = useTranslation();
-  const dateLocale: Locale = i18n.language === 'el' ? el : enUS;
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const { session } = useAuth();
   const { handleExpenseSubmit } = useDataOperations();
   const [isSubmitting, setIsSubmitting] = useState(false);
