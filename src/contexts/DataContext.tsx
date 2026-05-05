@@ -60,6 +60,9 @@ type DataActions = {
   refreshIncomes: () => Promise<void>;
   refreshAccounts: () => Promise<void>;
   refreshDebts: () => Promise<void>;
+  // Refs to latest data — read inside callbacks without triggering re-renders.
+  expensesRef: { readonly current: Expense[] };
+  incomesRef: { readonly current: Expense[] };
   setCategories: Dispatch<SetStateAction<Category[]>>;
   setExpenses: Dispatch<SetStateAction<Expense[]>>;
   setIncomes: Dispatch<SetStateAction<Expense[]>>;
@@ -126,6 +129,13 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // Expose latest data via refs so handlers can read it inside async callbacks
+  // without subscribing to context updates (keeps useDataOperations stable).
+  const expensesRef = useRef<Expense[]>(expenses);
+  expensesRef.current = expenses;
+  const incomesRef = useRef<Expense[]>(incomes);
+  incomesRef.current = incomes;
 
   // Categories without an explicit 'income' type belong to expenses (back-compat).
   const expenseCategories = useMemo(
@@ -392,6 +402,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       refreshIncomes,
       refreshAccounts,
       refreshDebts,
+      expensesRef,
+      incomesRef,
       setCategories,
       setExpenses,
       setIncomes,

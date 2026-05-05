@@ -45,10 +45,11 @@ const computeProgress = (
   expenses: Expense[],
   incomes: Expense[],
 ): GoalProgress => {
-  const startDate = new Date(goal.start_date);
-  startDate.setHours(0, 0, 0, 0);
+  // Parse YYYY-MM-DD as local midnight; `new Date('YYYY-MM-DD')` parses as UTC
+  // and shifts the day in negative-UTC timezones.
+  const startDate = new Date(goal.start_date + 'T00:00:00');
 
-  const current = sumForSource(goal, expenses, incomes, startDate);
+  const current = sumForSource(goal, expenses, incomes, goal.start_date);
   const target = Number(goal.target_amount);
   const ratio = target > 0 ? current / target : 0;
   const percent = Math.max(0, Math.min(1, ratio));
@@ -80,7 +81,7 @@ const sumForSource = (
   goal: Goal,
   expenses: Expense[],
   incomes: Expense[],
-  startDate: Date,
+  startDate: string,
 ): number => {
   if (goal.source_type === 'category') {
     if (!goal.category_id) return 0;
@@ -89,7 +90,7 @@ const sumForSource = (
       expenses.filter(
         (e) =>
           e.category_id === goal.category_id &&
-          new Date(e.date) >= startDate,
+          e.date >= startDate,
       ),
     );
   }
@@ -99,17 +100,17 @@ const sumForSource = (
 
     return sumExpenses(
       expenses.filter(
-        (e) => e.tag_id === goal.tag_id && new Date(e.date) >= startDate,
+        (e) => e.tag_id === goal.tag_id && e.date >= startDate,
       ),
     );
   }
 
   // net_delta — total income minus total expenses since start_date
   const incomeSum = sumExpenses(
-    incomes.filter((i) => new Date(i.date) >= startDate),
+    incomes.filter((i) => i.date >= startDate),
   );
   const expenseSum = sumExpenses(
-    expenses.filter((e) => new Date(e.date) >= startDate),
+    expenses.filter((e) => e.date >= startDate),
   );
 
   return Math.max(0, incomeSum - expenseSum);
@@ -125,8 +126,9 @@ const computeDeadlineState = (deadline?: string | null) => {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const deadlineDate = new Date(deadline);
-  deadlineDate.setHours(0, 0, 0, 0);
+  // Parse YYYY-MM-DD as local midnight; `new Date('YYYY-MM-DD')` parses as UTC
+  // and shifts the day in negative-UTC timezones.
+  const deadlineDate = new Date(deadline + 'T00:00:00');
 
   const diffMs = deadlineDate.getTime() - today.getTime();
   const days = Math.round(diffMs / (1000 * 60 * 60 * 24));

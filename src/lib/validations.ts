@@ -140,7 +140,17 @@ export const emailSchema = z
   .string()
   .email('Please enter a valid email address')
   .refine(
-    (email) => !BLOCKED_DOMAINS.some((domain) => email.endsWith(domain)),
+    (email) => {
+      const atIndex = email.lastIndexOf('@');
+      if (atIndex < 0) {
+        return true;
+      }
+      const domain = email.slice(atIndex + 1).toLowerCase();
+
+      return !BLOCKED_DOMAINS.some(
+        (blocked) => domain === blocked || domain.endsWith('.' + blocked),
+      );
+    },
     {
       message: 'Please use a valid email address',
     },

@@ -693,31 +693,24 @@ export const dataService = {
   },
 
   async upsertAccountBalance(snapshot: Partial<AccountBalance>) {
-    // The (account_id, recorded_at) unique constraint means a second snapshot
-    // on the same day overwrites the first. When the new payload has no
-    // contribution (a pure "Update value"), preserve any contribution already
-    // logged that day — otherwise the upsert would wipe the cost basis.
-    let payload = snapshot;
-    const isMissingContribution =
-      snapshot.contribution_delta === null ||
-      snapshot.contribution_delta === undefined;
-    if (isMissingContribution && snapshot.account_id && snapshot.recorded_at) {
-      const { data: existing } = await supabase
-        .from('account_balances')
-        .select('contribution_delta')
-        .eq('account_id', snapshot.account_id)
-        .eq('recorded_at', snapshot.recorded_at)
-        .maybeSingle();
-      if (existing && existing.contribution_delta != null) {
-        payload = { ...snapshot, contribution_delta: existing.contribution_delta };
-      }
+    // Atomic upsert via Postgres function — preserves a same-day
+    // contribution_delta when the caller didn't supply one. Replaces an
+    // earlier client-side SELECT-then-UPSERT that had a TOCTOU race when
+    // two devices logged into the same account wrote on the same day.
+    if (!snapshot.account_id || snapshot.balance == null) {
+      throw new Error('account_id and balance are required');
     }
 
-    const { data, error } = await supabase
-      .from('account_balances')
-      .upsert(payload, { onConflict: 'account_id,recorded_at' })
-      .select()
-      .single();
+    const { data, error } = await supabase.rpc('upsert_account_balance', {
+      p_account_id: snapshot.account_id,
+      p_balance: snapshot.balance,
+      p_contribution_delta: snapshot.contribution_delta ?? null,
+      p_recorded_at: snapshot.recorded_at ?? null,
+      p_note: snapshot.note ?? null,
+      p_original_amount: snapshot.original_amount ?? null,
+      p_original_currency: snapshot.original_currency ?? null,
+      p_exchange_rate: snapshot.exchange_rate ?? null,
+    });
 
     if (error) throw error;
     return data as AccountBalance;

@@ -59,6 +59,8 @@ vi.mock('@/contexts/DataContext', () => ({
     setCategoryBudgets: mockSetCategoryBudgets,
     refreshExpenses: mockRefreshExpenses,
     refreshDebts: mockRefreshDebts,
+    expensesRef: { current: [] },
+    incomesRef: { current: [] },
   }),
 }));
 

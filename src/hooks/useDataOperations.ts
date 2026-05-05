@@ -65,6 +65,7 @@ export const useDataOperations = () => {
     setDefaultCurrency,
     setDefaultSavingsPct,
     setDailyReminderHour,
+    expensesRef,
   } = useDataActions();
   const { toast } = useToast();
 
@@ -116,12 +117,11 @@ export const useDataOperations = () => {
 
         haptics.success();
 
-        let previousDebtId: string | null = null;
+        const previousDebtId = expenseId
+          ? expensesRef.current.find((e) => e.id === expenseId)?.debt_id ?? null
+          : null;
         setExpenses((prev) => {
           if (expenseId) {
-            previousDebtId =
-              prev.find((e) => e.id === expenseId)?.debt_id ?? null;
-
             return prev.map((e) => (e.id === expenseId ? finalExpense : e));
           }
 
@@ -157,6 +157,22 @@ export const useDataOperations = () => {
             ...expenseData,
             ...(expenseId ? { id: expenseId } : {}),
           } as Record<string, unknown>);
+          // Reflect the queued change locally; useOfflineSync will refresh
+          // from the server once the queue drains.
+          setExpenses((prev) => {
+            if (expenseId) {
+              return prev.map((e) =>
+                e.id === expenseId ? ({ ...e, ...expenseData } as Expense) : e,
+              );
+            }
+            const optimistic = {
+              ...expenseData,
+              id: `temp-${Date.now()}`,
+              created_at: new Date().toISOString(),
+            } as Expense;
+
+            return [optimistic, ...prev];
+          });
           haptics.success();
           toast({
             variant: 'success',
@@ -184,18 +200,15 @@ export const useDataOperations = () => {
       }
 
       haptics.warning();
+      // Snapshot before delete so receipt cleanup and debt refresh work even
+      // if a concurrent setter races us out of the row.
+      const existing = expensesRef.current.find((e) => e.id === expenseId);
+      const receiptPath = existing?.receipt_path ?? null;
+      const deletedDebtId = existing?.debt_id ?? null;
       try {
         await dataService.deleteExpense(expenseId);
 
-        // Read receipt path and update state atomically
-        let receiptPath: string | null = null;
-        let deletedDebtId: string | null = null;
-        setExpenses((prev) => {
-          const existing = prev.find((e) => e.id === expenseId);
-          receiptPath = existing?.receipt_path ?? null;
-          deletedDebtId = existing?.debt_id ?? null;
-          return prev.filter((e) => e.id !== expenseId);
-        });
+        setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
 
         if (deletedDebtId) {
           refreshDebts().catch((err) => {
@@ -216,6 +229,7 @@ export const useDataOperations = () => {
       } catch (error) {
         if (!navigator.onLine) {
           await offlineQueue.enqueue('deleteExpense', { id: expenseId });
+          setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
           haptics.success();
           toast({
             variant: 'success',
@@ -1119,6 +1133,20 @@ export const useDataOperations = () => {
             ...incomeData,
             ...(incomeId ? { id: incomeId } : {}),
           } as Record<string, unknown>);
+          setIncomes((prev) => {
+            if (incomeId) {
+              return prev.map((e) =>
+                e.id === incomeId ? ({ ...e, ...incomeData } as Expense) : e,
+              );
+            }
+            const optimistic = {
+              ...incomeData,
+              id: `temp-${Date.now()}`,
+              created_at: new Date().toISOString(),
+            } as Expense;
+
+            return [optimistic, ...prev];
+          });
           haptics.success();
           toast({
             variant: 'success',
@@ -1152,6 +1180,7 @@ export const useDataOperations = () => {
       } catch (error) {
         if (!navigator.onLine) {
           await offlineQueue.enqueue('deleteIncome', { id: incomeId });
+          setIncomes((prev) => prev.filter((e) => e.id !== incomeId));
           haptics.success();
           toast({
             variant: 'success',
