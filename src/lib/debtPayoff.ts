@@ -88,11 +88,22 @@ export const simulatePayoff = (input: SimInput): SimResult => {
 
     let extraPool = input.monthlyExtra;
 
+    // Recycle minimum payments from debts that finished in PRIOR months —
+    // the user's actual monthly budget is freed up by their payoff.
+    for (const s of states) {
+      if (s.payoffMonth !== null && s.payoffMonth < month) {
+        extraPool += s.debt.minimum_payment;
+      }
+    }
+
     for (const s of active) {
       const min = Math.min(s.debt.minimum_payment, s.remaining);
       s.remaining -= min;
       s.totalPaid += min;
       paymentThisMonth.set(s.debt.id, min);
+      // If the minimum overshot the balance, the leftover cascades into
+      // the priority-sorted extra pool below.
+      extraPool += s.debt.minimum_payment - min;
     }
 
     const stillActive = active.filter((s) => s.remaining > 0);

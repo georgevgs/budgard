@@ -1245,7 +1245,15 @@ export const useDataOperations = () => {
       }
 
       haptics.warning();
-      setRecurringIncomes((prev) => prev.filter((e) => e.id !== incomeId));
+
+      // Snapshot for rollback — refreshIncomes() refetches the `incomes`
+      // list, not `recurringIncomes`, so we restore the latter here.
+      let previousRecurring: RecurringExpense[] = [];
+      setRecurringIncomes((prev) => {
+        previousRecurring = prev;
+
+        return prev.filter((e) => e.id !== incomeId);
+      });
 
       try {
         await dataService.deleteRecurringIncome(incomeId);
@@ -1260,14 +1268,7 @@ export const useDataOperations = () => {
         });
       } catch (error) {
         haptics.error();
-        refreshIncomes().catch((err) => {
-          Sentry.captureException(err, {
-            tags: {
-              operation: 'refreshIncomes',
-              context: 'recurringIncomeDeleteRollback',
-            },
-          });
-        });
+        setRecurringIncomes(previousRecurring);
         Sentry.captureException(error, {
           tags: { operation: 'deleteRecurringIncome' },
         });

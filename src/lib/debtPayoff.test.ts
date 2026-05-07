@@ -145,6 +145,35 @@ describe('simulatePayoff', () => {
     );
   });
 
+  it('recycles freed minimums from paid-off debts into remaining balances', () => {
+    // Debt A pays off quickly; its 200/mo minimum should then attack debt B.
+    const a = makeDebt({
+      id: 'a',
+      apr: 0,
+      current_balance: 200,
+      minimum_payment: 200,
+    });
+    const b = makeDebt({
+      id: 'b',
+      apr: 0,
+      current_balance: 1000,
+      minimum_payment: 100,
+    });
+
+    const r = simulatePayoff({
+      debts: [a, b],
+      monthlyExtra: 0,
+      strategy: 'snowball',
+    });
+
+    // A clears in month 1 paying 200. From month 2 onward, B receives
+    // 100 (own min) + 200 (freed) = 300/month. Starting at 1000, B
+    // clears in month 4. Total paid = 200 + 1000 = 1200.
+    expect(r.perDebtPayoffMonth.a).toBe(1);
+    expect(r.perDebtPayoffMonth.b).toBe(4);
+    expect(r.totalPaid).toBe(1200);
+  });
+
   it('produces a sensible months count for $5000 @ 18% APR / $150 min', () => {
     // Online calculators put this around 47 months. Allow a small range.
     const r = simulatePayoff({
