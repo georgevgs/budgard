@@ -153,9 +153,12 @@ export const useDataOperations = () => {
       } catch (error) {
         if (!navigator.onLine) {
           const mutationType = expenseId ? 'updateExpense' : 'createExpense';
+          // Stash a temp id on creates so a subsequent offline delete can
+          // cancel the pending insert instead of leaving a server ghost.
+          const tempId = expenseId ? null : `temp-${Date.now()}`;
           await offlineQueue.enqueue(mutationType, {
             ...expenseData,
-            ...(expenseId ? { id: expenseId } : {}),
+            ...(expenseId ? { id: expenseId } : { __tempId: tempId }),
           } as Record<string, unknown>);
           // Reflect the queued change locally; useOfflineSync will refresh
           // from the server once the queue drains.
@@ -167,7 +170,7 @@ export const useDataOperations = () => {
             }
             const optimistic = {
               ...expenseData,
-              id: `temp-${Date.now()}`,
+              id: tempId as string,
               created_at: new Date().toISOString(),
             } as Expense;
 
@@ -228,7 +231,22 @@ export const useDataOperations = () => {
         }
       } catch (error) {
         if (!navigator.onLine) {
-          await offlineQueue.enqueue('deleteExpense', { id: expenseId });
+          // If we're deleting an expense that only exists as a queued
+          // offline create, cancel the create instead of enqueuing a delete
+          // — otherwise the create replays on reconnect and the server keeps
+          // a ghost row that the (temp-id) delete cannot reach.
+          if (expenseId.startsWith('temp-')) {
+            const queued = await offlineQueue.getAll();
+            const pendingCreate = queued.find(
+              (m) =>
+                m.type === 'createExpense' && m.payload.__tempId === expenseId,
+            );
+            if (pendingCreate) {
+              await offlineQueue.remove(pendingCreate.id);
+            }
+          } else {
+            await offlineQueue.enqueue('deleteExpense', { id: expenseId });
+          }
           setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
           haptics.success();
           toast({

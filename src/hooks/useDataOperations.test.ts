@@ -196,9 +196,13 @@ describe('useDataOperations', () => {
       await result.current.handleExpenseSubmit({ amount: 50 });
     });
 
-    expect(offlineQueue.enqueue).toHaveBeenCalledWith('createExpense', {
-      amount: 50,
-    });
+    expect(offlineQueue.enqueue).toHaveBeenCalledWith(
+      'createExpense',
+      expect.objectContaining({
+        amount: 50,
+        __tempId: expect.stringMatching(/^temp-/),
+      }),
+    );
   });
 
   // --- Expense Delete ---

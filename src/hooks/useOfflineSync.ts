@@ -15,7 +15,12 @@ export const useOfflineSync = (): void => {
   const processMutation = useCallback(
     async (mutation: QueuedMutation): Promise<boolean> => {
       try {
-        const payload = mutation.payload;
+        // __tempId is local-only metadata used to coalesce offline
+        // create+delete pairs; the server doesn't know about it.
+        const { __tempId: _t, ...payload } = mutation.payload as Record<
+          string,
+          unknown
+        >;
 
         switch (mutation.type) {
           case 'createExpense':
