@@ -4,6 +4,7 @@ import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right';
 import ArrowDownLeft from 'lucide-react/dist/esm/icons/arrow-down-left';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import type { NetWorthSummary } from '@/hooks/useNetWorth';
 
 type Props = {
@@ -52,6 +53,7 @@ const NetWorthHeader = ({ summary, defaultCurrency }: Props) => {
       </div>
 
       {renderInvestmentRow(summary, defaultCurrency, t)}
+      {renderStaleRatesWarning(summary.staleCurrencies, t)}
     </div>
   );
 }
@@ -64,6 +66,26 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const renderStaleRatesWarning = (
+  staleCurrencies: string[],
+  t: TranslateFunction,
+) => {
+  if (staleCurrencies.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex items-start gap-2 pt-2 border-t border-border/40 text-xs text-amber-600 dark:text-amber-500">
+      <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+      <span>
+        {t('networth.staleRatesWarning', {
+          currencies: staleCurrencies.join(', '),
+        })}
+      </span>
+    </div>
+  );
+};
 
 const renderInvestmentRow = (
   summary: NetWorthSummary,

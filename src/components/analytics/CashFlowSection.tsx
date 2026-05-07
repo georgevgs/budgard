@@ -15,7 +15,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { useData } from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
-import { formatCurrency, cn } from '@/lib/utils';
+import { formatCurrency, cn, monthsElapsedInYear } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
 
 const INCOME_COLOR = 'hsl(var(--income))';
@@ -67,9 +67,10 @@ const CashFlowSection = ({ selectedYear }: Props) => {
     const totalIncome = monthlyData.reduce((s, m) => s + m.income, 0);
     const totalExpense = monthlyData.reduce((s, m) => s - m.expense, 0);
 
+    const monthsElapsed = monthsElapsedInYear(selectedYear);
     let avgNet = 0;
-    if (monthlyData.length > 0) {
-      avgNet = (totalIncome - totalExpense) / 12;
+    if (monthsElapsed > 0) {
+      avgNet = (totalIncome - totalExpense) / monthsElapsed;
     }
 
     return {
@@ -78,7 +79,7 @@ const CashFlowSection = ({ selectedYear }: Props) => {
       net: totalIncome - totalExpense,
       avgNet,
     };
-  }, [monthlyData]);
+  }, [monthlyData, selectedYear]);
 
   const noData =
     yearTotals.totalIncome === 0 && yearTotals.totalExpense === 0;

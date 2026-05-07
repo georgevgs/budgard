@@ -1,8 +1,19 @@
 import { addWeeks, addMonths, addYears } from 'date-fns';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
-const WEEKS_PER_MONTH = 4.33;
-const BIWEEKLY_PERIODS_PER_MONTH = 2.17;
+// Calendar-month approximations used to convert sub-monthly cadences into a
+// single "monthly equivalent" figure. The exact ratio is 365.25 / 12 / 7 ≈
+// 4.348 weeks/month; we round to 4.33 (and 2.17 for biweekly) to match the
+// values most household-budgeting tools display. The drift is ≤0.5% per
+// conversion and is acceptable for projection-style UIs that already round to
+// the nearest unit. Do not change without updating tests that pin these.
+export const WEEKS_PER_MONTH = 4.33;
+export const BIWEEKLY_PERIODS_PER_MONTH = 2.17;
+
+// Belt-and-braces cap. With a weekly cadence this covers ~19 years of
+// catch-up; anything beyond that points to bad data (start_date in the
+// distant past with no last_generated_date) and we'd rather bail than spin.
+const MAX_CATCHUP_ITERATIONS = 1000;
 
 export const calculateNextOccurrence = (
   expense: RecurringExpense,
@@ -25,8 +36,13 @@ export const calculateNextOccurrence = (
   }
 
   let next = new Date(startDate);
+  let iterations = 0;
   while (next < today) {
     next = advanceByFrequency(next, expense.frequency);
+    iterations += 1;
+    if (iterations >= MAX_CATCHUP_ITERATIONS) {
+      return null;
+    }
   }
 
   return next;

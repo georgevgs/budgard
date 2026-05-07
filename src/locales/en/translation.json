@@ -187,7 +187,7 @@
     "projection": {
       "title": "Projected month-end",
       "subtitle": "+{{income}} income, -{{expense}} expenses",
-      "note": "Based on actuals so far plus active recurring."
+      "note": "Estimate only — assumes you keep spending and earning at the same daily pace, plus any active recurring."
     }
   },
   "annualExport": {
@@ -549,6 +549,7 @@
     "investmentLabel": "Investments",
     "lastUpdated": "Updated {{date}}",
     "notUpdated": "Not updated yet",
+    "staleRatesWarning": "Couldn't fetch exchange rates for {{currencies}} — those balances are shown unconverted, so the total may be off.",
     "archive": "Archive",
     "archiveTitle": "Archive account",
     "archiveConfirmation": "Archive \"{{name}}\"? It will be hidden from net worth and won't affect past totals.",
@@ -659,6 +660,7 @@
     "monthsCount_other": "{{count}} months",
     "percentPaid": "{{percent}}% paid",
     "cleared": "Paid off",
+    "balanceOverOriginal": "{{amount}} above original",
     "archive": "Archive",
     "archiveTitle": "Archive debt",
     "archiveConfirmation": "Archive \"{{name}}\"? Its payment history stays in your expenses.",
@@ -739,8 +741,8 @@
       "savingsHint": "Avalanche saves about {{amount}} in interest vs Snowball.",
       "orderTitle": "Payoff order",
       "paidInMonth": "Month {{month}}",
-      "unpayableTitle": "Payoff not reachable",
-      "unpayableDescription": "With current minimums and extra payment, at least one debt's interest outpaces the payment. Increase your monthly extra to find a workable plan."
+      "unpayableTitle": "Payments aren't keeping up with interest",
+      "unpayableDescription": "At least one debt's interest outpaces the current minimums and extra payment, so the balance keeps growing. Increase your monthly extra to find a workable plan."
     }
   },
   "templates": {
@@ -796,7 +798,7 @@
       "budgetExceeded": "Over budget by {{amount}} — review remaining expenses",
       "spendingPaceAhead": "Used {{budgetPercent}}% of budget but only {{timePercent}}% through the month",
       "spendingPaceBehind": "Used {{budgetPercent}}% of budget with {{timePercent}}% of the month gone — on track",
-      "monthProjection": "On track to spend ~{{amount}} this month",
+      "monthProjection": "At your current pace, you'd spend ~{{amount}} by month-end",
       "categoryUp": "{{name}} is up {{percent}}% vs last month",
       "categoryDown": "{{name}} is down {{percent}}% vs last month",
       "budgetStreak": "Under budget {{count}} months in a row",

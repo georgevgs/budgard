@@ -10,14 +10,15 @@ type Props = {
 
 const DebtProgressBar = ({ progress, currency }: Props) => {
   const { t } = useTranslation();
-  const percentLabel = Math.round(progress.percentPaid * 100);
+  // Bar fills 0..100 only — negative progress (balance grew) reads as empty.
+  const barValue = Math.max(0, Math.round(progress.percentPaid * 100));
   const isCleared = progress.currentBalance <= 0;
   const indicatorClass = pickIndicatorClass(progress, isCleared);
 
   return (
     <div className="space-y-2">
       <Progress
-        value={percentLabel}
+        value={barValue}
         className="h-2"
         indicatorClassName={indicatorClass}
       />
@@ -30,7 +31,7 @@ const DebtProgressBar = ({ progress, currency }: Props) => {
           </span>
         </span>
         <span className={cn('tabular-nums', getPercentClass(progress, isCleared))}>
-          {renderPercentLabel(percentLabel, isCleared, t)}
+          {renderPercentLabel(progress, isCleared, currency, t)}
         </span>
       </div>
     </div>
@@ -48,24 +49,32 @@ type TranslateFunction = (
 
 const pickIndicatorClass = (progress: DebtProgress, isCleared: boolean) => {
   if (isCleared) return 'bg-income';
-  if (progress.isUnpayable) return 'bg-destructive';
+  if (progress.isUnpayable || progress.balanceIncreased) return 'bg-destructive';
 
   return 'bg-primary';
 }
 
 const getPercentClass = (progress: DebtProgress, isCleared: boolean) => {
   if (isCleared) return 'text-income font-semibold';
-  if (progress.isUnpayable) return 'text-destructive font-medium';
+  if (progress.isUnpayable || progress.balanceIncreased) {
+    return 'text-destructive font-medium';
+  }
 
   return 'text-foreground';
 }
 
 const renderPercentLabel = (
-  percent: number,
+  progress: DebtProgress,
   isCleared: boolean,
+  currency: string,
   t: TranslateFunction,
 ) => {
   if (isCleared) return t('debts.cleared');
+  if (progress.balanceIncreased) {
+    return t('debts.balanceOverOriginal', {
+      amount: formatCurrency(progress.balanceOverOriginal, currency),
+    });
+  }
 
-  return t('debts.percentPaid', { percent });
+  return t('debts.percentPaid', { percent: Math.round(progress.percentPaid * 100) });
 }

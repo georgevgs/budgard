@@ -34,7 +34,7 @@ import CashFlowSection from '@/components/analytics/CashFlowSection';
 import AnnualExportCard from '@/components/analytics/AnnualExportCard';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, monthsElapsedInYear } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import { useDateLocale } from '@/hooks/useDateLocale';
@@ -145,9 +145,9 @@ const AnalyticsView = () => {
       slot.monthly[monthIdx] += e.amount;
     }
 
-    const monthsWithExpenses = monthlyData.filter((m) => m.amount > 0).length;
+    const monthsElapsed = monthsElapsedInYear(selectedYear);
     const monthlyAverage =
-      monthsWithExpenses > 0 ? totalSpent / monthsWithExpenses : 0;
+      monthsElapsed > 0 ? totalSpent / monthsElapsed : 0;
 
     const categoryBreakdown = categories
       .map((cat) => {
@@ -169,9 +169,9 @@ const AnalyticsView = () => {
       totalSpent,
       monthlyAverage,
       categoryBreakdown,
-      activeMonths: monthsWithExpenses,
+      monthsElapsed,
     };
-  }, [yearExpenses, categories, monthlyData]);
+  }, [yearExpenses, categories, selectedYear]);
 
   const animatedThisMonth = useAnimatedNumber(monthComparison.thisMonthAmount);
   const animatedYearTotal = useAnimatedNumber(yearlyStats.totalSpent);
@@ -347,7 +347,7 @@ const AnalyticsView = () => {
         {renderYearSummary(
           animatedYearTotal,
           yearlyStats.monthlyAverage,
-          yearlyStats.activeMonths,
+          yearlyStats.monthsElapsed,
           t,
           defaultCurrency,
         )}
@@ -609,11 +609,11 @@ const renderBudgetProgress = (
 const renderYearSummary = (
   totalSpent: number,
   monthlyAverage: number,
-  activeMonths: number,
+  monthsElapsed: number,
   t: TFunc,
   currency: string,
 ) => {
-  if (activeMonths === 0) return null;
+  if (monthsElapsed === 0 || totalSpent === 0) return null;
 
   return (
     <p className="text-sm text-muted-foreground -mt-1">

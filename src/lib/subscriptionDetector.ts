@@ -1,6 +1,7 @@
 import { differenceInDays, parseISO } from 'date-fns';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
+import { WEEKS_PER_MONTH, BIWEEKLY_PERIODS_PER_MONTH } from '@/lib/recurring';
 
 const PRICE_DRIFT_THRESHOLD_PCT = 5;
 
@@ -149,14 +150,21 @@ const analyzeGroup = (
   const medianAmount = median(amounts);
   if (!isAmountStable(amounts, medianAmount)) return null;
 
+  // Use the latest occurrence as the suggested amount, not the median. If the
+  // user accepts the suggestion we want them tracking today's price, not the
+  // historical average — slow upward drift would otherwise be silently smoothed
+  // out. The isAmountStable check above still uses the median to keep the
+  // outlier rejection symmetric.
+  const latest = sorted[sorted.length - 1];
+
   return {
     description: pickBestDescription(sorted),
     normalizedDescription,
-    amount: medianAmount,
+    amount: latest.amount,
     frequency: cadence,
     occurrences: sorted.length,
     category_id: pickMostCommonCategoryId(sorted),
-    lastDate: sorted[sorted.length - 1].date,
+    lastDate: latest.date,
   };
 };
 
@@ -255,9 +263,9 @@ const toMonthlyAmount = (
 ): number => {
   switch (frequency) {
     case 'weekly':
-      return amount * 4.33;
+      return amount * WEEKS_PER_MONTH;
     case 'biweekly':
-      return amount * 2.17;
+      return amount * BIWEEKLY_PERIODS_PER_MONTH;
     case 'quarterly':
       return amount / 3;
     case 'yearly':

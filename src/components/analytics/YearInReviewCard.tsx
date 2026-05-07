@@ -366,7 +366,9 @@ const computeYearStats = (
       byCat.set(e.category_id, (byCat.get(e.category_id) ?? 0) + e.amount);
     }
 
-    if (!biggestExpense || e.amount > biggestExpense.amount) {
+    // Compare by magnitude so refund/negative rows that slip past validation
+    // (CSV import, manual SQL) can't outrank a real charge by being "more negative".
+    if (!biggestExpense || Math.abs(e.amount) > Math.abs(biggestExpense.amount)) {
       biggestExpense = e;
     }
   }

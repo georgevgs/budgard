@@ -108,6 +108,34 @@ describe('detectSubscriptions', () => {
     expect(detectSubscriptions(expenses)).toHaveLength(0);
   });
 
+  it('reports the latest amount, not the median, when prices drift up within tolerance', () => {
+    // 9.99 → 10.49 → 10.49: median is 10.49, latest is 10.49. Trivial.
+    // Use 9.99 → 10.49 → 10.49 with median 10.49, latest 10.49 — same value.
+    // The interesting case: 9.99 → 9.99 → 10.49 (median 9.99, latest 10.49).
+    const expenses = [
+      buildExpense({
+        date: '2026-01-05',
+        description: 'Netflix',
+        amount: 9.99,
+      }),
+      buildExpense({
+        date: '2026-02-05',
+        description: 'Netflix',
+        amount: 9.99,
+      }),
+      buildExpense({
+        date: '2026-03-05',
+        description: 'Netflix',
+        amount: 10.49,
+      }),
+    ];
+
+    const [detected] = detectSubscriptions(expenses);
+
+    expect(detected.amount).toBe(10.49);
+    expect(detected.lastDate).toBe('2026-03-05');
+  });
+
   it('skips expenses already linked to a recurring expense', () => {
     const expenses = [
       buildExpense({

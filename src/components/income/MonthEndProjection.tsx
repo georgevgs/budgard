@@ -10,14 +10,11 @@ import {
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import { useData } from '@/contexts/DataContext';
 import { cn, formatCurrency } from '@/lib/utils';
-import type { RecurringExpense } from '@/types/RecurringExpense';
+import { getMonthlyAmount } from '@/lib/recurring';
 
 type Props = {
   selectedMonth: string;
 };
-
-const WEEKS_PER_MONTH = 4.33;
-const BIWEEKLY_PERIODS_PER_MONTH = 2.17;
 
 const MonthEndProjection = ({ selectedMonth }: Props) => {
   const { t } = useTranslation();
@@ -54,10 +51,10 @@ const MonthEndProjection = ({ selectedMonth }: Props) => {
 
     const recurringMonthlyExpense = recurringExpenses
       .filter((r) => r.active)
-      .reduce((s, r) => s + monthlyEquivalent(r), 0);
+      .reduce((s, r) => s + getMonthlyAmount(r), 0);
     const recurringMonthlyIncome = recurringIncomes
       .filter((r) => r.active)
-      .reduce((s, r) => s + monthlyEquivalent(r), 0);
+      .reduce((s, r) => s + getMonthlyAmount(r), 0);
 
     // Project based on actuals — simple straight line if we're at least 15% through
     const projectExpense = projectAmount(actualExpense, progress, recurringMonthlyExpense);
@@ -133,33 +130,20 @@ export default MonthEndProjection;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-export const monthlyEquivalent = (r: RecurringExpense): number => {
-  switch (r.frequency) {
-    case 'weekly':
-      return r.amount * WEEKS_PER_MONTH;
-    case 'biweekly':
-      return r.amount * BIWEEKLY_PERIODS_PER_MONTH;
-    case 'quarterly':
-      return r.amount / 3;
-    case 'yearly':
-      return r.amount / 12;
-    default:
-      return r.amount;
-  }
-};
-
 // Use recurring as the floor; extrapolate actuals only when we have meaningful signal.
+// The extrapolation is a naive straight line — it assumes the user keeps spending
+// at the same daily rate through month-end, which ignores weekends, paydays, and
+// seasonal patterns. Wrap any UI that surfaces this number with a "current pace"
+// caveat (see insights.projection.note).
 export const projectAmount = (
   actual: number,
   progress: number,
   recurringMonthly: number,
 ): number => {
   if (progress < 0.15) {
-    // Too early to extrapolate — just show recurring baseline + whatever's logged
     return Math.max(actual, recurringMonthly);
   }
 
-  // Straight line projection of actuals + recurring floor
   const linear = actual / progress;
 
   return Math.max(linear, recurringMonthly);

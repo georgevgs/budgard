@@ -4,10 +4,17 @@ import type { Debt } from '@/types/Debt';
 
 export type DebtProgress = {
   debtId: string;
-  percentPaid: number; // 0..1
+  // Range is (-∞, 1]. Negative when current balance exceeds original principal
+  // (interest accrued faster than payments, or new draws). Consumers must
+  // handle the negative branch — never assume [0, 1].
+  percentPaid: number;
   currentBalance: number;
   originalPrincipal: number;
   paidToDate: number;
+  // True when current balance > original principal. paidToDate is 0 in this
+  // case; balanceOverOriginal carries the overage so the UI can show it.
+  balanceIncreased: boolean;
+  balanceOverOriginal: number;
   monthsRemaining: number;
   projectedPayoffDate: string;
   projectedTotalInterest: number;
@@ -38,8 +45,14 @@ export const useAllDebtProgress = (
 const computeProgress = (debt: Debt): DebtProgress => {
   const principal = Number(debt.original_principal ?? 0);
   const balance = Number(debt.current_balance ?? 0);
-  const paidToDate = Math.max(principal - balance, 0);
-  const percentPaid = principal > 0 ? Math.min(paidToDate / principal, 1) : 0;
+  const delta = principal - balance;
+  const paidToDate = Math.max(delta, 0);
+  const balanceIncreased = delta < 0;
+  const balanceOverOriginal = balanceIncreased ? -delta : 0;
+  let percentPaid = 0;
+  if (principal > 0) {
+    percentPaid = Math.min(delta / principal, 1);
+  }
 
   const projection = simulatePayoff({
     debts: [debt],
@@ -53,6 +66,8 @@ const computeProgress = (debt: Debt): DebtProgress => {
     currentBalance: balance,
     originalPrincipal: principal,
     paidToDate,
+    balanceIncreased,
+    balanceOverOriginal,
     monthsRemaining: projection.monthsToPayoff,
     projectedPayoffDate: projection.payoffDate,
     projectedTotalInterest: projection.totalInterestPaid,

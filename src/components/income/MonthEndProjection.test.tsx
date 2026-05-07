@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { monthlyEquivalent, projectAmount } from './MonthEndProjection';
+import { projectAmount } from './MonthEndProjection';
+import { getMonthlyAmount } from '@/lib/recurring';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
 const makeRecurring = (
@@ -16,29 +17,29 @@ const makeRecurring = (
   active: true,
 });
 
-describe('monthlyEquivalent', () => {
+describe('getMonthlyAmount', () => {
   it('returns the amount unchanged for monthly', () => {
-    expect(monthlyEquivalent(makeRecurring(100, 'monthly'))).toBe(100);
+    expect(getMonthlyAmount(makeRecurring(100, 'monthly'))).toBe(100);
   });
 
   it('multiplies weekly by 4.33', () => {
-    expect(monthlyEquivalent(makeRecurring(50, 'weekly'))).toBeCloseTo(216.5);
+    expect(getMonthlyAmount(makeRecurring(50, 'weekly'))).toBeCloseTo(216.5);
   });
 
   it('multiplies biweekly by 2.17', () => {
-    expect(monthlyEquivalent(makeRecurring(100, 'biweekly'))).toBeCloseTo(217);
+    expect(getMonthlyAmount(makeRecurring(100, 'biweekly'))).toBeCloseTo(217);
   });
 
   it('divides quarterly by 3', () => {
-    expect(monthlyEquivalent(makeRecurring(300, 'quarterly'))).toBe(100);
+    expect(getMonthlyAmount(makeRecurring(300, 'quarterly'))).toBe(100);
   });
 
   it('divides yearly by 12', () => {
-    expect(monthlyEquivalent(makeRecurring(1200, 'yearly'))).toBe(100);
+    expect(getMonthlyAmount(makeRecurring(1200, 'yearly'))).toBe(100);
   });
 
   it('handles zero amount', () => {
-    expect(monthlyEquivalent(makeRecurring(0, 'weekly'))).toBe(0);
+    expect(getMonthlyAmount(makeRecurring(0, 'weekly'))).toBe(0);
   });
 });
 
