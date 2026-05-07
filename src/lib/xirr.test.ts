@@ -150,4 +150,41 @@ describe('computeAccountXirr', () => {
     ];
     expect(computeAccountXirr(account, snapshots)).toBeNull();
   });
+
+  it('returns null when holding period is shorter than 90 days', () => {
+    // 30-day span between contribution and latest snapshot — annualizing the
+    // gain would inflate it to a meaningless headline number.
+    const account = makeAccount({ current_balance: 1100 });
+    const snapshots = [
+      makeSnapshot({
+        balance: 1000,
+        recorded_at: '2026-01-01',
+        contribution_delta: 1000,
+      }),
+      makeSnapshot({
+        balance: 1100,
+        recorded_at: '2026-01-31',
+        contribution_delta: 0,
+      }),
+    ];
+    expect(computeAccountXirr(account, snapshots)).toBeNull();
+  });
+
+  it('computes XIRR once the holding period reaches the 90-day threshold', () => {
+    // 91-day span — just past the gate.
+    const account = makeAccount({ current_balance: 1100 });
+    const snapshots = [
+      makeSnapshot({
+        balance: 1000,
+        recorded_at: '2026-01-01',
+        contribution_delta: 1000,
+      }),
+      makeSnapshot({
+        balance: 1100,
+        recorded_at: '2026-04-02',
+        contribution_delta: 0,
+      }),
+    ];
+    expect(computeAccountXirr(account, snapshots)).not.toBeNull();
+  });
 });

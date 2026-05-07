@@ -18,6 +18,12 @@ const BISECTION_ITERATIONS = 200;
 const TOLERANCE = 1e-7;
 const MIN_RATE = -0.9999;
 const MAX_RATE = 100;
+// Annualizing returns from a tiny window produces nonsense (a +1% gain over
+// one day annualizes to ~3,650%). Investment-account XIRR is suppressed below
+// this span so the UI doesn't surface those numbers as "per year". 90 days is
+// the conservative threshold most retail brokerages use before showing an
+// annualized rate.
+const MIN_ANNUALIZATION_DAYS = 90;
 
 const yearsBetween = (later: Date, earlier: Date): number => {
   return (later.getTime() - earlier.getTime()) / MS_PER_DAY / DAYS_PER_YEAR;
@@ -169,6 +175,15 @@ export const computeAccountXirr = (
       ? parseISO(sorted[sorted.length - 1].recorded_at)
       : new Date();
   cashflows.push({ date: lastDate, amount: account.current_balance });
+
+  const firstCashflowDate = cashflows.reduce(
+    (earliest, cf) => (cf.date < earliest ? cf.date : earliest),
+    cashflows[0].date,
+  );
+  const spanDays = (lastDate.getTime() - firstCashflowDate.getTime()) / MS_PER_DAY;
+  if (spanDays < MIN_ANNUALIZATION_DAYS) {
+    return null;
+  }
 
   return xirr(cashflows);
 };

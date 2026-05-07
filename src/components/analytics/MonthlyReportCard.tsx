@@ -222,7 +222,9 @@ const renderBudgetSection = (
   return (
     <div className="mt-3">
       <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-        <span>{t('report.budgetUsed', { percent: budgetPercent })}</span>
+        <span>
+          {t('report.budgetUsed', { percent: Math.round(budgetPercent) })}
+        </span>
         <span>{formatCurrency(monthlyBudget, currency)}</span>
       </div>
       <div className="h-2 bg-muted rounded-full overflow-hidden">
