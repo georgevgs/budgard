@@ -105,7 +105,10 @@ const sumForSource = (
     );
   }
 
-  // net_delta — total income minus total expenses since start_date
+  // net_delta — total income minus total expenses since start_date.
+  // Don't clamp at zero: a negative current is the user actually running a
+  // deficit, and the progress card should reflect it (formatCurrency renders
+  // it as "-€200" / "€1,000"). The percent display handles the clamp itself.
   const incomeSum = sumExpenses(
     incomes.filter((i) => i.date >= startDate),
   );
@@ -113,7 +116,7 @@ const sumForSource = (
     expenses.filter((e) => e.date >= startDate),
   );
 
-  return Math.max(0, incomeSum - expenseSum);
+  return incomeSum - expenseSum;
 }
 
 const sumExpenses = (rows: Expense[]): number =>

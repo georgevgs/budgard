@@ -30,10 +30,15 @@ const mockSetCategoryBudgets = vi.fn((updater) => {
   if (typeof updater === 'function') updater([]);
 });
 
+const mockSetIncomes = vi.fn((updater) => {
+  if (typeof updater === 'function') updater([]);
+});
+
 vi.mock('@/contexts/DataContext', () => ({
   useData: () => ({
     isInitialized: true,
     setExpenses: mockSetExpenses,
+    setIncomes: mockSetIncomes,
     setCategories: mockSetCategories,
     setTags: mockSetTags,
     setRecurringExpenses: mockSetRecurringExpenses,
@@ -51,6 +56,7 @@ vi.mock('@/contexts/DataContext', () => ({
   }),
   useDataActions: () => ({
     setExpenses: mockSetExpenses,
+    setIncomes: mockSetIncomes,
     setCategories: mockSetCategories,
     setTags: mockSetTags,
     setRecurringExpenses: mockSetRecurringExpenses,

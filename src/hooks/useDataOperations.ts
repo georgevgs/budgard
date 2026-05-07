@@ -354,6 +354,31 @@ export const useDataOperations = () => {
           .sort((a, b) => a.name.localeCompare(b.name));
       });
 
+      // Each Expense carries an embedded `category` object (populated via the
+      // Supabase join at fetch time). ExpensesCard / MonthDrillDown read
+      // expense.category.{name,icon,color} directly, so the categories-list
+      // change alone leaves the cards stale until the next full refresh.
+      let previousExpenses: Expense[] = [];
+      let previousIncomes: Expense[] = [];
+      setExpenses((prev) => {
+        previousExpenses = prev;
+
+        return prev.map((e) =>
+          e.category_id === categoryId && e.category
+            ? { ...e, category: { ...e.category, ...categoryData } }
+            : e,
+        );
+      });
+      setIncomes((prev) => {
+        previousIncomes = prev;
+
+        return prev.map((i) =>
+          i.category_id === categoryId && i.category
+            ? { ...i, category: { ...i.category, ...categoryData } }
+            : i,
+        );
+      });
+
       try {
         const saved = await dataService.updateCategory(
           categoryId,
@@ -365,15 +390,27 @@ export const useDataOperations = () => {
             .map((c) => (c.id === categoryId ? saved : c))
             .sort((a, b) => a.name.localeCompare(b.name)),
         );
+        setExpenses((prev) =>
+          prev.map((e) =>
+            e.category_id === categoryId ? { ...e, category: saved } : e,
+          ),
+        );
+        setIncomes((prev) =>
+          prev.map((i) =>
+            i.category_id === categoryId ? { ...i, category: saved } : i,
+          ),
+        );
       } catch (error) {
         haptics.error();
         setCategories(previousCategories);
+        setExpenses(previousExpenses);
+        setIncomes(previousIncomes);
         Sentry.captureException(error, { tags: { operation: 'updateCategory' } });
         showErrorToast('Failed to update category');
         throw error;
       }
     },
-    [isInitialized, setCategories, showErrorToast],
+    [isInitialized, setCategories, setExpenses, setIncomes, showErrorToast],
   );
 
   const handleCategoryDelete = useCallback(

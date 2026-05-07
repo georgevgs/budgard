@@ -124,7 +124,7 @@ describe('useGoalProgress', () => {
       expect(result.current.percent).toBe(1);
     });
 
-    it('clamps to 0 when expenses exceed income', () => {
+    it('reports negative current when expenses exceed income (deficit)', () => {
       dataMock = {
         expenses: [makeExpense('2026-03-01', 1000)],
         incomes: [makeExpense('2026-03-01', 200)],
@@ -134,7 +134,10 @@ describe('useGoalProgress', () => {
 
       const { result } = renderHook(() => useGoalProgress(goal));
 
-      expect(result.current.current).toBe(0);
+      // -800 surfaces the deficit to the user; percent stays clamped at 0.
+      expect(result.current.current).toBe(-800);
+      expect(result.current.percent).toBe(0);
+      expect(result.current.isOverachieved).toBe(false);
     });
   });
 
