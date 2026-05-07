@@ -93,9 +93,16 @@ export const useDataOperations = () => {
 
         let receiptPath = savedExpense.receipt_path ?? null;
         let receiptFailed = false;
+        let oldPathToDelete: string | null = null;
 
         if (receiptOptions && expenseData.user_id) {
-          ({ receiptPath, receiptFailed } = await processReceipt(
+          let uploadedNewPath: string | null = null;
+          ({
+            receiptPath,
+            receiptFailed,
+            uploadedNewPath,
+            oldPathToDelete,
+          } = await processReceipt(
             savedExpense,
             receiptOptions,
             expenseData.user_id,
@@ -105,12 +112,42 @@ export const useDataOperations = () => {
             !receiptFailed &&
             receiptPath !== (savedExpense.receipt_path ?? null)
           ) {
-            const updated = await dataService.updateExpense(
-              { receipt_path: receiptPath },
-              savedExpense.id,
-            );
-            receiptPath = updated.receipt_path ?? null;
+            try {
+              const updated = await dataService.updateExpense(
+                { receipt_path: receiptPath },
+                savedExpense.id,
+              );
+              receiptPath = updated.receipt_path ?? null;
+            } catch (err) {
+              // The expense row didn't get pointed at the new file — roll
+              // back the upload so it doesn't orphan in storage. Don't
+              // delete the old file: the row still references it.
+              if (uploadedNewPath) {
+                deleteReceipt(uploadedNewPath).catch((cleanupErr) => {
+                  Sentry.captureException(cleanupErr, {
+                    tags: {
+                      operation: 'deleteReceipt',
+                      context: 'rollbackAfterReceiptUpdateFail',
+                    },
+                  });
+                });
+              }
+              throw err;
+            }
           }
+        }
+
+        // Safe to drop the previous receipt now: the row points at the new
+        // path (or null, on explicit removal).
+        if (oldPathToDelete) {
+          deleteReceipt(oldPathToDelete).catch((err) => {
+            Sentry.captureException(err, {
+              tags: {
+                operation: 'deleteReceipt',
+                context: 'afterReceiptUpdateSuccess',
+              },
+            });
+          });
         }
 
         const finalExpense = { ...savedExpense, receipt_path: receiptPath };
@@ -1411,26 +1448,33 @@ export const useDataOperations = () => {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-// Upload new receipt first, then remove old one to prevent data loss.
+// Uploads a new receipt (or signals removal of the existing one) but does NOT
+// touch the prior file in storage — the caller deletes it only after the
+// expense row has been pointed at the new path. uploadedNewPath lets the
+// caller roll back the upload if the subsequent DB write fails.
 const processReceipt = async (
   savedExpense: Expense,
   receiptOptions: ReceiptOptions,
   userId: string,
-): Promise<ReceiptResult> => {
+): Promise<
+  ReceiptResult & {
+    uploadedNewPath: string | null;
+    oldPathToDelete: string | null;
+  }
+> => {
   const { receiptFile, removeExistingReceipt, existingReceiptPath } =
     receiptOptions;
   let receiptPath = savedExpense.receipt_path ?? null;
   let receiptFailed = false;
+  let uploadedNewPath: string | null = null;
+  let oldPathToDelete: string | null = null;
 
   if (receiptFile) {
     try {
       receiptPath = await uploadReceipt(receiptFile, userId, savedExpense.id);
+      uploadedNewPath = receiptPath;
       if (existingReceiptPath) {
-        deleteReceipt(existingReceiptPath).catch((err) => {
-          Sentry.captureException(err, {
-            tags: { operation: 'deleteReceipt', context: 'afterReplaceUpload' },
-          });
-        });
+        oldPathToDelete = existingReceiptPath;
       }
     } catch (error) {
       Sentry.captureException(error, { tags: { operation: 'uploadReceipt' } });
@@ -1439,13 +1483,9 @@ const processReceipt = async (
   } else if (removeExistingReceipt) {
     receiptPath = null;
     if (existingReceiptPath) {
-      deleteReceipt(existingReceiptPath).catch((err) => {
-        Sentry.captureException(err, {
-          tags: { operation: 'deleteReceipt', context: 'removeExisting' },
-        });
-      });
+      oldPathToDelete = existingReceiptPath;
     }
   }
 
-  return { receiptPath, receiptFailed };
+  return { receiptPath, receiptFailed, uploadedNewPath, oldPathToDelete };
 };
