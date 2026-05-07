@@ -80,7 +80,10 @@ export const useExpensesFilter = ({
   };
 
   const hasActiveFilters =
-    search.length > 0 || !!selectedCategoryId || selectedTagId !== null;
+    search.length > 0 ||
+    !!selectedCategoryId ||
+    selectedTagId !== null ||
+    dateRangePreset !== null;
 
   // Sort all expenses once for cross-month search.
   // The DB returns expenses pre-sorted, but optimistic `add` actions prepend

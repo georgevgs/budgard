@@ -486,10 +486,14 @@ export const dataService = {
     const user = await this.getUser();
     if (!user) throw new Error('Not authenticated');
 
+    // Use upsert: users without a `user_budgets` row (no monthly budget set)
+    // would silently no-op with `.update()`.
     const { data, error } = await supabase
       .from('user_budgets')
-      .update({ daily_reminder_hour: hour })
-      .eq('user_id', user.id)
+      .upsert(
+        { user_id: user.id, daily_reminder_hour: hour },
+        { onConflict: 'user_id' },
+      )
       .select()
       .maybeSingle();
 

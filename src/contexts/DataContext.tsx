@@ -242,11 +242,15 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           if (controller.signal.aborted) {
             return;
           }
+          // Dedupe by id: if a refreshExpenses/refreshIncomes ran concurrently
+          // (e.g. user deleted a recurring expense, bulk-imported, or rolled
+          // back a category delete) it will have replaced state with full
+          // history, so older* may already be present.
           if (olderExpenses.length > 0) {
-            setExpenses((prev) => [...prev, ...olderExpenses]);
+            setExpenses((prev) => mergeUniqueById(prev, olderExpenses));
           }
           if (olderIncomes.length > 0) {
-            setIncomes((prev) => [...prev, ...olderIncomes]);
+            setIncomes((prev) => mergeUniqueById(prev, olderIncomes));
           }
         })
         .catch((error) => {
@@ -497,6 +501,20 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       </DataConfigContext.Provider>
     </DataActionsContext.Provider>
   );
+};
+
+const mergeUniqueById = <T extends { id: string }>(
+  prev: T[],
+  incoming: T[],
+): T[] => {
+  const existingIds = new Set(prev.map((item) => item.id));
+  const fresh = incoming.filter((item) => !existingIds.has(item.id));
+
+  if (fresh.length === 0) {
+    return prev;
+  }
+
+  return [...prev, ...fresh];
 };
 
 const isAbortError = (error: unknown): boolean => {

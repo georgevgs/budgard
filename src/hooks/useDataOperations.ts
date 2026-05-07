@@ -424,8 +424,14 @@ export const useDataOperations = () => {
 
       haptics.warning();
 
-      // Optimistic delete
-      setRecurringExpenses((prev) => prev.filter((e) => e.id !== expenseId));
+      // Snapshot for rollback — refreshExpenses() refetches `expenses`, not
+      // `recurringExpenses`, so we must restore the latter from this snapshot.
+      let previousRecurring: RecurringExpense[] = [];
+      setRecurringExpenses((prev) => {
+        previousRecurring = prev;
+
+        return prev.filter((e) => e.id !== expenseId);
+      });
 
       try {
         await dataService.deleteRecurringExpense(expenseId);
@@ -441,15 +447,7 @@ export const useDataOperations = () => {
         });
       } catch (error) {
         haptics.error();
-        // Rollback — re-fetch to restore the deleted item
-        refreshExpenses().catch((err) => {
-          Sentry.captureException(err, {
-            tags: {
-              operation: 'refreshExpenses',
-              context: 'recurringExpenseDeleteRollback',
-            },
-          });
-        });
+        setRecurringExpenses(previousRecurring);
         Sentry.captureException(error, {
           tags: { operation: 'deleteRecurringExpense' },
         });

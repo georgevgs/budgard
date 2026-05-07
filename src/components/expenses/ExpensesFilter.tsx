@@ -215,7 +215,7 @@ const ExpensesFilter = ({
         selectedCategoryId,
         selectedTagId,
         dateRangePreset,
-        hasActiveFilters: hasActiveFilters || !!dateRangePreset,
+        hasActiveFilters,
         categories,
         tags,
         t,

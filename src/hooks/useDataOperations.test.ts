@@ -424,7 +424,7 @@ describe('useDataOperations', () => {
     expect(mockRefreshExpenses).toHaveBeenCalled();
   });
 
-  it('rolls back and refreshes on recurring delete failure', async () => {
+  it('rolls back optimistic removal on recurring delete failure', async () => {
     mockDeleteRecurring.mockRejectedValue(new Error('fail'));
 
     const { result } = renderHook(() => useDataOperations());
@@ -435,7 +435,8 @@ describe('useDataOperations', () => {
       }),
     ).rejects.toThrow();
 
-    expect(mockRefreshExpenses).toHaveBeenCalled();
+    // Once for the optimistic remove, once to restore the snapshot.
+    expect(mockSetRecurringExpenses).toHaveBeenCalledTimes(2);
   });
 
   // --- Recurring Expense Toggle ---
