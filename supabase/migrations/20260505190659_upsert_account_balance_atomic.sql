@@ -1,14 +1,8 @@
--- Atomic upsert for account_balances that preserves contribution_delta when
--- the caller does not supply one (a "Update value" snapshot must not erase a
--- contribution already logged for the same day). The previous client-side
--- SELECT-then-UPSERT had a TOCTOU window where two concurrent writes could
--- corrupt cost basis.
-
 CREATE OR REPLACE FUNCTION public.upsert_account_balance(
   p_account_id UUID,
   p_balance NUMERIC,
   p_contribution_delta NUMERIC DEFAULT NULL,
-  p_recorded_at DATE DEFAULT NULL,
+  p_recorded_at DATE DEFAULT CURRENT_DATE,
   p_note TEXT DEFAULT NULL,
   p_original_amount NUMERIC DEFAULT NULL,
   p_original_currency TEXT DEFAULT NULL,
@@ -36,7 +30,7 @@ BEGIN
     p_account_id,
     p_balance,
     p_contribution_delta,
-    COALESCE(p_recorded_at, CURRENT_DATE),
+    p_recorded_at,
     p_note,
     p_original_amount,
     p_original_currency,
