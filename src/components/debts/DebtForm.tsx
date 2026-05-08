@@ -27,7 +27,7 @@ import {
 import CategoryColorPicker from '@/components/categories/CategoryColorPicker';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDataConfig } from '@/contexts/DataContext';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useDebtOps } from '@/hooks/dataOps/useDebtOps';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/lib/currencies';
 import {
   formatCurrencyInput,
@@ -48,7 +48,7 @@ const DebtForm = ({ debt, onClose }: Props) => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const { defaultCurrency } = useDataConfig();
-  const { handleDebtSubmit } = useDataOperations();
+  const { handleDebtSubmit } = useDebtOps();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditing = Boolean(debt);
 

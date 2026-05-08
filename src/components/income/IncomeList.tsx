@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import { useData } from '@/contexts/DataContext';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useIncomeOps } from '@/hooks/dataOps/useIncomeOps';
+import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
 import { formatCurrency } from '@/lib/utils';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import ExpensesMonthlySelector from '@/components/expenses/ExpensesMonthlySelector';
@@ -39,7 +40,8 @@ const IncomeList = () => {
   const { session } = useAuth();
   const { incomes, expenses, incomeCategories, isInitialized, defaultCurrency } =
     useData();
-  const { handleIncomeDelete, handleCategoriesAddBulk } = useDataOperations();
+  const { handleIncomeDelete } = useIncomeOps();
+  const { handleCategoriesAddBulk } = useCategoryOps();
   const currentMonth = format(new Date(), 'yyyy-MM');
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [search, setSearch] = useState('');

@@ -43,7 +43,8 @@ import { fetchExchangeRate } from '@/services/exchangeRateService';
 import { useAuth } from '@/hooks/useAuth';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import { useData } from '@/contexts/DataContext';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useIncomeOps } from '@/hooks/dataOps/useIncomeOps';
+import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
 import { incomeSchema, type IncomeFormData } from '@/lib/validations';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
@@ -57,7 +58,8 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const { incomeCategories, defaultCurrency } = useData();
-  const { handleIncomeSubmit, handleCategoryAdd } = useDataOperations();
+  const { handleIncomeSubmit } = useIncomeOps();
+  const { handleCategoryAdd } = useCategoryOps();
   const dateLocale = useDateLocale();
   const [categoryPopoverOpen, setCategoryPopoverOpen] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
@@ -71,16 +73,7 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
   const [rateError, setRateError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const initialAmount = income
-    ? formatCurrencyInput(
-        (income.original_currency && income.original_currency !== defaultCurrency
-          ? (income.original_amount ?? income.amount)
-          : income.amount
-        )
-          .toString()
-          .replace('.', ','),
-      )
-    : '';
+  const initialAmount = getInitialAmount(income, defaultCurrency);
 
   const form = useForm<IncomeFormData>({
     resolver: zodResolver(incomeSchema),
@@ -88,13 +81,13 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
       amount: initialAmount,
       description: income?.description || '',
       category_id: income?.category_id || 'none',
-      date: income ? parseISO(income.date) : new Date(),
+      date: getInitialDate(income),
     },
   });
 
   const watchedAmount = form.watch('amount');
   const watchedDate = form.watch('date');
-  const watchedDateStr = watchedDate ? format(watchedDate, 'yyyy-MM-dd') : '';
+  const watchedDateStr = formatWatchedDate(watchedDate);
   const selectedCategoryId = form.watch('category_id');
   const selectedCategory = incomeCategories.find(
     (c) => c.id === selectedCategoryId,
@@ -226,7 +219,7 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
         original_currency: originalCurrency,
         exchange_rate: exchangeRateValue,
         description: values.description,
-        category_id: values.category_id === 'none' ? null : values.category_id,
+        category_id: normalizeCategoryId(values.category_id),
         date: dateStr,
         user_id: session.user.id,
       };
@@ -489,6 +482,56 @@ type TranslateFunction = (
   options?: Record<string, unknown>,
 ) => string;
 
+const getInitialAmount = (
+  income: Expense | undefined,
+  defaultCurrency: string,
+): string => {
+  if (!income) return '';
+
+  const sourceAmount = pickSourceAmount(income, defaultCurrency);
+
+  return formatCurrencyInput(sourceAmount.toString().replace('.', ','));
+};
+
+const pickSourceAmount = (
+  income: Expense,
+  defaultCurrency: string,
+): number => {
+  const isForeign =
+    income.original_currency && income.original_currency !== defaultCurrency;
+  if (isForeign) return income.original_amount ?? income.amount;
+
+  return income.amount;
+};
+
+const getInitialDate = (income: Expense | undefined): Date => {
+  if (income) return parseISO(income.date);
+
+  return new Date();
+};
+
+const formatWatchedDate = (watchedDate: Date | undefined): string => {
+  if (!watchedDate) return '';
+
+  return format(watchedDate, 'yyyy-MM-dd');
+};
+
+const normalizeCategoryId = (categoryId: string): string | null => {
+  if (categoryId === 'none') return null;
+
+  return categoryId;
+};
+
+const getQuickCreateLabel = (
+  isCreating: boolean,
+  trimmedSearch: string,
+  t: TranslateFunction,
+): string => {
+  if (isCreating) return t('common.saving');
+
+  return t('income.createCategory', { name: trimmedSearch });
+};
+
 const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {
   if (isEditing) return t('income.editIncome');
 
@@ -576,11 +619,8 @@ const renderBottomAction = (
   onManage: () => void,
   t: TranslateFunction,
 ) => {
-  // Quick create when user is typing a unique new source — fast path.
   if (showCreate) {
-    const label = isCreating
-      ? t('common.saving')
-      : t('income.createCategory', { name: trimmedSearch });
+    const label = getQuickCreateLabel(isCreating, trimmedSearch, t);
 
     return (
       <button

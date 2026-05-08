@@ -8,6 +8,8 @@ import { useDataConfig } from '@/contexts/DataContext';
 import { useDebts } from '@/hooks/useDebts';
 import { useDebtPayoffPlan } from '@/hooks/useDebtPayoffPlan';
 import type { Debt } from '@/types/Debt';
+import type { DebtSummary } from '@/hooks/useDebts';
+import type { SimResult } from '@/lib/debtPayoff';
 import DebtsHeader from '@/components/debts/DebtsHeader';
 import DebtsEmpty from '@/components/debts/DebtsEmpty';
 import DebtsLoadingState from '@/components/debts/DebtsLoading';
@@ -28,15 +30,7 @@ const DebtsView = () => {
   const [selectedDebt, setSelectedDebt] = useState<Debt | undefined>();
   const [detailDebt, setDetailDebt] = useState<Debt | undefined>();
 
-  const sortedDebts = useMemo(() => {
-    const live = debts.filter((d) => !d.is_completed);
-    const cleared = debts.filter((d) => d.is_completed);
-
-    return [
-      ...live.sort((a, b) => Number(b.current_balance) - Number(a.current_balance)),
-      ...cleared,
-    ];
-  }, [debts]);
+  const sortedDebts = useMemo(() => sortDebts(debts), [debts]);
 
   const handleAddClick = useCallback(() => {
     setSelectedDebt(undefined);
@@ -102,19 +96,38 @@ const DebtsView = () => {
       {renderFab(debts.length, handleAddClick, t)}
     </div>
   );
-}
+};
 
 export default DebtsView;
 
 // --- Helpers ---
 
-import type { DebtSummary } from '@/hooks/useDebts';
-import type { SimResult } from '@/lib/debtPayoff';
-
 type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const sortDebts = (debts: Debt[]): Debt[] => {
+  const live = debts.filter((d) => !d.is_completed);
+  const cleared = debts.filter((d) => d.is_completed);
+  const liveSorted = live.sort(
+    (a, b) => Number(b.current_balance) - Number(a.current_balance),
+  );
+
+  return [...liveSorted, ...cleared];
+};
+
+const pickPayoffMonths = (avalanche: SimResult): number | null => {
+  if (avalanche.monthsToPayoff > 0) return avalanche.monthsToPayoff;
+
+  return null;
+};
+
+const pickPayoffDate = (avalanche: SimResult): Date | null => {
+  if (avalanche.monthsToPayoff > 0) return avalanche.payoffDate;
+
+  return null;
+};
 
 const renderBody = (
   debtCount: number,
@@ -132,8 +145,8 @@ const renderBody = (
     return <DebtsEmpty onAddClick={onAddClick} />;
   }
 
-  const monthsToDebtFree = avalanche.monthsToPayoff > 0 ? avalanche.monthsToPayoff : null;
-  const payoffDate = avalanche.monthsToPayoff > 0 ? avalanche.payoffDate : null;
+  const monthsToDebtFree = pickPayoffMonths(avalanche);
+  const payoffDate = pickPayoffDate(avalanche);
 
   return (
     <>
@@ -146,18 +159,29 @@ const renderBody = (
 
       {renderTabs(tab, setTab, t)}
 
-      {tab === 'list' ? (
-        <div className="space-y-3">
-          {sortedDebts.map((d) => (
-            <DebtCard key={d.id} debt={d} onClick={onDebtClick} />
-          ))}
-        </div>
-      ) : (
-        <DebtPayoffPlan debts={sortedDebts} defaultCurrency={defaultCurrency} />
-      )}
+      {renderTabContent(tab, sortedDebts, defaultCurrency, onDebtClick)}
     </>
   );
-}
+};
+
+const renderTabContent = (
+  tab: Tab,
+  sortedDebts: Debt[],
+  defaultCurrency: string,
+  onDebtClick: (debt: Debt) => void,
+) => {
+  if (tab === 'list') {
+    return (
+      <div className="space-y-3">
+        {sortedDebts.map((d) => (
+          <DebtCard key={d.id} debt={d} onClick={onDebtClick} />
+        ))}
+      </div>
+    );
+  }
+
+  return <DebtPayoffPlan debts={sortedDebts} defaultCurrency={defaultCurrency} />;
+};
 
 const renderTabs = (
   tab: Tab,
@@ -170,9 +194,7 @@ const renderTabs = (
       onClick={() => setTab('list')}
       className={cn(
         'flex-1 text-sm font-medium py-2 rounded-lg transition-colors',
-        tab === 'list'
-          ? 'bg-background text-foreground shadow-sm'
-          : 'text-muted-foreground hover:text-foreground',
+        getTabClasses(tab === 'list'),
       )}
     >
       {t('debts.tabs.list')}
@@ -182,15 +204,19 @@ const renderTabs = (
       onClick={() => setTab('plan')}
       className={cn(
         'flex-1 text-sm font-medium py-2 rounded-lg transition-colors',
-        tab === 'plan'
-          ? 'bg-background text-foreground shadow-sm'
-          : 'text-muted-foreground hover:text-foreground',
+        getTabClasses(tab === 'plan'),
       )}
     >
       {t('debts.tabs.plan')}
     </button>
   </div>
 );
+
+const getTabClasses = (isActive: boolean) => {
+  if (isActive) return 'bg-background text-foreground shadow-sm';
+
+  return 'text-muted-foreground hover:text-foreground';
+};
 
 const renderDetailSheet = (
   debt: Debt | undefined,
@@ -207,7 +233,7 @@ const renderDetailSheet = (
       onEdit={onEdit}
     />
   );
-}
+};
 
 const renderFab = (
   debtCount: number,
@@ -228,4 +254,4 @@ const renderFab = (
       </Button>
     </div>
   );
-}
+};

@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useAuth } from '@/contexts/AuthContext';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
 import { useDataConfig } from '@/contexts/DataContext';
 import { categorySchema, type CategoryFormData } from '@/lib/validations';
 import type { Category } from '@/types/Category';
@@ -51,7 +51,7 @@ const CategoryForm = ({
 }: Props) => {
   const { t } = useTranslation();
   const { session } = useAuth();
-  const { handleCategoryAdd, handleCategoryUpdate } = useDataOperations();
+  const { handleCategoryAdd, handleCategoryUpdate } = useCategoryOps();
   const { isInitialized } = useDataConfig();
 
   const isEditing = Boolean(category);

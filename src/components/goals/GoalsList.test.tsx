@@ -28,8 +28,8 @@ vi.mock('@/contexts/AuthContext', () => ({
 const mockGoalCreate = vi.fn();
 const mockGoalUpdate = vi.fn();
 const mockGoalDelete = vi.fn();
-vi.mock('@/hooks/useDataOperations', () => ({
-  useDataOperations: () => ({
+vi.mock('@/hooks/dataOps/useGoalOps', () => ({
+  useGoalOps: () => ({
     handleGoalCreate: mockGoalCreate,
     handleGoalUpdate: mockGoalUpdate,
     handleGoalDelete: mockGoalDelete,

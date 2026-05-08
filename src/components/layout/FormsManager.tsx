@@ -1,7 +1,7 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
-import type { ReceiptOptions } from '@/hooks/useDataOperations';
+import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 import ExpensesForm from '@/components/expenses/ExpensesForm';
 import { CategoryManager } from '@/components/categories/CategoryManager';
 import { useData } from '@/contexts/DataContext';

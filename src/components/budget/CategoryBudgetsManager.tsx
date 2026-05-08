@@ -19,7 +19,7 @@ import {
 } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
 import { useData } from '@/contexts/DataContext';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useBudgetOps } from '@/hooks/dataOps/useBudgetOps';
 import { useToast } from '@/hooks/useToast';
 import type { Category } from '@/types/Category';
 import type { CategoryBudget } from '@/types/CategoryBudget';
@@ -34,7 +34,7 @@ const CategoryBudgetsManager = ({ isOpen, onClose }: Props) => {
   const { expenseCategories, categoryBudgets, defaultCurrency, monthlyBudget } =
     useData();
   const { handleCategoryBudgetUpsert, handleCategoryBudgetDelete } =
-    useDataOperations();
+    useBudgetOps();
   const { toast } = useToast();
 
   const [drafts, setDrafts] = useState<Record<string, string>>({});

@@ -30,7 +30,8 @@ import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import { formatCurrency } from '@/lib/utils';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useDebtOps } from '@/hooks/dataOps/useDebtOps';
+import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import type { Locale } from 'date-fns';
 import { useDebtProgress } from '@/hooks/useDebtProgress';
@@ -50,7 +51,8 @@ type Props = {
 const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
-  const { handleDebtArchive, handleExpenseDelete } = useDataOperations();
+  const { handleDebtArchive } = useDebtOps();
+  const { handleExpenseDelete } = useExpenseOps();
   const progress = useDebtProgress(debt);
   const { payments, isLoading, removePayment } = useDebtPayments(
     debt.id,

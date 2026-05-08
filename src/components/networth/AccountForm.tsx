@@ -26,7 +26,7 @@ import {
 import CategoryColorPicker from '@/components/categories/CategoryColorPicker';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDataConfig } from '@/contexts/DataContext';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useAccountOps } from '@/hooks/dataOps/useAccountOps';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/lib/currencies';
 import {
   formatCurrencyInput,
@@ -55,7 +55,7 @@ const AccountForm = ({ account, onClose }: Props) => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const { defaultCurrency } = useDataConfig();
-  const { handleAccountSubmit } = useDataOperations();
+  const { handleAccountSubmit } = useAccountOps();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditing = Boolean(account);
 

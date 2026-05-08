@@ -21,23 +21,21 @@ vi.mock('@/contexts/DataContext', () => ({
   }),
 }));
 
-// Mock useDataOperations
 const mockHandleBudgetUpdate = vi.fn();
 const mockHandleCategoriesAddBulk = vi.fn();
-vi.mock('@/hooks/useDataOperations', () => ({
-  useDataOperations: () => ({
+vi.mock('@/hooks/dataOps/useBudgetOps', () => ({
+  useBudgetOps: () => ({
     handleBudgetUpdate: mockHandleBudgetUpdate,
-    handleCategoriesAddBulk: mockHandleCategoriesAddBulk,
-    handleExpenseSubmit: vi.fn(),
-    handleExpenseDelete: vi.fn(),
+    handleCategoryBudgetUpsert: vi.fn(),
+    handleCategoryBudgetDelete: vi.fn(),
+  }),
+}));
+vi.mock('@/hooks/dataOps/useCategoryOps', () => ({
+  useCategoryOps: () => ({
     handleCategoryAdd: vi.fn(),
     handleCategoryUpdate: vi.fn(),
     handleCategoryDelete: vi.fn(),
-    handleTagCreate: vi.fn(),
-    handleRecurringExpenseSubmit: vi.fn(),
-    handleRecurringExpenseDelete: vi.fn(),
-    handleRecurringExpenseToggle: vi.fn(),
-    handleBulkExpenseImport: vi.fn(),
+    handleCategoriesAddBulk: mockHandleCategoriesAddBulk,
   }),
 }));
 

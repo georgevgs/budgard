@@ -36,7 +36,7 @@ import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import { cn, formatCurrency } from '@/lib/utils';
 import { computeAccountXirr } from '@/lib/xirr';
 import { computeAccountYtd, type YtdResult } from '@/lib/ytd';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useAccountOps } from '@/hooks/dataOps/useAccountOps';
 import { useAccountBalances } from '@/hooks/useAccountBalances';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import { type Account, isLiability } from '@/types/Account';
@@ -56,7 +56,7 @@ type Props = {
 const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
-  const { handleAccountArchive, handleSnapshotDelete } = useDataOperations();
+  const { handleAccountArchive, handleSnapshotDelete } = useAccountOps();
   const { snapshots, isLoading, removeSnapshot } = useAccountBalances(
     account.id,
     open,

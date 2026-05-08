@@ -35,29 +35,18 @@ const ExpensesMonthlyOverview = ({
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
 
-  const displayTotal = hasActiveFilters ? filteredTotal : monthlyTotal;
+  const displayTotal = pickDisplayTotal(hasActiveFilters, filteredTotal, monthlyTotal);
   const animatedTotal = useAnimatedNumber(displayTotal);
-
-  // Find most expensive expense
-  const mostExpensive =
-    expenses.length > 0
-      ? expenses.reduce((prev, current) =>
-          prev.amount > current.amount ? prev : current,
-        )
-      : null;
-
-  const totalLabel = hasActiveFilters
-    ? t('expenses.filteredTotal')
-    : t('expenses.monthlyTotal');
+  const mostExpensive = findMostExpensive(expenses);
+  const totalLabel = getTotalLabel(hasActiveFilters, t);
 
   return (
     <div className="flex flex-col gap-4 bg-card border border-border/40 rounded-2xl p-5 shadow-sm">
-      {/* Monthly Total */}
       <button
         type="button"
-        onClick={hasExpenses ? onMonthlyTotalClick : undefined}
+        onClick={onMonthlyTotalClick}
         disabled={!hasExpenses}
-        aria-expanded={hasExpenses ? isExpanded : undefined}
+        aria-expanded={getAriaExpanded(hasExpenses, isExpanded)}
         className={cn(
           'w-full text-left transition-all rounded-lg',
           hasExpenses && 'cursor-pointer hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
@@ -74,10 +63,8 @@ const ExpensesMonthlyOverview = ({
         {renderExpandHint(hasExpenses, isExpanded, t)}
       </button>
 
-      {/* Statistics */}
       {renderStats(hasExpenses, expenses, mostExpensive, t, defaultCurrency)}
 
-      {/* Action Buttons */}
       {renderCurrentMonthButton(selectedMonth, currentMonth, onCurrentMonthClick, t)}
     </div>
   );
@@ -91,6 +78,38 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const pickDisplayTotal = (
+  hasActiveFilters: boolean,
+  filteredTotal: number,
+  monthlyTotal: number,
+): number => {
+  if (hasActiveFilters) return filteredTotal;
+
+  return monthlyTotal;
+};
+
+const findMostExpensive = (expenses: Expense[]): Expense | null => {
+  if (expenses.length === 0) return null;
+
+  return expenses.reduce((prev, current) => {
+    if (prev.amount > current.amount) return prev;
+
+    return current;
+  });
+};
+
+const getTotalLabel = (hasActiveFilters: boolean, t: TranslateFunction) => {
+  if (hasActiveFilters) return t('expenses.filteredTotal');
+
+  return t('expenses.monthlyTotal');
+};
+
+const getAriaExpanded = (hasExpenses: boolean, isExpanded: boolean) => {
+  if (!hasExpenses) return undefined;
+
+  return isExpanded;
+};
 
 const renderFilteredSubtotalNote = (
   hasActiveFilters: boolean,
@@ -116,9 +135,7 @@ const renderExpandHint = (
 ) => {
   if (!hasExpenses) return null;
 
-  const breakdownLabel = isExpanded
-    ? t('expenses.hideBreakdown')
-    : t('expenses.showBreakdown');
+  const breakdownLabel = getBreakdownLabel(isExpanded, t);
 
   return (
     <div className="flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
@@ -131,6 +148,12 @@ const renderExpandHint = (
       <span>{breakdownLabel}</span>
     </div>
   );
+};
+
+const getBreakdownLabel = (isExpanded: boolean, t: TranslateFunction) => {
+  if (isExpanded) return t('expenses.hideBreakdown');
+
+  return t('expenses.showBreakdown');
 };
 
 const renderMostExpensive = (

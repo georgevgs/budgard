@@ -19,7 +19,7 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useAccountOps } from '@/hooks/dataOps/useAccountOps';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import {
   formatCurrencyInput,
@@ -43,7 +43,7 @@ type Props = {
 const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
-  const { handleSnapshotCreate } = useDataOperations();
+  const { handleSnapshotCreate } = useAccountOps();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isInvestment = account.kind === 'investment';
   const isContributionMode = isInvestment && mode === 'contribution';

@@ -10,7 +10,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PiggyBank from 'lucide-react/dist/esm/icons/piggy-bank';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useIncomeOps } from '@/hooks/dataOps/useIncomeOps';
+import { useSettingsOps } from '@/hooks/dataOps/useSettingsOps';
 import { useDataConfig } from '@/contexts/DataContext';
 import { formatCurrency, cn } from '@/lib/utils';
 import { haptics } from '@/lib/haptics';
@@ -27,7 +28,8 @@ type Props = {
 const SavingsNudgeSheet = ({ income, open, onClose }: Props) => {
   const { t } = useTranslation();
   const { defaultCurrency, defaultSavingsPct } = useDataConfig();
-  const { handleSavingsPctUpdate, handleIncomeSubmit } = useDataOperations();
+  const { handleIncomeSubmit } = useIncomeOps();
+  const { handleSavingsPctUpdate } = useSettingsOps();
 
   const initialPct = defaultSavingsPct ?? 20;
   const [pct, setPct] = useState(initialPct);

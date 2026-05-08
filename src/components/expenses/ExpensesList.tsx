@@ -14,7 +14,9 @@ import Upload from 'lucide-react/dist/esm/icons/upload';
 import { FORM_TYPES, type FormType } from '@/components/layout/FormsManager';
 import { useAuth } from '@/hooks/useAuth';
 import { useData } from '@/contexts/DataContext';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
+import { useTemplateOps } from '@/hooks/dataOps/useTemplateOps';
+import { useBudgetOps } from '@/hooks/dataOps/useBudgetOps';
 import { cn } from '@/lib/utils';
 import { downloadExpensesAsCSV } from '@/lib/csvExport';
 import { Button } from '@/components/ui/button';
@@ -34,7 +36,8 @@ import { useCategoryBudgetAlerts } from '@/hooks/useCategoryBudgetAlerts';
 import { useCurrentMonthSpendingByCategory } from '@/hooks/useCurrentMonthSpendingByCategory';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
-import type { ReceiptOptions } from '@/hooks/useDataOperations';
+import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
+import type { DateRangePreset } from '@/hooks/useExpensesFilter';
 import ExpensesEmpty from '@/components/expenses/ExpensesEmpty';
 import TemplatesBar from '@/components/expenses/TemplatesBar';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
@@ -124,7 +127,12 @@ const ExpensesList = () => {
     defaultCurrency,
     categoryBudgets,
   } = useData();
-  const operations = useDataOperations();
+  const {
+    handleExpenseDelete: deleteExpense,
+    handleExpenseSubmit: submitExpense,
+  } = useExpenseOps();
+  const { handleTemplateCreate, handleTemplateDelete } = useTemplateOps();
+  const { handleBudgetUpdate } = useBudgetOps();
   const [optimisticExpenses, addOptimisticExpense] = useOptimistic(
     expenses,
     expensesReducer,
@@ -176,10 +184,10 @@ const ExpensesList = () => {
       if (id.startsWith('temp-')) return;
       startTransition(async () => {
         addOptimisticExpense({ type: 'delete', id });
-        await operations.handleExpenseDelete(id);
+        await deleteExpense(id);
       });
     },
-    [addOptimisticExpense, operations],
+    [addOptimisticExpense, deleteExpense],
   );
 
   const handleExpenseFormSubmit = useCallback(
@@ -219,10 +227,10 @@ const ExpensesList = () => {
           });
         }
 
-        await operations.handleExpenseSubmit(data, expenseId, receiptOptions);
+        await submitExpense(data, expenseId, receiptOptions);
       });
     },
-    [addOptimisticExpense, categories, tags, optimisticExpenses, operations],
+    [addOptimisticExpense, categories, tags, optimisticExpenses, submitExpense],
   );
 
   const monthlyTotal = useMemo(
@@ -230,10 +238,9 @@ const ExpensesList = () => {
     [monthlyExpenses],
   );
 
-  // Budget alerts — only for the current month
   useBudgetAlerts({
     monthlyBudget,
-    monthlySpent: selectedMonth === currentMonth ? monthlyTotal : 0,
+    monthlySpent: getBudgetSpent(selectedMonth, currentMonth, monthlyTotal),
     defaultCurrency,
   });
 
@@ -269,13 +276,16 @@ const ExpensesList = () => {
     [filteredExpenses],
   );
 
-  // When searching all months or using date range, the base total is all filtered expenses
-  const baseTotal =
-    isSearchingAllMonths || dateRangePreset ? filteredTotal : monthlyTotal;
+  const baseTotal = getBaseTotal(
+    isSearchingAllMonths,
+    dateRangePreset,
+    filteredTotal,
+    monthlyTotal,
+  );
 
   const handleSaveAsTemplate = useCallback(
     (expense: Expense) => {
-      operations.handleTemplateCreate({
+      handleTemplateCreate({
         amount: expense.amount,
         description: expense.description,
         category_id: expense.category_id ?? null,
@@ -283,7 +293,7 @@ const ExpensesList = () => {
         original_currency: expense.original_currency ?? null,
       });
     },
-    [operations],
+    [handleTemplateCreate],
   );
 
   const handleUseTemplate = useCallback(
@@ -313,7 +323,7 @@ const ExpensesList = () => {
           },
         });
 
-        await operations.handleExpenseSubmit({
+        await submitExpense({
           amount: template.amount,
           description: template.description,
           category_id: template.category_id,
@@ -323,7 +333,7 @@ const ExpensesList = () => {
         });
       });
     },
-    [session?.user?.id, addOptimisticExpense, categories, tags, operations],
+    [session?.user?.id, addOptimisticExpense, categories, tags, submitExpense],
   );
 
   const handleFormClose = useCallback(() => {
@@ -387,19 +397,18 @@ const ExpensesList = () => {
           {renderSearchResultCount(
             search,
             filteredExpenses.length,
-            isSearchingAllMonths
-              ? optimisticExpenses.length
-              : monthlyExpenses.length,
+            getSearchScopeTotal(
+              isSearchingAllMonths,
+              optimisticExpenses.length,
+              monthlyExpenses.length,
+            ),
             t,
           )}
 
-          {/* Collapsible Dashboard */}
           <div
             className={cn(
               'grid transition-all duration-200 ease-in-out',
-              isDashboardVisible
-                ? 'grid-rows-[1fr] opacity-100'
-                : 'grid-rows-[0fr] opacity-0',
+              getDashboardRowsClass(isDashboardVisible),
             )}
           >
             <div className="overflow-hidden space-y-3">
@@ -407,7 +416,7 @@ const ExpensesList = () => {
               <BudgetProgress
                 monthlyBudget={monthlyBudget}
                 monthlySpent={monthlyTotal}
-                onBudgetUpdate={operations.handleBudgetUpdate}
+                onBudgetUpdate={handleBudgetUpdate}
                 currencyCode={defaultCurrency}
               />
 
@@ -439,7 +448,7 @@ const ExpensesList = () => {
           templates={templates}
           defaultCurrency={defaultCurrency}
           onUse={handleUseTemplate}
-          onDelete={operations.handleTemplateDelete}
+          onDelete={handleTemplateDelete}
         />
 
         {/* Expenses List Section */}
@@ -492,6 +501,43 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const getBudgetSpent = (
+  selectedMonth: string,
+  currentMonth: string,
+  monthlyTotal: number,
+): number => {
+  if (selectedMonth === currentMonth) return monthlyTotal;
+
+  return 0;
+};
+
+const getBaseTotal = (
+  isSearchingAllMonths: boolean,
+  dateRangePreset: DateRangePreset,
+  filteredTotal: number,
+  monthlyTotal: number,
+): number => {
+  if (isSearchingAllMonths || dateRangePreset) return filteredTotal;
+
+  return monthlyTotal;
+};
+
+const getSearchScopeTotal = (
+  isSearchingAllMonths: boolean,
+  allMonthsCount: number,
+  monthCount: number,
+): number => {
+  if (isSearchingAllMonths) return allMonthsCount;
+
+  return monthCount;
+};
+
+const getDashboardRowsClass = (isVisible: boolean): string => {
+  if (isVisible) return 'grid-rows-[1fr] opacity-100';
+
+  return 'grid-rows-[0fr] opacity-0';
+};
 
 const renderSearchResultCount = (
   search: string,
@@ -557,9 +603,11 @@ const expensesReducer = (
     case 'add':
       return [action.expense, ...state];
     case 'update':
-      return state.map((e) =>
-        e.id === action.expense.id ? action.expense : e,
-      );
+      return state.map((e) => {
+        if (e.id === action.expense.id) return action.expense;
+
+        return e;
+      });
     case 'delete':
       return state.filter((e) => e.id !== action.id);
   }

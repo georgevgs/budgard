@@ -18,7 +18,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useAuth } from '@/contexts/AuthContext';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import {
   formatCurrencyInput,
@@ -41,7 +41,7 @@ const DebtPaymentForm = ({ debt, onClose }: Props) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const { session } = useAuth();
-  const { handleExpenseSubmit } = useDataOperations();
+  const { handleExpenseSubmit } = useExpenseOps();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const suggested = debt.minimum_payment > 0

@@ -18,7 +18,8 @@ import {
 } from '@/components/ui/dialog';
 import { cn, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useBudgetOps } from '@/hooks/dataOps/useBudgetOps';
+import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
 import { useAuth } from '@/hooks/useAuth';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useToast } from '@/hooks/useToast';
@@ -59,7 +60,8 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const { defaultCurrency } = useDataConfig();
-  const operations = useDataOperations();
+  const { handleBudgetUpdate } = useBudgetOps();
+  const { handleCategoriesAddBulk } = useCategoryOps();
   const { toast } = useToast();
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -83,14 +85,14 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
     if (amount > 0) {
       setIsSubmitting(true);
       try {
-        await operations.handleBudgetUpdate(amount);
+        await handleBudgetUpdate(amount);
       } catch {
         toast({ variant: 'destructive', description: t('onboarding.budgetSaveFailed') });
       }
       setIsSubmitting(false);
     }
     setStep(2);
-  }, [budgetInput, operations, toast, t]);
+  }, [budgetInput, handleBudgetUpdate, toast, t]);
 
   const handleCategoriesNext = useCallback(async () => {
     if (selectedCategories.size === 0) {
@@ -107,13 +109,13 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
         icon: PRESET_CATEGORIES[i].icon,
         user_id: session?.user?.id,
       }));
-      await operations.handleCategoriesAddBulk(toCreate);
+      await handleCategoriesAddBulk(toCreate);
     } catch {
       toast({ variant: 'destructive', description: t('onboarding.categoriesSaveFailed') });
     }
     setIsSubmitting(false);
     setStep(3);
-  }, [selectedCategories, session?.user?.id, operations, t, toast]);
+  }, [selectedCategories, session?.user?.id, handleCategoriesAddBulk, t, toast]);
 
   const handleCategoryToggle = useCallback((index: number) => {
     setSelectedCategories((prev) => {

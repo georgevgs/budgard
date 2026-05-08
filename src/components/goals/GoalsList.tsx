@@ -7,7 +7,7 @@ import Plus from 'lucide-react/dist/esm/icons/plus';
 import Target from 'lucide-react/dist/esm/icons/target';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useGoalOps } from '@/hooks/dataOps/useGoalOps';
 import { format } from 'date-fns';
 import { parseCurrencyInput } from '@/lib/utils';
 import type { Goal } from '@/types/Goal';
@@ -22,8 +22,7 @@ const GoalsList = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const { goals, defaultCurrency, isLoading } = useData();
-  const { handleGoalCreate, handleGoalUpdate, handleGoalDelete } =
-    useDataOperations();
+  const { handleGoalCreate, handleGoalUpdate, handleGoalDelete } = useGoalOps();
 
   const handleSubmit = async (values: GoalFormData) => {
     if (!session?.user?.id) return;

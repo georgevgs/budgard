@@ -24,7 +24,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/hooks/useToast';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
 import type { Category } from '@/types/Category';
 import { formatCurrency } from '@/lib/utils';
 import {
@@ -50,7 +50,7 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
   const { t } = useTranslation();
   const { expenseCategories: categories, defaultCurrency } = useData();
   const { toast } = useToast();
-  const { handleBulkExpenseImport } = useDataOperations();
+  const { handleBulkExpenseImport } = useExpenseOps();
 
   // Step state
   const [step, setStep] = useState<ImportStep>('upload');

@@ -83,7 +83,7 @@ const SubscriptionAuditCard = ({
       monthlyTotal,
       yearlyTotal: monthlyTotal * 12,
       top: ranked.slice(0, TOP_LIST_LIMIT),
-      largestMonthly: ranked.length > 0 ? getMonthlyAmount(ranked[0]) : 0,
+      largestMonthly: getLargestMonthly(ranked),
       drifts,
     };
   }, [recurringExpenses, expenses]);
@@ -125,6 +125,30 @@ type AuditStats = {
 };
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
+
+const getLargestMonthly = (ranked: RecurringExpense[]): number => {
+  if (ranked.length === 0) return 0;
+
+  return getMonthlyAmount(ranked[0]);
+};
+
+const computeLargestShare = (audit: AuditStats): number => {
+  if (audit.monthlyTotal <= 0) return 0;
+
+  return Math.round((audit.largestMonthly / audit.monthlyTotal) * 100);
+};
+
+const getDriftColor = (isUp: boolean): string => {
+  if (isUp) return 'text-amber-500';
+
+  return 'text-income';
+};
+
+const getDriftLabelKey = (isUp: boolean): string => {
+  if (isUp) return 'recurring.audit.driftUp';
+
+  return 'recurring.audit.driftDown';
+};
 
 const renderHeader = (t: TFunc) => (
   <div className="flex items-center gap-2 mb-3">
@@ -177,10 +201,7 @@ const renderLargestCallout = (audit: AuditStats, t: TFunc) => {
   if (audit.top.length === 0) return null;
 
   const largest = audit.top[0];
-  const share =
-    audit.monthlyTotal > 0
-      ? Math.round((audit.largestMonthly / audit.monthlyTotal) * 100)
-      : 0;
+  const share = computeLargestShare(audit);
 
   if (share < 30) return null;
 
@@ -257,8 +278,8 @@ const renderDriftBadge = (drift: PriceDrift | undefined, t: TFunc) => {
   if (!drift) return null;
 
   const isUp = drift.deltaPct > 0;
-  const colorClass = isUp ? 'text-amber-500' : 'text-income';
-  const labelKey = isUp ? 'recurring.audit.driftUp' : 'recurring.audit.driftDown';
+  const colorClass = getDriftColor(isUp);
+  const labelKey = getDriftLabelKey(isUp);
 
   return (
     <span

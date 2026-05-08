@@ -41,10 +41,8 @@ import { fetchExchangeRate } from '@/services/exchangeRateService';
 import { useAuth } from '@/hooks/useAuth';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import { useData } from '@/contexts/DataContext';
-import {
-  useDataOperations,
-  type ReceiptOptions,
-} from '@/hooks/useDataOperations';
+import { useTagOps } from '@/hooks/dataOps/useTagOps';
+import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 import { expenseSchema, type ExpenseFormData } from '@/lib/validations';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
@@ -85,7 +83,7 @@ const ExpensesForm = ({
   const { t } = useTranslation();
   const { session } = useAuth();
   const { tags, expenses: allExpenses, defaultCurrency } = useData();
-  const { handleTagCreate } = useDataOperations();
+  const { handleTagCreate } = useTagOps();
   const dateLocale = useDateLocale();
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [removeExistingReceipt, setRemoveExistingReceipt] = useState(false);
@@ -104,16 +102,7 @@ const ExpensesForm = ({
   const [rateError, setRateError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const initialAmount = expense
-    ? formatCurrencyInput(
-        (expense.original_currency && expense.original_currency !== defaultCurrency
-          ? (expense.original_amount ?? expense.amount)
-          : expense.amount
-        )
-          .toString()
-          .replace('.', ','),
-      )
-    : '';
+  const initialAmount = getInitialAmount(expense, defaultCurrency);
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
@@ -122,7 +111,7 @@ const ExpensesForm = ({
       description: expense?.description || '',
       category_id: expense?.category_id || 'none',
       tag_id: expense?.tag_id || undefined,
-      date: expense ? parseISO(expense.date) : new Date(),
+      date: getInitialDate(expense),
     },
   });
 
@@ -137,7 +126,7 @@ const ExpensesForm = ({
 
   const watchedAmount = form.watch('amount');
   const watchedDate = form.watch('date');
-  const watchedDateStr = watchedDate ? format(watchedDate, 'yyyy-MM-dd') : '';
+  const watchedDateStr = formatWatchedDate(watchedDate);
 
   useEffect(() => {
     if (selectedCurrency === defaultCurrency) {
@@ -283,7 +272,7 @@ const ExpensesForm = ({
         original_currency: originalCurrency,
         exchange_rate: exchangeRateValue,
         description: values.description,
-        category_id: values.category_id === 'none' ? null : values.category_id,
+        category_id: normalizeCategoryId(values.category_id),
         tag_id: values.tag_id || null,
         date: dateStr,
         user_id: session.user.id,
@@ -492,7 +481,7 @@ const ExpensesForm = ({
             <div
               className={cn(
                 'grid transition-[grid-template-rows] duration-200',
-                showDetails ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+                getDetailsRowsClass(showDetails),
               )}
             >
               <div className="overflow-hidden space-y-4">
@@ -614,6 +603,52 @@ type TranslateFunction = (
   options?: Record<string, unknown>,
 ) => string;
 
+const getInitialAmount = (
+  expense: Expense | undefined,
+  defaultCurrency: string,
+): string => {
+  if (!expense) return '';
+
+  const sourceAmount = pickSourceAmount(expense, defaultCurrency);
+
+  return formatCurrencyInput(sourceAmount.toString().replace('.', ','));
+};
+
+const pickSourceAmount = (
+  expense: Expense,
+  defaultCurrency: string,
+): number => {
+  const isForeign =
+    expense.original_currency && expense.original_currency !== defaultCurrency;
+  if (isForeign) return expense.original_amount ?? expense.amount;
+
+  return expense.amount;
+};
+
+const getInitialDate = (expense: Expense | undefined): Date => {
+  if (expense) return parseISO(expense.date);
+
+  return new Date();
+};
+
+const formatWatchedDate = (watchedDate: Date | undefined): string => {
+  if (!watchedDate) return '';
+
+  return format(watchedDate, 'yyyy-MM-dd');
+};
+
+const normalizeCategoryId = (categoryId: string): string | null => {
+  if (categoryId === 'none') return null;
+
+  return categoryId;
+};
+
+const getDetailsRowsClass = (showDetails: boolean): string => {
+  if (showDetails) return 'grid-rows-[1fr]';
+
+  return 'grid-rows-[0fr]';
+};
+
 const renderDetailsToggleLabel = (
   showDetails: boolean,
   t: TranslateFunction,
@@ -715,16 +750,22 @@ const renderSuggestionMeta = (suggestion: Expense) => {
 
   return (
     <span className="flex items-center gap-1.5 shrink-0 text-xs text-muted-foreground">
-      {suggestion.category.icon ? (
-        <span className="text-xs">{suggestion.category.icon}</span>
-      ) : (
-        <span
-          className="w-2 h-2 rounded-full"
-          style={{ backgroundColor: suggestion.category.color }}
-        />
-      )}
+      {renderSuggestionIcon(suggestion.category)}
       {suggestion.category.name}
     </span>
+  );
+};
+
+const renderSuggestionIcon = (category: Category) => {
+  if (category.icon) {
+    return <span className="text-xs">{category.icon}</span>;
+  }
+
+  return (
+    <span
+      className="w-2 h-2 rounded-full"
+      style={{ backgroundColor: category.color }}
+    />
   );
 };
 

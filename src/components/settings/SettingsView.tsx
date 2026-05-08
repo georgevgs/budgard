@@ -29,7 +29,7 @@ import Bell from 'lucide-react/dist/esm/icons/bell';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDataConfig } from '@/contexts/DataContext';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useSettingsOps } from '@/hooks/dataOps/useSettingsOps';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useTheme } from '@/hooks/useTheme';
 import {
@@ -57,7 +57,7 @@ const SettingsView = () => {
     handleCurrencyUpdate,
     handleDeleteAccount,
     handleDailyReminderHourUpdate,
-  } = useDataOperations();
+  } = useSettingsOps();
   const { theme, setTheme } = useTheme();
   const { accent, setAccent } = useAccentColor();
   const { toast } = useToast();

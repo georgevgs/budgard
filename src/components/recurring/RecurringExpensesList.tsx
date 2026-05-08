@@ -17,7 +17,8 @@ import SubscriptionAuditCard, {
   type RecurringPrefill,
 } from '@/components/recurring/SubscriptionAuditCard';
 import { useAuth } from '@/contexts/AuthContext';
-import { useDataOperations } from '@/hooks/useDataOperations';
+import { useRecurringExpenseOps } from '@/hooks/dataOps/useRecurringExpenseOps';
+import { useRecurringIncomeOps } from '@/hooks/dataOps/useRecurringIncomeOps';
 import { formatCurrency, parseCurrencyInput } from '@/lib/utils';
 import { calculateNextOccurrence, getMonthlyAmount } from '@/lib/recurring';
 import RecurringLoadingState from '@/components/recurring/RecurringLoading';
@@ -49,10 +50,12 @@ const RecurringExpensesList = () => {
     handleRecurringExpenseSubmit: submitRecurringExpense,
     handleRecurringExpenseDelete: deleteRecurringExpense,
     handleRecurringExpenseToggle: toggleRecurringExpense,
+  } = useRecurringExpenseOps();
+  const {
     handleRecurringIncomeSubmit: submitRecurringIncome,
     handleRecurringIncomeDelete: deleteRecurringIncome,
     handleRecurringIncomeToggle: toggleRecurringIncome,
-  } = useDataOperations();
+  } = useRecurringIncomeOps();
   const { t } = useTranslation();
 
   let items = recurringExpenses;

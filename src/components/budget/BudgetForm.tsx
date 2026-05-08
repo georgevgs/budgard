@@ -46,22 +46,13 @@ const BudgetForm = ({
     formState: { errors, isSubmitting },
   } = useForm<BudgetFormData>({
     resolver: zodResolver(budgetSchema),
-    defaultValues: {
-      amount: currentBudget
-        ? formatCurrencyInput(currentBudget.toString())
-        : '',
-    },
+    defaultValues: { amount: getInitialAmount(currentBudget) },
   });
 
-  // Reset form when dialog opens/closes or currentBudget changes
   useEffect(() => {
-    if (isOpen) {
-      reset({
-        amount: currentBudget
-          ? formatCurrencyInput(currentBudget.toString())
-          : '',
-      });
-    }
+    if (!isOpen) return;
+
+    reset({ amount: getInitialAmount(currentBudget) });
   }, [isOpen, currentBudget, reset]);
 
   const handleFormSubmit = async (data: BudgetFormData) => {
@@ -75,15 +66,20 @@ const BudgetForm = ({
     setValue('amount', formatted, { shouldValidate: true });
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (open) return;
+
+    onClose();
+  };
+
   const isEditing = currentBudget !== null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
         className="sm:max-w-[400px] p-0 gap-0"
-        onOpenChange={(open) => !open && onClose()}
+        onOpenChange={handleOpenChange}
       >
-        {/* Mobile drag handle */}
         <div
           className="flex justify-center pt-3 pb-2 sm:hidden"
           data-drag-handle
@@ -93,15 +89,9 @@ const BudgetForm = ({
 
         <div className="px-6 pb-6 pt-2 sm:pt-6">
           <DialogHeader className="pb-4" data-draggable-area>
-            <DialogTitle>
-              {isEditing ? t('budget.editBudget') : t('budget.setBudget')}
-            </DialogTitle>
+            <DialogTitle>{renderTitle(isEditing, t)}</DialogTitle>
             <DialogDescription>
-              {isEditing
-                ? t('budget.updateDescription', {
-                    amount: formatCurrency(currentBudget, currencyCode),
-                  })
-                : t('budget.setDescription')}
+              {renderDescription(isEditing, currentBudget, currencyCode, t)}
             </DialogDescription>
           </DialogHeader>
 
@@ -148,6 +138,33 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const getInitialAmount = (currentBudget: number | null): string => {
+  if (!currentBudget) return '';
+
+  return formatCurrencyInput(currentBudget.toString());
+};
+
+const renderTitle = (isEditing: boolean, t: TranslateFunction) => {
+  if (isEditing) return t('budget.editBudget');
+
+  return t('budget.setBudget');
+};
+
+const renderDescription = (
+  isEditing: boolean,
+  currentBudget: number | null,
+  currencyCode: string,
+  t: TranslateFunction,
+) => {
+  if (isEditing && currentBudget !== null) {
+    return t('budget.updateDescription', {
+      amount: formatCurrency(currentBudget, currencyCode),
+    });
+  }
+
+  return t('budget.setDescription');
+};
 
 const renderAmountError = (message: string | undefined) => {
   if (!message) return null;
