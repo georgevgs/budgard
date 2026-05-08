@@ -123,7 +123,7 @@ const pickPayoffMonths = (avalanche: SimResult): number | null => {
   return null;
 };
 
-const pickPayoffDate = (avalanche: SimResult): Date | null => {
+const pickPayoffDate = (avalanche: SimResult): string | null => {
   if (avalanche.monthsToPayoff > 0) return avalanche.payoffDate;
 
   return null;
