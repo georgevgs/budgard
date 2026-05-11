@@ -11,7 +11,9 @@ let dataMock: {
 } = { expenses: [], incomes: [], goals: [] };
 
 vi.mock('@/contexts/DataContext', () => ({
-  useData: () => dataMock,
+  useExpensesData: () => dataMock.expenses,
+  useIncomesData: () => dataMock.incomes,
+  useGoalsData: () => dataMock.goals,
 }));
 
 const makeExpense = (

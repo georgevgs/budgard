@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/select';
 import CategoryColorPicker from '@/components/categories/CategoryColorPicker';
 import { useAuth } from '@/contexts/AuthContext';
-import { useData } from '@/contexts/DataContext';
+import { useCategoriesData, useTagsData } from '@/contexts/DataContext';
 import { formatCurrencyInput } from '@/lib/utils';
 import { goalSchema, type GoalFormData } from '@/lib/validations';
 import type { Goal, GoalSourceType } from '@/types/Goal';
@@ -47,7 +47,8 @@ type Props = {
 const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
   const { t } = useTranslation();
   const { session } = useAuth();
-  const { expenseCategories, tags } = useData();
+  const { expenseCategories } = useCategoriesData();
+  const tags = useTagsData();
 
   const form = useForm<GoalFormData>({
     resolver: zodResolver(goalSchema),

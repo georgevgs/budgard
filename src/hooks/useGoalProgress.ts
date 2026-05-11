@@ -1,5 +1,9 @@
 import { useMemo } from 'react';
-import { useData } from '@/contexts/DataContext';
+import {
+  useExpensesData,
+  useIncomesData,
+  useGoalsData,
+} from '@/contexts/DataContext';
 import type { Expense } from '@/types/Expense';
 import type { Goal } from '@/types/Goal';
 
@@ -17,7 +21,8 @@ export type GoalProgress = {
 }
 
 export const useGoalProgress = (goal: Goal): GoalProgress => {
-  const { expenses, incomes } = useData();
+  const expenses = useExpensesData();
+  const incomes = useIncomesData();
 
   return useMemo(
     () => computeProgress(goal, expenses, incomes),
@@ -26,7 +31,9 @@ export const useGoalProgress = (goal: Goal): GoalProgress => {
 }
 
 export const useAllGoalProgress = (): Record<string, GoalProgress> => {
-  const { goals, expenses, incomes } = useData();
+  const goals = useGoalsData();
+  const expenses = useExpensesData();
+  const incomes = useIncomesData();
 
   return useMemo(() => {
     const map: Record<string, GoalProgress> = {};

@@ -20,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useData } from '@/contexts/DataContext';
+import { useCategoriesData } from '@/contexts/DataContext';
 import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
 import type { Category } from '@/types/Category';
 import CategoryForm from '@/components/categories/CategoryForm';
@@ -36,7 +36,7 @@ export const CategoryManager = ({
   categoryType = 'expense',
 }: CategoryManagerProps = {}) => {
   const { t } = useTranslation();
-  const { expenseCategories, incomeCategories } = useData();
+  const { expenseCategories, incomeCategories } = useCategoriesData();
   const { handleCategoryDelete } = useCategoryOps();
   const [view, setView] = useState<View>({ type: 'list' });
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);

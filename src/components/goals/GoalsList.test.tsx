@@ -2,24 +2,29 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import type { Goal } from '@/types/Goal';
-import type { Category } from '@/types/Category';
-import type { Tag } from '@/types/Tag';
-import type { Expense } from '@/types/Expense';
 
 let dataMock: {
   goals: Goal[];
-  categories: Category[];
-  expenseCategories: Category[];
-  tags: Tag[];
-  expenses: Expense[];
-  incomes: Expense[];
   defaultCurrency: string;
-  isLoading: boolean;
+  isInitialized: boolean;
   isSecondaryLoaded: boolean;
 };
 
 vi.mock('@/contexts/DataContext', () => ({
-  useData: () => dataMock,
+  useGoalsData: () => dataMock.goals,
+  useExpensesData: () => [],
+  useIncomesData: () => [],
+  useCategoriesData: () => ({
+    categories: [],
+    expenseCategories: [],
+    incomeCategories: [],
+  }),
+  useTagsData: () => [],
+  useDataConfig: () => ({
+    defaultCurrency: dataMock.defaultCurrency,
+    isInitialized: dataMock.isInitialized,
+    isSecondaryLoaded: dataMock.isSecondaryLoaded,
+  }),
 }));
 
 vi.mock('@/contexts/AuthContext', () => ({
@@ -52,13 +57,8 @@ const renderList = () =>
   );
 
 const baseData = {
-  categories: [],
-  expenseCategories: [],
-  tags: [],
-  expenses: [],
-  incomes: [],
   defaultCurrency: 'EUR',
-  isLoading: false,
+  isInitialized: true,
   isSecondaryLoaded: true,
 };
 

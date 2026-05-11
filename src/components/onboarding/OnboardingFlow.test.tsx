@@ -49,32 +49,28 @@ beforeEach(() => {
 
 describe('shouldShowOnboarding', () => {
   it('returns false when not initialized', () => {
-    expect(shouldShowOnboarding(false, false, 0, 0, null)).toBe(false);
-  });
-
-  it('returns false when loading', () => {
-    expect(shouldShowOnboarding(true, true, 0, 0, null)).toBe(false);
+    expect(shouldShowOnboarding(false, 0, 0, null)).toBe(false);
   });
 
   it('returns false when already onboarded', () => {
     localStorage.setItem('budgard_onboarded', 'true');
-    expect(shouldShowOnboarding(true, false, 0, 0, null)).toBe(false);
+    expect(shouldShowOnboarding(true, 0, 0, null)).toBe(false);
   });
 
   it('returns false when user has expenses', () => {
-    expect(shouldShowOnboarding(true, false, 5, 0, null)).toBe(false);
+    expect(shouldShowOnboarding(true, 5, 0, null)).toBe(false);
   });
 
   it('returns false when user has categories', () => {
-    expect(shouldShowOnboarding(true, false, 0, 3, null)).toBe(false);
+    expect(shouldShowOnboarding(true, 0, 3, null)).toBe(false);
   });
 
   it('returns false when user has a budget', () => {
-    expect(shouldShowOnboarding(true, false, 0, 0, 1500)).toBe(false);
+    expect(shouldShowOnboarding(true, 0, 0, 1500)).toBe(false);
   });
 
   it('returns true for fresh user with no data', () => {
-    expect(shouldShowOnboarding(true, false, 0, 0, null)).toBe(true);
+    expect(shouldShowOnboarding(true, 0, 0, null)).toBe(true);
   });
 });
 

@@ -1,19 +1,9 @@
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { lazy, Suspense, useMemo, useState, useEffect, useCallback } from 'react';
 import { format, parseISO, getYear } from 'date-fns';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import Minus from 'lucide-react/dist/esm/icons/minus';
 import Share2 from 'lucide-react/dist/esm/icons/share-2';
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ReferenceLine,
-} from 'recharts';
-import type { CategoricalChartFunc } from 'recharts/types/chart/types';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   useDataConfig,
@@ -45,7 +35,12 @@ import { useDateLocale } from '@/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
-const BUDGET_LINE_COLOR = '#f59e0b'; // amber-500 — matches bg-amber-500 budget warning
+// Lazy-load the chart so the Recharts chunk doesn't gate the rest of the
+// view's render. The placeholder reserves the same vertical space (~280px)
+// to avoid layout shift when the chunk resolves.
+const MonthlyTrendChart = lazy(
+  () => import('@/components/analytics/MonthlyTrendChart'),
+);
 
 const AnalyticsView = () => {
   const expenses = useExpensesData();
@@ -227,10 +222,8 @@ const AnalyticsView = () => {
     setDrillDownMonthKey(null);
   }, []);
 
-  const handleChartClick: CategoricalChartFunc = useCallback(
-    (nextState) => {
-      const index = nextState?.activeTooltipIndex;
-      if (typeof index !== 'number' || index < 0) return;
+  const handleMonthClick = useCallback(
+    (index: number) => {
       const month = (index + 1).toString().padStart(2, '0');
       setDrillDownMonthKey(`${selectedYear}-${month}`);
     },
@@ -355,74 +348,16 @@ const AnalyticsView = () => {
         <Card className="overflow-hidden">
           <CardContent className="p-5">
             <div className="w-full">
-              <ResponsiveContainer width="100%" height={280}>
-                <AreaChart
+              <Suspense fallback={<div className="h-[280px]" aria-hidden />}>
+                <MonthlyTrendChart
                   data={monthlyData}
-                  onClick={handleChartClick}
-                  margin={{ top: 4, right: 4, bottom: 0, left: -12 }}
-                >
-                  <defs>
-                    <linearGradient
-                      id="areaGradient"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="0%"
-                        stopColor="hsl(var(--primary))"
-                        stopOpacity={0.7}
-                      />
-                      <stop
-                        offset="100%"
-                        stopColor="hsl(var(--primary))"
-                        stopOpacity={0.1}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="month"
-                    tickLine={false}
-                    axisLine={false}
-                    tick={{
-                      fill: 'hsl(var(--muted-foreground))',
-                      fontSize: 12,
-                    }}
-                  />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    tick={{
-                      fill: 'hsl(var(--muted-foreground))',
-                      fontSize: 12,
-                    }}
-                    tickFormatter={(val: number) => `${Math.round(val)}${currencySymbol}`}
-                    domain={[0, yAxisMax ?? 'auto']}
-                  />
-                  <Tooltip
-                    content={<ChartTooltip currency={defaultCurrency} />}
-                    cursor={{
-                      stroke: 'hsl(var(--border))',
-                      strokeDasharray: '4 4',
-                    }}
-                  />
-                  {renderBudgetReferenceLine(monthlyBudget, t, defaultCurrency)}
-                  <Area
-                    type="monotone"
-                    dataKey="amount"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    fill="url(#areaGradient)"
-                    dot={{ r: 4, fill: 'hsl(var(--primary))', strokeWidth: 0 }}
-                    activeDot={{
-                      r: 6,
-                      fill: 'hsl(var(--primary))',
-                      strokeWidth: 0,
-                    }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+                  monthlyBudget={monthlyBudget}
+                  defaultCurrency={defaultCurrency}
+                  currencySymbol={currencySymbol}
+                  yAxisMax={yAxisMax}
+                  onMonthClick={handleMonthClick}
+                />
+              </Suspense>
             </div>
           </CardContent>
         </Card>
@@ -487,32 +422,6 @@ const AnalyticsView = () => {
 export default AnalyticsView;
 
 // ─── Helper render functions ──────────────────────────────────────────────────
-
-type TooltipPayloadEntry = {
-  value: number;
-  payload: { fullMonth: string };
-};
-
-type ChartTooltipProps = {
-  active?: boolean;
-  payload?: TooltipPayloadEntry[];
-  currency?: string;
-};
-
-const ChartTooltip = ({ active, payload, currency = 'EUR' }: ChartTooltipProps) => {
-  if (!active || !payload?.length) return null;
-
-  const { value, payload: data } = payload[0];
-
-  return (
-    <div className="rounded-lg border bg-card px-3 py-2 shadow-md">
-      <p className="text-xs text-muted-foreground">{data.fullMonth}</p>
-      <p className="text-sm font-semibold tabular-nums">
-        {formatCurrency(value, currency)}
-      </p>
-    </div>
-  );
-};
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
@@ -627,28 +536,6 @@ const renderYearSummary = (
         })}
       </span>
     </p>
-  );
-};
-
-const renderBudgetReferenceLine = (
-  monthlyBudget: number | null,
-  t: TFunc,
-  currency: string,
-) => {
-  if (!monthlyBudget) return null;
-
-  return (
-    <ReferenceLine
-      y={monthlyBudget}
-      stroke={BUDGET_LINE_COLOR}
-      strokeDasharray="5 5"
-      label={{
-        value: t('analytics.budgetLabel', { amount: formatCurrency(monthlyBudget, currency) }),
-        position: 'right',
-        fill: BUDGET_LINE_COLOR,
-        fontSize: 11,
-      }}
-    />
   );
 };
 

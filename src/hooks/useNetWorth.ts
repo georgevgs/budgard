@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import * as Sentry from '@sentry/react';
 import { format } from 'date-fns';
-import { useData } from '@/contexts/DataContext';
+import { useAccountsData, useDataConfig } from '@/contexts/DataContext';
 import { fetchExchangeRate } from '@/services/exchangeRateService';
 import { type AccountKind, isLiability } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
@@ -30,7 +30,8 @@ export type NetWorthSummary = {
 const RATE_KEY = (currency: string, date: string) => `${currency}|${date}`;
 
 export const useNetWorth = () => {
-  const { accounts, accountBalances, defaultCurrency } = useData();
+  const { accounts, accountBalances } = useAccountsData();
+  const { defaultCurrency } = useDataConfig();
   const [rates, setRates] = useState<Map<string, number>>(new Map());
   const [failedKeys, setFailedKeys] = useState<Set<string>>(new Set());
   const [isComputing, setIsComputing] = useState(false);

@@ -342,12 +342,11 @@ const renderCheckIcon = (isSelected: boolean) => {
 
 export const shouldShowOnboarding = (
   isInitialized: boolean,
-  isLoading: boolean,
   expenseCount: number,
   categoryCount: number,
   monthlyBudget: number | null,
 ): boolean => {
-  if (!isInitialized || isLoading) return false;
+  if (!isInitialized) return false;
   if (localStorage.getItem(ONBOARDED_KEY) === 'true') return false;
 
   return expenseCount === 0 && categoryCount === 0 && monthlyBudget === null;

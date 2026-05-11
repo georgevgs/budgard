@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Plus from 'lucide-react/dist/esm/icons/plus';
-import { useData } from '@/contexts/DataContext';
+import { useAccountsData, useDataConfig } from '@/contexts/DataContext';
 import { useNetWorth } from '@/hooks/useNetWorth';
 import { type Account, isLiability } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
@@ -18,13 +18,8 @@ import AccountDetailSheet from '@/components/networth/AccountDetailSheet';
 
 const NetWorthView = () => {
   const { t } = useTranslation();
-  const {
-    accounts,
-    accountBalances,
-    defaultCurrency,
-    isInitialized,
-    isSecondaryLoaded,
-  } = useData();
+  const { accounts, accountBalances } = useAccountsData();
+  const { defaultCurrency, isInitialized, isSecondaryLoaded } = useDataConfig();
   const { summary, series } = useNetWorth();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | undefined>();

@@ -18,7 +18,11 @@ import {
   parseCurrencyInput,
 } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
-import { useData } from '@/contexts/DataContext';
+import {
+  useCategoriesData,
+  useCategoryBudgetsData,
+  useDataConfig,
+} from '@/contexts/DataContext';
 import { useBudgetOps } from '@/hooks/dataOps/useBudgetOps';
 import { useToast } from '@/hooks/useToast';
 import type { Category } from '@/types/Category';
@@ -31,8 +35,9 @@ type Props = {
 
 const CategoryBudgetsManager = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation();
-  const { expenseCategories, categoryBudgets, defaultCurrency, monthlyBudget } =
-    useData();
+  const { expenseCategories } = useCategoriesData();
+  const categoryBudgets = useCategoryBudgetsData();
+  const { defaultCurrency, monthlyBudget } = useDataConfig();
   const { handleCategoryBudgetUpsert, handleCategoryBudgetDelete } =
     useBudgetOps();
   const { toast } = useToast();

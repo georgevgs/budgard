@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { useData } from '@/contexts/DataContext';
+import { useCategoriesData, useDataConfig } from '@/contexts/DataContext';
 import { useToast } from '@/hooks/useToast';
 import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
 import type { Category } from '@/types/Category';
@@ -48,7 +48,8 @@ type ImportStep = 'upload' | 'mapping' | 'preview' | 'importing';
 
 const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
   const { t } = useTranslation();
-  const { expenseCategories: categories, defaultCurrency } = useData();
+  const { expenseCategories: categories } = useCategoriesData();
+  const { defaultCurrency } = useDataConfig();
   const { toast } = useToast();
   const { handleBulkExpenseImport } = useExpenseOps();
 

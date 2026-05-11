@@ -7,7 +7,12 @@ import type { Category } from '@/types/Category';
 let dataState = { categories: [] as Category[], isInitialized: true };
 
 vi.mock('@/contexts/DataContext', () => ({
-  useData: () => dataState,
+  useCategoriesData: () => ({
+    categories: dataState.categories,
+    expenseCategories: dataState.categories,
+    incomeCategories: [],
+  }),
+  useDataConfig: () => ({ isInitialized: dataState.isInitialized }),
 }));
 
 // Mocks render DialogTitle/DialogDescription (sr-only) so Radix's runtime

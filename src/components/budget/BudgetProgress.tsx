@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import Plus from 'lucide-react/dist/esm/icons/plus';
@@ -12,7 +12,11 @@ import BudgetCategorySection, {
   EXCEEDED_THRESHOLD,
   type BudgetCategoryRow,
 } from '@/components/budget/BudgetCategorySection';
-import { useData } from '@/contexts/DataContext';
+import {
+  useExpensesData,
+  useCategoriesData,
+  useCategoryBudgetsData,
+} from '@/contexts/DataContext';
 import { useCurrentMonthSpendingByCategory } from '@/hooks/useCurrentMonthSpendingByCategory';
 import type { Category } from '@/types/Category';
 import type { CategoryBudget } from '@/types/CategoryBudget';
@@ -33,7 +37,9 @@ const BudgetProgress = ({
   const { t } = useTranslation();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isManagerOpen, setIsManagerOpen] = useState(false);
-  const { expenseCategories, categoryBudgets, expenses } = useData();
+  const { expenseCategories } = useCategoriesData();
+  const categoryBudgets = useCategoryBudgetsData();
+  const expenses = useExpensesData();
   const spendingByCategory = useCurrentMonthSpendingByCategory(expenses);
   const categoryRows = useMemo(
     () => buildCategoryRows(expenseCategories, categoryBudgets, spendingByCategory),
@@ -73,7 +79,7 @@ const BudgetProgress = ({
   });
 };
 
-export default BudgetProgress;
+export default memo(BudgetProgress);
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

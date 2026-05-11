@@ -4,7 +4,7 @@ import type { Category } from '@/types/Category';
 import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 import ExpensesForm from '@/components/expenses/ExpensesForm';
 import { CategoryManager } from '@/components/categories/CategoryManager';
-import { useData } from '@/contexts/DataContext';
+import { useCategoriesData, useDataConfig } from '@/contexts/DataContext';
 
 export const FORM_TYPES = {
   NEW_EXPENSE: 'newExpense',
@@ -31,11 +31,9 @@ const FormsManager = ({
   selectedExpense,
   onExpenseSubmit,
 }: FormsManagerProps) => {
-  const { expenseCategories: categories, isInitialized } = useData();
+  const { expenseCategories: categories } = useCategoriesData();
+  const { isInitialized } = useDataConfig();
 
-  // Don't show forms until data is ready (isInitialized is sufficient —
-  // checking isLoading here would unmount an open form during background refreshes,
-  // destroying any input the user has already typed).
   if (!isInitialized) {
     return null;
   }

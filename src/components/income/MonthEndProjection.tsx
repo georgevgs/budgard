@@ -8,7 +8,12 @@ import {
   differenceInCalendarDays,
 } from 'date-fns';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
-import { useData } from '@/contexts/DataContext';
+import {
+  useExpensesData,
+  useIncomesData,
+  useRecurringData,
+  useDataConfig,
+} from '@/contexts/DataContext';
 import { cn, formatCurrency } from '@/lib/utils';
 import { getMonthlyAmount } from '@/lib/recurring';
 
@@ -18,13 +23,10 @@ type Props = {
 
 const MonthEndProjection = ({ selectedMonth }: Props) => {
   const { t } = useTranslation();
-  const {
-    expenses,
-    incomes,
-    recurringExpenses,
-    recurringIncomes,
-    defaultCurrency,
-  } = useData();
+  const expenses = useExpensesData();
+  const incomes = useIncomesData();
+  const { recurringExpenses, recurringIncomes } = useRecurringData();
+  const { defaultCurrency } = useDataConfig();
 
   const projection = useMemo(() => {
     const monthStart = startOfMonth(new Date(selectedMonth + '-01'));

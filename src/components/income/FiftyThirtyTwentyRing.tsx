@@ -1,7 +1,12 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
-import { useData } from '@/contexts/DataContext';
+import {
+  useExpensesData,
+  useIncomesData,
+  useCategoriesData,
+  useDataConfig,
+} from '@/contexts/DataContext';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
@@ -42,7 +47,10 @@ const BUCKETS: BucketConfig[] = [
 
 const FiftyThirtyTwentyRing = ({ selectedMonth }: Props) => {
   const { t } = useTranslation();
-  const { expenses, incomes, categories, defaultCurrency } = useData();
+  const expenses = useExpensesData();
+  const incomes = useIncomesData();
+  const { categories } = useCategoriesData();
+  const { defaultCurrency } = useDataConfig();
 
   const monthExpenses = useMemo(() => {
     return expenses.filter(

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
@@ -141,7 +141,7 @@ const TemplatesBar = ({
   );
 };
 
-export default TemplatesBar;
+export default memo(TemplatesBar);
 
 // ─── Helper render functions ──────────────────────────────────────────────────
 

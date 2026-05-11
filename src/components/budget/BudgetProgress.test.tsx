@@ -13,11 +13,13 @@ vi.mock('@/components/budget/CategoryBudgetsManager', () => ({
 }));
 
 vi.mock('@/contexts/DataContext', () => ({
-  useData: () => ({
+  useExpensesData: () => [],
+  useCategoriesData: () => ({
+    categories: [],
     expenseCategories: [],
-    categoryBudgets: [],
-    expenses: [],
+    incomeCategories: [],
   }),
+  useCategoryBudgetsData: () => [],
 }));
 
 vi.mock('@/hooks/useCurrentMonthSpendingByCategory', () => ({

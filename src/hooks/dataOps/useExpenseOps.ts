@@ -199,7 +199,7 @@ export const useExpenseOps = () => {
         throw error;
       }
     },
-    [isInitialized, setExpenses, refreshDebts, showErrorToast, toast],
+    [isInitialized, expensesRef, setExpenses, refreshDebts, showErrorToast, toast],
   );
 
   const handleExpenseDelete = useCallback(
@@ -262,7 +262,7 @@ export const useExpenseOps = () => {
         throw error;
       }
     },
-    [isInitialized, setExpenses, refreshDebts, showErrorToast, toast],
+    [isInitialized, expensesRef, setExpenses, refreshDebts, showErrorToast, toast],
   );
 
   const handleBulkExpenseImport = useCallback(

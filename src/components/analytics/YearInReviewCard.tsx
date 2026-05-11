@@ -14,7 +14,12 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, dataUrlToBlob } from '@/lib/utils';
-import { useData, useDataConfig } from '@/contexts/DataContext';
+import {
+  useDataConfig,
+  useExpensesData,
+  useIncomesData,
+  useCategoriesData,
+} from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
 
@@ -31,7 +36,9 @@ const YearInReviewCard = ({ isOpen, onClose, year }: Props) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const { defaultCurrency } = useDataConfig();
-  const { expenses, incomes, expenseCategories } = useData();
+  const expenses = useExpensesData();
+  const incomes = useIncomesData();
+  const { expenseCategories } = useCategoriesData();
   const cardRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
 

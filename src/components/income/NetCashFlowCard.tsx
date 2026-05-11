@@ -6,7 +6,7 @@ import ArrowDownLeft from 'lucide-react/dist/esm/icons/arrow-down-left';
 import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 import { cn, formatCurrency } from '@/lib/utils';
-import { useData } from '@/contexts/DataContext';
+import { useIncomesData, useDataConfig } from '@/contexts/DataContext';
 import type { Expense } from '@/types/Expense';
 
 type NetCashFlowCardProps = {
@@ -20,7 +20,8 @@ const NetCashFlowCard = ({
 }: NetCashFlowCardProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { incomes, defaultCurrency } = useData();
+  const incomes = useIncomesData();
+  const { defaultCurrency } = useDataConfig();
 
   const monthlyIncomeTotal = useMemo(() => {
     return incomes

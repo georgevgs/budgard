@@ -6,7 +6,7 @@ import type { Debt } from '@/types/Debt';
 let dataMock: { debts: Debt[] } = { debts: [] };
 
 vi.mock('@/contexts/DataContext', () => ({
-  useData: () => dataMock,
+  useDebtsData: () => dataMock.debts,
 }));
 
 const makeDebt = (overrides: Partial<Debt> = {}): Debt => ({

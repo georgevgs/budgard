@@ -9,7 +9,11 @@ import {
 } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { useAuth } from '@/contexts/AuthContext';
-import { useData } from '@/contexts/DataContext';
+import {
+  useDataConfig,
+  useExpensesData,
+  useCategoriesData,
+} from '@/contexts/DataContext';
 import { usePwaUpdate } from '@/hooks/usePwaUpdate';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
@@ -77,15 +81,16 @@ const LoadingSpinner = () => (
 
 const AuthenticatedLayout = () => {
   useOfflineSync();
-  const { expenses, categories, monthlyBudget, isInitialized, isLoading } =
-    useData();
+  useIdleTabPrefetch();
+  const expenses = useExpensesData();
+  const { categories } = useCategoriesData();
+  const { isInitialized, monthlyBudget } = useDataConfig();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     if (
       shouldShowOnboarding(
         isInitialized,
-        isLoading,
         expenses.length,
         categories.length,
         monthlyBudget,
@@ -93,13 +98,7 @@ const AuthenticatedLayout = () => {
     ) {
       setShowOnboarding(true);
     }
-  }, [
-    isInitialized,
-    isLoading,
-    expenses.length,
-    categories.length,
-    monthlyBudget,
-  ]);
+  }, [isInitialized, expenses.length, categories.length, monthlyBudget]);
 
   return (
     <>
@@ -114,6 +113,34 @@ const AuthenticatedLayout = () => {
       />
     </>
   );
+};
+
+// Once the user is authenticated and the initial tab has painted, fetch the
+// other bottom-nav tab chunks during idle time. By the time the user taps a
+// sibling tab the JS is already in the browser cache, so the Suspense
+// fallback inside MainTabsLayout never has to flash.
+const useIdleTabPrefetch = () => {
+  useEffect(() => {
+    const prefetch = () => {
+      // Same module specifiers as the lazyWithRetry imports above, so Rollup
+      // reuses the same chunks rather than emitting new ones.
+      import('@/components/expenses/ExpensesList');
+      import('@/components/income/IncomeList');
+      import('@/components/recurring/RecurringExpensesList');
+      import('@/components/analytics/AnalyticsView');
+    };
+
+    const ric = (window as Window).requestIdleCallback;
+    if (typeof ric === 'function') {
+      const handle = ric(prefetch, { timeout: 4000 });
+
+      return () => (window as Window).cancelIdleCallback?.(handle);
+    }
+
+    const timer = setTimeout(prefetch, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 };
 
 const PublicLayout = ({ children }: { children: ReactNode }) => (

@@ -4,7 +4,12 @@ import { parseISO, getYear } from 'date-fns';
 import Download from 'lucide-react/dist/esm/icons/download';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useData } from '@/contexts/DataContext';
+import {
+  useExpensesData,
+  useIncomesData,
+  useCategoriesData,
+  useTagsData,
+} from '@/contexts/DataContext';
 import { useToast } from '@/hooks/useToast';
 import {
   buildCategorySummaryCsv,
@@ -20,7 +25,10 @@ type Props = {
 const AnnualExportCard = ({ selectedYear }: Props) => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { expenses, incomes, categories, tags } = useData();
+  const expenses = useExpensesData();
+  const incomes = useIncomesData();
+  const { categories } = useCategoriesData();
+  const tags = useTagsData();
 
   const yearTransactions = useMemo(() => {
     return collectYearTransactions(expenses, incomes, selectedYear);

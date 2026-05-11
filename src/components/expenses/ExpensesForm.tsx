@@ -40,7 +40,11 @@ import { SUPPORTED_CURRENCIES } from '@/lib/currencies';
 import { fetchExchangeRate } from '@/services/exchangeRateService';
 import { useAuth } from '@/hooks/useAuth';
 import { useDateLocale } from '@/hooks/useDateLocale';
-import { useData } from '@/contexts/DataContext';
+import {
+  useExpensesData,
+  useTagsData,
+  useDataConfig,
+} from '@/contexts/DataContext';
 import { useTagOps } from '@/hooks/dataOps/useTagOps';
 import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 import { expenseSchema, type ExpenseFormData } from '@/lib/validations';
@@ -82,7 +86,9 @@ const ExpensesForm = ({
 }: ExpensesFormProps) => {
   const { t } = useTranslation();
   const { session } = useAuth();
-  const { tags, expenses: allExpenses, defaultCurrency } = useData();
+  const tags = useTagsData();
+  const allExpenses = useExpensesData();
+  const { defaultCurrency } = useDataConfig();
   const { handleTagCreate } = useTagOps();
   const dateLocale = useDateLocale();
   const [receiptFile, setReceiptFile] = useState<File | null>(null);

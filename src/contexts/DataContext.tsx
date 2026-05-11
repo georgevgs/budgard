@@ -46,7 +46,6 @@ type DataState = {
   defaultCurrency: string;
   defaultSavingsPct: number | null;
   dailyReminderHour: number | null;
-  isLoading: boolean;
   isInitialized: boolean;
   isSecondaryLoaded: boolean;
 };
@@ -160,7 +159,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [dailyReminderHour, setDailyReminderHour] = useState<number | null>(
     null,
   );
-  const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   // Sticky once true — flips false only on logout reset, never on background
   // refetches, so /goals, /networth and /debts don't blank on foreground
@@ -173,11 +171,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   expensesRef.current = expenses;
   const incomesRef = useRef<Expense[]>(incomes);
   incomesRef.current = incomes;
-  // Tracks isInitialized inside async callbacks without stale closures.
-  // We use this to decide whether a fetch should blank views with the loading
-  // skeleton (first paint) or refresh silently in the background.
-  const isInitializedRef = useRef(isInitialized);
-  isInitializedRef.current = isInitialized;
 
   // Categories without an explicit 'income' type belong to expenses (back-compat).
   const expenseCategories = useMemo(
@@ -208,13 +201,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    // Only show the global loading flag on the very first fetch. Subsequent
-    // refreshes (e.g. visibility-driven on foreground) should be silent so
-    // already-rendered views don't blank back to a skeleton.
-    if (!isInitializedRef.current) {
-      setIsLoading(true);
-    }
-
     // Two-stage expense/income fetch: load the last RECENT_MONTHS of history
     // first so the user sees a working app fast, then top up older rows in
     // the background. Search across all months still works once stage 2
@@ -226,9 +212,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       // Stage 1: critical fetch — everything needed by the four bottom-nav
-      // tabs (expenses, income, recurring, analytics). Secondary domains
-      // (goals/accounts/balances/debts) are routed via the header AppMenu
-      // and load in stage 1.5 below.
+      // tabs (expenses, income, recurring, analytics). Accounts ride along
+      // because the recurring-expense form's investment-account selector
+      // would feel laggy populating a beat after stage 1.5. Other secondary
+      // domains (goals/account balances/debts) load in stage 1.5 below.
       const [
         categoriesData,
         expensesData,
@@ -239,6 +226,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         tagsData,
         templatesData,
         categoryBudgetsData,
+        accountsData,
       ] = await Promise.all([
         dataService.getCategories(controller.signal),
         dataService.getExpenses(controller.signal, recentCutoff),
@@ -249,6 +237,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         dataService.getTags(controller.signal),
         dataService.getTemplates(controller.signal),
         dataService.getCategoryBudgets(controller.signal),
+        dataService.getAccounts(controller.signal),
       ]);
 
       // React 18+ automatically batches these state updates
@@ -260,12 +249,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setTags(tagsData);
       setTemplates(templatesData);
       setCategoryBudgets(categoryBudgetsData);
+      setAccounts(accountsData);
       setMonthlyBudget(budgetData?.monthly_amount ?? null);
       setDefaultCurrency(budgetData?.default_currency ?? 'EUR');
       setDefaultSavingsPct(budgetData?.default_savings_pct ?? null);
       setDailyReminderHour(budgetData?.daily_reminder_hour ?? null);
       setIsInitialized(true);
-      setIsLoading(false);
       lastFetchAtRef.current = Date.now();
       wasAbortedRef.current = false;
 
@@ -273,16 +262,14 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       // debts). Fired immediately after stage 1 but doesn't block first paint.
       Promise.all([
         dataService.getGoals(controller.signal),
-        dataService.getAccounts(controller.signal),
         dataService.getAllAccountBalances(controller.signal),
         dataService.getDebts(controller.signal),
       ])
-        .then(([goalsData, accountsData, balancesData, debtsData]) => {
+        .then(([goalsData, balancesData, debtsData]) => {
           if (controller.signal.aborted) {
             return;
           }
           setGoals(goalsData);
-          setAccounts(accountsData);
           setAccountBalances(balancesData);
           setDebts(debtsData);
           setIsSecondaryLoaded(true);
@@ -333,7 +320,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       // the visibilitychange listener retries when the app comes to foreground.
       if (isAbortError(error)) {
         wasAbortedRef.current = true;
-        setIsLoading(false);
         return;
       }
       Sentry.captureException(error, { tags: { context: 'fetchData' } });
@@ -343,7 +329,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         description: 'Failed to load data',
         variant: 'destructive',
       });
-      setIsLoading(false);
     }
   }, [session?.user?.id]);
 
@@ -424,7 +409,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setDefaultSavingsPct(null);
       setIsInitialized(false);
       setIsSecondaryLoaded(false);
-      setIsLoading(false);
     }
   }, [isAuthLoading, session, isInitialized, fetchData]);
 
@@ -533,7 +517,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       defaultCurrency,
       defaultSavingsPct,
       dailyReminderHour,
-      isLoading,
       isInitialized,
       isSecondaryLoaded,
       ...actions,
@@ -557,7 +540,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       defaultCurrency,
       defaultSavingsPct,
       dailyReminderHour,
-      isLoading,
       isInitialized,
       isSecondaryLoaded,
       actions,

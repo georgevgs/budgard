@@ -42,7 +42,7 @@ import { SUPPORTED_CURRENCIES } from '@/lib/currencies';
 import { fetchExchangeRate } from '@/services/exchangeRateService';
 import { useAuth } from '@/hooks/useAuth';
 import { useDateLocale } from '@/hooks/useDateLocale';
-import { useData } from '@/contexts/DataContext';
+import { useCategoriesData, useDataConfig } from '@/contexts/DataContext';
 import { useIncomeOps } from '@/hooks/dataOps/useIncomeOps';
 import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
 import { incomeSchema, type IncomeFormData } from '@/lib/validations';
@@ -57,7 +57,8 @@ type IncomeFormProps = {
 const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
   const { t } = useTranslation();
   const { session } = useAuth();
-  const { incomeCategories, defaultCurrency } = useData();
+  const { incomeCategories } = useCategoriesData();
+  const { defaultCurrency } = useDataConfig();
   const { handleIncomeSubmit } = useIncomeOps();
   const { handleCategoryAdd } = useCategoryOps();
   const dateLocale = useDateLocale();

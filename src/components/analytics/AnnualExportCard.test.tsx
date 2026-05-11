@@ -19,7 +19,14 @@ const dataState: {
 };
 
 vi.mock('@/contexts/DataContext', () => ({
-  useData: () => dataState,
+  useExpensesData: () => dataState.expenses,
+  useIncomesData: () => dataState.incomes,
+  useCategoriesData: () => ({
+    categories: dataState.categories,
+    expenseCategories: dataState.categories,
+    incomeCategories: [],
+  }),
+  useTagsData: () => dataState.tags,
 }));
 
 vi.mock('@/hooks/useToast', () => ({

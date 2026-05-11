@@ -6,7 +6,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Target from 'lucide-react/dist/esm/icons/target';
 import { useAuth } from '@/contexts/AuthContext';
-import { useData } from '@/contexts/DataContext';
+import { useGoalsData, useDataConfig } from '@/contexts/DataContext';
 import { useGoalOps } from '@/hooks/dataOps/useGoalOps';
 import { format } from 'date-fns';
 import { parseCurrencyInput } from '@/lib/utils';
@@ -21,7 +21,8 @@ const GoalsList = () => {
   const [selectedGoal, setSelectedGoal] = useState<Goal | undefined>(undefined);
   const { t } = useTranslation();
   const { session } = useAuth();
-  const { goals, defaultCurrency, isLoading, isSecondaryLoaded } = useData();
+  const goals = useGoalsData();
+  const { defaultCurrency, isInitialized, isSecondaryLoaded } = useDataConfig();
   const { handleGoalCreate, handleGoalUpdate, handleGoalDelete } = useGoalOps();
 
   const handleSubmit = async (values: GoalFormData) => {
@@ -74,7 +75,7 @@ const GoalsList = () => {
     setSelectedGoal(undefined);
   };
 
-  if (isLoading || !isSecondaryLoaded) {
+  if (!isInitialized || !isSecondaryLoaded) {
     return <GoalsLoadingState />;
   }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Search from 'lucide-react/dist/esm/icons/search';
 import Filter from 'lucide-react/dist/esm/icons/filter';
@@ -229,7 +229,7 @@ const ExpensesFilter = ({
   );
 };
 
-export default ExpensesFilter;
+export default memo(ExpensesFilter);
 
 // ─── Helper render functions ──────────────────────────────────────────────────
 

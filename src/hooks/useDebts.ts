@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useData } from '@/contexts/DataContext';
+import { useDebtsData } from '@/contexts/DataContext';
 import type { Debt } from '@/types/Debt';
 
 export type DebtSummary = {
@@ -14,7 +14,7 @@ export type DebtSummary = {
 export type DebtsByCurrency = Record<string, Debt[]>;
 
 export const useDebts = () => {
-  const { debts } = useData();
+  const debts = useDebtsData();
 
   const active = useMemo(
     () => debts.filter((d) => !d.is_archived),

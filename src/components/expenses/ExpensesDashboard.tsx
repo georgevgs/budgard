@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
 import { useDataConfig } from '@/contexts/DataContext';
@@ -116,4 +116,4 @@ const ExpensesDashboard = ({
   );
 };
 
-export default ExpensesDashboard;
+export default memo(ExpensesDashboard);

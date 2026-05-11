@@ -11,7 +11,11 @@ let dataMock: {
 } = { accounts: [], accountBalances: [], defaultCurrency: 'EUR' };
 
 vi.mock('@/contexts/DataContext', () => ({
-  useData: () => dataMock,
+  useAccountsData: () => ({
+    accounts: dataMock.accounts,
+    accountBalances: dataMock.accountBalances,
+  }),
+  useDataConfig: () => ({ defaultCurrency: dataMock.defaultCurrency }),
 }));
 
 vi.mock('@/services/exchangeRateService', () => ({
