@@ -13,7 +13,14 @@ import Download from 'lucide-react/dist/esm/icons/download';
 import Upload from 'lucide-react/dist/esm/icons/upload';
 import { FORM_TYPES, type FormType } from '@/components/layout/FormsManager';
 import { useAuth } from '@/hooks/useAuth';
-import { useData } from '@/contexts/DataContext';
+import {
+  useDataConfig,
+  useExpensesData,
+  useCategoriesData,
+  useTagsData,
+  useTemplatesData,
+  useCategoryBudgetsData,
+} from '@/contexts/DataContext';
 import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
 import { useTemplateOps } from '@/hooks/dataOps/useTemplateOps';
 import { useBudgetOps } from '@/hooks/dataOps/useBudgetOps';
@@ -117,16 +124,12 @@ const ExpensesContent = ({
 const ExpensesList = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
-  const {
-    expenseCategories: categories,
-    expenses,
-    tags,
-    templates,
-    isInitialized,
-    monthlyBudget,
-    defaultCurrency,
-    categoryBudgets,
-  } = useData();
+  const expenses = useExpensesData();
+  const { expenseCategories: categories } = useCategoriesData();
+  const tags = useTagsData();
+  const templates = useTemplatesData();
+  const categoryBudgets = useCategoryBudgetsData();
+  const { isInitialized, monthlyBudget, defaultCurrency } = useDataConfig();
   const {
     handleExpenseDelete: deleteExpense,
     handleExpenseSubmit: submitExpense,

@@ -6,19 +6,36 @@ import App from '@/App';
 import { i18nReady } from './lib/i18n';
 import './index.css';
 
+// Init with only the lightweight tracing integration on the critical path.
+// Session Replay (DOM observers, mutation buffering) and Profiling
+// (sampling worker) do non-trivial setup, so they're added after first
+// paint via requestIdleCallback below.
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
   enabled: import.meta.env.PROD && !!import.meta.env.VITE_SENTRY_DSN,
-  integrations: [
-    Sentry.browserTracingIntegration(),
-    Sentry.replayIntegration(),
-    Sentry.browserProfilingIntegration(),
-  ],
+  integrations: [Sentry.browserTracingIntegration()],
   tracesSampleRate: 0.1,
   profileSessionSampleRate: 0.1,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
 });
+
+const initHeavySentryIntegrations = () => {
+  if (!import.meta.env.PROD || !import.meta.env.VITE_SENTRY_DSN) return;
+  Sentry.addIntegration(Sentry.replayIntegration());
+  Sentry.addIntegration(Sentry.browserProfilingIntegration());
+};
+
+const scheduleIdleWork = (cb: () => void) => {
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(cb, { timeout: 4000 });
+
+    return;
+  }
+  setTimeout(cb, 2000);
+};
+
+scheduleIdleWork(initHeavySentryIntegrations);
 
 // Recover from stale SW cache causing chunk load failures (common on iOS PWA after
 // a deployment while the app was backgrounded — old JS tries to load old chunk hashes

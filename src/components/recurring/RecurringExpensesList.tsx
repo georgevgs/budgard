@@ -3,7 +3,13 @@ import { Button } from '@/components/ui/button';
 import { EmptyStateCard } from '@/components/ui/empty-state-card';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
-import { useData } from '@/contexts/DataContext';
+import {
+  useDataConfig,
+  useExpensesData,
+  useRecurringData,
+  useCategoriesData,
+  useAccountsData,
+} from '@/contexts/DataContext';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import type { RecurringExpense } from '@/types/RecurringExpense';
@@ -35,16 +41,11 @@ const RecurringExpensesList = () => {
   const [prefill, setPrefill] = useState<RecurringExpensePrefill | undefined>(
     undefined,
   );
-  const {
-    recurringExpenses,
-    recurringIncomes,
-    expenseCategories,
-    incomeCategories,
-    expenses,
-    accounts,
-    defaultCurrency,
-    isLoading,
-  } = useData();
+  const { recurringExpenses, recurringIncomes } = useRecurringData();
+  const { expenseCategories, incomeCategories } = useCategoriesData();
+  const expenses = useExpensesData();
+  const { accounts } = useAccountsData();
+  const { defaultCurrency, isInitialized } = useDataConfig();
   const { session } = useAuth();
   const {
     handleRecurringExpenseSubmit: submitRecurringExpense,
@@ -160,7 +161,7 @@ const RecurringExpensesList = () => {
     0,
   );
 
-  if (isLoading) {
+  if (!isInitialized) {
     return <RecurringLoadingState />;
   }
 

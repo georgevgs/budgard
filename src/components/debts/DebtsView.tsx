@@ -22,7 +22,7 @@ type Tab = 'list' | 'plan';
 
 const DebtsView = () => {
   const { t } = useTranslation();
-  const { defaultCurrency, isInitialized } = useDataConfig();
+  const { defaultCurrency, isInitialized, isSecondaryLoaded } = useDataConfig();
   const { debts, summary } = useDebts();
   const { avalanche } = useDebtPayoffPlan(debts, 0);
   const [tab, setTab] = useState<Tab>('list');
@@ -56,7 +56,7 @@ const DebtsView = () => {
     setDetailDebt(undefined);
   }, []);
 
-  if (!isInitialized) {
+  if (!isInitialized || !isSecondaryLoaded) {
     return <DebtsLoadingState />;
   }
 

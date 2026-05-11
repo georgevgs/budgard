@@ -15,7 +15,11 @@ import {
 } from 'recharts';
 import type { CategoricalChartFunc } from 'recharts/types/chart/types';
 import { Card, CardContent } from '@/components/ui/card';
-import { useData } from '@/contexts/DataContext';
+import {
+  useDataConfig,
+  useExpensesData,
+  useCategoriesData,
+} from '@/contexts/DataContext';
 import {
   Select,
   SelectContent,
@@ -44,13 +48,9 @@ import type { Category } from '@/types/Category';
 const BUDGET_LINE_COLOR = '#f59e0b'; // amber-500 — matches bg-amber-500 budget warning
 
 const AnalyticsView = () => {
-  const {
-    expenses,
-    expenseCategories: categories,
-    monthlyBudget,
-    defaultCurrency,
-    isLoading,
-  } = useData();
+  const expenses = useExpensesData();
+  const { expenseCategories: categories } = useCategoriesData();
+  const { monthlyBudget, defaultCurrency, isInitialized } = useDataConfig();
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const currencySymbol = getCurrencySymbol(defaultCurrency);
@@ -246,7 +246,7 @@ const AnalyticsView = () => {
     return undefined;
   }, [monthlyData, monthlyBudget]);
 
-  if (isLoading) {
+  if (!isInitialized) {
     return <AnalyticsLoadingState />;
   }
 

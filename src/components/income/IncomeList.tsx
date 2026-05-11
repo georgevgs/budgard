@@ -7,7 +7,12 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
-import { useData } from '@/contexts/DataContext';
+import {
+  useDataConfig,
+  useExpensesData,
+  useIncomesData,
+  useCategoriesData,
+} from '@/contexts/DataContext';
 import { useIncomeOps } from '@/hooks/dataOps/useIncomeOps';
 import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
 import { formatCurrency } from '@/lib/utils';
@@ -38,8 +43,10 @@ const DEFAULT_INCOME_CATEGORIES: Array<{
 const IncomeList = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
-  const { incomes, expenses, incomeCategories, isInitialized, defaultCurrency } =
-    useData();
+  const incomes = useIncomesData();
+  const expenses = useExpensesData();
+  const { incomeCategories } = useCategoriesData();
+  const { isInitialized, defaultCurrency } = useDataConfig();
   const { handleIncomeDelete } = useIncomeOps();
   const { handleCategoriesAddBulk } = useCategoryOps();
   const currentMonth = format(new Date(), 'yyyy-MM');

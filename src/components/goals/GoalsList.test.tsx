@@ -15,6 +15,7 @@ let dataMock: {
   incomes: Expense[];
   defaultCurrency: string;
   isLoading: boolean;
+  isSecondaryLoaded: boolean;
 };
 
 vi.mock('@/contexts/DataContext', () => ({
@@ -58,6 +59,7 @@ const baseData = {
   incomes: [],
   defaultCurrency: 'EUR',
   isLoading: false,
+  isSecondaryLoaded: true,
 };
 
 const makeGoal = (overrides: Partial<Goal> = {}): Goal => ({

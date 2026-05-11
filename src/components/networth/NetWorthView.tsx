@@ -18,8 +18,13 @@ import AccountDetailSheet from '@/components/networth/AccountDetailSheet';
 
 const NetWorthView = () => {
   const { t } = useTranslation();
-  const { accounts, accountBalances, defaultCurrency, isInitialized } =
-    useData();
+  const {
+    accounts,
+    accountBalances,
+    defaultCurrency,
+    isInitialized,
+    isSecondaryLoaded,
+  } = useData();
   const { summary, series } = useNetWorth();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | undefined>();
@@ -83,7 +88,7 @@ const NetWorthView = () => {
     setDetailAccount(undefined);
   }, []);
 
-  if (!isInitialized) {
+  if (!isInitialized || !isSecondaryLoaded) {
     return <NetWorthLoadingState />;
   }
 

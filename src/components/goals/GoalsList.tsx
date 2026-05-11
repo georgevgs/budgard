@@ -21,7 +21,7 @@ const GoalsList = () => {
   const [selectedGoal, setSelectedGoal] = useState<Goal | undefined>(undefined);
   const { t } = useTranslation();
   const { session } = useAuth();
-  const { goals, defaultCurrency, isLoading } = useData();
+  const { goals, defaultCurrency, isLoading, isSecondaryLoaded } = useData();
   const { handleGoalCreate, handleGoalUpdate, handleGoalDelete } = useGoalOps();
 
   const handleSubmit = async (values: GoalFormData) => {
@@ -74,7 +74,7 @@ const GoalsList = () => {
     setSelectedGoal(undefined);
   };
 
-  if (isLoading) {
+  if (isLoading || !isSecondaryLoaded) {
     return <GoalsLoadingState />;
   }
 

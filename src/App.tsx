@@ -5,6 +5,7 @@ import {
   Route,
   Navigate,
   Outlet,
+  useLocation,
 } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { useAuth } from '@/contexts/AuthContext';
@@ -166,6 +167,90 @@ const CatchAllRedirect = () => {
 };
 
 // ============================================================================
+// Main Tabs Keep-Alive Layout
+// ============================================================================
+// The four bottom-nav tabs share this layout so switching between them does
+// not unmount/remount the route. Each tab mounts on its first visit and is
+// hidden (display: none) when inactive. This preserves local UI state
+// (selected month, filters, expanded dashboard) and avoids re-running the
+// derived-state useMemos in heavy views (Analytics aggregates, expense
+// filtering pipeline) on every tab switch.
+
+const MAIN_TAB_PATHS = [
+  '/expenses',
+  '/income',
+  '/recurring',
+  '/analytics',
+] as const;
+type MainTabPath = (typeof MAIN_TAB_PATHS)[number];
+
+const isMainTabPath = (path: string): path is MainTabPath =>
+  (MAIN_TAB_PATHS as readonly string[]).includes(path);
+
+const MainTabsLayout = () => {
+  const { pathname } = useLocation();
+  // Track which tabs have been visited via a ref so we can update during
+  // render — useState + useEffect would leave a one-frame gap where the
+  // target tab isn't in the set yet.
+  const visitedRef = useRef<Set<MainTabPath>>(new Set());
+  if (isMainTabPath(pathname)) {
+    visitedRef.current.add(pathname);
+  }
+  const visited = visitedRef.current;
+
+  return (
+    <>
+      {renderKeepAliveTab(
+        '/expenses',
+        pathname,
+        visited,
+        <ExpenseLoadingState />,
+        <ExpensesList />,
+      )}
+      {renderKeepAliveTab(
+        '/income',
+        pathname,
+        visited,
+        <ExpenseLoadingState />,
+        <IncomeList />,
+      )}
+      {renderKeepAliveTab(
+        '/recurring',
+        pathname,
+        visited,
+        <RecurringLoadingState />,
+        <RecurringExpensesList />,
+      )}
+      {renderKeepAliveTab(
+        '/analytics',
+        pathname,
+        visited,
+        <AnalyticsLoadingState />,
+        <AnalyticsView />,
+      )}
+    </>
+  );
+};
+
+const renderKeepAliveTab = (
+  tabPath: MainTabPath,
+  activePath: string,
+  visited: Set<MainTabPath>,
+  fallback: ReactNode,
+  element: ReactNode,
+) => {
+  if (!visited.has(tabPath)) return null;
+
+  const isActive = activePath === tabPath;
+
+  return (
+    <div key={tabPath} hidden={!isActive}>
+      <Suspense fallback={fallback}>{element}</Suspense>
+    </div>
+  );
+};
+
+// ============================================================================
 // Offline Banner
 // ============================================================================
 
@@ -232,38 +317,14 @@ const App = () => {
 
               {/* Authenticated routes with shared layout */}
               <Route element={<PrivateRoute />}>
-                <Route
-                  path="/expenses"
-                  element={
-                    <Suspense fallback={<ExpenseLoadingState />}>
-                      <ExpensesList />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/income"
-                  element={
-                    <Suspense fallback={<ExpenseLoadingState />}>
-                      <IncomeList />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/recurring"
-                  element={
-                    <Suspense fallback={<RecurringLoadingState />}>
-                      <RecurringExpensesList />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/analytics"
-                  element={
-                    <Suspense fallback={<AnalyticsLoadingState />}>
-                      <AnalyticsView />
-                    </Suspense>
-                  }
-                />
+                {/* Bottom-nav tabs share a keep-alive layout to preserve
+                    state and avoid re-running heavy memos on every switch */}
+                <Route element={<MainTabsLayout />}>
+                  <Route path="/expenses" />
+                  <Route path="/income" />
+                  <Route path="/recurring" />
+                  <Route path="/analytics" />
+                </Route>
                 <Route
                   path="/goals"
                   element={

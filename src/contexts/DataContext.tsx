@@ -48,6 +48,7 @@ type DataState = {
   dailyReminderHour: number | null;
   isLoading: boolean;
   isInitialized: boolean;
+  isSecondaryLoaded: boolean;
 };
 
 // Actions never change reference after mount (setters are stable, refresh
@@ -85,6 +86,10 @@ type DataActions = {
 // Carved out so consumers don't re-render on every expense/income mutation.
 type DataConfig = {
   isInitialized: boolean;
+  // Flips true after the deferred stage finishes loading goals, accounts,
+  // accountBalances and debts. Views that depend on those (GoalsList,
+  // NetWorthView, DebtsView) wait on this before rendering content.
+  isSecondaryLoaded: boolean;
   monthlyBudget: number | null;
   defaultCurrency: string;
   defaultSavingsPct: number | null;
@@ -96,6 +101,34 @@ type DataContextType = DataState & DataActions;
 const DataContext = createContext<DataContextType | null>(null);
 const DataActionsContext = createContext<DataActions | null>(null);
 const DataConfigContext = createContext<DataConfig | null>(null);
+
+// Per-slice contexts. Granular subscriptions: a component reading
+// ExpensesDataContext only re-renders when expenses change, not when incomes
+// or tags do. The combined DataContext above is kept for back-compat; new
+// consumers should prefer these scoped hooks.
+const ExpensesDataContext = createContext<Expense[] | null>(null);
+const IncomesDataContext = createContext<Expense[] | null>(null);
+type CategoriesSlice = {
+  categories: Category[];
+  expenseCategories: Category[];
+  incomeCategories: Category[];
+};
+const CategoriesDataContext = createContext<CategoriesSlice | null>(null);
+const TagsDataContext = createContext<Tag[] | null>(null);
+const TemplatesDataContext = createContext<ExpenseTemplate[] | null>(null);
+type RecurringSlice = {
+  recurringExpenses: RecurringExpense[];
+  recurringIncomes: RecurringExpense[];
+};
+const RecurringDataContext = createContext<RecurringSlice | null>(null);
+const GoalsDataContext = createContext<Goal[] | null>(null);
+type AccountsSlice = {
+  accounts: Account[];
+  accountBalances: AccountBalance[];
+};
+const AccountsDataContext = createContext<AccountsSlice | null>(null);
+const DebtsDataContext = createContext<Debt[] | null>(null);
+const CategoryBudgetsDataContext = createContext<CategoryBudget[] | null>(null);
 
 export const DataProvider = ({ children }: { children: ReactNode }) => {
   const { session, isLoading: isAuthLoading } = useAuth();
@@ -129,6 +162,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  // Sticky once true — flips false only on logout reset, never on background
+  // refetches, so /goals, /networth and /debts don't blank on foreground
+  // visibility refreshes.
+  const [isSecondaryLoaded, setIsSecondaryLoaded] = useState(false);
 
   // Expose latest data via refs so handlers can read it inside async callbacks
   // without subscribing to context updates (keeps useDataOperations stable).
@@ -136,6 +173,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   expensesRef.current = expenses;
   const incomesRef = useRef<Expense[]>(incomes);
   incomesRef.current = incomes;
+  // Tracks isInitialized inside async callbacks without stale closures.
+  // We use this to decide whether a fetch should blank views with the loading
+  // skeleton (first paint) or refresh silently in the background.
+  const isInitializedRef = useRef(isInitialized);
+  isInitializedRef.current = isInitialized;
 
   // Categories without an explicit 'income' type belong to expenses (back-compat).
   const expenseCategories = useMemo(
@@ -166,7 +208,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    setIsLoading(true);
+    // Only show the global loading flag on the very first fetch. Subsequent
+    // refreshes (e.g. visibility-driven on foreground) should be silent so
+    // already-rendered views don't blank back to a skeleton.
+    if (!isInitializedRef.current) {
+      setIsLoading(true);
+    }
 
     // Two-stage expense/income fetch: load the last RECENT_MONTHS of history
     // first so the user sees a working app fast, then top up older rows in
@@ -178,7 +225,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     const recentCutoff = recentCutoffDate.toISOString().split('T')[0];
 
     try {
-      // Stage 1: critical fetch — recent expenses/incomes + everything else.
+      // Stage 1: critical fetch — everything needed by the four bottom-nav
+      // tabs (expenses, income, recurring, analytics). Secondary domains
+      // (goals/accounts/balances/debts) are routed via the header AppMenu
+      // and load in stage 1.5 below.
       const [
         categoriesData,
         expensesData,
@@ -188,10 +238,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         budgetData,
         tagsData,
         templatesData,
-        goalsData,
-        accountsData,
-        accountBalancesData,
-        debtsData,
         categoryBudgetsData,
       ] = await Promise.all([
         dataService.getCategories(controller.signal),
@@ -202,10 +248,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         dataService.getBudget(controller.signal),
         dataService.getTags(controller.signal),
         dataService.getTemplates(controller.signal),
-        dataService.getGoals(controller.signal),
-        dataService.getAccounts(controller.signal),
-        dataService.getAllAccountBalances(controller.signal),
-        dataService.getDebts(controller.signal),
         dataService.getCategoryBudgets(controller.signal),
       ]);
 
@@ -217,10 +259,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setRecurringIncomes(recurringIncomesData);
       setTags(tagsData);
       setTemplates(templatesData);
-      setGoals(goalsData);
-      setAccounts(accountsData);
-      setAccountBalances(accountBalancesData);
-      setDebts(debtsData);
       setCategoryBudgets(categoryBudgetsData);
       setMonthlyBudget(budgetData?.monthly_amount ?? null);
       setDefaultCurrency(budgetData?.default_currency ?? 'EUR');
@@ -230,6 +268,33 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
       lastFetchAtRef.current = Date.now();
       wasAbortedRef.current = false;
+
+      // Stage 1.5: domains used by AppMenu-only views (goals, networth,
+      // debts). Fired immediately after stage 1 but doesn't block first paint.
+      Promise.all([
+        dataService.getGoals(controller.signal),
+        dataService.getAccounts(controller.signal),
+        dataService.getAllAccountBalances(controller.signal),
+        dataService.getDebts(controller.signal),
+      ])
+        .then(([goalsData, accountsData, balancesData, debtsData]) => {
+          if (controller.signal.aborted) {
+            return;
+          }
+          setGoals(goalsData);
+          setAccounts(accountsData);
+          setAccountBalances(balancesData);
+          setDebts(debtsData);
+          setIsSecondaryLoaded(true);
+        })
+        .catch((error) => {
+          if (isAbortError(error)) {
+            return;
+          }
+          Sentry.captureException(error, {
+            tags: { context: 'fetchSecondaryDomains' },
+          });
+        });
 
       // Stage 2: top up older expenses/incomes in the background. Append
       // to whatever is in state now (which may include user mutations made
@@ -358,6 +423,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setDefaultCurrency('EUR');
       setDefaultSavingsPct(null);
       setIsInitialized(false);
+      setIsSecondaryLoaded(false);
       setIsLoading(false);
     }
   }, [isAuthLoading, session, isInitialized, fetchData]);
@@ -431,6 +497,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const config = useMemo<DataConfig>(
     () => ({
       isInitialized,
+      isSecondaryLoaded,
       monthlyBudget,
       defaultCurrency,
       defaultSavingsPct,
@@ -438,6 +505,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }),
     [
       isInitialized,
+      isSecondaryLoaded,
       monthlyBudget,
       defaultCurrency,
       defaultSavingsPct,
@@ -467,6 +535,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       dailyReminderHour,
       isLoading,
       isInitialized,
+      isSecondaryLoaded,
       ...actions,
     }),
     [
@@ -490,14 +559,52 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       dailyReminderHour,
       isLoading,
       isInitialized,
+      isSecondaryLoaded,
       actions,
     ],
+  );
+
+  const categoriesSlice = useMemo<CategoriesSlice>(
+    () => ({ categories, expenseCategories, incomeCategories }),
+    [categories, expenseCategories, incomeCategories],
+  );
+  const recurringSlice = useMemo<RecurringSlice>(
+    () => ({ recurringExpenses, recurringIncomes }),
+    [recurringExpenses, recurringIncomes],
+  );
+  const accountsSlice = useMemo<AccountsSlice>(
+    () => ({ accounts, accountBalances }),
+    [accounts, accountBalances],
   );
 
   return (
     <DataActionsContext.Provider value={actions}>
       <DataConfigContext.Provider value={config}>
-        <DataContext.Provider value={value}>{children}</DataContext.Provider>
+        <ExpensesDataContext.Provider value={expenses}>
+          <IncomesDataContext.Provider value={incomes}>
+            <CategoriesDataContext.Provider value={categoriesSlice}>
+              <TagsDataContext.Provider value={tags}>
+                <TemplatesDataContext.Provider value={templates}>
+                  <RecurringDataContext.Provider value={recurringSlice}>
+                    <GoalsDataContext.Provider value={goals}>
+                      <AccountsDataContext.Provider value={accountsSlice}>
+                        <DebtsDataContext.Provider value={debts}>
+                          <CategoryBudgetsDataContext.Provider
+                            value={categoryBudgets}
+                          >
+                            <DataContext.Provider value={value}>
+                              {children}
+                            </DataContext.Provider>
+                          </CategoryBudgetsDataContext.Provider>
+                        </DebtsDataContext.Provider>
+                      </AccountsDataContext.Provider>
+                    </GoalsDataContext.Provider>
+                  </RecurringDataContext.Provider>
+                </TemplatesDataContext.Provider>
+              </TagsDataContext.Provider>
+            </CategoriesDataContext.Provider>
+          </IncomesDataContext.Provider>
+        </ExpensesDataContext.Provider>
       </DataConfigContext.Provider>
     </DataActionsContext.Provider>
   );
@@ -563,4 +670,99 @@ export const useDataConfig = () => {
   }
 
   return context;
+};
+
+// ─── Per-slice hooks ────────────────────────────────────────────────────────
+// Each subscribes to a single domain context, so consumers only re-render
+// when that slice changes — e.g. a tag mutation doesn't re-render expense
+// list consumers, an expense add doesn't re-render goals consumers.
+
+export const useExpensesData = () => {
+  const ctx = useContext(ExpensesDataContext);
+  if (ctx === null) {
+    throw new Error('useExpensesData must be used within a DataProvider');
+  }
+
+  return ctx;
+};
+
+export const useIncomesData = () => {
+  const ctx = useContext(IncomesDataContext);
+  if (ctx === null) {
+    throw new Error('useIncomesData must be used within a DataProvider');
+  }
+
+  return ctx;
+};
+
+export const useCategoriesData = () => {
+  const ctx = useContext(CategoriesDataContext);
+  if (!ctx) {
+    throw new Error('useCategoriesData must be used within a DataProvider');
+  }
+
+  return ctx;
+};
+
+export const useTagsData = () => {
+  const ctx = useContext(TagsDataContext);
+  if (ctx === null) {
+    throw new Error('useTagsData must be used within a DataProvider');
+  }
+
+  return ctx;
+};
+
+export const useTemplatesData = () => {
+  const ctx = useContext(TemplatesDataContext);
+  if (ctx === null) {
+    throw new Error('useTemplatesData must be used within a DataProvider');
+  }
+
+  return ctx;
+};
+
+export const useRecurringData = () => {
+  const ctx = useContext(RecurringDataContext);
+  if (!ctx) {
+    throw new Error('useRecurringData must be used within a DataProvider');
+  }
+
+  return ctx;
+};
+
+export const useGoalsData = () => {
+  const ctx = useContext(GoalsDataContext);
+  if (ctx === null) {
+    throw new Error('useGoalsData must be used within a DataProvider');
+  }
+
+  return ctx;
+};
+
+export const useAccountsData = () => {
+  const ctx = useContext(AccountsDataContext);
+  if (!ctx) {
+    throw new Error('useAccountsData must be used within a DataProvider');
+  }
+
+  return ctx;
+};
+
+export const useDebtsData = () => {
+  const ctx = useContext(DebtsDataContext);
+  if (ctx === null) {
+    throw new Error('useDebtsData must be used within a DataProvider');
+  }
+
+  return ctx;
+};
+
+export const useCategoryBudgetsData = () => {
+  const ctx = useContext(CategoryBudgetsDataContext);
+  if (ctx === null) {
+    throw new Error('useCategoryBudgetsData must be used within a DataProvider');
+  }
+
+  return ctx;
 };
