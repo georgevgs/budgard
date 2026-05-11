@@ -29,6 +29,10 @@ const AppMenu = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={() => navigate('/goals')}>
+          <Target className="h-4 w-4" />
+          {t('navigation.goals')}
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate('/networth')}>
           <Wallet className="h-4 w-4" />
           {t('navigation.networth')}
@@ -36,10 +40,6 @@ const AppMenu = () => {
         <DropdownMenuItem onClick={() => navigate('/debts')}>
           <CreditCard className="h-4 w-4" />
           {t('navigation.debts')}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/goals')}>
-          <Target className="h-4 w-4" />
-          {t('navigation.goals')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

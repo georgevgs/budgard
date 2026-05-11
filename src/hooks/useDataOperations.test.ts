@@ -697,7 +697,12 @@ describe('useDataOperations', () => {
     });
 
     it('refreshes debts after creating an expense linked to a debt', async () => {
-      const saved = { id: 'e1', amount: 200, debt_id: 'd1' };
+      const saved = {
+        id: 'e1',
+        amount: 200,
+        debt_id: 'd1',
+        type: 'debt_payment',
+      };
       mockCreateExpense.mockResolvedValue(saved);
 
       const { result } = renderHook(() => useDataOperations());
@@ -706,6 +711,7 @@ describe('useDataOperations', () => {
         await result.current.handleExpenseSubmit({
           amount: 200,
           debt_id: 'd1',
+          type: 'debt_payment',
         });
       });
 
@@ -723,6 +729,59 @@ describe('useDataOperations', () => {
       });
 
       expect(mockRefreshDebts).not.toHaveBeenCalled();
+    });
+
+    it('does not prepend debt_payment rows to the expenses array', async () => {
+      const saved = {
+        id: 'e1',
+        amount: 200,
+        debt_id: 'd1',
+        type: 'debt_payment',
+      };
+      mockCreateExpense.mockResolvedValue(saved);
+
+      let capturedUpdater: ((prev: unknown[]) => unknown[]) | null = null;
+      mockSetExpenses.mockImplementationOnce((updater) => {
+        if (typeof updater === 'function') capturedUpdater = updater;
+      });
+
+      const { result } = renderHook(() => useDataOperations());
+
+      await act(async () => {
+        await result.current.handleExpenseSubmit({
+          amount: 200,
+          debt_id: 'd1',
+          type: 'debt_payment',
+        });
+      });
+
+      expect(capturedUpdater).not.toBeNull();
+      const prev = [{ id: 'other', amount: 10 }];
+      const next = capturedUpdater!(prev);
+      // Array unchanged — debt_payment must not leak into the expenses list.
+      expect(next).toEqual(prev);
+    });
+
+    it('prepends a regular expense to the expenses array', async () => {
+      const saved = { id: 'e2', amount: 30, type: 'expense' };
+      mockCreateExpense.mockResolvedValue(saved);
+
+      let capturedUpdater: ((prev: unknown[]) => unknown[]) | null = null;
+      mockSetExpenses.mockImplementationOnce((updater) => {
+        if (typeof updater === 'function') capturedUpdater = updater;
+      });
+
+      const { result } = renderHook(() => useDataOperations());
+
+      await act(async () => {
+        await result.current.handleExpenseSubmit({ amount: 30 });
+      });
+
+      expect(capturedUpdater).not.toBeNull();
+      const prev = [{ id: 'other', amount: 10 }];
+      const next = capturedUpdater!(prev);
+      expect(next).toHaveLength(2);
+      expect((next[0] as { id: string }).id).toBe('e2');
     });
   });
 

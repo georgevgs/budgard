@@ -71,6 +71,7 @@ const DebtPaymentForm = ({ debt, onClose }: Props) => {
         date,
         description,
         debt_id: debt.id,
+        type: 'debt_payment',
         user_id: session.user.id,
       });
       onClose();

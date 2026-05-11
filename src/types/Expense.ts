@@ -2,7 +2,7 @@ import { Category } from '@/types/Category.ts';
 import { Debt } from '@/types/Debt.ts';
 import { Tag } from '@/types/Tag.ts';
 
-export type TransactionType = 'expense' | 'income';
+export type TransactionType = 'expense' | 'income' | 'debt_payment';
 
 export type Expense = {
   id: string;
@@ -20,7 +20,9 @@ export type Expense = {
   original_amount?: number | null;
   original_currency?: string | null;
   exchange_rate?: number | null;
-  // Discriminator: 'expense' (outflow) or 'income' (inflow). DB default is 'expense'.
+  // Discriminator: 'expense' (outflow), 'income' (inflow), or 'debt_payment'
+  // (outflow that reduces a liability — excluded from spending aggregations).
+  // DB default is 'expense'.
   type?: TransactionType;
   // Savings nudge: portion of an income row earmarked as savings.
   savings_allocation_amount?: number | null;

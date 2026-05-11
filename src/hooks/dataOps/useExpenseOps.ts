@@ -107,8 +107,15 @@ export const useExpenseOps = () => {
         haptics.success();
 
         const previousDebtId = getPreviousDebtId(expenseId, expensesRef.current);
+        const isDebtPayment = finalExpense.type === 'debt_payment';
         setExpenses((prev) => {
-          if (expenseId) return replaceById(prev, expenseId, finalExpense);
+          if (expenseId) {
+            if (isDebtPayment) return prev.filter((e) => e.id !== expenseId);
+
+            return replaceById(prev, expenseId, finalExpense);
+          }
+
+          if (isDebtPayment) return prev;
 
           return [finalExpense, ...prev];
         });
@@ -153,10 +160,16 @@ export const useExpenseOps = () => {
             ...expenseData,
             ...idPayload,
           } as Record<string, unknown>);
+          const isDebtPayment = expenseData.type === 'debt_payment';
           setExpenses((prev) => {
             if (expenseId) {
+              if (isDebtPayment) return prev.filter((e) => e.id !== expenseId);
+
               return patchById(prev, expenseId, expenseData);
             }
+
+            if (isDebtPayment) return prev;
+
             const optimistic = {
               ...expenseData,
               id: tempId as string,
