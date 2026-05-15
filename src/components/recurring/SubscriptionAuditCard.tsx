@@ -6,11 +6,13 @@ import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import Plus from 'lucide-react/dist/esm/icons/plus';
+import X from 'lucide-react/dist/esm/icons/x';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
+import { useIgnoredSubscriptions } from '@/hooks/useIgnoredSubscriptions';
 import { formatCurrency } from '@/lib/utils';
 import { calculateNextOccurrence, getMonthlyAmount } from '@/lib/recurring';
 import {
@@ -54,6 +56,7 @@ const SubscriptionAuditCard = ({
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();
+  const { ignored, ignore } = useIgnoredSubscriptions();
 
   const audit = useMemo(() => {
     const subscriptionLike = recurringExpenses.filter((r) =>
@@ -89,8 +92,11 @@ const SubscriptionAuditCard = ({
   }, [recurringExpenses, expenses]);
 
   const detected = useMemo(
-    () => detectSubscriptions(expenses, recurringExpenses),
-    [expenses, recurringExpenses],
+    () =>
+      detectSubscriptions(expenses, recurringExpenses).filter(
+        (d) => !ignored.has(d.normalizedDescription),
+      ),
+    [expenses, recurringExpenses, ignored],
   );
 
   const showSummary = audit.activeCount >= MIN_SUBS_TO_SHOW;
@@ -105,7 +111,7 @@ const SubscriptionAuditCard = ({
       <CardContent className="p-4 sm:p-5">
         {renderHeader(t)}
         {renderSummary(showSummary, audit, t, defaultCurrency, dateLocale, onToggle)}
-        {renderDetectedSection(detected, showDetected, onAddDetected, t, defaultCurrency)}
+        {renderDetectedSection(detected, showDetected, onAddDetected, ignore, t, defaultCurrency)}
       </CardContent>
     </Card>
   );
@@ -315,6 +321,7 @@ const renderDetectedSection = (
   detected: DetectedSubscription[],
   show: boolean,
   onAddDetected: (prefill: RecurringPrefill) => void,
+  onIgnore: (key: string) => void,
   t: TFunc,
   currency: string,
 ) => {
@@ -329,7 +336,9 @@ const renderDetectedSection = (
         {t('recurring.audit.detectedSubtitle', { count: detected.length })}
       </p>
       <div className="space-y-1.5">
-        {detected.map((d) => renderDetectedRow(d, onAddDetected, currency, t))}
+        {detected.map((d) =>
+          renderDetectedRow(d, onAddDetected, onIgnore, currency, t),
+        )}
       </div>
     </div>
   );
@@ -338,12 +347,13 @@ const renderDetectedSection = (
 const renderDetectedRow = (
   detection: DetectedSubscription,
   onAddDetected: (prefill: RecurringPrefill) => void,
+  onIgnore: (key: string) => void,
   currency: string,
   t: TFunc,
 ) => (
   <div
     key={detection.normalizedDescription}
-    className="flex items-center gap-3 px-2 py-2 rounded-lg bg-muted/30"
+    className="flex items-center gap-2 px-2 py-2 rounded-lg bg-muted/30"
   >
     <div className="flex-1 min-w-0">
       <p className="text-sm font-medium truncate">{detection.description}</p>
@@ -374,6 +384,17 @@ const renderDetectedRow = (
       <span className="hidden sm:inline">
         {t('recurring.audit.addAsRecurring')}
       </span>
+    </Button>
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8 shrink-0 text-muted-foreground"
+      aria-label={t('recurring.audit.ignoreAria', {
+        description: detection.description,
+      })}
+      onClick={() => onIgnore(detection.normalizedDescription)}
+    >
+      <X className="h-4 w-4" />
     </Button>
   </div>
 );
