@@ -208,7 +208,7 @@ const renderResultCard = (
             })}
           </span>
         </div>
-        <p className="text-xl sm:text-2xl font-bold tabular-nums leading-tight break-words">
+        <p className="text-xl sm:text-2xl font-bold tracking-tight tabular-nums leading-tight break-words">
           {t('debts.payoff.debtFreeIn')}{' '}
           <span className="text-primary">
             {t('debts.monthsCount', { count: result.monthsToPayoff })}
@@ -256,7 +256,7 @@ const renderComparison = (
   const monthsDiff = snowball.monthsToPayoff - avalanche.monthsToPayoff;
 
   return (
-    <Card className="border-border/50 rounded-2xl">
+    <Card className="border-border/50">
       <CardContent className="p-4 space-y-3">
         <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
           <TrendingDown className="h-3.5 w-3.5" />
@@ -329,7 +329,7 @@ const renderPayoffOrder = (
   if (ordered.length === 0) return null;
 
   return (
-    <Card className="border-border/50 rounded-2xl">
+    <Card className="border-border/50">
       <CardContent className="p-4 space-y-3">
         <p className="text-xs font-medium text-muted-foreground">
           {t('debts.payoff.orderTitle')}

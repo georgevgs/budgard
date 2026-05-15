@@ -80,7 +80,7 @@ const RecurringExpenseCard = ({
     <>
       <Card
         className={cn(
-          'border-border/50 rounded-2xl transition-opacity',
+          'transition-opacity hover:shadow-md',
           !expense.active && 'opacity-60 bg-muted/30',
         )}
       >

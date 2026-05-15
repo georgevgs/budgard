@@ -41,7 +41,7 @@ const BUCKETS: BucketConfig[] = [
     key: 'savings',
     target: 0.2,
     color: '#10b981',
-    textClass: 'text-emerald-600 dark:text-emerald-400',
+    textClass: 'text-income',
   },
 ];
 

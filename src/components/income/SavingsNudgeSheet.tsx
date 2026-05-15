@@ -108,7 +108,7 @@ const SavingsNudgeSheet = ({ income, open, onClose }: Props) => {
               <p className="text-xs text-muted-foreground mb-1">
                 {t('income.nudge.allocationLabel', { pct })}
               </p>
-              <p className="text-2xl font-bold tabular-nums text-income">
+              <p className="text-2xl font-bold tracking-tight tabular-nums text-income">
                 {formatCurrency(allocation, defaultCurrency)}
               </p>
             </div>

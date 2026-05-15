@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { Locale } from 'date-fns';
+import { Card } from '@/components/ui/card';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import { useSpendingInsights, type Insight } from '@/hooks/useSpendingInsights';
@@ -69,13 +70,13 @@ const renderSecondaryCards = (insights: Insight[]) => {
         const Icon = insight.icon;
 
         return (
-          <div
+          <Card
             key={insight.id}
-            className="rounded-2xl border border-border/40 bg-card px-3.5 py-3 shadow-sm flex items-center gap-3"
+            className="px-3.5 py-3 flex items-center gap-3"
           >
             <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">{insight.text}</p>
-          </div>
+          </Card>
         );
       })}
     </div>

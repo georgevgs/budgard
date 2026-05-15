@@ -530,7 +530,7 @@ const getScopeButtonClass = (active: boolean): string => {
     return 'bg-background text-foreground shadow-sm';
   }
 
-  return 'text-muted-foreground';
+  return 'text-muted-foreground hover:text-foreground';
 };
 
 const resolveCategoryName = (

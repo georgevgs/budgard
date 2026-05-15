@@ -23,7 +23,7 @@ const KIND_OPTIONS: KindOption[] = [
   {
     value: 'savings',
     targetPct: 20,
-    activeClasses: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
+    activeClasses: 'bg-income/15 text-income',
   },
 ];
 

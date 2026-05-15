@@ -71,7 +71,7 @@ const GoalCard = ({ goal, onEdit, onDelete }: Props) => {
 
   return (
     <>
-      <Card className="border-border/50 rounded-2xl">
+      <Card className="transition-shadow hover:shadow-md">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0 flex-1">

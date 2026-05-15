@@ -51,7 +51,7 @@ const ThemeToggle: React.FC = () => {
           <DropdownMenuItem
             key={themeName}
             onClick={() => setTheme(themeName)}
-            className={themeName === 'barbie' ? 'text-pink-500' : ''}
+            className={getThemeItemClassName(themeName)}
           >
             {themeIcons[themeName]}
             <span className="ml-2">{t(`theme.${themeName}`)}</span>
@@ -64,6 +64,14 @@ const ThemeToggle: React.FC = () => {
 };
 
 export default ThemeToggle;
+
+const getThemeItemClassName = (themeName: Theme): string => {
+  if (themeName === 'barbie') {
+    return 'text-pink-500';
+  }
+
+  return '';
+};
 
 const renderAccentSection = (
   isBarbie: boolean,

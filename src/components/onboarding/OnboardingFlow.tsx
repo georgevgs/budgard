@@ -195,7 +195,12 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
       </div>
 
       <div className="flex gap-3">
-        <Button variant="ghost" className="flex-1" onClick={() => setStep(2)}>
+        <Button
+          variant="ghost"
+          className="flex-1"
+          onClick={() => setStep(2)}
+          disabled={isSubmitting}
+        >
           {t('onboarding.skip')}
         </Button>
         <Button
@@ -248,7 +253,12 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
       </div>
 
       <div className="flex gap-3">
-        <Button variant="ghost" className="flex-1" onClick={() => setStep(3)}>
+        <Button
+          variant="ghost"
+          className="flex-1"
+          onClick={() => setStep(3)}
+          disabled={isSubmitting}
+        >
           {t('onboarding.skip')}
         </Button>
         <Button
@@ -281,7 +291,7 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
             className="flex items-start gap-3 rounded-xl border border-border/50 bg-card p-3"
           >
             <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <feature.Icon className="h-4.5 w-4.5 text-primary" />
+              <feature.Icon className="h-5 w-5 text-primary" />
             </div>
             <div className="min-w-0">
               <p className="text-sm font-medium text-foreground">

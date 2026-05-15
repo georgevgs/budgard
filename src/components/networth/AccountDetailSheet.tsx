@@ -158,7 +158,7 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
               </p>
               <p
                 className={cn(
-                  'text-2xl font-bold tabular-nums',
+                  'text-2xl font-bold tabular-nums tracking-tight',
                   getBalanceClass(liability),
                 )}
               >

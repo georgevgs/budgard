@@ -167,8 +167,10 @@ const MonthlyReportCard = ({
           </Button>
           <Button
             variant="outline"
+            size="icon"
             onClick={handleExport}
             disabled={isExporting || totalSpent === 0}
+            aria-label={t('report.saveImage')}
           >
             <Download className="h-4 w-4" />
           </Button>

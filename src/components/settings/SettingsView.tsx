@@ -168,14 +168,14 @@ const SettingsView = () => {
 
   return (
     <div className="container max-w-lg mx-auto p-4 pb-12 space-y-8">
-      <h2 className="text-lg font-semibold">{t('settings.title')}</h2>
+      <h2 className="text-lg font-semibold tracking-tight">{t('settings.title')}</h2>
 
       {/* Profile */}
       <section className="space-y-2">
         <p className="text-xs text-muted-foreground uppercase tracking-wide">
           {t('settings.profile.title')}
         </p>
-        <Card className="border-border/50 rounded-2xl">
+        <Card>
           <CardContent className="p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
@@ -187,7 +187,7 @@ const SettingsView = () => {
             </div>
             <Button
               variant="outline"
-              className="w-full justify-start text-destructive hover:text-destructive"
+              className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 focus-visible:ring-destructive"
               onClick={() => setShowSignOutDialog(true)}
             >
               <LogOut className="h-4 w-4 mr-2" />
@@ -202,7 +202,7 @@ const SettingsView = () => {
         <p className="text-xs text-muted-foreground uppercase tracking-wide">
           {t('settings.appearance.title')}
         </p>
-        <Card className="border-border/50 rounded-2xl">
+        <Card>
           <CardContent className="p-4 space-y-4">
             <div>
               <p className="text-sm mb-2">{t('settings.appearance.theme')}</p>
@@ -228,7 +228,7 @@ const SettingsView = () => {
         <p className="text-xs text-muted-foreground uppercase tracking-wide">
           {t('settings.language.title')}
         </p>
-        <Card className="border-border/50 rounded-2xl">
+        <Card>
           <CardContent className="p-4">
             <Select
               value={i18n.language}
@@ -254,7 +254,7 @@ const SettingsView = () => {
         <p className="text-xs text-muted-foreground uppercase tracking-wide">
           {t('settings.currency.title')}
         </p>
-        <Card className="border-border/50 rounded-2xl">
+        <Card>
           <CardContent className="p-4 space-y-1">
             <p className="text-sm">{t('settings.currency.default')}</p>
             <p className="text-xs text-muted-foreground mb-2">
@@ -285,7 +285,7 @@ const SettingsView = () => {
         <p className="text-xs text-muted-foreground uppercase tracking-wide">
           {t('settings.notifications.title')}
         </p>
-        <Card className="border-border/50 rounded-2xl">
+        <Card>
           <CardContent className="p-4 space-y-4">
             {renderNotificationToggle(pushState, pushSubscribe, pushUnsubscribe, t)}
             {renderDailyReminder(
@@ -304,7 +304,7 @@ const SettingsView = () => {
         <p className="text-xs text-muted-foreground uppercase tracking-wide">
           {t('settings.data.title')}
         </p>
-        <Card className="border-border/50 rounded-2xl">
+        <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground mb-3">
               {t('settings.data.deleteAccountDescription')}
@@ -326,7 +326,7 @@ const SettingsView = () => {
         <p className="text-xs text-muted-foreground uppercase tracking-wide">
           {t('settings.about.title')}
         </p>
-        <Card className="border-border/50 rounded-2xl">
+        <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">

@@ -120,7 +120,7 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
             isOpen && 'rotate-45',
           )}
           onClick={toggleMenu}
-          aria-label={t(isOpen ? 'speedDial.close' : 'speedDial.open')}
+          aria-label={getToggleLabel(isOpen, t)}
           aria-expanded={isOpen}
         >
           {renderToggleIcon(isOpen)}
@@ -150,4 +150,15 @@ const renderToggleIcon = (isOpen: boolean) => {
   if (isOpen) return <X className="h-6 w-6" />;
 
   return <Plus className="h-6 w-6" />;
+};
+
+const getToggleLabel = (
+  isOpen: boolean,
+  t: (key: string) => string,
+): string => {
+  if (isOpen) {
+    return t('speedDial.close');
+  }
+
+  return t('speedDial.open');
 };

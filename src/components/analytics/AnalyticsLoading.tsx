@@ -23,7 +23,7 @@ const AnalyticsLoadingState = () => (
         <Skeleton className="h-10 w-[130px] rounded-md" />
         <Skeleton className="h-4 w-36" />
       </div>
-      <Card className="border-border/50 rounded-2xl">
+      <Card>
         <CardContent className="p-6">
           <Skeleton className="h-[280px] w-full rounded-md" />
         </CardContent>
@@ -33,7 +33,7 @@ const AnalyticsLoadingState = () => (
     {/* Category breakdown */}
     <div className="space-y-3">
       <Skeleton className="h-3 w-32" />
-      <Card className="border-border/50 rounded-2xl">
+      <Card>
         <CardContent className="p-0 divide-y divide-border/50">
           {[0, 1, 2, 3].map((i) => (
             <div

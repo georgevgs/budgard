@@ -52,20 +52,20 @@ const NavTabs = () => {
                   <div
                     className={cn(
                       'flex flex-col items-center gap-0.5 px-5 py-1.5 rounded-2xl transition-all duration-200',
-                      isActive ? 'bg-primary/10' : 'hover:bg-muted/50',
+                      getPillClassName(isActive),
                     )}
                   >
                     <Icon
                       className={cn(
                         'h-5 w-5 transition-colors',
-                        isActive ? 'text-primary' : 'text-muted-foreground',
+                        getActiveTextClassName(isActive),
                       )}
                     />
                   </div>
                   <span
                     className={cn(
                       'text-xs font-medium transition-colors',
-                      isActive ? 'text-primary' : 'text-muted-foreground',
+                      getActiveTextClassName(isActive),
                     )}
                   >
                     {tab.name}
@@ -81,3 +81,21 @@ const NavTabs = () => {
 };
 
 export default NavTabs;
+
+// --- Helpers ---
+
+const getPillClassName = (isActive: boolean): string => {
+  if (isActive) {
+    return 'bg-primary/10';
+  }
+
+  return 'hover:bg-muted/50';
+};
+
+const getActiveTextClassName = (isActive: boolean): string => {
+  if (isActive) {
+    return 'text-primary';
+  }
+
+  return 'text-muted-foreground';
+};

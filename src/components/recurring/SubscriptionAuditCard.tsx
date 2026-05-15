@@ -101,7 +101,7 @@ const SubscriptionAuditCard = ({
   }
 
   return (
-    <Card className="border-border/50 rounded-2xl overflow-hidden">
+    <Card className="overflow-hidden">
       <CardContent className="p-4 sm:p-5">
         {renderHeader(t)}
         {renderSummary(showSummary, audit, t, defaultCurrency, dateLocale, onToggle)}

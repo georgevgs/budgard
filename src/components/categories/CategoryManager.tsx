@@ -233,7 +233,7 @@ const renderEmptyState = (type: CategoryType, t: TFunc) => {
   return (
     <div className="flex flex-col items-center text-center py-12 px-4">
       <FolderOpen
-        className="h-10 w-10 text-muted-foreground/40 mb-3"
+        className="h-12 w-12 text-muted-foreground/50 mb-3"
         aria-hidden="true"
       />
       <p className="text-sm font-medium">{renderEmptyTitle(type, t)}</p>

@@ -90,6 +90,7 @@ const GoalsList = () => {
           onClick={() => setIsFormOpen(true)}
           size="sm"
           className="shrink-0"
+          aria-label={t('goals.addGoal')}
         >
           <Plus className="h-4 w-4 sm:mr-2" />
           <span className="hidden sm:inline">{t('goals.addGoal')}</span>
@@ -158,7 +159,7 @@ const renderEmptyState = (
   onOpenForm: (open: boolean) => void,
   t: TranslateFunction,
 ) => (
-  <Card className="border-border/50 rounded-2xl p-8 text-center overflow-hidden">
+  <Card className="p-8 text-center overflow-hidden">
     <div className="flex flex-col items-center gap-3">
       <Target className="h-12 w-12 text-muted-foreground/50" />
       <div className="max-w-[280px]">
