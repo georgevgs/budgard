@@ -1,0 +1,15 @@
+[install]
+# 1. STOP FRESHLY POISONED PACKAGES (Minimum Release Age)
+# Refuse versions published less than 24 hours ago (86,400 seconds)
+minimumReleaseAge = 86400
+
+# Optional: Add packages you completely trust to bypass the age gate
+minimumReleaseAgeExcludes = ["typescript", "react", "react-dom"]
+
+# 2. BLOCK EXOTIC TRANSITIVE MALWARE (Block Exotic Subdeps)
+# Prevents dependencies from sneaking in malicious git/S3 tarball URLs
+blockExoticSubdeps = true
+
+# 3. ENFORCE LOCKFILE INTEGRITY
+# Ensures installations strict-fail if someone attempts a malicious lockfile injection in CI
+frozenLockfile = true

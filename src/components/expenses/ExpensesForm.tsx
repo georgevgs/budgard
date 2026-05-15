@@ -399,7 +399,7 @@ const ExpensesForm = ({
                           <button
                             key={suggestion.id}
                             type="button"
-                            className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-sm hover:bg-accent active:bg-accent text-left"
+                            className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-sm hover:bg-accent active:bg-accent text-left focus-visible:outline-none focus-visible:bg-accent"
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={() => handleSuggestionSelect(suggestion)}
                           >
@@ -544,7 +544,7 @@ const ExpensesForm = ({
                               <button
                                 key={tag.id}
                                 type="button"
-                                className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left"
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left focus-visible:outline-none focus-visible:bg-accent"
                                 onClick={() => handleTagSelect(tag.id)}
                               >
                                 <div
@@ -741,7 +741,7 @@ const renderCreateTagOption = (
   return (
     <button
       type="button"
-      className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left text-primary disabled:opacity-50 disabled:pointer-events-none"
+      className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left text-primary focus-visible:outline-none focus-visible:bg-accent disabled:opacity-50 disabled:pointer-events-none"
       onClick={onCreate}
       disabled={isCreatingTag}
     >

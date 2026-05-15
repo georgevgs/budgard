@@ -67,7 +67,7 @@ const ExpensesDashboard = ({
   }
 
   return (
-    <Card className="border-border/50 rounded-2xl">
+    <Card className="border-border/50">
       <CardContent className="pt-4 pb-2">
         <div className="w-full space-y-1">
           {categoryData.map((category) => (

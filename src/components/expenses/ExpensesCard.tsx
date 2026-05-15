@@ -92,7 +92,7 @@ const ExpensesCard = ({
 
   return (
     <>
-      <Card className="rounded-2xl transition-colors hover:bg-accent/50 border-border/50 overflow-hidden">
+      <Card className="transition-colors hover:bg-accent/50 border-border/50 overflow-hidden">
         <CardContent className="p-0">
           <div className="flex">
             {renderCategoryIndicator(expense)}

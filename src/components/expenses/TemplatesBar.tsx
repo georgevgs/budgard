@@ -175,7 +175,7 @@ const renderDeleteButton = (
     <button
       type="button"
       onClick={(e) => onClick(e, template)}
-      className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+      className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       aria-label={t('expenses.deleteTemplate', { name: template.description })}
     >
       <X className="h-3 w-3" />

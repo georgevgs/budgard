@@ -265,7 +265,7 @@ const renderSearchScopeToggle = (
         type="button"
         onClick={() => onScopeChange(false)}
         className={cn(
-          'text-xs px-3 py-1 rounded-full transition-colors',
+          'text-xs px-3 py-1 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           getScopeButtonClass(!isSearchingAllMonths),
         )}
       >
@@ -275,7 +275,7 @@ const renderSearchScopeToggle = (
         type="button"
         onClick={() => onScopeChange(true)}
         className={cn(
-          'text-xs px-3 py-1 rounded-full transition-colors',
+          'text-xs px-3 py-1 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           getScopeButtonClass(isSearchingAllMonths),
         )}
       >
@@ -405,7 +405,7 @@ const renderSearchBadge = (
       {t('expenses.search.active', { query: search })}
       <button
         type="button"
-        className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20"
+        className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
         onClick={() => onClear('')}
         aria-label={t('expenses.filter.clearSearch', {
           defaultValue: 'Clear search',
@@ -436,7 +436,7 @@ const renderCategoryFilterBadge = (
       {t('expenses.filter.categoryFilter', { name: categoryName })}
       <button
         type="button"
-        className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20"
+        className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
         onClick={() => onClear('all')}
         aria-label={t('expenses.filter.clearCategory', {
           defaultValue: 'Clear category filter',
@@ -463,7 +463,7 @@ const renderTagFilterBadge = (
       {tagName}
       <button
         type="button"
-        className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20"
+        className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
         onClick={() => onClear(null)}
         aria-label={t('expenses.filter.clearTag', {
           defaultValue: 'Clear tag filter',
@@ -497,7 +497,7 @@ const renderDateRangeBadge = (
       {t(labelKey)}
       <button
         type="button"
-        className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20"
+        className="ml-0.5 p-1 -mr-1 rounded-full hover:bg-muted-foreground/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
         onClick={() => onClear(null)}
         aria-label={t('expenses.filter.clearDateRange', {
           defaultValue: 'Clear date range',
