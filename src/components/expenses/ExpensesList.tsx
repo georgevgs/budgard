@@ -47,6 +47,7 @@ import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 import type { DateRangePreset } from '@/hooks/useExpensesFilter';
 import ExpensesEmpty from '@/components/expenses/ExpensesEmpty';
 import TemplatesBar from '@/components/expenses/TemplatesBar';
+import DailyRecapCard from '@/components/recap/DailyRecapCard';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 
 // ============================================================================
@@ -357,6 +358,10 @@ const ExpensesList = () => {
   return (
     <div className="flex flex-col min-h-[calc(100vh-58px)]">
       <div className="flex-1 container max-w-4xl mx-auto px-4 pt-5 pb-4">
+        <div className="mb-4">
+          <DailyRecapCard />
+        </div>
+
         {/* Month Selection and Overview Section */}
         <div className="space-y-3 mb-4">
           <ExpensesMonthlySelector

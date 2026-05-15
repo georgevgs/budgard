@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Plus from 'lucide-react/dist/esm/icons/plus';
-import { cn } from '@/lib/utils';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useDebts } from '@/hooks/useDebts';
 import { useDebtPayoffPlan } from '@/hooks/useDebtPayoffPlan';
@@ -16,16 +15,12 @@ import DebtsLoadingState from '@/components/debts/DebtsLoading';
 import DebtCard from '@/components/debts/DebtCard';
 import DebtForm from '@/components/debts/DebtForm';
 import DebtDetailSheet from '@/components/debts/DebtDetailSheet';
-import DebtPayoffPlan from '@/components/debts/DebtPayoffPlan';
-
-type Tab = 'list' | 'plan';
 
 const DebtsView = () => {
   const { t } = useTranslation();
   const { defaultCurrency, isInitialized, isSecondaryLoaded } = useDataConfig();
   const { debts, summary } = useDebts();
   const { avalanche } = useDebtPayoffPlan(debts, 0);
-  const [tab, setTab] = useState<Tab>('list');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedDebt, setSelectedDebt] = useState<Debt | undefined>();
   const [detailDebt, setDetailDebt] = useState<Debt | undefined>();
@@ -65,15 +60,12 @@ const DebtsView = () => {
       <div className="flex-1 container max-w-4xl mx-auto px-4 pt-5 pb-4 space-y-4">
         {renderBody(
           debts.length,
-          tab,
-          setTab,
           sortedDebts,
           summary,
           avalanche,
           defaultCurrency,
           handleDebtClick,
           handleAddClick,
-          t,
         )}
       </div>
 
@@ -131,15 +123,12 @@ const pickPayoffDate = (avalanche: SimResult): string | null => {
 
 const renderBody = (
   debtCount: number,
-  tab: Tab,
-  setTab: (tab: Tab) => void,
   sortedDebts: Debt[],
   summary: DebtSummary,
   avalanche: SimResult,
   defaultCurrency: string,
   onDebtClick: (debt: Debt) => void,
   onAddClick: () => void,
-  t: TranslateFunction,
 ) => {
   if (debtCount === 0) {
     return <DebtsEmpty onAddClick={onAddClick} />;
@@ -157,65 +146,13 @@ const renderBody = (
         payoffDate={payoffDate}
       />
 
-      {renderTabs(tab, setTab, t)}
-
-      {renderTabContent(tab, sortedDebts, defaultCurrency, onDebtClick)}
-    </>
-  );
-};
-
-const renderTabContent = (
-  tab: Tab,
-  sortedDebts: Debt[],
-  defaultCurrency: string,
-  onDebtClick: (debt: Debt) => void,
-) => {
-  if (tab === 'list') {
-    return (
       <div className="space-y-3">
         {sortedDebts.map((d) => (
           <DebtCard key={d.id} debt={d} onClick={onDebtClick} />
         ))}
       </div>
-    );
-  }
-
-  return <DebtPayoffPlan debts={sortedDebts} defaultCurrency={defaultCurrency} />;
-};
-
-const renderTabs = (
-  tab: Tab,
-  setTab: (tab: Tab) => void,
-  t: TranslateFunction,
-) => (
-  <div className="flex gap-1 p-1 bg-muted rounded-xl">
-    <button
-      type="button"
-      onClick={() => setTab('list')}
-      className={cn(
-        'flex-1 text-sm font-medium py-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        getTabClasses(tab === 'list'),
-      )}
-    >
-      {t('debts.tabs.list')}
-    </button>
-    <button
-      type="button"
-      onClick={() => setTab('plan')}
-      className={cn(
-        'flex-1 text-sm font-medium py-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        getTabClasses(tab === 'plan'),
-      )}
-    >
-      {t('debts.tabs.plan')}
-    </button>
-  </div>
-);
-
-const getTabClasses = (isActive: boolean) => {
-  if (isActive) return 'bg-background text-foreground shadow-sm';
-
-  return 'text-muted-foreground hover:text-foreground';
+    </>
+  );
 };
 
 const renderDetailSheet = (

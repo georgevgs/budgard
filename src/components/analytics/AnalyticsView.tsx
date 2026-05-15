@@ -3,7 +3,6 @@ import { format, parseISO, getYear } from 'date-fns';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import Minus from 'lucide-react/dist/esm/icons/minus';
-import Share2 from 'lucide-react/dist/esm/icons/share-2';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   useDataConfig,
@@ -22,11 +21,8 @@ import SpendingInsights from '@/components/analytics/SpendingInsights';
 import CategorySparkline from '@/components/analytics/CategorySparkline';
 import { CategoryDrillDown } from '@/components/analytics/CategoryDrillDown';
 import { MonthDrillDown } from '@/components/analytics/MonthDrillDown';
-import MonthlyReportCard from '@/components/analytics/MonthlyReportCard';
-import YearInReviewCard from '@/components/analytics/YearInReviewCard';
 import CashFlowSection from '@/components/analytics/CashFlowSection';
 import AnnualExportCard from '@/components/analytics/AnnualExportCard';
-import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency, monthsElapsedInYear } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
@@ -177,25 +173,6 @@ const AnalyticsView = () => {
     return (monthComparison.thisMonthAmount / monthlyBudget) * 100;
   }, [monthComparison.thisMonthAmount, monthlyBudget]);
 
-  // ─── Report card state ──────────────────────────────────────────────────────
-
-  const [isReportOpen, setIsReportOpen] = useState(false);
-  const [isYearReviewOpen, setIsYearReviewOpen] = useState(false);
-
-  const thisMonthExpensesByCategory = useMemo(() => {
-    const thisMonthKey = format(new Date(), 'yyyy-MM');
-    const thisMonthExpenses = expenses.filter(
-      (e) => format(parseISO(e.date), 'yyyy-MM') === thisMonthKey,
-    );
-    const map = new Map<string, number>();
-    for (const e of thisMonthExpenses) {
-      if (!e.category_id) continue;
-      map.set(e.category_id, (map.get(e.category_id) ?? 0) + e.amount);
-    }
-
-    return map;
-  }, [expenses]);
-
   // ─── Drill-down state ────────────────────────────────────────────────────────
 
   const [drillDownCategory, setDrillDownCategory] =
@@ -248,23 +225,9 @@ const AnalyticsView = () => {
       {/* Month snapshot */}
       <Card>
         <CardContent className="p-5">
-          <div className="flex items-start justify-between mb-1">
-            <p className="text-sm text-muted-foreground">
-              {monthComparison.thisMonthLabel}
-            </p>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 -mt-1 -mr-1 text-muted-foreground hover:text-foreground"
-              onClick={(e) => {
-                (e.currentTarget as HTMLElement).blur();
-                setIsReportOpen(true);
-              }}
-              aria-label={t('report.share')}
-            >
-              <Share2 className="h-3.5 w-3.5" />
-            </Button>
-          </div>
+          <p className="text-sm text-muted-foreground mb-1">
+            {monthComparison.thisMonthLabel}
+          </p>
           <div className="flex items-baseline gap-3 flex-wrap">
             <p className="text-3xl font-bold tabular-nums tracking-tight">
               {formatCurrency(animatedThisMonth, defaultCurrency)}
@@ -306,35 +269,21 @@ const AnalyticsView = () => {
           <h3 className="text-base font-semibold text-foreground">
             {t('analytics.yearOverview')}
           </h3>
-          <div className="flex items-center gap-1.5">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-foreground"
-              onClick={(e) => {
-                (e.currentTarget as HTMLElement).blur();
-                setIsYearReviewOpen(true);
-              }}
-              aria-label={t('yearInReview.title')}
-            >
-              <Share2 className="h-3.5 w-3.5" />
-            </Button>
-            <Select
-              value={selectedYear.toString()}
-              onValueChange={(value) => setSelectedYear(parseInt(value))}
-            >
-              <SelectTrigger className="w-[110px] h-8">
-                <SelectValue placeholder={t('analytics.selectYear')} />
-              </SelectTrigger>
-              <SelectContent>
-                {availableYears.map((year) => (
-                  <SelectItem key={year} value={year.toString()}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select
+            value={selectedYear.toString()}
+            onValueChange={(value) => setSelectedYear(parseInt(value))}
+          >
+            <SelectTrigger className="w-[110px] h-8">
+              <SelectValue placeholder={t('analytics.selectYear')} />
+            </SelectTrigger>
+            <SelectContent>
+              {availableYears.map((year) => (
+                <SelectItem key={year} value={year.toString()}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {renderYearSummary(
@@ -396,25 +345,6 @@ const AnalyticsView = () => {
         categories,
         handleMonthDrillDownClose,
       )}
-
-      {/* Monthly report card */}
-      <MonthlyReportCard
-        isOpen={isReportOpen}
-        onClose={() => setIsReportOpen(false)}
-        monthLabel={monthComparison.thisMonthLabel}
-        totalSpent={monthComparison.thisMonthAmount}
-        lastMonthAmount={monthComparison.lastMonthAmount}
-        monthlyBudget={monthlyBudget}
-        categories={categories}
-        expensesByCategory={thisMonthExpensesByCategory}
-      />
-
-      {/* Year in Review card */}
-      <YearInReviewCard
-        isOpen={isYearReviewOpen}
-        onClose={() => setIsYearReviewOpen(false)}
-        year={selectedYear}
-      />
     </div>
   );
 };

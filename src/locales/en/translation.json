@@ -386,6 +386,13 @@
       "ignoreAria": "Ignore {{description}}"
     }
   },
+  "recap": {
+    "title": "Yesterday",
+    "dismissAria": "Dismiss recap for today",
+    "acrossN_one": "across {{count}} expense",
+    "acrossN_other": "across {{count}} expenses",
+    "uncategorised": "Uncategorised"
+  },
   "settings": {
     "title": "Settings",
     "profile": {

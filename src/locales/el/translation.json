@@ -386,6 +386,13 @@
       "ignoreAria": "Αγνόησε {{description}}"
     }
   },
+  "recap": {
+    "title": "Χθες",
+    "dismissAria": "Απόκρυψη ανακεφαλαίωσης για σήμερα",
+    "acrossN_one": "σε {{count}} δαπάνη",
+    "acrossN_other": "σε {{count}} δαπάνες",
+    "uncategorised": "Χωρίς κατηγορία"
+  },
   "settings": {
     "title": "Ρυθμίσεις",
     "profile": {

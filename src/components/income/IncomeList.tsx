@@ -21,10 +21,8 @@ import ExpensesMonthlySelector from '@/components/expenses/ExpensesMonthlySelect
 import IncomeForm from '@/components/income/IncomeForm';
 import IncomeCard from '@/components/income/IncomeCard';
 import IncomeEmpty from '@/components/income/IncomeEmpty';
-import SavingsNudgeSheet from '@/components/income/SavingsNudgeSheet';
 import NetCashFlowCard from '@/components/income/NetCashFlowCard';
 import FiftyThirtyTwentyRing from '@/components/income/FiftyThirtyTwentyRing';
-import MonthEndProjection from '@/components/income/MonthEndProjection';
 import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
 import type { Expense } from '@/types/Expense';
 
@@ -54,7 +52,6 @@ const IncomeList = () => {
   const [search, setSearch] = useState('');
   const [selectedIncome, setSelectedIncome] = useState<Expense | undefined>();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [nudgeIncome, setNudgeIncome] = useState<Expense | null>(null);
   const seededRef = useRef(false);
 
   // Seed default income categories once when none exist
@@ -128,22 +125,9 @@ const IncomeList = () => {
     setIsFormOpen(true);
   }, []);
 
-  const handleFormClose = useCallback(
-    (saved?: Expense) => {
-      const wasEdit = Boolean(selectedIncome);
-      setIsFormOpen(false);
-      setSelectedIncome(undefined);
-
-      // Trigger savings nudge for newly created income with no savings allocation yet
-      if (saved && !wasEdit && saved.savings_allocation_amount == null) {
-        setNudgeIncome(saved);
-      }
-    },
-    [selectedIncome],
-  );
-
-  const handleNudgeClose = useCallback(() => {
-    setNudgeIncome(null);
+  const handleFormClose = useCallback(() => {
+    setIsFormOpen(false);
+    setSelectedIncome(undefined);
   }, []);
 
   if (!isInitialized) {
@@ -178,8 +162,6 @@ const IncomeList = () => {
 
           <FiftyThirtyTwentyRing selectedMonth={selectedMonth} />
 
-          <MonthEndProjection selectedMonth={selectedMonth} />
-
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -206,11 +188,11 @@ const IncomeList = () => {
         </div>
       </div>
 
-      <Dialog open={isFormOpen} onOpenChange={() => handleFormClose()}>
+      <Dialog open={isFormOpen} onOpenChange={handleFormClose}>
         <DialogContent
           className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
           aria-describedby="income-form-description"
-          onOpenChange={() => handleFormClose()}
+          onOpenChange={handleFormClose}
           onFocusOutside={(e) => e.preventDefault()}
         >
           <div id="income-form-description" className="sr-only">
@@ -219,8 +201,6 @@ const IncomeList = () => {
           <IncomeForm income={selectedIncome} onClose={handleFormClose} />
         </DialogContent>
       </Dialog>
-
-      {renderSavingsNudge(nudgeIncome, handleNudgeClose)}
 
       {/* FAB */}
       <div className="fixed bottom-24 right-4 z-50 pb-safe-b">
@@ -245,15 +225,6 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
-
-const renderSavingsNudge = (
-  income: Expense | null,
-  onClose: () => void,
-) => {
-  if (!income) return null;
-
-  return <SavingsNudgeSheet income={income} open={true} onClose={onClose} />;
-};
 
 const renderIncomeCount = (count: number, t: TranslateFunction) => {
   if (count === 0) return null;
