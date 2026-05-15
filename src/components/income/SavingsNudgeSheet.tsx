@@ -121,9 +121,9 @@ const SavingsNudgeSheet = ({ income, open, onClose }: Props) => {
                   type="button"
                   onClick={() => setPct(preset)}
                   className={cn(
-                    'flex-1 min-w-[60px] py-2 rounded-xl text-sm font-medium transition-colors',
+                    'flex-1 min-w-[60px] py-2 rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                     pct === preset
-                      ? 'bg-income text-income-foreground'
+                      ? 'bg-income text-income-foreground hover:bg-income/90'
                       : 'bg-muted/50 hover:bg-muted',
                   )}
                 >

@@ -193,7 +193,7 @@ const renderTabs = (
       type="button"
       onClick={() => setTab('list')}
       className={cn(
-        'flex-1 text-sm font-medium py-2 rounded-lg transition-colors',
+        'flex-1 text-sm font-medium py-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         getTabClasses(tab === 'list'),
       )}
     >
@@ -203,7 +203,7 @@ const renderTabs = (
       type="button"
       onClick={() => setTab('plan')}
       className={cn(
-        'flex-1 text-sm font-medium py-2 rounded-lg transition-colors',
+        'flex-1 text-sm font-medium py-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         getTabClasses(tab === 'plan'),
       )}
     >

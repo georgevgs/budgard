@@ -39,7 +39,7 @@ const DebtPayoffPlan = ({ debts, defaultCurrency }: Props) => {
 
   if (active.length === 0) {
     return (
-      <Card className="border-border/50 rounded-2xl p-8 text-center">
+      <Card className="border-border/50 p-8 text-center">
         <p className="text-sm text-muted-foreground">
           {t('debts.payoff.empty')}
         </p>
@@ -49,7 +49,7 @@ const DebtPayoffPlan = ({ debts, defaultCurrency }: Props) => {
 
   return (
     <div className="space-y-4">
-      <Card className="border-border/50 rounded-2xl">
+      <Card className="border-border/50">
         <CardContent className="p-4 space-y-3">
           <label className="text-sm font-medium">
             {t('debts.payoff.extraLabel')}
@@ -181,7 +181,7 @@ const renderResultCard = (
 ) => {
   if (result.unpayable) {
     return (
-      <Card className="border-destructive/30 rounded-2xl bg-destructive/5">
+      <Card className="border-destructive/30 bg-destructive/5">
         <CardContent className="p-4 flex items-start gap-3">
           <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
           <div className="text-sm">
@@ -198,7 +198,7 @@ const renderResultCard = (
   }
 
   return (
-    <Card className="border-primary/30 rounded-2xl bg-primary/5">
+    <Card className="border-primary/30 bg-primary/5">
       <CardContent className="p-5 space-y-3">
         <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
           <Sparkles className="h-3.5 w-3.5 shrink-0" />

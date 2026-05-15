@@ -35,7 +35,7 @@ const DebtCard = ({ debt, onClick }: Props) => {
           onClick(debt);
         }
       }}
-      className="border-border/50 rounded-2xl cursor-pointer hover:bg-accent/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="border-border/50 cursor-pointer hover:bg-accent/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <CardContent className="p-4 space-y-3">
         <div className="flex items-center gap-3">

@@ -382,7 +382,7 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
                       >
                         <button
                           type="button"
-                          className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left text-muted-foreground"
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent focus-visible:outline-none focus-visible:bg-accent text-left text-muted-foreground"
                           onClick={() => handleCategorySelect('none')}
                         >
                           {t('income.noCategory')}
@@ -391,7 +391,7 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
                           <button
                             key={category.id}
                             type="button"
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left"
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent focus-visible:outline-none focus-visible:bg-accent text-left"
                             onClick={() => handleCategorySelect(category.id)}
                           >
                             {renderCategoryDot(category)}
@@ -626,7 +626,7 @@ const renderBottomAction = (
     return (
       <button
         type="button"
-        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-accent text-left text-primary border-t border-border/40 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-accent focus-visible:outline-none focus-visible:bg-accent text-left text-primary border-t border-border/40 disabled:opacity-50 disabled:cursor-not-allowed"
         onClick={onCreate}
         disabled={isCreating}
       >
@@ -640,7 +640,7 @@ const renderBottomAction = (
   return (
     <button
       type="button"
-      className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-accent text-left text-muted-foreground hover:text-foreground border-t border-border/40"
+      className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-accent focus-visible:outline-none focus-visible:bg-accent text-left text-muted-foreground hover:text-foreground border-t border-border/40"
       onClick={onManage}
     >
       <Settings2 className="h-3.5 w-3.5 shrink-0" />

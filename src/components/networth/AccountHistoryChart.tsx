@@ -164,7 +164,7 @@ const renderRangeTabs = (
         type="button"
         onClick={() => onChange(r.key)}
         className={cn(
-          'text-xs font-medium px-2 py-1 rounded-md transition-colors',
+          'text-xs font-medium px-2 py-1 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
           getRangeButtonClass(r.key === active),
         )}
       >

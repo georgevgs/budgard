@@ -43,7 +43,7 @@ const NetWorthChart = ({ series, defaultCurrency }: Props) => {
   }
 
   return (
-    <Card className="border-border/40 rounded-2xl">
+    <Card>
       <CardContent className="p-4 space-y-2">
         <p className="text-sm font-medium">{t('networth.chart.title')}</p>
         <div className="w-full">

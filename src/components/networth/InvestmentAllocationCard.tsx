@@ -45,7 +45,7 @@ const InvestmentAllocationCard = ({ accounts }: Props) => {
   }
 
   return (
-    <Card className="border-border/40 rounded-2xl">
+    <Card>
       <CardContent className="p-4 space-y-3">
         <h3 className="text-sm font-medium">
           {t('networth.allocation.title')}

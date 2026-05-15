@@ -44,7 +44,7 @@ const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
           onClick(account);
         }
       }}
-      className="border-border/50 rounded-2xl cursor-pointer hover:bg-accent/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="border-border/50 cursor-pointer hover:bg-accent/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <CardContent className="p-4 flex items-center gap-3">
         <div
