@@ -40,8 +40,10 @@ export const useDebts = () => {
       (acc, d) => acc + Number(d.current_balance) * Number(d.apr),
       0,
     );
-    const weightedAverageApr =
-      totalBalance > 0 ? weightedAprNumerator / totalBalance : 0;
+    let weightedAverageApr = 0;
+    if (totalBalance > 0) {
+      weightedAverageApr = weightedAprNumerator / totalBalance;
+    }
 
     return {
       totalBalance,

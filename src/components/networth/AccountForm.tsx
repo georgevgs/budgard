@@ -65,11 +65,7 @@ const AccountForm = ({ account, onClose }: Props) => {
       name: account?.name ?? '',
       kind: account?.kind ?? 'bank',
       default_currency: account?.default_currency ?? defaultCurrency,
-      initial_balance: account
-        ? formatCurrencyInput(
-            account.current_balance.toString().replace('.', ','),
-          )
-        : '',
+      initial_balance: resolveInitialBalance(account),
       color: account?.color ?? DEFAULT_COLOR,
     },
   });
@@ -265,6 +261,16 @@ type TranslateFunction = (
 ) => string;
 
 import type { UseFormReturn } from 'react-hook-form';
+
+const resolveInitialBalance = (account: Account | undefined): string => {
+  if (!account) {
+    return '';
+  }
+
+  return formatCurrencyInput(
+    account.current_balance.toString().replace('.', ','),
+  );
+};
 
 const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {
   if (isEditing) return t('networth.form.editTitle');

@@ -26,17 +26,17 @@ const CategorySparkline = ({ values, color }: CategorySparklineProps) => {
   const W = 64;
   const H = 28;
   const pad = 2;
-  const step =
-    displayValues.length > 1 ? (W - pad * 2) / (displayValues.length - 1) : 0;
+  let step = 0;
+  if (displayValues.length > 1) {
+    step = (W - pad * 2) / (displayValues.length - 1);
+  }
 
   const points = displayValues.map((val, i) => ({
     x: pad + i * step,
     y: H - pad - (val / max) * (H - pad * 2),
   }));
 
-  const d = points
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)},${p.y.toFixed(1)}`)
-    .join(' ');
+  const d = points.map(pointToPathSegment).join(' ');
 
   return (
     <svg width={W} height={H} aria-hidden="true" className="overflow-visible">
@@ -54,3 +54,14 @@ const CategorySparkline = ({ values, color }: CategorySparklineProps) => {
 };
 
 export default CategorySparkline;
+
+// --- Helpers ---
+
+const pointToPathSegment = (p: { x: number; y: number }, i: number): string => {
+  let command = 'L';
+  if (i === 0) {
+    command = 'M';
+  }
+
+  return `${command} ${p.x.toFixed(1)},${p.y.toFixed(1)}`;
+};

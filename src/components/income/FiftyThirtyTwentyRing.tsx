@@ -149,7 +149,10 @@ type BucketRowProps = {
 };
 
 const BucketRow = ({ bucket, actual, total, currency, t }: BucketRowProps) => {
-  const actualPct = total > 0 ? actual / total : 0;
+  let actualPct = 0;
+  if (total > 0) {
+    actualPct = actual / total;
+  }
   const targetPct = bucket.target;
   const status = getBucketStatus(actualPct, targetPct, bucket.key);
 
@@ -233,10 +236,18 @@ const getBucketStatus = (
 
   // For savings, more is good. For need/want, less is generally good.
   if (bucket === 'savings') {
-    return diff > 0 ? 'on-target' : 'under';
+    if (diff > 0) {
+      return 'on-target';
+    }
+
+    return 'under';
   }
 
-  return diff > 0 ? 'over' : 'under';
+  if (diff > 0) {
+    return 'over';
+  }
+
+  return 'under';
 };
 
 const renderStatusLabel = (status: BucketStatus, t: TranslateFunction) => {

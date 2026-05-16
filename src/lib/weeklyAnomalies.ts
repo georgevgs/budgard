@@ -77,8 +77,10 @@ export const buildWeeklyRecap = ({
   const baselineTotal = sumAmount(baselineExpenses);
   const baselineWeeklyAverage = baselineTotal / BASELINE_WEEKS;
 
-  const totalRatio =
-    baselineWeeklyAverage > 0 ? weekTotal / baselineWeeklyAverage : null;
+  let totalRatio: number | null = null;
+  if (baselineWeeklyAverage > 0) {
+    totalRatio = weekTotal / baselineWeeklyAverage;
+  }
 
   const anomalies = computeAnomalies(weekExpenses, baselineExpenses, categories);
 
@@ -177,7 +179,11 @@ const classifyDirection = (ratio: number): 'up' | 'down' | null => {
 // far each ratio deviates from 1 (1.0 means "exactly normal").
 const compareAnomalies = (a: WeeklyAnomaly, b: WeeklyAnomaly): number => {
   if (a.direction !== b.direction) {
-    return a.direction === 'up' ? -1 : 1;
+    if (a.direction === 'up') {
+      return -1;
+    }
+
+    return 1;
   }
 
   return Math.abs(b.ratio - 1) - Math.abs(a.ratio - 1);

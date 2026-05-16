@@ -108,7 +108,7 @@ const ExpensesCard = ({
                   <p className="text-xs text-muted-foreground mt-0.5 truncate">
                     {format(
                       parseISO(expense.date),
-                      showFullDate ? 'MMM d, yyyy' : 'MMM d',
+                      resolveDateFormat(showFullDate),
                       { locale: dateLocale },
                     )}
                     {renderCategoryLabel(expense)}
@@ -190,6 +190,14 @@ const ExpensesCard = ({
 export default memo(ExpensesCard);
 
 // ─── Helper render functions ──────────────────────────────────────────────────
+
+const resolveDateFormat = (showFullDate: boolean | undefined): string => {
+  if (showFullDate) {
+    return 'MMM d, yyyy';
+  }
+
+  return 'MMM d';
+};
 
 const renderCategoryIndicator = (expense: Expense) => {
   if (!expense.category) return null;

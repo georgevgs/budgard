@@ -73,7 +73,13 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
       }
 
       reg.pushManager.getSubscription().then((sub) => {
-        setState(sub ? 'subscribed' : 'unsubscribed');
+        if (sub) {
+          setState('subscribed');
+
+          return;
+        }
+
+        setState('unsubscribed');
       });
     });
   }, []);

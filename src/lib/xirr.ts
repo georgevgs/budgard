@@ -170,16 +170,19 @@ export const computeAccountXirr = (
     return null;
   }
 
-  const lastDate =
-    sorted.length > 0
-      ? parseISO(sorted[sorted.length - 1].recorded_at)
-      : new Date();
+  let lastDate = new Date();
+  if (sorted.length > 0) {
+    lastDate = parseISO(sorted[sorted.length - 1].recorded_at);
+  }
   cashflows.push({ date: lastDate, amount: account.current_balance });
 
-  const firstCashflowDate = cashflows.reduce(
-    (earliest, cf) => (cf.date < earliest ? cf.date : earliest),
-    cashflows[0].date,
-  );
+  const firstCashflowDate = cashflows.reduce((earliest, cf) => {
+    if (cf.date < earliest) {
+      return cf.date;
+    }
+
+    return earliest;
+  }, cashflows[0].date);
   const spanDays = (lastDate.getTime() - firstCashflowDate.getTime()) / MS_PER_DAY;
   if (spanDays < MIN_ANNUALIZATION_DAYS) {
     return null;

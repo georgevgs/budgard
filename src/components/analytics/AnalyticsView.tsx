@@ -102,8 +102,10 @@ const AnalyticsView = () => {
       .reduce((sum, e) => sum + e.amount, 0);
 
     const delta = thisMonthAmount - lastMonthAmount;
-    const percentChange =
-      lastMonthAmount > 0 ? (delta / lastMonthAmount) * 100 : null;
+    let percentChange: number | null = null;
+    if (lastMonthAmount > 0) {
+      percentChange = (delta / lastMonthAmount) * 100;
+    }
 
     return {
       thisMonthLabel: format(now, 'LLLL yyyy', { locale: dateLocale }),
@@ -137,8 +139,10 @@ const AnalyticsView = () => {
     }
 
     const monthsElapsed = monthsElapsedInYear(selectedYear);
-    const monthlyAverage =
-      monthsElapsed > 0 ? totalSpent / monthsElapsed : 0;
+    let monthlyAverage = 0;
+    if (monthsElapsed > 0) {
+      monthlyAverage = totalSpent / monthsElapsed;
+    }
 
     const categoryBreakdown = categories
       .map((cat) => {
@@ -497,7 +501,11 @@ const renderCategoryBreakdown = (
     <Card>
       <CardContent className="p-0 divide-y divide-border/40">
         {breakdown.map((cat) => {
-          const pct = totalSpent > 0 ? (cat.amount / totalSpent) * 100 : 0;
+          let pct = 0;
+          if (totalSpent > 0) {
+            pct = (cat.amount / totalSpent) * 100;
+          }
+
           return (
             <button
               key={cat.id}

@@ -76,7 +76,11 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
       if (isInvestment && values.contribution_delta) {
         const trimmed = values.contribution_delta.trim();
         if (trimmed.length > 0) {
-          const sign = trimmed.startsWith('-') ? -1 : 1;
+          let sign = 1;
+          if (trimmed.startsWith('-')) {
+            sign = -1;
+          }
+
           const magnitude = parseCurrencyInput(trimmed.replace(/^-/, ''));
           if (isWithdrawalMode) {
             contribution = -Math.abs(magnitude);

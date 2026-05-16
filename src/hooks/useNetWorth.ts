@@ -199,10 +199,11 @@ export const useNetWorth = () => {
       if (!isLiveDebt(d)) {
         return;
       }
-      const rate =
-        d.currency === defaultCurrency
-          ? 1
-          : rates.get(RATE_KEY(d.currency, today)) ?? 1;
+      let rate = 1;
+      if (d.currency !== defaultCurrency) {
+        rate = rates.get(RATE_KEY(d.currency, today)) ?? 1;
+      }
+
       debtConstant += Number(d.current_balance) * rate;
     });
 
@@ -245,10 +246,11 @@ export const useNetWorth = () => {
           return;
         }
 
-        const rate =
-          a.default_currency === defaultCurrency
-            ? 1
-            : rates.get(RATE_KEY(a.default_currency, latest.recorded_at)) ?? 1;
+        let rate = 1;
+        if (a.default_currency !== defaultCurrency) {
+          rate = rates.get(RATE_KEY(a.default_currency, latest.recorded_at)) ?? 1;
+        }
+
         const balance = latest.balance * rate;
 
         if (isLiability(a.kind)) {

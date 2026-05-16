@@ -152,9 +152,10 @@ export const simulatePayoff = (input: SimInput): SimResult => {
 
   const finished = states.every((s) => s.remaining <= 0);
   const unpayable = !finished;
-  const monthsToPayoff = unpayable
-    ? MAX_MONTHS
-    : Math.max(...states.map((s) => s.payoffMonth ?? 0));
+  let monthsToPayoff = MAX_MONTHS;
+  if (!unpayable) {
+    monthsToPayoff = Math.max(...states.map((s) => s.payoffMonth ?? 0));
+  }
 
   const totalInterestPaid = states.reduce((acc, s) => acc + s.totalInterest, 0);
   const totalPaid = states.reduce((acc, s) => acc + s.totalPaid, 0);

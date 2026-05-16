@@ -57,7 +57,12 @@ export const hapticsSettings = {
   isEnabled: (): boolean => isUserEnabled(),
   setEnabled: (enabled: boolean): void => {
     try {
-      localStorage.setItem(STORAGE_KEY, enabled ? 'true' : 'false');
+      let stored: 'true' | 'false' = 'false';
+      if (enabled) {
+        stored = 'true';
+      }
+
+      localStorage.setItem(STORAGE_KEY, stored);
     } catch {
       // localStorage may be unavailable
     }

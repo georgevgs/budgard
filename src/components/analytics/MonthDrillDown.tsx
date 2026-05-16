@@ -54,9 +54,10 @@ export const MonthDrillDown = ({
 
     return Array.from(byCategory.entries())
       .map(([categoryId, amount]) => {
-        const category = categoryId
-          ? categories.find((c) => c.id === categoryId)
-          : null;
+        let category: Category | undefined | null = null;
+        if (categoryId) {
+          category = categories.find((c) => c.id === categoryId);
+        }
 
         return {
           id: categoryId ?? 'uncategorized',
@@ -71,9 +72,12 @@ export const MonthDrillDown = ({
       .sort((a, b) => b.amount - a.amount);
   }, [monthExpenses, categories, t]);
 
-  const monthLabel = monthKey
-    ? format(parseISO(`${monthKey}-01`), 'LLLL yyyy', { locale: dateLocale })
-    : '';
+  let monthLabel = '';
+  if (monthKey) {
+    monthLabel = format(parseISO(`${monthKey}-01`), 'LLLL yyyy', {
+      locale: dateLocale,
+    });
+  }
 
   const topExpenses = useMemo(
     () => [...monthExpenses].sort((a, b) => b.amount - a.amount).slice(0, 5),
@@ -127,7 +131,10 @@ const renderCategoryBreakdown = (
       </p>
       <div className="space-y-2">
         {breakdown.map((cat) => {
-          const pct = totalAmount > 0 ? (cat.amount / totalAmount) * 100 : 0;
+          let pct = 0;
+          if (totalAmount > 0) {
+            pct = (cat.amount / totalAmount) * 100;
+          }
 
           return (
             <div key={cat.id} className="flex items-center gap-3">

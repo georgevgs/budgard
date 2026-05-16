@@ -76,6 +76,21 @@ export const useSwipeToClose = ({
     };
   }, []);
 
+  let dragTransition = 'transform 0.2s ease-out';
+  if (isDragging) {
+    dragTransition = 'none';
+  }
+
+  let overlayOpacity = 1;
+  if (isDragging) {
+    overlayOpacity = Math.max(0.3, 1 - translateY / (threshold * 2));
+  }
+
+  let overlayTransition = 'opacity 0.2s ease-out';
+  if (isDragging) {
+    overlayTransition = 'none';
+  }
+
   return {
     handleTouchStart,
     handleTouchMove,
@@ -85,12 +100,12 @@ export const useSwipeToClose = ({
     // Style object for the modal content
     dragStyle: {
       transform: `translateY(${translateY}px)`,
-      transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+      transition: dragTransition,
     },
     // Style object for the overlay (fade out as dragging)
     overlayStyle: {
-      opacity: isDragging ? Math.max(0.3, 1 - translateY / (threshold * 2)) : 1,
-      transition: isDragging ? 'none' : 'opacity 0.2s ease-out',
+      opacity: overlayOpacity,
+      transition: overlayTransition,
     },
   };
 };

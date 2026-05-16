@@ -35,8 +35,10 @@ const NetCashFlowCard = ({
 
   const net = monthlyIncomeTotal - monthlyExpenseTotal;
   const isPositive = net >= 0;
-  const savingsRate =
-    monthlyIncomeTotal > 0 ? (net / monthlyIncomeTotal) * 100 : 0;
+  let savingsRate = 0;
+  if (monthlyIncomeTotal > 0) {
+    savingsRate = (net / monthlyIncomeTotal) * 100;
+  }
 
   return (
     <button

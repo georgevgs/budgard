@@ -58,7 +58,10 @@ const computeProgress = (
 
   const current = sumForSource(goal, expenses, incomes, goal.start_date);
   const target = Number(goal.target_amount);
-  const ratio = target > 0 ? current / target : 0;
+  let ratio = 0;
+  if (target > 0) {
+    ratio = current / target;
+  }
   const percent = Math.max(0, Math.min(1, ratio));
   const isOverachieved = ratio > 1;
 
@@ -169,7 +172,10 @@ const computePace = (
 
   const pacePerDay = current / daysElapsed;
   const remaining = Math.max(0, target - current);
-  const requiredPerDay = daysRemaining > 0 ? remaining / daysRemaining : remaining;
+  let requiredPerDay = remaining;
+  if (daysRemaining > 0) {
+    requiredPerDay = remaining / daysRemaining;
+  }
   const isOnTrack = pacePerDay >= requiredPerDay || current >= target;
 
   return { isOnTrack, pacePerDay, requiredPerDay };

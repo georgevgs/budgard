@@ -85,7 +85,7 @@ const IncomeCard = ({ income, onEdit, onDelete, showFullDate }: IncomeCardProps)
                   <p className="text-xs text-muted-foreground mt-0.5 truncate">
                     {format(
                       parseISO(income.date),
-                      showFullDate ? 'MMM d, yyyy' : 'MMM d',
+                      resolveDateFormat(showFullDate),
                       { locale: dateLocale },
                     )}
                     {renderCategoryLabel(income)}
@@ -160,6 +160,14 @@ const IncomeCard = ({ income, onEdit, onDelete, showFullDate }: IncomeCardProps)
 export default memo(IncomeCard);
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const resolveDateFormat = (showFullDate: boolean | undefined): string => {
+  if (showFullDate) {
+    return 'MMM d, yyyy';
+  }
+
+  return 'MMM d';
+};
 
 const renderCategoryIndicator = (income: Expense) => {
   if (!income.category) return null;

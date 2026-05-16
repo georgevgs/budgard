@@ -48,7 +48,10 @@ const computeProgress = (debt: Debt): DebtProgress => {
   const delta = principal - balance;
   const paidToDate = Math.max(delta, 0);
   const balanceIncreased = delta < 0;
-  const balanceOverOriginal = balanceIncreased ? -delta : 0;
+  let balanceOverOriginal = 0;
+  if (balanceIncreased) {
+    balanceOverOriginal = -delta;
+  }
   let percentPaid = 0;
   if (principal > 0) {
     percentPaid = Math.min(delta / principal, 1);

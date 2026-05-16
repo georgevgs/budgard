@@ -608,15 +608,17 @@ export const dataService = {
     // Seed an initial snapshot so the trigger keeps current_balance accurate
     // and the time-series chart has a starting point.
     if (initial_balance !== undefined && initial_balance !== null) {
+      let contributionDelta: number | null = null;
+      if ((created as Account).kind === 'investment') {
+        contributionDelta = initial_balance;
+      }
+
       const { error: snapshotError } = await supabase
         .from('account_balances')
         .insert({
           account_id: (created as Account).id,
           balance: initial_balance,
-          contribution_delta:
-            (created as Account).kind === 'investment'
-              ? initial_balance
-              : null,
+          contribution_delta: contributionDelta,
         });
       if (snapshotError) throw snapshotError;
     }

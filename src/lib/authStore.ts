@@ -32,8 +32,13 @@ const isTokenFresh =
   stored !== null &&
   (stored.expires_at ?? 0) > Math.floor(Date.now() / 1000) + 60;
 
+let initialSession: Session | null = null;
+if (isTokenFresh) {
+  initialSession = stored;
+}
+
 let _snapshot: AuthSnapshot = {
-  session: isTokenFresh ? stored : null,
+  session: initialSession,
   isLoading: !isTokenFresh,
 };
 
@@ -46,7 +51,7 @@ const notify = (next: AuthSnapshot) => {
 
 // Track the last valid session so we can attempt recovery when iOS aborts
 // Supabase's internal token refresh (which fires a spurious SIGNED_OUT).
-let _lastKnownSession: Session | null = isTokenFresh ? stored : null;
+let _lastKnownSession: Session | null = initialSession;
 let _recoveryTimer: ReturnType<typeof setTimeout> | null = null;
 // Set to true before an explicit signOut() call so we don't try to recover.
 let _intentionalSignOut = false;

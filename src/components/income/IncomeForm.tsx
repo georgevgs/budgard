@@ -29,15 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import Plus from 'lucide-react/dist/esm/icons/plus';
-import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
-import { format, parseISO } from 'date-fns';
-import {
-  cn,
-  formatCurrency,
-  formatCurrencyInput,
-  parseCurrencyInput,
-} from '@/lib/utils';
+import { format } from 'date-fns';
+import { cn, parseCurrencyInput } from '@/lib/utils';
 import { SUPPORTED_CURRENCIES } from '@/lib/currencies';
 import { useAuth } from '@/hooks/useAuth';
 import { useDateLocale } from '@/hooks/useDateLocale';
@@ -47,7 +40,19 @@ import { useIncomeOps } from '@/hooks/dataOps/useIncomeOps';
 import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
 import { incomeSchema, type IncomeFormData } from '@/lib/validations';
 import type { Expense } from '@/types/Expense';
-import type { Category } from '@/types/Category';
+import {
+  INCOME_COLORS,
+  getInitialAmount,
+  getInitialDate,
+  formatWatchedDate,
+  normalizeCategoryId,
+  renderFormTitle,
+  renderSaveButtonLabel,
+  renderConversionPreview,
+  renderCategoryButtonContent,
+  renderCategoryDot,
+  renderBottomAction,
+} from './IncomeForm.helpers';
 
 type IncomeFormProps = {
   income?: Expense;
@@ -429,185 +434,3 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
 };
 
 export default IncomeForm;
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-const INCOME_COLORS = [
-  '#10b981',
-  '#22c55e',
-  '#14b8a6',
-  '#06b6d4',
-  '#3b82f6',
-  '#84cc16',
-];
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
-
-const getInitialAmount = (
-  income: Expense | undefined,
-  defaultCurrency: string,
-): string => {
-  if (!income) return '';
-
-  const sourceAmount = pickSourceAmount(income, defaultCurrency);
-
-  return formatCurrencyInput(sourceAmount.toString().replace('.', ','));
-};
-
-const pickSourceAmount = (
-  income: Expense,
-  defaultCurrency: string,
-): number => {
-  const isForeign =
-    income.original_currency && income.original_currency !== defaultCurrency;
-  if (isForeign) return income.original_amount ?? income.amount;
-
-  return income.amount;
-};
-
-const getInitialDate = (income: Expense | undefined): Date => {
-  if (income) return parseISO(income.date);
-
-  return new Date();
-};
-
-const formatWatchedDate = (watchedDate: Date | undefined): string => {
-  if (!watchedDate) return '';
-
-  return format(watchedDate, 'yyyy-MM-dd');
-};
-
-const normalizeCategoryId = (categoryId: string): string | null => {
-  if (categoryId === 'none') return null;
-
-  return categoryId;
-};
-
-const getQuickCreateLabel = (
-  isCreating: boolean,
-  trimmedSearch: string,
-  t: TranslateFunction,
-): string => {
-  if (isCreating) return t('common.saving');
-
-  return t('income.createCategory', { name: trimmedSearch });
-};
-
-const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {
-  if (isEditing) return t('income.editIncome');
-
-  return t('income.addIncome');
-};
-
-const renderSaveButtonLabel = (isSubmitting: boolean, t: TranslateFunction) => {
-  if (isSubmitting) return t('common.saving');
-
-  return t('income.saveIncome');
-};
-
-const renderConversionPreview = (
-  isLoading: boolean,
-  hasError: boolean,
-  convertedAmount: number | null,
-  currency: string,
-  targetCurrency: string,
-  t: TranslateFunction,
-) => {
-  if (currency === targetCurrency) return null;
-
-  if (isLoading) {
-    return (
-      <p className="text-xs text-muted-foreground mt-1">
-        {t('expenses.currency.fetchingRate')}
-      </p>
-    );
-  }
-
-  if (hasError) {
-    return (
-      <p className="text-xs text-destructive mt-1">
-        {t('expenses.currency.rateError')}
-      </p>
-    );
-  }
-
-  if (!convertedAmount) return null;
-
-  return (
-    <p className="text-xs text-muted-foreground mt-1">
-      {t('expenses.currency.convertedAmount', {
-        amount: formatCurrency(convertedAmount, targetCurrency),
-      })}
-    </p>
-  );
-};
-
-const renderCategoryButtonContent = (
-  category: Category | undefined,
-  t: TranslateFunction,
-) => {
-  if (!category) {
-    return <span>{t('income.selectCategory')}</span>;
-  }
-
-  return (
-    <span className="flex items-center gap-2">
-      {renderCategoryDot(category)}
-      {category.name}
-    </span>
-  );
-};
-
-const renderCategoryDot = (category: Category) => {
-  if (category.icon) {
-    return <span className="text-sm">{category.icon}</span>;
-  }
-
-  return (
-    <div
-      className="w-3 h-3 rounded-full shrink-0"
-      style={{ backgroundColor: category.color }}
-      aria-hidden="true"
-    />
-  );
-};
-
-const renderBottomAction = (
-  showCreate: boolean,
-  isCreating: boolean,
-  trimmedSearch: string,
-  onCreate: () => void,
-  onManage: () => void,
-  t: TranslateFunction,
-) => {
-  if (showCreate) {
-    const label = getQuickCreateLabel(isCreating, trimmedSearch, t);
-
-    return (
-      <button
-        type="button"
-        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-accent focus-visible:outline-none focus-visible:bg-accent text-left text-primary border-t border-border/40 disabled:opacity-50 disabled:cursor-not-allowed"
-        onClick={onCreate}
-        disabled={isCreating}
-      >
-        <Plus className="h-3.5 w-3.5 shrink-0" />
-        {label}
-      </button>
-    );
-  }
-
-  // Default: combined add + edit entry point.
-  return (
-    <button
-      type="button"
-      className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-accent focus-visible:outline-none focus-visible:bg-accent text-left text-muted-foreground hover:text-foreground border-t border-border/40"
-      onClick={onManage}
-    >
-      <Settings2 className="h-3.5 w-3.5 shrink-0" />
-      {t('income.manageSources')}
-    </button>
-  );
-};

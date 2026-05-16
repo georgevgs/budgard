@@ -28,17 +28,29 @@ const GoalsList = () => {
   const handleSubmit = async (values: GoalFormData) => {
     if (!session?.user?.id) return;
 
+    let deadline: string | null = null;
+    if (values.deadline) {
+      deadline = format(values.deadline, 'yyyy-MM-dd');
+    }
+
+    let categoryId: string | null = null;
+    if (values.source_type === 'category') {
+      categoryId = values.category_id ?? null;
+    }
+
+    let tagId: string | null = null;
+    if (values.source_type === 'tag') {
+      tagId = values.tag_id ?? null;
+    }
+
     const payload: Partial<Goal> = {
       name: values.name,
       target_amount: parseCurrencyInput(values.target_amount),
       currency: selectedGoal?.currency ?? defaultCurrency,
-      deadline: values.deadline
-        ? format(values.deadline, 'yyyy-MM-dd')
-        : null,
+      deadline,
       source_type: values.source_type,
-      category_id:
-        values.source_type === 'category' ? values.category_id ?? null : null,
-      tag_id: values.source_type === 'tag' ? values.tag_id ?? null : null,
+      category_id: categoryId,
+      tag_id: tagId,
       icon: values.icon,
       color: values.color,
     };

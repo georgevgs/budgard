@@ -44,9 +44,12 @@ const DebtPaymentForm = ({ debt, onClose }: Props) => {
   const { handleExpenseSubmit } = useExpenseOps();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const suggested = debt.minimum_payment > 0
-    ? formatCurrencyInput(debt.minimum_payment.toString().replace('.', ','))
-    : '';
+  let suggested = '';
+  if (debt.minimum_payment > 0) {
+    suggested = formatCurrencyInput(
+      debt.minimum_payment.toString().replace('.', ','),
+    );
+  }
 
   const form = useForm<DebtPaymentFormData>({
     resolver: zodResolver(debtPaymentSchema),

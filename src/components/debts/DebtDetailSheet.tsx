@@ -150,7 +150,7 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
               <p className="text-xs text-muted-foreground">
                 {t('debts.detail.currentBalance')}
               </p>
-              <p className="text-2xl font-bold tabular-nums text-destructive">
+              <p className="text-2xl font-bold tabular-nums tracking-tight text-destructive">
                 {formatCurrency(debt.current_balance, debt.currency)}
               </p>
             </div>

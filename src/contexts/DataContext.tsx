@@ -5,8 +5,6 @@ import {
   useEffect,
   useMemo,
   useRef,
-  type Dispatch,
-  type SetStateAction,
   type ReactNode,
   useCallback,
 } from 'react';
@@ -24,78 +22,15 @@ import type { AccountBalance } from '@/types/AccountBalance';
 import type { Debt } from '@/types/Debt';
 import type { CategoryBudget } from '@/types/CategoryBudget';
 import { useToast } from '@/hooks/useToast';
-
-type DataState = {
-  categories: Category[];
-  // Derived: categories.type === 'expense' (or null/undefined for legacy rows)
-  expenseCategories: Category[];
-  // Derived: categories.type === 'income'
-  incomeCategories: Category[];
-  expenses: Expense[];
-  incomes: Expense[];
-  recurringExpenses: RecurringExpense[];
-  recurringIncomes: RecurringExpense[];
-  tags: Tag[];
-  templates: ExpenseTemplate[];
-  goals: Goal[];
-  accounts: Account[];
-  accountBalances: AccountBalance[];
-  debts: Debt[];
-  categoryBudgets: CategoryBudget[];
-  monthlyBudget: number | null;
-  defaultCurrency: string;
-  defaultSavingsPct: number | null;
-  dailyReminderHour: number | null;
-  isInitialized: boolean;
-  isSecondaryLoaded: boolean;
-};
-
-// Actions never change reference after mount (setters are stable, refresh
-// callbacks have stable deps). Splitting them into their own context lets
-// action-only consumers (forms, useDataOperations) skip re-renders triggered
-// by data mutations.
-type DataActions = {
-  refreshData: () => Promise<void>;
-  refreshExpenses: () => Promise<void>;
-  refreshIncomes: () => Promise<void>;
-  refreshAccounts: () => Promise<void>;
-  refreshDebts: () => Promise<void>;
-  // Refs to latest data — read inside callbacks without triggering re-renders.
-  expensesRef: { readonly current: Expense[] };
-  incomesRef: { readonly current: Expense[] };
-  setCategories: Dispatch<SetStateAction<Category[]>>;
-  setExpenses: Dispatch<SetStateAction<Expense[]>>;
-  setIncomes: Dispatch<SetStateAction<Expense[]>>;
-  setRecurringExpenses: Dispatch<SetStateAction<RecurringExpense[]>>;
-  setRecurringIncomes: Dispatch<SetStateAction<RecurringExpense[]>>;
-  setTags: Dispatch<SetStateAction<Tag[]>>;
-  setTemplates: Dispatch<SetStateAction<ExpenseTemplate[]>>;
-  setGoals: Dispatch<SetStateAction<Goal[]>>;
-  setAccounts: Dispatch<SetStateAction<Account[]>>;
-  setAccountBalances: Dispatch<SetStateAction<AccountBalance[]>>;
-  setDebts: Dispatch<SetStateAction<Debt[]>>;
-  setCategoryBudgets: Dispatch<SetStateAction<CategoryBudget[]>>;
-  setMonthlyBudget: Dispatch<SetStateAction<number | null>>;
-  setDefaultCurrency: Dispatch<SetStateAction<string>>;
-  setDefaultSavingsPct: Dispatch<SetStateAction<number | null>>;
-  setDailyReminderHour: Dispatch<SetStateAction<number | null>>;
-};
-
-// Slow-changing scalars that handlers need (mostly for optimistic rollback).
-// Carved out so consumers don't re-render on every expense/income mutation.
-type DataConfig = {
-  isInitialized: boolean;
-  // Flips true after the deferred stage finishes loading goals, accounts,
-  // accountBalances and debts. Views that depend on those (GoalsList,
-  // NetWorthView, DebtsView) wait on this before rendering content.
-  isSecondaryLoaded: boolean;
-  monthlyBudget: number | null;
-  defaultCurrency: string;
-  defaultSavingsPct: number | null;
-  dailyReminderHour: number | null;
-};
-
-type DataContextType = DataState & DataActions;
+import type {
+  DataActions,
+  DataConfig,
+  DataContextType,
+  CategoriesSlice,
+  RecurringSlice,
+  AccountsSlice,
+} from './DataContext.types';
+import { mergeUniqueById, isAbortError } from './DataContext.helpers';
 
 const DataContext = createContext<DataContextType | null>(null);
 const DataActionsContext = createContext<DataActions | null>(null);
@@ -107,24 +42,11 @@ const DataConfigContext = createContext<DataConfig | null>(null);
 // consumers should prefer these scoped hooks.
 const ExpensesDataContext = createContext<Expense[] | null>(null);
 const IncomesDataContext = createContext<Expense[] | null>(null);
-type CategoriesSlice = {
-  categories: Category[];
-  expenseCategories: Category[];
-  incomeCategories: Category[];
-};
 const CategoriesDataContext = createContext<CategoriesSlice | null>(null);
 const TagsDataContext = createContext<Tag[] | null>(null);
 const TemplatesDataContext = createContext<ExpenseTemplate[] | null>(null);
-type RecurringSlice = {
-  recurringExpenses: RecurringExpense[];
-  recurringIncomes: RecurringExpense[];
-};
 const RecurringDataContext = createContext<RecurringSlice | null>(null);
 const GoalsDataContext = createContext<Goal[] | null>(null);
-type AccountsSlice = {
-  accounts: Account[];
-  accountBalances: AccountBalance[];
-};
 const AccountsDataContext = createContext<AccountsSlice | null>(null);
 const DebtsDataContext = createContext<Debt[] | null>(null);
 const CategoryBudgetsDataContext = createContext<CategoryBudget[] | null>(null);
@@ -590,34 +512,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       </DataConfigContext.Provider>
     </DataActionsContext.Provider>
   );
-};
-
-const mergeUniqueById = <T extends { id: string }>(
-  prev: T[],
-  incoming: T[],
-): T[] => {
-  const existingIds = new Set(prev.map((item) => item.id));
-  const fresh = incoming.filter((item) => !existingIds.has(item.id));
-
-  if (fresh.length === 0) {
-    return prev;
-  }
-
-  return [...prev, ...fresh];
-};
-
-const isAbortError = (error: unknown): boolean => {
-  if (error instanceof DOMException && error.name === 'AbortError') return true;
-  if (error instanceof Error && error.message.includes('AbortError'))
-    return true;
-  if (
-    typeof error === 'object' &&
-    error !== null &&
-    'message' in error &&
-    String((error as Record<string, unknown>).message).includes('AbortError')
-  )
-    return true;
-  return false;
 };
 
 export const useData = () => {

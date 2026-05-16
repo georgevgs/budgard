@@ -56,7 +56,10 @@ const detectDelimiter = (firstLine: string): string => {
  */
 export const getCsvPreviewData = (csvContent: string): CsvPreviewData => {
   const lines = csvContent.trim().split(/\r?\n/);
-  const delimiter = lines.length > 0 ? detectDelimiter(lines[0]) : ',';
+  let delimiter = ',';
+  if (lines.length > 0) {
+    delimiter = detectDelimiter(lines[0]);
+  }
 
   const allRows = lines
     .filter((line) => line.trim())
@@ -221,8 +224,15 @@ export const parseExpensesCsv = (
   const categoryMap = new Map(
     categories.map((cat) => [cat.name.toLowerCase(), cat]),
   );
-  const delimiter = lines.length > 0 ? detectDelimiter(lines[0]) : ',';
-  const startIndex = isHeaderRow(lines[0]) ? 1 : 0;
+  let delimiter = ',';
+  if (lines.length > 0) {
+    delimiter = detectDelimiter(lines[0]);
+  }
+
+  let startIndex = 0;
+  if (isHeaderRow(lines[0])) {
+    startIndex = 1;
+  }
   const { dateColumn, descriptionColumn, amountColumn, categoryColumn } =
     columnMapping;
   const minColumns =
@@ -354,7 +364,10 @@ const processRow = (
   const dateStr = fields[dateColumn];
   const description = fields[descriptionColumn];
   const amountStr = fields[amountColumn];
-  const categoryName = categoryColumn !== null ? fields[categoryColumn] : '';
+  let categoryName = '';
+  if (categoryColumn !== null) {
+    categoryName = fields[categoryColumn];
+  }
 
   // Skip empty/metadata rows (common at end of bank exports)
   const trimmedDate = dateStr.trim().replace(/^["']+|["']+$/g, '');
@@ -409,17 +422,23 @@ const processRow = (
   const trimmedCategory = categoryName.trim();
   const isUncategorized =
     !trimmedCategory || trimmedCategory.toLowerCase() === 'uncategorized';
-  const unmatchedCategory =
-    !isUncategorized && !categoryMap.has(trimmedCategory.toLowerCase())
-      ? trimmedCategory
-      : null;
+
+  let unmatchedCategory: string | null = null;
+  if (!isUncategorized && !categoryMap.has(trimmedCategory.toLowerCase())) {
+    unmatchedCategory = trimmedCategory;
+  }
+
+  let rowCategoryName = trimmedCategory;
+  if (isUncategorized) {
+    rowCategoryName = '';
+  }
 
   return {
     kind: 'valid',
     row: {
       date,
       description: trimmedDescription,
-      categoryName: isUncategorized ? '' : trimmedCategory,
+      categoryName: rowCategoryName,
       amount,
       rowNumber,
     },
@@ -625,7 +644,10 @@ const parseAmount = (
   //   positive (no sign or +) = income, negative = expense
   // - If treatPositiveAsIncome is false (e.g., Budgard export):
   //   only explicit + is income, everything else is expense
-  const isIncome = treatPositiveAsIncome ? !hasMinusSign : hasPlusSign;
+  let isIncome = hasPlusSign;
+  if (treatPositiveAsIncome) {
+    isIncome = !hasMinusSign;
+  }
 
   return {
     amount: Math.round(amount * 100) / 100,

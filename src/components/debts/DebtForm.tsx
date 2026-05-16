@@ -58,13 +58,9 @@ const DebtForm = ({ debt, onClose }: Props) => {
       name: debt?.name ?? '',
       kind: debt?.kind ?? 'credit_card',
       currency: debt?.currency ?? defaultCurrency,
-      current_balance: debt
-        ? formatCurrencyInput(debt.current_balance.toString().replace('.', ','))
-        : '',
-      apr: debt ? debt.apr.toString() : '',
-      minimum_payment: debt
-        ? formatCurrencyInput(debt.minimum_payment.toString().replace('.', ','))
-        : '',
+      current_balance: resolveCurrencyDefault(debt?.current_balance),
+      apr: resolveAprDefault(debt),
+      minimum_payment: resolveCurrencyDefault(debt?.minimum_payment),
       icon: debt?.icon ?? DEFAULT_ICON,
       color: debt?.color ?? DEFAULT_COLOR,
     },
@@ -326,6 +322,22 @@ type TranslateFunction = (
 ) => string;
 
 import type { UseFormReturn } from 'react-hook-form';
+
+const resolveCurrencyDefault = (value: number | undefined): string => {
+  if (value === undefined) {
+    return '';
+  }
+
+  return formatCurrencyInput(value.toString().replace('.', ','));
+};
+
+const resolveAprDefault = (debt: Debt | undefined): string => {
+  if (!debt) {
+    return '';
+  }
+
+  return debt.apr.toString();
+};
 
 const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {
   if (isEditing) return t('debts.form.editTitle');

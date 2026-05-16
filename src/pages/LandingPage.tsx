@@ -16,7 +16,10 @@ const LandingPage = () => {
   const { i18n } = useTranslation();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  const currentLang = i18n.language.startsWith('el') ? 'el' : 'en';
+  let currentLang: 'el' | 'en' = 'en';
+  if (i18n.language.startsWith('el')) {
+    currentLang = 'el';
+  }
 
   const handleLanguageChange = (lang: string) => {
     void i18n.changeLanguage(lang);

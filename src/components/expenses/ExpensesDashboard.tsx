@@ -42,7 +42,10 @@ const ExpensesDashboard = ({
           (sum, expense) => sum + expense.amount,
           0,
         );
-        const percentage = total > 0 ? (amount / total) * 100 : 0;
+        let percentage = 0;
+        if (total > 0) {
+          percentage = (amount / total) * 100;
+        }
 
         return {
           id: category.id,

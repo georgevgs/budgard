@@ -115,7 +115,10 @@ const renderMonthlyBreakdown = (
       </p>
       <div className="space-y-1.5">
         {months.map((month) => {
-          const width = max > 0 ? (month.amount / max) * 100 : 0;
+          let width = 0;
+          if (max > 0) {
+            width = (month.amount / max) * 100;
+          }
 
           return (
             <div key={month.label} className="flex items-center gap-3">

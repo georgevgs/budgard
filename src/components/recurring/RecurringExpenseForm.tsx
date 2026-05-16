@@ -83,7 +83,7 @@ const RecurringExpenseForm = ({
       category_id:
         expense?.category_id ?? prefill?.category_id ?? 'none',
       frequency: expense?.frequency ?? prefill?.frequency ?? 'monthly',
-      start_date: expense ? parseISO(expense.start_date) : new Date(),
+      start_date: resolveStartDate(expense),
       end_date: expense?.end_date ? parseISO(expense.end_date) : undefined,
       linked_account_id: expense?.linked_account_id ?? null,
     },
@@ -339,6 +339,14 @@ const resolveAmountDefault = (
   }
 
   return '';
+};
+
+const resolveStartDate = (expense: RecurringExpense | undefined): Date => {
+  if (expense) {
+    return parseISO(expense.start_date);
+  }
+
+  return new Date();
 };
 
 import type { UseFormReturn } from 'react-hook-form';

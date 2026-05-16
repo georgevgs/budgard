@@ -32,10 +32,11 @@ const ExpensesMonthlySelector = ({
   const dateLocale = useDateLocale();
 
   const handleMonthChange = (direction: 'prev' | 'next') => {
-    const newDate =
-      direction === 'next'
-        ? addMonths(selectedDate, 1)
-        : subMonths(selectedDate, 1);
+    let newDate = subMonths(selectedDate, 1);
+    if (direction === 'next') {
+      newDate = addMonths(selectedDate, 1);
+    }
+
     onMonthChange(format(newDate, 'yyyy-MM'));
   };
 
@@ -45,10 +46,12 @@ const ExpensesMonthlySelector = ({
   };
 
   const handleYearChange = (direction: 'prev' | 'next') => {
-    const newDate = setYear(
-      selectedDate,
-      selectedDate.getFullYear() + (direction === 'next' ? 1 : -1),
-    );
+    let offset = -1;
+    if (direction === 'next') {
+      offset = 1;
+    }
+
+    const newDate = setYear(selectedDate, selectedDate.getFullYear() + offset);
     onMonthChange(format(newDate, 'yyyy-MM'));
   };
 

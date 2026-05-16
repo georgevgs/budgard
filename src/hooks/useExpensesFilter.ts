@@ -66,14 +66,22 @@ const matchesAllFilters = (
 
 const compareExpensesDateDesc = (a: Expense, b: Expense): number => {
   if (b.date !== a.date) {
-    return b.date < a.date ? -1 : 1;
+    if (b.date < a.date) {
+      return -1;
+    }
+
+    return 1;
   }
 
   if (b.created_at === a.created_at) {
     return 0;
   }
 
-  return b.created_at < a.created_at ? -1 : 1;
+  if (b.created_at < a.created_at) {
+    return -1;
+  }
+
+  return 1;
 };
 
 const compareExpensesDateAsc = (a: Expense, b: Expense): number => {

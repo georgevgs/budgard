@@ -54,10 +54,8 @@ const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
     resolver: zodResolver(goalSchema),
     defaultValues: {
       name: goal?.name ?? '',
-      target_amount: goal
-        ? formatCurrencyInput(goal.target_amount.toString().replace('.', ','))
-        : '',
-      deadline: goal?.deadline ? parseISO(goal.deadline) : undefined,
+      target_amount: resolveTargetAmount(goal),
+      deadline: resolveDeadline(goal),
       source_type: goal?.source_type ?? 'net_delta',
       category_id: goal?.category_id ?? undefined,
       tag_id: goal?.tag_id ?? undefined,
@@ -257,6 +255,22 @@ type TranslateFunction = (
 ) => string;
 
 type GoalFormReturn = ReturnType<typeof useForm<GoalFormData>>;
+
+const resolveTargetAmount = (goal: Goal | undefined): string => {
+  if (!goal) {
+    return '';
+  }
+
+  return formatCurrencyInput(goal.target_amount.toString().replace('.', ','));
+};
+
+const resolveDeadline = (goal: Goal | undefined): Date | undefined => {
+  if (!goal?.deadline) {
+    return undefined;
+  }
+
+  return parseISO(goal.deadline);
+};
 
 const renderTitle = (isEditing: boolean, t: TranslateFunction) => {
   if (isEditing) return t('goals.editTitle');
