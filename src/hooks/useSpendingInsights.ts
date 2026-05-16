@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { format, parseISO, getDaysInMonth } from 'date-fns';
 import type { Locale } from 'date-fns';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import Wallet from 'lucide-react/dist/esm/icons/wallet';
 import Gauge from 'lucide-react/dist/esm/icons/gauge';
 import type { LucideIcon } from 'lucide-react';
@@ -9,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import { formatCurrency } from '@/lib/utils';
+import { buildWeeklyRecap, type WeeklyAnomaly } from '@/lib/weeklyAnomalies';
 
 export type Insight = {
   id: string;
@@ -29,15 +31,18 @@ export type SpendingInsightsParams = {
 const MIN_DAYS_FOR_TRENDS = 7;
 
 export const useSpendingInsights = (params: SpendingInsightsParams): Insight[] => {
-  const { expenses, monthlyBudget, monthComparison, defaultCurrency } = params;
+  const { expenses, monthlyBudget, monthComparison, categories, defaultCurrency } = params;
   const { t } = useTranslation();
 
   return useMemo(() => {
     const now = new Date();
     const dayOfMonth = now.getDate();
     const daysInMonth = getDaysInMonth(now);
+    const recap = buildWeeklyRecap({ now, expenses, categories });
+    const topAnomaly = recap?.anomalies[0] ?? null;
 
     const insights: (Insight | null)[] = [
+      weeklyAnomalyInsight({ anomaly: topAnomaly, t }),
       dailyBudgetRemainingInsight({
         monthlyBudget,
         thisMonthAmount: monthComparison.thisMonthAmount,
@@ -62,19 +67,50 @@ export const useSpendingInsights = (params: SpendingInsightsParams): Insight[] =
       }),
     ];
 
-    // Quiet the unused-imports warning during a future cleanup pass; keep the
-    // imports so reintroducing dropped insights doesn't reshuffle the file.
-    void expenses;
     void parseISO;
     void format;
 
     return insights.filter((i): i is Insight => i !== null);
-  }, [expenses, monthlyBudget, monthComparison, defaultCurrency, t]);
+  }, [expenses, categories, monthlyBudget, monthComparison, defaultCurrency, t]);
 };
 
 // ─── Insight builders ───────────────────────────────────────────────────────
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
+
+type WeeklyAnomalyArgs = {
+  anomaly: WeeklyAnomaly | null;
+  t: TFunc;
+};
+
+const weeklyAnomalyInsight = (args: WeeklyAnomalyArgs): Insight | null => {
+  const { anomaly, t } = args;
+  if (!anomaly) return null;
+
+  const multiple = anomaly.ratio.toFixed(1).replace(/\.0$/, '');
+
+  if (anomaly.direction === 'up') {
+    return {
+      id: 'weeklyAnomalyUp',
+      icon: TrendingUp,
+      text: t('analytics.insights.weeklyAnomalyUp', {
+        name: anomaly.categoryName,
+        multiple,
+      }),
+      variant: 'warning',
+    };
+  }
+
+  return {
+    id: 'weeklyAnomalyDown',
+    icon: TrendingDown,
+    text: t('analytics.insights.weeklyAnomalyDown', {
+      name: anomaly.categoryName,
+      multiple,
+    }),
+    variant: 'positive',
+  };
+};
 
 type DailyArgs = {
   monthlyBudget: number | null;

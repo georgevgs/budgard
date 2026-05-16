@@ -393,6 +393,18 @@
     "acrossN_other": "σε {{count}} δαπάνες",
     "uncategorised": "Χωρίς κατηγορία"
   },
+  "weeklyRecap": {
+    "title": "Αυτή την εβδομάδα",
+    "dismissAria": "Απόκρυψη εβδομαδιαίας ανακεφαλαίωσης",
+    "acrossN_one": "σε {{count}} δαπάνη",
+    "acrossN_other": "σε {{count}} δαπάνες",
+    "aboutNormal": "Περίπου όσο και μια συνηθισμένη εβδομάδα.",
+    "aboveAvg": "{{percent}}% πάνω από τον τρίμηνο μέσο όρο εβδομάδας.",
+    "belowAvg": "{{percent}}% κάτω από τον τρίμηνο μέσο όρο εβδομάδας.",
+    "upMultiple": "{{multiple}}× του μέσου όρου",
+    "downMultiple": "{{multiple}}× του μέσου όρου",
+    "usualWeekly": "συνήθως {{amount}}/εβδ"
+  },
   "settings": {
     "title": "Ρυθμίσεις",
     "profile": {
@@ -821,7 +833,9 @@
       "largestExpense": "Μεγαλύτερη δαπάνη αυτό τον μήνα: {{description}} {{amount}}",
       "inactive": "Δεν έχεις καταγράψει δαπάνες για {{days}} ημέρες — κράτα τα αρχεία ενημερωμένα.",
       "peakDay": "Τείνεις να ξοδεύεις περισσότερο τις {{day}}.",
-      "loggingStreak": "Σερί καταγραφής {{count}} ημερών — συνέχισε έτσι."
+      "loggingStreak": "Σερί καταγραφής {{count}} ημερών — συνέχισε έτσι.",
+      "weeklyAnomalyUp": "{{name}}: {{multiple}}× πάνω από τον μέσο όρο σου αυτή την εβδομάδα",
+      "weeklyAnomalyDown": "{{name}}: στο {{multiple}}× του μέσου όρου σου αυτή την εβδομάδα"
     },
     "drillDown": {
       "categoryTotal": "{{amount}} σε {{count}} έξοδα",

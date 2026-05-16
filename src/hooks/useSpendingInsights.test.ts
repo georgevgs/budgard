@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
+import { format, subDays } from 'date-fns';
 import { useSpendingInsights } from './useSpendingInsights';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
@@ -25,6 +26,20 @@ const makeExpense = (date: string, amount: number): Expense => ({
   user_id: 'u1',
   created_at: date + 'T10:00:00Z',
 });
+
+const baselineRun = (
+  categoryId: string,
+  amount: number,
+  count: number,
+  refDate: Date,
+): Expense[] => {
+  const start = subDays(refDate, 8);
+  const step = Math.max(1, Math.floor(85 / count));
+
+  return Array.from({ length: count }, (_, i) =>
+    makeExpense(format(subDays(start, i * step), 'yyyy-MM-dd'), amount),
+  ).map((e) => ({ ...e, category_id: categoryId }));
+};
 
 describe('useSpendingInsights', () => {
   beforeEach(() => {
@@ -120,5 +135,20 @@ describe('useSpendingInsights', () => {
     const insight = result.current.find((i) => i.id === 'monthProjection');
     expect(insight).toBeDefined();
     expect(insight!.variant).toBe('warning');
+  });
+
+  // --- Weekly Anomaly ---
+
+  it('surfaces a weekly anomaly as a warning insight', () => {
+    const today = new Date('2026-03-15');
+    const expenses: Expense[] = [
+      ...baselineRun('cat-1', 30, 12, today),
+      makeExpense(format(today, 'yyyy-MM-dd'), 80),
+    ];
+
+    const { result } = render({ expenses });
+    const anomaly = result.current.find((i) => i.id === 'weeklyAnomalyUp');
+    expect(anomaly).toBeDefined();
+    expect(anomaly!.variant).toBe('warning');
   });
 });

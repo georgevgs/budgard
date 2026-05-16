@@ -393,6 +393,18 @@
     "acrossN_other": "across {{count}} expenses",
     "uncategorised": "Uncategorised"
   },
+  "weeklyRecap": {
+    "title": "This week",
+    "dismissAria": "Dismiss weekly recap",
+    "acrossN_one": "across {{count}} expense",
+    "acrossN_other": "across {{count}} expenses",
+    "aboutNormal": "About the same as your usual week.",
+    "aboveAvg": "{{percent}}% above your 3-month average week.",
+    "belowAvg": "{{percent}}% below your 3-month average week.",
+    "upMultiple": "{{multiple}}× normal",
+    "downMultiple": "{{multiple}}× normal",
+    "usualWeekly": "usually {{amount}}/wk"
+  },
   "settings": {
     "title": "Settings",
     "profile": {
@@ -821,7 +833,9 @@
       "largestExpense": "Biggest expense this month: {{description}} at {{amount}}",
       "inactive": "Nothing logged in {{days}} days — keep your records up to date.",
       "peakDay": "You tend to spend the most on {{day}}s.",
-      "loggingStreak": "{{count}}-day logging streak — keep it up."
+      "loggingStreak": "{{count}}-day logging streak — keep it up.",
+      "weeklyAnomalyUp": "{{name}} is {{multiple}}× your usual this week",
+      "weeklyAnomalyDown": "{{name}} is at {{multiple}}× your usual this week"
     },
     "drillDown": {
       "categoryTotal": "{{amount}} across {{count}} expenses",

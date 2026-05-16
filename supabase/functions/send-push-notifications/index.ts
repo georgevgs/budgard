@@ -23,6 +23,12 @@ type DailyReminderUser = {
   user_id: string;
 };
 
+type WeeklyRecapUser = {
+  user_id: string;
+  week_total: number;
+  default_currency: string;
+};
+
 type PushSubscription = {
   endpoint: string;
   p256dh: string;
@@ -145,6 +151,43 @@ Deno.serve(async (req) => {
             data: { url: '/expenses?action=add' },
           },
         });
+      }
+    }
+
+    // ── Weekly recap (Sundays only) ─────────────────────────────────────
+    // Sends one "your week in review" nudge that opens the app to the
+    // dashboard, where WeeklyRecapCard renders the per-category anomaly
+    // breakdown. We compute only the totals here — the rich client-side
+    // recap (top anomaly etc.) is calculated on render, so the push body
+    // stays generic and the user gets the full picture in-app.
+
+    const nowDate = new Date();
+    const isSundayUtc = nowDate.getUTCDay() === 0;
+
+    if (isSundayUtc) {
+      const todayStr = nowDate.toISOString().split('T')[0];
+
+      const { data: weeklyUsers, error: weeklyError } = await adminClient.rpc(
+        'get_weekly_recap_push_users',
+        { p_window_end: todayStr },
+      );
+
+      if (!weeklyError && weeklyUsers) {
+        for (const user of weeklyUsers as WeeklyRecapUser[]) {
+          const formatted = formatAmount(
+            Number(user.week_total),
+            user.default_currency,
+          );
+          notifications.push({
+            user_id: user.user_id,
+            payload: {
+              title: 'Your week in review',
+              body: `${formatted} spent this week — open the app to see which categories swung the most.`,
+              tag: 'weekly-recap',
+              data: { url: '/expenses' },
+            },
+          });
+        }
       }
     }
 
