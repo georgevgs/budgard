@@ -4,6 +4,66 @@ import type { Expense } from '@/types/Expense';
 
 // ISO-8601 timestamps and YYYY-MM-DD dates sort lexicographically.
 // String comparison is ~10x faster than parseISO + getTime for hot paths.
+type FilterCriteria = {
+  deferredSearch: string;
+  searchLower: string;
+  selectedCategoryId: string | null;
+  selectedTagId: string | null;
+};
+
+const matchesSearch = (expense: Expense, criteria: FilterCriteria): boolean => {
+  if (!criteria.deferredSearch) {
+    return true;
+  }
+  if (expense.description.toLowerCase().includes(criteria.searchLower)) {
+    return true;
+  }
+  if (expense.category?.name.toLowerCase().includes(criteria.searchLower)) {
+    return true;
+  }
+  if (expense.tag?.name.toLowerCase().includes(criteria.searchLower)) {
+    return true;
+  }
+
+  return false;
+};
+
+const matchesCategory = (
+  expense: Expense,
+  selectedCategoryId: string | null,
+): boolean => {
+  if (!selectedCategoryId) {
+    return true;
+  }
+  if (selectedCategoryId === 'uncategorized') {
+    return expense.category_id === null || expense.category_id === undefined;
+  }
+
+  return expense.category_id === selectedCategoryId;
+};
+
+const matchesTag = (
+  expense: Expense,
+  selectedTagId: string | null,
+): boolean => {
+  if (!selectedTagId) {
+    return true;
+  }
+
+  return expense.tag_id === selectedTagId;
+};
+
+const matchesAllFilters = (
+  expense: Expense,
+  criteria: FilterCriteria,
+): boolean => {
+  if (!matchesSearch(expense, criteria)) return false;
+  if (!matchesCategory(expense, criteria.selectedCategoryId)) return false;
+  if (!matchesTag(expense, criteria.selectedTagId)) return false;
+
+  return true;
+};
+
 const compareExpensesDateDesc = (a: Expense, b: Expense): number => {
   if (b.date !== a.date) {
     return b.date < a.date ? -1 : 1;
@@ -146,27 +206,17 @@ export const useExpensesFilter = ({
       baseExpenses = monthlyExpenses;
     }
 
-    const filtered = hasActiveFilters
-      ? baseExpenses.filter((expense) => {
-          const matchesSearch = deferredSearch
-            ? expense.description.toLowerCase().includes(searchLower) ||
-              (expense.category?.name.toLowerCase().includes(searchLower) ??
-                false) ||
-              (expense.tag?.name.toLowerCase().includes(searchLower) ?? false)
-            : true;
-          const matchesCategory = selectedCategoryId
-            ? selectedCategoryId === 'uncategorized'
-              ? expense.category_id === null ||
-                expense.category_id === undefined
-              : expense.category_id === selectedCategoryId
-            : true;
-          const matchesTag = selectedTagId
-            ? expense.tag_id === selectedTagId
-            : true;
-
-          return matchesSearch && matchesCategory && matchesTag;
-        })
-      : baseExpenses;
+    let filtered = baseExpenses;
+    if (hasActiveFilters) {
+      filtered = baseExpenses.filter((expense) =>
+        matchesAllFilters(expense, {
+          deferredSearch,
+          searchLower,
+          selectedCategoryId,
+          selectedTagId,
+        }),
+      );
+    }
 
     // base expenses are already date-desc; skip copy+sort for the default case
     if (sortOrder === 'date-desc') return filtered;

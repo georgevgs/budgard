@@ -137,7 +137,8 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
           key={`step-${i}`}
           className={cn(
             'h-1.5 rounded-full transition-all duration-300',
-            i === step ? 'w-6 bg-primary' : 'w-1.5 bg-muted-foreground/30',
+            i === step && 'w-6 bg-primary',
+            i !== step && 'w-1.5 bg-muted-foreground/30',
             i < step && 'bg-primary/50 w-1.5',
           )}
         />
@@ -237,9 +238,8 @@ export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
               onClick={() => handleCategoryToggle(index)}
               className={cn(
                 'flex items-center gap-2.5 rounded-xl px-3 py-3 text-sm font-medium transition-all border',
-                isSelected
-                  ? 'border-primary bg-primary/10 text-foreground'
-                  : 'border-border/50 bg-card text-muted-foreground hover:border-border',
+                isSelected && 'border-primary bg-primary/10 text-foreground',
+                !isSelected && 'border-border/50 bg-card text-muted-foreground hover:border-border',
               )}
             >
               <span className="text-base shrink-0">{cat.icon}</span>

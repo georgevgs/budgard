@@ -108,12 +108,8 @@ const RecurringExpenseForm = ({
   };
 
   const isIncome = type === 'income';
-  const titleSuffix = isIncome
-    ? t('recurring.income.suffix')
-    : t('recurring.expensesTitle');
-  const formTitle = expense
-    ? `${t('recurring.formEdit')} — ${titleSuffix}`
-    : `${t('recurring.formAdd')} — ${titleSuffix}`;
+  const titleSuffix = getTitleSuffix(isIncome, t);
+  const formTitle = getFormTitle(Boolean(expense), titleSuffix, t);
 
   return (
     <div className="flex flex-col max-h-full">
@@ -309,6 +305,26 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const getTitleSuffix = (isIncome: boolean, t: TranslateFunction): string => {
+  if (isIncome) {
+    return t('recurring.income.suffix');
+  }
+
+  return t('recurring.expensesTitle');
+};
+
+const getFormTitle = (
+  isEditing: boolean,
+  titleSuffix: string,
+  t: TranslateFunction,
+): string => {
+  if (isEditing) {
+    return `${t('recurring.formEdit')} — ${titleSuffix}`;
+  }
+
+  return `${t('recurring.formAdd')} — ${titleSuffix}`;
+};
 
 const resolveAmountDefault = (
   expense: RecurringExpense | undefined,

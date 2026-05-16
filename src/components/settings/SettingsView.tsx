@@ -418,15 +418,33 @@ const renderThemeButton = (
   return (
     <Button
       key={themeName}
-      variant={isActive ? 'default' : 'outline'}
+      variant={getThemeButtonVariant(isActive)}
       size="sm"
       onClick={() => setTheme(themeName)}
-      className={themeName === 'barbie' && !isActive ? 'text-pink-500' : ''}
+      className={getThemeButtonClass(themeName, isActive)}
     >
       <Icon className="h-4 w-4 mr-1.5" />
       {t(`theme.${themeName}`)}
     </Button>
   );
+};
+
+const getThemeButtonVariant = (
+  isActive: boolean,
+): 'default' | 'outline' => {
+  if (isActive) {
+    return 'default';
+  }
+
+  return 'outline';
+};
+
+const getThemeButtonClass = (themeName: string, isActive: boolean): string => {
+  if (themeName === 'barbie' && !isActive) {
+    return 'text-pink-500';
+  }
+
+  return '';
 };
 
 const renderAccentPicker = (

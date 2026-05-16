@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useTransition } from 'react';
+import { useState, useMemo, useTransition } from 'react';
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
@@ -37,9 +37,9 @@ import Tag from 'lucide-react/dist/esm/icons/tag';
 import { format, parseISO } from 'date-fns';
 import { cn, formatCurrency, formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
 import { SUPPORTED_CURRENCIES } from '@/lib/currencies';
-import { fetchExchangeRate } from '@/services/exchangeRateService';
 import { useAuth } from '@/hooks/useAuth';
 import { useDateLocale } from '@/hooks/useDateLocale';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
 import {
   useExpensesData,
   useTagsData,
@@ -103,9 +103,7 @@ const ExpensesForm = ({
   const [selectedCurrency, setSelectedCurrency] = useState(
     expense?.original_currency ?? defaultCurrency,
   );
-  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
-  const [isFetchingRate, setIsFetchingRate] = useState(false);
-  const [rateError, setRateError] = useState(false);
+  const [submitRateError, setSubmitRateError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const initialAmount = getInitialAmount(expense, defaultCurrency);
@@ -134,41 +132,13 @@ const ExpensesForm = ({
   const watchedDate = form.watch('date');
   const watchedDateStr = formatWatchedDate(watchedDate);
 
-  useEffect(() => {
-    if (selectedCurrency === defaultCurrency) {
-      setExchangeRate(null);
-      setRateError(false);
-      return;
-    }
-
-    if (!watchedDateStr) return;
-
-    const controller = new AbortController();
-
-    const fetchRate = async () => {
-      setIsFetchingRate(true);
-      setRateError(false);
-      try {
-        const rate = await fetchExchangeRate(
-          selectedCurrency,
-          watchedDateStr,
-          controller.signal,
-          defaultCurrency,
-        );
-        if (!controller.signal.aborted) setExchangeRate(rate);
-      } catch {
-        if (!controller.signal.aborted) {
-          setRateError(true);
-          setExchangeRate(null);
-        }
-      } finally {
-        if (!controller.signal.aborted) setIsFetchingRate(false);
-      }
-    };
-
-    void fetchRate();
-    return () => controller.abort();
-  }, [selectedCurrency, watchedDateStr, defaultCurrency]);
+  const {
+    rate: exchangeRate,
+    isFetching: isFetchingRate,
+    error: fetchRateError,
+    ensureRate,
+  } = useExchangeRate(selectedCurrency, watchedDateStr, defaultCurrency);
+  const rateError = fetchRateError || submitRateError;
 
   const previewConvertedAmount = useMemo(() => {
     if (selectedCurrency === defaultCurrency || !exchangeRate) return null;
@@ -248,8 +218,7 @@ const ExpensesForm = ({
 
   const handleCurrencyChange = (value: string) => {
     setSelectedCurrency(value);
-    setExchangeRate(null);
-    setRateError(false);
+    setSubmitRateError(false);
   };
 
   const handleSubmit = async (values: ExpenseFormData) => {
@@ -265,7 +234,7 @@ const ExpensesForm = ({
       let exchangeRateValue: number | null = null;
 
       if (selectedCurrency !== defaultCurrency) {
-        const rate = exchangeRate ?? (await fetchExchangeRate(selectedCurrency, dateStr, undefined, defaultCurrency));
+        const rate = await ensureRate();
         finalAmount = Math.round(rawAmount * rate * 100) / 100;
         originalAmount = rawAmount;
         originalCurrency = selectedCurrency;
@@ -291,7 +260,7 @@ const ExpensesForm = ({
       });
       onClose();
     } catch {
-      setRateError(true);
+      setSubmitRateError(true);
     } finally {
       setIsSubmitting(false);
     }

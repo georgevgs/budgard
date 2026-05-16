@@ -9,6 +9,7 @@ import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
 import Banknote from 'lucide-react/dist/esm/icons/banknote';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import type { LucideIcon } from 'lucide-react';
+import type { Locale } from 'date-fns';
 import type { AccountKind } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import { useDateLocale } from '@/hooks/useDateLocale';
@@ -25,13 +26,11 @@ const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
   const liability = isLiability(account.kind);
   const Icon = ICON_BY_KIND[account.kind];
 
-  const lastUpdatedLabel = latestSnapshot
-    ? t('networth.lastUpdated', {
-        date: format(parseISO(latestSnapshot.recorded_at), 'MMM d', {
-          locale: dateLocale,
-        }),
-      })
-    : t('networth.notUpdated');
+  const lastUpdatedLabel = getLastUpdatedLabel(
+    latestSnapshot,
+    dateLocale,
+    t,
+  );
 
   return (
     <Card
@@ -62,10 +61,11 @@ const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
         <p
           className={cn(
             'text-base font-semibold tabular-nums shrink-0',
-            liability ? 'text-destructive' : 'text-foreground',
+            liability && 'text-destructive',
+            !liability && 'text-foreground',
           )}
         >
-          {liability ? '−' : ''}
+          {renderLiabilityPrefix(liability)}
           {formatCurrency(account.current_balance, account.default_currency)}
         </p>
       </CardContent>
@@ -76,6 +76,32 @@ const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
 export default AccountCard;
 
 // --- Helpers ---
+
+type TranslateFunction = (key: string, options?: Record<string, unknown>) => string;
+
+const getLastUpdatedLabel = (
+  latestSnapshot: AccountBalance | undefined,
+  dateLocale: Locale,
+  t: TranslateFunction,
+) => {
+  if (!latestSnapshot) {
+    return t('networth.notUpdated');
+  }
+
+  return t('networth.lastUpdated', {
+    date: format(parseISO(latestSnapshot.recorded_at), 'MMM d', {
+      locale: dateLocale,
+    }),
+  });
+};
+
+const renderLiabilityPrefix = (liability: boolean) => {
+  if (liability) {
+    return '−';
+  }
+
+  return '';
+};
 
 const ICON_BY_KIND: Record<AccountKind, LucideIcon> = {
   cash: Banknote,

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useTransition } from 'react';
+import { useState, useMemo, useTransition } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -39,9 +39,9 @@ import {
   parseCurrencyInput,
 } from '@/lib/utils';
 import { SUPPORTED_CURRENCIES } from '@/lib/currencies';
-import { fetchExchangeRate } from '@/services/exchangeRateService';
 import { useAuth } from '@/hooks/useAuth';
 import { useDateLocale } from '@/hooks/useDateLocale';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { useCategoriesData, useDataConfig } from '@/contexts/DataContext';
 import { useIncomeOps } from '@/hooks/dataOps/useIncomeOps';
 import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
@@ -69,9 +69,7 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
   const [selectedCurrency, setSelectedCurrency] = useState(
     income?.original_currency ?? defaultCurrency,
   );
-  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
-  const [isFetchingRate, setIsFetchingRate] = useState(false);
-  const [rateError, setRateError] = useState(false);
+  const [submitRateError, setSubmitRateError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const initialAmount = getInitialAmount(income, defaultCurrency);
@@ -114,41 +112,13 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
     setIsManagerOpen(true);
   };
 
-  useEffect(() => {
-    if (selectedCurrency === defaultCurrency) {
-      setExchangeRate(null);
-      setRateError(false);
-      return;
-    }
-
-    if (!watchedDateStr) return;
-
-    const controller = new AbortController();
-
-    const fetchRate = async () => {
-      setIsFetchingRate(true);
-      setRateError(false);
-      try {
-        const rate = await fetchExchangeRate(
-          selectedCurrency,
-          watchedDateStr,
-          controller.signal,
-          defaultCurrency,
-        );
-        if (!controller.signal.aborted) setExchangeRate(rate);
-      } catch {
-        if (!controller.signal.aborted) {
-          setRateError(true);
-          setExchangeRate(null);
-        }
-      } finally {
-        if (!controller.signal.aborted) setIsFetchingRate(false);
-      }
-    };
-
-    void fetchRate();
-    return () => controller.abort();
-  }, [selectedCurrency, watchedDateStr, defaultCurrency]);
+  const {
+    rate: exchangeRate,
+    isFetching: isFetchingRate,
+    error: fetchRateError,
+    ensureRate,
+  } = useExchangeRate(selectedCurrency, watchedDateStr, defaultCurrency);
+  const rateError = fetchRateError || submitRateError;
 
   const previewConvertedAmount = useMemo(() => {
     if (selectedCurrency === defaultCurrency || !exchangeRate) return null;
@@ -200,14 +170,7 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
       let exchangeRateValue: number | null = null;
 
       if (selectedCurrency !== defaultCurrency) {
-        const rate =
-          exchangeRate ??
-          (await fetchExchangeRate(
-            selectedCurrency,
-            dateStr,
-            undefined,
-            defaultCurrency,
-          ));
+        const rate = await ensureRate();
         finalAmount = Math.round(rawAmount * rate * 100) / 100;
         originalAmount = rawAmount;
         originalCurrency = selectedCurrency;
@@ -228,7 +191,7 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
       const saved = await handleIncomeSubmit(payload, income?.id);
       onClose(saved ?? undefined);
     } catch {
-      setRateError(true);
+      setSubmitRateError(true);
     } finally {
       setIsSubmitting(false);
     }

@@ -278,6 +278,14 @@ const renderSubmitLabel = (isSubmitting: boolean, t: TranslateFunction) => {
   return t('networth.form.save');
 };
 
+const getInitialBalanceLabelKey = (selectedKind: AccountKind): string => {
+  if (selectedKind === 'investment') {
+    return 'networth.form.initialValueLabel';
+  }
+
+  return 'networth.form.initialBalanceLabel';
+};
+
 const renderInitialBalanceField = (
   form: UseFormReturn<AccountFormData>,
   isEditing: boolean,
@@ -287,10 +295,7 @@ const renderInitialBalanceField = (
 ) => {
   if (isEditing) return null;
 
-  const labelKey =
-    selectedKind === 'investment'
-      ? 'networth.form.initialValueLabel'
-      : 'networth.form.initialBalanceLabel';
+  const labelKey = getInitialBalanceLabelKey(selectedKind);
 
   return (
     <FormField

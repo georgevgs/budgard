@@ -43,7 +43,14 @@ const renderItem = (
   t: Tx,
 ) => {
   const isOpen = openIndex === index;
-  const handleClick = () => setOpenIndex(isOpen ? null : index);
+  const handleClick = () => {
+    if (isOpen) {
+      setOpenIndex(null);
+
+      return;
+    }
+    setOpenIndex(index);
+  };
 
   return (
     <div key={n}>
@@ -58,7 +65,8 @@ const renderItem = (
         <Plus
           className={cn(
             'h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200',
-            isOpen ? 'rotate-45' : 'rotate-0',
+            isOpen && 'rotate-45',
+            !isOpen && 'rotate-0',
           )}
         />
       </button>

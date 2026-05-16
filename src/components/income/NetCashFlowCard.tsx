@@ -56,10 +56,11 @@ const NetCashFlowCard = ({
       <p
         className={cn(
           'text-3xl font-bold tracking-tight tabular-nums',
-          isPositive ? 'text-income' : 'text-destructive',
+          isPositive && 'text-income',
+          !isPositive && 'text-destructive',
         )}
       >
-        {isPositive ? '+' : ''}
+        {renderSignPrefix(isPositive)}
         {formatCurrency(net, defaultCurrency)}
       </p>
 
@@ -95,6 +96,14 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const renderSignPrefix = (isPositive: boolean) => {
+  if (isPositive) {
+    return '+';
+  }
+
+  return '';
+};
 
 const renderSavingsRate = (
   isPositive: boolean,

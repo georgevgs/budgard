@@ -69,7 +69,7 @@ const TemplatesBar = ({
             className="h-6 px-2 text-xs text-muted-foreground"
             onClick={() => setIsManaging(!isManaging)}
           >
-            {isManaging ? t('templates.done') : t('templates.manage')}
+            {renderManageLabel(isManaging, t)}
           </Button>
         </div>
 
@@ -144,6 +144,17 @@ const TemplatesBar = ({
 export default memo(TemplatesBar);
 
 // ─── Helper render functions ──────────────────────────────────────────────────
+
+const renderManageLabel = (
+  isManaging: boolean,
+  t: (key: string) => string,
+): string => {
+  if (isManaging) {
+    return t('templates.done');
+  }
+
+  return t('templates.manage');
+};
 
 const renderCategoryIndicator = (template: ExpenseTemplate) => {
   if (!template.category) return null;

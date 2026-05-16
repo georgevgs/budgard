@@ -58,9 +58,8 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
           aria-hidden={!isOpen}
           className={cn(
             'flex flex-col gap-2 items-end transition-all duration-200 scale-90 origin-bottom pointer-events-auto',
-            isOpen
-              ? 'opacity-100 translate-y-0'
-              : 'opacity-0 -translate-y-4 pointer-events-none',
+            isOpen && 'opacity-100 translate-y-0',
+            !isOpen && 'opacity-0 -translate-y-4 pointer-events-none',
           )}
         >
           {/* Add Expense Button */}
@@ -81,7 +80,7 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
               className="h-12 w-12 rounded-full shadow-lg"
               onClick={() => handleAction(onAddExpense)}
               aria-label={t('expenses.addExpense')}
-              tabIndex={isOpen ? 0 : -1}
+              tabIndex={getTabIndex(isOpen)}
             >
               <Receipt className="h-5 w-5" />
             </Button>
@@ -105,7 +104,7 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
               className="h-12 w-12 rounded-full shadow-lg"
               onClick={() => handleAction(onAddCategory)}
               aria-label={t('categories.addCategory')}
-              tabIndex={isOpen ? 0 : -1}
+              tabIndex={getTabIndex(isOpen)}
             >
               <Tag className="h-5 w-5" />
             </Button>
@@ -144,6 +143,14 @@ const renderOverlay = (isOpen: boolean, onClose: () => void) => {
       role="presentation"
     />
   );
+};
+
+const getTabIndex = (isOpen: boolean): number => {
+  if (isOpen) {
+    return 0;
+  }
+
+  return -1;
 };
 
 const renderToggleIcon = (isOpen: boolean) => {

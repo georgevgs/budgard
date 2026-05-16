@@ -95,9 +95,8 @@ const NetWorthChart = ({ series, defaultCurrency }: Props) => {
                         <span
                           className={cn(
                             'tabular-nums font-semibold',
-                            point.total >= 0
-                              ? 'text-foreground'
-                              : 'text-destructive',
+                            point.total >= 0 && 'text-foreground',
+                            point.total < 0 && 'text-destructive',
                           )}
                         >
                           {formatCurrency(point.total, defaultCurrency)}

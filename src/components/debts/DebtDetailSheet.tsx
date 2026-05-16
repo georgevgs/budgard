@@ -34,7 +34,7 @@ import { useDebtOps } from '@/hooks/dataOps/useDebtOps';
 import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import type { Locale } from 'date-fns';
-import { useDebtProgress } from '@/hooks/useDebtProgress';
+import { useDebtProgress, type DebtProgress } from '@/hooks/useDebtProgress';
 import { useDebtPayments } from '@/hooks/useDebtPayments';
 import type { Debt } from '@/types/Debt';
 import type { Expense } from '@/types/Expense';
@@ -173,9 +173,7 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
                   {t('debts.detail.payoffIn')}
                 </p>
                 <p className="font-medium tabular-nums mt-0.5">
-                  {progress.isUnpayable || progress.monthsRemaining <= 0
-                    ? '—'
-                    : t('debts.monthsCount', { count: progress.monthsRemaining })}
+                  {renderPayoffMonths(progress, t)}
                 </p>
               </div>
               <div>
@@ -304,6 +302,17 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const renderPayoffMonths = (
+  progress: DebtProgress,
+  t: TranslateFunction,
+) => {
+  if (progress.isUnpayable || progress.monthsRemaining <= 0) {
+    return '—';
+  }
+
+  return t('debts.monthsCount', { count: progress.monthsRemaining });
+};
 
 const renderUnpayableCallout = (
   isUnpayable: boolean,

@@ -24,9 +24,8 @@ const Header = ({ onSignIn }: Props) => {
     <header
       className={cn(
         'sticky top-0 z-50 transition-colors duration-200',
-        scrolled
-          ? 'border-b border-border/50 bg-background/85 backdrop-blur-xl'
-          : 'border-b border-transparent bg-background/0',
+        scrolled && 'border-b border-border/50 bg-background/85 backdrop-blur-xl',
+        !scrolled && 'border-b border-transparent bg-background/0',
       )}
     >
       <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">

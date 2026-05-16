@@ -26,7 +26,7 @@ import { useCategoriesData, useDataConfig } from '@/contexts/DataContext';
 import { useToast } from '@/hooks/useToast';
 import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
 import type { Category } from '@/types/Category';
-import { formatCurrency } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import {
   parseExpensesCsv,
   mapRowsToExpenses,
@@ -312,6 +312,31 @@ type TranslateFunction = (
   options?: Record<string, unknown>,
 ) => string;
 
+const parseCategoryMapValue = (value: string): string | null => {
+  if (value === '_skip') {
+    return null;
+  }
+
+  return value;
+};
+
+const parseCategoryColumnValue = (v: string): number | null => {
+  if (v === '_none') {
+    return null;
+  }
+
+  return parseInt(v);
+};
+
+const isMappedColumn = (cellIdx: number, mapping: ColumnMapping): boolean => {
+  if (cellIdx === mapping.dateColumn) return true;
+  if (cellIdx === mapping.descriptionColumn) return true;
+  if (cellIdx === mapping.amountColumn) return true;
+  if (cellIdx === mapping.categoryColumn) return true;
+
+  return false;
+};
+
 const renderUploadStep = (
   isCurrentStep: boolean,
   isDragging: boolean,
@@ -324,7 +349,11 @@ const renderUploadStep = (
 
   return (
     <div
-      className={`border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-colors mb-4 ${isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'}`}
+      className={cn(
+        'border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-colors mb-4',
+        isDragging && 'border-primary bg-primary/5',
+        !isDragging && 'border-muted-foreground/25',
+      )}
       onDragOver={(e) => {
         e.preventDefault();
         setIsDragging(true);
@@ -419,7 +448,7 @@ const renderMappingStep = (
           <Select
             value={columnMapping.categoryColumn?.toString() ?? '_none'}
             onValueChange={(v) =>
-              updateColumnMapping('categoryColumn', v === '_none' ? null : parseInt(v))
+              updateColumnMapping('categoryColumn', parseCategoryColumnValue(v))
             }
           >
             <SelectTrigger><SelectValue /></SelectTrigger>
@@ -464,14 +493,10 @@ const renderMappingStep = (
                   {row.map((cell, cellIdx) => (
                     <td
                       key={`cell-${rowIdx}-${cellIdx}`}
-                      className={`px-2 py-1 truncate max-w-[120px] ${
-                        cellIdx === columnMapping.dateColumn ||
-                        cellIdx === columnMapping.descriptionColumn ||
-                        cellIdx === columnMapping.amountColumn ||
-                        cellIdx === columnMapping.categoryColumn
-                          ? 'bg-primary/10'
-                          : ''
-                      }`}
+                      className={cn(
+                        'px-2 py-1 truncate max-w-[120px]',
+                        isMappedColumn(cellIdx, columnMapping) && 'bg-primary/10',
+                      )}
                     >
                       {cell}
                     </td>
@@ -534,7 +559,7 @@ const renderUnmatchedCategories = (
             <Select
               value={categoryMappings.get(catName) || '_skip'}
               onValueChange={(value) =>
-                onCategoryMap(catName, value === '_skip' ? null : value)
+                onCategoryMap(catName, parseCategoryMapValue(value))
               }
             >
               <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>

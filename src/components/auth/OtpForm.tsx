@@ -14,6 +14,7 @@ import { emailSchema } from '@/lib/validations';
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { useTranslation } from 'react-i18next';
 import FormSubmitButton from '@/components/ui/form-submit-button';
+import { cn } from '@/lib/utils';
 
 type OtpFormProps = {
   onSuccess?: () => void;
@@ -114,14 +115,14 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
               name="email"
               type="email"
               placeholder={t('auth.enterEmail')}
-              className={`w-full h-10 ${state.error ? 'border-destructive' : ''}`}
+              className={cn('w-full h-10', state.error && 'border-destructive')}
               disabled={isAuthLoading}
               autoCorrect="off"
               autoCapitalize="none"
               spellCheck={false}
               aria-label={t('auth.enterEmail')}
               aria-invalid={!!state.error}
-              aria-describedby={state.error ? 'email-error' : undefined}
+              aria-describedby={getErrorDescribedBy(state.error)}
             />
             {renderEmailError(state.error)}
 
@@ -245,6 +246,14 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
 export default OtpForm;
 
 // ─── Helper render functions ──────────────────────────────────────────────────
+
+const getErrorDescribedBy = (error: string | null): string | undefined => {
+  if (error) {
+    return 'email-error';
+  }
+
+  return undefined;
+};
 
 const renderEmailError = (error: string | null) => {
   if (!error) return null;

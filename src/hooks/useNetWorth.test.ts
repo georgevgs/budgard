@@ -3,18 +3,26 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useNetWorth } from './useNetWorth';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
+import type { Debt } from '@/types/Debt';
 
 let dataMock: {
   accounts: Account[];
   accountBalances: AccountBalance[];
+  debts: Debt[];
   defaultCurrency: string;
-} = { accounts: [], accountBalances: [], defaultCurrency: 'EUR' };
+} = {
+  accounts: [],
+  accountBalances: [],
+  debts: [],
+  defaultCurrency: 'EUR',
+};
 
 vi.mock('@/contexts/DataContext', () => ({
   useAccountsData: () => ({
     accounts: dataMock.accounts,
     accountBalances: dataMock.accountBalances,
   }),
+  useDebtsData: () => dataMock.debts,
   useDataConfig: () => ({ defaultCurrency: dataMock.defaultCurrency }),
 }));
 
@@ -43,6 +51,28 @@ const makeAccount = (overrides: Partial<Account> = {}): Account => ({
   ...overrides,
 });
 
+const makeDebt = (overrides: Partial<Debt> = {}): Debt => ({
+  id: 'd-' + Math.random().toString(36).slice(2, 10),
+  user_id: 'u1',
+  name: 'Debt',
+  kind: 'credit_card',
+  original_principal: 0,
+  current_balance: 0,
+  apr: 0,
+  minimum_payment: 0,
+  currency: 'EUR',
+  start_date: '2026-01-01',
+  payoff_target_date: null,
+  icon: 'credit-card',
+  color: '#ef4444',
+  is_archived: false,
+  is_completed: false,
+  completed_at: null,
+  created_at: '2026-01-01T00:00:00Z',
+  updated_at: '2026-01-01T00:00:00Z',
+  ...overrides,
+});
+
 const makeBalance = (
   accountId: string,
   recordedAt: string,
@@ -66,6 +96,7 @@ describe('useNetWorth', () => {
     dataMock = {
       accounts: [],
       accountBalances: [],
+      debts: [],
       defaultCurrency: 'EUR',
     };
   });
@@ -91,6 +122,7 @@ describe('useNetWorth', () => {
         }),
       ],
       accountBalances: [],
+      debts: [],
     };
 
     const { result } = renderHook(() => useNetWorth());
@@ -112,6 +144,7 @@ describe('useNetWorth', () => {
         }),
       ],
       accountBalances: [],
+      debts: [],
     };
 
     const { result } = renderHook(() => useNetWorth());
@@ -133,6 +166,7 @@ describe('useNetWorth', () => {
         }),
       ],
       accountBalances: [],
+      debts: [],
     };
 
     const { result } = renderHook(() => useNetWorth());
@@ -156,6 +190,7 @@ describe('useNetWorth', () => {
         makeBalance('a1', '2026-03-01', 600),
         makeBalance('a2', '2026-04-01', 1200),
       ],
+      debts: [],
     };
 
     const { result } = renderHook(() => useNetWorth());
@@ -181,6 +216,91 @@ describe('useNetWorth', () => {
     expect(series[3].total).toBe(1800);
   });
 
+  it('adds active debts to liabilities and reduces total', () => {
+    dataMock = {
+      defaultCurrency: 'EUR',
+      accounts: [makeAccount({ id: 'cash', kind: 'cash', current_balance: 1000 })],
+      accountBalances: [],
+      debts: [
+        makeDebt({ id: 'card-debt', current_balance: 300 }),
+        makeDebt({ id: 'loan-debt', kind: 'auto_loan', current_balance: 200 }),
+      ],
+    };
+
+    const { result } = renderHook(() => useNetWorth());
+
+    expect(result.current.summary.assets).toBe(1000);
+    expect(result.current.summary.liabilities).toBe(500);
+    expect(result.current.summary.debts).toBe(500);
+    expect(result.current.summary.total).toBe(500);
+  });
+
+  it('ignores archived, completed, and zero-balance debts', () => {
+    dataMock = {
+      defaultCurrency: 'EUR',
+      accounts: [makeAccount({ id: 'cash', kind: 'cash', current_balance: 1000 })],
+      accountBalances: [],
+      debts: [
+        makeDebt({ id: 'd1', current_balance: 300 }),
+        makeDebt({ id: 'd2', current_balance: 500, is_archived: true }),
+        makeDebt({ id: 'd3', current_balance: 800, is_completed: true }),
+        makeDebt({ id: 'd4', current_balance: 0 }),
+      ],
+    };
+
+    const { result } = renderHook(() => useNetWorth());
+
+    expect(result.current.summary.debts).toBe(300);
+    expect(result.current.summary.liabilities).toBe(300);
+    expect(result.current.summary.total).toBe(700);
+  });
+
+  it('converts foreign-currency debt balances to default currency', async () => {
+    dataMock = {
+      defaultCurrency: 'EUR',
+      accounts: [makeAccount({ id: 'cash', kind: 'cash', current_balance: 1000 })],
+      accountBalances: [],
+      debts: [makeDebt({ id: 'usd-debt', currency: 'USD', current_balance: 1000 })],
+    };
+
+    const { result } = renderHook(() => useNetWorth());
+
+    await waitFor(() => {
+      expect(result.current.summary.debts).toBe(900);
+    });
+    expect(result.current.summary.liabilities).toBe(900);
+    expect(result.current.summary.total).toBe(100);
+  });
+
+  it('applies debt total as a constant baseline across the time series', () => {
+    dataMock = {
+      defaultCurrency: 'EUR',
+      accounts: [makeAccount({ id: 'a1', kind: 'bank', current_balance: 1000 })],
+      accountBalances: [
+        makeBalance('a1', '2026-01-01', 800),
+        makeBalance('a1', '2026-02-01', 1000),
+      ],
+      debts: [makeDebt({ id: 'd1', current_balance: 200 })],
+    };
+
+    const { result } = renderHook(() => useNetWorth());
+    const series = result.current.series;
+
+    expect(series).toHaveLength(2);
+    expect(series[0]).toEqual({
+      date: '2026-01-01',
+      assets: 800,
+      liabilities: 200,
+      total: 600,
+    });
+    expect(series[1]).toEqual({
+      date: '2026-02-01',
+      assets: 1000,
+      liabilities: 200,
+      total: 800,
+    });
+  });
+
   it('treats liabilities as negative in the time series', () => {
     dataMock = {
       defaultCurrency: 'EUR',
@@ -196,6 +316,7 @@ describe('useNetWorth', () => {
         makeBalance('a1', '2026-01-01', 1000),
         makeBalance('card', '2026-01-01', 300),
       ],
+      debts: [],
     };
 
     const { result } = renderHook(() => useNetWorth());

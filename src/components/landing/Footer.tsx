@@ -93,9 +93,8 @@ const renderLangButton = (
       onClick={() => onChangeLanguage(code)}
       className={cn(
         'h-8 px-3 rounded-full text-xs font-medium transition-colors',
-        isActive
-          ? 'bg-foreground text-background'
-          : 'text-muted-foreground hover:text-foreground',
+        isActive && 'bg-foreground text-background',
+        !isActive && 'text-muted-foreground hover:text-foreground',
       )}
     >
       {label}

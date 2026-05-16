@@ -64,8 +64,7 @@ const renderToggleButton = (
   setCycle: (c: Cycle) => void,
 ) => {
   const isActive = current === value;
-  const labelKey =
-    value === 'monthly' ? 'landing.pricing.monthly' : 'landing.pricing.yearly';
+  const labelKey = getLabelKey(value);
 
   return (
     <button
@@ -73,15 +72,22 @@ const renderToggleButton = (
       onClick={() => setCycle(value)}
       className={cn(
         'px-4 h-9 rounded-full text-sm font-medium transition-colors',
-        isActive
-          ? 'bg-background text-foreground shadow-sm'
-          : 'text-muted-foreground hover:text-foreground',
+        isActive && 'bg-background text-foreground shadow-sm',
+        !isActive && 'text-muted-foreground hover:text-foreground',
       )}
     >
       {t(labelKey)}
       {renderSaveBadge(t, value)}
     </button>
   );
+};
+
+const getLabelKey = (value: Cycle): string => {
+  if (value === 'monthly') {
+    return 'landing.pricing.monthly';
+  }
+
+  return 'landing.pricing.yearly';
 };
 
 const renderSaveBadge = (t: Tx, value: Cycle) => {

@@ -83,20 +83,10 @@ const ReceiptUpload = ({
   if (hasReceipt) {
     return (
       <div className="flex items-center gap-3 rounded-2xl border border-border/50 p-3">
-        {previewUrl ? (
-          <img
-            src={previewUrl}
-            alt={t('receipt.receiptImage')}
-            className="h-12 w-12 rounded object-cover"
-          />
-        ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded bg-muted">
-            <Camera className="h-5 w-5 text-muted-foreground" />
-          </div>
-        )}
+        {renderThumbnail(previewUrl, t)}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate">
-            {selectedFile ? selectedFile.name : t('receipt.receipt')}
+            {renderFileLabel(selectedFile, t)}
           </p>
           <button
             type="button"
@@ -155,3 +145,33 @@ const ReceiptUpload = ({
 };
 
 export default ReceiptUpload;
+
+// --- Helpers ---
+
+type TranslateFunction = (key: string) => string;
+
+const renderThumbnail = (previewUrl: string | null, t: TranslateFunction) => {
+  if (previewUrl) {
+    return (
+      <img
+        src={previewUrl}
+        alt={t('receipt.receiptImage')}
+        className="h-12 w-12 rounded object-cover"
+      />
+    );
+  }
+
+  return (
+    <div className="flex h-12 w-12 items-center justify-center rounded bg-muted">
+      <Camera className="h-5 w-5 text-muted-foreground" />
+    </div>
+  );
+};
+
+const renderFileLabel = (selectedFile: File | null, t: TranslateFunction) => {
+  if (selectedFile) {
+    return selectedFile.name;
+  }
+
+  return t('receipt.receipt');
+};

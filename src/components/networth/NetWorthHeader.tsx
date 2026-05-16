@@ -25,7 +25,8 @@ const NetWorthHeader = ({ summary, defaultCurrency }: Props) => {
       <p
         className={cn(
           'text-3xl font-bold tracking-tight tabular-nums',
-          isPositive ? 'text-foreground' : 'text-destructive',
+          isPositive && 'text-foreground',
+          !isPositive && 'text-destructive',
         )}
       >
         {formatCurrency(animatedTotal, defaultCurrency)}
@@ -66,6 +67,14 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const renderSignPrefix = (isPositive: boolean) => {
+  if (isPositive) {
+    return '+';
+  }
+
+  return '';
+};
 
 const renderStaleRatesWarning = (
   staleCurrencies: string[],
@@ -126,14 +135,15 @@ const renderInvestmentRow = (
         <p
           className={cn(
             'text-sm font-semibold tabular-nums',
-            isPositive ? 'text-income' : 'text-destructive',
+            isPositive && 'text-income',
+            !isPositive && 'text-destructive',
           )}
         >
-          {isPositive ? '+' : ''}
+          {renderSignPrefix(isPositive)}
           {formatCurrency(gain, defaultCurrency)}
         </p>
         <p className="text-xs text-muted-foreground tabular-nums">
-          {isPositive ? '+' : ''}
+          {renderSignPrefix(isPositive)}
           {returnPct.toFixed(1)}%
         </p>
       </div>

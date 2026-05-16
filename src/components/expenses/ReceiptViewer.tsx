@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import * as Sentry from '@sentry/react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import {
@@ -9,7 +8,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { getReceiptUrl } from '@/services/receiptService';
+import { useReceiptUrl } from '@/hooks/useReceiptUrl';
 
 type ReceiptViewerProps = {
   receiptPath: string;
@@ -19,33 +18,9 @@ type ReceiptViewerProps = {
 
 const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
   const { t } = useTranslation();
-  const [url, setUrl] = useState<string | null>(null);
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!open) {
-      if (url) URL.revokeObjectURL(url);
-      setUrl(null);
-      setError(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(false);
-
-    getReceiptUrl(receiptPath)
-      .then(setUrl)
-      .catch((err) => {
-        Sentry.captureException(err, { tags: { operation: 'getReceiptUrl' } });
-        setError(true);
-      })
-      .finally(() => setLoading(false));
-
-    return () => {
-      if (url) URL.revokeObjectURL(url);
-    };
-  }, [open, receiptPath]); // eslint-disable-line react-hooks/exhaustive-deps
+  const { url, isLoading, error } = useReceiptUrl(receiptPath, open);
+  const [imageFailed, setImageFailed] = useState(false);
+  const hasError = error || imageFailed;
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -70,9 +45,9 @@ const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
           </DialogHeader>
 
           <div className="flex items-center justify-center min-h-[200px] mt-4">
-            {renderLoadingState(loading)}
-            {renderErrorState(error, t)}
-            {renderReceiptImage(url, error, () => setError(true), t)}
+            {renderLoadingState(isLoading)}
+            {renderErrorState(hasError, t)}
+            {renderReceiptImage(url, hasError, () => setImageFailed(true), t)}
           </div>
         </div>
       </DialogContent>
