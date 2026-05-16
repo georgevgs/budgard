@@ -47,6 +47,7 @@ import { useTagOps } from '@/hooks/dataOps/useTagOps';
 import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 import { expenseSchema, type ExpenseFormData } from '@/lib/validations';
 import type { Expense } from '@/types/Expense';
+import type { Category } from '@/types/Category';
 import ReceiptUpload from '@/components/expenses/ReceiptUpload';
 import { TagButtonContent } from '@/components/expenses/TagPicker';
 import {
