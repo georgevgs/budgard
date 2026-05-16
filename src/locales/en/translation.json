@@ -50,7 +50,7 @@
     "editExpense": "Edit Expense",
     "deleteExpense": "Delete Expense",
     "noExpenses": "No expenses for {{month}}",
-    "addFirst": "Add your first expense for this month",
+    "addFirst": "Tap + to log your first one. Your future self says thanks.",
     "amount": "Amount",
     "description": "Description",
     "category": "Category",
@@ -63,8 +63,8 @@
     "ofMonthlyTotal": "of {{total}} total",
     "showBreakdown": "Show breakdown",
     "hideBreakdown": "Hide breakdown",
-    "noExpensesFor": "No expenses for {{month}}",
-    "addFirstExpense": "Add your first expense for this month",
+    "noExpensesFor": "Nothing logged for {{month}}",
+    "addFirstExpense": "Tap + to log your first one. Your future self says thanks.",
     "formDescription": "Fill in the details for your expense. All fields except category are required.",
     "amountPlaceholder": "0,00",
     "amountLabel": "Amount",
@@ -89,7 +89,7 @@
       "rateError": "Could not fetch exchange rate",
       "convertedAmount": "≈ {{amount}}"
     },
-    "noExpensesMatchFilter": "No expenses match your current filters",
+    "noExpensesMatchFilter": "Your filters are picky — nothing matches. Try loosening them up.",
     "totalCount": "Total Expenses",
     "mostExpensive": "Most Expensive",
     "exportCSV": "Export CSV",
@@ -146,13 +146,13 @@
     "addSourceDescription": "Create a new source to organize your income",
     "editSourceDescription": "Update this source's name, color, or icon",
     "noSources": "No sources yet",
-    "emptySourcesHelp": "Tap Add Source below to track where your money comes from.",
+    "emptySourcesHelp": "Tap Add Source to track where the money's actually coming from.",
     "manageSources": "Manage sources",
     "manageDescription": "Add, edit, or remove your income sources",
     "formDescription": "Log income to track your full cash flow.",
     "monthlyTotal": "Monthly Income",
-    "noIncomeFor": "No income for {{month}}",
-    "addFirstIncome": "Track salary, freelance work, refunds — anything coming in.",
+    "noIncomeFor": "Nothing came in for {{month}}",
+    "addFirstIncome": "Salary, side hustle, surprise refund — log anything coming in.",
     "entryCount": "{{count}} entries",
     "searchPlaceholder": "Search income...",
     "searchLabel": "Search income",
@@ -161,8 +161,8 @@
     "savingsRate": "{{rate}}% saved",
     "savedBadge": "Saved {{amount}}",
     "nudge": {
-      "title": "Set aside for savings?",
-      "description": "Decide how much of {{amount}} goes to savings now, before it disappears into the month.",
+      "title": "Tuck some away before it disappears?",
+      "description": "Decide how much of {{amount}} goes to savings now, before the month eats it.",
       "allocationLabel": "Saving {{pct}}% =",
       "customPct": "Custom percentage",
       "ofIncome": "of this income",
@@ -241,7 +241,7 @@
     "customIcon": "Paste emoji",
     "selectColorAria": "Select color {{color}}",
     "selectIconAria": "Select icon {{icon}}",
-    "emptyHelp": "Tap Add Category below to start organizing your spending.",
+    "emptyHelp": "Tap Add Category to start sorting things out — coffee deserves its own bucket.",
     "deleteConfirmation": "Are you sure you want to delete \"{{name}}\"? Expenses in this category will become uncategorized. This action cannot be undone.",
     "kind": {
       "label": "50/30/20 bucket (optional)",
@@ -327,7 +327,7 @@
     "expensesTitle": "Recurring Expenses",
     "monthlyFrom": "~{{amount}} / month from {{count}} active",
     "noRecurring": "No recurring expenses set up yet",
-    "noRecurringDescription": "Add recurring expenses like rent, subscriptions, or bills",
+    "noRecurringDescription": "Rent, Netflix, the gym you swear you'll use — set them once and let them roll.",
     "addFirstRecurring": "Add Your First Recurring Expense",
     "formTitle": "{{action}} Recurring Expense",
     "formAdd": "Add",
@@ -363,7 +363,7 @@
       "addRecurring": "Add Recurring Income",
       "monthlyFrom": "~{{amount}} / month from {{count}} active",
       "empty": "No recurring income set up yet",
-      "emptyDescription": "Add salary, dividends, or any income that arrives on a schedule",
+      "emptyDescription": "Salary, dividends, the side gig that finally pays — log it once and watch it land.",
       "addFirstRecurring": "Add Your First Recurring Income"
     },
     "audit": {
@@ -445,7 +445,7 @@
     "about": {
       "title": "About",
       "version": "Version",
-      "madeWith": "Made with care"
+      "madeWith": "Made in the EU"
     }
   },
   "navigation": {
@@ -459,6 +459,7 @@
     "settings": "Settings",
     "openProfileMenu": "Open profile menu",
     "openAppMenu": "Open menu",
+    "goHome": "Go to home",
     "signedInAs": "Signed in as",
     "ariaLabel": "Main navigation",
     "previousMonth": "Previous month",
@@ -545,7 +546,7 @@
     },
     "empty": {
       "title": "No goals yet",
-      "description": "Set a target — vacation, emergency fund, paying down debt — and watch progress build from your existing entries.",
+      "description": "Pick a target — vacation, emergency fund, new espresso machine — and watch the progress build.",
       "cta": "Create your first goal"
     }
   },
@@ -578,7 +579,7 @@
     },
     "empty": {
       "title": "No accounts yet",
-      "description": "Track checking, savings, cards, and investments to see your net worth grow.",
+      "description": "Add checking, savings, cards, and investments to see the full picture.",
       "cta": "Add your first account"
     },
     "form": {
@@ -690,7 +691,7 @@
     },
     "empty": {
       "title": "No debts tracked",
-      "description": "Add anything you owe — credit cards, loans, mortgages — to see how fast you can pay them off.",
+      "description": "Add anything you owe — cards, loans, a mortgage — and we'll project a payoff date.",
       "cta": "Add your first debt"
     },
     "form": {
@@ -761,7 +762,7 @@
     "used": "Expense added from template",
     "deleteTitle": "Delete Template",
     "deleteConfirmation": "Are you sure you want to delete this template?",
-    "empty": "Save an expense as a template for one-tap reuse",
+    "empty": "Got an expense you log twenty times a month? Save it as a template — then it's a single tap.",
     "manage": "Manage",
     "done": "Done",
     "useTemplate": "Use template: {{description}}"
@@ -810,17 +811,17 @@
       "monthProjection": "At your current pace, you'd spend ~{{amount}} by month-end",
       "categoryUp": "{{name}} is up {{percent}}% vs last month",
       "categoryDown": "{{name}} is down {{percent}}% vs last month",
-      "budgetStreak": "Under budget {{count}} months in a row",
+      "budgetStreak": "Under budget {{count}} months in a row.",
       "recurringShare": "{{percent}}% of this month is recurring expenses",
-      "weekendHigher": "Weekend spending is {{percent}}% higher per transaction",
-      "weekdayHigher": "Weekday spending is {{percent}}% higher per transaction",
-      "categoryConcentration": "{{percent}}% of this month's spending is on {{name}}",
-      "highVolatility": "Your monthly spending varies a lot — consider a consistent budget",
-      "stableSpending": "Your spending has been consistent over the past months",
+      "weekendHigher": "Weekend spending is {{percent}}% higher per transaction.",
+      "weekdayHigher": "Weekday spending is {{percent}}% higher per transaction.",
+      "categoryConcentration": "{{percent}}% of this month went to {{name}}",
+      "highVolatility": "Your monthly spending varies a lot — a steadier budget might help.",
+      "stableSpending": "Your spending has been steady over the past months.",
       "largestExpense": "Biggest expense this month: {{description}} at {{amount}}",
-      "inactive": "No expenses logged in {{days}} days — keep your records up to date",
-      "peakDay": "You tend to spend the most on {{day}}s",
-      "loggingStreak": "{{count}}-day logging streak — keep it up!"
+      "inactive": "Nothing logged in {{days}} days — keep your records up to date.",
+      "peakDay": "You tend to spend the most on {{day}}s.",
+      "loggingStreak": "{{count}}-day logging streak — keep it up."
     },
     "drillDown": {
       "categoryTotal": "{{amount}} across {{count}} expenses",
@@ -910,24 +911,24 @@
   },
   "onboarding": {
     "welcomeTitle": "Welcome to Budgard",
-    "welcomeDescription": "A simple expense tracker to help you stay on top of your finances. Let's get you set up — it only takes a minute.",
-    "getStarted": "Get Started",
-    "budgetTitle": "Set your monthly budget",
-    "budgetDescription": "How much do you want to spend each month? You can change this later.",
+    "welcomeDescription": "A calm way to know where your money goes. Under a minute to set up — no spreadsheets, no judgement.",
+    "getStarted": "Let's go",
+    "budgetTitle": "Set a monthly budget",
+    "budgetDescription": "Pick a number you can actually live with. You can tweak it any time.",
     "budgetPlaceholder": "1.500",
-    "categoriesTitle": "Pick your categories",
-    "categoriesDescription": "Select the spending categories that apply to you. You can add more later.",
-    "featuresTitle": "You're all set!",
+    "categoriesTitle": "What do you usually spend on?",
+    "categoriesDescription": "Pick the buckets that fit your life. Add more later — coffee deserves its own.",
+    "featuresTitle": "You're all set.",
     "featuresDescription": "Here's what you can do with Budgard.",
-    "featureExpenses": "Track Expenses",
-    "featureExpensesDesc": "Log daily spending with categories and tags.",
-    "featureRecurring": "Recurring Bills",
-    "featureRecurringDesc": "Set up subscriptions and regular bills.",
+    "featureExpenses": "Track expenses",
+    "featureExpensesDesc": "Log spending in seconds. Tag it, color it, find it later.",
+    "featureRecurring": "Recurring bills",
+    "featureRecurringDesc": "Rent, subscriptions, the gym you swear you'll use.",
     "featureAnalytics": "Analytics",
-    "featureAnalyticsDesc": "Visualize trends and see where your money goes.",
+    "featureAnalyticsDesc": "See where your money actually goes — usually within a week.",
     "featureReceipts": "Receipts",
-    "featureReceiptsDesc": "Snap photos and attach them to expenses.",
-    "startTracking": "Start Tracking",
+    "featureReceiptsDesc": "Snap a photo, attach it, never dig through a wallet again.",
+    "startTracking": "Start tracking",
     "skip": "Skip",
     "next": "Continue",
     "budgetSaveFailed": "Could not save budget. You can set it later in settings.",

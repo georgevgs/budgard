@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
 import ProfileMenu from '@/components/layout/ProfileMenu';
@@ -21,15 +22,20 @@ const Header = () => {
         <div className="justify-self-start">
           <ProfileMenu />
         </div>
-        <div className="justify-self-center flex items-center gap-2">
+        <Link
+          to="/expenses"
+          aria-label={t('navigation.goHome')}
+          className="justify-self-center flex items-center gap-2 rounded-lg px-2 py-1 -mx-2 -my-1 transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
           <img
             src="/icon-512x512.png"
-            alt={t('common.logoAlt')}
+            alt=""
+            aria-hidden="true"
             className="h-7 w-7 rounded-lg mix-blend-multiply dark:invert dark:mix-blend-screen"
             style={{ objectFit: 'contain' }}
           />
           <span className="text-lg font-semibold tracking-tight">Budgard</span>
-        </div>
+        </Link>
         <div className="justify-self-end">
           <AppMenu />
         </div>
