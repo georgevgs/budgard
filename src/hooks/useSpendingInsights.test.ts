@@ -4,7 +4,6 @@ import { format, subDays } from 'date-fns';
 import { useSpendingInsights } from './useSpendingInsights';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
-import { enUS } from 'date-fns/locale';
 
 const categories: Category[] = [
   {
@@ -55,7 +54,6 @@ describe('useSpendingInsights', () => {
         monthlyBudget: null,
         monthComparison: { thisMonthAmount: 0, lastMonthAmount: 0 },
         categories,
-        dateLocale: enUS,
         defaultCurrency: 'EUR',
         ...overrides,
       }),

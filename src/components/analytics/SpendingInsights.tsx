@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next';
-import type { Locale } from 'date-fns';
 import { Card } from '@/components/ui/card';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
@@ -10,7 +9,6 @@ type SpendingInsightsProps = {
   monthlyBudget: number | null;
   monthComparison: { thisMonthAmount: number; lastMonthAmount: number };
   categories: Category[];
-  dateLocale: Locale;
   defaultCurrency: string;
 };
 

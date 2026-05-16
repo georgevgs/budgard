@@ -133,9 +133,13 @@ const renderAnomalyRow = (
   t: TFunc,
 ) => {
   const multiple = anomaly.ratio.toFixed(1).replace(/\.0$/, '');
-  const Icon = anomaly.direction === 'up' ? TrendingUp : TrendingDown;
-  const colorClass =
-    anomaly.direction === 'up' ? 'text-amber-500' : 'text-income';
+
+  let Icon = TrendingDown;
+  let colorClass = 'text-income';
+  if (anomaly.direction === 'up') {
+    Icon = TrendingUp;
+    colorClass = 'text-amber-500';
+  }
 
   return (
     <div key={anomaly.categoryId} className="flex items-start gap-3 text-sm">

@@ -259,7 +259,6 @@ const AnalyticsView = () => {
         monthlyBudget={monthlyBudget}
         monthComparison={monthComparison}
         categories={categories}
-        dateLocale={dateLocale}
         defaultCurrency={defaultCurrency}
       />
 

@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { enUS } from 'date-fns/locale';
 import type { Insight } from '@/hooks/useSpendingInsights';
 
 let mockInsights: Insight[] = [];
@@ -20,7 +19,6 @@ const baseProps = {
   monthlyBudget: null,
   monthComparison: { thisMonthAmount: 0, lastMonthAmount: 0 },
   categories: [],
-  dateLocale: enUS,
   defaultCurrency: 'EUR',
 };
 

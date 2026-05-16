@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import { format, parseISO, getDaysInMonth } from 'date-fns';
-import type { Locale } from 'date-fns';
+import { getDaysInMonth } from 'date-fns';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import Wallet from 'lucide-react/dist/esm/icons/wallet';
@@ -24,7 +23,6 @@ export type SpendingInsightsParams = {
   monthlyBudget: number | null;
   monthComparison: { thisMonthAmount: number; lastMonthAmount: number };
   categories: Category[];
-  dateLocale: Locale;
   defaultCurrency: string;
 }
 
@@ -66,9 +64,6 @@ export const useSpendingInsights = (params: SpendingInsightsParams): Insight[] =
         t,
       }),
     ];
-
-    void parseISO;
-    void format;
 
     return insights.filter((i): i is Insight => i !== null);
   }, [expenses, categories, monthlyBudget, monthComparison, defaultCurrency, t]);
@@ -143,6 +138,11 @@ const dailyBudgetRemainingInsight = (args: DailyArgs): Insight | null => {
 
   const dailyAllowance = remaining / daysRemaining;
 
+  let variant: Insight['variant'] = 'positive';
+  if (dailyAllowance < 10) {
+    variant = 'warning';
+  }
+
   return {
     id: 'dailyBudgetRemaining',
     icon: Wallet,
@@ -150,7 +150,7 @@ const dailyBudgetRemainingInsight = (args: DailyArgs): Insight | null => {
       amount: formatCurrency(dailyAllowance, defaultCurrency),
       days: daysRemaining,
     }),
-    variant: dailyAllowance < 10 ? 'warning' : 'positive',
+    variant,
   };
 };
 
