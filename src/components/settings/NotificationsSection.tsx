@@ -8,6 +8,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import Bell from 'lucide-react/dist/esm/icons/bell';
+import type {
+  NotificationPreferenceKey,
+  NotificationPreferences,
+} from '@/types/Budget';
 
 type PushState =
   | 'loading'
@@ -21,20 +25,24 @@ type TFunc = (key: string, options?: Record<string, unknown>) => string;
 type NotificationsSectionProps = {
   pushState: PushState;
   dailyReminderHour: number | null;
+  notificationPreferences: NotificationPreferences;
   onPushSubscribe: () => Promise<void>;
   onPushUnsubscribe: () => Promise<void>;
   onDailyReminderToggle: (enabled: boolean) => void;
   onDailyReminderTimeChange: (localHour: number) => void;
+  onPreferenceToggle: (key: NotificationPreferenceKey, enabled: boolean) => void;
   t: TFunc;
 };
 
 const NotificationsSection = ({
   pushState,
   dailyReminderHour,
+  notificationPreferences,
   onPushSubscribe,
   onPushUnsubscribe,
   onDailyReminderToggle,
   onDailyReminderTimeChange,
+  onPreferenceToggle,
   t,
 }: NotificationsSectionProps) => {
   return (
@@ -50,6 +58,12 @@ const NotificationsSection = ({
             dailyReminderHour,
             onDailyReminderToggle,
             onDailyReminderTimeChange,
+            t,
+          )}
+          {renderPreferences(
+            pushState,
+            notificationPreferences,
+            onPreferenceToggle,
             t,
           )}
         </CardContent>
@@ -71,6 +85,46 @@ export const localToUtcHour = (localHour: number): number => {
 
 const REMINDER_HOURS = Array.from({ length: 24 }, (_, i) => i);
 
+// Order is deliberate: most-actionable first, broad reminders last.
+const PREFERENCE_KEYS: NotificationPreferenceKey[] = [
+  'bill_reminders',
+  'debt_payment',
+  'budget_warning',
+  'budget_exceeded',
+  'weekly_recap',
+  'inactivity_nudge',
+];
+
+const PREFERENCE_LABELS: Record<
+  NotificationPreferenceKey,
+  { label: string; description: string }
+> = {
+  bill_reminders: {
+    label: 'settings.notifications.prefBillRemindersLabel',
+    description: 'settings.notifications.prefBillRemindersDescription',
+  },
+  debt_payment: {
+    label: 'settings.notifications.prefDebtPaymentLabel',
+    description: 'settings.notifications.prefDebtPaymentDescription',
+  },
+  budget_warning: {
+    label: 'settings.notifications.prefBudgetWarningLabel',
+    description: 'settings.notifications.prefBudgetWarningDescription',
+  },
+  budget_exceeded: {
+    label: 'settings.notifications.prefBudgetExceededLabel',
+    description: 'settings.notifications.prefBudgetExceededDescription',
+  },
+  weekly_recap: {
+    label: 'settings.notifications.prefWeeklyRecapLabel',
+    description: 'settings.notifications.prefWeeklyRecapDescription',
+  },
+  inactivity_nudge: {
+    label: 'settings.notifications.prefInactivityLabel',
+    description: 'settings.notifications.prefInactivityDescription',
+  },
+};
+
 const utcToLocalHour = (utcHour: number): number => {
   const d = new Date();
   d.setUTCHours(utcHour, 0, 0, 0);
@@ -80,6 +134,16 @@ const utcToLocalHour = (utcHour: number): number => {
 
 const formatHour = (hour: number): string => {
   return `${hour.toString().padStart(2, '0')}:00`;
+};
+
+const isPrefEnabled = (
+  prefs: NotificationPreferences,
+  key: NotificationPreferenceKey,
+): boolean => {
+  // Missing key = enabled (default-on policy mirrors the edge function).
+  if (prefs[key] === false) return false;
+
+  return true;
 };
 
 const renderNotificationToggle = (
@@ -206,6 +270,53 @@ const renderReminderTimePicker = (
           ))}
         </SelectContent>
       </Select>
+    </div>
+  );
+};
+
+const renderPreferences = (
+  pushState: PushState,
+  prefs: NotificationPreferences,
+  onToggle: (key: NotificationPreferenceKey, enabled: boolean) => void,
+  t: TFunc,
+) => {
+  if (pushState !== 'subscribed') return null;
+
+  return (
+    <div className="border-t border-border/50 pt-4 space-y-3">
+      <div>
+        <p className="text-sm">{t('settings.notifications.preferencesTitle')}</p>
+        <p className="text-xs text-muted-foreground">
+          {t('settings.notifications.preferencesDescription')}
+        </p>
+      </div>
+      <div className="space-y-3 pt-1">
+        {PREFERENCE_KEYS.map((key) => renderPreferenceRow(key, prefs, onToggle, t))}
+      </div>
+    </div>
+  );
+};
+
+const renderPreferenceRow = (
+  key: NotificationPreferenceKey,
+  prefs: NotificationPreferences,
+  onToggle: (key: NotificationPreferenceKey, enabled: boolean) => void,
+  t: TFunc,
+) => {
+  const labels = PREFERENCE_LABELS[key];
+  const checked = isPrefEnabled(prefs, key);
+
+  return (
+    <div key={key} className="flex items-center justify-between gap-3">
+      <div className="min-w-0">
+        <p className="text-sm">{t(labels.label)}</p>
+        <p className="text-xs text-muted-foreground">{t(labels.description)}</p>
+      </div>
+      <Switch
+        checked={checked}
+        onCheckedChange={(next) => onToggle(key, next)}
+        aria-label={t(labels.label)}
+      />
     </div>
   );
 };

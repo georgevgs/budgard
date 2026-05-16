@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import type { Budget } from '@/types/Budget';
+import type { Budget, NotificationPreferences } from '@/types/Budget';
 import type { CategoryBudget } from '@/types/CategoryBudget';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
@@ -492,6 +492,24 @@ export const dataService = {
       .from('user_budgets')
       .upsert(
         { user_id: user.id, daily_reminder_hour: hour },
+        { onConflict: 'user_id' },
+      )
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+
+    return data as Budget;
+  },
+
+  async updateNotificationPreferences(prefs: NotificationPreferences) {
+    const user = await this.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { data, error } = await supabase
+      .from('user_budgets')
+      .upsert(
+        { user_id: user.id, notification_preferences: prefs },
         { onConflict: 'user_id' },
       )
       .select()

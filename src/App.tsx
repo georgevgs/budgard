@@ -345,12 +345,15 @@ const App = () => {
               {/* Authenticated routes with shared layout */}
               <Route element={<PrivateRoute />}>
                 {/* Bottom-nav tabs share a keep-alive layout to preserve
-                    state and avoid re-running heavy memos on every switch */}
+                    state and avoid re-running heavy memos on every switch.
+                    MainTabsLayout renders all four tabs directly (no Outlet),
+                    so each leaf route gets an empty element — its only job is
+                    to participate in path matching. */}
                 <Route element={<MainTabsLayout />}>
-                  <Route path="/expenses" />
-                  <Route path="/income" />
-                  <Route path="/recurring" />
-                  <Route path="/analytics" />
+                  <Route path="/expenses" element={null} />
+                  <Route path="/income" element={null} />
+                  <Route path="/recurring" element={null} />
+                  <Route path="/analytics" element={null} />
                 </Route>
                 <Route
                   path="/goals"

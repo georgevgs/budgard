@@ -441,7 +441,22 @@
       "dailyReminderLabel": "Ημερήσια Υπενθύμιση",
       "dailyReminderDescription": "Λάβετε μια ημερήσια υπενθύμιση για καταγραφή εξόδων",
       "dailyReminderTime": "Ώρα υπενθύμισης",
-      "dailyReminderFailed": "Αποτυχία ενημέρωσης ημερήσιας υπενθύμισης"
+      "dailyReminderFailed": "Αποτυχία ενημέρωσης ημερήσιας υπενθύμισης",
+      "preferencesTitle": "Είδη ειδοποιήσεων",
+      "preferencesDescription": "Επιλέξτε ποιες ειδοποιήσεις θέλετε να λαμβάνετε",
+      "prefBillRemindersLabel": "Επερχόμενοι λογαριασμοί",
+      "prefBillRemindersDescription": "Υπενθυμίσεις 1 και 3 ημέρες πριν από έναν επαναλαμβανόμενο λογαριασμό",
+      "prefInactivityLabel": "Υπενθύμιση αδράνειας",
+      "prefInactivityDescription": "Αν περάσουν 3 ημέρες χωρίς να καταχωρήσετε έξοδο",
+      "prefWeeklyRecapLabel": "Εβδομαδιαία ανασκόπηση",
+      "prefWeeklyRecapDescription": "Σύνοψη εξόδων κάθε Κυριακή",
+      "prefBudgetWarningLabel": "Προειδοποίηση προϋπολογισμού (80%)",
+      "prefBudgetWarningDescription": "Ειδοποίηση όταν φτάσετε το 80% ενός ορίου",
+      "prefBudgetExceededLabel": "Υπέρβαση προϋπολογισμού",
+      "prefBudgetExceededDescription": "Ειδοποίηση την ημέρα που ξεπερνάτε ένα όριο",
+      "prefDebtPaymentLabel": "Πληρωμές χρεών",
+      "prefDebtPaymentDescription": "Υπενθύμιση την ημέρα πριν από μια ελάχιστη πληρωμή",
+      "preferenceUpdateFailed": "Αποτυχία ενημέρωσης προτίμησης"
     },
     "data": {
       "title": "Διαχείριση Δεδομένων",

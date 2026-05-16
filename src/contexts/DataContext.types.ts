@@ -9,6 +9,7 @@ import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import type { Debt } from '@/types/Debt';
 import type { CategoryBudget } from '@/types/CategoryBudget';
+import type { NotificationPreferences } from '@/types/Budget';
 
 export type DataState = {
   categories: Category[];
@@ -31,6 +32,7 @@ export type DataState = {
   defaultCurrency: string;
   defaultSavingsPct: number | null;
   dailyReminderHour: number | null;
+  notificationPreferences: NotificationPreferences;
   isInitialized: boolean;
   isSecondaryLoaded: boolean;
 };
@@ -64,6 +66,7 @@ export type DataActions = {
   setDefaultCurrency: Dispatch<SetStateAction<string>>;
   setDefaultSavingsPct: Dispatch<SetStateAction<number | null>>;
   setDailyReminderHour: Dispatch<SetStateAction<number | null>>;
+  setNotificationPreferences: Dispatch<SetStateAction<NotificationPreferences>>;
 };
 
 // Slow-changing scalars that handlers need (mostly for optimistic rollback).
@@ -78,6 +81,7 @@ export type DataConfig = {
   defaultCurrency: string;
   defaultSavingsPct: number | null;
   dailyReminderHour: number | null;
+  notificationPreferences: NotificationPreferences;
 };
 
 export type DataContextType = DataState & DataActions;

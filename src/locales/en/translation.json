@@ -441,7 +441,22 @@
       "dailyReminderLabel": "Daily Reminder",
       "dailyReminderDescription": "Get a daily nudge to log your expenses",
       "dailyReminderTime": "Reminder time",
-      "dailyReminderFailed": "Failed to update daily reminder"
+      "dailyReminderFailed": "Failed to update daily reminder",
+      "preferencesTitle": "Notification types",
+      "preferencesDescription": "Choose which alerts you want to receive",
+      "prefBillRemindersLabel": "Upcoming bills",
+      "prefBillRemindersDescription": "Reminders 1 and 3 days before a recurring bill",
+      "prefInactivityLabel": "Inactivity nudge",
+      "prefInactivityDescription": "If you go 3 days without logging an expense",
+      "prefWeeklyRecapLabel": "Weekly recap",
+      "prefWeeklyRecapDescription": "A spending summary every Sunday",
+      "prefBudgetWarningLabel": "Budget warning (80%)",
+      "prefBudgetWarningDescription": "Heads-up when you reach 80% of a cap",
+      "prefBudgetExceededLabel": "Budget exceeded",
+      "prefBudgetExceededDescription": "Alert the day you cross a budget cap",
+      "prefDebtPaymentLabel": "Debt payments",
+      "prefDebtPaymentDescription": "Reminder the day before a minimum payment is due",
+      "preferenceUpdateFailed": "Failed to update preference"
     },
     "data": {
       "title": "Data Management",

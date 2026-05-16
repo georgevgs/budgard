@@ -21,6 +21,7 @@ import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import type { Debt } from '@/types/Debt';
 import type { CategoryBudget } from '@/types/CategoryBudget';
+import type { NotificationPreferences } from '@/types/Budget';
 import { useToast } from '@/hooks/useToast';
 import type {
   DataActions,
@@ -81,6 +82,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [dailyReminderHour, setDailyReminderHour] = useState<number | null>(
     null,
   );
+  const [notificationPreferences, setNotificationPreferences] =
+    useState<NotificationPreferences>({});
   const [isInitialized, setIsInitialized] = useState(false);
   // Sticky once true — flips false only on logout reset, never on background
   // refetches, so /goals, /networth and /debts don't blank on foreground
@@ -176,6 +179,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setDefaultCurrency(budgetData?.default_currency ?? 'EUR');
       setDefaultSavingsPct(budgetData?.default_savings_pct ?? null);
       setDailyReminderHour(budgetData?.daily_reminder_hour ?? null);
+      setNotificationPreferences(budgetData?.notification_preferences ?? {});
       setIsInitialized(true);
       lastFetchAtRef.current = Date.now();
       wasAbortedRef.current = false;
@@ -396,6 +400,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setDefaultCurrency,
       setDefaultSavingsPct,
       setDailyReminderHour,
+      setNotificationPreferences,
     }),
     [refreshData, refreshExpenses, refreshIncomes, refreshAccounts, refreshDebts],
   );
@@ -408,6 +413,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       defaultCurrency,
       defaultSavingsPct,
       dailyReminderHour,
+      notificationPreferences,
     }),
     [
       isInitialized,
@@ -416,6 +422,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       defaultCurrency,
       defaultSavingsPct,
       dailyReminderHour,
+      notificationPreferences,
     ],
   );
 
@@ -439,6 +446,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       defaultCurrency,
       defaultSavingsPct,
       dailyReminderHour,
+      notificationPreferences,
       isInitialized,
       isSecondaryLoaded,
       ...actions,
@@ -462,6 +470,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       defaultCurrency,
       defaultSavingsPct,
       dailyReminderHour,
+      notificationPreferences,
       isInitialized,
       isSecondaryLoaded,
       actions,

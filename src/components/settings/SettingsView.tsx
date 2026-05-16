@@ -18,6 +18,7 @@ import { SUPPORTED_CURRENCIES } from '@/lib/currencies';
 import { signOut } from '@/lib/auth';
 import { useToast } from '@/hooks/useToast';
 import { haptics, hapticsSettings } from '@/lib/haptics';
+import type { NotificationPreferenceKey } from '@/types/Budget';
 import AppearanceSection from './AppearanceSection';
 import NotificationsSection, { localToUtcHour } from './NotificationsSection';
 import ProfileSection from './ProfileSection';
@@ -33,11 +34,13 @@ const LANGUAGES = [
 const SettingsView = () => {
   const { t, i18n } = useTranslation();
   const { session } = useAuth();
-  const { defaultCurrency, dailyReminderHour } = useDataConfig();
+  const { defaultCurrency, dailyReminderHour, notificationPreferences } =
+    useDataConfig();
   const {
     handleCurrencyUpdate,
     handleDeleteAccount,
     handleDailyReminderHourUpdate,
+    handleNotificationPreferenceUpdate,
   } = useSettingsOps();
   const { theme, setTheme } = useTheme();
   const { accent, setAccent } = useAccentColor();
@@ -105,6 +108,20 @@ const SettingsView = () => {
       }
     },
     [handleDailyReminderHourUpdate, toast, t],
+  );
+
+  const handlePreferenceToggle = useCallback(
+    async (key: NotificationPreferenceKey, enabled: boolean) => {
+      try {
+        await handleNotificationPreferenceUpdate(key, enabled);
+      } catch {
+        toast({
+          variant: 'destructive',
+          description: t('settings.notifications.preferenceUpdateFailed'),
+        });
+      }
+    },
+    [handleNotificationPreferenceUpdate, toast, t],
   );
 
   const handleSignOut = async () => {
@@ -226,10 +243,12 @@ const SettingsView = () => {
       <NotificationsSection
         pushState={pushState}
         dailyReminderHour={dailyReminderHour}
+        notificationPreferences={notificationPreferences}
         onPushSubscribe={pushSubscribe}
         onPushUnsubscribe={pushUnsubscribe}
         onDailyReminderToggle={handleDailyReminderToggle}
         onDailyReminderTimeChange={handleDailyReminderTimeChange}
+        onPreferenceToggle={handlePreferenceToggle}
         t={t}
       />
 

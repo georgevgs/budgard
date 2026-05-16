@@ -45,6 +45,14 @@ type CategoryBudgetCrossedUser = {
   default_currency: string;
 };
 
+type DebtDue = {
+  user_id: string;
+  debt_id: string;
+  debt_name: string;
+  minimum_payment: number;
+  currency: string;
+};
+
 type PushSubscription = {
   endpoint: string;
   p256dh: string;
@@ -61,6 +69,17 @@ type NotificationPayload = {
   };
 };
 
+// Mirrors the client-side type in src/types/Budget.ts.
+type NotificationPreferenceKey =
+  | 'bill_reminders'
+  | 'inactivity_nudge'
+  | 'weekly_recap'
+  | 'budget_warning'
+  | 'budget_exceeded'
+  | 'debt_payment';
+
+type PreferencesByUser = Map<string, Record<string, boolean>>;
+
 const constantTimeEqual = (a: string, b: string): boolean => {
   if (a.length !== b.length) return false;
   let mismatch = 0;
@@ -69,6 +88,20 @@ const constantTimeEqual = (a: string, b: string): boolean => {
   }
 
   return mismatch === 0;
+};
+
+// Missing key == enabled. Mirrors the client-side default so a user with no
+// stored preferences keeps receiving every notification type.
+const isEnabled = (
+  prefsByUser: PreferencesByUser,
+  userId: string,
+  key: NotificationPreferenceKey,
+): boolean => {
+  const prefs = prefsByUser.get(userId);
+  if (!prefs) return true;
+  if (prefs[key] === false) return false;
+
+  return true;
 };
 
 const formatAmount = (amount: number, currency: string): string => {
@@ -126,6 +159,25 @@ Deno.serve(async (req) => {
     const isDailyBatchHour = currentUtcHour === 8;
     const isSundayUtc = nowDate.getUTCDay() === 0;
 
+    // Per-user notification toggles. Fetched once; each block below filters
+    // its candidates by `isEnabled(prefsByUser, userId, key)`. Missing rows
+    // (users without a user_budgets row) and missing keys default to true.
+    const prefsByUser: PreferencesByUser = new Map();
+    {
+      const { data: prefsRows } = await adminClient
+        .from('user_budgets')
+        .select('user_id, notification_preferences');
+
+      if (prefsRows) {
+        for (const row of prefsRows as Array<{
+          user_id: string;
+          notification_preferences: Record<string, boolean> | null;
+        }>) {
+          prefsByUser.set(row.user_id, row.notification_preferences ?? {});
+        }
+      }
+    }
+
     if (isDailyBatchHour) {
       // ── Recurring expense reminders (due tomorrow) ─────────────────────
 
@@ -140,6 +192,9 @@ Deno.serve(async (req) => {
 
       if (!recurringError && recurringDue) {
         for (const expense of recurringDue as RecurringDue[]) {
+          if (!isEnabled(prefsByUser, expense.user_id, 'bill_reminders')) {
+            continue;
+          }
           const formatted = formatAmount(
             expense.amount,
             expense.default_currency,
@@ -170,6 +225,9 @@ Deno.serve(async (req) => {
 
       if (!recurringSoonError && recurringSoon) {
         for (const expense of recurringSoon as RecurringDue[]) {
+          if (!isEnabled(prefsByUser, expense.user_id, 'bill_reminders')) {
+            continue;
+          }
           const formatted = formatAmount(
             expense.amount,
             expense.default_currency,
@@ -199,6 +257,9 @@ Deno.serve(async (req) => {
 
       if (!inactiveError && inactiveUsers) {
         for (const user of inactiveUsers as InactiveUser[]) {
+          if (!isEnabled(prefsByUser, user.user_id, 'inactivity_nudge')) {
+            continue;
+          }
           notifications.push({
             user_id: user.user_id,
             payload: {
@@ -228,6 +289,9 @@ Deno.serve(async (req) => {
 
         if (!weeklyError && weeklyUsers) {
           for (const user of weeklyUsers as WeeklyRecapUser[]) {
+            if (!isEnabled(prefsByUser, user.user_id, 'weekly_recap')) {
+              continue;
+            }
             const formatted = formatAmount(
               Number(user.week_total),
               user.default_currency,
@@ -242,6 +306,33 @@ Deno.serve(async (req) => {
               },
             });
           }
+        }
+      }
+
+      // ── Debt payment due tomorrow ───────────────────────────────────────
+      // Inferred from `debts.start_date` day-of-month; helper also dedups
+      // against any debt_payment already logged for this debt this month.
+
+      const { data: debtsDue, error: debtsDueError } = await adminClient.rpc(
+        'get_debt_payments_due_on',
+        { p_target_date: tomorrowStr },
+      );
+
+      if (!debtsDueError && debtsDue) {
+        for (const debt of debtsDue as DebtDue[]) {
+          if (!isEnabled(prefsByUser, debt.user_id, 'debt_payment')) {
+            continue;
+          }
+          const formatted = formatAmount(debt.minimum_payment, debt.currency);
+          notifications.push({
+            user_id: debt.user_id,
+            payload: {
+              title: 'Debt payment tomorrow',
+              body: `${debt.debt_name}: minimum ${formatted} due tomorrow — log it to keep the payoff plan on track.`,
+              tag: `debt-due-${debt.debt_id}`,
+              data: { url: '/debts' },
+            },
+          });
         }
       }
 
@@ -264,6 +355,9 @@ Deno.serve(async (req) => {
 
       if (!budgetError && budgetCrossed) {
         for (const row of budgetCrossed as BudgetCrossedUser[]) {
+          if (!isEnabled(prefsByUser, row.user_id, 'budget_exceeded')) {
+            continue;
+          }
           const spent = formatAmount(
             Number(row.current_total),
             row.default_currency,
@@ -294,6 +388,9 @@ Deno.serve(async (req) => {
 
       if (!catBudgetError && catBudgetCrossed) {
         for (const row of catBudgetCrossed as CategoryBudgetCrossedUser[]) {
+          if (!isEnabled(prefsByUser, row.user_id, 'budget_exceeded')) {
+            continue;
+          }
           const spent = formatAmount(
             Number(row.current_total),
             row.default_currency,
@@ -308,6 +405,74 @@ Deno.serve(async (req) => {
               title: 'Category over budget',
               body: `${row.category_name} hit ${spent} — past your ${cap} cap.`,
               tag: `cat-budget-${row.category_id}-${monthKey}`,
+              data: { url: '/expenses' },
+            },
+          });
+        }
+      }
+
+      // ── Budget approaching 80% (monthly cap) ────────────────────────────
+      // Early warning the day the user first crosses 80% of cap (and hasn't
+      // also crossed 100% today — the "blown" alert takes precedence above).
+
+      const { data: budgetApproaching, error: budgetApproachingError } =
+        await adminClient.rpc('get_users_approaching_budget', {
+          p_today: todayStr,
+          p_yesterday: yesterdayStr,
+        });
+
+      if (!budgetApproachingError && budgetApproaching) {
+        for (const row of budgetApproaching as BudgetCrossedUser[]) {
+          if (!isEnabled(prefsByUser, row.user_id, 'budget_warning')) {
+            continue;
+          }
+          const spent = formatAmount(
+            Number(row.current_total),
+            row.default_currency,
+          );
+          const cap = formatAmount(
+            Number(row.monthly_amount),
+            row.default_currency,
+          );
+          notifications.push({
+            user_id: row.user_id,
+            payload: {
+              title: 'Budget warning',
+              body: `${spent} of your ${cap} cap spent — you're past 80% with the month still going.`,
+              tag: `budget-warning-${monthKey}`,
+              data: { url: '/expenses' },
+            },
+          });
+        }
+      }
+
+      // ── Category budget approaching 80% ─────────────────────────────────
+
+      const { data: catBudgetApproaching, error: catBudgetApproachingError } =
+        await adminClient.rpc('get_users_approaching_category_budget', {
+          p_today: todayStr,
+          p_yesterday: yesterdayStr,
+        });
+
+      if (!catBudgetApproachingError && catBudgetApproaching) {
+        for (const row of catBudgetApproaching as CategoryBudgetCrossedUser[]) {
+          if (!isEnabled(prefsByUser, row.user_id, 'budget_warning')) {
+            continue;
+          }
+          const spent = formatAmount(
+            Number(row.current_total),
+            row.default_currency,
+          );
+          const cap = formatAmount(
+            Number(row.monthly_amount),
+            row.default_currency,
+          );
+          notifications.push({
+            user_id: row.user_id,
+            payload: {
+              title: 'Category nearing cap',
+              body: `${row.category_name} at ${spent} — past 80% of your ${cap} cap.`,
+              tag: `cat-budget-warning-${row.category_id}-${monthKey}`,
               data: { url: '/expenses' },
             },
           });
