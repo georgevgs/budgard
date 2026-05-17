@@ -42,9 +42,9 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 
 **Income**
 - Log one-off and recurring income alongside expenses
-- Net cash flow card (income − expenses) with month-end projection
+- Net cash flow card (income − expenses) with savings rate
 - 50/30/20 ring (needs / wants / savings) computed live from your data
-- Savings nudge sheet that suggests a target based on the current month
+- Optional savings allocation per income entry
 - Stored in a single transactions table with a `type` discriminator
 
 **Analytics**
@@ -52,14 +52,13 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Interactive year-over-year area chart with clickable month drill-down
 - Category breakdown with sparkline trends and drill-down details
 - Budget progress indicator with color-coded alerts
-- Proactive spending insights: projections, peak spending days, category comparisons, budget streaks, weekend vs weekday patterns, spending volatility
-- Shareable monthly report card — export as PNG or share via native share sheet
-- Year in Review — annual share card with total spent, top categories, biggest expense, income, and net for any year
+- Proactive insights: weekly category anomalies, daily budget remaining, spending pace, and month-end projection
+- Annual export — download a year of transactions or a category summary as CSV
 
 **Budget**
 - Set a monthly total budget target
 - Per-category budgets with their own 80% / 100% alerts
-- Real-time progress tracking with color-coded alerts at 75%, 90%, and 100%
+- Real-time progress tracking with color-coded alerts at 80% and 100%
 - Budget reference line on analytics chart
 
 **Savings Goals**
@@ -68,10 +67,12 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Edit, contribute, or delete from a single goal card
 
 **Net Worth**
-- Manual accounts (checking, savings, cash, investment-lite, other)
-- Snapshot-based balance history per account
+- Manual accounts (checking, savings, cash, investment, other)
+- Snapshot-based balance history per account, with verb-style actions (Add money, Withdraw, Update value)
 - Net worth chart with month-over-month delta
 - Account groups roll up totals by category
+- Investment accounts get an annualized return (XIRR), cost-basis line on the per-account chart, and an allocation donut across holdings
+- Recurring expenses can target an investment account so contributions roll into the balance automatically
 
 **Debt Tracker**
 - Track debts with balance, APR, and minimum payment
@@ -81,14 +82,18 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 
 **Categories and Tags**
 - Custom categories with user-chosen colors and emoji icons
+- Categories can be tagged as Need, Want, or Savings to feed the 50/30/20 ring
 - Tags for finer-grained expense grouping
 - Filter by category or tag in the expense list
 
 **Notifications**
-- Push notifications for recurring expenses due tomorrow
-- Inactivity nudge when no expenses are logged for 3 days
-- Configurable daily reminder to log expenses
-- Works across mobile and desktop
+- Bill reminders for recurring expenses due tomorrow
+- Debt-payment reminders the day before they're due
+- Budget warning when monthly or per-category spend crosses 80%
+- Budget exceeded when monthly or per-category spend crosses 100%
+- Configurable daily reminder at the hour you choose
+- In-app daily and weekly recap cards that summarize recent activity
+- Per-type toggles in settings; works across mobile and desktop
 
 **Customization**
 - Three themes: dark, light, and Barbie
@@ -111,9 +116,9 @@ UI components from shadcn/ui, charts from Recharts, forms from react-hook-form +
 
 ### Key architecture
 
-- **State**: Context API — `AuthContext` for sessions, `DataContext` for all user data
-- **Data**: All Supabase calls go through `services/dataService.ts`
-- **Mutations**: Optimistic updates with rollback in `hooks/useDataOperations.ts`
+- **State**: Context API — `AuthContext` for sessions; `DataContext` is split into `useData` (full snapshot), `useDataConfig` (slow-changing scalars), and `useDataActions` (stable setters) so consumers don't re-render on unrelated mutations
+- **Data**: All Supabase calls go through `services/dataService.ts`; transactions load in two stages (last 12 months first, full history streams in)
+- **Mutations**: Optimistic updates with rollback composed from `hooks/dataOps/*` under `useDataOperations`
 - **Validation**: Zod schemas in `lib/validations.ts`, react-hook-form for forms
 - **Routing**: Lazy-loaded routes with `PrivateRoute` / `PublicRoute` guards
 - **Path alias**: `@/*` maps to `./src/*`
