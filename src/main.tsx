@@ -18,6 +18,13 @@ Sentry.init({
   profileSessionSampleRate: 0.1,
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
+  ignoreErrors: [
+    // Cloudflare Turnstile's bootstrap script triggers `eval` in some paths
+    // (mostly older Safari). Our CSP intentionally omits `unsafe-eval`, so the
+    // rejection bubbles up here as noise — Turnstile still works.
+    /Refused to evaluate a string as JavaScript/,
+    /'unsafe-eval' is not an allowed source/,
+  ],
 });
 
 const initHeavySentryIntegrations = () => {
