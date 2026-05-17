@@ -2,9 +2,6 @@
 // users with '{}' get the full set, and any newly-added type defaults on).
 export type NotificationPreferenceKey =
   | 'bill_reminders'
-  | 'inactivity_nudge'
-  | 'weekly_recap'
-  | 'budget_warning'
   | 'budget_exceeded'
   | 'debt_payment';
 

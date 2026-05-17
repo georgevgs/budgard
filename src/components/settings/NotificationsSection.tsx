@@ -85,14 +85,11 @@ export const localToUtcHour = (localHour: number): number => {
 
 const REMINDER_HOURS = Array.from({ length: 24 }, (_, i) => i);
 
-// Order is deliberate: most-actionable first, broad reminders last.
+// Order is deliberate: most-actionable first.
 const PREFERENCE_KEYS: NotificationPreferenceKey[] = [
   'bill_reminders',
   'debt_payment',
-  'budget_warning',
   'budget_exceeded',
-  'weekly_recap',
-  'inactivity_nudge',
 ];
 
 const PREFERENCE_LABELS: Record<
@@ -107,21 +104,9 @@ const PREFERENCE_LABELS: Record<
     label: 'settings.notifications.prefDebtPaymentLabel',
     description: 'settings.notifications.prefDebtPaymentDescription',
   },
-  budget_warning: {
-    label: 'settings.notifications.prefBudgetWarningLabel',
-    description: 'settings.notifications.prefBudgetWarningDescription',
-  },
   budget_exceeded: {
     label: 'settings.notifications.prefBudgetExceededLabel',
     description: 'settings.notifications.prefBudgetExceededDescription',
-  },
-  weekly_recap: {
-    label: 'settings.notifications.prefWeeklyRecapLabel',
-    description: 'settings.notifications.prefWeeklyRecapDescription',
-  },
-  inactivity_nudge: {
-    label: 'settings.notifications.prefInactivityLabel',
-    description: 'settings.notifications.prefInactivityDescription',
   },
 };
 

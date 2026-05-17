@@ -15,18 +15,8 @@ type RecurringDue = {
   default_currency: string;
 };
 
-type InactiveUser = {
-  user_id: string;
-};
-
 type DailyReminderUser = {
   user_id: string;
-};
-
-type WeeklyRecapUser = {
-  user_id: string;
-  week_total: number;
-  default_currency: string;
 };
 
 type BudgetCrossedUser = {
@@ -72,13 +62,14 @@ type NotificationPayload = {
 // Mirrors the client-side type in src/types/Budget.ts.
 type NotificationPreferenceKey =
   | 'bill_reminders'
-  | 'inactivity_nudge'
-  | 'weekly_recap'
-  | 'budget_warning'
   | 'budget_exceeded'
   | 'debt_payment';
 
 type PreferencesByUser = Map<string, Record<string, boolean>>;
+
+// Default UTC hour for users who haven't picked a daily-reminder time.
+// Matches the historical batch hour so existing users see no shift.
+const DEFAULT_BATCH_HOUR_UTC = 8;
 
 const constantTimeEqual = (a: string, b: string): boolean => {
   if (a.length !== b.length) return false;
@@ -149,338 +140,173 @@ Deno.serve(async (req) => {
 
     const notifications: NotificationPayload[] = [];
 
-    // Cron fires hourly (0 * * * *). Daily-reminder logic needs every-hour
-    // resolution so it can match each user's chosen UTC hour. The other
-    // batch jobs (recurring, inactivity, weekly, budget) only need to run
-    // once a day — gate them to 08:00 UTC.
+    // Cron fires hourly (0 * * * *). Each batch block runs at the user's
+    // preferred UTC hour (their daily_reminder_hour) so non-UTC users don't
+    // get pinged at midnight. Users without a stored hour fall back to 08:00.
 
     const nowDate = new Date();
     const currentUtcHour = nowDate.getUTCHours();
-    const isDailyBatchHour = currentUtcHour === 8;
-    const isSundayUtc = nowDate.getUTCDay() === 0;
+    const todayStr = nowDate.toISOString().split('T')[0];
+    const monthKey = todayStr.slice(0, 7); // YYYY-MM
 
-    // Per-user notification toggles. Fetched once; each block below filters
-    // its candidates by `isEnabled(prefsByUser, userId, key)`. Missing rows
-    // (users without a user_budgets row) and missing keys default to true.
+    // One query for both notification toggles and preferred hour.
     const prefsByUser: PreferencesByUser = new Map();
+    const preferredHourByUser = new Map<string, number>();
     {
-      const { data: prefsRows } = await adminClient
+      const { data: budgetRows } = await adminClient
         .from('user_budgets')
-        .select('user_id, notification_preferences');
+        .select('user_id, notification_preferences, daily_reminder_hour');
 
-      if (prefsRows) {
-        for (const row of prefsRows as Array<{
+      if (budgetRows) {
+        for (const row of budgetRows as Array<{
           user_id: string;
           notification_preferences: Record<string, boolean> | null;
+          daily_reminder_hour: number | null;
         }>) {
           prefsByUser.set(row.user_id, row.notification_preferences ?? {});
+          if (row.daily_reminder_hour !== null) {
+            preferredHourByUser.set(row.user_id, row.daily_reminder_hour);
+          }
         }
       }
     }
 
-    if (isDailyBatchHour) {
-      // ── Recurring expense reminders (due tomorrow) ─────────────────────
+    const matchesPreferredHour = (userId: string): boolean => {
+      const hour = preferredHourByUser.get(userId) ?? DEFAULT_BATCH_HOUR_UTC;
 
-      const tomorrow = new Date(nowDate);
-      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+      return hour === currentUtcHour;
+    };
 
-      const { data: recurringDue, error: recurringError } =
-        await adminClient.rpc('get_recurring_due_on', {
-          p_target_date: tomorrowStr,
-        });
+    // ── Recurring expense reminders (due tomorrow) ───────────────────────
 
-      if (!recurringError && recurringDue) {
-        for (const expense of recurringDue as RecurringDue[]) {
-          if (!isEnabled(prefsByUser, expense.user_id, 'bill_reminders')) {
-            continue;
-          }
-          const formatted = formatAmount(
-            expense.amount,
-            expense.default_currency,
-          );
-          notifications.push({
-            user_id: expense.user_id,
-            payload: {
-              title: 'Heads up!',
-              body: `${expense.description} (${formatted}) is coming for your wallet tomorrow.`,
-              tag: `recurring-${expense.recurring_expense_id}`,
-              data: { url: '/recurring' },
-            },
-          });
+    const tomorrow = new Date(nowDate);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    const { data: recurringDue, error: recurringError } = await adminClient.rpc(
+      'get_recurring_due_on',
+      { p_target_date: tomorrowStr },
+    );
+
+    if (!recurringError && recurringDue) {
+      for (const expense of recurringDue as RecurringDue[]) {
+        if (!matchesPreferredHour(expense.user_id)) continue;
+        if (!isEnabled(prefsByUser, expense.user_id, 'bill_reminders')) {
+          continue;
         }
-      }
-
-      // ── Recurring expense reminders (due in 3 days) ────────────────────
-      // Separate tag from the T-1 nudge so the user sees both events.
-
-      const inThreeDays = new Date(nowDate);
-      inThreeDays.setUTCDate(inThreeDays.getUTCDate() + 3);
-      const inThreeDaysStr = inThreeDays.toISOString().split('T')[0];
-
-      const { data: recurringSoon, error: recurringSoonError } =
-        await adminClient.rpc('get_recurring_due_on', {
-          p_target_date: inThreeDaysStr,
-        });
-
-      if (!recurringSoonError && recurringSoon) {
-        for (const expense of recurringSoon as RecurringDue[]) {
-          if (!isEnabled(prefsByUser, expense.user_id, 'bill_reminders')) {
-            continue;
-          }
-          const formatted = formatAmount(
-            expense.amount,
-            expense.default_currency,
-          );
-          notifications.push({
-            user_id: expense.user_id,
-            payload: {
-              title: 'Heads up!',
-              body: `${expense.description} (${formatted}) is due in 3 days — keep some room in your wallet.`,
-              tag: `recurring-${expense.recurring_expense_id}-3d`,
-              data: { url: '/recurring' },
-            },
-          });
-        }
-      }
-
-      // ── Inactivity nudge (no expenses in 3 days) ───────────────────────
-
-      const threeDaysAgo = new Date(nowDate);
-      threeDaysAgo.setUTCDate(threeDaysAgo.getUTCDate() - 3);
-      const threeDaysAgoStr = threeDaysAgo.toISOString().split('T')[0];
-
-      const { data: inactiveUsers, error: inactiveError } =
-        await adminClient.rpc('get_inactive_push_users', {
-          p_since_date: threeDaysAgoStr,
-        });
-
-      if (!inactiveError && inactiveUsers) {
-        for (const user of inactiveUsers as InactiveUser[]) {
-          if (!isEnabled(prefsByUser, user.user_id, 'inactivity_nudge')) {
-            continue;
-          }
-          notifications.push({
-            user_id: user.user_id,
-            payload: {
-              title: 'Where did you go?',
-              body: "3 days with no expenses? Either you're on a no-spend streak or you forgot about me.",
-              tag: 'inactivity-nudge',
-              data: { url: '/expenses?action=add' },
-            },
-          });
-        }
-      }
-
-      // ── Weekly recap (Sundays only) ────────────────────────────────────
-      // Sends one "your week in review" nudge that opens the app to the
-      // dashboard, where WeeklyRecapCard renders the per-category anomaly
-      // breakdown. We compute only the totals here — the rich client-side
-      // recap (top anomaly etc.) is calculated on render, so the push body
-      // stays generic and the user gets the full picture in-app.
-
-      if (isSundayUtc) {
-        const todayStr = nowDate.toISOString().split('T')[0];
-
-        const { data: weeklyUsers, error: weeklyError } = await adminClient.rpc(
-          'get_weekly_recap_push_users',
-          { p_window_end: todayStr },
+        const formatted = formatAmount(
+          expense.amount,
+          expense.default_currency,
         );
-
-        if (!weeklyError && weeklyUsers) {
-          for (const user of weeklyUsers as WeeklyRecapUser[]) {
-            if (!isEnabled(prefsByUser, user.user_id, 'weekly_recap')) {
-              continue;
-            }
-            const formatted = formatAmount(
-              Number(user.week_total),
-              user.default_currency,
-            );
-            notifications.push({
-              user_id: user.user_id,
-              payload: {
-                title: 'Your week in review',
-                body: `${formatted} spent this week — open the app to see which categories swung the most.`,
-                tag: 'weekly-recap',
-                data: { url: '/expenses' },
-              },
-            });
-          }
-        }
-      }
-
-      // ── Debt payment due tomorrow ───────────────────────────────────────
-      // Inferred from `debts.start_date` day-of-month; helper also dedups
-      // against any debt_payment already logged for this debt this month.
-
-      const { data: debtsDue, error: debtsDueError } = await adminClient.rpc(
-        'get_debt_payments_due_on',
-        { p_target_date: tomorrowStr },
-      );
-
-      if (!debtsDueError && debtsDue) {
-        for (const debt of debtsDue as DebtDue[]) {
-          if (!isEnabled(prefsByUser, debt.user_id, 'debt_payment')) {
-            continue;
-          }
-          const formatted = formatAmount(debt.minimum_payment, debt.currency);
-          notifications.push({
-            user_id: debt.user_id,
-            payload: {
-              title: 'Debt payment tomorrow',
-              body: `${debt.debt_name}: minimum ${formatted} due tomorrow — log it to keep the payoff plan on track.`,
-              tag: `debt-due-${debt.debt_id}`,
-              data: { url: '/debts' },
-            },
-          });
-        }
-      }
-
-      // ── Budget crossed (monthly cap) ────────────────────────────────────
-      // Fires only on the day total first crosses the cap (today >= cap,
-      // yesterday < cap). Tag is month-scoped so multiple browsers/devices
-      // collapse to one notification, and a later month re-fires cleanly.
-
-      const todayStr = nowDate.toISOString().split('T')[0];
-      const yesterday = new Date(nowDate);
-      yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
-      const monthKey = todayStr.slice(0, 7); // YYYY-MM
-
-      const { data: budgetCrossed, error: budgetError } =
-        await adminClient.rpc('get_users_crossed_budget', {
-          p_today: todayStr,
-          p_yesterday: yesterdayStr,
+        notifications.push({
+          user_id: expense.user_id,
+          payload: {
+            title: `${expense.description} due tomorrow`,
+            body: `${formatted} scheduled for tomorrow.`,
+            tag: `bill-${expense.recurring_expense_id}`,
+            data: { url: '/recurring' },
+          },
         });
-
-      if (!budgetError && budgetCrossed) {
-        for (const row of budgetCrossed as BudgetCrossedUser[]) {
-          if (!isEnabled(prefsByUser, row.user_id, 'budget_exceeded')) {
-            continue;
-          }
-          const spent = formatAmount(
-            Number(row.current_total),
-            row.default_currency,
-          );
-          const cap = formatAmount(
-            Number(row.monthly_amount),
-            row.default_currency,
-          );
-          notifications.push({
-            user_id: row.user_id,
-            payload: {
-              title: 'Budget blown',
-              body: `${spent} spent this month — you've passed your ${cap} cap.`,
-              tag: `budget-exceeded-${monthKey}`,
-              data: { url: '/expenses' },
-            },
-          });
-        }
-      }
-
-      // ── Category budget crossed ────────────────────────────────────────
-
-      const { data: catBudgetCrossed, error: catBudgetError } =
-        await adminClient.rpc('get_users_crossed_category_budget', {
-          p_today: todayStr,
-          p_yesterday: yesterdayStr,
-        });
-
-      if (!catBudgetError && catBudgetCrossed) {
-        for (const row of catBudgetCrossed as CategoryBudgetCrossedUser[]) {
-          if (!isEnabled(prefsByUser, row.user_id, 'budget_exceeded')) {
-            continue;
-          }
-          const spent = formatAmount(
-            Number(row.current_total),
-            row.default_currency,
-          );
-          const cap = formatAmount(
-            Number(row.monthly_amount),
-            row.default_currency,
-          );
-          notifications.push({
-            user_id: row.user_id,
-            payload: {
-              title: 'Category over budget',
-              body: `${row.category_name} hit ${spent} — past your ${cap} cap.`,
-              tag: `cat-budget-${row.category_id}-${monthKey}`,
-              data: { url: '/expenses' },
-            },
-          });
-        }
-      }
-
-      // ── Budget approaching 80% (monthly cap) ────────────────────────────
-      // Early warning the day the user first crosses 80% of cap (and hasn't
-      // also crossed 100% today — the "blown" alert takes precedence above).
-
-      const { data: budgetApproaching, error: budgetApproachingError } =
-        await adminClient.rpc('get_users_approaching_budget', {
-          p_today: todayStr,
-          p_yesterday: yesterdayStr,
-        });
-
-      if (!budgetApproachingError && budgetApproaching) {
-        for (const row of budgetApproaching as BudgetCrossedUser[]) {
-          if (!isEnabled(prefsByUser, row.user_id, 'budget_warning')) {
-            continue;
-          }
-          const spent = formatAmount(
-            Number(row.current_total),
-            row.default_currency,
-          );
-          const cap = formatAmount(
-            Number(row.monthly_amount),
-            row.default_currency,
-          );
-          notifications.push({
-            user_id: row.user_id,
-            payload: {
-              title: 'Budget warning',
-              body: `${spent} of your ${cap} cap spent — you're past 80% with the month still going.`,
-              tag: `budget-warning-${monthKey}`,
-              data: { url: '/expenses' },
-            },
-          });
-        }
-      }
-
-      // ── Category budget approaching 80% ─────────────────────────────────
-
-      const { data: catBudgetApproaching, error: catBudgetApproachingError } =
-        await adminClient.rpc('get_users_approaching_category_budget', {
-          p_today: todayStr,
-          p_yesterday: yesterdayStr,
-        });
-
-      if (!catBudgetApproachingError && catBudgetApproaching) {
-        for (const row of catBudgetApproaching as CategoryBudgetCrossedUser[]) {
-          if (!isEnabled(prefsByUser, row.user_id, 'budget_warning')) {
-            continue;
-          }
-          const spent = formatAmount(
-            Number(row.current_total),
-            row.default_currency,
-          );
-          const cap = formatAmount(
-            Number(row.monthly_amount),
-            row.default_currency,
-          );
-          notifications.push({
-            user_id: row.user_id,
-            payload: {
-              title: 'Category nearing cap',
-              body: `${row.category_name} at ${spent} — past 80% of your ${cap} cap.`,
-              tag: `cat-budget-warning-${row.category_id}-${monthKey}`,
-              data: { url: '/expenses' },
-            },
-          });
-        }
       }
     }
 
-    // ── Daily reminder (user-selected hour, every hour) ──────────────────
+    // ── Debt payment due tomorrow ────────────────────────────────────────
+
+    const { data: debtsDue, error: debtsDueError } = await adminClient.rpc(
+      'get_debt_payments_due_on',
+      { p_target_date: tomorrowStr },
+    );
+
+    if (!debtsDueError && debtsDue) {
+      for (const debt of debtsDue as DebtDue[]) {
+        if (!matchesPreferredHour(debt.user_id)) continue;
+        if (!isEnabled(prefsByUser, debt.user_id, 'debt_payment')) continue;
+        const formatted = formatAmount(debt.minimum_payment, debt.currency);
+        notifications.push({
+          user_id: debt.user_id,
+          payload: {
+            title: `${debt.debt_name} payment tomorrow`,
+            body: `Minimum ${formatted} due — log it to keep the payoff plan on track.`,
+            tag: `debt-${debt.debt_id}`,
+            data: { url: '/debts' },
+          },
+        });
+      }
+    }
+
+    // ── Budget crossed (monthly cap) ─────────────────────────────────────
+    // Fires only on the day total first crosses the cap (today >= cap,
+    // yesterday < cap). Tag is month-scoped so a re-run replaces rather
+    // than re-pings, and a new month re-fires cleanly.
+
+    const yesterday = new Date(nowDate);
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    const { data: budgetCrossed, error: budgetError } = await adminClient.rpc(
+      'get_users_crossed_budget',
+      { p_today: todayStr, p_yesterday: yesterdayStr },
+    );
+
+    if (!budgetError && budgetCrossed) {
+      for (const row of budgetCrossed as BudgetCrossedUser[]) {
+        if (!matchesPreferredHour(row.user_id)) continue;
+        if (!isEnabled(prefsByUser, row.user_id, 'budget_exceeded')) continue;
+        const spent = formatAmount(
+          Number(row.current_total),
+          row.default_currency,
+        );
+        const cap = formatAmount(
+          Number(row.monthly_amount),
+          row.default_currency,
+        );
+        notifications.push({
+          user_id: row.user_id,
+          payload: {
+            title: 'Monthly budget reached',
+            body: `${spent} spent — you've passed your ${cap} cap.`,
+            tag: `budget-${monthKey}`,
+            data: { url: '/expenses' },
+          },
+        });
+      }
+    }
+
+    // ── Category budget crossed ──────────────────────────────────────────
+
+    const { data: catBudgetCrossed, error: catBudgetError } =
+      await adminClient.rpc('get_users_crossed_category_budget', {
+        p_today: todayStr,
+        p_yesterday: yesterdayStr,
+      });
+
+    if (!catBudgetError && catBudgetCrossed) {
+      for (const row of catBudgetCrossed as CategoryBudgetCrossedUser[]) {
+        if (!matchesPreferredHour(row.user_id)) continue;
+        if (!isEnabled(prefsByUser, row.user_id, 'budget_exceeded')) continue;
+        const spent = formatAmount(
+          Number(row.current_total),
+          row.default_currency,
+        );
+        const cap = formatAmount(
+          Number(row.monthly_amount),
+          row.default_currency,
+        );
+        notifications.push({
+          user_id: row.user_id,
+          payload: {
+            title: `${row.category_name} over budget`,
+            body: `${spent} spent — past your ${cap} cap.`,
+            tag: `cat-budget-${row.category_id}-${monthKey}`,
+            data: { url: '/expenses' },
+          },
+        });
+      }
+    }
+
+    // ── Daily reminder (user-selected hour) ──────────────────────────────
+    // Only fires if no other notification is already queued for this user
+    // this run — keeps the engagement nudge from layering on top of bills.
 
     const { data: reminderUsers, error: reminderError } = await adminClient
       .from('user_budgets')
@@ -489,8 +315,6 @@ Deno.serve(async (req) => {
 
     if (!reminderError && reminderUsers) {
       for (const user of reminderUsers as DailyReminderUser[]) {
-        // Skip if we already have a notification queued for this user
-        // (e.g., recurring reminder already covers today)
         const alreadyQueued = notifications.some(
           (n) => n.user_id === user.user_id,
         );
@@ -499,8 +323,8 @@ Deno.serve(async (req) => {
         notifications.push({
           user_id: user.user_id,
           payload: {
-            title: 'Cha-ching!',
-            body: "Your wallet called — it wants receipts. Let's log today's expenses.",
+            title: 'Log today',
+            body: 'A minute now keeps your numbers honest. Tap to add an expense.',
             tag: 'daily-reminder',
             data: { url: '/expenses?action=add' },
           },
@@ -509,13 +333,14 @@ Deno.serve(async (req) => {
     }
 
     // ── Send notifications ───────────────────────────────────────────────
+    // One push per event. The OS (Chrome on Android, Safari on iOS) groups
+    // notifications from the same origin in the tray; distinct tags keep
+    // each item separately tappable to its own destination.
 
     let sent = 0;
     let failed = 0;
     const staleEndpoints: string[] = [];
 
-    // Deduplicate by user_id — if a user has both a recurring reminder
-    // and an inactivity nudge, send both (different tags prevent stacking).
     for (const notification of notifications) {
       const { data: subscriptions } = await adminClient
         .from('push_subscriptions')
