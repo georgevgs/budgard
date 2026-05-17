@@ -62,6 +62,7 @@ type NotificationPayload = {
 // Mirrors the client-side type in src/types/Budget.ts.
 type NotificationPreferenceKey =
   | 'bill_reminders'
+  | 'budget_warning'
   | 'budget_exceeded'
   | 'debt_payment';
 
@@ -298,6 +299,73 @@ Deno.serve(async (req) => {
             title: `${row.category_name} over budget`,
             body: `${spent} spent — past your ${cap} cap.`,
             tag: `cat-budget-${row.category_id}-${monthKey}`,
+            data: { url: '/expenses' },
+          },
+        });
+      }
+    }
+
+    // ── Budget approaching 80% (monthly cap) ─────────────────────────────
+    // Early-warning the day the user first crosses 80% of cap. The RPC
+    // excludes anyone who *also* crossed 100% today so the "blown" alert
+    // above wins and we don't double-ping.
+
+    const { data: budgetApproaching, error: budgetApproachingError } =
+      await adminClient.rpc('get_users_approaching_budget', {
+        p_today: todayStr,
+        p_yesterday: yesterdayStr,
+      });
+
+    if (!budgetApproachingError && budgetApproaching) {
+      for (const row of budgetApproaching as BudgetCrossedUser[]) {
+        if (!matchesPreferredHour(row.user_id)) continue;
+        if (!isEnabled(prefsByUser, row.user_id, 'budget_warning')) continue;
+        const spent = formatAmount(
+          Number(row.current_total),
+          row.default_currency,
+        );
+        const cap = formatAmount(
+          Number(row.monthly_amount),
+          row.default_currency,
+        );
+        notifications.push({
+          user_id: row.user_id,
+          payload: {
+            title: 'Monthly budget at 80%',
+            body: `${spent} of your ${cap} cap spent — still some month to go.`,
+            tag: `budget-warning-${monthKey}`,
+            data: { url: '/expenses' },
+          },
+        });
+      }
+    }
+
+    // ── Category budget approaching 80% ──────────────────────────────────
+
+    const { data: catBudgetApproaching, error: catBudgetApproachingError } =
+      await adminClient.rpc('get_users_approaching_category_budget', {
+        p_today: todayStr,
+        p_yesterday: yesterdayStr,
+      });
+
+    if (!catBudgetApproachingError && catBudgetApproaching) {
+      for (const row of catBudgetApproaching as CategoryBudgetCrossedUser[]) {
+        if (!matchesPreferredHour(row.user_id)) continue;
+        if (!isEnabled(prefsByUser, row.user_id, 'budget_warning')) continue;
+        const spent = formatAmount(
+          Number(row.current_total),
+          row.default_currency,
+        );
+        const cap = formatAmount(
+          Number(row.monthly_amount),
+          row.default_currency,
+        );
+        notifications.push({
+          user_id: row.user_id,
+          payload: {
+            title: `${row.category_name} at 80%`,
+            body: `${spent} of your ${cap} cap spent.`,
+            tag: `cat-budget-warning-${row.category_id}-${monthKey}`,
             data: { url: '/expenses' },
           },
         });

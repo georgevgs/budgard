@@ -446,6 +446,8 @@
       "preferencesDescription": "Επιλέξτε ποιες ειδοποιήσεις θέλετε να λαμβάνετε",
       "prefBillRemindersLabel": "Επερχόμενοι λογαριασμοί",
       "prefBillRemindersDescription": "Υπενθύμιση την ημέρα πριν από έναν επαναλαμβανόμενο λογαριασμό",
+      "prefBudgetWarningLabel": "Προϋπολογισμός στο 80%",
+      "prefBudgetWarningDescription": "Προειδοποίηση όταν φτάσετε το 80% ενός ορίου",
       "prefBudgetExceededLabel": "Υπέρβαση προϋπολογισμού",
       "prefBudgetExceededDescription": "Ειδοποίηση την ημέρα που ξεπερνάτε ένα όριο",
       "prefDebtPaymentLabel": "Πληρωμές χρεών",

@@ -446,6 +446,8 @@
       "preferencesDescription": "Choose which alerts you want to receive",
       "prefBillRemindersLabel": "Upcoming bills",
       "prefBillRemindersDescription": "Reminder the day before a recurring bill",
+      "prefBudgetWarningLabel": "Budget at 80%",
+      "prefBudgetWarningDescription": "Heads-up when you reach 80% of a cap",
       "prefBudgetExceededLabel": "Budget exceeded",
       "prefBudgetExceededDescription": "Alert the day you cross a budget cap",
       "prefDebtPaymentLabel": "Debt payments",

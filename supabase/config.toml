@@ -258,6 +258,11 @@ inspector_port = 8083
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 # entrypoint = "./functions/MY_FUNCTION_NAME/index.ts"
 
+# Invoked by pg_cron with a Bearer CRON_SECRET, not a Supabase JWT.
+# Must stay verify_jwt = false or the hourly cron returns 401.
+[functions.send-push-notifications]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

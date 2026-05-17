@@ -89,6 +89,7 @@ const REMINDER_HOURS = Array.from({ length: 24 }, (_, i) => i);
 const PREFERENCE_KEYS: NotificationPreferenceKey[] = [
   'bill_reminders',
   'debt_payment',
+  'budget_warning',
   'budget_exceeded',
 ];
 
@@ -103,6 +104,10 @@ const PREFERENCE_LABELS: Record<
   debt_payment: {
     label: 'settings.notifications.prefDebtPaymentLabel',
     description: 'settings.notifications.prefDebtPaymentDescription',
+  },
+  budget_warning: {
+    label: 'settings.notifications.prefBudgetWarningLabel',
+    description: 'settings.notifications.prefBudgetWarningDescription',
   },
   budget_exceeded: {
     label: 'settings.notifications.prefBudgetExceededLabel',
