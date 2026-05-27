@@ -112,7 +112,7 @@ const RecurringExpenseForm = ({
   const formTitle = getFormTitle(Boolean(expense), titleSuffix, t);
 
   return (
-    <div className="flex flex-col max-h-full">
+    <div className="flex flex-col flex-1 min-h-0">
       <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
         <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
       </div>
