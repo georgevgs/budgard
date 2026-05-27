@@ -31,7 +31,11 @@ import type {
   RecurringSlice,
   AccountsSlice,
 } from './DataContext.types';
-import { mergeUniqueById, isAbortError } from './DataContext.helpers';
+import {
+  mergeUniqueById,
+  isAbortError,
+  isExpiredJwtError,
+} from './DataContext.helpers';
 
 const DataContext = createContext<DataContextType | null>(null);
 const DataActionsContext = createContext<DataActions | null>(null);
@@ -201,7 +205,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           setIsSecondaryLoaded(true);
         })
         .catch((error) => {
-          if (isAbortError(error)) {
+          if (isAbortError(error) || isExpiredJwtError(error)) {
             return;
           }
           Sentry.captureException(error, {
@@ -232,7 +236,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           }
         })
         .catch((error) => {
-          if (isAbortError(error)) {
+          if (isAbortError(error) || isExpiredJwtError(error)) {
             return;
           }
           Sentry.captureException(error, {
@@ -246,6 +250,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       // the visibilitychange listener retries when the app comes to foreground.
       if (isAbortError(error)) {
         wasAbortedRef.current = true;
+        return;
+      }
+      // JWT expiry self-heals via supabase-js refresh + the visibilitychange
+      // retry, so don't toast or page the user about it.
+      if (isExpiredJwtError(error)) {
         return;
       }
       Sentry.captureException(error, { tags: { context: 'fetchData' } });

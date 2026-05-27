@@ -26,3 +26,19 @@ export const isAbortError = (error: unknown): boolean => {
 
   return false;
 };
+
+// Supabase/PostgREST returns these when the JWT has lapsed (common on iOS PWA
+// after backgrounding). supabase-js refreshes the session and the next call
+// succeeds, so there's nothing actionable to report.
+export const isExpiredJwtError = (error: unknown): boolean => {
+  if (typeof error !== 'object' || error === null) return false;
+  const record = error as Record<string, unknown>;
+  if (record.code === 'PGRST301' || record.code === 'PGRST303') return true;
+  if (
+    typeof record.message === 'string' &&
+    record.message.toLowerCase().includes('jwt expired')
+  )
+    return true;
+
+  return false;
+};
