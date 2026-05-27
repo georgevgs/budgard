@@ -179,10 +179,16 @@ Deno.serve(async (req) => {
     };
 
     // ── Recurring expense reminders (due tomorrow) ───────────────────────
+    // When ≥3 bills fall on the same day for a user, bundle into a single
+    // push (e.g. "3 bills due tomorrow — €X total") to avoid stacking up to
+    // a dozen notifications on the 1st of the month. Below the threshold,
+    // keep one-push-per-bill so each is tappable on its own.
 
     const tomorrow = new Date(nowDate);
     tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
     const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    const BILL_BUNDLE_THRESHOLD = 3;
 
     const { data: recurringDue, error: recurringError } = await adminClient.rpc(
       'get_recurring_due_on',
@@ -190,24 +196,49 @@ Deno.serve(async (req) => {
     );
 
     if (!recurringError && recurringDue) {
+      const billsByUser = new Map<string, RecurringDue[]>();
+
       for (const expense of recurringDue as RecurringDue[]) {
         if (!matchesPreferredHour(expense.user_id)) continue;
         if (!isEnabled(prefsByUser, expense.user_id, 'bill_reminders')) {
           continue;
         }
-        const formatted = formatAmount(
-          expense.amount,
-          expense.default_currency,
-        );
-        notifications.push({
-          user_id: expense.user_id,
-          payload: {
-            title: `${expense.description} due tomorrow`,
-            body: `${formatted} scheduled for tomorrow.`,
-            tag: `bill-${expense.recurring_expense_id}`,
-            data: { url: '/recurring' },
-          },
-        });
+        const list = billsByUser.get(expense.user_id) ?? [];
+        list.push(expense);
+        billsByUser.set(expense.user_id, list);
+      }
+
+      for (const [userId, bills] of billsByUser) {
+        if (bills.length >= BILL_BUNDLE_THRESHOLD) {
+          const total = bills.reduce((sum, b) => sum + Number(b.amount), 0);
+          const formatted = formatAmount(total, bills[0].default_currency);
+          notifications.push({
+            user_id: userId,
+            payload: {
+              title: `${bills.length} bills due tomorrow`,
+              body: `${formatted} total scheduled for tomorrow.`,
+              tag: `bills-bundled-${tomorrowStr}`,
+              data: { url: '/recurring' },
+            },
+          });
+          continue;
+        }
+
+        for (const expense of bills) {
+          const formatted = formatAmount(
+            expense.amount,
+            expense.default_currency,
+          );
+          notifications.push({
+            user_id: expense.user_id,
+            payload: {
+              title: `${expense.description} due tomorrow`,
+              body: `${formatted} scheduled for tomorrow.`,
+              tag: `bill-${expense.recurring_expense_id}`,
+              data: { url: '/recurring' },
+            },
+          });
+        }
       }
     }
 
@@ -244,6 +275,8 @@ Deno.serve(async (req) => {
     yesterday.setUTCDate(yesterday.getUTCDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
 
+    const usersWithMonthlyCrossed = new Set<string>();
+
     const { data: budgetCrossed, error: budgetError } = await adminClient.rpc(
       'get_users_crossed_budget',
       { p_today: todayStr, p_yesterday: yesterdayStr },
@@ -253,6 +286,7 @@ Deno.serve(async (req) => {
       for (const row of budgetCrossed as BudgetCrossedUser[]) {
         if (!matchesPreferredHour(row.user_id)) continue;
         if (!isEnabled(prefsByUser, row.user_id, 'budget_exceeded')) continue;
+        usersWithMonthlyCrossed.add(row.user_id);
         const spent = formatAmount(
           Number(row.current_total),
           row.default_currency,
@@ -274,6 +308,10 @@ Deno.serve(async (req) => {
     }
 
     // ── Category budget crossed ──────────────────────────────────────────
+    // Suppressed for users who also crossed the monthly cap today — the
+    // same spending event typically tips both, and the user is heading to
+    // /expenses anyway where each category is visible. Avoids a stack of
+    // simultaneous pushes at month-end.
 
     const { data: catBudgetCrossed, error: catBudgetError } =
       await adminClient.rpc('get_users_crossed_category_budget', {
@@ -285,6 +323,7 @@ Deno.serve(async (req) => {
       for (const row of catBudgetCrossed as CategoryBudgetCrossedUser[]) {
         if (!matchesPreferredHour(row.user_id)) continue;
         if (!isEnabled(prefsByUser, row.user_id, 'budget_exceeded')) continue;
+        if (usersWithMonthlyCrossed.has(row.user_id)) continue;
         const spent = formatAmount(
           Number(row.current_total),
           row.default_currency,
