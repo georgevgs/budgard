@@ -16,6 +16,7 @@ function Calendar({
 }: CalendarProps) {
   return (
     <DayPicker
+      weekStartsOn={1}
       showOutsideDays={showOutsideDays}
       className={cn('pt-5 px-3 pb-3', className)}
       classNames={{
