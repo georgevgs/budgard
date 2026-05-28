@@ -138,10 +138,14 @@ describe('useSpendingInsights', () => {
   // --- Weekly Anomaly ---
 
   it('surfaces a weekly anomaly as a warning insight', () => {
-    const today = new Date('2026-03-15');
+    // Monday so the recap looks back at the just-completed Mon–Sun window.
+    // The anomaly expense lands on the prior Sunday inside that window.
+    const today = new Date('2026-03-16');
+    vi.setSystemTime(today);
+    const inWindow = subDays(today, 1);
     const expenses: Expense[] = [
       ...baselineRun('cat-1', 30, 12, today),
-      makeExpense(format(today, 'yyyy-MM-dd'), 80),
+      makeExpense(format(inWindow, 'yyyy-MM-dd'), 80),
     ];
 
     const { result } = render({ expenses });

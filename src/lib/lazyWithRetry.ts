@@ -12,7 +12,8 @@ import { lazy, type ComponentType } from 'react';
  * worker, clears all caches, and redirects back to the current page so the
  * browser fetches fresh assets.
  */
-const lazyWithRetry = <T extends ComponentType<unknown>>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const lazyWithRetry = <T extends ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
 ): ReturnType<typeof lazy<T>> =>
   lazy(async () => {

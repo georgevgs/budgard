@@ -19,10 +19,7 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import Header from '@/components/layout/Header';
 import NavTabs from '@/components/layout/NavTabs';
-import {
-  OnboardingFlow,
-  shouldShowOnboarding,
-} from '@/components/onboarding/OnboardingFlow';
+import { shouldShowOnboarding } from '@/lib/onboarding';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import {
   AppLoadingSkeleton,
@@ -61,6 +58,9 @@ const SettingsView = lazyWithRetry(
   () => import('@/components/settings/SettingsView'),
 );
 const LandingPage = lazyWithRetry(() => import('@/pages/LandingPage'));
+const OnboardingFlow = lazyWithRetry(
+  () => import('@/components/onboarding/OnboardingFlow'),
+);
 
 // ============================================================================
 // Loading Component
@@ -107,11 +107,18 @@ const AuthenticatedLayout = () => {
         <Outlet />
       </main>
       <NavTabs />
-      <OnboardingFlow
-        isOpen={showOnboarding}
-        onComplete={() => setShowOnboarding(false)}
-      />
+      {renderOnboarding(showOnboarding, () => setShowOnboarding(false))}
     </>
+  );
+};
+
+const renderOnboarding = (isOpen: boolean, onComplete: () => void) => {
+  if (!isOpen) return null;
+
+  return (
+    <Suspense fallback={null}>
+      <OnboardingFlow isOpen={isOpen} onComplete={onComplete} />
+    </Suspense>
   );
 };
 

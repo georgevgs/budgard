@@ -365,36 +365,10 @@
       "empty": "Δεν έχει οριστεί κανένα επαναλαμβανόμενο έσοδο",
       "emptyDescription": "Μισθός, μερίσματα, η δουλειά δίπλα που επιτέλους πληρώνει — όρισέ το μία φορά και άσ' το να φτάνει.",
       "addFirstRecurring": "Προσθέστε το Πρώτο Επαναλαμβανόμενο Έσοδο"
-    },
-    "audit": {
-      "title": "Έλεγχος συνδρομών",
-      "perMonth": "/ μήνα",
-      "perYear": "{{amount}} / έτος",
-      "activeCount": "{{count}} ενεργές",
-      "topLabel": "Κορυφαίες κατά μηνιαίο κόστος",
-      "largestHint": "Η συνδρομή {{name}} είναι το {{percent}}% των συνδρομών σου — αξίζει μια δεύτερη ματιά.",
-      "nextOn": "επόμενη {{date}}",
-      "driftUp": "Πάνω {{percent}}% από την καθορισμένη τιμή",
-      "driftDown": "Κάτω {{percent}}% από την καθορισμένη τιμή",
-      "detectedTitle": "Εντοπισμένες συνδρομές",
-      "detectedSubtitle_one": "{{count}} επαναλαμβανόμενη χρέωση μοιάζει με συνδρομή που δεν έχεις καταχωρήσει.",
-      "detectedSubtitle_other": "{{count}} επαναλαμβανόμενες χρεώσεις μοιάζουν με συνδρομές που δεν έχεις καταχωρήσει.",
-      "detectedOccurrences_one": "{{count}} χρέωση",
-      "detectedOccurrences_other": "{{count}} χρεώσεις",
-      "addAsRecurring": "Προσθήκη",
-      "ignore": "Αγνόηση",
-      "ignoreAria": "Αγνόησε {{description}}"
     }
   },
-  "recap": {
-    "title": "Χθες",
-    "dismissAria": "Απόκρυψη ανακεφαλαίωσης για σήμερα",
-    "acrossN_one": "σε {{count}} δαπάνη",
-    "acrossN_other": "σε {{count}} δαπάνες",
-    "uncategorised": "Χωρίς κατηγορία"
-  },
   "weeklyRecap": {
-    "title": "Αυτή την εβδομάδα",
+    "title": "Περασμένη εβδομάδα",
     "dismissAria": "Απόκρυψη εβδομαδιαίας ανακεφαλαίωσης",
     "acrossN_one": "σε {{count}} δαπάνη",
     "acrossN_other": "σε {{count}} δαπάνες",

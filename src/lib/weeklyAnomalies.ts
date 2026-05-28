@@ -1,10 +1,12 @@
-import { format, subDays } from 'date-fns';
+import { format, startOfWeek, subDays } from 'date-fns';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
-// "This week" is the rolling 7-day window ending at `now` (inclusive).
-// Baseline is the 90 days immediately preceding that window. We compare each
-// category's current week against its average week over that baseline.
+// "This week" is the last completed Mon–Sun window before `now`. The recap is
+// surfaced on Mondays, so on a Monday the window is the week that just ended
+// yesterday. Baseline is the 90 days immediately preceding that window. We
+// compare each category's current week against its average week over that
+// baseline.
 const WEEK_DAYS = 7;
 const BASELINE_DAYS = 90;
 const BASELINE_WEEKS = BASELINE_DAYS / WEEK_DAYS;
@@ -53,7 +55,11 @@ export const buildWeeklyRecap = ({
   expenses,
   categories,
 }: BuildArgs): WeeklyRecap | null => {
-  const windowEndDate = now;
+  // Window = last completed Mon–Sun. startOfWeek({ weekStartsOn: 1 }) gives
+  // the Monday at the start of *this* week; the prior Sunday is one day
+  // before that, and the prior Monday seven days before that.
+  const thisMonday = startOfWeek(now, { weekStartsOn: 1 });
+  const windowEndDate = subDays(thisMonday, 1);
   const windowStartDate = subDays(windowEndDate, WEEK_DAYS - 1);
   const baselineStartDate = subDays(windowStartDate, BASELINE_DAYS);
 

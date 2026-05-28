@@ -365,36 +365,10 @@
       "empty": "No recurring income set up yet",
       "emptyDescription": "Salary, dividends, the side gig that finally pays — log it once and watch it land.",
       "addFirstRecurring": "Add Your First Recurring Income"
-    },
-    "audit": {
-      "title": "Subscription audit",
-      "perMonth": "/ mo",
-      "perYear": "{{amount}} / year",
-      "activeCount": "{{count}} active",
-      "topLabel": "Top by monthly cost",
-      "largestHint": "{{name}} is {{percent}}% of your subscription spend — worth a second look.",
-      "nextOn": "next {{date}}",
-      "driftUp": "Up {{percent}}% vs configured price",
-      "driftDown": "Down {{percent}}% vs configured price",
-      "detectedTitle": "Detected subscriptions",
-      "detectedSubtitle_one": "{{count}} repeat charge looks like a subscription you haven't logged.",
-      "detectedSubtitle_other": "{{count}} repeat charges look like subscriptions you haven't logged.",
-      "detectedOccurrences_one": "{{count}} charge",
-      "detectedOccurrences_other": "{{count}} charges",
-      "addAsRecurring": "Add",
-      "ignore": "Ignore",
-      "ignoreAria": "Ignore {{description}}"
     }
   },
-  "recap": {
-    "title": "Yesterday",
-    "dismissAria": "Dismiss recap for today",
-    "acrossN_one": "across {{count}} expense",
-    "acrossN_other": "across {{count}} expenses",
-    "uncategorised": "Uncategorised"
-  },
   "weeklyRecap": {
-    "title": "This week",
+    "title": "Last week",
     "dismissAria": "Dismiss weekly recap",
     "acrossN_one": "across {{count}} expense",
     "acrossN_other": "across {{count}} expenses",

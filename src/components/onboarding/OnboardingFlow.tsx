@@ -23,8 +23,8 @@ import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
 import { useAuth } from '@/hooks/useAuth';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useToast } from '@/hooks/useToast';
+import { ONBOARDED_KEY } from '@/lib/onboarding';
 
-const ONBOARDED_KEY = 'budgard_onboarded';
 const STEP_COUNT = 4;
 
 type PresetCategory = {
@@ -350,14 +350,4 @@ const renderCheckIcon = (isSelected: boolean) => {
   return <Check className="h-4 w-4 text-primary shrink-0" />;
 };
 
-export const shouldShowOnboarding = (
-  isInitialized: boolean,
-  expenseCount: number,
-  categoryCount: number,
-  monthlyBudget: number | null,
-): boolean => {
-  if (!isInitialized) return false;
-  if (localStorage.getItem(ONBOARDED_KEY) === 'true') return false;
-
-  return expenseCount === 0 && categoryCount === 0 && monthlyBudget === null;
-};
+export default OnboardingFlow;

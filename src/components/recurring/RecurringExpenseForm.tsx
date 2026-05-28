@@ -46,16 +46,8 @@ const frequencyValues = [
   'yearly',
 ] as const;
 
-export type RecurringExpensePrefill = {
-  description?: string;
-  amount?: number;
-  frequency?: RecurringExpense['frequency'];
-  category_id?: string | null;
-};
-
 type RecurringExpenseFormProps = {
   expense?: RecurringExpense;
-  prefill?: RecurringExpensePrefill;
   categories: Category[];
   investmentAccounts?: Account[];
   type?: 'expense' | 'income';
@@ -65,7 +57,6 @@ type RecurringExpenseFormProps = {
 
 const RecurringExpenseForm = ({
   expense,
-  prefill,
   categories,
   investmentAccounts = [],
   type = 'expense',
@@ -78,11 +69,10 @@ const RecurringExpenseForm = ({
   const form = useForm<RecurringExpenseFormData>({
     resolver: zodResolver(recurringExpenseSchema),
     defaultValues: {
-      amount: resolveAmountDefault(expense, prefill),
-      description: expense?.description ?? prefill?.description ?? '',
-      category_id:
-        expense?.category_id ?? prefill?.category_id ?? 'none',
-      frequency: expense?.frequency ?? prefill?.frequency ?? 'monthly',
+      amount: resolveAmountDefault(expense),
+      description: expense?.description ?? '',
+      category_id: expense?.category_id ?? 'none',
+      frequency: expense?.frequency ?? 'monthly',
       start_date: resolveStartDate(expense),
       end_date: expense?.end_date ? parseISO(expense.end_date) : undefined,
       linked_account_id: expense?.linked_account_id ?? null,
@@ -328,14 +318,9 @@ const getFormTitle = (
 
 const resolveAmountDefault = (
   expense: RecurringExpense | undefined,
-  prefill: RecurringExpensePrefill | undefined,
 ): string => {
   if (expense) {
     return formatCurrencyInput(expense.amount.toString().replace('.', ','));
-  }
-
-  if (prefill?.amount !== undefined) {
-    return formatCurrencyInput(prefill.amount.toString().replace('.', ','));
   }
 
   return '';

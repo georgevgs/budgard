@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import * as Sentry from '@sentry/react';
+import { browserTracingIntegration, init } from '@sentry/react';
 import { RootProvider } from '@/contexts/RootProvider';
 import App from '@/App';
 import { i18nReady } from './lib/i18n';
@@ -9,11 +9,11 @@ import './index.css';
 // Init with only the lightweight tracing integration on the critical path.
 // Session Replay (DOM observers, mutation buffering) and Profiling
 // (sampling worker) do non-trivial setup, so they're added after first
-// paint via requestIdleCallback below.
-Sentry.init({
+// paint via a dynamic import that puts them in their own chunk.
+init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
   enabled: import.meta.env.PROD && !!import.meta.env.VITE_SENTRY_DSN,
-  integrations: [Sentry.browserTracingIntegration()],
+  integrations: [browserTracingIntegration()],
   tracesSampleRate: 0.1,
   profileSessionSampleRate: 0.1,
   replaysSessionSampleRate: 0.1,
@@ -27,12 +27,6 @@ Sentry.init({
   ],
 });
 
-const initHeavySentryIntegrations = () => {
-  if (!import.meta.env.PROD || !import.meta.env.VITE_SENTRY_DSN) return;
-  Sentry.addIntegration(Sentry.replayIntegration());
-  Sentry.addIntegration(Sentry.browserProfilingIntegration());
-};
-
 const scheduleIdleWork = (cb: () => void) => {
   if ('requestIdleCallback' in window) {
     window.requestIdleCallback(cb, { timeout: 4000 });
@@ -42,7 +36,10 @@ const scheduleIdleWork = (cb: () => void) => {
   setTimeout(cb, 2000);
 };
 
-scheduleIdleWork(initHeavySentryIntegrations);
+scheduleIdleWork(() => {
+  if (!import.meta.env.PROD || !import.meta.env.VITE_SENTRY_DSN) return;
+  import('@/lib/sentryHeavy').then((m) => m.initHeavySentryIntegrations());
+});
 
 // Recover from stale SW cache causing chunk load failures (common on iOS PWA after
 // a deployment while the app was backgrounded — old JS tries to load old chunk hashes

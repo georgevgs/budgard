@@ -5,7 +5,6 @@ import Plus from 'lucide-react/dist/esm/icons/plus';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
 import {
   useDataConfig,
-  useExpensesData,
   useRecurringData,
   useCategoriesData,
   useAccountsData,
@@ -13,15 +12,9 @@ import {
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import type { RecurringExpense } from '@/types/RecurringExpense';
-import type { Expense } from '@/types/Expense';
 import type { RecurringExpenseFormData } from '@/lib/validations';
-import RecurringExpenseForm, {
-  type RecurringExpensePrefill,
-} from '@/components/recurring/RecurringExpenseForm';
+import RecurringExpenseForm from '@/components/recurring/RecurringExpenseForm';
 import RecurringExpenseCard from '@/components/recurring/RecurringExpenseCard';
-import SubscriptionAuditCard, {
-  type RecurringPrefill,
-} from '@/components/recurring/SubscriptionAuditCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRecurringExpenseOps } from '@/hooks/dataOps/useRecurringExpenseOps';
 import { useRecurringIncomeOps } from '@/hooks/dataOps/useRecurringIncomeOps';
@@ -38,12 +31,8 @@ const RecurringExpensesList = () => {
   const [selectedExpense, setSelectedExpense] = useState<
     RecurringExpense | undefined
   >(undefined);
-  const [prefill, setPrefill] = useState<RecurringExpensePrefill | undefined>(
-    undefined,
-  );
   const { recurringExpenses, recurringIncomes } = useRecurringData();
   const { expenseCategories, incomeCategories } = useCategoriesData();
-  const expenses = useExpensesData();
   const { accounts } = useAccountsData();
   const { defaultCurrency, isInitialized } = useDataConfig();
   const { session } = useAuth();
@@ -146,13 +135,6 @@ const RecurringExpensesList = () => {
   const handleFormClose = () => {
     setIsFormOpen(false);
     setSelectedExpense(undefined);
-    setPrefill(undefined);
-  };
-
-  const handleAddDetected = (next: RecurringPrefill) => {
-    setPrefill(next);
-    setSelectedExpense(undefined);
-    setIsFormOpen(true);
   };
 
   const activeItems = items.filter((e) => e.active);
@@ -220,8 +202,6 @@ const RecurringExpensesList = () => {
         </div>
       </div>
 
-      {renderAudit(mode, recurringExpenses, expenses, handleToggle, handleAddDetected)}
-
       <div className="grid gap-4">
         {renderExpensesList(
           items,
@@ -241,7 +221,6 @@ const RecurringExpensesList = () => {
         >
           <RecurringExpenseForm
             expense={selectedExpense}
-            prefill={prefill}
             categories={categories}
             investmentAccounts={investmentAccounts}
             type={mode}
@@ -262,25 +241,6 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
-
-const renderAudit = (
-  mode: RecurringMode,
-  recurringExpenses: RecurringExpense[],
-  expenses: Expense[],
-  onToggle: (id: string, active: boolean) => void,
-  onAddDetected: (prefill: RecurringPrefill) => void,
-) => {
-  if (mode !== 'expense') return null;
-
-  return (
-    <SubscriptionAuditCard
-      recurringExpenses={recurringExpenses}
-      expenses={expenses}
-      onToggle={onToggle}
-      onAddDetected={onAddDetected}
-    />
-  );
-};
 
 const renderModeTitle = (mode: RecurringMode, t: TranslateFunction): string => {
   if (mode === 'income') {

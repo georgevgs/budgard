@@ -102,6 +102,10 @@ export default defineConfig({
           // naturally keeps it out of the entry's modulepreload list.
           'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
           'date-vendor': ['date-fns', 'react-day-picker'],
+          // Supabase realtime client cannot be tree-shaken (statically imported
+          // by SupabaseClient), so isolate the whole package into its own
+          // chunk. Entry shrinks; supabase parses in parallel.
+          'supabase-vendor': ['@supabase/supabase-js'],
         },
       },
     },

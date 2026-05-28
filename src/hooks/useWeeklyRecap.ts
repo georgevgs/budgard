@@ -41,19 +41,24 @@ export type UseWeeklyRecapResult = {
   dismiss: () => void;
 };
 
+// Recap surfaces only on Mondays so the user reflects on the week that just
+// finished. Off-Monday days return null without computing the recap.
+const MONDAY = 1;
+
 export const useWeeklyRecap = (): UseWeeklyRecapResult => {
   const expenses = useExpensesData();
   const { expenseCategories } = useCategoriesData();
 
-  const recap = useMemo<WeeklyRecap | null>(
-    () =>
-      buildWeeklyRecap({
-        now: new Date(),
-        expenses,
-        categories: expenseCategories,
-      }),
-    [expenses, expenseCategories],
-  );
+  const recap = useMemo<WeeklyRecap | null>(() => {
+    const now = new Date();
+    if (now.getDay() !== MONDAY) return null;
+
+    return buildWeeklyRecap({
+      now,
+      expenses,
+      categories: expenseCategories,
+    });
+  }, [expenses, expenseCategories]);
 
   const dismissedValue = useSyncExternalStore(
     subscribeDismissed,

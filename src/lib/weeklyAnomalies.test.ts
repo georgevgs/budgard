@@ -4,7 +4,11 @@ import { buildWeeklyRecap } from './weeklyAnomalies';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
-const NOW = new Date('2026-05-17T12:00:00Z');
+// NOW is a Monday so the recap window is the just-completed Mon–Sun
+// (2026-05-11 through 2026-05-17). IN_WINDOW lands on the Sunday inside that
+// window so fixtures can place "this week" expenses unambiguously.
+const NOW = new Date('2026-05-18T12:00:00Z');
+const IN_WINDOW = subDays(NOW, 1);
 
 const category = (id: string, name: string): Category => ({
   id,
@@ -20,19 +24,21 @@ const expense = (overrides: Partial<Expense>): Expense => ({
   id: overrides.id ?? `e-${Math.random()}`,
   amount: overrides.amount ?? 10,
   description: 'Test',
-  date: overrides.date ?? format(NOW, 'yyyy-MM-dd'),
+  date: overrides.date ?? format(IN_WINDOW, 'yyyy-MM-dd'),
   user_id: 'u1',
   created_at: '2026-05-17T00:00:00Z',
   ...overrides,
 });
 
-// Build N evenly spaced baseline expenses across the 90-day window.
+// Build N evenly spaced baseline expenses across the 90-day window preceding
+// the recap window.
 const baselineSeries = (
   categoryId: string,
   amountEach: number,
   count: number,
 ): Expense[] => {
-  // Start 8 days ago (just outside the current week) and walk further back.
+  // Start one day before the recap window (i.e. the Sunday before last) and
+  // walk further back through the baseline.
   const start = subDays(NOW, 8);
   const step = Math.max(1, Math.floor(85 / count));
 
@@ -64,7 +70,7 @@ describe('buildWeeklyRecap', () => {
         expense({
           amount: 80,
           category_id: 'cat-groc',
-          date: format(NOW, 'yyyy-MM-dd'),
+          date: format(IN_WINDOW, 'yyyy-MM-dd'),
         }),
       ],
       categories: [category('cat-groc', 'Groceries')],
@@ -86,7 +92,7 @@ describe('buildWeeklyRecap', () => {
         expense({
           amount: 20,
           category_id: 'cat-eat',
-          date: format(NOW, 'yyyy-MM-dd'),
+          date: format(IN_WINDOW, 'yyyy-MM-dd'),
         }),
       ],
       categories: [category('cat-eat', 'Eating out')],
@@ -116,7 +122,7 @@ describe('buildWeeklyRecap', () => {
         expense({
           amount: 100,
           category_id: 'cat-rare',
-          date: format(NOW, 'yyyy-MM-dd'),
+          date: format(IN_WINDOW, 'yyyy-MM-dd'),
         }),
       ],
       categories: [category('cat-rare', 'Rare')],
@@ -133,7 +139,7 @@ describe('buildWeeklyRecap', () => {
         expense({
           amount: 500,
           category_id: 'cat-x',
-          date: format(NOW, 'yyyy-MM-dd'),
+          date: format(IN_WINDOW, 'yyyy-MM-dd'),
           type: 'debt_payment',
         }),
       ],
@@ -147,7 +153,7 @@ describe('buildWeeklyRecap', () => {
     const recap = buildWeeklyRecap({
       now: NOW,
       expenses: [
-        expense({ amount: 12, date: format(NOW, 'yyyy-MM-dd') }),
+        expense({ amount: 12, date: format(IN_WINDOW, 'yyyy-MM-dd') }),
         expense({ amount: 18, date: format(subDays(NOW, 3), 'yyyy-MM-dd') }),
         expense({ amount: 999, date: format(subDays(NOW, 8), 'yyyy-MM-dd') }),
       ],
@@ -167,7 +173,7 @@ describe('buildWeeklyRecap', () => {
         expense({
           amount: 80,
           category_id: c.id,
-          date: format(NOW, 'yyyy-MM-dd'),
+          date: format(IN_WINDOW, 'yyyy-MM-dd'),
         }),
       );
     }
@@ -186,14 +192,14 @@ describe('buildWeeklyRecap', () => {
         expense({
           amount: 30,
           category_id: 'cat-up',
-          date: format(NOW, 'yyyy-MM-dd'),
+          date: format(IN_WINDOW, 'yyyy-MM-dd'),
         }),
         // Down: well below normal
         ...baselineSeries('cat-down', 50, 24),
         expense({
           amount: 5,
           category_id: 'cat-down',
-          date: format(NOW, 'yyyy-MM-dd'),
+          date: format(IN_WINDOW, 'yyyy-MM-dd'),
         }),
       ],
       categories: [
