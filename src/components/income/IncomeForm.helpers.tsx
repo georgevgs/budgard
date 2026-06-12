@@ -1,4 +1,4 @@
-import { format, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
 import {
@@ -48,18 +48,6 @@ export const getInitialDate = (income: Expense | undefined): Date => {
   if (income) return parseISO(income.date);
 
   return new Date();
-};
-
-export const formatWatchedDate = (watchedDate: Date | undefined): string => {
-  if (!watchedDate) return '';
-
-  return format(watchedDate, 'yyyy-MM-dd');
-};
-
-export const normalizeCategoryId = (categoryId: string): string | null => {
-  if (categoryId === 'none') return null;
-
-  return categoryId;
 };
 
 export const getQuickCreateLabel = (

@@ -1,134 +1,40 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Search from 'lucide-react/dist/esm/icons/search';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useAuth } from '@/hooks/useAuth';
-import {
-  useDataConfig,
-  useExpensesData,
-  useIncomesData,
-  useCategoriesData,
-} from '@/contexts/DataContext';
+import { useDataConfig } from '@/contexts/DataContext';
 import { useIncomeOps } from '@/hooks/dataOps/useIncomeOps';
-import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
+import { useSeedIncomeCategories } from '@/hooks/incomeList/useSeedIncomeCategories';
+import { useMonthlyIncomes } from '@/hooks/incomeList/useMonthlyIncomes';
+import { useIncomeFormState } from '@/hooks/incomeList/useIncomeFormState';
 import { formatCurrency } from '@/lib/utils';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import ExpensesMonthlySelector from '@/components/expenses/ExpensesMonthlySelector';
-import IncomeForm from '@/components/income/IncomeForm';
 import IncomeCard from '@/components/income/IncomeCard';
 import IncomeEmpty from '@/components/income/IncomeEmpty';
+import IncomeFormDialog from '@/components/income/IncomeFormDialog';
 import NetCashFlowCard from '@/components/income/NetCashFlowCard';
 import FiftyThirtyTwentyRing from '@/components/income/FiftyThirtyTwentyRing';
 import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
 import type { Expense } from '@/types/Expense';
 
-const DEFAULT_INCOME_CATEGORIES: Array<{
-  nameKey: string;
-  color: string;
-  icon: string;
-}> = [
-  { nameKey: 'income.defaults.salary', color: '#10b981', icon: '💼' },
-  { nameKey: 'income.defaults.freelance', color: '#22c55e', icon: '💻' },
-  { nameKey: 'income.defaults.refund', color: '#06b6d4', icon: '↩️' },
-  { nameKey: 'income.defaults.gift', color: '#a855f7', icon: '🎁' },
-  { nameKey: 'income.defaults.investment', color: '#3b82f6', icon: '📈' },
-];
-
 const IncomeList = () => {
   const { t } = useTranslation();
-  const { session } = useAuth();
-  const incomes = useIncomesData();
-  const expenses = useExpensesData();
-  const { incomeCategories } = useCategoriesData();
   const { isInitialized, defaultCurrency } = useDataConfig();
   const { handleIncomeDelete } = useIncomeOps();
-  const { handleCategoriesAddBulk } = useCategoryOps();
   const currentMonth = format(new Date(), 'yyyy-MM');
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [search, setSearch] = useState('');
-  const [selectedIncome, setSelectedIncome] = useState<Expense | undefined>();
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const seededRef = useRef(false);
+  const formState = useIncomeFormState();
 
-  // Seed default income categories once when none exist
-  useEffect(() => {
-    if (!isInitialized) return;
-    if (seededRef.current) return;
-    if (!session?.user?.id) return;
-    if (incomeCategories.length > 0) return;
+  useSeedIncomeCategories();
 
-    seededRef.current = true;
-    const userId = session.user.id;
-    const seedData = DEFAULT_INCOME_CATEGORIES.map((c) => ({
-      name: t(c.nameKey),
-      color: c.color,
-      icon: c.icon,
-      user_id: userId,
-      type: 'income' as const,
-      kind: 'income' as const,
-    }));
-
-    handleCategoriesAddBulk(seedData).catch(() => {
-      seededRef.current = false;
-    });
-  }, [
-    isInitialized,
-    incomeCategories.length,
-    session?.user?.id,
-    handleCategoriesAddBulk,
-    t,
-  ]);
-
-  const monthlyIncomes = useMemo(() => {
-    return incomes.filter(
-      (income) => format(parseISO(income.date), 'yyyy-MM') === selectedMonth,
-    );
-  }, [incomes, selectedMonth]);
-
-  const filteredIncomes = useMemo(() => {
-    if (!search.trim()) return monthlyIncomes;
-    const lower = search.toLowerCase();
-
-    return monthlyIncomes.filter((i) => {
-      return (
-        i.description.toLowerCase().includes(lower) ||
-        (i.category?.name.toLowerCase().includes(lower) ?? false)
-      );
-    });
-  }, [monthlyIncomes, search]);
-
-  const monthlyTotal = useMemo(
-    () => monthlyIncomes.reduce((sum, i) => sum + i.amount, 0),
-    [monthlyIncomes],
-  );
-
-  const monthlyExpenseTotal = useMemo(() => {
-    return expenses
-      .filter((e) => format(parseISO(e.date), 'yyyy-MM') === selectedMonth)
-      .reduce((sum, e) => sum + e.amount, 0);
-  }, [expenses, selectedMonth]);
-
+  const { monthlyIncomes, filteredIncomes, monthlyTotal, monthlyExpenseTotal } =
+    useMonthlyIncomes(selectedMonth, search);
   const animatedTotal = useAnimatedNumber(monthlyTotal);
-
-  const handleIncomeEdit = useCallback((income: Expense) => {
-    if (income.id.startsWith('temp-')) return;
-    setSelectedIncome(income);
-    setIsFormOpen(true);
-  }, []);
-
-  const handleAddClick = useCallback(() => {
-    setSelectedIncome(undefined);
-    setIsFormOpen(true);
-  }, []);
-
-  const handleFormClose = useCallback(() => {
-    setIsFormOpen(false);
-    setSelectedIncome(undefined);
-  }, []);
 
   if (!isInitialized) {
     return <ExpenseLoadingState />;
@@ -143,17 +49,12 @@ const IncomeList = () => {
             onMonthChange={setSelectedMonth}
           />
 
-          <div className="flex flex-col gap-4 bg-card border border-border/40 rounded-2xl p-5 shadow-sm">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                {t('income.monthlyTotal')}
-              </p>
-              <p className="text-3xl font-bold tracking-tight tabular-nums text-income">
-                +{formatCurrency(animatedTotal, defaultCurrency)}
-              </p>
-              {renderIncomeCount(monthlyIncomes.length, t)}
-            </div>
-          </div>
+          {renderMonthlyTotalCard(
+            animatedTotal,
+            defaultCurrency,
+            monthlyIncomes.length,
+            t,
+          )}
 
           <NetCashFlowCard
             selectedMonth={selectedMonth}
@@ -180,33 +81,25 @@ const IncomeList = () => {
             monthlyIncomes,
             search,
             selectedMonth,
-            handleAddClick,
-            handleIncomeEdit,
+            formState.handleAddClick,
+            formState.handleIncomeEdit,
             handleIncomeDelete,
             t,
           )}
         </div>
       </div>
 
-      <Dialog open={isFormOpen} onOpenChange={handleFormClose}>
-        <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
-          aria-describedby="income-form-description"
-          onOpenChange={handleFormClose}
-          onFocusOutside={(e) => e.preventDefault()}
-        >
-          <div id="income-form-description" className="sr-only">
-            {t('income.formDescription')}
-          </div>
-          <IncomeForm income={selectedIncome} onClose={handleFormClose} />
-        </DialogContent>
-      </Dialog>
+      <IncomeFormDialog
+        open={formState.isFormOpen}
+        income={formState.selectedIncome}
+        onClose={formState.handleFormClose}
+      />
 
       {/* FAB */}
       <div className="fixed bottom-24 right-4 z-50 pb-safe-b">
         <Button
           size="icon"
-          onClick={handleAddClick}
+          onClick={formState.handleAddClick}
           className="h-14 w-14 rounded-full shadow-lg shadow-income/30 bg-income text-income-foreground hover:bg-income/90"
           aria-label={t('income.addIncome')}
         >
@@ -225,6 +118,27 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const renderMonthlyTotalCard = (
+  animatedTotal: number,
+  defaultCurrency: string,
+  incomeCount: number,
+  t: TranslateFunction,
+) => {
+  return (
+    <div className="flex flex-col gap-4 bg-card border border-border/40 rounded-2xl p-5 shadow-sm">
+      <div>
+        <p className="text-sm font-medium text-muted-foreground">
+          {t('income.monthlyTotal')}
+        </p>
+        <p className="text-3xl font-bold tracking-tight tabular-nums text-income">
+          +{formatCurrency(animatedTotal, defaultCurrency)}
+        </p>
+        {renderIncomeCount(incomeCount, t)}
+      </div>
+    </div>
+  );
+};
 
 const renderIncomeCount = (count: number, t: TranslateFunction) => {
   if (count === 0) return null;

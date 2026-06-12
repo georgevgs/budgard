@@ -1,4 +1,3 @@
-import { useState, useMemo, useTransition } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,48 +9,24 @@ import {
   DialogHeader,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { CurrencyInput } from '@/components/ui/currency-input';
-import { DatePickerField } from '@/components/ui/date-picker-field';
 import { CategoryManager } from '@/components/categories/CategoryManager';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { format } from 'date-fns';
-import { cn, parseCurrencyInput } from '@/lib/utils';
-import { SUPPORTED_CURRENCIES } from '@/lib/currencies';
-import { useAuth } from '@/hooks/useAuth';
+import { Form } from '@/components/ui/form';
 import { useDateLocale } from '@/hooks/useDateLocale';
-import { useExchangeRate } from '@/hooks/useExchangeRate';
-import { useCategoriesData, useDataConfig } from '@/contexts/DataContext';
-import { useIncomeOps } from '@/hooks/dataOps/useIncomeOps';
-import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
+import { useDataConfig } from '@/contexts/DataContext';
+import { useIncomeCurrencyConversion } from '@/hooks/incomeForm/useIncomeCurrencyConversion';
+import { useIncomeCategoryPicker } from '@/hooks/incomeForm/useIncomeCategoryPicker';
+import { useIncomeSubmit } from '@/hooks/incomeForm/useIncomeSubmit';
 import { incomeSchema, type IncomeFormData } from '@/lib/validations';
 import type { Expense } from '@/types/Expense';
+import IncomeAmountField from '@/components/income/IncomeAmountField';
+import IncomeDescriptionField from '@/components/income/IncomeDescriptionField';
+import IncomeCategoryField from '@/components/income/IncomeCategoryField';
+import IncomeDateField from '@/components/income/IncomeDateField';
 import {
-  INCOME_COLORS,
   getInitialAmount,
   getInitialDate,
-  formatWatchedDate,
-  normalizeCategoryId,
   renderFormTitle,
   renderSaveButtonLabel,
-  renderConversionPreview,
-  renderCategoryButtonContent,
-  renderCategoryDot,
-  renderBottomAction,
 } from '@/components/income/IncomeForm.helpers';
 
 type IncomeFormProps = {
@@ -61,146 +36,26 @@ type IncomeFormProps = {
 
 const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
   const { t } = useTranslation();
-  const { session } = useAuth();
-  const { incomeCategories } = useCategoriesData();
   const { defaultCurrency } = useDataConfig();
-  const { handleIncomeSubmit } = useIncomeOps();
-  const { handleCategoryAdd } = useCategoryOps();
   const dateLocale = useDateLocale();
-  const [categoryPopoverOpen, setCategoryPopoverOpen] = useState(false);
-  const [categorySearch, setCategorySearch] = useState('');
-  const [isCreatingCategory, startCategoryCreation] = useTransition();
-  const [isManagerOpen, setIsManagerOpen] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState(
-    income?.original_currency ?? defaultCurrency,
-  );
-  const [submitRateError, setSubmitRateError] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const initialAmount = getInitialAmount(income, defaultCurrency);
 
   const form = useForm<IncomeFormData>({
     resolver: zodResolver(incomeSchema),
     defaultValues: {
-      amount: initialAmount,
+      amount: getInitialAmount(income, defaultCurrency),
       description: income?.description || '',
       category_id: income?.category_id || 'none',
       date: getInitialDate(income),
     },
   });
 
-  const watchedAmount = form.watch('amount');
-  const watchedDate = form.watch('date');
-  const watchedDateStr = formatWatchedDate(watchedDate);
-  const selectedCategoryId = form.watch('category_id');
-  const selectedCategory = incomeCategories.find(
-    (c) => c.id === selectedCategoryId,
-  );
-
-  const filteredCategories = useMemo(() => {
-    if (!categorySearch) return incomeCategories;
-    const lower = categorySearch.toLowerCase();
-
-    return incomeCategories.filter((c) => c.name.toLowerCase().includes(lower));
-  }, [incomeCategories, categorySearch]);
-
-  const trimmedSearch = categorySearch.trim();
-  const hasExactMatch = incomeCategories.some(
-    (c) => c.name.toLowerCase() === trimmedSearch.toLowerCase(),
-  );
-  // When the user is typing a unique new name, the bottom row becomes a quick
-  // "+ Create" action. Otherwise it's "Manage sources" (combined add + edit + delete).
-  const showCreateOption = trimmedSearch.length > 0 && !hasExactMatch;
-
-  const handleOpenManager = () => {
-    setCategoryPopoverOpen(false);
-    setIsManagerOpen(true);
-  };
-
-  const {
-    rate: exchangeRate,
-    isFetching: isFetchingRate,
-    error: fetchRateError,
-    ensureRate,
-  } = useExchangeRate(selectedCurrency, watchedDateStr, defaultCurrency);
-  const rateError = fetchRateError || submitRateError;
-
-  const previewConvertedAmount = useMemo(() => {
-    if (selectedCurrency === defaultCurrency || !exchangeRate) return null;
-    const raw = parseCurrencyInput(watchedAmount);
-    if (!raw) return null;
-
-    return Math.round(raw * exchangeRate * 100) / 100;
-  }, [exchangeRate, selectedCurrency, watchedAmount, defaultCurrency]);
-
-  const handleCategorySelect = (id: string) => {
-    form.setValue('category_id', id);
-    setCategoryPopoverOpen(false);
-    setCategorySearch('');
-  };
-
-  const handleCategoryCreateInline = () => {
-    if (!categorySearch.trim() || isCreatingCategory) return;
-    if (!session?.user?.id) return;
-
-    const userId = session.user.id;
-    startCategoryCreation(async () => {
-      try {
-        await handleCategoryAdd({
-          name: categorySearch.trim(),
-          color: INCOME_COLORS[incomeCategories.length % INCOME_COLORS.length],
-          icon: null,
-          user_id: userId,
-          type: 'income',
-          kind: 'income',
-        });
-        setCategoryPopoverOpen(false);
-        setCategorySearch('');
-      } catch {
-        // toast already shown
-      }
-    });
-  };
-
-  const handleSubmit = async (values: IncomeFormData) => {
-    if (!session?.user?.id) return;
-
-    setIsSubmitting(true);
-    try {
-      const rawAmount = parseCurrencyInput(values.amount);
-      const dateStr = format(values.date, 'yyyy-MM-dd');
-      let finalAmount = rawAmount;
-      let originalAmount: number | null = null;
-      let originalCurrency: string | null = null;
-      let exchangeRateValue: number | null = null;
-
-      if (selectedCurrency !== defaultCurrency) {
-        const rate = await ensureRate();
-        finalAmount = Math.round(rawAmount * rate * 100) / 100;
-        originalAmount = rawAmount;
-        originalCurrency = selectedCurrency;
-        exchangeRateValue = rate;
-      }
-
-      const payload: Partial<Expense> = {
-        amount: finalAmount,
-        original_amount: originalAmount,
-        original_currency: originalCurrency,
-        exchange_rate: exchangeRateValue,
-        description: values.description,
-        category_id: normalizeCategoryId(values.category_id),
-        date: dateStr,
-        user_id: session.user.id,
-      };
-
-      const saved = await handleIncomeSubmit(payload, income?.id);
-      onClose(saved ?? undefined);
-    } catch {
-      setSubmitRateError(true);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const conversion = useIncomeCurrencyConversion(form, income);
+  const picker = useIncomeCategoryPicker(form);
+  const { isSubmitting, handleSubmit } = useIncomeSubmit({
+    income,
+    conversion,
+    onClose,
+  });
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
@@ -225,181 +80,10 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
             onSubmit={form.handleSubmit((v) => handleSubmit(v))}
             className="space-y-4 pb-4"
           >
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex gap-2">
-                    <Select
-                      value={selectedCurrency}
-                      onValueChange={setSelectedCurrency}
-                    >
-                      <SelectTrigger
-                        className="w-20 shrink-0"
-                        aria-label={t('expenses.currency.label')}
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-60">
-                        {SUPPORTED_CURRENCIES.map((c) => (
-                          <SelectItem key={c.code} value={c.code}>
-                            {c.code}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormControl>
-                      <CurrencyInput
-                        currency={selectedCurrency}
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder={t('expenses.amountPlaceholder')}
-                        aria-label={t('income.amountLabel')}
-                        wrapperClassName="flex-1"
-                      />
-                    </FormControl>
-                  </div>
-                  {renderConversionPreview(
-                    isFetchingRate,
-                    rateError,
-                    previewConvertedAmount,
-                    selectedCurrency,
-                    defaultCurrency,
-                    t,
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      placeholder={t('income.descriptionPlaceholder')}
-                      {...field}
-                      autoComplete="off"
-                      aria-label={t('income.descriptionLabel')}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="category_id"
-              render={() => (
-                <FormItem>
-                  <Popover
-                    open={categoryPopoverOpen}
-                    onOpenChange={setCategoryPopoverOpen}
-                    modal={false}
-                  >
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className={cn(
-                            'w-full justify-between font-normal',
-                            !selectedCategory && 'text-muted-foreground',
-                          )}
-                        >
-                          {renderCategoryButtonContent(selectedCategory, t)}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[var(--radix-popover-trigger-width)] p-0 flex flex-col"
-                      align="start"
-                      style={{
-                        maxHeight:
-                          'min(360px, var(--radix-popover-content-available-height))',
-                      }}
-                    >
-                      <div className="p-2 shrink-0">
-                        <Input
-                          placeholder={t('income.searchOrCreateCategory')}
-                          value={categorySearch}
-                          onChange={(e) => setCategorySearch(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              if (
-                                filteredCategories.length === 1 &&
-                                !showCreateOption
-                              ) {
-                                handleCategorySelect(filteredCategories[0].id);
-                              } else if (showCreateOption) {
-                                handleCategoryCreateInline();
-                              }
-                            }
-                          }}
-                          autoFocus
-                        />
-                      </div>
-                      <div
-                        className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
-                        style={{ touchAction: 'pan-y' }}
-                      >
-                        <button
-                          type="button"
-                          className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent focus-visible:outline-none focus-visible:bg-accent text-left text-muted-foreground"
-                          onClick={() => handleCategorySelect('none')}
-                        >
-                          {t('income.noCategory')}
-                        </button>
-                        {filteredCategories.map((category) => (
-                          <button
-                            key={category.id}
-                            type="button"
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent focus-visible:outline-none focus-visible:bg-accent text-left"
-                            onClick={() => handleCategorySelect(category.id)}
-                          >
-                            {renderCategoryDot(category)}
-                            {category.name}
-                          </button>
-                        ))}
-                      </div>
-                      {/* Sticky footer — always visible regardless of list scroll */}
-                      <div className="shrink-0">
-                        {renderBottomAction(
-                          showCreateOption,
-                          isCreatingCategory,
-                          trimmedSearch,
-                          handleCategoryCreateInline,
-                          handleOpenManager,
-                          t,
-                        )}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <DatePickerField
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder={t('expenses.pickDate')}
-                    locale={dateLocale}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <IncomeAmountField form={form} conversion={conversion} />
+            <IncomeDescriptionField form={form} />
+            <IncomeCategoryField form={form} picker={picker} />
+            <IncomeDateField form={form} dateLocale={dateLocale} />
 
             <div className="flex gap-3 justify-end pt-2 pb-2">
               <Button type="button" variant="outline" onClick={() => onClose()}>
@@ -419,12 +103,12 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
 
       {/* Nested manager dialog — single entry point for add + edit + delete */}
       <Dialog
-        open={isManagerOpen}
-        onOpenChange={(open) => setIsManagerOpen(open)}
+        open={picker.isManagerOpen}
+        onOpenChange={(open) => picker.setIsManagerOpen(open)}
       >
         <DialogContent
           className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden flex flex-col max-h-[85dvh]"
-          onOpenChange={(open: boolean) => setIsManagerOpen(open)}
+          onOpenChange={(open: boolean) => picker.setIsManagerOpen(open)}
         >
           <CategoryManager categoryType="income" />
         </DialogContent>

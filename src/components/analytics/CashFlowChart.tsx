@@ -61,46 +61,9 @@ const CashFlowChart = ({ data, currencySymbol, currency }: Props) => {
           <ReferenceLine y={0} stroke="currentColor" strokeOpacity={0.3} />
           <Tooltip
             cursor={{ fill: 'rgba(0,0,0,0.04)' }}
-            content={({ active, payload }) => {
-              if (!active || !payload || payload.length === 0) return null;
-              const point = payload[0].payload as ChartPoint;
-
-              return (
-                <div className="rounded-xl bg-popover border border-border/40 shadow-md p-3 text-xs space-y-1.5">
-                  <p className="font-medium text-foreground">
-                    {point.fullMonth}
-                  </p>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-income">{t('income.title')}</span>
-                    <span className="tabular-nums">
-                      +{formatCurrency(point.income, currency)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-destructive">
-                      {t('expenses.title')}
-                    </span>
-                    <span className="tabular-nums">
-                      -{formatCurrency(Math.abs(point.expense), currency)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between gap-3 border-t border-border/40 pt-1.5 mt-1.5">
-                    <span className="font-medium">
-                      {t('income.netCashFlow')}
-                    </span>
-                    <span
-                      className={cn(
-                        'tabular-nums font-semibold',
-                        getNetClass(point.net),
-                      )}
-                    >
-                      {renderNetSign(point.net)}
-                      {formatCurrency(point.net, currency)}
-                    </span>
-                  </div>
-                </div>
-              );
-            }}
+            content={({ active, payload }) =>
+              renderTooltipContent(active, payload, currency, t)
+            }
           />
           <Legend
             wrapperStyle={{ fontSize: 11, paddingTop: 4 }}
@@ -138,6 +101,47 @@ const CashFlowChart = ({ data, currencySymbol, currency }: Props) => {
 export default memo(CashFlowChart);
 
 // --- Helpers ---
+
+type TooltipPayload = Array<{ payload: ChartPoint }> | undefined;
+
+type TranslateFunction = (key: string) => string;
+
+const renderTooltipContent = (
+  active: boolean | undefined,
+  payload: TooltipPayload,
+  currency: string,
+  t: TranslateFunction,
+) => {
+  if (!active || !payload || payload.length === 0) return null;
+  const point = payload[0].payload;
+
+  return (
+    <div className="rounded-xl bg-popover border border-border/40 shadow-md p-3 text-xs space-y-1.5">
+      <p className="font-medium text-foreground">{point.fullMonth}</p>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-income">{t('income.title')}</span>
+        <span className="tabular-nums">
+          +{formatCurrency(point.income, currency)}
+        </span>
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-destructive">{t('expenses.title')}</span>
+        <span className="tabular-nums">
+          -{formatCurrency(Math.abs(point.expense), currency)}
+        </span>
+      </div>
+      <div className="flex items-center justify-between gap-3 border-t border-border/40 pt-1.5 mt-1.5">
+        <span className="font-medium">{t('income.netCashFlow')}</span>
+        <span
+          className={cn('tabular-nums font-semibold', getNetClass(point.net))}
+        >
+          {renderNetSign(point.net)}
+          {formatCurrency(point.net, currency)}
+        </span>
+      </div>
+    </div>
+  );
+};
 
 const getNetClass = (net: number): string => {
   if (net >= 0) {
