@@ -13,6 +13,7 @@ vi.mock('@/lib/supabase', () => ({
       onAuthStateChange: vi.fn(
         (cb: (event: string, session: unknown) => void) => {
           authChangeCallback = cb;
+
           return { data: { subscription: { unsubscribe: vi.fn() } } };
         },
       ),
@@ -32,21 +33,21 @@ describe('authStore', () => {
   });
 
   it('exports subscribe and getSnapshot', async () => {
-    const { authStore } = await import('./authStore');
+    const { authStore } = await import('@/lib/authStore');
     expect(typeof authStore.subscribe).toBe('function');
     expect(typeof authStore.getSnapshot).toBe('function');
     expect(typeof authStore.getServerSnapshot).toBe('function');
   });
 
   it('getServerSnapshot returns null session with loading true', async () => {
-    const { authStore } = await import('./authStore');
+    const { authStore } = await import('@/lib/authStore');
     const snapshot = authStore.getServerSnapshot();
     expect(snapshot.session).toBeNull();
     expect(snapshot.isLoading).toBe(true);
   });
 
   it('subscribe returns an unsubscribe function', async () => {
-    const { authStore } = await import('./authStore');
+    const { authStore } = await import('@/lib/authStore');
     const listener = vi.fn();
     const unsubscribe = authStore.subscribe(listener);
     expect(typeof unsubscribe).toBe('function');
@@ -54,7 +55,7 @@ describe('authStore', () => {
   });
 
   it('notifies listeners when session changes via auth state change', async () => {
-    const { authStore } = await import('./authStore');
+    const { authStore } = await import('@/lib/authStore');
     const listener = vi.fn();
     authStore.subscribe(listener);
 
@@ -82,7 +83,7 @@ describe('authStore', () => {
     authChangeCallback?.('SIGNED_OUT', null);
 
     // Should NOT immediately sign out — starts recovery timer
-    const { authStore } = await import('./authStore');
+    const { authStore } = await import('@/lib/authStore');
     // Snapshot should still have the previous session (held during recovery)
     const snap = authStore.getSnapshot();
     expect(snap.session).toBeTruthy();
@@ -122,7 +123,7 @@ describe('authStore', () => {
       error: { message: 'expired' },
     });
 
-    const { authStore } = await import('./authStore');
+    const { authStore } = await import('@/lib/authStore');
     await vi.advanceTimersByTimeAsync(2000);
 
     // After failed recovery, session should be null
@@ -130,7 +131,7 @@ describe('authStore', () => {
   });
 
   it('markIntentionalSignOut prevents recovery attempt', async () => {
-    const { markIntentionalSignOut, authStore } = await import('./authStore');
+    const { markIntentionalSignOut, authStore } = await import('@/lib/authStore');
 
     const session = {
       user: { id: 'u1' },

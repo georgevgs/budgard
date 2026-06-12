@@ -52,7 +52,7 @@ import {
   renderCategoryButtonContent,
   renderCategoryDot,
   renderBottomAction,
-} from './IncomeForm.helpers';
+} from '@/components/income/IncomeForm.helpers';
 
 type IncomeFormProps = {
   income?: Expense;

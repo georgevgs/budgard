@@ -24,7 +24,7 @@ describe('fetchExchangeRate', () => {
 
   beforeEach(async () => {
     vi.resetModules();
-    ({ fetchExchangeRate } = await import('./exchangeRateService'));
+    ({ fetchExchangeRate } = await import('@/services/exchangeRateService'));
   });
 
   afterEach(() => {

@@ -30,12 +30,12 @@ import type {
   CategoriesSlice,
   RecurringSlice,
   AccountsSlice,
-} from './DataContext.types';
+} from '@/contexts/DataContext.types';
 import {
   mergeUniqueById,
   isAbortError,
   isExpiredJwtError,
-} from './DataContext.helpers';
+} from '@/contexts/DataContext.helpers';
 
 const DataContext = createContext<DataContextType | null>(null);
 const DataActionsContext = createContext<DataActions | null>(null);
@@ -250,6 +250,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       // the visibilitychange listener retries when the app comes to foreground.
       if (isAbortError(error)) {
         wasAbortedRef.current = true;
+
         return;
       }
       // JWT expiry self-heals via supabase-js refresh + the visibilitychange
@@ -322,6 +323,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
     if (session?.user?.id && !isInitialized) {
       fetchData();
+
       return;
     }
 
@@ -362,6 +364,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         abortControllerRef.current?.abort();
+
         return;
       }
 
@@ -379,6 +382,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };

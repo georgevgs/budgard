@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import BudgetCategorySection, {
   type BudgetCategoryRow,
-} from './BudgetCategorySection';
+} from '@/components/budget/BudgetCategorySection';
 
 const row = (overrides: Partial<BudgetCategoryRow> = {}): BudgetCategoryRow => ({
   id: 'c1',

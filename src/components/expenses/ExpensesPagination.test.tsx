@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import ExpensesPagination from './ExpensesPagination';
+import ExpensesPagination from '@/components/expenses/ExpensesPagination';
 import type { Expense } from '@/types/Expense';
 
 vi.mock('@/components/expenses/ExpensesCard', () => ({

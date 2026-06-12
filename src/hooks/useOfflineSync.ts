@@ -57,6 +57,7 @@ export const useOfflineSync = (): void => {
             tags: { operation: 'offlineSync', mutationType: mutation.type },
           });
         }
+
         return false;
       }
     },

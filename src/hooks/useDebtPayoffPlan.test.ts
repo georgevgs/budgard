@@ -3,7 +3,7 @@ import { renderHook } from '@testing-library/react';
 import {
   useDebtPayoffPlan,
   useDebtSimulation,
-} from './useDebtPayoffPlan';
+} from '@/hooks/useDebtPayoffPlan';
 import type { Debt } from '@/types/Debt';
 
 const makeDebt = (overrides: Partial<Debt> = {}): Debt => ({

@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { browserTracingIntegration, init } from '@sentry/react';
 import { RootProvider } from '@/contexts/RootProvider';
 import App from '@/App';
-import { i18nReady } from './lib/i18n';
+import { i18nReady } from '@/lib/i18n';
 import './index.css';
 
 // Init with only the lightweight tracing integration on the critical path.

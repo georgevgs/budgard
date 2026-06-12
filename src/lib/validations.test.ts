@@ -9,7 +9,7 @@ import {
   categoryBudgetSchema,
   RECEIPT_ALLOWED_TYPES,
   RECEIPT_MAX_FILE_SIZE,
-} from './validations';
+} from '@/lib/validations';
 
 describe('emailSchema', () => {
   it('accepts a valid email', () => {

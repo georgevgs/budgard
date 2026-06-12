@@ -69,6 +69,7 @@ supabase.auth.onAuthStateChange((event, session) => {
   if (session) {
     _lastKnownSession = session;
     notify({ session, isLoading: false });
+
     return;
   }
 
@@ -120,6 +121,7 @@ supabase.auth.onAuthStateChange((event, session) => {
 export const authStore = {
   subscribe(listener: () => void) {
     listeners.add(listener);
+
     return () => {
       listeners.delete(listener);
     };

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { OnboardingFlow } from './OnboardingFlow';
+import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
 import { shouldShowOnboarding } from '@/lib/onboarding';
 
 // Mock useAuth

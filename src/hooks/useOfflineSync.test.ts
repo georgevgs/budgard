@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useOfflineSync } from './useOfflineSync';
+import { useOfflineSync } from '@/hooks/useOfflineSync';
 
 // Mock dependencies
 const mockRefreshExpenses = vi.fn().mockResolvedValue(undefined);

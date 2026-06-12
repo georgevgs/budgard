@@ -5,7 +5,7 @@ vi.mock('@/lib/haptics', () => ({
   haptics: { light: vi.fn() },
 }));
 
-import SpeedDial from './SpeedDial';
+import SpeedDial from '@/components/layout/SpeedDial';
 
 const renderDial = (overrides: Partial<{ onAddExpense: () => void; onAddCategory: () => void }> = {}) => {
   const onAddExpense = overrides.onAddExpense ?? vi.fn();

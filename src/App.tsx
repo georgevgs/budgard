@@ -310,6 +310,7 @@ const OfflineBanner = () => {
     if (isOnline && wentOffline.current) {
       setShowBackOnline(true);
       const t = setTimeout(() => setShowBackOnline(false), 2500);
+
       return () => clearTimeout(t);
     }
   }, [isOnline]);

@@ -82,6 +82,7 @@ export const useNetWorth = () => {
       setRates(new Map());
       setFailedKeys(new Set());
       setIsComputing(false);
+
       return;
     }
 
@@ -98,11 +99,13 @@ export const useNetWorth = () => {
               undefined,
               defaultCurrency,
             );
+
             return { key, rate, failed: false };
           } catch (error) {
             Sentry.captureException(error, {
               tags: { context: 'useNetWorth.fetchExchangeRate' },
             });
+
             return { key, rate: 1, failed: true };
           }
         }),
@@ -212,6 +215,7 @@ export const useNetWorth = () => {
       const arr = byAccount.get(b.account_id);
       if (arr) {
         arr.push(b);
+
         return;
       }
       byAccount.set(b.account_id, [b]);
@@ -255,6 +259,7 @@ export const useNetWorth = () => {
 
         if (isLiability(a.kind)) {
           liabilities += balance;
+
           return;
         }
         assets += balance;

@@ -5,7 +5,7 @@ import {
   uploadReceipt,
   getReceiptUrl,
   deleteReceipt,
-} from './receiptService';
+} from '@/services/receiptService';
 
 // Mock browser-image-compression
 vi.mock('browser-image-compression', () => ({

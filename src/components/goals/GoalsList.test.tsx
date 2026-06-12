@@ -47,7 +47,7 @@ vi.mock('@/components/goals/GoalForm', () => ({
   default: () => null,
 }));
 
-import GoalsList from './GoalsList';
+import GoalsList from '@/components/goals/GoalsList';
 
 const renderList = () =>
   render(

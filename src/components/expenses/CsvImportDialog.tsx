@@ -112,6 +112,7 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
           description: t('import.invalidFileType'),
           variant: 'destructive',
         });
+
         return;
       }
 
@@ -191,6 +192,7 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
       setCategoryMappings((prev) => {
         const next = new Map(prev);
         next.set(categoryName, categoryId);
+
         return next;
       });
     },

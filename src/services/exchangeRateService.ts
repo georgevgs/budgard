@@ -32,5 +32,6 @@ export const fetchExchangeRate = async (
   if (!entry) throw new Error(`${toCurrency} rate missing from response`);
 
   rateCache.set(cacheKey, entry.rate);
+
   return entry.rate;
 };

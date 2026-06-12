@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { lazyWithRetry } from './lazyWithRetry';
+import { lazyWithRetry } from '@/lib/lazyWithRetry';
 
 describe('lazyWithRetry', () => {
   beforeEach(() => {

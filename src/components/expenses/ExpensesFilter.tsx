@@ -63,6 +63,7 @@ const ExpensesFilter = ({
   const handleCategoryChange = (categoryId: string) => {
     if (categoryId === 'all') {
       onCategoryChange(null);
+
       return;
     }
 
@@ -72,6 +73,7 @@ const ExpensesFilter = ({
   const handleTagSelectChange = (value: string) => {
     if (value === 'all') {
       onTagChange(null);
+
       return;
     }
 
@@ -81,6 +83,7 @@ const ExpensesFilter = ({
   const handleDateRangeChange = (value: string) => {
     if (value === 'none') {
       onDateRangeChange(null);
+
       return;
     }
 

@@ -83,6 +83,7 @@ export const getCsvPreviewData = (csvContent: string): CsvPreviewData => {
   const hasNegativeAmounts = dataRows.some((row) =>
     row.some((cell) => {
       const cleaned = cell.trim().replace(/[€$£¥\s"']/g, '');
+
       return cleaned.startsWith('-') && /^-\d/.test(cleaned);
     }),
   );
@@ -475,6 +476,7 @@ const validateDescription = (
       rawValue: raw,
     };
   }
+
   return null;
 };
 
@@ -583,6 +585,7 @@ const isValidDate = (year: number, month: number, day: number): boolean => {
   if (year < 2000 || year > 2100) return false;
 
   const date = new Date(year, month - 1, day);
+
   return (
     date.getFullYear() === year &&
     date.getMonth() === month - 1 &&

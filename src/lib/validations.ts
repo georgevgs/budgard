@@ -176,6 +176,7 @@ export const expenseSchema = z.object({
     .regex(AMOUNT_PATTERN, 'Invalid amount format')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
+
       return amount > 0 && amount <= 1000000;
     }, 'Amount must be between 0 and 1.000.000'),
   description: z
@@ -215,6 +216,7 @@ export const recurringExpenseSchema = z
       .regex(AMOUNT_PATTERN, 'Invalid amount format')
       .refine((val) => {
         const amount = parseCurrencyInput(val);
+
         return amount > 0 && amount <= 1000000;
       }, 'Amount must be between 0 and 1.000.000'),
     description: z
@@ -253,6 +255,7 @@ export const budgetSchema = z.object({
     .regex(AMOUNT_PATTERN, 'Invalid amount format')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
+
       return amount > 0 && amount <= 10000000;
     }, 'Amount must be between 0 and 10.000.000'),
 });
@@ -268,6 +271,7 @@ export const categoryBudgetSchema = z.object({
     .regex(AMOUNT_PATTERN, 'Invalid amount format')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
+
       return amount > 0 && amount <= 10000000;
     }, 'Amount must be between 0 and 10.000.000'),
 });
@@ -280,6 +284,7 @@ export const templateSchema = z.object({
     .regex(AMOUNT_PATTERN, 'Invalid amount format')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
+
       return amount > 0 && amount <= 1000000;
     }, 'Amount must be between 0 and 1.000.000'),
   description: z
@@ -301,6 +306,7 @@ export const incomeSchema = z.object({
     .regex(AMOUNT_PATTERN, 'Invalid amount format')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
+
       return amount > 0 && amount <= 1000000;
     }, 'Amount must be between 0 and 1.000.000'),
   description: z
@@ -325,6 +331,7 @@ export const recurringIncomeSchema = z
       .regex(AMOUNT_PATTERN, 'Invalid amount format')
       .refine((val) => {
         const amount = parseCurrencyInput(val);
+
         return amount > 0 && amount <= 1000000;
       }, 'Amount must be between 0 and 1.000.000'),
     description: z
@@ -373,6 +380,7 @@ export const goalSchema = z
       .regex(AMOUNT_PATTERN, 'Invalid amount format')
       .refine((val) => {
         const amount = parseCurrencyInput(val);
+
         return amount > 0 && amount <= 10000000;
       }, 'Target must be between 0 and 10.000.000'),
     deadline: z.date().optional(),
@@ -418,6 +426,7 @@ export const accountSchema = z.object({
     .regex(AMOUNT_PATTERN, 'Invalid amount format')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
+
       return amount >= 0 && amount <= 100000000;
     }, 'Amount must be between 0 and 100.000.000'),
   color: z.string().regex(HEX_COLOR, 'Invalid color format'),
@@ -433,6 +442,7 @@ export const accountBalanceSchema = z.object({
     .regex(AMOUNT_PATTERN, 'Invalid amount format')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
+
       return amount >= 0 && amount <= 100000000;
     }, 'Amount must be between 0 and 100.000.000'),
   contribution_delta: z
@@ -478,6 +488,7 @@ export const debtSchema = z.object({
     .regex(AMOUNT_PATTERN, 'Invalid amount format')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
+
       return amount > 0 && amount <= 100000000;
     }, 'Amount must be between 0 and 100.000.000'),
   apr: z
@@ -485,6 +496,7 @@ export const debtSchema = z.object({
     .min(1, 'APR is required')
     .refine((val) => {
       const num = Number(val.replace(',', '.'));
+
       return !Number.isNaN(num) && num >= 0 && num <= 100;
     }, 'APR must be between 0 and 100'),
   minimum_payment: z
@@ -493,6 +505,7 @@ export const debtSchema = z.object({
     .regex(AMOUNT_PATTERN, 'Invalid amount format')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
+
       return amount >= 0 && amount <= 100000000;
     }, 'Amount must be between 0 and 100.000.000'),
   currency: z.string().length(3, 'Pick a currency'),
@@ -509,6 +522,7 @@ export const debtPaymentSchema = z.object({
     .regex(AMOUNT_PATTERN, 'Invalid amount format')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
+
       return amount > 0 && amount <= 100000000;
     }, 'Amount must be between 0 and 100.000.000'),
   date: z.date({ required_error: 'Date is required' }),

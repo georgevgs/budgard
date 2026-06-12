@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { format } from 'date-fns';
-import { calculateNextOccurrence, getMonthlyAmount } from './recurring';
+import { calculateNextOccurrence, getMonthlyAmount } from '@/lib/recurring';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
 // Use local-time formatting because addMonths/addWeeks operate on local

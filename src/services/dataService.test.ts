@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { supabase } from '@/lib/supabase';
-import { dataService } from './dataService';
+import { dataService } from '@/services/dataService';
 
 // Build a chainable mock that captures the final call intent
 const mockChain = (finalData: unknown = null, finalError: unknown = null) => {
@@ -26,6 +26,7 @@ const mockChain = (finalData: unknown = null, finalError: unknown = null) => {
     value: (resolve: (val: unknown) => void) =>
       resolve({ data: finalData, error: finalError }),
   });
+
   return chain;
 };
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
-import { useNetWorth } from './useNetWorth';
+import { useNetWorth } from '@/hooks/useNetWorth';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import type { Debt } from '@/types/Debt';
@@ -31,6 +31,7 @@ vi.mock('@/services/exchangeRateService', () => ({
   fetchExchangeRate: vi.fn(async (from: string, _date: string, _signal: AbortSignal | undefined, to: string) => {
     if (from === to) return 1;
     if (from === 'USD' && to === 'EUR') return 0.9;
+
     return 1;
   }),
 }));

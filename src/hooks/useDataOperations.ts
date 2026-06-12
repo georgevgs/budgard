@@ -1,18 +1,18 @@
 import { useMemo } from 'react';
-import { useExpenseOps } from './dataOps/useExpenseOps';
-import { useIncomeOps } from './dataOps/useIncomeOps';
-import { useCategoryOps } from './dataOps/useCategoryOps';
-import { useTagOps } from './dataOps/useTagOps';
-import { useTemplateOps } from './dataOps/useTemplateOps';
-import { useGoalOps } from './dataOps/useGoalOps';
-import { useAccountOps } from './dataOps/useAccountOps';
-import { useDebtOps } from './dataOps/useDebtOps';
-import { useRecurringExpenseOps } from './dataOps/useRecurringExpenseOps';
-import { useRecurringIncomeOps } from './dataOps/useRecurringIncomeOps';
-import { useBudgetOps } from './dataOps/useBudgetOps';
-import { useSettingsOps } from './dataOps/useSettingsOps';
+import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
+import { useIncomeOps } from '@/hooks/dataOps/useIncomeOps';
+import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
+import { useTagOps } from '@/hooks/dataOps/useTagOps';
+import { useTemplateOps } from '@/hooks/dataOps/useTemplateOps';
+import { useGoalOps } from '@/hooks/dataOps/useGoalOps';
+import { useAccountOps } from '@/hooks/dataOps/useAccountOps';
+import { useDebtOps } from '@/hooks/dataOps/useDebtOps';
+import { useRecurringExpenseOps } from '@/hooks/dataOps/useRecurringExpenseOps';
+import { useRecurringIncomeOps } from '@/hooks/dataOps/useRecurringIncomeOps';
+import { useBudgetOps } from '@/hooks/dataOps/useBudgetOps';
+import { useSettingsOps } from '@/hooks/dataOps/useSettingsOps';
 
-export type { ReceiptOptions } from './dataOps/useExpenseOps';
+export type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 
 // Aggregates every domain ops hook so existing consumers can keep importing a
 // single hook. New consumers should prefer the per-domain hooks under

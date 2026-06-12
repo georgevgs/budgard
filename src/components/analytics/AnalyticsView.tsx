@@ -70,6 +70,7 @@ const AnalyticsView = () => {
   const monthlyData = useMemo(() => {
     const months = Array.from({ length: 12 }, (_, i) => {
       const month = (i + 1).toString().padStart(2, '0');
+
       return `${selectedYear}-${month}`;
     });
 
@@ -77,6 +78,7 @@ const AnalyticsView = () => {
       const monthExpenses = yearExpenses.filter(
         (e) => format(parseISO(e.date), 'yyyy-MM') === month,
       );
+
       return {
         month: format(parseISO(`${month}-01`), 'LLL', { locale: dateLocale }),
         fullMonth: format(parseISO(`${month}-01`), 'LLLL', {

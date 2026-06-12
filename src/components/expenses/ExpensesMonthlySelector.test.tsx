@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import ExpensesMonthlySelector from './ExpensesMonthlySelector';
+import ExpensesMonthlySelector from '@/components/expenses/ExpensesMonthlySelector';
 
 const renderSelector = (onChange = vi.fn(), month = '2026-04') => {
   render(

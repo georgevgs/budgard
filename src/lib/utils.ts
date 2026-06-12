@@ -59,6 +59,7 @@ export const parseCurrencyInput = (value: string): number => {
   const cleaned = value
     .replace(/\./g, '') // Remove thousand separators
     .replace(',', '.'); // Convert decimal comma to dot
+
   return parseFloat(cleaned) || 0;
 };
 

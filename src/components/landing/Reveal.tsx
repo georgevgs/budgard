@@ -21,6 +21,7 @@ const Reveal = ({ children, delay = 0, className }: Props) => {
 
     if (prefersReducedMotion) {
       setVisible(true);
+
       return;
     }
 

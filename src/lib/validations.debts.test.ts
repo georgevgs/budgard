@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { debtSchema, debtPaymentSchema } from './validations';
+import { debtSchema, debtPaymentSchema } from '@/lib/validations';
 
 const baseValidDebt = {
   name: 'Visa Gold',

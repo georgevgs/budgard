@@ -10,7 +10,7 @@ vi.mock('@/lib/auth', () => ({
   onAuthStateChange: (cb: unknown) => mockOnAuthStateChange(cb),
 }));
 
-import { useAuth } from './useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 describe('useAuth', () => {
   const mockUnsubscribe = vi.fn();
@@ -68,6 +68,7 @@ describe('useAuth', () => {
     mockOnAuthStateChange.mockImplementation(
       (cb: (session: unknown) => void) => {
         authCallback = cb;
+
         return { data: { subscription: { unsubscribe: mockUnsubscribe } } };
       },
     );

@@ -78,11 +78,13 @@ const CategoryBudgetsManager = ({ isOpen, onClose }: Props) => {
 
     if (diff.invalid) {
       setError(t('budget.categoryBudgets.invalidAmount'));
+
       return;
     }
 
     if (diff.upserts.length === 0 && diff.deletes.length === 0) {
       onClose();
+
       return;
     }
 

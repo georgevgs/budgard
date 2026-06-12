@@ -1,15 +1,21 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import BudgetProgress from './BudgetProgress';
+import BudgetProgress from '@/components/budget/BudgetProgress';
 
 vi.mock('@/components/budget/BudgetForm', () => ({
-  default: ({ isOpen }: { isOpen: boolean }) =>
-    isOpen ? <div data-testid="budget-form" /> : null,
+  default: ({ isOpen }: { isOpen: boolean }) => {
+    if (!isOpen) return null;
+
+    return <div data-testid="budget-form" />;
+  },
 }));
 
 vi.mock('@/components/budget/CategoryBudgetsManager', () => ({
-  default: ({ isOpen }: { isOpen: boolean }) =>
-    isOpen ? <div data-testid="category-budgets-manager" /> : null,
+  default: ({ isOpen }: { isOpen: boolean }) => {
+    if (!isOpen) return null;
+
+    return <div data-testid="category-budgets-manager" />;
+  },
 }));
 
 vi.mock('@/contexts/DataContext', () => ({

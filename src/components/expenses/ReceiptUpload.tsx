@@ -30,6 +30,7 @@ const ReceiptUpload = ({
 
   const previewUrl = useMemo(() => {
     if (selectedFile) return URL.createObjectURL(selectedFile);
+
     return null;
   }, [selectedFile]);
 
@@ -47,6 +48,7 @@ const ReceiptUpload = ({
         variant: 'destructive',
         description: t('receipt.invalidType'),
       });
+
       return;
     }
     if (file.size > RECEIPT_MAX_FILE_SIZE) {
@@ -54,6 +56,7 @@ const ReceiptUpload = ({
         variant: 'destructive',
         description: t('receipt.fileTooLarge'),
       });
+
       return;
     }
     onFileSelect(file);

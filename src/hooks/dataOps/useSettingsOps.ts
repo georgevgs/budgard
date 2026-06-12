@@ -5,7 +5,7 @@ import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
 import { signOut } from '@/lib/auth';
 import type { NotificationPreferenceKey } from '@/types/Budget';
-import { useShowErrorToast } from './useShowErrorToast';
+import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
 
 export const useSettingsOps = () => {
   const {

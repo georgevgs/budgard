@@ -4,7 +4,7 @@ import { useDataActions } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
 import type { Tag } from '@/types/Tag';
-import { useShowErrorToast } from './useShowErrorToast';
+import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
 
 export const useTagOps = () => {
   const { setTags } = useDataActions();
@@ -32,6 +32,7 @@ export const useTagOps = () => {
             (a, b) => a.name.localeCompare(b.name),
           ),
         );
+
         return savedTag;
       } catch (error) {
         haptics.error();

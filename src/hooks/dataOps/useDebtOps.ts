@@ -5,8 +5,8 @@ import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
 import type { Debt } from '@/types/Debt';
-import { pickByEdit, replaceById } from './helpers';
-import { useShowErrorToast } from './useShowErrorToast';
+import { pickByEdit, replaceById } from '@/hooks/dataOps/helpers';
+import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
 
 export const useDebtOps = () => {
   const { isInitialized } = useDataConfig();

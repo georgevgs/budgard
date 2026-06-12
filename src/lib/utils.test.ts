@@ -7,7 +7,7 @@ import {
   parseCurrencyInput,
   extractEmoji,
   dataUrlToBlob,
-} from './utils';
+} from '@/lib/utils';
 
 describe('cn', () => {
   it('merges class names', () => {

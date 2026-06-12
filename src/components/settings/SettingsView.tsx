@@ -19,10 +19,10 @@ import { signOut } from '@/lib/auth';
 import { useToast } from '@/hooks/useToast';
 import { haptics, hapticsSettings } from '@/lib/haptics';
 import type { NotificationPreferenceKey } from '@/types/Budget';
-import AppearanceSection from './AppearanceSection';
-import NotificationsSection, { localToUtcHour } from './NotificationsSection';
-import ProfileSection from './ProfileSection';
-import DataManagementSection from './DataManagementSection';
+import AppearanceSection from '@/components/settings/AppearanceSection';
+import NotificationsSection, { localToUtcHour } from '@/components/settings/NotificationsSection';
+import ProfileSection from '@/components/settings/ProfileSection';
+import DataManagementSection from '@/components/settings/DataManagementSection';
 
 type Theme = 'light' | 'dark' | 'barbie';
 

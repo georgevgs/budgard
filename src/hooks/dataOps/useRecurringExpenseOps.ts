@@ -5,8 +5,8 @@ import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
 import type { RecurringExpense } from '@/types/RecurringExpense';
-import { patchById, pickByEdit, replaceById } from './helpers';
-import { useShowErrorToast } from './useShowErrorToast';
+import { patchById, pickByEdit, replaceById } from '@/hooks/dataOps/helpers';
+import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
 
 export const useRecurringExpenseOps = () => {
   const { isInitialized } = useDataConfig();

@@ -89,6 +89,7 @@ const AccountForm = ({ account, onClose }: Props) => {
           account.id,
         );
         onClose();
+
         return;
       }
 

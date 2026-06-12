@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useBudgetAlerts } from './useBudgetAlerts';
+import { useBudgetAlerts } from '@/hooks/useBudgetAlerts';
 
 // Mock the toast module
 const mockToast = vi.fn();

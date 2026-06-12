@@ -28,6 +28,7 @@ const ExpensesDashboard = ({
           acc[categoryId] = [];
         }
         acc[categoryId].push(expense);
+
         return acc;
       },
       {},
@@ -62,6 +63,7 @@ const ExpensesDashboard = ({
   const formatPercentage = (percentage: number): string => {
     if (percentage === 0) return t('dashboard.zeroPercent');
     if (percentage < 1) return t('dashboard.lessThanOnePercent');
+
     return t('dashboard.percent', { value: Math.round(percentage) });
   };
 

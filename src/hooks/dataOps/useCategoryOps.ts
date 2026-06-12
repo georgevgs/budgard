@@ -6,8 +6,8 @@ import { haptics } from '@/lib/haptics';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { CategoryBudget } from '@/types/CategoryBudget';
-import { patchById, replaceById } from './helpers';
-import { useShowErrorToast } from './useShowErrorToast';
+import { patchById, replaceById } from '@/hooks/dataOps/helpers';
+import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
 
 export const useCategoryOps = () => {
   const { isInitialized } = useDataConfig();

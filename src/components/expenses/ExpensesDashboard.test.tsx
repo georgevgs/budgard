@@ -13,7 +13,7 @@ vi.mock('@/contexts/DataContext', () => ({
   }),
 }));
 
-import ExpensesDashboard from './ExpensesDashboard';
+import ExpensesDashboard from '@/components/expenses/ExpensesDashboard';
 
 const cat = (id: string, name: string, color = '#22c55e'): Category => ({
   id,

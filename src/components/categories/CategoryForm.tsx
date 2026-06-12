@@ -385,6 +385,7 @@ const persistCategory = async (
 ) => {
   if (existing) {
     await handleUpdate(existing.id, buildUpdatePayload(values, isIncomeCategory));
+
     return;
   }
 

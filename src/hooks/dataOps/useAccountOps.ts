@@ -6,8 +6,8 @@ import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
-import { pickByEdit, replaceById } from './helpers';
-import { useShowErrorToast } from './useShowErrorToast';
+import { pickByEdit, replaceById } from '@/hooks/dataOps/helpers';
+import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
 
 export const useAccountOps = () => {
   const { isInitialized } = useDataConfig();
@@ -111,6 +111,7 @@ export const useAccountOps = () => {
             (b) =>
               !(b.account_id === accountId && b.recorded_at === saved.recorded_at),
           );
+
           return [...filtered, saved].sort((a, b) =>
             a.recorded_at.localeCompare(b.recorded_at),
           );
@@ -118,6 +119,7 @@ export const useAccountOps = () => {
         setAccounts((prev) => replaceById(prev, accountId, updatedAccount));
 
         toast({ variant: 'success', title: 'Balance updated' });
+
         return saved;
       } catch (error) {
         haptics.error();

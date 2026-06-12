@@ -3,7 +3,7 @@ import {
   simulatePayoff,
   compareStrategies,
   minimumCoversInterest,
-} from './debtPayoff';
+} from '@/lib/debtPayoff';
 import type { Debt } from '@/types/Debt';
 
 const makeDebt = (overrides: Partial<Debt> = {}): Debt => ({

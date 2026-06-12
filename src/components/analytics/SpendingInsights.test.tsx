@@ -8,7 +8,7 @@ vi.mock('@/hooks/useSpendingInsights', () => ({
   useSpendingInsights: () => mockInsights,
 }));
 
-import SpendingInsights from './SpendingInsights';
+import SpendingInsights from '@/components/analytics/SpendingInsights';
 
 const Icon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg data-testid="insight-icon" {...props} />

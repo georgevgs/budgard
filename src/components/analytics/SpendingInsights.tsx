@@ -90,8 +90,10 @@ const getIconClass = (variant: Insight['variant']): string => {
 
 const getHeroBgClass = (variant: Insight['variant']): string => {
   if (variant === 'warning')
+
     return 'bg-amber-500/10 border border-amber-500/20';
   if (variant === 'positive')
+
     return 'bg-income/10 border border-income/20';
 
   return 'bg-primary/10 border border-primary/20';

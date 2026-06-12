@@ -12,7 +12,7 @@ import {
   signOut,
   getSession,
   onAuthStateChange,
-} from './auth';
+} from '@/lib/auth';
 import { markIntentionalSignOut } from '@/lib/authStore';
 
 describe('auth', () => {

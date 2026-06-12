@@ -195,6 +195,7 @@ export const minimumCoversInterest = (debt: Debt): boolean => {
   if (debt.current_balance <= 0) return true;
 
   const monthlyInterest = (debt.current_balance * debt.apr) / 100 / 12;
+
   return debt.minimum_payment >= monthlyInterest;
 };
 

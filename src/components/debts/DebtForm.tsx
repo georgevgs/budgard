@@ -91,6 +91,7 @@ const DebtForm = ({ debt, onClose }: Props) => {
           debt.id,
         );
         onClose();
+
         return;
       }
 

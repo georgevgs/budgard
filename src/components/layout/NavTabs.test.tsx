@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import NavTabs from './NavTabs';
+import NavTabs from '@/components/layout/NavTabs';
 
 const renderAt = (path: string) =>
   render(

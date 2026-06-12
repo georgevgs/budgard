@@ -33,7 +33,7 @@ vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({ toast: toastFn }),
 }));
 
-import AnnualExportCard from './AnnualExportCard';
+import AnnualExportCard from '@/components/analytics/AnnualExportCard';
 
 const category: Category = {
   id: 'cat-1',

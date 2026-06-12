@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
-import CategorySparkline from './CategorySparkline';
+import CategorySparkline from '@/components/analytics/CategorySparkline';
 
 describe('CategorySparkline', () => {
   it('renders a placeholder div when all values are zero', () => {

@@ -32,5 +32,6 @@ export const SUPPORTED_CURRENCIES: Currency[] = [
 
 export const getCurrencySymbol = (code: string): string => {
   const currency = SUPPORTED_CURRENCIES.find((c) => c.code === code);
+
   return currency?.symbol ?? code;
 };

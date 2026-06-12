@@ -18,6 +18,7 @@ export const dataService = {
       error,
     } = await supabase.auth.getUser();
     if (error) throw error;
+
     return user;
   },
 
@@ -49,6 +50,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as Tag;
   },
 
@@ -102,6 +104,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as Expense;
   },
 
@@ -115,6 +118,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as Expense;
   },
 
@@ -139,6 +143,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as Expense;
   },
 
@@ -150,6 +155,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as Expense;
   },
 
@@ -167,6 +173,7 @@ export const dataService = {
       .select(`*, category:categories(*), tag:tags(*)`);
 
     if (error) throw error;
+
     return data as Expense[];
   },
 
@@ -187,6 +194,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as Category;
   },
 
@@ -200,6 +208,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as Category;
   },
 
@@ -253,6 +262,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as RecurringExpense;
   },
 
@@ -269,6 +279,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as RecurringExpense;
   },
 
@@ -290,6 +301,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as RecurringExpense;
   },
 
@@ -301,6 +313,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as RecurringExpense;
   },
 
@@ -317,6 +330,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as RecurringExpense;
   },
 
@@ -338,6 +352,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as RecurringExpense;
   },
 
@@ -401,6 +416,7 @@ export const dataService = {
       .maybeSingle();
 
     if (error) throw error;
+
     return data as Budget;
   },
 
@@ -418,6 +434,7 @@ export const dataService = {
       .maybeSingle();
 
     if (error) throw error;
+
     return data as Budget;
   },
 
@@ -435,6 +452,7 @@ export const dataService = {
       .maybeSingle();
 
     if (error) throw error;
+
     return data as Budget;
   },
 
@@ -466,6 +484,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as CategoryBudget;
   },
 
@@ -575,6 +594,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as Goal;
   },
 
@@ -588,6 +608,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as Goal;
   },
 
@@ -662,6 +683,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as Account;
   },
 
@@ -674,6 +696,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as Account;
   },
 
@@ -713,6 +736,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as AccountBalance;
   },
 
@@ -737,6 +761,7 @@ export const dataService = {
     });
 
     if (error) throw error;
+
     return data as AccountBalance;
   },
 
@@ -758,6 +783,7 @@ export const dataService = {
     const { data, error } = await query.single();
 
     if (error) throw error;
+
     return data as Account;
   },
 
@@ -781,6 +807,7 @@ export const dataService = {
     const { data, error } = await query.single();
 
     if (error) throw error;
+
     return data as Debt;
   },
 
@@ -799,6 +826,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as Debt;
   },
 
@@ -812,6 +840,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as Debt;
   },
 
@@ -824,6 +853,7 @@ export const dataService = {
       .single();
 
     if (error) throw error;
+
     return data as Debt;
   },
 

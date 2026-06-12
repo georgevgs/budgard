@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeAccountYtd } from './ytd';
+import { computeAccountYtd } from '@/lib/ytd';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 

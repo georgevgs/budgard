@@ -5,8 +5,8 @@ import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
 import type { Goal } from '@/types/Goal';
-import { patchById, replaceById } from './helpers';
-import { useShowErrorToast } from './useShowErrorToast';
+import { patchById, replaceById } from '@/hooks/dataOps/helpers';
+import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
 
 export const useGoalOps = () => {
   const { isInitialized } = useDataConfig();

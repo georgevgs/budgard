@@ -4,7 +4,7 @@ import {
   buildCsv,
   buildTransactionsCsv,
   downloadExpensesAsCSV,
-} from './csvExport';
+} from '@/lib/csvExport';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import type { Tag } from '@/types/Tag';
@@ -76,6 +76,7 @@ describe('downloadExpensesAsCSV', () => {
       .spyOn(URL, 'createObjectURL')
       .mockImplementation((blob: Blob | MediaSource) => {
         capturedBlob = blob as Blob;
+
         return 'blob:test';
       });
     revokeObjectURLSpy = vi
@@ -85,6 +86,7 @@ describe('downloadExpensesAsCSV', () => {
       .spyOn(document.body, 'appendChild')
       .mockImplementation((node) => {
         clickedLink = node as HTMLAnchorElement;
+
         return node;
       });
     removeChildSpy = vi

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { toast as sonnerToast } from 'sonner';
-import { toast } from './useToast';
+import { toast } from '@/hooks/useToast';
 
 vi.mock('sonner', () => {
   const fn = vi.fn() as ReturnType<typeof vi.fn> & {
@@ -9,6 +9,7 @@ vi.mock('sonner', () => {
   };
   fn.error = vi.fn();
   fn.success = vi.fn();
+
   return { toast: fn };
 });
 

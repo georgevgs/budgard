@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useExpensesFilter } from './useExpensesFilter';
+import { useExpensesFilter } from '@/hooks/useExpensesFilter';
 import type { Expense } from '@/types/Expense';
 
 const makeExpense = (

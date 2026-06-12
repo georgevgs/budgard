@@ -45,7 +45,7 @@ vi.mock('@/components/ui/dropdown-menu', () => ({
   DropdownMenuSeparator: () => <hr />,
 }));
 
-import ProfileMenu from './ProfileMenu';
+import ProfileMenu from '@/components/layout/ProfileMenu';
 
 const renderMenu = () =>
   render(

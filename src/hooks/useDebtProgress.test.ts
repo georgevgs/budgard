@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useDebtProgress, useAllDebtProgress } from './useDebtProgress';
+import { useDebtProgress, useAllDebtProgress } from '@/hooks/useDebtProgress';
 import type { Debt } from '@/types/Debt';
 
 const makeDebt = (overrides: Partial<Debt> = {}): Debt => ({

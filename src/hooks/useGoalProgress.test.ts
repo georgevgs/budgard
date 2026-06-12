@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useGoalProgress, useAllGoalProgress } from './useGoalProgress';
+import { useGoalProgress, useAllGoalProgress } from '@/hooks/useGoalProgress';
 import type { Expense } from '@/types/Expense';
 import type { Goal } from '@/types/Goal';
 

@@ -41,6 +41,7 @@ const NavTabs = () => {
       <div className="flex items-center justify-around">
         {tabs.map((tab) => {
           const Icon = tab.icon;
+
           return (
             <NavLink
               key={tab.path}

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { haptics, hapticsSettings } from './haptics';
+import { haptics, hapticsSettings } from '@/lib/haptics';
 
 const STORAGE_KEY = 'haptics-enabled';
 
@@ -63,8 +63,7 @@ describe('haptics', () => {
 
   it('does not throw when vibrate is not supported', () => {
     const descriptor = Object.getOwnPropertyDescriptor(navigator, 'vibrate');
-    // @ts-expect-error -- intentionally removing for test
-    delete navigator.vibrate;
+    delete (navigator as { vibrate?: Navigator['vibrate'] }).vibrate;
 
     expect(() => haptics.success()).not.toThrow();
     expect(() => haptics.warning()).not.toThrow();

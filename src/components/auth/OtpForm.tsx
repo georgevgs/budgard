@@ -41,6 +41,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
       // Handle go-back action
       if (formData.get('_action') === 'back') {
         setOtp('');
+
         return { ...initialState };
       }
 
@@ -76,6 +77,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
         if (error) {
           turnstileRef.current?.reset();
           setTurnstileToken(null);
+
           return { step: 'request', email: '', error: t('auth.sendFailed') };
         }
 
@@ -83,6 +85,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
           title: t('auth.codeSent'),
           description: t('auth.checkEmail'),
         });
+
         return { step: 'verify', email, error: null };
       }
 
@@ -101,6 +104,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
 
       toast({ title: t('common.success'), description: t('auth.signedIn') });
       onSuccess?.();
+
       return { step: 'verify', email: prev.email, error: null };
     },
     initialState,

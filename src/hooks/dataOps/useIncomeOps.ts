@@ -6,8 +6,8 @@ import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
 import { offlineQueue } from '@/lib/offlineQueue';
 import type { Expense } from '@/types/Expense';
-import { replaceById, patchById, pickByEdit } from './helpers';
-import { useShowErrorToast } from './useShowErrorToast';
+import { replaceById, patchById, pickByEdit } from '@/hooks/dataOps/helpers';
+import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
 
 export const useIncomeOps = () => {
   const { isInitialized } = useDataConfig();

@@ -22,6 +22,7 @@ export const signInWithOTP = async (email: string, token: string) => {
 
 export const signOut = async () => {
   markIntentionalSignOut();
+
   return supabase.auth.signOut();
 };
 

@@ -6,11 +6,12 @@ let capturedOnSuccess: (() => void) | null = null;
 vi.mock('@/components/auth/OtpForm', () => ({
   default: ({ onSuccess }: { onSuccess: () => void }) => {
     capturedOnSuccess = onSuccess;
+
     return <div data-testid="otp-form" />;
   },
 }));
 
-import LoginModal from './LoginModal';
+import LoginModal from '@/components/auth/LoginModal';
 
 describe('LoginModal', () => {
   it('does not render content when closed', () => {

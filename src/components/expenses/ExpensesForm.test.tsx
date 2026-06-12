@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { TagClearButton, TagButtonContent } from './TagPicker';
+import { TagClearButton, TagButtonContent } from '@/components/expenses/TagPicker';
 
 describe('TagClearButton', () => {
   it('renders a span, not a button, to avoid nested button issues', () => {

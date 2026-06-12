@@ -1,14 +1,17 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useSwipeToClose } from './useSwipeToClose';
+import { useSwipeToClose } from '@/hooks/useSwipeToClose';
 
 const makeTouchEvent = (clientY: number, target?: Partial<HTMLElement>) => {
   const el = {
     closest: vi.fn((selector: string) => {
       if (selector === '[data-drag-handle]')
+
         return target?.dataset?.dragHandle ? el : null;
       if (selector === '[data-draggable-area]')
+
         return target?.dataset?.draggableArea ? el : null;
+
       return null;
     }),
     dataset: {},

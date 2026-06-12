@@ -4,7 +4,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 vi.mock('@/services/receiptService', () => ({ getReceiptUrl: vi.fn() }));
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
 
-import ReceiptViewer from './ReceiptViewer';
+import ReceiptViewer from '@/components/expenses/ReceiptViewer';
 import { getReceiptUrl } from '@/services/receiptService';
 
 const mockedGetReceiptUrl = vi.mocked(getReceiptUrl);

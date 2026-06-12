@@ -18,6 +18,7 @@ vi.mock('react-i18next', () => ({
           key,
         );
       }
+
       return key;
     },
     i18n: { language: 'en' },
@@ -46,6 +47,7 @@ vi.mock('@/lib/supabase', () => {
     }
     obj.data = null;
     obj.error = null;
+
     return obj;
   };
 

@@ -5,8 +5,8 @@ import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
-import { replaceById } from './helpers';
-import { useShowErrorToast } from './useShowErrorToast';
+import { replaceById } from '@/hooks/dataOps/helpers';
+import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
 
 export const useTemplateOps = () => {
   const { isInitialized } = useDataConfig();

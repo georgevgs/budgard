@@ -51,6 +51,7 @@ export const usePwaUpdate = (): void => {
     // Clear the flag instead.
     if (!reg?.waiting) {
       setNeedRefresh(false);
+
       return;
     }
 
@@ -86,6 +87,7 @@ export const usePwaUpdate = (): void => {
       // needRefresh went back to false — reset dismissal so a future
       // new update will show the toast again.
       toastDismissedRef.current = false;
+
       return;
     }
 
@@ -94,6 +96,7 @@ export const usePwaUpdate = (): void => {
     if (reg?.waiting) {
       if (toastDismissedRef.current) return;
       showUpdateToast();
+
       return;
     }
 
@@ -107,6 +110,7 @@ export const usePwaUpdate = (): void => {
       const latest = swRegistration.get();
       if (!latest?.waiting) {
         setNeedRefresh(false);
+
         return;
       }
 

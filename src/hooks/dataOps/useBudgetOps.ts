@@ -4,7 +4,7 @@ import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
 import type { CategoryBudget } from '@/types/CategoryBudget';
-import { useShowErrorToast } from './useShowErrorToast';
+import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
 
 export const useBudgetOps = () => {
   const { isInitialized, monthlyBudget } = useDataConfig();

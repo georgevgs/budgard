@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { goalSchema } from './validations';
+import { goalSchema } from '@/lib/validations';
 
 const baseValid = {
   name: 'Vacation fund',

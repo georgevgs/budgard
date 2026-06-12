@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useDebts } from './useDebts';
+import { useDebts } from '@/hooks/useDebts';
 import type { Debt } from '@/types/Debt';
 
 let dataMock: { debts: Debt[] } = { debts: [] };

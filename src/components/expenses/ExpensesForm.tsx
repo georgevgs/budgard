@@ -65,7 +65,7 @@ import {
   renderSuggestionMeta,
   renderCategoryIndicator,
   renderNoTagsMessage,
-} from './ExpensesForm.helpers';
+} from '@/components/expenses/ExpensesForm.helpers';
 
 // Preset colors cycled when auto-assigning a color to a new tag
 const TAG_COLORS = [
@@ -139,6 +139,7 @@ const ExpensesForm = ({
   const filteredTags = useMemo(() => {
     if (!tagSearch) return tags;
     const lower = tagSearch.toLowerCase();
+
     return tags.filter((t) => t.name.toLowerCase().includes(lower));
   }, [tags, tagSearch]);
 
@@ -187,6 +188,7 @@ const ExpensesForm = ({
     return suggestions
       .filter((s) => {
         const desc = s.description.toLowerCase();
+
         return desc.includes(query) && desc !== query;
       })
       .slice(0, 5);
@@ -198,6 +200,9 @@ const ExpensesForm = ({
     form.setValue('tag_id', selected.tag_id ?? undefined);
     setSuggestionsOpen(false);
   };
+
+  const isSuggestionsPopoverOpen =
+    suggestionsOpen && filteredSuggestions.length > 0;
 
   const hasExactMatch = tags.some(
     (t) => t.name.toLowerCase() === tagSearch.toLowerCase(),
@@ -351,7 +356,7 @@ const ExpensesForm = ({
               render={({ field }) => (
                 <FormItem>
                   <Popover
-                    open={suggestionsOpen && filteredSuggestions.length > 0}
+                    open={isSuggestionsPopoverOpen}
                     onOpenChange={setSuggestionsOpen}
                     modal={false}
                   >

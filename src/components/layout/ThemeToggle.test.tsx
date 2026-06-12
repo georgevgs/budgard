@@ -39,7 +39,7 @@ vi.mock('@/components/ui/dropdown-menu', () => ({
   DropdownMenuLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
-import ThemeToggle from './ThemeToggle';
+import ThemeToggle from '@/components/layout/ThemeToggle';
 
 describe('ThemeToggle', () => {
   it('lists all three themes', () => {

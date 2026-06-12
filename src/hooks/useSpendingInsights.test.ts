@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { format, subDays } from 'date-fns';
-import { useSpendingInsights } from './useSpendingInsights';
+import { useSpendingInsights } from '@/hooks/useSpendingInsights';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 

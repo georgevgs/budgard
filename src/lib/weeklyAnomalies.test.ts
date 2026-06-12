@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { format, subDays } from 'date-fns';
-import { buildWeeklyRecap } from './weeklyAnomalies';
+import { buildWeeklyRecap } from '@/lib/weeklyAnomalies';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 

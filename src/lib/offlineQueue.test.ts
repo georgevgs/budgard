@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import 'fake-indexeddb/auto';
-import { offlineQueue } from './offlineQueue';
+import { offlineQueue } from '@/lib/offlineQueue';
 
 describe('offlineQueue', () => {
   beforeEach(async () => {

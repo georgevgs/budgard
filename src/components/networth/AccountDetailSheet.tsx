@@ -40,7 +40,7 @@ import {
   renderHistoryList,
   getBalanceClass,
   renderLiabilitySign,
-} from './AccountDetailSheet.helpers';
+} from '@/components/networth/AccountDetailSheet.helpers';
 
 type Props = {
   account: Account;

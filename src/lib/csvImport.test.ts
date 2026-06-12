@@ -4,7 +4,7 @@ import {
   suggestColumnMapping,
   parseExpensesCsv,
   mapRowsToExpenses,
-} from './csvImport';
+} from '@/lib/csvImport';
 import type { Category } from '@/types/Category';
 
 const categories: Category[] = [
