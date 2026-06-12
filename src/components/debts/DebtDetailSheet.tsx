@@ -1,45 +1,21 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-  DialogHeader,
-} from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import Plus from 'lucide-react/dist/esm/icons/plus';
-import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
-import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import { formatCurrency } from '@/lib/utils';
-import { useDebtOps } from '@/hooks/dataOps/useDebtOps';
-import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
+import { useDebtDetailActions } from '@/hooks/debts/useDebtDetailActions';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import type { Locale } from 'date-fns';
-import { useDebtProgress, type DebtProgress } from '@/hooks/useDebtProgress';
+import { useDebtProgress } from '@/hooks/useDebtProgress';
 import { useDebtPayments } from '@/hooks/useDebtPayments';
 import type { Debt } from '@/types/Debt';
 import type { Expense } from '@/types/Expense';
-import DebtPaymentForm from '@/components/debts/DebtPaymentForm';
-import DebtProgressBar from '@/components/debts/DebtProgressBar';
+import DebtDetailHeader from '@/components/debts/DebtDetailHeader';
+import DebtPaymentDialog from '@/components/debts/DebtPaymentDialog';
+import ConfirmDestructiveDialog from '@/components/debts/ConfirmDestructiveDialog';
 
 type Props = {
   debt: Debt;
@@ -51,8 +27,6 @@ type Props = {
 const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
-  const { handleDebtArchive } = useDebtOps();
-  const { handleExpenseDelete } = useExpenseOps();
   const progress = useDebtProgress(debt);
   const { payments, isLoading, removePayment } = useDebtPayments(
     debt.id,
@@ -60,44 +34,7 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
     debt.updated_at,
   );
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
-  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
-  const [paymentToDelete, setPaymentToDelete] = useState<string | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const handleArchiveClick = () => {
-    setMenuOpen(false);
-    setTimeout(() => setShowArchiveDialog(true), 0);
-  };
-
-  const handleArchiveConfirm = async () => {
-    setShowArchiveDialog(false);
-    try {
-      await handleDebtArchive(debt.id);
-      onClose();
-    } catch {
-      // toast already shown
-    }
-  };
-
-  const handleEditClick = () => {
-    setMenuOpen(false);
-    setTimeout(() => onEdit(debt), 0);
-  };
-
-  const handlePaymentDeleteConfirm = async () => {
-    if (!paymentToDelete) {
-      return;
-    }
-
-    const id = paymentToDelete;
-    setPaymentToDelete(null);
-    try {
-      await handleExpenseDelete(id);
-      removePayment(id);
-    } catch {
-      // toast already shown
-    }
-  };
+  const actions = useDebtDetailActions({ debt, onClose, removePayment });
 
   return (
     <>
@@ -111,83 +48,12 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
             <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
           </div>
 
-          <DialogHeader className="p-4 pb-2" data-draggable-area>
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <DialogTitle className="text-xl truncate">
-                  {debt.name}
-                </DialogTitle>
-                <DialogDescription>
-                  {t(`debts.kind.${debt.kind}`)} · {t('debts.aprSuffix', { apr: debt.apr.toFixed(2) })}
-                </DialogDescription>
-              </div>
-              <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 shrink-0"
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                    <span className="sr-only">{t('common.openMenu')}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem onClick={handleEditClick}>
-                    {t('common.edit')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={handleArchiveClick}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    {t('debts.archive')}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            <div className="pt-3">
-              <p className="text-xs text-muted-foreground">
-                {t('debts.detail.currentBalance')}
-              </p>
-              <p className="text-2xl font-bold tabular-nums tracking-tight text-destructive">
-                {formatCurrency(debt.current_balance, debt.currency)}
-              </p>
-            </div>
-
-            <div className="pt-3">
-              <DebtProgressBar progress={progress} currency={debt.currency} />
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 pt-3 text-xs">
-              <div>
-                <p className="text-muted-foreground">
-                  {t('debts.detail.minPayment')}
-                </p>
-                <p className="font-medium tabular-nums mt-0.5">
-                  {formatCurrency(debt.minimum_payment, debt.currency)}
-                </p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">
-                  {t('debts.detail.payoffIn')}
-                </p>
-                <p className="font-medium tabular-nums mt-0.5">
-                  {renderPayoffMonths(progress, t)}
-                </p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">
-                  {t('debts.detail.totalInterest')}
-                </p>
-                <p className="font-medium tabular-nums mt-0.5">
-                  {formatCurrency(progress.projectedTotalInterest, debt.currency)}
-                </p>
-              </div>
-            </div>
-
-            {renderUnpayableCallout(progress.isUnpayable, t)}
-          </DialogHeader>
+          <DebtDetailHeader
+            debt={debt}
+            progress={progress}
+            onEdit={onEdit}
+            onArchiveRequest={() => actions.setShowArchiveDialog(true)}
+          />
 
           <div
             className="overflow-y-auto flex-1 px-4 pb-4 overscroll-contain"
@@ -213,83 +79,38 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
               payments,
               debt.currency,
               dateLocale,
-              (id) => setPaymentToDelete(id),
+              (id) => actions.setPaymentToDelete(id),
               t,
             )}
           </div>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isPaymentOpen} onOpenChange={() => setIsPaymentOpen(false)}>
-        <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
-          onOpenChange={() => setIsPaymentOpen(false)}
-          onFocusOutside={(e) => e.preventDefault()}
-        >
-          <DebtPaymentForm
-            debt={debt}
-            onClose={() => setIsPaymentOpen(false)}
-          />
-        </DialogContent>
-      </Dialog>
+      <DebtPaymentDialog
+        open={isPaymentOpen}
+        debt={debt}
+        onClose={() => setIsPaymentOpen(false)}
+      />
 
-      <AlertDialog
-        open={showArchiveDialog}
-        onOpenChange={setShowArchiveDialog}
-      >
-        <AlertDialogContent
-          className="sm:max-w-[425px]"
-          onOpenChange={setShowArchiveDialog}
-        >
-          <AlertDialogHeader data-draggable-area>
-            <AlertDialogTitle>
-              {t('debts.archiveTitle')}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('debts.archiveConfirmation', { name: debt.name })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleArchiveConfirm}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t('debts.archive')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDestructiveDialog
+        open={actions.showArchiveDialog}
+        title={t('debts.archiveTitle')}
+        description={t('debts.archiveConfirmation', { name: debt.name })}
+        confirmLabel={t('debts.archive')}
+        onOpenChange={actions.setShowArchiveDialog}
+        onConfirm={actions.handleArchiveConfirm}
+      />
 
-      <AlertDialog
-        open={Boolean(paymentToDelete)}
-        onOpenChange={(open) => !open && setPaymentToDelete(null)}
-      >
-        <AlertDialogContent
-          className="sm:max-w-[425px]"
-          onOpenChange={(open: boolean) =>
-            !open && setPaymentToDelete(null)
-          }
-        >
-          <AlertDialogHeader data-draggable-area>
-            <AlertDialogTitle>
-              {t('debts.detail.deletePaymentTitle')}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('debts.detail.deletePaymentDescription')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handlePaymentDeleteConfirm}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t('common.delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDestructiveDialog
+        open={Boolean(actions.paymentToDelete)}
+        title={t('debts.detail.deletePaymentTitle')}
+        description={t('debts.detail.deletePaymentDescription')}
+        confirmLabel={t('common.delete')}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) actions.setPaymentToDelete(null);
+        }}
+        onConfirm={actions.handlePaymentDeleteConfirm}
+      />
     </>
   );
 }
@@ -302,38 +123,6 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
-
-const renderPayoffMonths = (
-  progress: DebtProgress,
-  t: TranslateFunction,
-) => {
-  if (progress.isUnpayable || progress.monthsRemaining <= 0) {
-    return '—';
-  }
-
-  return t('debts.monthsCount', { count: progress.monthsRemaining });
-};
-
-const renderUnpayableCallout = (
-  isUnpayable: boolean,
-  t: TranslateFunction,
-) => {
-  if (!isUnpayable) return null;
-
-  return (
-    <div className="flex items-start gap-2 mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-      <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
-      <div className="text-xs">
-        <p className="font-medium text-destructive">
-          {t('debts.unpayable.title')}
-        </p>
-        <p className="text-destructive/80 mt-0.5">
-          {t('debts.unpayable.description')}
-        </p>
-      </div>
-    </div>
-  );
-}
 
 const renderHistoryList = (
   isLoading: boolean,

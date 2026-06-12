@@ -10,31 +10,13 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { DatePickerField } from '@/components/ui/date-picker-field';
-import { Label } from '@/components/ui/label';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import CategoryColorPicker from '@/components/categories/CategoryColorPicker';
+import { Form } from '@/components/ui/form';
+import GoalFormFields from '@/components/goals/GoalFormFields';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCategoriesData, useTagsData } from '@/contexts/DataContext';
 import { formatCurrencyInput } from '@/lib/utils';
 import { goalSchema, type GoalFormData } from '@/lib/validations';
-import type { Goal, GoalSourceType } from '@/types/Goal';
+import type { Goal } from '@/types/Goal';
 
-const sourceValues = ['category', 'tag', 'net_delta'] as const;
 const DEFAULT_GOAL_COLOR = '#f97316';
 const DEFAULT_GOAL_ICON = 'target';
 
@@ -47,8 +29,6 @@ type Props = {
 const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
   const { t } = useTranslation();
   const { session } = useAuth();
-  const { expenseCategories } = useCategoriesData();
-  const tags = useTagsData();
 
   const form = useForm<GoalFormData>({
     resolver: zodResolver(goalSchema),
@@ -70,13 +50,6 @@ const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
   const handleSubmit = async (values: GoalFormData) => {
     if (!session?.user?.id) return;
     await onSubmit(values);
-  };
-
-  const isDeadlineDisabled = (date: Date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    return date < today;
   };
 
   return (
@@ -106,129 +79,7 @@ const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4 pb-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <Label>{t('goals.nameLabel')}</Label>
-                  <FormControl>
-                    <Input
-                      placeholder={t('goals.namePlaceholder')}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="target_amount"
-              render={({ field }) => (
-                <FormItem>
-                  <Label>{t('goals.targetLabel')}</Label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      €
-                    </span>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder={t('common.amountZero')}
-                        {...field}
-                        onChange={(e) => {
-                          const formatted = formatCurrencyInput(e.target.value);
-                          field.onChange(formatted);
-                        }}
-                        className="pl-7"
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="source_type"
-              render={({ field }) => (
-                <FormItem>
-                  <Label>{t('goals.sourceTypeLabel')}</Label>
-                  <Select
-                    onValueChange={(value: GoalSourceType) => {
-                      field.onChange(value);
-                      form.setValue('category_id', undefined);
-                      form.setValue('tag_id', undefined);
-                    }}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {sourceValues.map((source) => (
-                        <SelectItem key={source} value={source}>
-                          <div className="flex flex-col">
-                            <span>{t(`goals.sources.${source}.label`)}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {t(`goals.sources.${source}.description`)}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {renderCategoryField(sourceType, form, expenseCategories, t)}
-
-            {renderTagField(sourceType, form, tags, t)}
-
-            <FormField
-              control={form.control}
-              name="deadline"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <Label>{t('goals.deadlineFieldLabel')}</Label>
-                  <DatePickerField
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder={t('goals.noDeadline')}
-                    disabled={isDeadlineDisabled}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="color"
-              render={({ field }) => (
-                <FormItem>
-                  <Label>{t('goals.colorLabel')}</Label>
-                  <FormControl>
-                    <CategoryColorPicker
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            </div>
+            <GoalFormFields form={form} sourceType={sourceType} />
           </div>
 
           <div className="flex justify-end gap-2 px-4 sm:px-6 py-3 border-t border-border/50 shrink-0">
@@ -253,8 +104,6 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
-
-type GoalFormReturn = ReturnType<typeof useForm<GoalFormData>>;
 
 const resolveTargetAmount = (goal: Goal | undefined): string => {
   if (!goal) {
@@ -295,88 +144,4 @@ const renderSubmitLabel = (
   if (isEditing) return t('common.update');
 
   return t('goals.create');
-}
-
-const renderCategoryField = (
-  sourceType: GoalSourceType,
-  form: GoalFormReturn,
-  categories: { id: string; name: string; color: string }[],
-  t: TranslateFunction,
-) => {
-  if (sourceType !== 'category') return null;
-
-  return (
-    <FormField
-      control={form.control}
-      name="category_id"
-      render={({ field }) => (
-        <FormItem>
-          <Label>{t('goals.categoryLabel')}</Label>
-          <Select onValueChange={field.onChange} value={field.value}>
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder={t('goals.selectCategory')} />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {categories.map((category) => (
-                <SelectItem key={category.id} value={category.id}>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full shrink-0"
-                      style={{ backgroundColor: category.color }}
-                    />
-                    {category.name}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
-}
-
-const renderTagField = (
-  sourceType: GoalSourceType,
-  form: GoalFormReturn,
-  tags: { id: string; name: string; color: string }[],
-  t: TranslateFunction,
-) => {
-  if (sourceType !== 'tag') return null;
-
-  return (
-    <FormField
-      control={form.control}
-      name="tag_id"
-      render={({ field }) => (
-        <FormItem>
-          <Label>{t('goals.tagLabel')}</Label>
-          <Select onValueChange={field.onChange} value={field.value}>
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder={t('goals.selectTag')} />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {tags.map((tag) => (
-                <SelectItem key={tag.id} value={tag.id}>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full shrink-0"
-                      style={{ backgroundColor: tag.color }}
-                    />
-                    {tag.name}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
 }

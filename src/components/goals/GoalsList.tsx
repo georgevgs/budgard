@@ -5,13 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Target from 'lucide-react/dist/esm/icons/target';
-import { useAuth } from '@/contexts/AuthContext';
 import { useGoalsData, useDataConfig } from '@/contexts/DataContext';
 import { useGoalOps } from '@/hooks/dataOps/useGoalOps';
-import { format } from 'date-fns';
-import { parseCurrencyInput } from '@/lib/utils';
+import { useGoalSubmit } from '@/hooks/goals/useGoalSubmit';
 import type { Goal } from '@/types/Goal';
-import type { GoalFormData } from '@/lib/validations';
 import GoalCard from '@/components/goals/GoalCard';
 import GoalForm from '@/components/goals/GoalForm';
 import GoalsLoadingState from '@/components/goals/GoalsLoading';
@@ -20,54 +17,16 @@ const GoalsList = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | undefined>(undefined);
   const { t } = useTranslation();
-  const { session } = useAuth();
   const goals = useGoalsData();
-  const { defaultCurrency, isInitialized, isSecondaryLoaded } = useDataConfig();
-  const { handleGoalCreate, handleGoalUpdate, handleGoalDelete } = useGoalOps();
-
-  const handleSubmit = async (values: GoalFormData) => {
-    if (!session?.user?.id) return;
-
-    let deadline: string | null = null;
-    if (values.deadline) {
-      deadline = format(values.deadline, 'yyyy-MM-dd');
-    }
-
-    let categoryId: string | null = null;
-    if (values.source_type === 'category') {
-      categoryId = values.category_id ?? null;
-    }
-
-    let tagId: string | null = null;
-    if (values.source_type === 'tag') {
-      tagId = values.tag_id ?? null;
-    }
-
-    const payload: Partial<Goal> = {
-      name: values.name,
-      target_amount: parseCurrencyInput(values.target_amount),
-      currency: selectedGoal?.currency ?? defaultCurrency,
-      deadline,
-      source_type: values.source_type,
-      category_id: categoryId,
-      tag_id: tagId,
-      icon: values.icon,
-      color: values.color,
-    };
-
-    try {
-      if (selectedGoal) {
-        await handleGoalUpdate(selectedGoal.id, payload);
-      } else {
-        await handleGoalCreate({ ...payload, user_id: session.user.id });
-      }
-
+  const { isInitialized, isSecondaryLoaded } = useDataConfig();
+  const { handleGoalDelete } = useGoalOps();
+  const { handleSubmit } = useGoalSubmit({
+    selectedGoal,
+    onDone: () => {
       setIsFormOpen(false);
       setSelectedGoal(undefined);
-    } catch {
-      // Error toast already shown in hook
-    }
-  };
+    },
+  });
 
   const handleEdit = (goal: Goal) => {
     setSelectedGoal(goal);

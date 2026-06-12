@@ -9,14 +9,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form';
+import { Form } from '@/components/ui/form';
 import { useAuth } from '@/contexts/AuthContext';
 import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
 import { useDateLocale } from '@/hooks/useDateLocale';
@@ -24,8 +17,7 @@ import {
   formatCurrencyInput,
   parseCurrencyInput,
 } from '@/lib/utils';
-import { CurrencyInput } from '@/components/ui/currency-input';
-import { DatePickerField } from '@/components/ui/date-picker-field';
+import DebtPaymentFields from '@/components/debts/DebtPaymentFields';
 import {
   debtPaymentSchema,
   type DebtPaymentFormData,
@@ -112,60 +104,11 @@ const DebtPaymentForm = ({ debt, onClose }: Props) => {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4 pb-4">
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <CurrencyInput
-                        currency={debt.currency}
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder={t('debts.payment.amountPlaceholder')}
-                        aria-label={t('debts.payment.amountLabel')}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <DatePickerField
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder={t('debts.payment.pickDate')}
-                      locale={dateLocale}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder={t('debts.payment.descriptionPlaceholder')}
-                        autoComplete="off"
-                        aria-label={t('debts.payment.descriptionLabel')}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <DebtPaymentFields
+              form={form}
+              currency={debt.currency}
+              dateLocale={dateLocale}
+            />
           </div>
 
           <div className="flex gap-3 justify-end px-4 sm:px-6 py-3 border-t border-border/50 shrink-0">

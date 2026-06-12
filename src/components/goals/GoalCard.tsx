@@ -1,28 +1,10 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import Target from 'lucide-react/dist/esm/icons/target';
 import Calendar from 'lucide-react/dist/esm/icons/calendar';
 import GoalProgressBar from '@/components/goals/GoalProgressBar';
+import GoalCardActions from '@/components/goals/GoalCardActions';
 import { useGoalProgress } from '@/hooks/useGoalProgress';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import { useCategoriesData, useTagsData } from '@/contexts/DataContext';
@@ -38,108 +20,36 @@ type Props = {
 }
 
 const GoalCard = ({ goal, onEdit, onDelete }: Props) => {
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const { t } = useTranslation();
   const { categories } = useCategoriesData();
   const tags = useTagsData();
   const progress = useGoalProgress(goal);
   const dateLocale = useDateLocale();
 
-  const blurActiveElement = () => {
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
-  };
-
-  const handleEditClick = () => {
-    blurActiveElement();
-    setDropdownOpen(false);
-    setTimeout(() => onEdit(goal), 0);
-  };
-
-  const handleDeleteClick = () => {
-    blurActiveElement();
-    setDropdownOpen(false);
-    setTimeout(() => setShowDeleteDialog(true), 0);
-  };
-
-  const handleConfirmDelete = () => {
-    onDelete(goal.id);
-    setShowDeleteDialog(false);
-  };
-
   return (
-    <>
-      <Card className="transition-shadow hover:shadow-md">
-        <CardContent className="p-4 space-y-3">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div
-                className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
-                style={{ backgroundColor: `${goal.color}20`, color: goal.color }}
-              >
-                <Target className="h-5 w-5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-medium truncate">{goal.name}</p>
-                {renderSourceLabel(goal, categories, tags, t)}
-              </div>
-            </div>
-            <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 text-muted-foreground hover:text-foreground shrink-0"
-                >
-                  <MoreVertical className="h-4 w-4" />
-                  <span className="sr-only">{t('common.openMenu')}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-32">
-                <DropdownMenuItem onClick={handleEditClick}>
-                  {t('common.edit')}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleDeleteClick}
-                  className="text-destructive focus:text-destructive"
-                >
-                  {t('common.delete')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          <GoalProgressBar progress={progress} currency={goal.currency} />
-
-          {renderFooter(goal, progress, dateLocale, t)}
-        </CardContent>
-      </Card>
-
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent
-          className="sm:max-w-[425px]"
-          onOpenChange={setShowDeleteDialog}
-        >
-          <AlertDialogHeader data-draggable-area>
-            <AlertDialogTitle>{t('goals.deleteTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('goals.deleteConfirmation', { name: goal.name })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+    <Card className="transition-shadow hover:shadow-md">
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div
+              className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
+              style={{ backgroundColor: `${goal.color}20`, color: goal.color }}
             >
-              {t('common.delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+              <Target className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium truncate">{goal.name}</p>
+              {renderSourceLabel(goal, categories, tags, t)}
+            </div>
+          </div>
+          <GoalCardActions goal={goal} onEdit={onEdit} onDelete={onDelete} />
+        </div>
+
+        <GoalProgressBar progress={progress} currency={goal.currency} />
+
+        {renderFooter(goal, progress, dateLocale, t)}
+      </CardContent>
+    </Card>
   );
 }
 
