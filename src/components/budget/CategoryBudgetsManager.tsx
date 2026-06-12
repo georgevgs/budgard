@@ -171,7 +171,7 @@ const renderDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="sm:max-w-[480px] p-0 gap-0 max-h-[90vh] flex flex-col"
+        className="sm:max-w-[480px] p-0 gap-0 max-h-[90dvh] flex flex-col"
         onOpenChange={(open) => !open && onClose()}
       >
         <div

@@ -77,7 +77,7 @@ export const CategoryDrillDown = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="overflow-y-auto max-h-[60vh] px-6 pb-6">
+        <div className="overflow-y-auto max-h-[60dvh] px-6 pb-6">
           {renderMonthlyBreakdown(monthlyBreakdown, categoryColor, t, defaultCurrency)}
 
           <p className="text-xs text-muted-foreground uppercase tracking-wide mt-5 mb-2">

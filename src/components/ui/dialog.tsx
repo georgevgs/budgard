@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { useTranslation } from 'react-i18next';
 import X from 'lucide-react/dist/esm/icons/x';
 
 import { cn } from '@/lib/utils.ts';
@@ -50,6 +51,7 @@ const DialogContent = React.forwardRef<
     onOpenChange?: (open: boolean) => void;
   }
 >(({ className, children, onOpenChange, style, ...props }, ref) => {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
 
   const {
@@ -84,14 +86,14 @@ const DialogContent = React.forwardRef<
           className={cn(
             'fixed z-50 grid w-full gap-4 border border-border/40 bg-card shadow-lg duration-200',
             // Mobile: drawer from bottom with rounded top corners
-            'bottom-0 left-0 right-0 max-h-[85vh] rounded-t-[24px]',
+            'bottom-0 left-0 right-0 max-h-[85dvh] rounded-t-[24px]',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
             'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
             // Desktop: centered modal
             'sm:left-[50%] sm:top-[50%] sm:bottom-auto sm:right-auto',
             'sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%]',
-            'sm:rounded-2xl sm:max-h-[90vh]',
+            'sm:rounded-2xl sm:max-h-[90dvh]',
             'sm:data-[state=closed]:slide-out-to-left-1/2 sm:data-[state=closed]:slide-out-to-top-[48%]',
             'sm:data-[state=open]:slide-in-from-left-1/2 sm:data-[state=open]:slide-in-from-top-[48%]',
             'sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95',
@@ -106,9 +108,9 @@ const DialogContent = React.forwardRef<
           {...props}
         >
           {children}
-          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+          <DialogPrimitive.Close className="absolute right-2 top-2 inline-flex h-10 w-10 items-center justify-center rounded-lg opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
             <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{t('common.close')}</span>
           </DialogPrimitive.Close>
         </DialogPrimitive.Content>
       </DialogPortal>

@@ -208,7 +208,7 @@ const renderCategoryList = (
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-muted-foreground hover:text-foreground shrink-0"
+            className="h-10 w-10 -my-1.5 text-muted-foreground hover:text-foreground shrink-0"
             onClick={() => setView({ type: 'form', category })}
             aria-label={t('categories.editCategory')}
           >
@@ -217,7 +217,7 @@ const renderCategoryList = (
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
+            className="h-10 w-10 -my-1.5 text-muted-foreground hover:text-destructive shrink-0"
             onClick={() => setDeleteTarget(category)}
             aria-label={t('categories.deleteCategory')}
           >

@@ -423,7 +423,7 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
         onOpenChange={(open) => setIsManagerOpen(open)}
       >
         <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden flex flex-col max-h-[85vh]"
+          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden flex flex-col max-h-[85dvh]"
           onOpenChange={(open: boolean) => setIsManagerOpen(open)}
         >
           <CategoryManager categoryType="income" />

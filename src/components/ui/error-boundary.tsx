@@ -95,7 +95,7 @@ const ErrorFallback = ({ error, onReset, onReload }: ErrorFallbackProps) => {
     error?.message?.includes('is not a valid JavaScript MIME type');
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-background flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center space-y-6">
         <div className="flex justify-center">
           <div className="rounded-full bg-destructive/10 p-4">

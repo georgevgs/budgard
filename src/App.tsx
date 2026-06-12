@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   BrowserRouter,
   Routes,
@@ -66,14 +67,18 @@ const OnboardingFlow = lazyWithRetry(
 // Loading Component
 // ============================================================================
 
-const LoadingSpinner = () => (
-  <div className="min-h-screen bg-background flex items-center justify-center">
-    <div className="flex flex-col items-center gap-2">
-      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-      <p className="text-sm text-muted-foreground">Loading...</p>
+const LoadingSpinner = () => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="min-h-dvh bg-background flex items-center justify-center">
+      <div className="flex flex-col items-center gap-2" role="status">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+        <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // ============================================================================
 // Layout Components
@@ -289,6 +294,7 @@ const renderKeepAliveTab = (
 // ============================================================================
 
 const OfflineBanner = () => {
+  const { t } = useTranslation();
   const isOnline = useOnlineStatus();
   // Track whether we've ever gone offline so we can show a "back online" flash
   const wentOffline = useRef(false);
@@ -310,10 +316,13 @@ const OfflineBanner = () => {
 
   if (!isOnline) {
     return (
-      <div className="fixed bottom-16 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
-        <div className="flex items-center gap-2 rounded-full bg-destructive text-destructive-foreground text-sm font-medium px-4 py-2 shadow-lg pointer-events-auto">
+      <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+        <div
+          role="status"
+          className="flex items-center gap-2 rounded-full bg-destructive text-destructive-foreground text-sm font-medium px-4 py-2 shadow-lg pointer-events-auto"
+        >
           <span className="h-2 w-2 rounded-full bg-destructive-foreground/70 animate-pulse" />
-          No internet connection
+          {t('common.offline')}
         </div>
       </div>
     );
@@ -321,10 +330,13 @@ const OfflineBanner = () => {
 
   if (showBackOnline) {
     return (
-      <div className="fixed bottom-16 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
-        <div className="flex items-center gap-2 rounded-full bg-green-600 text-white text-sm font-medium px-4 py-2 shadow-lg pointer-events-auto">
+      <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+        <div
+          role="status"
+          className="flex items-center gap-2 rounded-full bg-green-600 text-white text-sm font-medium px-4 py-2 shadow-lg pointer-events-auto"
+        >
           <span className="h-2 w-2 rounded-full bg-white/70" />
-          Back online
+          {t('common.backOnline')}
         </div>
       </div>
     );
@@ -342,7 +354,7 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-dvh bg-background flex flex-col">
         <ErrorBoundary>
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>

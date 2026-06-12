@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 // Full-page skeleton shown during the auth check phase so users never
 // see a spinner — the skeleton is visible from the very first frame.
 export const AppLoadingSkeleton = () => (
-  <div className="min-h-screen bg-background flex flex-col">
+  <div className="min-h-dvh bg-background flex flex-col">
     {/* Header */}
     <div className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="container flex h-14 items-center justify-between px-4">

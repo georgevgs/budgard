@@ -19,7 +19,11 @@
     "clear": "Clear",
     "amountZero": "0,00",
     "percentZero": "0.00",
-    "integerZero": "0"
+    "integerZero": "0",
+    "offline": "No internet connection",
+    "backOnline": "Back online",
+    "close": "Close",
+    "morePages": "More pages"
   },
   "auth": {
     "signIn": "Sign In",

@@ -52,10 +52,15 @@ const initI18n = async (): Promise<void> => {
       },
     });
 
+  // Keep <html lang> in sync so screen readers use the right pronunciation
+  document.documentElement.lang = initialLang;
+
   i18n.on('languageChanged', async (lng) => {
     if (!isSupported(lng)) {
       return;
     }
+
+    document.documentElement.lang = lng;
 
     if (i18n.hasResourceBundle(lng, 'translation')) {
       return;

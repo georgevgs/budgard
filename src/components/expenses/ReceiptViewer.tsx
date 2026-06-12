@@ -91,7 +91,7 @@ const renderReceiptImage = (
     <img
       src={url}
       alt={t('receipt.receiptImage')}
-      className="max-h-[70vh] w-full object-contain rounded"
+      className="max-h-[70dvh] w-full object-contain rounded"
       onError={onError}
     />
   );

@@ -117,6 +117,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
               placeholder={t('auth.enterEmail')}
               className={cn('w-full h-10', state.error && 'border-destructive')}
               disabled={isAuthLoading}
+              autoComplete="email"
               autoCorrect="off"
               autoCapitalize="none"
               spellCheck={false}

@@ -19,7 +19,11 @@
     "clear": "Καθαρισμός",
     "amountZero": "0,00",
     "percentZero": "0,00",
-    "integerZero": "0"
+    "integerZero": "0",
+    "offline": "Δεν υπάρχει σύνδεση στο διαδίκτυο",
+    "backOnline": "Ξανά σε σύνδεση",
+    "close": "Κλείσιμο",
+    "morePages": "Περισσότερες σελίδες"
   },
   "auth": {
     "signIn": "Σύνδεση",

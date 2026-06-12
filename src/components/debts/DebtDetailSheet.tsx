@@ -103,7 +103,7 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
     <>
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden flex flex-col max-h-[85vh]"
+          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden flex flex-col max-h-[85dvh]"
           aria-describedby="debt-detail-description"
           onOpenChange={onClose}
         >
@@ -126,7 +126,7 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 shrink-0"
+                    className="h-10 w-10 shrink-0"
                   >
                     <MoreVertical className="h-4 w-4" />
                     <span className="sr-only">{t('common.openMenu')}</span>
