@@ -1,4 +1,4 @@
-import { useState, useMemo, useTransition } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,78 +8,28 @@ import {
   DialogHeader,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { CurrencyInput } from '@/components/ui/currency-input';
-import { DatePickerField } from '@/components/ui/date-picker-field';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Popover,
-  PopoverAnchor,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
-import { format } from 'date-fns';
-import { cn, parseCurrencyInput } from '@/lib/utils';
-import { SUPPORTED_CURRENCIES } from '@/lib/currencies';
-import { useAuth } from '@/hooks/useAuth';
+import { Form } from '@/components/ui/form';
+import { useDataConfig } from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
-import { useExchangeRate } from '@/hooks/useExchangeRate';
-import {
-  useExpensesData,
-  useTagsData,
-  useDataConfig,
-} from '@/contexts/DataContext';
-import { useTagOps } from '@/hooks/dataOps/useTagOps';
+import { useCurrencyConversion } from '@/hooks/expenseForm/useCurrencyConversion';
+import { useDescriptionSuggestions } from '@/hooks/expenseForm/useDescriptionSuggestions';
+import { useTagPicker } from '@/hooks/expenseForm/useTagPicker';
+import { useExpenseSubmit } from '@/hooks/expenseForm/useExpenseSubmit';
 import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 import { expenseSchema, type ExpenseFormData } from '@/lib/validations';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
-import ReceiptUpload from '@/components/expenses/ReceiptUpload';
-import { TagButtonContent } from '@/components/expenses/TagPicker';
+import ExpenseAmountField from '@/components/expenses/ExpenseAmountField';
+import ExpenseDescriptionField from '@/components/expenses/ExpenseDescriptionField';
+import ExpenseCategoryField from '@/components/expenses/ExpenseCategoryField';
+import ExpenseDateField from '@/components/expenses/ExpenseDateField';
+import ExpenseFormDetails from '@/components/expenses/ExpenseFormDetails';
 import {
   getInitialAmount,
   getInitialDate,
-  formatWatchedDate,
-  normalizeCategoryId,
-  getDetailsRowsClass,
-  renderDetailsToggleLabel,
-  renderSaveButtonLabel,
-  renderConversionPreview,
   renderFormTitle,
-  renderTagClearIndicator,
-  renderCreateTagOption,
-  renderSuggestionMeta,
-  renderCategoryIndicator,
-  renderNoTagsMessage,
+  renderSaveButtonLabel,
 } from '@/components/expenses/ExpensesForm.helpers';
-
-// Preset colors cycled when auto-assigning a color to a new tag
-const TAG_COLORS = [
-  '#6366f1',
-  '#ec4899',
-  '#f59e0b',
-  '#10b981',
-  '#3b82f6',
-  '#ef4444',
-  '#8b5cf6',
-  '#14b8a6',
-  '#f97316',
-  '#06b6d4',
-];
 
 type ExpensesFormProps = {
   expense?: Expense;
@@ -99,33 +49,18 @@ const ExpensesForm = ({
   onSubmit,
 }: ExpensesFormProps) => {
   const { t } = useTranslation();
-  const { session } = useAuth();
-  const tags = useTagsData();
-  const allExpenses = useExpensesData();
   const { defaultCurrency } = useDataConfig();
-  const { handleTagCreate } = useTagOps();
   const dateLocale = useDateLocale();
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [removeExistingReceipt, setRemoveExistingReceipt] = useState(false);
-  const [tagPopoverOpen, setTagPopoverOpen] = useState(false);
-  const [tagSearch, setTagSearch] = useState('');
-  const [isCreatingTag, startTagCreation] = useTransition();
-  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [showDetails, setShowDetails] = useState(() =>
     Boolean(expense?.tag_id || expense?.receipt_path),
   );
-  const [selectedCurrency, setSelectedCurrency] = useState(
-    expense?.original_currency ?? defaultCurrency,
-  );
-  const [submitRateError, setSubmitRateError] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const initialAmount = getInitialAmount(expense, defaultCurrency);
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
-      amount: initialAmount,
+      amount: getInitialAmount(expense, defaultCurrency),
       description: expense?.description || '',
       category_id: expense?.category_id || 'none',
       tag_id: expense?.tag_id || undefined,
@@ -133,157 +68,17 @@ const ExpensesForm = ({
     },
   });
 
-  const selectedTagId = form.watch('tag_id');
-  const selectedTag = tags.find((t) => t.id === selectedTagId);
-
-  const filteredTags = useMemo(() => {
-    if (!tagSearch) return tags;
-    const lower = tagSearch.toLowerCase();
-
-    return tags.filter((t) => t.name.toLowerCase().includes(lower));
-  }, [tags, tagSearch]);
-
-  const watchedAmount = form.watch('amount');
-  const watchedDate = form.watch('date');
-  const watchedDateStr = formatWatchedDate(watchedDate);
-
-  const {
-    rate: exchangeRate,
-    isFetching: isFetchingRate,
-    error: fetchRateError,
-    ensureRate,
-  } = useExchangeRate(selectedCurrency, watchedDateStr, defaultCurrency);
-  const rateError = fetchRateError || submitRateError;
-
-  const previewConvertedAmount = useMemo(() => {
-    if (selectedCurrency === defaultCurrency || !exchangeRate) return null;
-    const raw = parseCurrencyInput(watchedAmount);
-    if (!raw) return null;
-
-    return Math.round(raw * exchangeRate * 100) / 100;
-  }, [exchangeRate, selectedCurrency, watchedAmount, defaultCurrency]);
-
-  const descriptionValue = form.watch('description');
-
-  const suggestions = useMemo(() => {
-    const seen = new Map<string, Expense>();
-    const sorted = [...allExpenses].sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    );
-    for (const expense of sorted) {
-      const key = expense.description.toLowerCase();
-      if (!seen.has(key)) {
-        seen.set(key, expense);
-      }
-    }
-
-    return Array.from(seen.values());
-  }, [allExpenses]);
-
-  const filteredSuggestions = useMemo(() => {
-    const query = descriptionValue.trim().toLowerCase();
-    if (!query) return [];
-
-    return suggestions
-      .filter((s) => {
-        const desc = s.description.toLowerCase();
-
-        return desc.includes(query) && desc !== query;
-      })
-      .slice(0, 5);
-  }, [suggestions, descriptionValue]);
-
-  const handleSuggestionSelect = (selected: Expense) => {
-    form.setValue('description', selected.description);
-    form.setValue('category_id', selected.category_id ?? 'none');
-    form.setValue('tag_id', selected.tag_id ?? undefined);
-    setSuggestionsOpen(false);
-  };
-
-  const isSuggestionsPopoverOpen =
-    suggestionsOpen && filteredSuggestions.length > 0;
-
-  const hasExactMatch = tags.some(
-    (t) => t.name.toLowerCase() === tagSearch.toLowerCase(),
-  );
-  const showCreateOption = tagSearch.trim().length > 0 && !hasExactMatch;
-
-  const handleTagSelect = (tagId: string) => {
-    form.setValue('tag_id', tagId);
-    setTagPopoverOpen(false);
-    setTagSearch('');
-  };
-
-  const handleTagClear = () => {
-    form.setValue('tag_id', undefined);
-    setTagSearch('');
-  };
-
-  const handleTagCreateInline = () => {
-    if (!tagSearch.trim() || isCreatingTag) return;
-    startTagCreation(async () => {
-      try {
-        const color = TAG_COLORS[tags.length % TAG_COLORS.length];
-        const newTag = await handleTagCreate(tagSearch.trim(), color);
-        form.setValue('tag_id', newTag.id);
-        setTagPopoverOpen(false);
-        setTagSearch('');
-      } catch {
-        // error already shown via toast
-      }
-    });
-  };
-
-  const handleCurrencyChange = (value: string) => {
-    setSelectedCurrency(value);
-    setSubmitRateError(false);
-  };
-
-  const handleSubmit = async (values: ExpenseFormData) => {
-    if (!session?.user?.id) return;
-
-    setIsSubmitting(true);
-    try {
-      const rawAmount = parseCurrencyInput(values.amount);
-      const dateStr = format(values.date, 'yyyy-MM-dd');
-      let finalAmount = rawAmount;
-      let originalAmount: number | null = null;
-      let originalCurrency: string | null = null;
-      let exchangeRateValue: number | null = null;
-
-      if (selectedCurrency !== defaultCurrency) {
-        const rate = await ensureRate();
-        finalAmount = Math.round(rawAmount * rate * 100) / 100;
-        originalAmount = rawAmount;
-        originalCurrency = selectedCurrency;
-        exchangeRateValue = rate;
-      }
-
-      const expenseData: Partial<Expense> = {
-        amount: finalAmount,
-        original_amount: originalAmount,
-        original_currency: originalCurrency,
-        exchange_rate: exchangeRateValue,
-        description: values.description,
-        category_id: normalizeCategoryId(values.category_id),
-        tag_id: values.tag_id || null,
-        date: dateStr,
-        user_id: session.user.id,
-      };
-
-      onSubmit(expenseData, expense?.id, {
-        receiptFile,
-        removeExistingReceipt,
-        existingReceiptPath: expense?.receipt_path ?? null,
-      });
-      onClose();
-    } catch {
-      setSubmitRateError(true);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const conversion = useCurrencyConversion(form, expense);
+  const suggestions = useDescriptionSuggestions(form);
+  const tagPicker = useTagPicker(form);
+  const { isSubmitting, handleSubmit } = useExpenseSubmit({
+    expense,
+    conversion,
+    receiptFile,
+    removeExistingReceipt,
+    onSubmit,
+    onClose,
+  });
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
@@ -301,7 +96,9 @@ const ExpensesForm = ({
           <DialogTitle className="text-xl">
             {renderFormTitle(Boolean(expense), t)}
           </DialogTitle>
-          <DialogDescription>{t('expenses.formDescription')}</DialogDescription>
+          <DialogDescription>
+            {t('expenses.formDescription')}
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -309,268 +106,21 @@ const ExpensesForm = ({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-4 pb-4"
           >
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex gap-2">
-                    <Select
-                      value={selectedCurrency}
-                      onValueChange={handleCurrencyChange}
-                    >
-                      <SelectTrigger
-                        className="w-20 shrink-0"
-                        aria-label={t('expenses.currency.label')}
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-60">
-                        {SUPPORTED_CURRENCIES.map((c) => (
-                          <SelectItem key={c.code} value={c.code}>
-                            {c.code}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormControl>
-                      <CurrencyInput
-                        currency={selectedCurrency}
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder={t('expenses.amountPlaceholder')}
-                        aria-label={t('expenses.amountLabel')}
-                        wrapperClassName="flex-1"
-                      />
-                    </FormControl>
-                  </div>
-                  {renderConversionPreview(isFetchingRate, rateError, previewConvertedAmount, selectedCurrency, defaultCurrency, t)}
-                  <FormMessage />
-                </FormItem>
-              )}
+            <ExpenseAmountField form={form} conversion={conversion} />
+            <ExpenseDescriptionField form={form} suggestions={suggestions} />
+            <ExpenseCategoryField form={form} categories={categories} />
+            <ExpenseDateField form={form} dateLocale={dateLocale} />
+            <ExpenseFormDetails
+              form={form}
+              tagPicker={tagPicker}
+              showDetails={showDetails}
+              onToggleDetails={() => setShowDetails((prev) => !prev)}
+              currentReceiptPath={expense?.receipt_path}
+              receiptFile={receiptFile}
+              isRemovingReceipt={removeExistingReceipt}
+              onReceiptSelect={setReceiptFile}
+              onRemoveExistingReceipt={() => setRemoveExistingReceipt(true)}
             />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <Popover
-                    open={isSuggestionsPopoverOpen}
-                    onOpenChange={setSuggestionsOpen}
-                    modal={false}
-                  >
-                    <PopoverAnchor asChild>
-                      <FormControl>
-                        <Input
-                          placeholder={t('expenses.descriptionPlaceholder')}
-                          {...field}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            setSuggestionsOpen(true);
-                          }}
-                          onFocus={() => setSuggestionsOpen(true)}
-                          autoComplete="off"
-                          className="overflow-ellipsis"
-                          aria-label={t('expenses.descriptionLabel')}
-                        />
-                      </FormControl>
-                    </PopoverAnchor>
-                    <PopoverContent
-                      className="w-[var(--radix-popover-trigger-width)] p-0"
-                      align="start"
-                      onOpenAutoFocus={(e) => e.preventDefault()}
-                      onInteractOutside={() => setSuggestionsOpen(false)}
-                    >
-                      <div className="max-h-[200px] overflow-y-auto">
-                        {filteredSuggestions.map((suggestion) => (
-                          <button
-                            key={suggestion.id}
-                            type="button"
-                            className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-sm hover:bg-accent active:bg-accent text-left focus-visible:outline-none focus-visible:bg-accent"
-                            onMouseDown={(e) => e.preventDefault()}
-                            onClick={() => handleSuggestionSelect(suggestion)}
-                          >
-                            <span className="truncate">
-                              {suggestion.description}
-                            </span>
-                            {renderSuggestionMeta(suggestion)}
-                          </button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="category_id"
-              render={({ field }) => (
-                <FormItem>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={t('expenses.selectCategory')}
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent position="popper" className="max-h-[300px]">
-                      <SelectItem value="none">
-                        {t('expenses.noCategory')}
-                      </SelectItem>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          <div className="flex items-center gap-2">
-                            {renderCategoryIndicator(category)}
-                            {category.name}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <DatePickerField
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder={t('expenses.pickDate')}
-                    locale={dateLocale}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Collapsible details section */}
-            <button
-              type="button"
-              onClick={() => setShowDetails((prev) => !prev)}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <ChevronDown
-                className={cn(
-                  'h-4 w-4 transition-transform duration-200',
-                  showDetails && 'rotate-180',
-                )}
-              />
-              {renderDetailsToggleLabel(showDetails, t)}
-            </button>
-
-            <div
-              className={cn(
-                'grid transition-[grid-template-rows] duration-200',
-                getDetailsRowsClass(showDetails),
-              )}
-            >
-              <div className="overflow-hidden space-y-4">
-                {/* Tag field */}
-                <FormField
-                  control={form.control}
-                  name="tag_id"
-                  render={() => (
-                    <FormItem>
-                      <Popover
-                        open={tagPopoverOpen}
-                        onOpenChange={setTagPopoverOpen}
-                        modal={false}
-                      >
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className={cn(
-                                'w-full justify-between font-normal',
-                                !selectedTag && 'text-muted-foreground',
-                              )}
-                            >
-                              <TagButtonContent selectedTag={selectedTag} />
-                              {renderTagClearIndicator(selectedTag, handleTagClear)}
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-full p-0" align="start">
-                          <div className="p-2">
-                            <Input
-                              placeholder={t('expenses.tagSearchPlaceholder')}
-                              value={tagSearch}
-                              onChange={(e) => setTagSearch(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  e.preventDefault();
-                                  if (
-                                    filteredTags.length === 1 &&
-                                    !showCreateOption
-                                  ) {
-                                    handleTagSelect(filteredTags[0].id);
-                                  } else if (showCreateOption) {
-                                    handleTagCreateInline();
-                                  }
-                                }
-                              }}
-                              autoFocus
-                            />
-                          </div>
-                          <div className="max-h-[200px] overflow-y-auto">
-                            {filteredTags.map((tag) => (
-                              <button
-                                key={tag.id}
-                                type="button"
-                                className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left focus-visible:outline-none focus-visible:bg-accent"
-                                onClick={() => handleTagSelect(tag.id)}
-                              >
-                                <div
-                                  className="w-3 h-3 rounded-full shrink-0"
-                                  style={{ backgroundColor: tag.color }}
-                                />
-                                {tag.name}
-                              </button>
-                            ))}
-                            {renderCreateTagOption(
-                              showCreateOption,
-                              isCreatingTag,
-                              tagSearch,
-                              handleTagCreateInline,
-                              t,
-                            )}
-                            {renderNoTagsMessage(
-                              filteredTags.length,
-                              showCreateOption,
-                              t,
-                            )}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <ReceiptUpload
-                  currentReceiptPath={expense?.receipt_path}
-                  selectedFile={receiptFile}
-                  isRemoving={removeExistingReceipt}
-                  onFileSelect={setReceiptFile}
-                  onRemoveExisting={() => setRemoveExistingReceipt(true)}
-                />
-              </div>
-            </div>
 
             <div className="flex gap-3 justify-end pt-2 pb-2">
               <Button type="button" variant="outline" onClick={onClose}>

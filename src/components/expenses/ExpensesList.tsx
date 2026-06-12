@@ -1,355 +1,50 @@
-import {
-  useState,
-  useCallback,
-  useEffect,
-  useMemo,
-  useOptimistic,
-  useTransition,
-} from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
 import { format } from 'date-fns';
-import { useTranslation } from 'react-i18next';
-import Download from 'lucide-react/dist/esm/icons/download';
-import Upload from 'lucide-react/dist/esm/icons/upload';
-import { FORM_TYPES, type FormType } from '@/components/layout/FormsManager';
-import { useAuth } from '@/hooks/useAuth';
-import {
-  useDataConfig,
-  useExpensesData,
-  useCategoriesData,
-  useTagsData,
-  useTemplatesData,
-  useCategoryBudgetsData,
-} from '@/contexts/DataContext';
-import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
-import { useTemplateOps } from '@/hooks/dataOps/useTemplateOps';
-import { useBudgetOps } from '@/hooks/dataOps/useBudgetOps';
-import { cn } from '@/lib/utils';
-import { downloadExpensesAsCSV } from '@/lib/csvExport';
-import { Button } from '@/components/ui/button';
 import FormsManager from '@/components/layout/FormsManager';
-import SpeedDial from '@/components/layout/SpeedDial';
-import BudgetProgress from '@/components/budget/BudgetProgress';
-import ExpensesMonthlySelector from '@/components/expenses/ExpensesMonthlySelector';
-import ExpensesMonthlyOverview from '@/components/expenses/ExpensesMonthlyOverview';
-import ExpensesDashboard from '@/components/expenses/ExpensesDashboard';
-import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
-import ExpensesPagination from '@/components/expenses/ExpensesPagination';
-import ExpensesFilter from '@/components/expenses/ExpensesFilter';
-import CsvImportDialog from '@/components/expenses/CsvImportDialog';
+import { useDataConfig, useTemplatesData } from '@/contexts/DataContext';
+import { useTemplateOps } from '@/hooks/dataOps/useTemplateOps';
+import { useOptimisticExpenseActions } from '@/hooks/expensesList/useOptimisticExpenseActions';
+import { useExpenseAlerts } from '@/hooks/expensesList/useExpenseAlerts';
+import { useExpenseTotals } from '@/hooks/expensesList/useExpenseTotals';
+import { useExpenseFormState } from '@/hooks/expensesList/useExpenseFormState';
+import { useOpenFormFromUrl } from '@/hooks/expensesList/useOpenFormFromUrl';
 import { useExpensesFilter } from '@/hooks/useExpensesFilter';
-import { useBudgetAlerts } from '@/hooks/useBudgetAlerts';
-import { useCategoryBudgetAlerts } from '@/hooks/useCategoryBudgetAlerts';
-import { useCurrentMonthSpendingByCategory } from '@/hooks/useCurrentMonthSpendingByCategory';
-import type { Expense } from '@/types/Expense';
-import type { Category } from '@/types/Category';
-import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
-import type { DateRangePreset } from '@/hooks/useExpensesFilter';
-import ExpensesEmpty from '@/components/expenses/ExpensesEmpty';
+import SpeedDial from '@/components/layout/SpeedDial';
+import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
+import ExpensesOverviewSection from '@/components/expenses/ExpensesOverviewSection';
+import ExpensesContent from '@/components/expenses/ExpensesContent';
+import CsvImportDialog from '@/components/expenses/CsvImportDialog';
 import TemplatesBar from '@/components/expenses/TemplatesBar';
 import WeeklyRecapCard from '@/components/recap/WeeklyRecapCard';
-import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
-
-// ============================================================================
-// Extracted Components for Readability
-// ============================================================================
-
-type ExpensesContentProps = {
-  expenses: Expense[];
-  hasActiveFilters: boolean;
-  noMatchMessage: string;
-  clearFiltersLabel: string;
-  selectedMonth: string;
-  searchQuery: string;
-  showFullDate: boolean;
-  onAddClick: () => void;
-  onEdit: (expense: Expense) => void;
-  onDelete: (id: string) => void;
-  onSaveAsTemplate: (expense: Expense) => void;
-  onClearFilters: () => void;
-};
-
-const ExpensesContent = ({
-  expenses,
-  hasActiveFilters,
-  noMatchMessage,
-  clearFiltersLabel,
-  selectedMonth,
-  searchQuery,
-  showFullDate,
-  onAddClick,
-  onEdit,
-  onDelete,
-  onSaveAsTemplate,
-  onClearFilters,
-}: ExpensesContentProps) => {
-  // Has expenses - show paginated list
-  if (expenses.length > 0) {
-    return (
-      <ExpensesPagination
-        expenses={expenses}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onSaveAsTemplate={onSaveAsTemplate}
-        searchQuery={searchQuery}
-        showFullDate={showFullDate}
-      />
-    );
-  }
-
-  // No expenses, but filters are active - show "no matches" message
-  if (hasActiveFilters) {
-    return (
-      <div
-        className="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-border/40"
-        role="status"
-      >
-        <p className="text-sm text-muted-foreground mb-3">{noMatchMessage}</p>
-        <Button variant="outline" size="sm" onClick={onClearFilters}>
-          {clearFiltersLabel}
-        </Button>
-      </div>
-    );
-  }
-
-  // No expenses at all - show empty state
-  return (
-    <ExpensesEmpty selectedMonth={selectedMonth} onAddClick={onAddClick} />
-  );
-};
-
-// ============================================================================
-// Main Component
-// ============================================================================
 
 const ExpensesList = () => {
-  const { t } = useTranslation();
-  const { session } = useAuth();
-  const expenses = useExpensesData();
-  const { expenseCategories: categories } = useCategoriesData();
-  const tags = useTagsData();
   const templates = useTemplatesData();
-  const categoryBudgets = useCategoryBudgetsData();
-  const { isInitialized, monthlyBudget, defaultCurrency } = useDataConfig();
-  const {
-    handleExpenseDelete: deleteExpense,
-    handleExpenseSubmit: submitExpense,
-  } = useExpenseOps();
-  const { handleTemplateCreate, handleTemplateDelete } = useTemplateOps();
-  const { handleBudgetUpdate } = useBudgetOps();
-  const [optimisticExpenses, addOptimisticExpense] = useOptimistic(
-    expenses,
-    expensesReducer,
-  );
-  const [, startTransition] = useTransition();
-
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
-  const [formType, setFormType] = useState<FormType>(null);
+  const { isInitialized, defaultCurrency } = useDataConfig();
+  const { handleTemplateDelete } = useTemplateOps();
+  const formState = useExpenseFormState();
   const [isDashboardVisible, setIsDashboardVisible] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const currentMonth = format(new Date(), 'yyyy-MM');
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
-  // Open add-expense form when navigated with ?action=add (e.g. from push notification)
-  useEffect(() => {
-    if (!isInitialized) return;
-    if (searchParams.get('action') !== 'add') return;
-
-    setFormType(FORM_TYPES.NEW_EXPENSE);
-    setSearchParams({}, { replace: true });
-  }, [isInitialized, searchParams, setSearchParams]);
-
-  // Use the filter hook — pass optimistic list so deletes reflect immediately
   const {
-    filteredExpenses,
-    monthlyExpenses,
-    search,
-    selectedCategoryId,
-    selectedTagId,
-    sortOrder,
-    hasActiveFilters,
-    isSearchingAllMonths,
-    dateRangePreset,
-    setSearch,
-    setSelectedCategoryId,
-    setSelectedTagId,
-    setSortOrder,
-    setIsSearchingAllMonths,
-    setDateRangePreset,
-    handleClearFilters,
-  } = useExpensesFilter({
+    optimisticExpenses,
+    handleExpenseDelete,
+    handleExpenseFormSubmit,
+    handleSaveAsTemplate,
+    handleUseTemplate,
+  } = useOptimisticExpenseActions();
+
+  useOpenFormFromUrl(isInitialized, formState.setFormType);
+
+  // Pass the optimistic list so deletes reflect immediately
+  const filter = useExpensesFilter({
     expenses: optimisticExpenses,
     selectedMonth,
   });
+  const { monthlyTotal, filteredTotal, baseTotal } = useExpenseTotals(filter);
 
-  const handleExpenseDelete = useCallback(
-    (id: string) => {
-      if (id.startsWith('temp-')) return;
-      startTransition(async () => {
-        addOptimisticExpense({ type: 'delete', id });
-        await deleteExpense(id);
-      });
-    },
-    [addOptimisticExpense, deleteExpense],
-  );
-
-  const handleExpenseFormSubmit = useCallback(
-    (
-      data: Partial<Expense>,
-      expenseId?: string,
-      receiptOptions?: ReceiptOptions,
-    ) => {
-      startTransition(async () => {
-        const category = categories.find((c) => c.id === data.category_id);
-        const tag = tags.find((t) => t.id === data.tag_id);
-
-        if (expenseId) {
-          const existing = optimisticExpenses.find((e) => e.id === expenseId);
-          if (existing) {
-            addOptimisticExpense({
-              type: 'update',
-              expense: { ...existing, ...data, category, tag },
-            });
-          }
-        } else {
-          addOptimisticExpense({
-            type: 'add',
-            expense: {
-              id: `temp-${Date.now()}`,
-              user_id: data.user_id!,
-              amount: data.amount!,
-              description: data.description!,
-              date: data.date!,
-              category_id: data.category_id,
-              tag_id: data.tag_id,
-              category,
-              tag,
-              receipt_path: null,
-              created_at: new Date().toISOString(),
-            },
-          });
-        }
-
-        await submitExpense(data, expenseId, receiptOptions);
-      });
-    },
-    [addOptimisticExpense, categories, tags, optimisticExpenses, submitExpense],
-  );
-
-  const monthlyTotal = useMemo(
-    () => monthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0),
-    [monthlyExpenses],
-  );
-
-  useBudgetAlerts({
-    monthlyBudget,
-    monthlySpent: getBudgetSpent(selectedMonth, currentMonth, monthlyTotal),
-    defaultCurrency,
-  });
-
-  // Per-category alerts read directly from the live `expenses` list because
-  // the optimistic copy doesn't include reverted-but-not-yet-purged items.
-  const spendingByCategory = useCurrentMonthSpendingByCategory(expenses);
-  const categoryAlertInputs = useMemo(() => {
-    const byCategoryId = new Map(categories.map((c) => [c.id, c]));
-
-    return categoryBudgets
-      .map((budget) => {
-        const category = byCategoryId.get(budget.category_id);
-        if (!category) return null;
-
-        return {
-          categoryId: category.id,
-          categoryName: category.name,
-          cap: budget.monthly_amount,
-          spent: spendingByCategory.get(category.id) ?? 0,
-        };
-      })
-      .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
-  }, [categoryBudgets, categories, spendingByCategory]);
-
-  useCategoryBudgetAlerts({
-    alerts: categoryAlertInputs,
-    defaultCurrency,
-    enabled: selectedMonth === currentMonth,
-  });
-
-  const filteredTotal = useMemo(
-    () => filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0),
-    [filteredExpenses],
-  );
-
-  const baseTotal = getBaseTotal(
-    isSearchingAllMonths,
-    dateRangePreset,
-    filteredTotal,
-    monthlyTotal,
-  );
-
-  const handleSaveAsTemplate = useCallback(
-    (expense: Expense) => {
-      handleTemplateCreate({
-        amount: expense.amount,
-        description: expense.description,
-        category_id: expense.category_id ?? null,
-        tag_id: expense.tag_id ?? null,
-        original_currency: expense.original_currency ?? null,
-      });
-    },
-    [handleTemplateCreate],
-  );
-
-  const handleUseTemplate = useCallback(
-    (template: ExpenseTemplate) => {
-      if (!session?.user?.id) return;
-
-      const userId = session.user.id;
-      const today = format(new Date(), 'yyyy-MM-dd');
-      const category = categories.find((c) => c.id === template.category_id);
-      const tag = tags.find((t) => t.id === template.tag_id);
-
-      startTransition(async () => {
-        addOptimisticExpense({
-          type: 'add',
-          expense: {
-            id: `temp-${Date.now()}`,
-            user_id: userId,
-            amount: template.amount,
-            description: template.description,
-            date: today,
-            category_id: template.category_id,
-            tag_id: template.tag_id,
-            category,
-            tag,
-            receipt_path: null,
-            created_at: new Date().toISOString(),
-          },
-        });
-
-        await submitExpense({
-          amount: template.amount,
-          description: template.description,
-          category_id: template.category_id,
-          tag_id: template.tag_id,
-          date: today,
-          user_id: userId,
-        });
-      });
-    },
-    [session?.user?.id, addOptimisticExpense, categories, tags, submitExpense],
-  );
-
-  const handleFormClose = useCallback(() => {
-    setFormType(null);
-    setSelectedExpense(undefined);
-  }, []);
-
-  const handleExpenseEdit = useCallback((expense: Expense) => {
-    if (expense.id.startsWith('temp-')) return;
-    setSelectedExpense(expense);
-    setFormType(FORM_TYPES.EDIT_EXPENSE);
-  }, []);
+  useExpenseAlerts({ selectedMonth, currentMonth, monthlyTotal });
 
   if (!isInitialized) {
     return <ExpenseLoadingState />;
@@ -362,96 +57,20 @@ const ExpensesList = () => {
           <WeeklyRecapCard />
         </div>
 
-        {/* Month Selection and Overview Section */}
-        <div className="space-y-3 mb-4">
-          <ExpensesMonthlySelector
-            selectedMonth={selectedMonth}
-            onMonthChange={setSelectedMonth}
-          />
-          <ExpensesMonthlyOverview
-            monthlyTotal={baseTotal}
-            filteredTotal={filteredTotal}
-            hasActiveFilters={hasActiveFilters}
-            selectedMonth={selectedMonth}
-            currentMonth={currentMonth}
-            isExpanded={isDashboardVisible}
-            hasExpenses={filteredExpenses.length > 0}
-            expenses={filteredExpenses}
-            onCurrentMonthClick={() => setSelectedMonth(currentMonth)}
-            onMonthlyTotalClick={() =>
-              setIsDashboardVisible(!isDashboardVisible)
-            }
-          />
+        <ExpensesOverviewSection
+          selectedMonth={selectedMonth}
+          currentMonth={currentMonth}
+          onMonthChange={setSelectedMonth}
+          isDashboardVisible={isDashboardVisible}
+          onToggleDashboard={() => setIsDashboardVisible((prev) => !prev)}
+          filter={filter}
+          baseTotal={baseTotal}
+          filteredTotal={filteredTotal}
+          monthlyTotal={monthlyTotal}
+          allExpensesCount={optimisticExpenses.length}
+          onOpenImport={() => setIsImportDialogOpen(true)}
+        />
 
-          <ExpensesFilter
-            categories={categories}
-            tags={tags}
-            search={search}
-            selectedCategoryId={selectedCategoryId}
-            selectedTagId={selectedTagId}
-            sortOrder={sortOrder}
-            hasActiveFilters={hasActiveFilters}
-            isSearchingAllMonths={isSearchingAllMonths}
-            dateRangePreset={dateRangePreset}
-            onSearchChange={setSearch}
-            onCategoryChange={setSelectedCategoryId}
-            onTagChange={setSelectedTagId}
-            onSortChange={setSortOrder}
-            onSearchScopeChange={setIsSearchingAllMonths}
-            onDateRangeChange={setDateRangePreset}
-            onClearFilters={handleClearFilters}
-          />
-
-          {renderSearchResultCount(
-            search,
-            filteredExpenses.length,
-            getSearchScopeTotal(
-              isSearchingAllMonths,
-              optimisticExpenses.length,
-              monthlyExpenses.length,
-            ),
-            t,
-          )}
-
-          <div
-            className={cn(
-              'grid transition-all duration-200 ease-in-out',
-              getDashboardRowsClass(isDashboardVisible),
-            )}
-          >
-            <div className="overflow-hidden space-y-3">
-              {/* Budget Progress */}
-              <BudgetProgress
-                monthlyBudget={monthlyBudget}
-                monthlySpent={monthlyTotal}
-                onBudgetUpdate={handleBudgetUpdate}
-                currencyCode={defaultCurrency}
-              />
-
-              {renderDashboard(filteredExpenses, categories)}
-
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsImportDialogOpen(true)}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  {t('import.importCSV')}
-                </Button>
-                {renderExportButton(
-                  filteredExpenses,
-                  categories,
-                  selectedMonth,
-                  t,
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Templates Bar */}
         <TemplatesBar
           templates={templates}
           defaultCurrency={defaultCurrency}
@@ -459,164 +78,36 @@ const ExpensesList = () => {
           onDelete={handleTemplateDelete}
         />
 
-        {/* Expenses List Section */}
         <div className="flex-1">
           <ExpensesContent
-            expenses={filteredExpenses}
-            hasActiveFilters={hasActiveFilters}
-            noMatchMessage={t('expenses.noExpensesMatchFilter')}
-            clearFiltersLabel={t('expenses.filter.clearAll')}
+            filter={filter}
             selectedMonth={selectedMonth}
-            searchQuery={search}
-            showFullDate={isSearchingAllMonths || !!dateRangePreset}
-            onAddClick={() => setFormType(FORM_TYPES.NEW_EXPENSE)}
-            onEdit={handleExpenseEdit}
+            onAddClick={formState.openNewExpenseForm}
+            onEdit={formState.handleExpenseEdit}
             onDelete={handleExpenseDelete}
             onSaveAsTemplate={handleSaveAsTemplate}
-            onClearFilters={handleClearFilters}
           />
         </div>
       </div>
 
-      {/* Forms Manager */}
       <FormsManager
-        formType={formType}
-        onClose={handleFormClose}
-        selectedExpense={selectedExpense}
+        formType={formState.formType}
+        onClose={formState.handleFormClose}
+        selectedExpense={formState.selectedExpense}
         onExpenseSubmit={handleExpenseFormSubmit}
       />
 
-      {/* CSV Import Dialog */}
       <CsvImportDialog
         open={isImportDialogOpen}
         onClose={() => setIsImportDialogOpen(false)}
       />
 
-      {/* Speed Dial */}
       <SpeedDial
-        onAddExpense={() => setFormType(FORM_TYPES.NEW_EXPENSE)}
-        onAddCategory={() => setFormType(FORM_TYPES.NEW_CATEGORY)}
+        onAddExpense={formState.openNewExpenseForm}
+        onAddCategory={formState.openNewCategoryForm}
       />
     </div>
   );
 };
 
 export default ExpensesList;
-
-// ─── Helper render functions ──────────────────────────────────────────────────
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
-
-const getBudgetSpent = (
-  selectedMonth: string,
-  currentMonth: string,
-  monthlyTotal: number,
-): number => {
-  if (selectedMonth === currentMonth) return monthlyTotal;
-
-  return 0;
-};
-
-const getBaseTotal = (
-  isSearchingAllMonths: boolean,
-  dateRangePreset: DateRangePreset,
-  filteredTotal: number,
-  monthlyTotal: number,
-): number => {
-  if (isSearchingAllMonths || dateRangePreset) return filteredTotal;
-
-  return monthlyTotal;
-};
-
-const getSearchScopeTotal = (
-  isSearchingAllMonths: boolean,
-  allMonthsCount: number,
-  monthCount: number,
-): number => {
-  if (isSearchingAllMonths) return allMonthsCount;
-
-  return monthCount;
-};
-
-const getDashboardRowsClass = (isVisible: boolean): string => {
-  if (isVisible) return 'grid-rows-[1fr] opacity-100';
-
-  return 'grid-rows-[0fr] opacity-0';
-};
-
-const renderSearchResultCount = (
-  search: string,
-  filteredCount: number,
-  totalCount: number,
-  t: TranslateFunction,
-) => {
-  if (search.length === 0) return null;
-
-  return (
-    <p className="text-xs text-muted-foreground px-1">
-      {t('expenses.search.resultCount', {
-        count: filteredCount,
-        total: totalCount,
-      })}
-    </p>
-  );
-};
-
-const renderDashboard = (expenses: Expense[], categories: Category[]) => {
-  if (expenses.length === 0) return null;
-
-  return <ExpensesDashboard expenses={expenses} categories={categories} />;
-};
-
-const renderExportButton = (
-  expenses: Expense[],
-  categories: Category[],
-  selectedMonth: string,
-  t: TranslateFunction,
-) => {
-  if (expenses.length === 0) return null;
-
-  return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={() =>
-        downloadExpensesAsCSV({ expenses, categories, selectedMonth })
-      }
-      className="text-muted-foreground hover:text-foreground"
-    >
-      <Download className="h-4 w-4 mr-2" />
-      {t('expenses.exportCSV')}
-    </Button>
-  );
-};
-
-// ============================================================================
-// Optimistic reducer
-// ============================================================================
-
-type OptimisticAction =
-  | { type: 'add'; expense: Expense }
-  | { type: 'update'; expense: Expense }
-  | { type: 'delete'; id: string };
-
-const expensesReducer = (
-  state: Expense[],
-  action: OptimisticAction,
-): Expense[] => {
-  switch (action.type) {
-    case 'add':
-      return [action.expense, ...state];
-    case 'update':
-      return state.map((e) => {
-        if (e.id === action.expense.id) return action.expense;
-
-        return e;
-      });
-    case 'delete':
-      return state.filter((e) => e.id !== action.id);
-  }
-};

@@ -18,47 +18,10 @@ const ExpensesDashboard = ({
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
 
-  const categoryData = useMemo(() => {
-    const categoryExpenses = expenses.reduce<Record<string, Expense[]>>(
-      (acc, expense) => {
-        const categoryId = expense.category_id;
-        if (!categoryId) return acc;
-
-        if (!acc[categoryId]) {
-          acc[categoryId] = [];
-        }
-        acc[categoryId].push(expense);
-
-        return acc;
-      },
-      {},
-    );
-
-    const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-
-    return categories
-      .map((category) => {
-        const categoryExpenseList = categoryExpenses[category.id] || [];
-        const amount = categoryExpenseList.reduce(
-          (sum, expense) => sum + expense.amount,
-          0,
-        );
-        let percentage = 0;
-        if (total > 0) {
-          percentage = (amount / total) * 100;
-        }
-
-        return {
-          id: category.id,
-          name: category.name,
-          amount,
-          percentage,
-          color: category.color,
-        };
-      })
-      .filter((cat) => cat.amount > 0)
-      .sort((a, b) => b.amount - a.amount);
-  }, [expenses, categories]);
+  const categoryData = useMemo(
+    () => buildCategoryData(expenses, categories),
+    [expenses, categories],
+  );
 
   const formatPercentage = (percentage: number): string => {
     if (percentage === 0) return t('dashboard.zeroPercent');
@@ -122,3 +85,47 @@ const ExpensesDashboard = ({
 };
 
 export default memo(ExpensesDashboard);
+
+// --- Helpers ---
+
+const buildCategoryData = (expenses: Expense[], categories: Category[]) => {
+  const categoryExpenses = expenses.reduce<Record<string, Expense[]>>(
+    (acc, expense) => {
+      const categoryId = expense.category_id;
+      if (!categoryId) return acc;
+
+      if (!acc[categoryId]) {
+        acc[categoryId] = [];
+      }
+      acc[categoryId].push(expense);
+
+      return acc;
+    },
+    {},
+  );
+
+  const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+  return categories
+    .map((category) => {
+      const categoryExpenseList = categoryExpenses[category.id] || [];
+      const amount = categoryExpenseList.reduce(
+        (sum, expense) => sum + expense.amount,
+        0,
+      );
+      let percentage = 0;
+      if (total > 0) {
+        percentage = (amount / total) * 100;
+      }
+
+      return {
+        id: category.id,
+        name: category.name,
+        amount,
+        percentage,
+        color: category.color,
+      };
+    })
+    .filter((cat) => cat.amount > 0)
+    .sort((a, b) => b.amount - a.amount);
+};

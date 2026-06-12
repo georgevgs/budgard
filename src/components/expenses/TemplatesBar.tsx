@@ -1,16 +1,7 @@
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import TemplateDeleteDialog from '@/components/expenses/TemplateDeleteDialog';
 import X from 'lucide-react/dist/esm/icons/x';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
@@ -112,31 +103,11 @@ const TemplatesBar = ({
         </div>
       </div>
 
-      <AlertDialog
+      <TemplateDeleteDialog
         open={deleteTarget !== null}
-        onOpenChange={() => setDeleteTarget(null)}
-      >
-        <AlertDialogContent
-          className="sm:max-w-[425px]"
-          onOpenChange={() => setDeleteTarget(null)}
-        >
-          <AlertDialogHeader data-draggable-area>
-            <AlertDialogTitle>{t('templates.deleteTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('templates.deleteConfirmation')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t('common.delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={handleConfirmDelete}
+      />
     </>
   );
 };

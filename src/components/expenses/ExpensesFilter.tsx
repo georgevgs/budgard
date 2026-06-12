@@ -4,21 +4,17 @@ import Search from 'lucide-react/dist/esm/icons/search';
 import Filter from 'lucide-react/dist/esm/icons/filter';
 import X from 'lucide-react/dist/esm/icons/x';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import ExpensesFilterDrawer from '@/components/expenses/ExpensesFilterDrawer';
 import type { Category } from '@/types/Category';
 import type { Tag } from '@/types/Tag';
-import type { SortOrder, DateRangePreset } from '@/hooks/useExpensesFilter';
-
-const UNCATEGORIZED_VALUE = 'uncategorized';
+import {
+  UNCATEGORIZED_VALUE,
+  type SortOrder,
+  type DateRangePreset,
+} from '@/hooks/useExpensesFilter';
 
 type ExpensesFilterProps = {
   categories: Category[];
@@ -60,41 +56,15 @@ const ExpensesFilter = ({
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleCategoryChange = (categoryId: string) => {
-    if (categoryId === 'all') {
-      onCategoryChange(null);
+  const handleCategoryChange = (categoryId: string) =>
+    onCategoryChange(normalizeAllValue(categoryId));
 
-      return;
-    }
-
-    onCategoryChange(categoryId);
-  };
-
-  const handleTagSelectChange = (value: string) => {
-    if (value === 'all') {
-      onTagChange(null);
-
-      return;
-    }
-
-    onTagChange(value);
-  };
-
-  const handleDateRangeChange = (value: string) => {
-    if (value === 'none') {
-      onDateRangeChange(null);
-
-      return;
-    }
-
-    onDateRangeChange(value as DateRangePreset);
-  };
-
-  const activeFilterCount =
-    countActive(search) +
-    countActive(selectedCategoryId) +
-    countActive(selectedTagId) +
-    countActive(dateRangePreset);
+  const activeFilterCount = countActiveFilters([
+    search,
+    selectedCategoryId,
+    selectedTagId,
+    dateRangePreset,
+  ]);
 
   return (
     <div>
@@ -128,90 +98,19 @@ const ExpensesFilter = ({
         onSearchScopeChange,
       )}
 
-      <div
-        className={cn(
-          'grid transition-all duration-200',
-          getDrawerClass(isOpen),
-        )}
-      >
-        <div className="overflow-hidden space-y-3">
-          <Select
-            value={selectedCategoryId || 'all'}
-            onValueChange={handleCategoryChange}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t('expenses.filter.selectCategory')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                {t('expenses.filter.allCategories')}
-              </SelectItem>
-              <SelectItem value={UNCATEGORIZED_VALUE}>
-                {t('expenses.noCategory')}
-              </SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={category.id} value={category.id}>
-                  <div className="flex items-center gap-2">
-                    {renderCategoryIcon(category)}
-                    {category.name}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {renderTagsSelect(tags, selectedTagId, t, handleTagSelectChange)}
-
-          <Select value={sortOrder} onValueChange={onSortChange}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="date-desc">
-                {t('expenses.sort.dateDesc')}
-              </SelectItem>
-              <SelectItem value="date-asc">
-                {t('expenses.sort.dateAsc')}
-              </SelectItem>
-              <SelectItem value="amount-desc">
-                {t('expenses.sort.amountDesc')}
-              </SelectItem>
-              <SelectItem value="amount-asc">
-                {t('expenses.sort.amountAsc')}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={dateRangePreset ?? 'none'}
-            onValueChange={handleDateRangeChange}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t('expenses.filter.dateRange')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">
-                {t('expenses.filter.noDateRange')}
-              </SelectItem>
-              <SelectItem value="last7">
-                {t('expenses.filter.last7Days')}
-              </SelectItem>
-              <SelectItem value="last30">
-                {t('expenses.filter.last30Days')}
-              </SelectItem>
-              <SelectItem value="last90">
-                {t('expenses.filter.last90Days')}
-              </SelectItem>
-              <SelectItem value="thisQuarter">
-                {t('expenses.filter.thisQuarter')}
-              </SelectItem>
-              <SelectItem value="thisYear">
-                {t('expenses.filter.thisYear')}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      <ExpensesFilterDrawer
+        isOpen={isOpen}
+        categories={categories}
+        tags={tags}
+        selectedCategoryId={selectedCategoryId}
+        selectedTagId={selectedTagId}
+        sortOrder={sortOrder}
+        dateRangePreset={dateRangePreset}
+        onCategorySelect={handleCategoryChange}
+        onTagChange={onTagChange}
+        onSortChange={onSortChange}
+        onDateRangeChange={onDateRangeChange}
+      />
 
       {renderActiveFiltersSection({
         search,
@@ -235,19 +134,6 @@ const ExpensesFilter = ({
 export default memo(ExpensesFilter);
 
 // ─── Helper render functions ──────────────────────────────────────────────────
-
-const renderCategoryIcon = (category: { icon?: string | null; color: string }) => {
-  if (category.icon) {
-    return <span className="text-sm">{category.icon}</span>;
-  }
-
-  return (
-    <div
-      className="w-3 h-3 rounded-full shrink-0"
-      style={{ backgroundColor: category.color }}
-    />
-  );
-};
 
 type TranslateFunction = (
   key: string,
@@ -298,43 +184,6 @@ const renderFilterCountBadge = (
     <span className="absolute -right-1 -top-1 h-4 w-4 rounded-full bg-primary text-[10px] font-medium text-primary-foreground flex items-center justify-center">
       {activeFilterCount}
     </span>
-  );
-};
-
-const renderTagsSelect = (
-  tags: Tag[],
-  selectedTagId: string | null,
-  t: TranslateFunction,
-  onValueChange: (value: string) => void,
-) => {
-  if (tags.length === 0) return null;
-
-  return (
-    <Select value={selectedTagId || 'all'} onValueChange={onValueChange}>
-      <SelectTrigger>
-        <SelectValue
-          placeholder={t('expenses.filter.selectTag', {
-            defaultValue: 'All tags',
-          })}
-        />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="all">
-          {t('expenses.filter.allTags', { defaultValue: 'All tags' })}
-        </SelectItem>
-        {tags.map((tag) => (
-          <SelectItem key={tag.id} value={tag.id}>
-            <div className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: tag.color }}
-              />
-              {tag.name}
-            </div>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
   );
 };
 
@@ -512,20 +361,13 @@ const renderDateRangeBadge = (
   );
 };
 
-const countActive = (value: unknown): number => {
-  if (value) {
-    return 1;
-  }
+const countActiveFilters = (values: unknown[]): number =>
+  values.filter(Boolean).length;
 
-  return 0;
-};
+const normalizeAllValue = (value: string): string | null => {
+  if (value === 'all') return null;
 
-const getDrawerClass = (isOpen: boolean): string => {
-  if (isOpen) {
-    return 'grid-rows-[1fr] opacity-100 mt-2';
-  }
-
-  return 'grid-rows-[0fr] opacity-0';
+  return value;
 };
 
 const getScopeButtonClass = (active: boolean): string => {

@@ -1,5 +1,5 @@
 import type { TFunction } from 'i18next';
-import { format, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
 import Tag from 'lucide-react/dist/esm/icons/tag';
 import {
   formatCurrency,
@@ -40,18 +40,6 @@ export const getInitialDate = (expense: Expense | undefined): Date => {
   if (expense) return parseISO(expense.date);
 
   return new Date();
-};
-
-export const formatWatchedDate = (watchedDate: Date | undefined): string => {
-  if (!watchedDate) return '';
-
-  return format(watchedDate, 'yyyy-MM-dd');
-};
-
-export const normalizeCategoryId = (categoryId: string): string | null => {
-  if (categoryId === 'none') return null;
-
-  return categoryId;
 };
 
 export const getDetailsRowsClass = (showDetails: boolean): string => {

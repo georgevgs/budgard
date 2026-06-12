@@ -1,10 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverTrigger } from '@/components/ui/popover';
 import ChevronLeft from 'lucide-react/dist/esm/icons/chevron-left';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 import {
@@ -16,7 +12,7 @@ import {
   setYear,
 } from 'date-fns';
 import { useDateLocale } from '@/hooks/useDateLocale';
-import { cn } from '@/lib/utils';
+import MonthYearPickerContent from '@/components/expenses/MonthYearPickerContent';
 
 type ExpensesMonthlySelectorProps = {
   selectedMonth: string; // Format: "yyyy-MM"
@@ -55,9 +51,6 @@ const ExpensesMonthlySelector = ({
     onMonthChange(format(newDate, 'yyyy-MM'));
   };
 
-  const currentYear = selectedDate.getFullYear();
-  const currentMonth = selectedDate.getMonth();
-
   return (
     <div className="flex items-center justify-between gap-4 p-1 rounded-2xl bg-card border border-border/40 shadow-sm">
       <Button
@@ -80,48 +73,12 @@ const ExpensesMonthlySelector = ({
             {format(selectedDate, 'LLLL yyyy', { locale: dateLocale })}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-64 p-0" align="center">
-          <div className="flex items-center justify-between border-b p-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-10 w-10 p-0"
-              onClick={() => handleYearChange('prev')}
-              aria-label={t('navigation.previousYear')}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <div className="font-semibold">{currentYear}</div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-10 w-10 p-0"
-              onClick={() => handleYearChange('next')}
-              aria-label={t('navigation.nextYear')}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="grid grid-cols-3 gap-2 p-2">
-            {Array.from({ length: 12 }, (_, index) => (
-              <Button
-                key={`month-${index}`}
-                variant="ghost"
-                size="sm"
-                className={cn(
-                  'h-10 w-full justify-center',
-                  currentMonth === index &&
-                    'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground',
-                )}
-                onClick={() => handleMonthSelect(index)}
-              >
-                {format(setMonth(selectedDate, index), 'LLL', {
-                  locale: dateLocale,
-                })}
-              </Button>
-            ))}
-          </div>
-        </PopoverContent>
+        <MonthYearPickerContent
+          selectedDate={selectedDate}
+          dateLocale={dateLocale}
+          onYearChange={handleYearChange}
+          onMonthSelect={handleMonthSelect}
+        />
       </Popover>
 
       <Button

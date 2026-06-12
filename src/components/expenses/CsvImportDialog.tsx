@@ -1,4 +1,3 @@
-import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import Upload from 'lucide-react/dist/esm/icons/upload';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
@@ -22,21 +21,15 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { useCategoriesData, useDataConfig } from '@/contexts/DataContext';
-import { useToast } from '@/hooks/useToast';
-import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
+import { useDataConfig } from '@/contexts/DataContext';
+import { useCsvImportFlow } from '@/hooks/expensesList/useCsvImportFlow';
 import type { Category } from '@/types/Category';
 import { cn, formatCurrency } from '@/lib/utils';
-import {
-  parseExpensesCsv,
-  mapRowsToExpenses,
-  readFileAsText,
-  getCsvPreviewData,
-  suggestColumnMapping,
-  type ParsedExpenseRow,
-  type CsvParseError,
-  type CsvPreviewData,
-  type ColumnMapping,
+import type {
+  ParsedExpenseRow,
+  CsvParseError,
+  CsvPreviewData,
+  ColumnMapping,
 } from '@/lib/csvImport';
 
 type CsvImportDialogProps = {
@@ -44,208 +37,13 @@ type CsvImportDialogProps = {
   onClose: () => void;
 }
 
-type ImportStep = 'upload' | 'mapping' | 'preview' | 'importing';
-
 const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
   const { t } = useTranslation();
-  const { expenseCategories: categories } = useCategoriesData();
   const { defaultCurrency } = useDataConfig();
-  const { toast } = useToast();
-  const { handleBulkExpenseImport } = useExpenseOps();
-
-  // Step state
-  const [step, setStep] = useState<ImportStep>('upload');
-  const [isDragging, setIsDragging] = useState(false);
-
-  // CSV content state
-  const [csvContent, setCsvContent] = useState<string>('');
-  const [csvPreview, setCsvPreview] = useState<CsvPreviewData | null>(null);
-
-  // Column mapping state
-  const [columnMapping, setColumnMapping] = useState<ColumnMapping>({
-    dateColumn: 0,
-    descriptionColumn: 1,
-    amountColumn: 3,
-    categoryColumn: null,
-  });
-  const [skipIncome, setSkipIncome] = useState(true);
-
-  // Parse results state
-  const [validRows, setValidRows] = useState<ParsedExpenseRow[]>([]);
-  const [errors, setErrors] = useState<CsvParseError[]>([]);
-  const [unmatchedCategories, setUnmatchedCategories] = useState<string[]>([]);
-  const [skippedIncomeCount, setSkippedIncomeCount] = useState(0);
-  const [categoryMappings, setCategoryMappings] = useState<
-    Map<string, string | null>
-  >(new Map());
-  const [importError, setImportError] = useState<string | null>(null);
-
-  const resetState = useCallback(() => {
-    setStep('upload');
-    setCsvContent('');
-    setCsvPreview(null);
-    setColumnMapping({
-      dateColumn: 0,
-      descriptionColumn: 1,
-      amountColumn: 3,
-      categoryColumn: null,
-    });
-    setSkipIncome(true);
-    setValidRows([]);
-    setErrors([]);
-    setUnmatchedCategories([]);
-    setCategoryMappings(new Map());
-    setSkippedIncomeCount(0);
-    setImportError(null);
-  }, []);
-
-  const handleClose = useCallback(() => {
-    resetState();
-    onClose();
-  }, [resetState, onClose]);
-
-  const handleFile = useCallback(
-    async (file: File) => {
-      if (!file.name.endsWith('.csv')) {
-        toast({
-          title: t('common.error'),
-          description: t('import.invalidFileType'),
-          variant: 'destructive',
-        });
-
-        return;
-      }
-
-      try {
-        const content = await readFileAsText(file);
-        setCsvContent(content);
-
-        const preview = getCsvPreviewData(content);
-        setCsvPreview(preview);
-
-        // Auto-suggest column mapping
-        const suggested = suggestColumnMapping(preview);
-        setColumnMapping(suggested);
-
-        setStep('mapping');
-      } catch {
-        toast({
-          title: t('common.error'),
-          description: t('import.parseError'),
-          variant: 'destructive',
-        });
-      }
-    },
-    [toast, t],
-  );
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
-
-      const file = e.dataTransfer.files[0];
-      if (file) {
-        handleFile(file);
-      }
-    },
-    [handleFile],
-  );
-
-  const handleFileInput = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        handleFile(file);
-      }
-    },
-    [handleFile],
-  );
-
-  const handleProceedToPreview = useCallback(() => {
-    const hasNegativeAmounts = csvPreview?.hasNegativeAmounts ?? false;
-    const result = parseExpensesCsv(
-      csvContent,
-      categories,
-      columnMapping,
-      skipIncome,
-      hasNegativeAmounts,
-    );
-
-    setValidRows(result.validRows);
-    setErrors(result.errors);
-    setUnmatchedCategories(result.unmatchedCategories);
-    setSkippedIncomeCount(result.skippedIncomeCount);
-
-    // Initialize category mappings with null (skip)
-    const initialMappings = new Map<string, string | null>();
-    result.unmatchedCategories.forEach((cat) => {
-      initialMappings.set(cat, null);
-    });
-    setCategoryMappings(initialMappings);
-
-    setStep('preview');
-  }, [csvContent, categories, columnMapping, skipIncome, csvPreview]);
-
-  const handleCategoryMapping = useCallback(
-    (categoryName: string, categoryId: string | null) => {
-      setCategoryMappings((prev) => {
-        const next = new Map(prev);
-        next.set(categoryName, categoryId);
-
-        return next;
-      });
-    },
-    [],
-  );
-
-  const handleImport = useCallback(async () => {
-    setStep('importing');
-
-    try {
-      const expensesToImport = mapRowsToExpenses(
-        validRows,
-        categories,
-        categoryMappings,
-      );
-      await handleBulkExpenseImport(expensesToImport);
-
-      toast({
-        title: t('common.success'),
-        description: t('import.successMessage', {
-          count: expensesToImport.length,
-        }),
-      });
-
-      handleClose();
-    } catch {
-      setImportError(t('import.importError'));
-      setStep('preview');
-    }
-  }, [
-    validRows,
-    categories,
-    categoryMappings,
-    handleBulkExpenseImport,
-    toast,
-    t,
-    handleClose,
-  ]);
-
-  const handleBackToMapping = useCallback(() => {
-    setImportError(null);
-    setStep('mapping');
-  }, []);
-
-  const updateColumnMapping = useCallback(
-    (field: keyof ColumnMapping, value: number | null) => {
-      setColumnMapping((prev) => ({ ...prev, [field]: value }));
-    },
-    [],
-  );
+  const flow = useCsvImportFlow(onClose);
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={flow.handleClose}>
       <DialogContent
         className="sm:max-w-[550px] p-0 gap-0"
         aria-describedby={undefined}
@@ -265,40 +63,40 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
           </DialogHeader>
 
           {renderUploadStep(
-            step === 'upload',
-            isDragging,
-            handleDrop,
-            handleFileInput,
-            setIsDragging,
+            flow.step === 'upload',
+            flow.isDragging,
+            flow.handleDrop,
+            flow.handleFileInput,
+            flow.setIsDragging,
             t,
           )}
           {renderMappingStep(
-            step === 'mapping',
-            csvPreview,
-            columnMapping,
-            skipIncome,
-            updateColumnMapping,
-            setSkipIncome,
-            resetState,
-            handleProceedToPreview,
+            flow.step === 'mapping',
+            flow.csvPreview,
+            flow.columnMapping,
+            flow.skipIncome,
+            flow.updateColumnMapping,
+            flow.setSkipIncome,
+            flow.resetState,
+            flow.handleProceedToPreview,
             t,
           )}
           {renderPreviewStep(
-            step === 'preview',
-            validRows,
-            errors,
-            skippedIncomeCount,
-            unmatchedCategories,
-            categories,
-            categoryMappings,
-            handleCategoryMapping,
-            handleImport,
-            handleBackToMapping,
-            importError,
+            flow.step === 'preview',
+            flow.validRows,
+            flow.errors,
+            flow.skippedIncomeCount,
+            flow.unmatchedCategories,
+            flow.categories,
+            flow.categoryMappings,
+            flow.handleCategoryMapping,
+            flow.handleImport,
+            flow.handleBackToMapping,
+            flow.importError,
             t,
             defaultCurrency,
           )}
-          {renderImportingStep(step === 'importing', validRows.length, t)}
+          {renderImportingStep(flow.step === 'importing', flow.validRows.length, t)}
         </div>
       </DialogContent>
     </Dialog>

@@ -28,6 +28,8 @@ const matchesSearch = (expense: Expense, criteria: FilterCriteria): boolean => {
   return false;
 };
 
+export const UNCATEGORIZED_VALUE = 'uncategorized';
+
 const matchesCategory = (
   expense: Expense,
   selectedCategoryId: string | null,
@@ -35,7 +37,7 @@ const matchesCategory = (
   if (!selectedCategoryId) {
     return true;
   }
-  if (selectedCategoryId === 'uncategorized') {
+  if (selectedCategoryId === UNCATEGORIZED_VALUE) {
     return expense.category_id === null || expense.category_id === undefined;
   }
 
@@ -284,3 +286,5 @@ export const useExpensesFilter = ({
     hasActiveFilters,
   };
 };
+
+export type ExpensesFilterApi = ReturnType<typeof useExpensesFilter>;
