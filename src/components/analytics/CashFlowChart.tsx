@@ -102,18 +102,18 @@ export default memo(CashFlowChart);
 
 // --- Helpers ---
 
-type TooltipPayload = Array<{ payload: ChartPoint }> | undefined;
+type TooltipEntries = ReadonlyArray<{ payload?: unknown }> | undefined;
 
 type TranslateFunction = (key: string) => string;
 
 const renderTooltipContent = (
   active: boolean | undefined,
-  payload: TooltipPayload,
+  payload: TooltipEntries,
   currency: string,
   t: TranslateFunction,
 ) => {
   if (!active || !payload || payload.length === 0) return null;
-  const point = payload[0].payload;
+  const point = payload[0].payload as ChartPoint;
 
   return (
     <div className="rounded-xl bg-popover border border-border/40 shadow-md p-3 text-xs space-y-1.5">
