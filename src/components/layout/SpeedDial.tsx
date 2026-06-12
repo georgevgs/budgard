@@ -7,6 +7,7 @@ import Tag from 'lucide-react/dist/esm/icons/tag';
 import X from 'lucide-react/dist/esm/icons/x';
 import { cn } from '@/lib/utils';
 import { haptics } from '@/lib/haptics';
+import SpeedDialAction from '@/components/layout/SpeedDialAction';
 
 type SpeedDialProps = {
   onAddExpense: () => void;
@@ -62,53 +63,20 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
             !isOpen && 'opacity-0 -translate-y-4 pointer-events-none',
           )}
         >
-          {/* Add Expense Button */}
-          <div className="flex items-center gap-2">
-            <div
-              className={cn(
-                'px-2 py-1 rounded-xl bg-card border border-border/40 shadow-sm',
-                'opacity-0 -translate-x-4 transition-all duration-200',
-                isOpen && 'opacity-100 translate-x-0 delay-100',
-              )}
-            >
-              <span className="text-sm font-medium">
-                {t('expenses.addExpense')}
-              </span>
-            </div>
-            <Button
-              size="icon"
-              className="h-12 w-12 rounded-full shadow-lg"
-              onClick={() => handleAction(onAddExpense)}
-              aria-label={t('expenses.addExpense')}
-              tabIndex={getTabIndex(isOpen)}
-            >
-              <Receipt className="h-5 w-5" />
-            </Button>
-          </div>
+          <SpeedDialAction
+            isOpen={isOpen}
+            label={t('expenses.addExpense')}
+            icon={<Receipt className="h-5 w-5" />}
+            onClick={() => handleAction(onAddExpense)}
+            labelDelayClass="delay-100"
+          />
 
-          {/* Add Category Button */}
-          <div className="flex items-center gap-2">
-            <div
-              className={cn(
-                'px-2 py-1 rounded-xl bg-card border border-border/40 shadow-sm',
-                'opacity-0 -translate-x-4 transition-all duration-200',
-                isOpen && 'opacity-100 translate-x-0',
-              )}
-            >
-              <span className="text-sm font-medium">
-                {t('categories.addCategory')}
-              </span>
-            </div>
-            <Button
-              size="icon"
-              className="h-12 w-12 rounded-full shadow-lg"
-              onClick={() => handleAction(onAddCategory)}
-              aria-label={t('categories.addCategory')}
-              tabIndex={getTabIndex(isOpen)}
-            >
-              <Tag className="h-5 w-5" />
-            </Button>
-          </div>
+          <SpeedDialAction
+            isOpen={isOpen}
+            label={t('categories.addCategory')}
+            icon={<Tag className="h-5 w-5" />}
+            onClick={() => handleAction(onAddCategory)}
+          />
         </div>
 
         {/* Main Toggle Button */}
@@ -143,14 +111,6 @@ const renderOverlay = (isOpen: boolean, onClose: () => void) => {
       role="presentation"
     />
   );
-};
-
-const getTabIndex = (isOpen: boolean): number => {
-  if (isOpen) {
-    return 0;
-  }
-
-  return -1;
 };
 
 const renderToggleIcon = (isOpen: boolean) => {
