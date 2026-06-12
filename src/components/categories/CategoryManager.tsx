@@ -10,16 +10,7 @@ import {
   DialogHeader,
   DialogDescription,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import ConfirmDestructiveDialog from '@/components/common/ConfirmDestructiveDialog';
 import { useCategoriesData } from '@/contexts/DataContext';
 import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
 import type { Category } from '@/types/Category';
@@ -114,39 +105,18 @@ export const CategoryManager = ({
         </Button>
       </div>
 
-      <AlertDialog
+      <ConfirmDestructiveDialog
         open={deleteTarget !== null}
+        title={t('categories.deleteCategory')}
+        description={t('categories.deleteConfirmation', {
+          name: deleteTarget?.name,
+        })}
+        confirmLabel={t('common.delete')}
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null);
         }}
-      >
-        <AlertDialogContent
-          className="sm:max-w-[425px]"
-          onOpenChange={(open: boolean) => {
-            if (!open) setDeleteTarget(null);
-          }}
-        >
-          <AlertDialogHeader data-draggable-area>
-            <AlertDialogTitle>
-              {t('categories.deleteCategory')}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('categories.deleteConfirmation', {
-                name: deleteTarget?.name,
-              })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t('common.delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onConfirm={handleDelete}
+      />
     </>
   );
 };

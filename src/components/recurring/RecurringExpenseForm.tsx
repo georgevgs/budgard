@@ -9,24 +9,9 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { CurrencyInput } from '@/components/ui/currency-input';
-import { DatePickerField } from '@/components/ui/date-picker-field';
-import { Label } from '@/components/ui/label';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Form } from '@/components/ui/form';
+import RecurringExpenseFields from '@/components/recurring/RecurringExpenseFields';
+import RecurringScheduleFields from '@/components/recurring/RecurringScheduleFields';
 import { useAuth } from '@/hooks/useAuth';
 import { formatCurrencyInput } from '@/lib/utils';
 import {
@@ -37,14 +22,6 @@ import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Category } from '@/types/Category';
 import type { Account } from '@/types/Account';
 import { useTranslation } from 'react-i18next';
-
-const frequencyValues = [
-  'weekly',
-  'biweekly',
-  'monthly',
-  'quarterly',
-  'yearly',
-] as const;
 
 type RecurringExpenseFormProps = {
   expense?: RecurringExpense;
@@ -82,16 +59,6 @@ const RecurringExpenseForm = ({
   const isExpense = type === 'expense';
   const showLinkedAccount = isExpense && investmentAccounts.length > 0;
 
-  const isStartDateDisabled = (date: Date) => {
-    if (expense) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    return date < today;
-  };
-
-  const isEndDateDisabled = (date: Date) => date < form.getValues('start_date');
-
   const handleSubmit = async (values: RecurringExpenseFormData) => {
     if (!session?.user?.id) return;
     await onSubmit(values);
@@ -123,150 +90,14 @@ const RecurringExpenseForm = ({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-4 pb-4"
           >
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <Label>{t('recurring.amount')}</Label>
-                  <FormControl>
-                    <CurrencyInput
-                      currency="EUR"
-                      value={field.value ?? ''}
-                      onChange={field.onChange}
-                      placeholder={t('common.amountZero')}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <RecurringExpenseFields form={form} categories={categories} />
+
+            <RecurringScheduleFields
+              form={form}
+              isEditing={Boolean(expense)}
+              showLinkedAccount={showLinkedAccount}
+              investmentAccounts={investmentAccounts}
             />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <Label>{t('recurring.description')}</Label>
-                  <FormControl>
-                    <Input
-                      placeholder={t('recurring.descriptionPlaceholder')}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="category_id"
-              render={({ field }) => (
-                <FormItem>
-                  <Label>{t('recurring.category')}</Label>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={t('recurring.selectCategory')}
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="none">
-                        {t('recurring.noCategory')}
-                      </SelectItem>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          <div className="flex items-center gap-2">
-                            {renderCategoryIcon(category)}
-                            {category.name}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="frequency"
-              render={({ field }) => (
-                <FormItem>
-                  <Label>{t('recurring.frequency')}</Label>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={t('recurring.selectFrequency')}
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {frequencyValues.map((freq) => (
-                        <SelectItem key={freq} value={freq}>
-                          <div className="flex flex-col">
-                            <span>{t(`recurring.frequencies.${freq}`)}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {t(`recurring.frequencyDescriptions.${freq}`)}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {renderLinkedAccountField(form, showLinkedAccount, investmentAccounts, t)}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="start_date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <Label>{t('recurring.startDateLabel')}</Label>
-                    <DatePickerField
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder={t('recurring.pickDate')}
-                      disabled={isStartDateDisabled}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="end_date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <Label>{t('recurring.endDateLabel')}</Label>
-                    <DatePickerField
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder={t('recurring.noEndDate')}
-                      disabled={isEndDateDisabled}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
 
             <div className="flex justify-end gap-2 pt-4 pb-2">
               <Button type="button" variant="outline" onClick={onClose}>
@@ -342,77 +173,6 @@ const resolveEndDate = (
   }
 
   return undefined;
-};
-
-import type { UseFormReturn } from 'react-hook-form';
-
-const NO_LINKED_ACCOUNT = 'none';
-
-const renderLinkedAccountField = (
-  form: UseFormReturn<RecurringExpenseFormData>,
-  show: boolean,
-  accounts: Account[],
-  t: TranslateFunction,
-) => {
-  if (!show) return null;
-
-  return (
-    <FormField
-      control={form.control}
-      name="linked_account_id"
-      render={({ field }) => (
-        <FormItem>
-          <Label>{t('recurring.linkedAccountLabel')}</Label>
-          <Select
-            onValueChange={(value) => {
-              if (value === NO_LINKED_ACCOUNT) {
-                field.onChange(null);
-
-                return;
-              }
-              field.onChange(value);
-            }}
-            defaultValue={field.value ?? NO_LINKED_ACCOUNT}
-          >
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={t('recurring.linkedAccountPlaceholder')}
-                />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              <SelectItem value={NO_LINKED_ACCOUNT}>
-                {t('recurring.noLinkedAccount')}
-              </SelectItem>
-              {accounts.map((account) => (
-                <SelectItem key={account.id} value={account.id}>
-                  {account.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">
-            {t('recurring.linkedAccountHint')}
-          </p>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
-};
-
-const renderCategoryIcon = (category: { icon?: string | null; color: string }) => {
-  if (category.icon) {
-    return <span className="text-sm">{category.icon}</span>;
-  }
-
-  return (
-    <div
-      className="w-3 h-3 rounded-full shrink-0"
-      style={{ backgroundColor: category.color }}
-    />
-  );
 };
 
 const renderSubmitLabel = (

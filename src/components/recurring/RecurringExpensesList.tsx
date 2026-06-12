@@ -10,20 +10,17 @@ import {
   useAccountsData,
 } from '@/contexts/DataContext';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { format } from 'date-fns';
 import type { RecurringExpense } from '@/types/RecurringExpense';
-import type { RecurringExpenseFormData } from '@/lib/validations';
 import RecurringExpenseForm from '@/components/recurring/RecurringExpenseForm';
 import RecurringExpenseCard from '@/components/recurring/RecurringExpenseCard';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRecurringExpenseOps } from '@/hooks/dataOps/useRecurringExpenseOps';
-import { useRecurringIncomeOps } from '@/hooks/dataOps/useRecurringIncomeOps';
-import { formatCurrency, parseCurrencyInput } from '@/lib/utils';
+import {
+  useRecurringActions,
+  type RecurringMode,
+} from '@/hooks/recurring/useRecurringActions';
+import { formatCurrency } from '@/lib/utils';
 import { calculateNextOccurrence, getMonthlyAmount } from '@/lib/recurring';
 import RecurringLoadingState from '@/components/recurring/RecurringLoading';
 import { useTranslation } from 'react-i18next';
-
-type RecurringMode = 'expense' | 'income';
 
 const RecurringExpensesList = () => {
   const [mode, setMode] = useState<RecurringMode>('expense');
@@ -35,18 +32,16 @@ const RecurringExpensesList = () => {
   const { expenseCategories, incomeCategories } = useCategoriesData();
   const { accounts } = useAccountsData();
   const { defaultCurrency, isInitialized } = useDataConfig();
-  const { session } = useAuth();
-  const {
-    handleRecurringExpenseSubmit: submitRecurringExpense,
-    handleRecurringExpenseDelete: deleteRecurringExpense,
-    handleRecurringExpenseToggle: toggleRecurringExpense,
-  } = useRecurringExpenseOps();
-  const {
-    handleRecurringIncomeSubmit: submitRecurringIncome,
-    handleRecurringIncomeDelete: deleteRecurringIncome,
-    handleRecurringIncomeToggle: toggleRecurringIncome,
-  } = useRecurringIncomeOps();
   const { t } = useTranslation();
+
+  const { handleSubmit, handleDelete, handleToggle } = useRecurringActions({
+    mode,
+    selectedExpense,
+    onDone: () => {
+      setIsFormOpen(false);
+      setSelectedExpense(undefined);
+    },
+  });
 
   let items = recurringExpenses;
   if (mode === 'income') {
@@ -62,74 +57,9 @@ const RecurringExpensesList = () => {
     (a) => a.kind === 'investment' && !a.is_archived,
   );
 
-  const handleSubmit = async (values: RecurringExpenseFormData) => {
-    if (!session?.user?.id) return;
-
-    try {
-      let categoryId: string | null = values.category_id;
-      if (values.category_id === 'none') {
-        categoryId = null;
-      }
-
-      let endDate: string | null = null;
-      if (values.end_date) {
-        endDate = format(values.end_date, 'yyyy-MM-dd');
-      }
-
-      const data: Partial<RecurringExpense> = {
-        amount: parseCurrencyInput(values.amount),
-        description: values.description,
-        category_id: categoryId,
-        frequency: values.frequency,
-        start_date: format(values.start_date, 'yyyy-MM-dd'),
-        end_date: endDate,
-        user_id: session.user.id,
-      };
-
-      if (mode === 'expense') {
-        data.linked_account_id = values.linked_account_id ?? null;
-      }
-
-      if (mode === 'income') {
-        await submitRecurringIncome(data, selectedExpense?.id);
-      } else {
-        await submitRecurringExpense(data, selectedExpense?.id);
-      }
-
-      setIsFormOpen(false);
-      setSelectedExpense(undefined);
-    } catch {
-      // Error handling is done in the hook
-    }
-  };
-
   const handleEditExpense = (expense: RecurringExpense) => {
     setSelectedExpense(expense);
     setIsFormOpen(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      if (mode === 'income') {
-        await deleteRecurringIncome(id);
-      } else {
-        await deleteRecurringExpense(id);
-      }
-    } catch {
-      // Error handling is done in the hook
-    }
-  };
-
-  const handleToggle = async (id: string, active: boolean) => {
-    try {
-      if (mode === 'income') {
-        await toggleRecurringIncome(id, active);
-      } else {
-        await toggleRecurringExpense(id, active);
-      }
-    } catch {
-      // Error handling is done in the hook
-    }
   };
 
   const handleFormClose = () => {
@@ -150,56 +80,16 @@ const RecurringExpensesList = () => {
   return (
     <div className="container max-w-4xl mx-auto p-4 space-y-4">
       <div className="flex flex-col gap-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <h2 className="text-lg font-semibold">
-              {renderModeTitle(mode, t)}
-            </h2>
-            {renderMonthlySummary(
-              activeItems.length,
-              monthlyTotal,
-              mode,
-              t,
-              defaultCurrency,
-            )}
-          </div>
-          <Button
-            onClick={() => setIsFormOpen(true)}
-            size="sm"
-            className="shrink-0"
-            aria-label={renderAddCtaLabel(mode, t)}
-          >
-            <Plus className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">
-              {renderAddCtaLabel(mode, t)}
-            </span>
-          </Button>
-        </div>
+        {renderHeader(
+          mode,
+          activeItems.length,
+          monthlyTotal,
+          defaultCurrency,
+          () => setIsFormOpen(true),
+          t,
+        )}
 
-        {/* Mode toggle */}
-        <div
-          role="tablist"
-          className="inline-flex rounded-full bg-muted p-0.5 self-start"
-        >
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === 'expense'}
-            onClick={() => setMode('expense')}
-            className={`text-xs px-4 py-1.5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${getModeButtonClass(mode === 'expense')}`}
-          >
-            {t('expenses.title')}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === 'income'}
-            onClick={() => setMode('income')}
-            className={`text-xs px-4 py-1.5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${getModeButtonClass(mode === 'income')}`}
-          >
-            {t('income.title')}
-          </button>
-        </div>
+        {renderModeToggle(mode, setMode, t)}
       </div>
 
       <div className="grid gap-4">
@@ -241,6 +131,61 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const renderHeader = (
+  mode: RecurringMode,
+  activeCount: number,
+  monthlyTotal: number,
+  currency: string,
+  onAddClick: () => void,
+  t: TranslateFunction,
+) => (
+  <div className="flex items-start justify-between gap-4">
+    <div className="min-w-0">
+      <h2 className="text-lg font-semibold">{renderModeTitle(mode, t)}</h2>
+      {renderMonthlySummary(activeCount, monthlyTotal, mode, t, currency)}
+    </div>
+    <Button
+      onClick={onAddClick}
+      size="sm"
+      className="shrink-0"
+      aria-label={renderAddCtaLabel(mode, t)}
+    >
+      <Plus className="h-4 w-4 sm:mr-2" />
+      <span className="hidden sm:inline">{renderAddCtaLabel(mode, t)}</span>
+    </Button>
+  </div>
+);
+
+const renderModeToggle = (
+  mode: RecurringMode,
+  setMode: (mode: RecurringMode) => void,
+  t: TranslateFunction,
+) => (
+  <div
+    role="tablist"
+    className="inline-flex rounded-full bg-muted p-0.5 self-start"
+  >
+    <button
+      type="button"
+      role="tab"
+      aria-selected={mode === 'expense'}
+      onClick={() => setMode('expense')}
+      className={`text-xs px-4 py-1.5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${getModeButtonClass(mode === 'expense')}`}
+    >
+      {t('expenses.title')}
+    </button>
+    <button
+      type="button"
+      role="tab"
+      aria-selected={mode === 'income'}
+      onClick={() => setMode('income')}
+      className={`text-xs px-4 py-1.5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${getModeButtonClass(mode === 'income')}`}
+    >
+      {t('income.title')}
+    </button>
+  </div>
+);
 
 const renderModeTitle = (mode: RecurringMode, t: TranslateFunction): string => {
   if (mode === 'income') {
