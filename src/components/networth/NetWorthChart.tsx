@@ -81,46 +81,9 @@ const NetWorthChart = ({ series, defaultCurrency }: Props) => {
               <ReferenceLine y={0} stroke="currentColor" strokeOpacity={0.3} />
               <Tooltip
                 cursor={{ stroke: 'currentColor', strokeOpacity: 0.2 }}
-                content={({ active, payload }) => {
-                  if (!active || !payload || payload.length === 0) return null;
-                  const point = payload[0].payload as (typeof data)[number];
-
-                  return (
-                    <div className="rounded-xl bg-popover border border-border/40 shadow-md p-3 text-xs space-y-1.5">
-                      <p className="font-medium text-foreground">
-                        {point.fullDate}
-                      </p>
-                      <div className="flex items-center justify-between gap-3">
-                        <span>{t('networth.totalLabel')}</span>
-                        <span
-                          className={cn(
-                            'tabular-nums font-semibold',
-                            point.total >= 0 && 'text-foreground',
-                            point.total < 0 && 'text-destructive',
-                          )}
-                        >
-                          {formatCurrency(point.total, defaultCurrency)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-muted-foreground">
-                          {t('networth.assetsLabel')}
-                        </span>
-                        <span className="tabular-nums">
-                          {formatCurrency(point.assets, defaultCurrency)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-muted-foreground">
-                          {t('networth.liabilitiesLabel')}
-                        </span>
-                        <span className="tabular-nums">
-                          {formatCurrency(point.liabilities, defaultCurrency)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                }}
+                content={({ active, payload }) =>
+                  renderTooltipContent(active, payload, defaultCurrency, t)
+                }
               />
               <Area
                 type="monotone"
@@ -138,3 +101,55 @@ const NetWorthChart = ({ series, defaultCurrency }: Props) => {
 }
 
 export default NetWorthChart;
+
+// --- Helpers ---
+
+type ChartPoint = NetWorthPoint & { label: string; fullDate: string };
+
+type TooltipPayload = Array<{ payload: ChartPoint }> | undefined;
+
+type TranslateFunction = (key: string) => string;
+
+const renderTooltipContent = (
+  active: boolean | undefined,
+  payload: TooltipPayload,
+  defaultCurrency: string,
+  t: TranslateFunction,
+) => {
+  if (!active || !payload || payload.length === 0) return null;
+  const point = payload[0].payload;
+
+  return (
+    <div className="rounded-xl bg-popover border border-border/40 shadow-md p-3 text-xs space-y-1.5">
+      <p className="font-medium text-foreground">{point.fullDate}</p>
+      <div className="flex items-center justify-between gap-3">
+        <span>{t('networth.totalLabel')}</span>
+        <span
+          className={cn(
+            'tabular-nums font-semibold',
+            point.total >= 0 && 'text-foreground',
+            point.total < 0 && 'text-destructive',
+          )}
+        >
+          {formatCurrency(point.total, defaultCurrency)}
+        </span>
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-muted-foreground">
+          {t('networth.assetsLabel')}
+        </span>
+        <span className="tabular-nums">
+          {formatCurrency(point.assets, defaultCurrency)}
+        </span>
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-muted-foreground">
+          {t('networth.liabilitiesLabel')}
+        </span>
+        <span className="tabular-nums">
+          {formatCurrency(point.liabilities, defaultCurrency)}
+        </span>
+      </div>
+    </div>
+  );
+};

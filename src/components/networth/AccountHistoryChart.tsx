@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { format, parseISO, subMonths, subYears } from 'date-fns';
+import { format, parseISO, subMonths, subYears, type Locale } from 'date-fns';
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -41,34 +41,10 @@ const AccountHistoryChart = ({ account, snapshots }: Props) => {
   const isInvestment = account.kind === 'investment';
   const [range, setRange] = useState<RangeKey>('all');
 
-  const data = useMemo<Point[]>(() => {
-    const sorted = [...snapshots].sort((a, b) =>
-      a.recorded_at.localeCompare(b.recorded_at),
-    );
-    let runningBasis = 0;
-
-    return sorted.map((snap) => {
-      let costBasis: number | null = null;
-      if (isInvestment) {
-        if (snap.contribution_delta != null) {
-          runningBasis += snap.contribution_delta;
-        }
-        costBasis = runningBasis;
-      }
-
-      return {
-        date: snap.recorded_at,
-        label: format(parseISO(snap.recorded_at), 'MMM d', {
-          locale: dateLocale,
-        }),
-        fullDate: format(parseISO(snap.recorded_at), 'PPP', {
-          locale: dateLocale,
-        }),
-        balance: snap.balance,
-        costBasis,
-      };
-    });
-  }, [snapshots, isInvestment, dateLocale]);
+  const data = useMemo<Point[]>(
+    () => buildPoints(snapshots, isInvestment, dateLocale),
+    [snapshots, isInvestment, dateLocale],
+  );
 
   const visible = useMemo(() => filterByRange(data, range), [data, range]);
 
@@ -144,6 +120,39 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const buildPoints = (
+  snapshots: AccountBalance[],
+  isInvestment: boolean,
+  dateLocale: Locale | undefined,
+): Point[] => {
+  const sorted = [...snapshots].sort((a, b) =>
+    a.recorded_at.localeCompare(b.recorded_at),
+  );
+  let runningBasis = 0;
+
+  return sorted.map((snap) => {
+    let costBasis: number | null = null;
+    if (isInvestment) {
+      if (snap.contribution_delta != null) {
+        runningBasis += snap.contribution_delta;
+      }
+      costBasis = runningBasis;
+    }
+
+    return {
+      date: snap.recorded_at,
+      label: format(parseISO(snap.recorded_at), 'MMM d', {
+        locale: dateLocale,
+      }),
+      fullDate: format(parseISO(snap.recorded_at), 'PPP', {
+        locale: dateLocale,
+      }),
+      balance: snap.balance,
+      costBasis,
+    };
+  });
+};
 
 const RANGES: ReadonlyArray<{ key: RangeKey; labelKey: string }> = [
   { key: '1m', labelKey: 'networth.chart.range1m' },

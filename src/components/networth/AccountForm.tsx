@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useForm } from 'react-hook-form';
+import { useForm, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   DialogTitle,
@@ -16,33 +15,14 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import CategoryColorPicker from '@/components/categories/CategoryColorPicker';
-import { useAuth } from '@/contexts/AuthContext';
+import AccountIdentityFields from '@/components/networth/AccountIdentityFields';
 import { useDataConfig } from '@/contexts/DataContext';
-import { useAccountOps } from '@/hooks/dataOps/useAccountOps';
-import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '@/lib/currencies';
-import {
-  formatCurrencyInput,
-  parseCurrencyInput,
-} from '@/lib/utils';
+import { useAccountSubmit } from '@/hooks/networth/useAccountSubmit';
+import { getCurrencySymbol } from '@/lib/currencies';
+import { formatCurrencyInput } from '@/lib/utils';
 import { accountSchema, type AccountFormData } from '@/lib/validations';
 import type { Account, AccountKind } from '@/types/Account';
-
-const KINDS: ReadonlyArray<AccountKind> = [
-  'bank',
-  'cash',
-  'credit_card',
-  'loan',
-  'investment',
-  'other',
-];
 
 const DEFAULT_COLOR = '#f97316';
 
@@ -53,11 +33,9 @@ type Props = {
 
 const AccountForm = ({ account, onClose }: Props) => {
   const { t } = useTranslation();
-  const { session } = useAuth();
   const { defaultCurrency } = useDataConfig();
-  const { handleAccountSubmit } = useAccountOps();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditing = Boolean(account);
+  const { isSubmitting, handleSubmit } = useAccountSubmit({ account, onClose });
 
   const form = useForm<AccountFormData>({
     resolver: zodResolver(accountSchema),
@@ -72,42 +50,6 @@ const AccountForm = ({ account, onClose }: Props) => {
 
   const selectedCurrency = form.watch('default_currency');
   const selectedKind = form.watch('kind');
-
-  const handleSubmit = async (values: AccountFormData) => {
-    if (!session?.user?.id) return;
-
-    setIsSubmitting(true);
-    try {
-      if (isEditing && account) {
-        await handleAccountSubmit(
-          {
-            name: values.name,
-            kind: values.kind,
-            default_currency: values.default_currency,
-            color: values.color,
-          },
-          account.id,
-        );
-        onClose();
-
-        return;
-      }
-
-      await handleAccountSubmit({
-        name: values.name,
-        kind: values.kind,
-        default_currency: values.default_currency,
-        color: values.color,
-        user_id: session.user.id,
-        initial_balance: parseCurrencyInput(values.initial_balance),
-      });
-      onClose();
-    } catch {
-      // toast already shown
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <>
@@ -137,104 +79,31 @@ const AccountForm = ({ account, onClose }: Props) => {
             </DialogHeader>
 
             <div className="space-y-4 pb-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder={t('networth.form.namePlaceholder')}
-                      autoComplete="off"
-                      aria-label={t('networth.form.nameLabel')}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              <AccountIdentityFields form={form} />
+
+              {renderInitialBalanceField(
+                form,
+                isEditing,
+                selectedCurrency,
+                selectedKind,
+                t,
               )}
-            />
 
-            <FormField
-              control={form.control}
-              name="kind"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger aria-label={t('networth.form.kindLabel')}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {KINDS.map((k) => (
-                          <SelectItem key={k} value={k}>
-                            {t(`networth.kind.${k}`)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="default_currency"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger
-                        aria-label={t('networth.form.currencyLabel')}
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-60">
-                        {SUPPORTED_CURRENCIES.map((c) => (
-                          <SelectItem key={c.code} value={c.code}>
-                            {c.code} — {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {renderInitialBalanceField(
-              form,
-              isEditing,
-              selectedCurrency,
-              selectedKind,
-              t,
-            )}
-
-            <FormField
-              control={form.control}
-              name="color"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <CategoryColorPicker
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+              <FormField
+                control={form.control}
+                name="color"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <CategoryColorPicker
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
           </div>
 
@@ -260,8 +129,6 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
-
-import type { UseFormReturn } from 'react-hook-form';
 
 const resolveInitialBalance = (account: Account | undefined): string => {
   if (!account) {

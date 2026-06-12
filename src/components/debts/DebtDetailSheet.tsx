@@ -15,7 +15,7 @@ import type { Debt } from '@/types/Debt';
 import type { Expense } from '@/types/Expense';
 import DebtDetailHeader from '@/components/debts/DebtDetailHeader';
 import DebtPaymentDialog from '@/components/debts/DebtPaymentDialog';
-import ConfirmDestructiveDialog from '@/components/debts/ConfirmDestructiveDialog';
+import ConfirmDestructiveDialog from '@/components/common/ConfirmDestructiveDialog';
 
 type Props = {
   debt: Debt;

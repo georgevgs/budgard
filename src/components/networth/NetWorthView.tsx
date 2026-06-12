@@ -1,11 +1,15 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Plus from 'lucide-react/dist/esm/icons/plus';
-import { useAccountsData, useDataConfig } from '@/contexts/DataContext';
+import { useDataConfig } from '@/contexts/DataContext';
 import { useNetWorth } from '@/hooks/useNetWorth';
-import { type Account, isLiability } from '@/types/Account';
+import {
+  useGroupedAccounts,
+  type GroupedAccounts,
+} from '@/hooks/networth/useGroupedAccounts';
+import { type Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import NetWorthHeader from '@/components/networth/NetWorthHeader';
 import NetWorthEmpty from '@/components/networth/NetWorthEmpty';
@@ -18,46 +22,12 @@ import AccountDetailSheet from '@/components/networth/AccountDetailSheet';
 
 const NetWorthView = () => {
   const { t } = useTranslation();
-  const { accounts, accountBalances } = useAccountsData();
+  const { accounts, grouped, latestSnapshotByAccount } = useGroupedAccounts();
   const { defaultCurrency, isInitialized, isSecondaryLoaded } = useDataConfig();
   const { summary, series } = useNetWorth();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | undefined>();
   const [detailAccount, setDetailAccount] = useState<Account | undefined>();
-
-  const latestSnapshotByAccount = useMemo(() => {
-    const map = new Map<string, AccountBalance>();
-    accountBalances.forEach((b) => {
-      const existing = map.get(b.account_id);
-      if (!existing || b.recorded_at > existing.recorded_at) {
-        map.set(b.account_id, b);
-      }
-    });
-
-    return map;
-  }, [accountBalances]);
-
-  const grouped = useMemo(() => {
-    const assets: Account[] = [];
-    const liabilities: Account[] = [];
-    const investments: Account[] = [];
-
-    accounts.forEach((a) => {
-      if (a.kind === 'investment') {
-        investments.push(a);
-
-        return;
-      }
-      if (isLiability(a.kind)) {
-        liabilities.push(a);
-
-        return;
-      }
-      assets.push(a);
-    });
-
-    return { assets, liabilities, investments };
-  }, [accounts]);
 
   const handleAddClick = useCallback(() => {
     setSelectedAccount(undefined);
@@ -133,12 +103,6 @@ type TranslateFunction = (
   options?: Record<string, unknown>,
 ) => string;
 
-type Grouped = {
-  assets: Account[];
-  liabilities: Account[];
-  investments: Account[];
-}
-
 import type { NetWorthSummary, NetWorthPoint } from '@/hooks/useNetWorth';
 
 const renderBody = (
@@ -146,7 +110,7 @@ const renderBody = (
   summary: NetWorthSummary,
   series: NetWorthPoint[],
   defaultCurrency: string,
-  grouped: Grouped,
+  grouped: GroupedAccounts,
   latestSnapshotByAccount: Map<string, AccountBalance>,
   onAccountClick: (account: Account) => void,
   onAddClick: () => void,
