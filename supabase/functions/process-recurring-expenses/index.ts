@@ -71,9 +71,11 @@ Deno.serve(async (req: Request) => {
     });
 
     if (error) {
+      // Log full detail server-side; return a generic message so internal
+      // schema/constraint names aren't leaked to the client.
       console.error('Error processing recurring expenses:', error);
       return new Response(
-        JSON.stringify({ error: 'Failed to process recurring expenses', details: error.message }),
+        JSON.stringify({ error: 'Failed to process recurring expenses' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

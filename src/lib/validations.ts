@@ -232,9 +232,11 @@ export const recurringExpenseSchema = z
       'quarterly',
       'yearly',
     ] as const),
-    start_date: z.date({
-      required_error: 'Start date is required',
-    }),
+    start_date: z
+      .date({
+        required_error: 'Start date is required',
+      })
+      .min(new Date('2000-01-01'), 'Start date cannot be before 2000'),
     end_date: z.date().optional(),
     linked_account_id: z.string().nullable().optional(),
   })
@@ -340,9 +342,11 @@ export const recurringIncomeSchema = z
       'quarterly',
       'yearly',
     ] as const),
-    start_date: z.date({
-      required_error: 'Start date is required',
-    }),
+    start_date: z
+      .date({
+        required_error: 'Start date is required',
+      })
+      .min(new Date('2000-01-01'), 'Start date cannot be before 2000'),
     end_date: z.date().optional(),
   })
   .refine((data) => !data.end_date || data.end_date >= data.start_date, {
