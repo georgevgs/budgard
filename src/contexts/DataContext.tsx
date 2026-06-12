@@ -36,6 +36,11 @@ import {
   isAbortError,
   isExpiredJwtError,
 } from '@/contexts/DataContext.helpers';
+import {
+  loadDataSnapshot,
+  saveDataSnapshot,
+  clearDataSnapshot,
+} from '@/lib/dataCache';
 
 const DataContext = createContext<DataContextType | null>(null);
 const DataActionsContext = createContext<DataActions | null>(null);
@@ -119,6 +124,14 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   // refetches when the user briefly alt-tabs.
   const lastFetchAtRef = useRef<number>(0);
   const wasAbortedRef = useRef<boolean>(false);
+  // True once cached data has been hydrated into state this session. While
+  // the user is looking at hydrated data, a failed background refresh should
+  // not raise a destructive "Failed to load data" toast — the offline banner
+  // already covers connectivity, and the data on screen is still usable.
+  const hydratedFromCacheRef = useRef(false);
+  // User id whose boot sequence (cache hydration + initial fetch) already
+  // ran, so token refreshes re-triggering the boot effect don't refetch.
+  const bootedUserIdRef = useRef<string | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!session?.user?.id) {
@@ -260,6 +273,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       }
       Sentry.captureException(error, { tags: { context: 'fetchData' } });
       console.error('Failed to load data:', error);
+      // Hydrated data is already on screen — a destructive toast over a
+      // perfectly usable view would only alarm the user. The next
+      // foreground/online refetch heals silently.
+      if (hydratedFromCacheRef.current) {
+        return;
+      }
       toastRef.current({
         title: 'Error',
         description: 'Failed to load data',
@@ -271,6 +290,38 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const refreshData = useCallback(async () => {
     await fetchData();
   }, [fetchData]);
+
+  // Cache-then-network boot: paint instantly from the locally persisted
+  // snapshot of the last session, then let fetchData (fired right after)
+  // replace everything with fresh server state. A cache miss is silent —
+  // the app boots network-first exactly as before.
+  const hydrateFromSnapshot = useCallback((userId: string) => {
+    const snapshot = loadDataSnapshot(userId);
+    if (!snapshot) {
+      return;
+    }
+
+    setCategories(snapshot.categories);
+    setExpenses(snapshot.expenses);
+    setIncomes(snapshot.incomes);
+    setRecurringExpenses(snapshot.recurringExpenses);
+    setRecurringIncomes(snapshot.recurringIncomes);
+    setTags(snapshot.tags);
+    setTemplates(snapshot.templates);
+    setCategoryBudgets(snapshot.categoryBudgets);
+    setAccounts(snapshot.accounts);
+    setGoals(snapshot.goals);
+    setAccountBalances(snapshot.accountBalances);
+    setDebts(snapshot.debts);
+    setMonthlyBudget(snapshot.monthlyBudget);
+    setDefaultCurrency(snapshot.defaultCurrency);
+    setDefaultSavingsPct(snapshot.defaultSavingsPct);
+    setDailyReminderHour(snapshot.dailyReminderHour);
+    setNotificationPreferences(snapshot.notificationPreferences);
+    hydratedFromCacheRef.current = true;
+    setIsInitialized(true);
+    setIsSecondaryLoaded(snapshot.secondaryLoaded);
+  }, []);
 
   const refreshExpenses = useCallback(async () => {
     try {
@@ -321,13 +372,20 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    if (session?.user?.id && !isInitialized) {
+    const userId = session?.user?.id;
+    if (userId && bootedUserIdRef.current !== userId) {
+      bootedUserIdRef.current = userId;
+      hydrateFromSnapshot(userId);
       fetchData();
 
       return;
     }
 
     if (!session) {
+      bootedUserIdRef.current = null;
+      hydratedFromCacheRef.current = false;
+      // Never leave financial data behind on a shared device after sign-out.
+      clearDataSnapshot();
       abortControllerRef.current?.abort();
       setCategories([]);
       setExpenses([]);
@@ -347,7 +405,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setIsInitialized(false);
       setIsSecondaryLoaded(false);
     }
-  }, [isAuthLoading, session, isInitialized, fetchData]);
+  }, [isAuthLoading, session, fetchData, hydrateFromSnapshot]);
 
   // Page Visibility API: proactively abort on background, retry on foreground.
   // On iOS PWA the OS aborts network requests mid-flight when the app is
@@ -387,6 +445,79 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [session?.user?.id, fetchData]);
+
+  // Persist a snapshot of the current data so the next app open paints
+  // instantly from cache while the network fetch runs. Debounced because
+  // fetch stages and optimistic mutations arrive in bursts; flushed
+  // immediately on backgrounding so a quick "add expense, close app"
+  // sequence isn't lost to the debounce window.
+  const userId = session?.user?.id;
+  useEffect(() => {
+    if (!isInitialized || !userId) {
+      return;
+    }
+
+    let saved = false;
+    const persist = () => {
+      saved = true;
+      saveDataSnapshot(userId, {
+        categories,
+        expenses,
+        incomes,
+        recurringExpenses,
+        recurringIncomes,
+        tags,
+        templates,
+        categoryBudgets,
+        accounts,
+        goals,
+        accountBalances,
+        debts,
+        monthlyBudget,
+        defaultCurrency,
+        defaultSavingsPct,
+        dailyReminderHour,
+        notificationPreferences,
+        secondaryLoaded: isSecondaryLoaded,
+      });
+    };
+
+    const timer = setTimeout(persist, 2000);
+
+    const flushOnHide = () => {
+      if (document.visibilityState === 'hidden' && !saved) {
+        clearTimeout(timer);
+        persist();
+      }
+    };
+    document.addEventListener('visibilitychange', flushOnHide);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('visibilitychange', flushOnHide);
+    };
+  }, [
+    isInitialized,
+    userId,
+    categories,
+    expenses,
+    incomes,
+    recurringExpenses,
+    recurringIncomes,
+    tags,
+    templates,
+    categoryBudgets,
+    accounts,
+    goals,
+    accountBalances,
+    debts,
+    monthlyBudget,
+    defaultCurrency,
+    defaultSavingsPct,
+    dailyReminderHour,
+    notificationPreferences,
+    isSecondaryLoaded,
+  ]);
 
   const actions = useMemo<DataActions>(
     () => ({
