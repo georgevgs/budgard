@@ -8,6 +8,10 @@ type ToastParams = {
   description?: string;
   variant?: ToastVariant;
   duration?: number;
+  // Stable id: sonner replaces an existing toast with the same id instead of
+  // stacking a duplicate. Used e.g. by the PWA update prompt so it can never
+  // pile up across re-renders or repeated update checks.
+  id?: string;
   action?: {
     label: string;
     onClick: () => void;
@@ -15,10 +19,11 @@ type ToastParams = {
   onDismiss?: () => void;
 }
 
-const toast = ({ variant, title, description, duration, action, onDismiss }: ToastParams) => {
+const toast = ({ variant, title, description, duration, id, action, onDismiss }: ToastParams) => {
   const message = title ?? description ?? '';
   const opts: ExternalToast = {};
   if (title && description) opts.description = description;
+  if (id !== undefined) opts.id = id;
   if (duration !== undefined) opts.duration = duration;
   if (onDismiss) {
     opts.onDismiss = () => onDismiss();

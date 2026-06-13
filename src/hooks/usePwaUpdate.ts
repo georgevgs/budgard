@@ -55,12 +55,25 @@ export const usePwaUpdate = (): void => {
       return;
     }
 
+    // Hand off to vite-plugin-pwa: posts SKIP_WAITING to the waiting worker.
     updateServiceWorker(true);
+
+    // Guarantee the waiting worker is actually consumed. vite-plugin-pwa only
+    // reloads on its internal `controlling` event gated by `isUpdate`, which
+    // is unreliable on iOS standalone PWAs — when it doesn't fire, the worker
+    // stays waiting and the prompt reappears on every app open. skipWaiting
+    // still moves the new worker to "activated", so a manual reload picks it
+    // up. Reload as soon as control changes, with a timed fallback for the
+    // platforms where controllerchange never fires.
+    forceReloadAfterSkipWaiting();
   }, [updateServiceWorker, setNeedRefresh]);
 
   const showUpdateToast = useCallback((): void => {
     toastDismissedRef.current = false;
     toast({
+      // Stable id → at most one update toast ever exists; a repeat call
+      // replaces it rather than stacking a second "Update available".
+      id: 'pwa-update',
       title: 'Update available',
       description: 'A new version is ready.',
       duration: 15000,
@@ -154,4 +167,27 @@ export const usePwaUpdate = (): void => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
+};
+
+// --- Helpers ---
+
+const FORCE_RELOAD_FALLBACK_MS = 3000;
+
+// After SKIP_WAITING is posted, reload so the freshly activated worker takes
+// control. Reload immediately on controllerchange; if it never fires (iOS),
+// reload anyway after a short delay. Guarded so we reload at most once.
+const forceReloadAfterSkipWaiting = (): void => {
+  let reloaded = false;
+
+  const reload = () => {
+    if (reloaded) return;
+    reloaded = true;
+    window.location.reload();
+  };
+
+  navigator.serviceWorker?.addEventListener('controllerchange', reload, {
+    once: true,
+  });
+
+  setTimeout(reload, FORCE_RELOAD_FALLBACK_MS);
 };
