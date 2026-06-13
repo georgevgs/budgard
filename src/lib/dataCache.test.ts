@@ -3,6 +3,7 @@ import {
   loadDataSnapshot,
   saveDataSnapshot,
   clearDataSnapshot,
+  getRecentCutoff,
   type DataSnapshot,
 } from '@/lib/dataCache';
 import type { Expense } from '@/types/Expense';
@@ -67,10 +68,12 @@ describe('dataCache', () => {
     expect(loadDataSnapshot(USER_ID)).toBeNull();
   });
 
-  it('returns null for a different user', () => {
+  it('returns null for a different user and purges the foreign snapshot', () => {
     saveDataSnapshot(USER_ID, makeSnapshot());
 
     expect(loadDataSnapshot('someone-else')).toBeNull();
+    // A different account boots: user A's snapshot must not linger in storage.
+    expect(localStorage.getItem(CACHE_KEY)).toBeNull();
   });
 
   it('returns null when the stored version does not match', () => {
@@ -117,6 +120,39 @@ describe('dataCache', () => {
     expect(loadDataSnapshot(USER_ID)).toBeNull();
   });
 
+  it('returns null when monthlyBudget is not a number or null', () => {
+    saveDataSnapshot(USER_ID, makeSnapshot());
+    const stored = JSON.parse(localStorage.getItem(CACHE_KEY)!);
+    stored.data.monthlyBudget = '1500';
+    localStorage.setItem(CACHE_KEY, JSON.stringify(stored));
+
+    expect(loadDataSnapshot(USER_ID)).toBeNull();
+  });
+
+  it('accepts a null monthlyBudget', () => {
+    saveDataSnapshot(USER_ID, makeSnapshot({ monthlyBudget: null }));
+
+    expect(loadDataSnapshot(USER_ID)?.monthlyBudget).toBeNull();
+  });
+
+  it('returns null when defaultCurrency is an empty string', () => {
+    saveDataSnapshot(USER_ID, makeSnapshot());
+    const stored = JSON.parse(localStorage.getItem(CACHE_KEY)!);
+    stored.data.defaultCurrency = '';
+    localStorage.setItem(CACHE_KEY, JSON.stringify(stored));
+
+    expect(loadDataSnapshot(USER_ID)).toBeNull();
+  });
+
+  it('returns null when notificationPreferences is missing', () => {
+    saveDataSnapshot(USER_ID, makeSnapshot());
+    const stored = JSON.parse(localStorage.getItem(CACHE_KEY)!);
+    delete stored.data.notificationPreferences;
+    localStorage.setItem(CACHE_KEY, JSON.stringify(stored));
+
+    expect(loadDataSnapshot(USER_ID)).toBeNull();
+  });
+
   it('trims expenses and incomes older than the recent window on save', () => {
     const recent = makeExpense({ id: 'recent', date: '2026-06-01' });
     const ancient = makeExpense({ id: 'ancient', date: '2020-01-01' });
@@ -129,6 +165,15 @@ describe('dataCache', () => {
 
     expect(loaded?.expenses.map((e) => e.id)).toEqual(['recent']);
     expect(loaded?.incomes).toHaveLength(0);
+  });
+
+  it('getRecentCutoff returns a YYYY-MM-DD date 12 months back', () => {
+    const cutoff = getRecentCutoff();
+
+    expect(cutoff).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    const expected = new Date();
+    expected.setMonth(expected.getMonth() - 12);
+    expect(cutoff).toBe(expected.toISOString().split('T')[0]);
   });
 
   it('clearDataSnapshot removes the stored snapshot', () => {

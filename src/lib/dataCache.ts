@@ -39,7 +39,7 @@ export type DataSnapshot = {
 };
 
 type StoredSnapshot = {
-  version: number;
+  version: string;
   userId: string;
   savedAt: string;
   data: DataSnapshot;
@@ -47,10 +47,19 @@ type StoredSnapshot = {
 
 const CACHE_KEY = 'budgard-data-snapshot';
 
-// Bump whenever the shape of DataSnapshot (or any type inside it) changes in
-// a way old cached payloads can't satisfy. A version mismatch simply discards
-// the snapshot — the app falls back to the normal network-first boot.
-const CACHE_VERSION = 1;
+// Structural version of the snapshot envelope itself. The full cache key also
+// folds in the app version (below) so any release auto-invalidates old
+// snapshots — that removes the human step of manually bumping a version every
+// time a field inside DataSnapshot changes shape (a missed bump would
+// otherwise hydrate a wrong shape into state, silently).
+const CACHE_SCHEMA = 1;
+
+// Replaced at build time by Vite's `define`. Fall back to 'dev' if it isn't
+// (e.g. an unconfigured tool) so reading it can never throw at module load.
+const APP_VERSION =
+  typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev';
+
+const CACHE_VERSION = `${CACHE_SCHEMA}:${APP_VERSION}`;
 
 // Snapshots older than this are discarded: painting week-old numbers and
 // then swapping them for fresh ones is more confusing than a loading state.
@@ -58,7 +67,17 @@ const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 // Mirror the fetch pipeline's stage-1 window so a hydrated boot looks exactly
 // like a fresh stage-1 result; older history still streams in via stage 2.
-const RECENT_MONTHS = 12;
+// Exported so DataContext's fetch pipeline uses the identical window — a
+// single source of truth prevents the cache and the network fetch from
+// trimming to different horizons (which would make rows flicker on boot).
+export const RECENT_MONTHS = 12;
+
+export const getRecentCutoff = (): string => {
+  const cutoff = new Date();
+  cutoff.setMonth(cutoff.getMonth() - RECENT_MONTHS);
+
+  return cutoff.toISOString().split('T')[0];
+};
 
 export const loadDataSnapshot = (userId: string): DataSnapshot | null => {
   try {
@@ -72,6 +91,11 @@ export const loadDataSnapshot = (userId: string): DataSnapshot | null => {
       return null;
     }
     if (stored.userId !== userId) {
+      // A snapshot belonging to a different account must never linger in
+      // localStorage once someone else is using the app (shared device, or a
+      // direct A→B re-auth with no sign-out in between). Purge it now.
+      clearDataSnapshot();
+
       return null;
     }
 
@@ -91,7 +115,7 @@ export const loadDataSnapshot = (userId: string): DataSnapshot | null => {
 };
 
 export const saveDataSnapshot = (userId: string, data: DataSnapshot): void => {
-  const cutoff = recentCutoffDate();
+  const cutoff = getRecentCutoff();
   const stored: StoredSnapshot = {
     version: CACHE_VERSION,
     userId,
@@ -122,13 +146,6 @@ export const clearDataSnapshot = (): void => {
 
 // --- Helpers ---
 
-const recentCutoffDate = (): string => {
-  const cutoff = new Date();
-  cutoff.setMonth(cutoff.getMonth() - RECENT_MONTHS);
-
-  return cutoff.toISOString().split('T')[0];
-};
-
 // YYYY-MM-DD dates sort lexicographically, so string comparison is safe.
 const trimToRecent = (transactions: Expense[], cutoff: string): Expense[] => {
   return transactions.filter((transaction) => transaction.date >= cutoff);
@@ -149,6 +166,12 @@ const ARRAY_FIELDS = [
   'debts',
 ] as const;
 
+const NULLABLE_NUMBER_FIELDS = [
+  'monthlyBudget',
+  'defaultSavingsPct',
+  'dailyReminderHour',
+] as const;
+
 const isStructurallyValid = (data: unknown): data is DataSnapshot => {
   if (typeof data !== 'object' || data === null) {
     return false;
@@ -160,10 +183,22 @@ const isStructurallyValid = (data: unknown): data is DataSnapshot => {
       return false;
     }
   }
-  if (typeof record.defaultCurrency !== 'string') {
+  if (typeof record.defaultCurrency !== 'string' || record.defaultCurrency === '') {
     return false;
   }
   if (typeof record.secondaryLoaded !== 'boolean') {
+    return false;
+  }
+  // Scalar fields are number-or-null; reject anything else so a malformed or
+  // older-shape snapshot can't hydrate e.g. a string into monthlyBudget and
+  // turn every budget calculation into NaN for the session.
+  for (const field of NULLABLE_NUMBER_FIELDS) {
+    const value = record[field];
+    if (value !== null && typeof value !== 'number') {
+      return false;
+    }
+  }
+  if (typeof record.notificationPreferences !== 'object' || record.notificationPreferences === null) {
     return false;
   }
 

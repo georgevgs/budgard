@@ -40,6 +40,7 @@ import {
   loadDataSnapshot,
   saveDataSnapshot,
   clearDataSnapshot,
+  getRecentCutoff,
 } from '@/lib/dataCache';
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -147,10 +148,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     // first so the user sees a working app fast, then top up older rows in
     // the background. Search across all months still works once stage 2
     // resolves; until then, "all months" search is limited to recent rows.
-    const RECENT_MONTHS = 12;
-    const recentCutoffDate = new Date();
-    recentCutoffDate.setMonth(recentCutoffDate.getMonth() - RECENT_MONTHS);
-    const recentCutoff = recentCutoffDate.toISOString().split('T')[0];
+    // Cutoff comes from the cache module so the hydrated snapshot and this
+    // fetch always trim to the identical window.
+    const recentCutoff = getRecentCutoff();
 
     try {
       // Stage 1: critical fetch — everything needed by the four bottom-nav
@@ -198,6 +198,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setDailyReminderHour(budgetData?.daily_reminder_hour ?? null);
       setNotificationPreferences(budgetData?.notification_preferences ?? {});
       setIsInitialized(true);
+      // Fresh server data has now replaced anything hydrated from cache, so
+      // stop suppressing the load-failure toast: a *later* fetch failure
+      // (foreground refetch, manual refresh) should surface normally rather
+      // than be silently swallowed for the rest of the session.
+      hydratedFromCacheRef.current = false;
       lastFetchAtRef.current = Date.now();
       wasAbortedRef.current = false;
 
@@ -273,9 +278,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       }
       Sentry.captureException(error, { tags: { context: 'fetchData' } });
       console.error('Failed to load data:', error);
-      // Hydrated data is already on screen — a destructive toast over a
-      // perfectly usable view would only alarm the user. The next
-      // foreground/online refetch heals silently.
+      // Still showing cached data from this boot (no successful fetch yet) —
+      // a destructive toast over a perfectly usable view would only alarm the
+      // user. The flag is cleared the moment a fetch succeeds, so failures
+      // after that point still toast.
       if (hydratedFromCacheRef.current) {
         return;
       }
@@ -402,6 +408,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setMonthlyBudget(null);
       setDefaultCurrency('EUR');
       setDefaultSavingsPct(null);
+      // Reminder hour and notification prefs are per-user too — clearing them
+      // stops a second account on a shared device briefly seeing user A's
+      // settings before the new fetch resolves.
+      setDailyReminderHour(null);
+      setNotificationPreferences({});
       setIsInitialized(false);
       setIsSecondaryLoaded(false);
     }
@@ -452,14 +463,19 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   // immediately on backgrounding so a quick "add expense, close app"
   // sequence isn't lost to the debounce window.
   const userId = session?.user?.id;
+  // Holds the latest "save current state" closure. The flush-on-hide listener
+  // reads it instead of closing over data, so that listener is registered once
+  // for the session rather than torn down and re-added on every mutation.
+  const persistSnapshotRef = useRef<(() => void) | null>(null);
+
   useEffect(() => {
     if (!isInitialized || !userId) {
+      persistSnapshotRef.current = null;
+
       return;
     }
 
-    let saved = false;
     const persist = () => {
-      saved = true;
       saveDataSnapshot(userId, {
         categories,
         expenses,
@@ -481,21 +497,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         secondaryLoaded: isSecondaryLoaded,
       });
     };
+    persistSnapshotRef.current = persist;
 
     const timer = setTimeout(persist, 2000);
 
-    const flushOnHide = () => {
-      if (document.visibilityState === 'hidden' && !saved) {
-        clearTimeout(timer);
-        persist();
-      }
-    };
-    document.addEventListener('visibilitychange', flushOnHide);
-
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('visibilitychange', flushOnHide);
-    };
+    return () => clearTimeout(timer);
   }, [
     isInitialized,
     userId,
@@ -518,6 +524,24 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     notificationPreferences,
     isSecondaryLoaded,
   ]);
+
+  // Flush the pending snapshot synchronously when the app is backgrounded, so
+  // data changed within the debounce window isn't lost if the OS freezes or
+  // discards the page (common on iOS PWA). Registered once for the lifetime
+  // of the provider — it reads the latest persist closure from the ref.
+  useEffect(() => {
+    const flushOnHide = () => {
+      if (document.visibilityState === 'hidden') {
+        persistSnapshotRef.current?.();
+      }
+    };
+
+    document.addEventListener('visibilitychange', flushOnHide);
+
+    return () => {
+      document.removeEventListener('visibilitychange', flushOnHide);
+    };
+  }, []);
 
   const actions = useMemo<DataActions>(
     () => ({
