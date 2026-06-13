@@ -136,10 +136,14 @@ const useIdleTabPrefetch = () => {
     const prefetch = () => {
       // Same module specifiers as the lazyWithRetry imports above, so Rollup
       // reuses the same chunks rather than emitting new ones.
-      import('@/components/expenses/ExpensesList');
-      import('@/components/income/IncomeList');
-      import('@/components/recurring/RecurringExpensesList');
-      import('@/components/analytics/AnalyticsView');
+      // Prefetch is a background optimization — swallow failures (a transient
+      // network blip on mobile throws "Importing a module script failed.").
+      // The real navigation is still protected by lazyWithRetry → /reset.
+      const swallow = () => {};
+      import('@/components/expenses/ExpensesList').catch(swallow);
+      import('@/components/income/IncomeList').catch(swallow);
+      import('@/components/recurring/RecurringExpensesList').catch(swallow);
+      import('@/components/analytics/AnalyticsView').catch(swallow);
     };
 
     const ric = (window as Window).requestIdleCallback;

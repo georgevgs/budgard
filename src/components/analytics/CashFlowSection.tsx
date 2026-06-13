@@ -1,12 +1,13 @@
-import { lazy, Suspense } from 'react';
+import { Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useCashFlowData } from '@/hooks/analytics/useCashFlowData';
 import { formatCurrency, cn } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
+import { lazyWithRetry } from '@/lib/lazyWithRetry';
 
-const CashFlowChart = lazy(
+const CashFlowChart = lazyWithRetry(
   () => import('@/components/analytics/CashFlowChart'),
 );
 

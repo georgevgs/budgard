@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -12,11 +12,12 @@ import { useDataConfig } from '@/contexts/DataContext';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import { formatCurrency } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
+import { lazyWithRetry } from '@/lib/lazyWithRetry';
 
 // Lazy-load the chart so the Recharts chunk doesn't gate the rest of the
 // view's render. The placeholder reserves the same vertical space (~280px)
 // to avoid layout shift when the chunk resolves.
-const MonthlyTrendChart = lazy(
+const MonthlyTrendChart = lazyWithRetry(
   () => import('@/components/analytics/MonthlyTrendChart'),
 );
 
