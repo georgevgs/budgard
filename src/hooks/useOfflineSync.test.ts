@@ -23,10 +23,14 @@ vi.mock('@/hooks/useToast', () => ({
 
 const mockGetAll = vi.fn();
 const mockRemove = vi.fn().mockResolvedValue(undefined);
+const mockUpdate = vi.fn().mockResolvedValue(undefined);
+const mockCount = vi.fn().mockResolvedValue(0);
 vi.mock('@/lib/offlineQueue', () => ({
   offlineQueue: {
     getAll: () => mockGetAll(),
     remove: (...args: unknown[]) => mockRemove(...args),
+    update: (...args: unknown[]) => mockUpdate(...args),
+    count: () => mockCount(),
   },
 }));
 
@@ -161,5 +165,44 @@ describe('useOfflineSync', () => {
     });
 
     expect(mockGetAll).toHaveBeenCalled();
+  });
+
+  it('leaves the queue intact when sync fails due to connectivity', async () => {
+    mockGetAll.mockResolvedValue([
+      { id: 7, type: 'createExpense', payload: { amount: 1 }, createdAt: '' },
+    ]);
+    // Online, but the request fails at the network layer (server unreachable).
+    mockCreateExpense.mockRejectedValue(new TypeError('Failed to fetch'));
+
+    renderHook(() => useOfflineSync());
+    await act(async () => {});
+
+    // Transient → keep it, don't drop, don't count a retry, don't toast.
+    expect(mockRemove).not.toHaveBeenCalled();
+    expect(mockUpdate).not.toHaveBeenCalled();
+    expect(mockToast).not.toHaveBeenCalled();
+  });
+
+  it('drops a poison mutation after the retry cap', async () => {
+    mockGetAll.mockResolvedValue([
+      {
+        id: 9,
+        type: 'createExpense',
+        payload: { amount: 1 },
+        createdAt: '',
+        retries: 4,
+      },
+    ]);
+    // A permanent (non-connectivity) failure that has already been retried.
+    mockCreateExpense.mockRejectedValue(new Error('permanent rejection'));
+
+    renderHook(() => useOfflineSync());
+    await act(async () => {});
+
+    expect(mockRemove).toHaveBeenCalledWith(9);
+    expect(mockUpdate).not.toHaveBeenCalled();
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({ variant: 'destructive' }),
+    );
   });
 });

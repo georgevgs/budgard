@@ -1,10 +1,12 @@
 import { useCallback, useMemo } from 'react';
 import * as Sentry from '@sentry/react';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
-import { offlineQueue } from '@/lib/offlineQueue';
+import { offlineQueue, createTempId } from '@/lib/offlineQueue';
+import { isOfflineError } from '@/lib/offlineError';
 import type { Expense } from '@/types/Expense';
 import { replaceById, patchById, pickByEdit } from '@/hooks/dataOps/helpers';
 import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
@@ -13,6 +15,7 @@ export const useIncomeOps = () => {
   const { isInitialized } = useDataConfig();
   const { setIncomes } = useDataActions();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const showErrorToast = useShowErrorToast();
 
   const handleIncomeSubmit = useCallback(
@@ -45,18 +48,23 @@ export const useIncomeOps = () => {
 
         return savedIncome;
       } catch (error) {
-        if (!navigator.onLine) {
+        if (isOfflineError(error)) {
           const mutationType = pickByEdit(
             incomeId,
             'updateIncome',
             'createIncome',
           );
+          const tempId = pickByEdit<string | null>(
+            incomeId,
+            null,
+            createTempId(),
+          );
           const idPayload = pickByEdit<Record<string, unknown>>(
             incomeId,
             { id: incomeId },
-            {},
+            { __tempId: tempId },
           );
-          await offlineQueue.enqueue(mutationType, {
+          await offlineQueue.enqueueWithReconcile(mutationType, {
             ...incomeData,
             ...idPayload,
           } as Record<string, unknown>);
@@ -66,7 +74,7 @@ export const useIncomeOps = () => {
             }
             const optimistic = {
               ...incomeData,
-              id: `temp-${Date.now()}`,
+              id: tempId as string,
               created_at: new Date().toISOString(),
             } as Expense;
 
@@ -75,8 +83,8 @@ export const useIncomeOps = () => {
           haptics.success();
           toast({
             variant: 'success',
-            title: 'Income queued',
-            description: 'Will sync when back online',
+            title: t('offline.savedOffline'),
+            description: t('offline.willSync'),
           });
 
           return null;
@@ -93,7 +101,7 @@ export const useIncomeOps = () => {
         throw error;
       }
     },
-    [isInitialized, setIncomes, showErrorToast, toast],
+    [isInitialized, setIncomes, showErrorToast, toast, t],
   );
 
   const handleIncomeDelete = useCallback(
@@ -107,14 +115,16 @@ export const useIncomeOps = () => {
         await dataService.deleteIncome(incomeId);
         setIncomes((prev) => prev.filter((e) => e.id !== incomeId));
       } catch (error) {
-        if (!navigator.onLine) {
-          await offlineQueue.enqueue('deleteIncome', { id: incomeId });
+        if (isOfflineError(error)) {
+          await offlineQueue.enqueueWithReconcile('deleteIncome', {
+            id: incomeId,
+          });
           setIncomes((prev) => prev.filter((e) => e.id !== incomeId));
           haptics.success();
           toast({
             variant: 'success',
-            title: 'Delete queued',
-            description: 'Will sync when back online',
+            title: t('offline.deleteSavedOffline'),
+            description: t('offline.willSync'),
           });
 
           return;
@@ -125,7 +135,7 @@ export const useIncomeOps = () => {
         throw error;
       }
     },
-    [isInitialized, setIncomes, showErrorToast, toast],
+    [isInitialized, setIncomes, showErrorToast, toast, t],
   );
 
   return useMemo(

@@ -5,64 +5,18 @@ import { offlineQueue, type QueuedMutation } from '@/lib/offlineQueue';
 import { dataService } from '@/services/dataService';
 import { useDataActions } from '@/contexts/DataContext';
 import { toast } from '@/hooks/useToast';
+import { isOfflineError } from '@/lib/offlineError';
 import type { Expense } from '@/types/Expense';
+
+// A permanently-failing mutation (validation, RLS, unknown type) is retried a
+// few times to ride out a misclassified blip, then dropped so it can't block
+// the rest of the queue forever.
+const MAX_RETRIES = 5;
 
 export const useOfflineSync = (): void => {
   const { t } = useTranslation();
   const { refreshExpenses, refreshIncomes } = useDataActions();
   const isSyncing = useRef(false);
-
-  const processMutation = useCallback(
-    async (mutation: QueuedMutation): Promise<boolean> => {
-      try {
-        // __tempId is local-only metadata used to coalesce offline
-        // create+delete pairs; the server doesn't know about it.
-        const { __tempId: _t, ...payload } = mutation.payload as Record<
-          string,
-          unknown
-        >;
-
-        switch (mutation.type) {
-          case 'createExpense':
-            await dataService.createExpense(payload as Partial<Expense>);
-            break;
-          case 'updateExpense':
-            await dataService.updateExpense(
-              payload as Partial<Expense>,
-              payload.id as string,
-            );
-            break;
-          case 'deleteExpense':
-            await dataService.deleteExpense(payload.id as string);
-            break;
-          case 'createIncome':
-            await dataService.createIncome(payload as Partial<Expense>);
-            break;
-          case 'updateIncome':
-            await dataService.updateIncome(
-              payload as Partial<Expense>,
-              payload.id as string,
-            );
-            break;
-          case 'deleteIncome':
-            await dataService.deleteIncome(payload.id as string);
-            break;
-        }
-
-        return true;
-      } catch (error) {
-        // Don't capture if offline — that's the expected reason syncs fail
-        if (navigator.onLine) {
-          Sentry.captureException(error, {
-            tags: { operation: 'offlineSync', mutationType: mutation.type },
-          });
-        }
-
-        return false;
-      }
-    },
-    [],
-  );
 
   const syncQueue = useCallback(async () => {
     if (isSyncing.current) return;
@@ -75,14 +29,33 @@ export const useOfflineSync = (): void => {
     let successCount = 0;
     let failCount = 0;
 
+    // Process in id order; stop the pass on the first failure so dependent
+    // mutations can't run out of order.
     for (const mutation of mutations) {
-      const success = await processMutation(mutation);
-      if (success) {
+      try {
+        await applyMutation(mutation);
         await offlineQueue.remove(mutation.id);
         successCount++;
-      } else {
+      } catch (error) {
+        // Still offline / server still unreachable — keep the change untouched
+        // and retry on the next trigger. Don't count it against the retry cap.
+        if (isOfflineError(error)) {
+          break;
+        }
+
+        // Permanent failure: count a retry, and drop it once it's clearly poison.
+        const retries = (mutation.retries ?? 0) + 1;
+        Sentry.captureException(error, {
+          tags: { operation: 'offlineSync', mutationType: mutation.type },
+          extra: { retries },
+        });
+
+        if (retries >= MAX_RETRIES) {
+          await offlineQueue.remove(mutation.id);
+        } else {
+          await offlineQueue.update(mutation.id, { retries });
+        }
         failCount++;
-        // Stop on first failure — likely still offline or auth expired
         break;
       }
     }
@@ -94,7 +67,7 @@ export const useOfflineSync = (): void => {
         variant: 'success',
         title: t('offline.syncSuccess', { count: successCount }),
       });
-      // Refresh to get server state for both expenses and incomes
+      // Refresh to get server state (real ids replace optimistic temp rows).
       refreshExpenses().catch((err) => {
         Sentry.captureException(err, {
           tags: { operation: 'refreshExpenses', context: 'afterOfflineSync' },
@@ -113,21 +86,74 @@ export const useOfflineSync = (): void => {
         title: t('offline.syncFailed', { count: failCount }),
       });
     }
-  }, [processMutation, refreshExpenses, refreshIncomes, t]);
+  }, [refreshExpenses, refreshIncomes, t]);
 
-  // Sync when coming back online
+  // Drain the queue when connectivity returns, when the app is foregrounded
+  // (covers a server that recovered while the app sat in the background, where
+  // no 'online' event fires), and once on mount.
   useEffect(() => {
-    const handleOnline = () => {
+    const handleOnline = (): void => {
       syncQueue();
     };
 
-    window.addEventListener('online', handleOnline);
+    const handleVisibility = (): void => {
+      if (document.visibilityState === 'visible') {
+        syncQueue();
+      }
+    };
 
-    // Also try to sync on mount (in case we came back online while app was closed)
+    window.addEventListener('online', handleOnline);
+    document.addEventListener('visibilitychange', handleVisibility);
+
     syncQueue();
 
     return () => {
       window.removeEventListener('online', handleOnline);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [syncQueue]);
+};
+
+// --- Helpers ---
+
+const applyMutation = async (mutation: QueuedMutation): Promise<void> => {
+  // __tempId is local-only metadata used to coalesce offline create+edit/delete
+  // chains; the server doesn't know about it.
+  const { __tempId: _tempId, ...payload } = mutation.payload as Record<
+    string,
+    unknown
+  >;
+
+  switch (mutation.type) {
+    case 'createExpense':
+      await dataService.createExpense(payload as Partial<Expense>);
+      break;
+    case 'updateExpense':
+      await dataService.updateExpense(
+        payload as Partial<Expense>,
+        payload.id as string,
+      );
+      break;
+    case 'deleteExpense':
+      await dataService.deleteExpense(payload.id as string);
+      break;
+    case 'createIncome':
+      await dataService.createIncome(payload as Partial<Expense>);
+      break;
+    case 'updateIncome':
+      await dataService.updateIncome(
+        payload as Partial<Expense>,
+        payload.id as string,
+      );
+      break;
+    case 'deleteIncome':
+      await dataService.deleteIncome(payload.id as string);
+      break;
+    default: {
+      // Exhaustiveness guard: a stale entry of an unknown type must fail loudly
+      // (then be retried/dropped), never be silently treated as synced.
+      const unknownType: never = mutation.type;
+      throw new Error(`Unknown offline mutation type: ${String(unknownType)}`);
+    }
+  }
 };

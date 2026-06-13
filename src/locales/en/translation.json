@@ -910,7 +910,11 @@
   },
   "offline": {
     "syncSuccess": "Synced {{count}} queued change(s)",
-    "syncFailed": "Failed to sync {{count}} change(s)"
+    "syncFailed": "Failed to sync {{count}} change(s)",
+    "savedOffline": "Saved offline",
+    "deleteSavedOffline": "Delete saved offline",
+    "willSync": "We'll sync it when you're back online",
+    "pending": "{{count}} change(s) pending sync"
   },
   "onboarding": {
     "welcomeTitle": "Welcome to Budgard",

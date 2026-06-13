@@ -146,7 +146,12 @@ vi.mock('@/services/receiptService', () => ({
 }));
 
 vi.mock('@/lib/offlineQueue', () => ({
-  offlineQueue: { enqueue: vi.fn().mockResolvedValue(undefined) },
+  offlineQueue: {
+    enqueue: vi.fn().mockResolvedValue(undefined),
+    enqueueWithReconcile: vi.fn().mockResolvedValue(undefined),
+  },
+  createTempId: () => `temp-${Date.now()}`,
+  isTempId: (id: string) => id.startsWith('temp-'),
 }));
 
 describe('useDataOperations', () => {
@@ -202,12 +207,36 @@ describe('useDataOperations', () => {
       await result.current.handleExpenseSubmit({ amount: 50 });
     });
 
-    expect(offlineQueue.enqueue).toHaveBeenCalledWith(
+    expect(offlineQueue.enqueueWithReconcile).toHaveBeenCalledWith(
       'createExpense',
       expect.objectContaining({
         amount: 50,
         __tempId: expect.stringMatching(/^temp-/),
       }),
+    );
+  });
+
+  it('queues expense when the server is down but the device is online', async () => {
+    // navigator.onLine stays true (beforeEach); the request fails at the
+    // network layer, which isOfflineError() treats as "save locally".
+    mockCreateExpense.mockRejectedValue(new TypeError('Failed to fetch'));
+
+    const { offlineQueue } = await import('@/lib/offlineQueue');
+    const { result } = renderHook(() => useDataOperations());
+
+    await act(async () => {
+      await result.current.handleExpenseSubmit({ amount: 50 });
+    });
+
+    expect(offlineQueue.enqueueWithReconcile).toHaveBeenCalledWith(
+      'createExpense',
+      expect.objectContaining({
+        amount: 50,
+        __tempId: expect.stringMatching(/^temp-/),
+      }),
+    );
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({ variant: 'success' }),
     );
   });
 
@@ -239,9 +268,10 @@ describe('useDataOperations', () => {
       await result.current.handleExpenseDelete('e1');
     });
 
-    expect(offlineQueue.enqueue).toHaveBeenCalledWith('deleteExpense', {
-      id: 'e1',
-    });
+    expect(offlineQueue.enqueueWithReconcile).toHaveBeenCalledWith(
+      'deleteExpense',
+      { id: 'e1' },
+    );
   });
 
   // --- Category Add ---

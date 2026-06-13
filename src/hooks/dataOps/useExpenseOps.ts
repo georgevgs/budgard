@@ -1,11 +1,13 @@
 import { useCallback, useMemo } from 'react';
 import * as Sentry from '@sentry/react';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { uploadReceipt, deleteReceipt } from '@/services/receiptService';
 import { haptics } from '@/lib/haptics';
-import { offlineQueue } from '@/lib/offlineQueue';
+import { offlineQueue, createTempId } from '@/lib/offlineQueue';
+import { isOfflineError } from '@/lib/offlineError';
 import type { Expense } from '@/types/Expense';
 import { replaceById, patchById, pickByEdit } from '@/hooks/dataOps/helpers';
 import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
@@ -28,6 +30,7 @@ export const useExpenseOps = () => {
   const { setExpenses, refreshExpenses, refreshDebts, expensesRef } =
     useDataActions();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const showErrorToast = useShowErrorToast();
 
   const handleExpenseSubmit = useCallback(
@@ -140,7 +143,7 @@ export const useExpenseOps = () => {
           });
         }
       } catch (error) {
-        if (!navigator.onLine) {
+        if (isOfflineError(error)) {
           const mutationType = pickByEdit(
             expenseId,
             'updateExpense',
@@ -149,14 +152,14 @@ export const useExpenseOps = () => {
           const tempId = pickByEdit<string | null>(
             expenseId,
             null,
-            `temp-${Date.now()}`,
+            createTempId(),
           );
           const idPayload = pickByEdit<Record<string, unknown>>(
             expenseId,
             { id: expenseId },
             { __tempId: tempId },
           );
-          await offlineQueue.enqueue(mutationType, {
+          await offlineQueue.enqueueWithReconcile(mutationType, {
             ...expenseData,
             ...idPayload,
           } as Record<string, unknown>);
@@ -181,8 +184,8 @@ export const useExpenseOps = () => {
           haptics.success();
           toast({
             variant: 'success',
-            title: 'Expense queued',
-            description: 'Will sync when back online',
+            title: t('offline.savedOffline'),
+            description: t('offline.willSync'),
           });
 
           return;
@@ -199,7 +202,7 @@ export const useExpenseOps = () => {
         throw error;
       }
     },
-    [isInitialized, expensesRef, setExpenses, refreshDebts, showErrorToast, toast],
+    [isInitialized, expensesRef, setExpenses, refreshDebts, showErrorToast, toast, t],
   );
 
   const handleExpenseDelete = useCallback(
@@ -233,25 +236,16 @@ export const useExpenseOps = () => {
           });
         }
       } catch (error) {
-        if (!navigator.onLine) {
-          if (expenseId.startsWith('temp-')) {
-            const queued = await offlineQueue.getAll();
-            const pendingCreate = queued.find(
-              (m) =>
-                m.type === 'createExpense' && m.payload.__tempId === expenseId,
-            );
-            if (pendingCreate) {
-              await offlineQueue.remove(pendingCreate.id);
-            }
-          } else {
-            await offlineQueue.enqueue('deleteExpense', { id: expenseId });
-          }
+        if (isOfflineError(error)) {
+          await offlineQueue.enqueueWithReconcile('deleteExpense', {
+            id: expenseId,
+          });
           setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
           haptics.success();
           toast({
             variant: 'success',
-            title: 'Delete queued',
-            description: 'Will sync when back online',
+            title: t('offline.deleteSavedOffline'),
+            description: t('offline.willSync'),
           });
 
           return;
@@ -262,7 +256,7 @@ export const useExpenseOps = () => {
         throw error;
       }
     },
-    [isInitialized, expensesRef, setExpenses, refreshDebts, showErrorToast, toast],
+    [isInitialized, expensesRef, setExpenses, refreshDebts, showErrorToast, toast, t],
   );
 
   const handleBulkExpenseImport = useCallback(

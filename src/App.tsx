@@ -17,6 +17,7 @@ import {
 } from '@/contexts/DataContext';
 import { usePwaUpdate } from '@/hooks/usePwaUpdate';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { useOfflineQueueCount } from '@/hooks/useOfflineQueueCount';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import Header from '@/components/layout/Header';
 import NavTabs from '@/components/layout/NavTabs';
@@ -300,6 +301,7 @@ const renderKeepAliveTab = (
 const OfflineBanner = () => {
   const { t } = useTranslation();
   const isOnline = useOnlineStatus();
+  const pendingCount = useOfflineQueueCount();
   // Track whether we've ever gone offline so we can show a "back online" flash
   const wentOffline = useRef(false);
   const [showBackOnline, setShowBackOnline] = useState(false);
@@ -313,42 +315,63 @@ const OfflineBanner = () => {
   useEffect(() => {
     if (isOnline && wentOffline.current) {
       setShowBackOnline(true);
-      const t = setTimeout(() => setShowBackOnline(false), 2500);
+      const timer = setTimeout(() => setShowBackOnline(false), 2500);
 
-      return () => clearTimeout(t);
+      return () => clearTimeout(timer);
     }
   }, [isOnline]);
 
   if (!isOnline) {
-    return (
-      <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
-        <div
-          role="status"
-          className="flex items-center gap-2 rounded-full bg-destructive text-destructive-foreground text-sm font-medium px-4 py-2 shadow-lg pointer-events-auto"
-        >
-          <span className="h-2 w-2 rounded-full bg-destructive-foreground/70 animate-pulse" />
-          {t('common.offline')}
-        </div>
-      </div>
+    return renderStatusPill(OFFLINE_PILL, t('common.offline'));
+  }
+
+  if (pendingCount > 0) {
+    return renderStatusPill(
+      PENDING_PILL,
+      t('offline.pending', { count: pendingCount }),
     );
   }
 
   if (showBackOnline) {
-    return (
-      <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
-        <div
-          role="status"
-          className="flex items-center gap-2 rounded-full bg-green-600 text-white text-sm font-medium px-4 py-2 shadow-lg pointer-events-auto"
-        >
-          <span className="h-2 w-2 rounded-full bg-white/70" />
-          {t('common.backOnline')}
-        </div>
-      </div>
-    );
+    return renderStatusPill(ONLINE_PILL, t('common.backOnline'));
   }
 
   return null;
 };
+
+// --- Helpers ---
+
+type StatusPillTone = {
+  pill: string;
+  dot: string;
+};
+
+const OFFLINE_PILL: StatusPillTone = {
+  pill: 'bg-destructive text-destructive-foreground',
+  dot: 'bg-destructive-foreground/70 animate-pulse',
+};
+
+const PENDING_PILL: StatusPillTone = {
+  pill: 'bg-secondary text-secondary-foreground',
+  dot: 'bg-secondary-foreground/70 animate-pulse',
+};
+
+const ONLINE_PILL: StatusPillTone = {
+  pill: 'bg-green-600 text-white',
+  dot: 'bg-white/70',
+};
+
+const renderStatusPill = (tone: StatusPillTone, label: string) => (
+  <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+    <div
+      role="status"
+      className={`flex items-center gap-2 rounded-full ${tone.pill} text-sm font-medium px-4 py-2 shadow-lg pointer-events-auto`}
+    >
+      <span className={`h-2 w-2 rounded-full ${tone.dot}`} />
+      {label}
+    </div>
+  </div>
+);
 
 // ============================================================================
 // App Component
