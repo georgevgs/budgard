@@ -524,6 +524,7 @@
     "onTrack": "On track",
     "behind": "Behind",
     "reached": "Reached",
+    "celebrate": "🎉 Goal reached — {{name}}!",
     "percentComplete": "{{percent}}% done",
     "overachieved": "{{percent}}% — over target",
     "sources": {
@@ -671,6 +672,7 @@
     "monthsCount_other": "{{count}} months",
     "percentPaid": "{{percent}}% paid",
     "cleared": "Paid off",
+    "celebrate": "🎉 Debt paid off — {{name}}! You did it!",
     "balanceOverOriginal": "{{amount}} above original",
     "archive": "Archive",
     "archiveTitle": "Archive debt",

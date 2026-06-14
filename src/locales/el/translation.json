@@ -524,6 +524,7 @@
     "onTrack": "Σε καλό δρόμο",
     "behind": "Πίσω από τον στόχο",
     "reached": "Επιτεύχθηκε",
+    "celebrate": "🎉 Στόχος επιτεύχθηκε — {{name}}!",
     "percentComplete": "{{percent}}% ολοκλήρωση",
     "overachieved": "{{percent}}% — πάνω από τον στόχο",
     "sources": {
@@ -671,6 +672,7 @@
     "monthsCount_other": "{{count}} μήνες",
     "percentPaid": "{{percent}}% εξοφλημένο",
     "cleared": "Εξοφλήθηκε",
+    "celebrate": "🎉 Χρέος εξοφλήθηκε — {{name}}! Τα κατάφερες!",
     "balanceOverOriginal": "{{amount}} πάνω από το αρχικό",
     "archive": "Αρχειοθέτηση",
     "archiveTitle": "Αρχειοθέτηση χρέους",

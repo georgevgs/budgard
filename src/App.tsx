@@ -21,6 +21,7 @@ import { useOfflineQueueCount } from '@/hooks/useOfflineQueueCount';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import Header from '@/components/layout/Header';
 import NavTabs from '@/components/layout/NavTabs';
+import MilestoneWatcher from '@/components/common/MilestoneWatcher';
 import { shouldShowOnboarding } from '@/lib/onboarding';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import {
@@ -113,6 +114,7 @@ const AuthenticatedLayout = () => {
         <Outlet />
       </main>
       <NavTabs />
+      <MilestoneWatcher />
       {renderOnboarding(showOnboarding, () => setShowOnboarding(false))}
     </>
   );
