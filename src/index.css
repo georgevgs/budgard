@@ -41,6 +41,10 @@
     --chart-5: 12 76% 61%;
     --income: 160 70% 38%;
     --income-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 38 92% 10%;
+    --info: 217 91% 53%;
+    --info-foreground: 0 0% 100%;
     --radius: 0.875rem;
   }
 
@@ -71,6 +75,10 @@
     --chart-5: 12 76% 61%;
     --income: 160 65% 50%;
     --income-foreground: 160 70% 8%;
+    --warning: 43 96% 56%;
+    --warning-foreground: 38 92% 10%;
+    --info: 213 94% 68%;
+    --info-foreground: 213 94% 12%;
   }
 
   [data-theme='barbie'] {
@@ -100,6 +108,10 @@
     --chart-5: 326 100% 95%;
     --income: 160 60% 42%;
     --income-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 38 92% 10%;
+    --info: 217 91% 53%;
+    --info-foreground: 0 0% 100%;
     --radius: 1rem;
   }
 }

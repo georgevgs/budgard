@@ -23,7 +23,8 @@
     "offline": "No internet connection",
     "backOnline": "Back online",
     "close": "Close",
-    "morePages": "More pages"
+    "morePages": "More pages",
+    "skipToContent": "Skip to content"
   },
   "auth": {
     "signIn": "Sign In",
@@ -94,6 +95,8 @@
       "convertedAmount": "≈ {{amount}}"
     },
     "noExpensesMatchFilter": "Your filters are picky — nothing matches. Try loosening them up.",
+    "resultsCount_one": "{{count}} result",
+    "resultsCount_other": "{{count}} results",
     "totalCount": "Total Expenses",
     "mostExpensive": "Most Expensive",
     "exportCSV": "Export CSV",

@@ -11,6 +11,10 @@ import {
   Tooltip,
 } from 'recharts';
 import { cn, formatCurrency } from '@/lib/utils';
+import {
+  ChartTooltipShell,
+  ChartTooltipRow,
+} from '@/components/common/ChartTooltip';
 import { getCurrencySymbol } from '@/lib/currencies';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
@@ -261,18 +265,15 @@ const renderTooltip = ({
   if (!point) return null;
 
   return (
-    <div className="rounded-xl bg-popover border border-border/40 shadow-md p-3 text-xs space-y-1.5">
-      <p className="font-medium text-foreground">{point.fullDate}</p>
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-muted-foreground">
-          {renderValueLabel(isInvestment, t)}
-        </span>
-        <span className="tabular-nums font-semibold">
-          {formatCurrency(point.balance, currency)}
-        </span>
-      </div>
+    <ChartTooltipShell title={point.fullDate}>
+      <ChartTooltipRow
+        label={renderValueLabel(isInvestment, t)}
+        labelClassName="text-muted-foreground"
+        value={formatCurrency(point.balance, currency)}
+        valueClassName="font-semibold"
+      />
       {renderCostBasisRow(isInvestment, point, currency, t)}
-    </div>
+    </ChartTooltipShell>
   );
 }
 
@@ -294,13 +295,10 @@ const renderCostBasisRow = (
   if (point.costBasis == null) return null;
 
   return (
-    <div className="flex items-center justify-between gap-3">
-      <span className="text-muted-foreground">
-        {t('networth.detail.costBasis')}
-      </span>
-      <span className="tabular-nums">
-        {formatCurrency(point.costBasis, currency)}
-      </span>
-    </div>
+    <ChartTooltipRow
+      label={t('networth.detail.costBasis')}
+      labelClassName="text-muted-foreground"
+      value={formatCurrency(point.costBasis, currency)}
+    />
   );
 }

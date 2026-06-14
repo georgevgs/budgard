@@ -12,6 +12,10 @@ import {
   Legend,
 } from 'recharts';
 import { cn, formatCurrency } from '@/lib/utils';
+import {
+  ChartTooltipShell,
+  ChartTooltipRow,
+} from '@/components/common/ChartTooltip';
 
 const INCOME_COLOR = 'hsl(var(--income))';
 const EXPENSE_COLOR = 'hsl(var(--destructive))';
@@ -116,30 +120,25 @@ const renderTooltipContent = (
   const point = payload[0].payload as ChartPoint;
 
   return (
-    <div className="rounded-xl bg-popover border border-border/40 shadow-md p-3 text-xs space-y-1.5">
-      <p className="font-medium text-foreground">{point.fullMonth}</p>
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-income">{t('income.title')}</span>
-        <span className="tabular-nums">
-          +{formatCurrency(point.income, currency)}
-        </span>
-      </div>
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-destructive">{t('expenses.title')}</span>
-        <span className="tabular-nums">
-          -{formatCurrency(Math.abs(point.expense), currency)}
-        </span>
-      </div>
-      <div className="flex items-center justify-between gap-3 border-t border-border/40 pt-1.5 mt-1.5">
-        <span className="font-medium">{t('income.netCashFlow')}</span>
-        <span
-          className={cn('tabular-nums font-semibold', getNetClass(point.net))}
-        >
-          {renderNetSign(point.net)}
-          {formatCurrency(point.net, currency)}
-        </span>
-      </div>
-    </div>
+    <ChartTooltipShell title={point.fullMonth}>
+      <ChartTooltipRow
+        label={t('income.title')}
+        labelClassName="text-income"
+        value={`+${formatCurrency(point.income, currency)}`}
+      />
+      <ChartTooltipRow
+        label={t('expenses.title')}
+        labelClassName="text-destructive"
+        value={`-${formatCurrency(Math.abs(point.expense), currency)}`}
+      />
+      <ChartTooltipRow
+        label={t('income.netCashFlow')}
+        labelClassName="font-medium"
+        value={`${renderNetSign(point.net)}${formatCurrency(point.net, currency)}`}
+        valueClassName={cn('font-semibold', getNetClass(point.net))}
+        separated
+      />
+    </ChartTooltipShell>
   );
 };
 

@@ -72,7 +72,7 @@ const pickManageLabel = (rowCount: number, t: TFunc) => {
 
 const pickBarColor = (isOver: boolean, isWarning: boolean) => {
   if (isOver) return 'bg-destructive';
-  if (isWarning) return 'bg-amber-500';
+  if (isWarning) return 'bg-warning';
 
   return 'bg-primary';
 };
@@ -115,7 +115,7 @@ const renderRow = (row: BudgetCategoryRow, currency: string, t: TFunc) => {
           className={cn(
             'tabular-nums shrink-0',
             row.isOver && 'text-destructive font-medium',
-            row.isWarning && 'text-amber-600 dark:text-amber-500 font-medium',
+            row.isWarning && 'text-warning font-medium',
           )}
         >
           {formatCurrency(row.spent, currency)}

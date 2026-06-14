@@ -124,7 +124,7 @@ const renderHighlightedText = (text: string, query: string | undefined) => {
   return (
     <>
       {text.slice(0, matchIndex)}
-      <mark className="bg-yellow-200 dark:bg-yellow-500/30 text-foreground rounded-sm px-0.5">
+      <mark className="bg-warning/30 text-foreground rounded-sm px-0.5">
         {text.slice(matchIndex, matchIndex + query.length)}
       </mark>
       {text.slice(matchIndex + query.length)}

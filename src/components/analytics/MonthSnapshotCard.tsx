@@ -130,7 +130,7 @@ const renderBudgetProgress = (
   if (budgetUsedPercent > 90) {
     barClass = 'bg-destructive';
   } else if (budgetUsedPercent > 75) {
-    barClass = 'bg-amber-500';
+    barClass = 'bg-warning';
   }
 
   return (

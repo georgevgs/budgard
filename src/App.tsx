@@ -109,8 +109,14 @@ const AuthenticatedLayout = () => {
 
   return (
     <>
+      <SkipToContentLink />
+      <ScrollToTop />
       <Header />
-      <main className="flex-1 pt-2 pb-20">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="flex-1 pt-2 pb-20 focus:outline-none"
+      >
         <Outlet />
       </main>
       <NavTabs />
@@ -118,6 +124,36 @@ const AuthenticatedLayout = () => {
       {renderOnboarding(showOnboarding, () => setShowOnboarding(false))}
     </>
   );
+};
+
+// Visually hidden until focused — the first Tab on the authenticated app jumps
+// keyboard/screen-reader users straight past the header into the main content.
+const SkipToContentLink = () => {
+  const { t } = useTranslation();
+
+  return (
+    <a
+      href="#main-content"
+      className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary-foreground focus:shadow-lg"
+    >
+      {t('common.skipToContent')}
+    </a>
+  );
+};
+
+// Reset window scroll when landing on a freshly-mounted secondary route. The
+// four keep-alive tabs share window scroll and preserve their own view state,
+// so they are intentionally skipped to avoid fighting that layout.
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    if (isMainTabPath(pathname)) return;
+
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
 };
 
 const renderOnboarding = (isOpen: boolean, onComplete: () => void) => {
@@ -359,8 +395,8 @@ const PENDING_PILL: StatusPillTone = {
 };
 
 const ONLINE_PILL: StatusPillTone = {
-  pill: 'bg-green-600 text-white',
-  dot: 'bg-white/70',
+  pill: 'bg-income text-income-foreground',
+  dot: 'bg-income-foreground/70',
 };
 
 const renderStatusPill = (tone: StatusPillTone, label: string) => (

@@ -28,19 +28,19 @@ const BUCKETS: BucketConfig[] = [
   {
     key: 'need',
     target: 0.5,
-    color: '#3b82f6',
-    textClass: 'text-blue-600 dark:text-blue-400',
+    color: 'hsl(var(--info))',
+    textClass: 'text-info',
   },
   {
     key: 'want',
     target: 0.3,
-    color: '#f59e0b',
-    textClass: 'text-amber-600 dark:text-amber-400',
+    color: 'hsl(var(--warning))',
+    textClass: 'text-warning',
   },
   {
     key: 'savings',
     target: 0.2,
-    color: '#10b981',
+    color: 'hsl(var(--income))',
     textClass: 'text-income',
   },
 ];
@@ -261,7 +261,7 @@ const renderStatusLabel = (status: BucketStatus, t: TranslateFunction) => {
 
   if (status === 'over') {
     return (
-      <span className="text-amber-600 dark:text-amber-400 text-xs font-medium">
+      <span className="text-warning text-xs font-medium">
         {t('insights.overTarget')}
       </span>
     );

@@ -55,7 +55,7 @@ const pickIndicatorClass = (progress: GoalProgress) => {
   }
 
   if (progress.isOnTrack === false) {
-    return 'bg-amber-500';
+    return 'bg-warning';
   }
 
   return 'bg-primary';

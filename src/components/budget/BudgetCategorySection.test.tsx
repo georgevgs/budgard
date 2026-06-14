@@ -77,7 +77,7 @@ describe('BudgetCategorySection', () => {
     expect(container.querySelector('.bg-destructive')).not.toBeNull();
   });
 
-  it('uses the amber bar when a row is in warning range', () => {
+  it('uses the warning bar when a row is in warning range', () => {
     const { container } = render(
       <BudgetCategorySection
         totalCategoryCount={1}
@@ -87,7 +87,7 @@ describe('BudgetCategorySection', () => {
       />,
     );
 
-    expect(container.querySelector('.bg-amber-500')).not.toBeNull();
+    expect(container.querySelector('.bg-warning')).not.toBeNull();
   });
 
   it('opens manager via the header button', () => {

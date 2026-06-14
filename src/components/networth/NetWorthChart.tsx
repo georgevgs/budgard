@@ -12,6 +12,10 @@ import {
 } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn, formatCurrency } from '@/lib/utils';
+import {
+  ChartTooltipShell,
+  ChartTooltipRow,
+} from '@/components/common/ChartTooltip';
 import { getCurrencySymbol } from '@/lib/currencies';
 import type { NetWorthPoint } from '@/hooks/useNetWorth';
 import { useDateLocale } from '@/hooks/useDateLocale';
@@ -120,36 +124,22 @@ const renderTooltipContent = (
   const point = payload[0].payload as ChartPoint;
 
   return (
-    <div className="rounded-xl bg-popover border border-border/40 shadow-md p-3 text-xs space-y-1.5">
-      <p className="font-medium text-foreground">{point.fullDate}</p>
-      <div className="flex items-center justify-between gap-3">
-        <span>{t('networth.totalLabel')}</span>
-        <span
-          className={cn(
-            'tabular-nums font-semibold',
-            point.total >= 0 && 'text-foreground',
-            point.total < 0 && 'text-destructive',
-          )}
-        >
-          {formatCurrency(point.total, defaultCurrency)}
-        </span>
-      </div>
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-muted-foreground">
-          {t('networth.assetsLabel')}
-        </span>
-        <span className="tabular-nums">
-          {formatCurrency(point.assets, defaultCurrency)}
-        </span>
-      </div>
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-muted-foreground">
-          {t('networth.liabilitiesLabel')}
-        </span>
-        <span className="tabular-nums">
-          {formatCurrency(point.liabilities, defaultCurrency)}
-        </span>
-      </div>
-    </div>
+    <ChartTooltipShell title={point.fullDate}>
+      <ChartTooltipRow
+        label={t('networth.totalLabel')}
+        value={formatCurrency(point.total, defaultCurrency)}
+        valueClassName={cn('font-semibold', point.total < 0 && 'text-destructive')}
+      />
+      <ChartTooltipRow
+        label={t('networth.assetsLabel')}
+        labelClassName="text-muted-foreground"
+        value={formatCurrency(point.assets, defaultCurrency)}
+      />
+      <ChartTooltipRow
+        label={t('networth.liabilitiesLabel')}
+        labelClassName="text-muted-foreground"
+        value={formatCurrency(point.liabilities, defaultCurrency)}
+      />
+    </ChartTooltipShell>
   );
 };

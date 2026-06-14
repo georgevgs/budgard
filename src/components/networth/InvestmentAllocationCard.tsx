@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
+import { ChartTooltipShell } from '@/components/common/ChartTooltip';
 import type { Account } from '@/types/Account';
 
 type Props = {
@@ -118,11 +119,10 @@ const renderTooltip = (
   if (!slice) return null;
 
   return (
-    <div className="rounded-xl bg-popover border border-border/40 shadow-md p-2.5 text-xs">
-      <p className="font-medium">{slice.name}</p>
+    <ChartTooltipShell title={slice.name}>
       <p className="tabular-nums text-muted-foreground">
         {formatCurrency(slice.value, slice.currency)} · {slice.pct.toFixed(1)}%
       </p>
-    </div>
+    </ChartTooltipShell>
   );
 }

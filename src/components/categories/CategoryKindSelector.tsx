@@ -13,12 +13,12 @@ const KIND_OPTIONS: KindOption[] = [
   {
     value: 'need',
     targetPct: 50,
-    activeClasses: 'bg-blue-500/15 text-blue-700 dark:text-blue-300',
+    activeClasses: 'bg-info/15 text-info',
   },
   {
     value: 'want',
     targetPct: 30,
-    activeClasses: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
+    activeClasses: 'bg-warning/15 text-warning',
   },
   {
     value: 'savings',

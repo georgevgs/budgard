@@ -85,7 +85,7 @@ const renderStaleRatesWarning = (
   }
 
   return (
-    <div className="flex items-start gap-2 pt-2 border-t border-border/40 text-xs text-amber-600 dark:text-amber-500">
+    <div className="flex items-start gap-2 pt-2 border-t border-border/40 text-xs text-warning">
       <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
       <span>
         {t('networth.staleRatesWarning', {

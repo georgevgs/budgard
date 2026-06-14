@@ -138,7 +138,7 @@ const renderAnomalyRow = (
   let colorClass = 'text-income';
   if (anomaly.direction === 'up') {
     Icon = TrendingUp;
-    colorClass = 'text-amber-500';
+    colorClass = 'text-warning';
   }
 
   return (

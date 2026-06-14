@@ -11,8 +11,9 @@ import {
 } from 'recharts';
 import type { CategoricalChartFunc } from 'recharts/types/chart/types';
 import { formatCurrency } from '@/lib/utils';
+import { ChartTooltipShell } from '@/components/common/ChartTooltip';
 
-const BUDGET_LINE_COLOR = '#f59e0b';
+const BUDGET_LINE_COLOR = 'hsl(var(--warning))';
 
 type MonthlyDataPoint = {
   month: string;
@@ -139,12 +140,11 @@ const ChartTooltip = ({
   const { value, payload: data } = payload[0];
 
   return (
-    <div className="rounded-lg border bg-card px-3 py-2 shadow-md">
-      <p className="text-xs text-muted-foreground">{data.fullMonth}</p>
+    <ChartTooltipShell title={data.fullMonth}>
       <p className="text-sm font-semibold tabular-nums">
         {formatCurrency(value, currency)}
       </p>
-    </div>
+    </ChartTooltipShell>
   );
 };
 

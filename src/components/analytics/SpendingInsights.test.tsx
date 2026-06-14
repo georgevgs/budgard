@@ -58,12 +58,12 @@ describe('SpendingInsights', () => {
     expect(screen.getByText('Third')).toBeInTheDocument();
   });
 
-  it('applies amber background when hero variant is warning', () => {
+  it('applies warning background when hero variant is warning', () => {
     mockInsights = [insight('a', 'warning', 'Hero')];
     const { container } = render(<SpendingInsights {...baseProps} />);
 
     const hero = container.querySelector('.rounded-2xl');
-    expect(hero?.className).toContain('amber');
+    expect(hero?.className).toContain('warning');
   });
 
   it('applies income background when hero variant is positive', () => {

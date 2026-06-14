@@ -205,7 +205,7 @@ const renderBudgetState = ({
             className={cn(
               'font-medium',
               isOverBudget && 'text-destructive',
-              isWarning && 'text-amber-600 dark:text-amber-500',
+              isWarning && 'text-warning',
             )}
           >
             {renderRemainingLabel(isOverBudget, remaining, t, currencyCode)}
@@ -238,7 +238,7 @@ const renderBudgetState = ({
 
 const pickProgressColor = (isOverBudget: boolean, isWarning: boolean) => {
   if (isOverBudget) return 'bg-destructive';
-  if (isWarning) return 'bg-amber-500';
+  if (isWarning) return 'bg-warning';
 
   return 'bg-primary';
 };

@@ -148,7 +148,7 @@ const renderPaceBadge = (progress: GoalProgress, t: TranslateFunction) => {
     return (
       <Badge
         variant="secondary"
-        className="text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400"
+        className="text-xs bg-warning/10 text-warning"
       >
         {t('goals.behind')}
       </Badge>

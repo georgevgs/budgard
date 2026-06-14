@@ -13,6 +13,7 @@ import SpeedDial from '@/components/layout/SpeedDial';
 import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
 import ExpensesOverviewSection from '@/components/expenses/ExpensesOverviewSection';
 import ExpensesContent from '@/components/expenses/ExpensesContent';
+import FilterResultsAnnouncer from '@/components/expenses/FilterResultsAnnouncer';
 import CsvImportDialog from '@/components/expenses/CsvImportDialog';
 import TemplatesBar from '@/components/expenses/TemplatesBar';
 import WeeklyRecapCard from '@/components/recap/WeeklyRecapCard';
@@ -76,6 +77,11 @@ const ExpensesList = () => {
           defaultCurrency={defaultCurrency}
           onUse={handleUseTemplate}
           onDelete={handleTemplateDelete}
+        />
+
+        <FilterResultsAnnouncer
+          count={filter.filteredExpenses.length}
+          active={filter.hasActiveFilters}
         />
 
         <div className="flex-1">

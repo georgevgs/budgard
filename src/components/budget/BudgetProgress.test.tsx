@@ -80,7 +80,7 @@ describe('BudgetProgress', () => {
       />,
     );
 
-    const indicator = container.querySelector('.bg-amber-500');
+    const indicator = container.querySelector('.bg-warning');
     expect(indicator).not.toBeNull();
   });
 

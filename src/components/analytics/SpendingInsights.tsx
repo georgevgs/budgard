@@ -82,7 +82,7 @@ const renderSecondaryCards = (insights: Insight[]) => {
 };
 
 const getIconClass = (variant: Insight['variant']): string => {
-  if (variant === 'warning') return 'text-amber-500';
+  if (variant === 'warning') return 'text-warning';
   if (variant === 'positive') return 'text-income';
 
   return 'text-primary';
@@ -91,7 +91,7 @@ const getIconClass = (variant: Insight['variant']): string => {
 const getHeroBgClass = (variant: Insight['variant']): string => {
   if (variant === 'warning')
 
-    return 'bg-amber-500/10 border border-amber-500/20';
+    return 'bg-warning/10 border border-warning/20';
   if (variant === 'positive')
 
     return 'bg-income/10 border border-income/20';
@@ -100,7 +100,7 @@ const getHeroBgClass = (variant: Insight['variant']): string => {
 };
 
 const getIconBgClass = (variant: Insight['variant']): string => {
-  if (variant === 'warning') return 'bg-amber-500/15';
+  if (variant === 'warning') return 'bg-warning/15';
   if (variant === 'positive') return 'bg-income/15';
 
   return 'bg-primary/15';

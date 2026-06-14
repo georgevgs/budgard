@@ -23,7 +23,8 @@
     "offline": "Δεν υπάρχει σύνδεση στο διαδίκτυο",
     "backOnline": "Ξανά σε σύνδεση",
     "close": "Κλείσιμο",
-    "morePages": "Περισσότερες σελίδες"
+    "morePages": "Περισσότερες σελίδες",
+    "skipToContent": "Μετάβαση στο περιεχόμενο"
   },
   "auth": {
     "signIn": "Σύνδεση",
@@ -94,6 +95,8 @@
       "convertedAmount": "≈ {{amount}}"
     },
     "noExpensesMatchFilter": "Τα φίλτρα σου είναι λίγο απαιτητικά — τίποτα δεν ταιριάζει. Δοκίμασε να τα χαλαρώσεις.",
+    "resultsCount_one": "{{count}} αποτέλεσμα",
+    "resultsCount_other": "{{count}} αποτελέσματα",
     "totalCount": "Σύνολο Εξόδων",
     "mostExpensive": "Μεγαλύτερο Έξοδο",
     "exportCSV": "Εξαγωγή CSV",
