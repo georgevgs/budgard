@@ -24,6 +24,7 @@ const Header = () => {
         </div>
         <Link
           to="/expenses"
+          viewTransition
           aria-label={t('navigation.goHome')}
           className="justify-self-center flex items-center gap-2 rounded-lg px-2 py-1 -mx-2 -my-1 transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >

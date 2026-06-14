@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { prefersReducedMotion } from '@/lib/motion';
 
 const ANIMATION_DURATION_MS = 400;
 
@@ -13,6 +14,12 @@ export const useAnimatedNumber = (target: number): number => {
   useEffect(() => {
     if (animationRef.current !== null) {
       cancelAnimationFrame(animationRef.current);
+    }
+
+    if (prefersReducedMotion()) {
+      setDisplay(target);
+
+      return;
     }
 
     startValueRef.current = display;

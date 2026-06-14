@@ -19,7 +19,7 @@ const DebtProgressBar = ({ progress, currency }: Props) => {
     <div className="space-y-2">
       <Progress
         value={barValue}
-        className="h-2"
+        className="h-2 progress-fill"
         indicatorClassName={indicatorClass}
       />
       <div className="flex items-center justify-between text-xs text-muted-foreground">

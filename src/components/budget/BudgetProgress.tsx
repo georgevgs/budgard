@@ -186,7 +186,7 @@ const renderBudgetState = ({
 
         <Progress
           value={percentage}
-          className="h-2"
+          className="h-2 progress-fill"
           indicatorClassName={progressColor}
           aria-label={t('budget.budgetProgress', {
             current: formatCurrency(monthlySpent, currencyCode),

@@ -147,8 +147,14 @@ const renderBody = (
       />
 
       <div className="space-y-3">
-        {sortedDebts.map((d) => (
-          <DebtCard key={d.id} debt={d} onClick={onDebtClick} />
+        {sortedDebts.map((d, index) => (
+          <div
+            key={d.id}
+            className="card-enter"
+            style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
+          >
+            <DebtCard debt={d} onClick={onDebtClick} />
+          </div>
         ))}
       </div>
     </>

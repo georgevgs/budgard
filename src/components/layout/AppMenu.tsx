@@ -29,15 +29,21 @@ const AppMenu = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={() => navigate('/goals')}>
+        <DropdownMenuItem
+          onClick={() => navigate('/goals', { viewTransition: true })}
+        >
           <Target className="h-4 w-4" />
           {t('navigation.goals')}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/networth')}>
+        <DropdownMenuItem
+          onClick={() => navigate('/networth', { viewTransition: true })}
+        >
           <Wallet className="h-4 w-4" />
           {t('navigation.networth')}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/debts')}>
+        <DropdownMenuItem
+          onClick={() => navigate('/debts', { viewTransition: true })}
+        >
           <CreditCard className="h-4 w-4" />
           {t('navigation.debts')}
         </DropdownMenuItem>

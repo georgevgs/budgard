@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { haptics } from '@/lib/haptics';
 import FileText from 'lucide-react/dist/esm/icons/file-text';
 import BarChart from 'lucide-react/dist/esm/icons/bar-chart';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
@@ -46,6 +47,8 @@ const NavTabs = () => {
             <NavLink
               key={tab.path}
               to={tab.path}
+              viewTransition
+              onClick={() => haptics.selection()}
               className="flex flex-1 flex-col items-center py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset rounded-lg"
             >
               {({ isActive }) => (

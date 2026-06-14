@@ -177,12 +177,13 @@ const renderIncomeContent = (
     );
   }
 
-  return filteredIncomes.map((income) => (
-    <IncomeCard
+  return filteredIncomes.map((income, index) => (
+    <div
       key={income.id}
-      income={income}
-      onEdit={onEdit}
-      onDelete={onDelete}
-    />
+      className="card-enter"
+      style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
+    >
+      <IncomeCard income={income} onEdit={onEdit} onDelete={onDelete} />
+    </div>
   ));
 };

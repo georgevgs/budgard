@@ -234,6 +234,22 @@
   animation: card-enter 220ms ease-out both;
 }
 
+/* Progress bars grow in from the left on mount. Applied to the track, so the
+   indicator's inline transform (the actual value) is left untouched. */
+@keyframes progress-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.progress-fill {
+  transform-origin: left center;
+  animation: progress-grow 500ms ease-out both;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   ::view-transition-old(root) {
     animation: 180ms ease-out both vt-fade-out;

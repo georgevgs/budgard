@@ -116,13 +116,14 @@ const renderGoalsOrEmpty = (
     return renderEmptyState(onOpenForm, t);
   }
 
-  return goals.map((goal) => (
-    <GoalCard
+  return goals.map((goal, index) => (
+    <div
       key={goal.id}
-      goal={goal}
-      onEdit={onEdit}
-      onDelete={onDelete}
-    />
+      className="card-enter"
+      style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
+    >
+      <GoalCard goal={goal} onEdit={onEdit} onDelete={onDelete} />
+    </div>
   ));
 }
 
