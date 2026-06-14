@@ -11,6 +11,10 @@ export const usePwaUpdate = (): void => {
   const needRefreshRef = useRef(false);
   const lastUpdateCheckRef = useRef<number>(0);
   const toastDismissedRef = useRef(false);
+  // Set once a reload-to-update came back still offering the same update — i.e.
+  // the apply looped. While true, applyUpdate refuses to reload again so a bad
+  // race can never become an endless loop.
+  const updateStuckRef = useRef(false);
 
   const {
     needRefresh: [needRefresh, setNeedRefresh],
@@ -42,7 +46,28 @@ export const usePwaUpdate = (): void => {
     },
   });
 
+  // Shown when an update apply has looped (a reload landed back on the old
+  // version). Deliberately has no action button: tapping reload is exactly
+  // what loops. The reliable finish is a full close + reopen, which lets the
+  // waiting worker activate on a clean boot with no client to race.
+  const showStuckToast = useCallback((): void => {
+    toast({
+      id: 'pwa-update',
+      title: 'Almost up to date',
+      description: 'Fully close and reopen Budgard to finish updating.',
+      duration: 10000,
+    });
+  }, [toast]);
+
   const applyUpdate = useCallback((): void => {
+    // A previous apply already looped this session — reloading again would just
+    // loop again. Point the user at the reliable finish instead.
+    if (updateStuckRef.current) {
+      showStuckToast();
+
+      return;
+    }
+
     const reg = swRegistration.get();
     // iOS PWA can leave needRefresh=true with no waiting SW after a
     // same-content reinstall. Calling updateServiceWorker(true) here would
@@ -58,16 +83,14 @@ export const usePwaUpdate = (): void => {
     // Hand off to vite-plugin-pwa: posts SKIP_WAITING to the waiting worker.
     updateServiceWorker(true);
 
-    // The reliable path: skipWaiting → activate → clients.claim() (enabled via
-    // `clientsClaim: true` in the workbox config) → control transfers to the new
-    // worker → `controllerchange` fires → vite-plugin-pwa's own `controlling`
-    // listener reloads. The call below is belt-and-braces: an immediate reload on
-    // controllerchange plus a timed fallback for the rare platform where the
-    // event stays silent. By the time the fallback could fire, claim has already
-    // transferred control, so even that reload lands on the new app — never the
-    // old one.
+    // The reliable path: skipWaiting → activate → clients.claim() (run by
+    // push-sw.js on this user-initiated SKIP_WAITING) → control transfers to the
+    // new worker → `controllerchange` fires. forceReloadAfterSkipWaiting reloads
+    // on that event, and otherwise waits until the new worker actually controls
+    // the page before reloading — never blindly, so the reload can't land back on
+    // the old precached app and loop.
     forceReloadAfterSkipWaiting();
-  }, [updateServiceWorker, setNeedRefresh]);
+  }, [updateServiceWorker, setNeedRefresh, showStuckToast]);
 
   const showUpdateToast = useCallback((): void => {
     toastDismissedRef.current = false;
@@ -105,6 +128,18 @@ export const usePwaUpdate = (): void => {
       return;
     }
 
+    // We are being offered an update again moments after we reloaded to apply
+    // one. That means the reload didn't take (it landed back on the old
+    // version) — a loop. Break it: stop auto-applying and guide the user to a
+    // clean finish instead of letting another reload restart the cycle.
+    if (reloadedForUpdateRecently()) {
+      updateStuckRef.current = true;
+      setNeedRefresh(false);
+      showStuckToast();
+
+      return;
+    }
+
     // Fast path: a waiting worker is already observable, show immediately.
     const reg = swRegistration.get();
     if (reg?.waiting) {
@@ -133,7 +168,7 @@ export const usePwaUpdate = (): void => {
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [needRefresh, showUpdateToast, setNeedRefresh]);
+  }, [needRefresh, showUpdateToast, showStuckToast, setNeedRefresh]);
 
   // Check for SW updates when the app returns to foreground.
   // iOS freezes the web view when backgrounded and doesn't automatically
@@ -172,19 +207,35 @@ export const usePwaUpdate = (): void => {
 
 // --- Helpers ---
 
-const FORCE_RELOAD_FALLBACK_MS = 3000;
+const CONTROL_TRANSFER_POLL_MS = 250;
+const CONTROL_TRANSFER_HARD_CAP_MS = 10000;
 
-// After SKIP_WAITING is posted, reload so the freshly activated worker takes
-// control. With clientsClaim enabled the new worker claims the client on
-// activate, so controllerchange fires reliably and the reload happens at once;
-// the timed fallback only matters on a platform where the event stays silent.
-// Guarded so we reload at most once.
+// A genuine apply re-offers an update within a second or two of the reload (boot
+// → update check → still-waiting worker). A legitimately new deploy lands far
+// later. So "offered again inside this window" reliably means a loop, while the
+// stamp self-expires and can't false-positive a real update minutes later.
+const RELOAD_LOOP_WINDOW_MS = 30000;
+
+// sessionStorage survives a reload but not a full app close (which is itself the
+// escape hatch). We stamp the time right before reloading to apply an update;
+// the needRefresh effect reads it to spot a reload that looped.
+const UPDATE_RELOAD_FLAG = 'pwa-update-reloaded-at';
+
+// After SKIP_WAITING is posted, reload onto the freshly activated worker — but
+// only once it ACTUALLY controls the page. Reloading while the old worker still
+// controls re-serves the old precached index.html, which re-detects the waiting
+// worker and loops (the bug this guards against). So reload on `controllerchange`
+// (the clean signal), and as a fallback poll the controller reference, since iOS
+// standalone PWAs often transfer control without firing the event. Only after a
+// hard cap do we reload regardless; the flag set here means even that pessimistic
+// reload can loop at most once before the breaker trips. Reloads at most once.
 const forceReloadAfterSkipWaiting = (): void => {
   let reloaded = false;
 
-  const reload = () => {
+  const reload = (): void => {
     if (reloaded) return;
     reloaded = true;
+    markUpdateReload();
     window.location.reload();
   };
 
@@ -192,5 +243,53 @@ const forceReloadAfterSkipWaiting = (): void => {
     once: true,
   });
 
-  setTimeout(reload, FORCE_RELOAD_FALLBACK_MS);
+  const previousController = navigator.serviceWorker?.controller ?? null;
+  const startedAt = Date.now();
+
+  const poll = window.setInterval(() => {
+    if (reloaded) {
+      window.clearInterval(poll);
+
+      return;
+    }
+
+    const controller = navigator.serviceWorker?.controller ?? null;
+    const controlTransferred = controller !== null && controller !== previousController;
+    if (controlTransferred) {
+      window.clearInterval(poll);
+      reload();
+
+      return;
+    }
+
+    if (Date.now() - startedAt >= CONTROL_TRANSFER_HARD_CAP_MS) {
+      window.clearInterval(poll);
+      reload();
+    }
+  }, CONTROL_TRANSFER_POLL_MS);
+};
+
+const markUpdateReload = (): void => {
+  try {
+    sessionStorage.setItem(UPDATE_RELOAD_FLAG, String(Date.now()));
+  } catch {
+    // Private mode can throw on write — the reload still happens, we just lose
+    // loop protection for this one attempt.
+  }
+};
+
+// Read-and-clear: true if we reloaded to apply an update within the loop window.
+// Clearing on read means each reload is judged exactly once.
+const reloadedForUpdateRecently = (): boolean => {
+  try {
+    const raw = sessionStorage.getItem(UPDATE_RELOAD_FLAG);
+    sessionStorage.removeItem(UPDATE_RELOAD_FLAG);
+    if (raw === null) return false;
+
+    const reloadedAt = Number(raw);
+
+    return Number.isFinite(reloadedAt) && Date.now() - reloadedAt < RELOAD_LOOP_WINDOW_MS;
+  } catch {
+    return false;
+  }
 };

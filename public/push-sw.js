@@ -1,5 +1,27 @@
 // Push notification handlers — injected into the Workbox-generated SW via importScripts.
 
+// Update activation: claim clients ONLY when the user explicitly applies an
+// update. Tapping "Update" posts {type:'SKIP_WAITING'} to the waiting worker;
+// we flag that here and run clients.claim() in `activate` so control transfers
+// to the new worker (→ controllerchange → the app reloads onto the new version).
+// We deliberately do NOT claim on a background activation (e.g. the worker
+// activating because all tabs closed), so the app never reloads itself without
+// being asked. This replaces workbox's unconditional `clientsClaim: true`.
+let claimOnActivate = false;
+
+self.addEventListener('message', (event) => {
+  if (!event.data || event.data.type !== 'SKIP_WAITING') return;
+
+  claimOnActivate = true;
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  if (!claimOnActivate) return;
+
+  event.waitUntil(self.clients.claim());
+});
+
 self.addEventListener('push', (event) => {
   if (!event.data) return;
 

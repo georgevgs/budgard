@@ -45,15 +45,11 @@ export default defineConfig({
       includeAssets: ["favicon.ico", "icon-192x192.png", "icon-512x512.png", "apple-touch-icon.png", "manifest.json"],
       workbox: {
         importScripts: ['/push-sw.js'],
-        // Make the new worker take control of the open page the moment it
-        // activates (after the user taps Update → skipWaiting). Without this,
-        // the new worker activates but never claims the client, so
-        // `controllerchange` never fires, the reload-on-controlling listener
-        // never runs, and the app reloads back into the old precached
-        // index.html → "Update available" loops forever. clients.claim() only
-        // runs in `activate`, and in prompt mode the worker stays waiting until
-        // the user opts in, so this never causes a surprise mid-session reload.
-        clientsClaim: true,
+        // NOTE: we intentionally do NOT set `clientsClaim: true`. That claims on
+        // EVERY activation, including background ones (worker activating because
+        // all tabs closed), which makes the app reload itself unprompted. Instead
+        // push-sw.js claims only when the user taps Update (SKIP_WAITING), so
+        // control transfers — and the app reloads — only when asked.
         cleanupOutdatedCaches: true,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,json}"],
         navigateFallback: '/index.html',
