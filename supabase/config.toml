@@ -263,6 +263,11 @@ inspector_port = 8083
 [functions.send-push-notifications]
 verify_jwt = false
 
+# Called by Stripe servers with a signed Stripe-Signature header, not a
+# Supabase JWT. Must stay verify_jwt = false or every webhook returns 401.
+[functions.stripe-webhook]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

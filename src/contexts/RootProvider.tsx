@@ -1,5 +1,6 @@
 import type { ReactNode, ReactElement } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext.tsx';
+import { SubscriptionProvider } from '@/contexts/SubscriptionContext.tsx';
 import { DataProvider } from '@/contexts/DataContext.tsx';
 
 type RootProviderProps = {
@@ -9,7 +10,9 @@ type RootProviderProps = {
 export const RootProvider = ({ children }: RootProviderProps): ReactElement => {
   return (
     <AuthProvider>
-      <DataProvider>{children}</DataProvider>
+      <SubscriptionProvider>
+        <DataProvider>{children}</DataProvider>
+      </SubscriptionProvider>
     </AuthProvider>
   );
 };
