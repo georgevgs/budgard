@@ -17,6 +17,11 @@ const STRIPE_API_VERSION = '2025-03-31.basil';
 
 type Plan = 'monthly' | 'yearly';
 
+// Mirrors isSubscriptionPro on the client. A user whose subscription is in
+// one of these states must not reach checkout again — that would create a
+// second Stripe subscription and a double charge.
+const ACTIVE_STATUSES = ['trialing', 'active', 'past_due'];
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -37,6 +42,17 @@ Deno.serve(async (req) => {
     const { data: { user }, error: userError } = await userClient.auth.getUser();
     if (userError || !user) {
       return jsonResponse({ error: 'Unauthorized' }, 401);
+    }
+
+    // RLS scopes this to the caller's own row. Fail open on query errors:
+    // blocking checkout over a transient read failure loses a sale, and the
+    // webhook upsert keeps one row per user regardless.
+    const { data: existing } = await userClient
+      .from('subscriptions')
+      .select('status')
+      .maybeSingle();
+    if (existing && ACTIVE_STATUSES.includes(existing.status)) {
+      return jsonResponse({ error: 'Already subscribed' }, 409);
     }
 
     const plan = await readPlan(req);

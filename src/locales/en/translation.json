@@ -1073,7 +1073,7 @@
       },
       "pillar3": {
         "title": "Yours to keep",
-        "body": "Export every transaction to CSV. Cancel any time. Your data stays portable."
+        "body": "Cancel any time. Delete your account and every trace goes with it. Your data stays yours."
       }
     },
     "pricing": {
@@ -1105,9 +1105,9 @@
         "feature1": "Everything in Free",
         "feature2": "Per-category budgets",
         "feature3": "Savings goals",
-        "feature4": "Unlimited recurring expenses & multiple tags per expense",
-        "feature5": "Full analytics history with year-over-year trends",
-        "feature6": "CSV + PDF exports",
+        "feature4": "Unlimited recurring expenses",
+        "feature5": "Full analytics history and cash-flow trends",
+        "feature6": "CSV exports of your full history",
         "feature7": "Early access to new features"
       }
     },
@@ -1120,11 +1120,11 @@
       },
       "q2": {
         "question": "What's actually different on Pro?",
-        "answer": "Per-category budgets, savings goals, unlimited recurring expenses, multiple tags per expense, full all-time analytics with year-over-year trends, and CSV + PDF exports. The full list is in the pricing card above."
+        "answer": "Per-category budgets, savings goals, unlimited recurring expenses, full all-time analytics with cash-flow trends, and CSV exports. The full list is in the pricing card above."
       },
       "q3": {
         "question": "Can I cancel anytime?",
-        "answer": "Yes. Cancel from settings in two taps. Your data stays — you just drop back to the free plan at the end of your billing period."
+        "answer": "Yes, you can cancel anytime — you keep Pro until the end of the period you've already paid for, then drop back to the free plan. Your data stays."
       },
       "q4": {
         "question": "Where is my data stored?",
@@ -1132,7 +1132,7 @@
       },
       "q5": {
         "question": "Can I export my data?",
-        "answer": "Yes. CSV and PDF exports are available on Pro for your full history. Either way, your data is yours and stays portable."
+        "answer": "Yes. CSV exports are available on Pro for your full history. Either way, your data is yours and stays portable."
       },
       "q6": {
         "question": "Do you have an iOS or Android app?",

@@ -7,8 +7,53 @@ import type { Subscription, SubscriptionStatus } from '@/types/Subscription';
 // user already paid for ends, and only then flips it to 'canceled'.
 const ACTIVE_STATUSES: SubscriptionStatus[] = ['trialing', 'active', 'past_due'];
 
-export const isSubscriptionPro = (subscription: Subscription | null): boolean => {
-  if (!subscription) return false;
+// Status alone trusts that Stripe's terminal webhook (canceled/unpaid) always
+// arrives. If it never does, the row would stay 'active' forever, so access
+// also lapses a grace window after the last date the subscription is known to
+// be paid through. The default window only needs to absorb webhook delivery
+// delays; past_due gets a much longer one because Stripe keeps retrying the
+// failed payment for weeks before settling the final status.
+const GRACE_DAYS_DEFAULT = 3;
+const GRACE_DAYS_PAST_DUE = 30;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
-  return ACTIVE_STATUSES.includes(subscription.status);
+export const isSubscriptionPro = (
+  subscription: Subscription | null,
+  now: Date = new Date(),
+): boolean => {
+  if (!subscription) return false;
+  if (!ACTIVE_STATUSES.includes(subscription.status)) return false;
+
+  const paidThrough = getPaidThrough(subscription);
+  if (!paidThrough) return true;
+
+  const graceMs = getGraceDays(subscription.status) * DAY_MS;
+
+  return now.getTime() < paidThrough.getTime() + graceMs;
+};
+
+// --- Helpers ---
+
+// The latest date the subscription is known to be paid (or trialing) through.
+// Null when the webhook payload carried none of the period fields; status
+// alone decides then, exactly as before the safety net existed.
+const getPaidThrough = (subscription: Subscription): Date | null => {
+  const timestamps = [
+    subscription.renews_at,
+    subscription.ends_at,
+    subscription.trial_ends_at,
+  ]
+    .filter((value): value is string => value !== null)
+    .map((value) => new Date(value).getTime())
+    .filter((time) => Number.isFinite(time));
+
+  if (timestamps.length === 0) return null;
+
+  return new Date(Math.max(...timestamps));
+};
+
+const getGraceDays = (status: SubscriptionStatus): number => {
+  if (status === 'past_due') return GRACE_DAYS_PAST_DUE;
+
+  return GRACE_DAYS_DEFAULT;
 };

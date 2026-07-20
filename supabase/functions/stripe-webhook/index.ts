@@ -30,6 +30,7 @@ type StripeSubscription = {
 
 type WebhookEvent = {
   type: string;
+  created: number;
   data: { object: StripeSubscription };
 };
 
@@ -84,12 +85,16 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   );
 
-  const { error } = await adminClient
-    .from('subscriptions')
-    .upsert(buildRow(userId, subscription), { onConflict: 'user_id' });
+  // apply_subscription_event upserts, but skips the write when the row was
+  // last touched by a NEWER Stripe event — deliveries are unordered and
+  // retried, and a stale 'active' must never overwrite a 'canceled'.
+  const { error } = await adminClient.rpc(
+    'apply_subscription_event',
+    buildEventParams(userId, subscription, event.created),
+  );
 
   if (error) {
-    console.error('stripe-webhook: upsert failed:', error);
+    console.error('stripe-webhook: apply_subscription_event failed:', error);
 
     // Non-200 makes Stripe retry the delivery.
     return jsonResponse({ error: 'Failed to store subscription' }, 500);
@@ -106,24 +111,31 @@ const jsonResponse = (body: Record<string, unknown>, status: number) =>
     headers: { 'Content-Type': 'application/json' },
   });
 
-const buildRow = (userId: string, subscription: StripeSubscription) => {
+const buildEventParams = (
+  userId: string,
+  subscription: StripeSubscription,
+  eventCreated: number | undefined,
+) => {
   const firstItem = subscription.items?.data?.[0];
 
   return {
-    user_id: userId,
-    stripe_subscription_id: subscription.id,
-    stripe_customer_id: subscription.customer,
-    stripe_price_id: firstItem?.price?.id ?? '',
-    status: subscription.status,
-    cancel_at_period_end: subscription.cancel_at_period_end ?? false,
-    trial_ends_at: unixToIso(subscription.trial_end),
+    p_user_id: userId,
+    p_stripe_subscription_id: subscription.id,
+    p_stripe_customer_id: subscription.customer,
+    p_stripe_price_id: firstItem?.price?.id ?? '',
+    p_status: subscription.status,
+    p_cancel_at_period_end: subscription.cancel_at_period_end ?? false,
+    p_trial_ends_at: unixToIso(subscription.trial_end),
     // API version 2025-03-31.basil moved current_period_end onto the
     // subscription item; older event payloads still have it top-level.
-    renews_at: unixToIso(
+    p_renews_at: unixToIso(
       firstItem?.current_period_end ?? subscription.current_period_end,
     ),
-    ends_at: unixToIso(subscription.ended_at ?? subscription.cancel_at),
-    livemode: subscription.livemode ?? true,
+    p_ends_at: unixToIso(subscription.ended_at ?? subscription.cancel_at),
+    p_livemode: subscription.livemode ?? true,
+    // A payload missing `created` (never seen from Stripe) must still apply,
+    // so it gets "now" rather than being dropped by the ordering guard.
+    p_event_at: unixToIso(eventCreated) ?? new Date().toISOString(),
   };
 };
 
