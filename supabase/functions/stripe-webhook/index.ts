@@ -68,6 +68,25 @@ Deno.serve(async (req) => {
   }
 
   const subscription = event.data.object;
+
+  // A signed event whose livemode does not match this environment's Stripe
+  // key means a test-mode event reached the live endpoint (or vice versa) —
+  // most likely a webhook misconfiguration. Never mirror it into the
+  // subscriptions table: a test subscription must not grant live Pro access.
+  // 200 so Stripe does not retry a delivery that will never be accepted.
+  const expectedLivemode = getExpectedLivemode();
+  if (
+    expectedLivemode !== null &&
+    subscription.livemode !== expectedLivemode
+  ) {
+    console.error(
+      `stripe-webhook: ignoring ${event.type} for ${subscription.id}: ` +
+        `livemode=${subscription.livemode} but environment expects ${expectedLivemode}`,
+    );
+
+    return jsonResponse({ received: true }, 200);
+  }
+
   const userId = subscription.metadata?.user_id;
   if (!userId) {
     // The subscription was created outside the app's checkout flow (which
@@ -137,6 +156,17 @@ const buildEventParams = (
     // so it gets "now" rather than being dropped by the ordering guard.
     p_event_at: unixToIso(eventCreated) ?? new Date().toISOString(),
   };
+};
+
+// The environment's expected mode is derived from the secret key the other
+// Stripe functions charge with (sk_live_/rk_live_ vs sk_test_/rk_test_), so
+// no extra configuration can drift. Null (key not set) skips the check
+// rather than dropping events over an unrelated misconfiguration.
+const getExpectedLivemode = (): boolean | null => {
+  const secretKey = Deno.env.get('STRIPE_SECRET_KEY');
+  if (!secretKey) return null;
+
+  return secretKey.startsWith('sk_live_') || secretKey.startsWith('rk_live_');
 };
 
 const unixToIso = (seconds: number | null | undefined): string | null => {

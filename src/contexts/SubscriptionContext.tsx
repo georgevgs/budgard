@@ -25,6 +25,7 @@ type SubscriptionContextType = {
   isLoading: boolean;
   refresh: () => Promise<void>;
   startCheckout: (plan: CheckoutPlan) => Promise<string>;
+  startPortal: () => Promise<string>;
 };
 
 const SubscriptionContext = createContext<SubscriptionContextType | null>(null);
@@ -100,12 +101,18 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
     [],
   );
 
+  const startPortal = useCallback(
+    () => subscriptionService.createPortalSession(),
+    [],
+  );
+
   const value = {
     subscription,
     isPro: isSubscriptionPro(subscription),
     isLoading,
     refresh,
     startCheckout,
+    startPortal,
   };
 
   return (

@@ -25,6 +25,7 @@ vi.mock('@/contexts/SubscriptionContext', () => ({
 vi.mock('@/contexts/UpgradeDialogContext', () => ({
   useUpgradeDialog: () => ({
     isUpgradeOpen: true,
+    preferredPlan: 'yearly',
     openUpgrade: vi.fn(),
     closeUpgrade: closeUpgradeMock,
   }),

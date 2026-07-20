@@ -4,6 +4,7 @@ import { useDataConfig } from '@/contexts/DataContext';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useSettingsHandlers } from '@/hooks/settings/useSettingsHandlers';
 import AppearanceSection from '@/components/settings/AppearanceSection';
+import BillingSection from '@/components/settings/BillingSection';
 import NotificationsSection from '@/components/settings/NotificationsSection';
 import ProfileSection from '@/components/settings/ProfileSection';
 import DataManagementSection from '@/components/settings/DataManagementSection';
@@ -33,6 +34,8 @@ const SettingsView = () => {
         onSignOut={handlers.handleSignOut}
         t={t}
       />
+
+      <BillingSection />
 
       <AppearanceSection
         theme={handlers.theme}

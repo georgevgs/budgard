@@ -25,6 +25,7 @@ import MilestoneWatcher from '@/components/common/MilestoneWatcher';
 import ProRoute from '@/components/pro/ProRoute';
 import UpgradeDialog from '@/components/pro/UpgradeDialog';
 import { useCheckoutReturn } from '@/hooks/pro/useCheckoutReturn';
+import { useUpgradeIntent } from '@/hooks/pro/useUpgradeIntent';
 import { shouldShowOnboarding } from '@/lib/onboarding';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import {
@@ -64,6 +65,9 @@ const SettingsView = lazyWithRetry(
   () => import('@/components/settings/SettingsView'),
 );
 const LandingPage = lazyWithRetry(() => import('@/pages/LandingPage'));
+const PrivacyPage = lazyWithRetry(() => import('@/pages/legal/PrivacyPage'));
+const TermsPage = lazyWithRetry(() => import('@/pages/legal/TermsPage'));
+const ContactPage = lazyWithRetry(() => import('@/pages/legal/ContactPage'));
 const OnboardingFlow = lazyWithRetry(
   () => import('@/components/onboarding/OnboardingFlow'),
 );
@@ -110,6 +114,20 @@ const AuthenticatedLayout = () => {
       setShowOnboarding(true);
     }
   }, [isInitialized, expenses.length, categories.length, monthlyBudget]);
+
+  // A landing-page "Get Pro" choice completes here after sign-in. Blocked
+  // until the data layer knows whether onboarding is due — and while it runs —
+  // so the upgrade dialog never opens underneath the onboarding flow.
+  useUpgradeIntent(
+    !isInitialized ||
+      showOnboarding ||
+      shouldShowOnboarding(
+        isInitialized,
+        expenses.length,
+        categories.length,
+        monthlyBudget,
+      ),
+  );
 
   return (
     <>
@@ -431,6 +449,32 @@ const App = () => {
             <Routes>
               {/* Public route */}
               <Route path="/" element={<PublicRoute />} />
+
+              {/* Legal pages, reachable signed in or out */}
+              <Route
+                path="/privacy"
+                element={
+                  <PublicLayout>
+                    <PrivacyPage />
+                  </PublicLayout>
+                }
+              />
+              <Route
+                path="/terms"
+                element={
+                  <PublicLayout>
+                    <TermsPage />
+                  </PublicLayout>
+                }
+              />
+              <Route
+                path="/contact"
+                element={
+                  <PublicLayout>
+                    <ContactPage />
+                  </PublicLayout>
+                }
+              />
 
               {/* Authenticated routes with shared layout */}
               <Route element={<PrivateRoute />}>

@@ -6,21 +6,20 @@ import EyebrowLabel from '@/components/landing/EyebrowLabel';
 import Reveal from '@/components/landing/Reveal';
 import Check from 'lucide-react/dist/esm/icons/check';
 import { cn } from '@/lib/utils';
-import {
-  PRICE_MONTHLY,
-  PRICE_YEARLY,
-  PRICE_YEARLY_PER_MONTH,
-} from '@/lib/proPlans';
+import { useProPlans, type ProPlansDisplay } from '@/hooks/pro/useProPlans';
+import type { ProPlanId } from '@/lib/proPlans';
 
 type Props = {
   onGetStarted: () => void;
+  onGetPro: (plan: Cycle) => void;
 };
 
 type Tx = (key: string, opts?: Record<string, unknown>) => string;
-type Cycle = 'monthly' | 'yearly';
+type Cycle = ProPlanId;
 
-const Pricing = ({ onGetStarted }: Props) => {
+const Pricing = ({ onGetStarted, onGetPro }: Props) => {
   const { t } = useTranslation();
+  const plans = useProPlans();
   const [cycle, setCycle] = useState<Cycle>('yearly');
 
   return (
@@ -29,7 +28,7 @@ const Pricing = ({ onGetStarted }: Props) => {
       <Reveal delay={100}>{renderToggle(t, cycle, setCycle)}</Reveal>
       <div className="mt-10 grid md:grid-cols-2 gap-5 max-w-4xl mx-auto">
         <Reveal delay={150}>{renderFreeCard(t, onGetStarted)}</Reveal>
-        <Reveal delay={250}>{renderProCard(t, cycle, onGetStarted)}</Reveal>
+        <Reveal delay={250}>{renderProCard(t, cycle, plans, onGetPro)}</Reveal>
       </div>
     </SectionShell>
   );
@@ -132,7 +131,12 @@ const renderFreeCard = (t: Tx, onGetStarted: () => void) => (
   </div>
 );
 
-const renderProCard = (t: Tx, cycle: Cycle, onGetStarted: () => void) => (
+const renderProCard = (
+  t: Tx,
+  cycle: Cycle,
+  plans: ProPlansDisplay,
+  onGetPro: (plan: Cycle) => void,
+) => (
   <div className="relative rounded-3xl border-2 border-primary/40 bg-card p-8 flex flex-col shadow-xl shadow-primary/10">
     <div className="absolute -top-3 left-8 px-2.5 h-6 inline-flex items-center rounded-full bg-primary text-primary-foreground text-[11px] font-semibold tracking-wide">
       {t('landing.pricing.recommended')}
@@ -143,8 +147,8 @@ const renderProCard = (t: Tx, cycle: Cycle, onGetStarted: () => void) => (
     <p className="mt-1 text-sm text-muted-foreground">
       {t('landing.pricing.pro.subtitle')}
     </p>
-    {renderProPrice(t, cycle)}
-    <Button onClick={onGetStarted} className="mt-6 rounded-full h-11">
+    {renderProPrice(t, cycle, plans)}
+    <Button onClick={() => onGetPro(cycle)} className="mt-6 rounded-full h-11">
       {t('landing.pricing.pro.cta')}
     </Button>
     <ul className="mt-8 space-y-3">
@@ -155,12 +159,12 @@ const renderProCard = (t: Tx, cycle: Cycle, onGetStarted: () => void) => (
   </div>
 );
 
-const renderProPrice = (t: Tx, cycle: Cycle) => {
+const renderProPrice = (t: Tx, cycle: Cycle, plans: ProPlansDisplay) => {
   if (cycle === 'monthly') {
     return (
       <div className="mt-6 flex items-baseline gap-1.5">
         <span className="text-5xl font-semibold tabular-nums tracking-tight">
-          {PRICE_MONTHLY}
+          {plans.monthlyLabel}
         </span>
         <span className="text-sm text-muted-foreground">
           {t('landing.pricing.perMonth')}
@@ -173,14 +177,14 @@ const renderProPrice = (t: Tx, cycle: Cycle) => {
     <div className="mt-6">
       <div className="flex items-baseline gap-1.5">
         <span className="text-5xl font-semibold tabular-nums tracking-tight">
-          {PRICE_YEARLY_PER_MONTH}
+          {plans.yearlyPerMonthLabel}
         </span>
         <span className="text-sm text-muted-foreground">
           {t('landing.pricing.perMonth')}
         </span>
       </div>
       <p className="mt-1 text-xs text-muted-foreground tabular-nums">
-        {t('landing.pricing.billedYearly', { price: PRICE_YEARLY })}
+        {t('landing.pricing.billedYearly', { price: plans.yearlyLabel })}
       </p>
     </div>
   );

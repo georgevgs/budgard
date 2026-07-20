@@ -44,6 +44,20 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Unauthorized' }, 401);
     }
 
+    // Durable per-user rate limit (5 attempts / 10 min, enforced in
+    // Postgres). Checkout creates real Stripe objects, so it must not be
+    // hammerable. Fail open on RPC errors for the same reason as the
+    // subscription read below: a transient failure must not lose a sale.
+    const { data: allowed, error: rateError } = await userClient.rpc(
+      'consume_checkout_attempt',
+    );
+    if (rateError) {
+      console.error('stripe-checkout: rate limit check failed:', rateError);
+    }
+    if (!rateError && allowed === false) {
+      return jsonResponse({ error: 'Too many attempts. Try again soon.' }, 429);
+    }
+
     // RLS scopes this to the caller's own row. Fail open on query errors:
     // blocking checkout over a transient read failure loses a sale, and the
     // webhook upsert keeps one row per user regardless.

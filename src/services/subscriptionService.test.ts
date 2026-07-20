@@ -101,3 +101,42 @@ describe('createCheckout', () => {
     );
   });
 });
+
+describe('createPortalSession', () => {
+  it('posts to the stripe-portal function and returns the URL', async () => {
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: { access_token: 'jwt-token' } },
+      error: null,
+    } as never);
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ url: 'https://portal.example/session' }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const url = await subscriptionService.createPortalSession();
+
+    expect(url).toBe('https://portal.example/session');
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining('/functions/v1/stripe-portal'),
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          Authorization: 'Bearer jwt-token',
+        }),
+      }),
+    );
+  });
+
+  it('throws when not authenticated', async () => {
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: null },
+      error: null,
+    } as never);
+
+    await expect(subscriptionService.createPortalSession()).rejects.toThrow(
+      'Not authenticated',
+    );
+  });
+});

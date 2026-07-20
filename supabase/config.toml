@@ -268,6 +268,11 @@ verify_jwt = false
 [functions.stripe-webhook]
 verify_jwt = false
 
+# Public read-only pricing endpoint. The landing page shows prices to
+# signed-out visitors, so it cannot require a JWT.
+[functions.stripe-prices]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

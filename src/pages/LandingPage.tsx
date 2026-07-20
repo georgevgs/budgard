@@ -11,6 +11,8 @@ import Pricing from '@/components/landing/Pricing';
 import Faq from '@/components/landing/Faq';
 import FinalCta from '@/components/landing/FinalCta';
 import Footer from '@/components/landing/Footer';
+import { saveUpgradeIntent } from '@/lib/upgradeIntent';
+import type { ProPlanId } from '@/lib/proPlans';
 
 const LandingPage = () => {
   const { i18n } = useTranslation();
@@ -29,6 +31,13 @@ const LandingPage = () => {
     setShowLoginModal(true);
   };
 
+  // The chosen plan survives the sign-in step; after auth the app reopens
+  // the upgrade flow on it (useUpgradeIntent).
+  const handleGetPro = (plan: ProPlanId) => {
+    saveUpgradeIntent(plan);
+    setShowLoginModal(true);
+  };
+
   return (
     <div className="min-h-dvh bg-background">
       <Header onSignIn={handleGetStarted} />
@@ -37,7 +46,7 @@ const LandingPage = () => {
       <Budget />
       <Categories />
       <Privacy />
-      <Pricing onGetStarted={handleGetStarted} />
+      <Pricing onGetStarted={handleGetStarted} onGetPro={handleGetPro} />
       <Faq />
       <FinalCta onGetStarted={handleGetStarted} />
       <Footer

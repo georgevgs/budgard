@@ -446,6 +446,24 @@
       "deleteAccountSuccess": "Account deleted successfully",
       "deleteAccountFailed": "Failed to delete account"
     },
+    "billing": {
+      "title": "Subscription",
+      "planLabel": "Plan",
+      "freePlan": "Free",
+      "freeBody": "Pro unlocks per-category budgets, savings goals, unlimited recurring expenses, full history and CSV exports.",
+      "upgrade": "Upgrade to Pro",
+      "pro": "Pro",
+      "proMonthly": "Pro — Monthly",
+      "proYearly": "Pro — Yearly",
+      "renewsLabel": "Renews on",
+      "endsLabel": "Ends on",
+      "cancelScheduled": "Your subscription is set to end then. You keep Pro until that date.",
+      "pastDue": "We couldn't collect your last payment. Update your payment method to keep Pro.",
+      "manage": "Manage subscription",
+      "opening": "Opening…",
+      "manageHint": "Cancel, switch plan, update payment details or download invoices — handled securely by Stripe.",
+      "portalError": "Couldn't open subscription management. Please try again."
+    },
     "about": {
       "title": "About",
       "version": "Version",
@@ -986,6 +1004,192 @@
     "successBody": "Your subscription is active. Enjoy the full picture.",
     "cancelledTitle": "Checkout cancelled",
     "cancelledBody": "No charge was made. You can upgrade any time."
+  },
+  "legal": {
+    "backHome": "Back to Budgard",
+    "lastUpdated": "Last updated: {{date}}",
+    "privacy": {
+      "title": "Privacy Policy",
+      "intro": "This page explains what data Budgard stores, why it stores it, and the control you have over it. The short version: your data is used to run the app for you — nothing else.",
+      "sections": [
+        {
+          "heading": "Who we are",
+          "paragraphs": [
+            "Budgard (\"we\", \"us\") provides a personal budgeting app at budgard.com and is the data controller for the personal data described below. For any privacy question or request, email {{email}}."
+          ]
+        },
+        {
+          "heading": "The data we store",
+          "paragraphs": [
+            "Your account is your email address — we use it to sign you in with one-time codes and to send account emails. No password is stored.",
+            "Everything you enter in the app is stored so we can show it back to you and sync it across your devices: expenses, income, categories, tags, budgets, savings goals, recurring expenses, debts, accounts and net-worth snapshots, plus your preferences such as language, currency, theme and notification choices.",
+            "If you turn on push notifications, we also store the push token your browser issues for your device."
+          ]
+        },
+        {
+          "heading": "What we use it for",
+          "paragraphs": [
+            "We use your data solely to run Budgard: showing your finances, syncing your devices, sending the notifications you asked for, managing your Pro subscription and fixing errors.",
+            "We do not sell personal data, we show no ads, and we do not use your data for advertising or profiling."
+          ]
+        },
+        {
+          "heading": "Legal bases",
+          "paragraphs": [
+            "We process your data to perform our contract with you (running the app), with your consent where we ask for it (push notifications), and under our legitimate interest in keeping the service secure and working (error monitoring, abuse prevention)."
+          ]
+        },
+        {
+          "heading": "Payments",
+          "paragraphs": [
+            "Pro subscriptions are processed by Stripe, acting as merchant of record. Your card or bank details go directly to Stripe and never reach our servers; we store only your subscription status, plan and billing period. Stripe handles your payment data under its own privacy policy at stripe.com/privacy."
+          ]
+        },
+        {
+          "heading": "Service providers",
+          "paragraphs": [
+            "A few providers run parts of the service on our behalf: Supabase (database and authentication), Netlify and Cloudflare (hosting and content delivery), Stripe (payments) and Sentry (error monitoring). Each processes data only on our instructions under a data-processing agreement."
+          ]
+        },
+        {
+          "heading": "Retention and deletion",
+          "paragraphs": [
+            "We keep your data for as long as your account exists. Deleting your account in Settings permanently removes your account and everything you entered. Copies cached on your device for offline use are cleared when you sign out."
+          ]
+        },
+        {
+          "heading": "Your rights",
+          "paragraphs": [
+            "Under the GDPR you can access, correct, export, delete and restrict the processing of your personal data, and object to processing based on legitimate interest. Much of this is built in: you can edit anything in the app, export CSV files, and delete your account in Settings.",
+            "For anything else, email {{email}}. You can also lodge a complaint with your local data-protection authority."
+          ]
+        },
+        {
+          "heading": "Cookies and local storage",
+          "paragraphs": [
+            "Budgard sets no advertising or cross-site tracking cookies. We use your browser's local storage to keep you signed in and to cache your data so the app opens fast and works offline."
+          ]
+        },
+        {
+          "heading": "Security",
+          "paragraphs": [
+            "All traffic is encrypted in transit and your records are isolated per account on the server. No method of storage is 100% secure, but we treat your financial data with the care we'd want for our own."
+          ]
+        },
+        {
+          "heading": "Children",
+          "paragraphs": [
+            "Budgard is not directed at children under 16, and we do not knowingly collect their data."
+          ]
+        },
+        {
+          "heading": "Changes to this policy",
+          "paragraphs": [
+            "When this policy changes, we update this page and the date at its top. Meaningful changes are announced in the app."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "intro": "The rules for using Budgard, in plain language.",
+      "sections": [
+        {
+          "heading": "What Budgard is",
+          "paragraphs": [
+            "Budgard is a personal budgeting app: you record your income, spending and savings, and Budgard organises them into budgets, insights and reports. These terms are an agreement between you and Budgard; by creating an account you accept them."
+          ]
+        },
+        {
+          "heading": "Your account",
+          "paragraphs": [
+            "You sign in with one-time email codes, so your account is as safe as your inbox — keep access to your email secure. You are responsible for what happens under your account, and one account is meant for one person."
+          ]
+        },
+        {
+          "heading": "Free and Pro",
+          "paragraphs": [
+            "The core of Budgard is free. Pro is an optional paid subscription that unlocks additional features such as per-category budgets, savings goals, unlimited recurring expenses, full history and CSV exports.",
+            "Plans may evolve over time. If we materially reduce what Pro includes, we will tell you before your next renewal."
+          ]
+        },
+        {
+          "heading": "Billing",
+          "paragraphs": [
+            "Pro is billed monthly or yearly. Payments are processed by Stripe as merchant of record — Stripe is the seller you buy the subscription from, and your receipt comes from Stripe. The price shown at checkout is what you pay, and subscriptions renew automatically until cancelled."
+          ]
+        },
+        {
+          "heading": "Cancelling and refunds",
+          "paragraphs": [
+            "You can cancel any time from Settings → Manage subscription. Cancelling stops the next renewal; you keep Pro until the end of the period you already paid for.",
+            "As an EU consumer you have a statutory 14-day right of withdrawal for new purchases. Refund requests are handled in line with that right and with Stripe's consumer terms."
+          ]
+        },
+        {
+          "heading": "Your data",
+          "paragraphs": [
+            "Your financial records are yours. You give us only the permission needed to store, process and display them for you — nothing more. You can export your data as CSV at any time, and deleting your account deletes them (see the Privacy Policy)."
+          ]
+        },
+        {
+          "heading": "Acceptable use",
+          "paragraphs": [
+            "Don't abuse the service: no unlawful use, no attempts to break, overload or probe it, no reselling it, and no interfering with other people's accounts."
+          ]
+        },
+        {
+          "heading": "Not financial advice",
+          "paragraphs": [
+            "Budgard organises figures you enter and shows calculations based on them. Nothing in the app is financial, investment, tax or legal advice; decisions you make based on the numbers remain your own."
+          ]
+        },
+        {
+          "heading": "Availability",
+          "paragraphs": [
+            "We work to keep Budgard fast and available, but it is provided \"as is\" — occasional downtime, bugs or sync delays can happen. We may change or discontinue features; if we ever discontinue the service entirely, we will give you reasonable notice to export your data."
+          ]
+        },
+        {
+          "heading": "Liability",
+          "paragraphs": [
+            "To the extent permitted by law, our total liability for claims connected to the service is limited to the amount you paid us in the twelve months before the claim. Nothing in these terms limits liability that cannot be limited by law, or your statutory rights as a consumer."
+          ]
+        },
+        {
+          "heading": "Ending the agreement",
+          "paragraphs": [
+            "You can stop using Budgard and delete your account at any time. We may suspend or close accounts that break these terms, after warning you where reasonable."
+          ]
+        },
+        {
+          "heading": "Governing law",
+          "paragraphs": [
+            "These terms are governed by the laws of Greece. If you live elsewhere in the EU, the mandatory consumer-protection rules of your country of residence still apply to you."
+          ]
+        },
+        {
+          "heading": "Changes to these terms",
+          "paragraphs": [
+            "We may update these terms as Budgard evolves. If a change meaningfully affects you, we will announce it in the app before it takes effect; continuing to use Budgard after that means you accept the updated terms."
+          ]
+        },
+        {
+          "heading": "Contact",
+          "paragraphs": [
+            "Questions about these terms: {{email}}."
+          ]
+        }
+      ]
+    },
+    "contact": {
+      "title": "Contact",
+      "lead": "A question, an idea, or something broken? Email us — a human reads every message.",
+      "emailCta": "Email {{email}}",
+      "responseNote": "We usually reply within a couple of days.",
+      "billingNote": "Receipts and invoices live in Settings → Manage subscription, handled by Stripe.",
+      "privacyNote": "Privacy requests — exports, deletions, questions — are welcome at the same address."
+    }
   },
   "landing": {
     "nav": {

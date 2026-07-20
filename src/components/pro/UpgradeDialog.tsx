@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Check from 'lucide-react/dist/esm/icons/check';
 import { Button } from '@/components/ui/button';
@@ -12,23 +12,28 @@ import {
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
 import { useToast } from '@/hooks/useToast';
+import { useProPlans, type ProPlansDisplay } from '@/hooks/pro/useProPlans';
 import type { CheckoutPlan } from '@/services/subscriptionService';
-import {
-  PRICE_MONTHLY,
-  PRICE_YEARLY,
-  PRICE_YEARLY_PER_MONTH,
-} from '@/lib/proPlans';
 import { cn } from '@/lib/utils';
 
 const FEATURE_KEYS = ['f1', 'f2', 'f3', 'f4', 'f5'];
 
 const UpgradeDialog = () => {
   const { t } = useTranslation();
-  const { isUpgradeOpen, closeUpgrade } = useUpgradeDialog();
+  const { isUpgradeOpen, closeUpgrade, preferredPlan } = useUpgradeDialog();
   const { startCheckout } = useSubscription();
   const { toast } = useToast();
-  const [plan, setPlan] = useState<CheckoutPlan>('yearly');
+  const plans = useProPlans();
+  const [plan, setPlan] = useState<CheckoutPlan>(preferredPlan);
   const [isRedirecting, setIsRedirecting] = useState(false);
+
+  // Each open starts on the caller's preferred plan (e.g. the plan chosen on
+  // the landing page) instead of whatever the last visit left selected.
+  useEffect(() => {
+    if (isUpgradeOpen) {
+      setPlan(preferredPlan);
+    }
+  }, [isUpgradeOpen, preferredPlan]);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) closeUpgrade();
@@ -58,7 +63,7 @@ const UpgradeDialog = () => {
 
         <div className="space-y-5">
           {renderPlanToggle(plan, setPlan, t)}
-          {renderPrice(plan, t)}
+          {renderPrice(plan, plans, t)}
           <ul className="space-y-2.5">
             {FEATURE_KEYS.map((key) => renderFeature(t(`pro.features.${key}`)))}
           </ul>
@@ -128,12 +133,12 @@ const renderSaveBadge = (value: CheckoutPlan, t: TFunc) => {
   );
 };
 
-const renderPrice = (plan: CheckoutPlan, t: TFunc) => {
+const renderPrice = (plan: CheckoutPlan, plans: ProPlansDisplay, t: TFunc) => {
   if (plan === 'monthly') {
     return (
       <div className="text-center">
         <span className="text-4xl font-semibold tabular-nums tracking-tight">
-          {PRICE_MONTHLY}
+          {plans.monthlyLabel}
         </span>
         <span className="ml-1.5 text-sm text-muted-foreground">
           {t('pro.perMonth')}
@@ -145,13 +150,13 @@ const renderPrice = (plan: CheckoutPlan, t: TFunc) => {
   return (
     <div className="text-center">
       <span className="text-4xl font-semibold tabular-nums tracking-tight">
-        {PRICE_YEARLY_PER_MONTH}
+        {plans.yearlyPerMonthLabel}
       </span>
       <span className="ml-1.5 text-sm text-muted-foreground">
         {t('pro.perMonth')}
       </span>
       <p className="mt-1 text-xs text-muted-foreground tabular-nums">
-        {t('pro.billedYearly', { price: PRICE_YEARLY })}
+        {t('pro.billedYearly', { price: plans.yearlyLabel })}
       </p>
     </div>
   );

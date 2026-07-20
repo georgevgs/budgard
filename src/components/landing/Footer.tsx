@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import Wallet from 'lucide-react/dist/esm/icons/wallet';
 import { cn } from '@/lib/utils';
 
@@ -50,18 +51,31 @@ const renderLinkColumn = (t: Tx, group: string, items: string[]) => (
     </p>
     <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
       {items.map((item) => (
-        <li key={item}>
-          <a
-            href={hrefFor(group, item)}
-            className="hover:text-foreground transition-colors"
-          >
-            {t(`landing.footer.${group}.${item}`)}
-          </a>
-        </li>
+        <li key={item}>{renderLink(group, item, t)}</li>
       ))}
     </ul>
   </div>
 );
+
+// Product entries scroll to landing-page sections; company entries are real
+// routes (/privacy, /terms, /contact).
+const renderLink = (group: string, item: string, t: Tx) => {
+  const label = t(`landing.footer.${group}.${item}`);
+
+  if (group === 'product') {
+    return (
+      <a href={`#${item}`} className="hover:text-foreground transition-colors">
+        {label}
+      </a>
+    );
+  }
+
+  return (
+    <Link to={`/${item}`} className="hover:text-foreground transition-colors">
+      {label}
+    </Link>
+  );
+};
 
 const renderLanguageColumn = (
   t: Tx,
@@ -108,11 +122,3 @@ const renderBottomBar = (t: Tx) => (
     <p>{t('landing.footer.builtIn')}</p>
   </div>
 );
-
-const hrefFor = (group: string, item: string) => {
-  if (group === 'product') {
-    return `#${item}`;
-  }
-
-  return '#';
-};
