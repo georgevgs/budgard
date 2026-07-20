@@ -997,8 +997,9 @@
       "f1": "Per-category budgets",
       "f2": "Savings goals",
       "f3": "Unlimited recurring expenses",
-      "f4": "Full analytics history",
-      "f5": "CSV exports"
+      "f4": "Full analytics history and cash-flow trends",
+      "f5": "CSV exports",
+      "f6": "Early access to new features"
     },
     "gate": {
       "goalsTitle": "Savings goals are a Pro feature",

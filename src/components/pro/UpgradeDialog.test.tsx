@@ -83,11 +83,12 @@ describe('UpgradeDialog', () => {
     });
   });
 
-  it('lists the Pro feature set', () => {
+  it('lists the full Pro feature set including early access', () => {
     renderDialog();
 
     expect(screen.getByText('pro.features.f1')).toBeInTheDocument();
     expect(screen.getByText('pro.features.f5')).toBeInTheDocument();
+    expect(screen.getByText('pro.features.f6')).toBeInTheDocument();
   });
 
   it('links to the legal pages and closes the dialog on the way out', () => {

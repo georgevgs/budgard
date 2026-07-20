@@ -5,6 +5,7 @@ import Target from 'lucide-react/dist/esm/icons/target';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import FileDown from 'lucide-react/dist/esm/icons/file-down';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 
 type FeatureIcon = ComponentType<{ className?: string }>;
 
@@ -19,6 +20,7 @@ const FEATURES: Feature[] = [
   { key: 'f3', Icon: Repeat },
   { key: 'f4', Icon: TrendingUp },
   { key: 'f5', Icon: FileDown },
+  { key: 'f6', Icon: Sparkles },
 ];
 
 const PaywallFeatures = () => {
