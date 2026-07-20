@@ -977,12 +977,19 @@
   },
   "pro": {
     "upgradeTitle": "Αναβάθμιση σε Pro",
+    "heroTitle": "Budgard Pro",
     "dialogSubtitle": "Ξεκλειδώστε την πλήρη εικόνα με λιγότερο από έναν καφέ τον μήνα.",
     "monthly": "Μηνιαία",
     "yearly": "Ετήσια",
-    "save": "−17%",
+    "choosePlan": "Επιλογή πλάνου",
+    "savePercent": "Έκπτωση {{percent}}%",
     "perMonth": "/ μήνα",
     "billedYearly": "Χρέωση {{price}} μία φορά τον χρόνο",
+    "cancelAnytime": "Ακύρωση όποτε θέλετε",
+    "legal": {
+      "terms": "Όροι",
+      "privacy": "Απόρρητο"
+    },
     "cta": "Συνέχεια για πληρωμή",
     "redirecting": "Μετάβαση στο ταμείο…",
     "checkoutError": "Δεν ήταν δυνατή η έναρξη της πληρωμής. Δοκιμάστε ξανά.",

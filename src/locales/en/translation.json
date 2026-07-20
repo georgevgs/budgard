@@ -977,12 +977,19 @@
   },
   "pro": {
     "upgradeTitle": "Upgrade to Pro",
+    "heroTitle": "Budgard Pro",
     "dialogSubtitle": "Unlock the full picture for less than a coffee a month.",
     "monthly": "Monthly",
     "yearly": "Yearly",
-    "save": "−17%",
+    "choosePlan": "Choose a plan",
+    "savePercent": "Save {{percent}}%",
     "perMonth": "/ month",
     "billedYearly": "Billed {{price}} once a year",
+    "cancelAnytime": "Cancel anytime",
+    "legal": {
+      "terms": "Terms",
+      "privacy": "Privacy"
+    },
     "cta": "Continue to checkout",
     "redirecting": "Taking you to checkout…",
     "checkoutError": "Couldn't start checkout. Please try again.",

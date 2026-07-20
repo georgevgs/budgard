@@ -1,22 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Check from 'lucide-react/dist/esm/icons/check';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import PaywallHero from '@/components/pro/PaywallHero';
+import PaywallFeatures from '@/components/pro/PaywallFeatures';
+import PaywallPlans from '@/components/pro/PaywallPlans';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
 import { useToast } from '@/hooks/useToast';
-import { useProPlans, type ProPlansDisplay } from '@/hooks/pro/useProPlans';
+import { useProPlans } from '@/hooks/pro/useProPlans';
 import type { CheckoutPlan } from '@/services/subscriptionService';
-import { cn } from '@/lib/utils';
-
-const FEATURE_KEYS = ['f1', 'f2', 'f3', 'f4', 'f5'];
 
 const UpgradeDialog = () => {
   const { t } = useTranslation();
@@ -53,27 +47,27 @@ const UpgradeDialog = () => {
   return (
     <Dialog open={isUpgradeOpen} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="sm:max-w-[420px]"
+        className="gap-0 p-0 sm:max-w-[400px]"
         onOpenChange={handleOpenChange}
       >
-        <DialogHeader>
-          <DialogTitle>{t('pro.upgradeTitle')}</DialogTitle>
-          <DialogDescription>{t('pro.dialogSubtitle')}</DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-5">
-          {renderPlanToggle(plan, setPlan, t)}
-          {renderPrice(plan, plans, t)}
-          <ul className="space-y-2.5">
-            {FEATURE_KEYS.map((key) => renderFeature(t(`pro.features.${key}`)))}
-          </ul>
+        <div className="flex-1 overflow-y-auto px-6 pb-4 pt-10">
+          <PaywallHero />
+          <div className="mt-6">
+            <PaywallFeatures />
+          </div>
+          <div className="mt-6">
+            <PaywallPlans plan={plan} onSelect={setPlan} plans={plans} />
+          </div>
+        </div>
+        <div className="space-y-3 border-t border-border/40 px-6 pb-6 pt-4">
           <Button
             onClick={handleCheckout}
             disabled={isRedirecting}
-            className="w-full h-11 rounded-full"
+            className="h-12 w-full rounded-full text-base font-semibold shadow-lg shadow-primary/25"
           >
             {renderCtaLabel(isRedirecting, t)}
           </Button>
+          {renderFootnote(t, closeUpgrade)}
         </div>
       </DialogContent>
     </Dialog>
@@ -86,91 +80,36 @@ export default UpgradeDialog;
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-const renderPlanToggle = (
-  plan: CheckoutPlan,
-  setPlan: (plan: CheckoutPlan) => void,
-  t: TFunc,
-) => (
-  <div className="flex justify-center">
-    <div className="inline-flex p-1 rounded-full bg-muted border border-border/60">
-      {renderToggleButton('monthly', plan, setPlan, t)}
-      {renderToggleButton('yearly', plan, setPlan, t)}
-    </div>
-  </div>
-);
-
-const renderToggleButton = (
-  value: CheckoutPlan,
-  current: CheckoutPlan,
-  setPlan: (plan: CheckoutPlan) => void,
-  t: TFunc,
-) => {
-  const isActive = current === value;
-
-  return (
-    <button
-      type="button"
-      onClick={() => setPlan(value)}
-      className={cn(
-        'px-4 h-9 rounded-full text-sm font-medium transition-colors',
-        isActive && 'bg-background text-foreground shadow-sm',
-        !isActive && 'text-muted-foreground hover:text-foreground',
-      )}
-    >
-      {t(`pro.${value}`)}
-      {renderSaveBadge(value, t)}
-    </button>
-  );
-};
-
-const renderSaveBadge = (value: CheckoutPlan, t: TFunc) => {
-  if (value !== 'yearly') return null;
-
-  return (
-    <span className="ml-2 text-[10px] font-semibold uppercase tracking-wider text-primary">
-      {t('pro.save')}
-    </span>
-  );
-};
-
-const renderPrice = (plan: CheckoutPlan, plans: ProPlansDisplay, t: TFunc) => {
-  if (plan === 'monthly') {
-    return (
-      <div className="text-center">
-        <span className="text-4xl font-semibold tabular-nums tracking-tight">
-          {plans.monthlyLabel}
-        </span>
-        <span className="ml-1.5 text-sm text-muted-foreground">
-          {t('pro.perMonth')}
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="text-center">
-      <span className="text-4xl font-semibold tabular-nums tracking-tight">
-        {plans.yearlyPerMonthLabel}
-      </span>
-      <span className="ml-1.5 text-sm text-muted-foreground">
-        {t('pro.perMonth')}
-      </span>
-      <p className="mt-1 text-xs text-muted-foreground tabular-nums">
-        {t('pro.billedYearly', { price: plans.yearlyLabel })}
-      </p>
-    </div>
-  );
-};
-
-const renderFeature = (label: string) => (
-  <li key={label} className="flex items-start gap-3 text-sm">
-    <Check className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-    <span className="text-foreground/85">{label}</span>
-  </li>
-);
-
 const renderCtaLabel = (isRedirecting: boolean, t: TFunc): string => {
   if (isRedirecting) return t('pro.redirecting');
 
   return t('pro.cta');
 };
+
+// "Cancel anytime · Terms · Privacy" — the reassurance line every good
+// paywall closes on. Links close the dialog so the page behind is visible.
+const renderFootnote = (t: TFunc, onNavigate: () => void) => (
+  <p className="text-center text-[11px] text-muted-foreground">
+    {t('pro.cancelAnytime')}
+    <span aria-hidden className="mx-1.5">
+      ·
+    </span>
+    <Link
+      to="/terms"
+      onClick={onNavigate}
+      className="underline underline-offset-2 hover:text-foreground"
+    >
+      {t('pro.legal.terms')}
+    </Link>
+    <span aria-hidden className="mx-1.5">
+      ·
+    </span>
+    <Link
+      to="/privacy"
+      onClick={onNavigate}
+      className="underline underline-offset-2 hover:text-foreground"
+    >
+      {t('pro.legal.privacy')}
+    </Link>
+  </p>
+);

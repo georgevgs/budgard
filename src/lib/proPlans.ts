@@ -42,6 +42,19 @@ export const formatPlanAmount = (
 export const yearlyPerMonthAmount = (yearlyAmount: number): number =>
   Math.floor(yearlyAmount / 12);
 
+// Whole-percent saving of the yearly plan's advertised per-month price vs
+// the monthly plan (e.g. €1.66 vs €1.99 → 17). Compared on the displayed
+// per-month amounts so the badge always matches the prices next to it.
+export const yearlySavingsPercent = (prices: ProPlanPrices): number => {
+  const monthly = prices.monthly.amount;
+  if (monthly <= 0) return 0;
+
+  const saved = monthly - yearlyPerMonthAmount(prices.yearly.amount);
+  if (saved <= 0) return 0;
+
+  return Math.round((saved / monthly) * 100);
+};
+
 // Maps a subscription row's stripe_price_id back to a plan. Null when the
 // price is unknown (fallback data, or a legacy/changed Stripe price).
 export const planIdForPriceId = (
