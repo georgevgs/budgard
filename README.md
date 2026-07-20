@@ -13,7 +13,7 @@ A personal expense tracker that actually fits in your pocket.
 
 ---
 
-I built Budgard because every expense app I tried was either too complicated or locked behind a subscription. This one is just what I need: log an expense, see where the money went, move on with your day.
+I built Budgard because every expense app I tried was either too complicated or locked its basics behind a subscription. This one is just what I need: log an expense, see where the money went, move on with your day. The essentials are free for good — an optional Pro tier covers the power features and keeps the project running.
 
 It's a PWA so it installs on your phone like a native app, syncs across devices, and works without an App Store.
 
@@ -28,17 +28,16 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Date-grouped feed with sticky headers (Today, Yesterday, or formatted date)
 - Filter and search by category, tag, date range, or keyword
 - Sort by date or amount, search across all months
-- CSV import and export
+- CSV import and export (export is Pro)
 - Multi-currency support with live exchange rates
 - Animated number transitions on totals
 
 **Recurring Expenses**
-- Set up recurring expenses (weekly, biweekly, monthly, quarterly, yearly) with start/end dates
+- Set up recurring expenses (weekly, biweekly, monthly, quarterly, yearly) with start/end dates — 3 on the free plan, unlimited with Pro
 - Automatic expense generation via Supabase Edge Function
 - Track next occurrence and overdue status
 - Toggle active/inactive without deleting
 - Preview estimated monthly cost
-- Subscription audit — surface monthly + yearly cost of all active subs, flag the largest, toggle off in one tap
 
 **Income**
 - Log one-off and recurring income alongside expenses
@@ -49,19 +48,19 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 
 **Analytics**
 - Monthly spending snapshot with month-over-month comparison
-- Interactive year-over-year area chart with clickable month drill-down
+- Interactive area chart with clickable month drill-down — last 3 months free, full history with Pro
 - Category breakdown with sparkline trends and drill-down details
 - Budget progress indicator with color-coded alerts
 - Proactive insights: weekly category anomalies, daily budget remaining, spending pace, and month-end projection
-- Annual export — download a year of transactions or a category summary as CSV
+- Cash flow trends and annual CSV export (Pro)
 
 **Budget**
 - Set a monthly total budget target
-- Per-category budgets with their own 80% / 100% alerts
+- Per-category budgets with their own 80% / 100% alerts (Pro)
 - Real-time progress tracking with color-coded alerts at 80% and 100%
 - Budget reference line on analytics chart
 
-**Savings Goals**
+**Savings Goals** (Pro)
 - Create goals with a target amount and optional deadline
 - Visual progress bar with on-track / behind status
 - Edit, contribute, or delete from a single goal card
@@ -92,7 +91,7 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Budget warning when monthly or per-category spend crosses 80%
 - Budget exceeded when monthly or per-category spend crosses 100%
 - Configurable daily reminder at the hour you choose
-- In-app daily and weekly recap cards that summarize recent activity
+- In-app weekly recap card every Monday summarizing the prior week
 - Per-type toggles in settings; works across mobile and desktop
 
 **Customization**
@@ -108,9 +107,17 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Installable on iOS, Android, and desktop
 - Account deletion from settings
 
+## Free and Pro
+
+The core app is free — not a trial, not metered. The free plan includes unlimited expenses in 23 currencies, a monthly total budget, up to 3 recurring expenses, the last 3 months of analytics, and one tag per expense. Net worth and debt tracking are free too.
+
+**Budgard Pro** — €1.99/month or €19.99/year — unlocks per-category budgets, savings goals, unlimited recurring expenses, full analytics history with cash flow trends, and CSV exports, plus early access to new features.
+
+Payments run through Stripe as merchant of record; subscriptions are managed or cancelled anytime from Settings via the Stripe customer portal.
+
 ## Tech
 
-React 19 + TypeScript + Vite on the frontend. Supabase handles auth (email OTP), the Postgres database, file storage for receipts, and Edge Functions for recurring expense generation and push notifications. Deployed on Netlify.
+React 19 + TypeScript + Vite on the frontend. Supabase handles auth (email OTP), the Postgres database, file storage for receipts, and Edge Functions for recurring expense generation, push notifications, and Stripe billing (checkout, webhook, customer portal, live prices). Deployed on Netlify.
 
 UI components from shadcn/ui, charts from Recharts, forms from react-hook-form + Zod. State lives in React Context with optimistic updates (custom rollback pattern) so the UI never feels slow. Cloudflare Turnstile protects the auth flow. Errors are monitored with Sentry. Push notifications use the Web Push API with VAPID authentication.
 
