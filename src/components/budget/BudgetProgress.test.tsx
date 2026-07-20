@@ -28,6 +28,18 @@ vi.mock('@/contexts/DataContext', () => ({
   useCategoryBudgetsData: () => [],
 }));
 
+vi.mock('@/hooks/useIsPro', () => ({
+  useIsPro: () => true,
+}));
+
+vi.mock('@/contexts/UpgradeDialogContext', () => ({
+  useUpgradeDialog: () => ({
+    isUpgradeOpen: false,
+    openUpgrade: vi.fn(),
+    closeUpgrade: vi.fn(),
+  }),
+}));
+
 vi.mock('@/hooks/useCurrentMonthSpendingByCategory', () => ({
   useCurrentMonthSpendingByCategory: () => new Map<string, number>(),
 }));

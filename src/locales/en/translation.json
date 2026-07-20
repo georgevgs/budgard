@@ -461,6 +461,7 @@
     "recurring": "Recurring",
     "analytics": "Analytics",
     "settings": "Settings",
+    "upgrade": "Upgrade to Pro",
     "openProfileMenu": "Open profile menu",
     "openAppMenu": "Open menu",
     "goHome": "Go to home",
@@ -955,6 +956,36 @@
       "shopping": "Shopping",
       "utilities": "Utilities"
     }
+  },
+  "pro": {
+    "upgradeTitle": "Upgrade to Pro",
+    "dialogSubtitle": "Unlock the full picture for less than a coffee a month.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "save": "−17%",
+    "perMonth": "/ month",
+    "billedYearly": "Billed {{price}} once a year",
+    "cta": "Continue to checkout",
+    "redirecting": "Taking you to checkout…",
+    "checkoutError": "Couldn't start checkout. Please try again.",
+    "features": {
+      "f1": "Per-category budgets",
+      "f2": "Savings goals",
+      "f3": "Unlimited recurring expenses",
+      "f4": "Full analytics history",
+      "f5": "CSV exports"
+    },
+    "gate": {
+      "goalsTitle": "Savings goals are a Pro feature",
+      "goalsBody": "Set targets, watch them fill up, and celebrate when you hit them. Upgrade to start saving with intent.",
+      "analyticsTitle": "See beyond 3 months",
+      "analyticsBody": "The free plan shows your last 3 months. Pro unlocks your full history, cash flow, and CSV exports.",
+      "recurringLimit": "The free plan includes up to {{limit}} recurring expenses. Upgrade for unlimited."
+    },
+    "successTitle": "Welcome to Pro!",
+    "successBody": "Your subscription is active. Enjoy the full picture.",
+    "cancelledTitle": "Checkout cancelled",
+    "cancelledBody": "No charge was made. You can upgrade any time."
   },
   "landing": {
     "nav": {

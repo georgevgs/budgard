@@ -6,6 +6,11 @@ import EyebrowLabel from '@/components/landing/EyebrowLabel';
 import Reveal from '@/components/landing/Reveal';
 import Check from 'lucide-react/dist/esm/icons/check';
 import { cn } from '@/lib/utils';
+import {
+  PRICE_MONTHLY,
+  PRICE_YEARLY,
+  PRICE_YEARLY_PER_MONTH,
+} from '@/lib/proPlans';
 
 type Props = {
   onGetStarted: () => void;
@@ -13,10 +18,6 @@ type Props = {
 
 type Tx = (key: string, opts?: Record<string, unknown>) => string;
 type Cycle = 'monthly' | 'yearly';
-
-const PRICE_MONTHLY = '€1.99';
-const PRICE_YEARLY = '€19.99';
-const PRICE_YEARLY_PER_MONTH = '€1.66';
 
 const Pricing = ({ onGetStarted }: Props) => {
   const { t } = useTranslation();

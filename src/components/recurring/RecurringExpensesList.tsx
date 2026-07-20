@@ -21,6 +21,13 @@ import { formatCurrency } from '@/lib/utils';
 import { calculateNextOccurrence, getMonthlyAmount } from '@/lib/recurring';
 import RecurringLoadingState from '@/components/recurring/RecurringLoading';
 import { useTranslation } from 'react-i18next';
+import { useIsPro } from '@/hooks/useIsPro';
+import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
+import { useToast } from '@/hooks/useToast';
+import {
+  canAddRecurringExpense,
+  FREE_RECURRING_EXPENSE_LIMIT,
+} from '@/lib/proLimits';
 
 const RecurringExpensesList = () => {
   const [mode, setMode] = useState<RecurringMode>('expense');
@@ -33,6 +40,9 @@ const RecurringExpensesList = () => {
   const { accounts } = useAccountsData();
   const { defaultCurrency, isInitialized } = useDataConfig();
   const { t } = useTranslation();
+  const isPro = useIsPro();
+  const { openUpgrade } = useUpgradeDialog();
+  const { toast } = useToast();
 
   const { handleSubmit, handleDelete, handleToggle } = useRecurringActions({
     mode,
@@ -62,6 +72,27 @@ const RecurringExpensesList = () => {
     setIsFormOpen(true);
   };
 
+  // The free cap applies to recurring expenses only; recurring incomes stay
+  // uncapped on every plan.
+  const handleAddClick = () => {
+    const atFreeCap =
+      mode === 'expense' &&
+      !canAddRecurringExpense(isPro, recurringExpenses.length);
+
+    if (atFreeCap) {
+      toast({
+        title: t('pro.gate.recurringLimit', {
+          limit: FREE_RECURRING_EXPENSE_LIMIT,
+        }),
+      });
+      openUpgrade();
+
+      return;
+    }
+
+    setIsFormOpen(true);
+  };
+
   const handleFormClose = () => {
     setIsFormOpen(false);
     setSelectedExpense(undefined);
@@ -85,7 +116,7 @@ const RecurringExpensesList = () => {
           activeItems.length,
           monthlyTotal,
           defaultCurrency,
-          () => setIsFormOpen(true),
+          handleAddClick,
           t,
         )}
 

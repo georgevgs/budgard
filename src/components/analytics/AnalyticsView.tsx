@@ -1,10 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  useDataConfig,
-  useExpensesData,
-  useCategoriesData,
-} from '@/contexts/DataContext';
+import { useDataConfig, useCategoriesData } from '@/contexts/DataContext';
 import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
 import SpendingInsights from '@/components/analytics/SpendingInsights';
 import CategorySparkline from '@/components/analytics/CategorySparkline';
@@ -14,8 +10,10 @@ import MonthSnapshotCard from '@/components/analytics/MonthSnapshotCard';
 import YearOverviewSection from '@/components/analytics/YearOverviewSection';
 import CashFlowSection from '@/components/analytics/CashFlowSection';
 import AnnualExportCard from '@/components/analytics/AnnualExportCard';
+import ProUpsellCard from '@/components/pro/ProUpsellCard';
 import { useAnalyticsData } from '@/hooks/analytics/useAnalyticsData';
 import { useAnalyticsDrillDown } from '@/hooks/analytics/useAnalyticsDrillDown';
+import { useIsPro } from '@/hooks/useIsPro';
 import type { CategoryRow } from '@/hooks/analytics/useAnalyticsData';
 import { formatCurrency } from '@/lib/utils';
 import type { Expense } from '@/types/Expense';
@@ -23,7 +21,7 @@ import type { Category } from '@/types/Category';
 
 const AnalyticsView = () => {
   const { t } = useTranslation();
-  const expenses = useExpensesData();
+  const isPro = useIsPro();
   const { expenseCategories: categories } = useCategoriesData();
   const { monthlyBudget, defaultCurrency, isInitialized } = useDataConfig();
 
@@ -44,7 +42,7 @@ const AnalyticsView = () => {
 
       {/* Spending insights */}
       <SpendingInsights
-        expenses={expenses}
+        expenses={analytics.expenses}
         monthlyBudget={monthlyBudget}
         monthComparison={analytics.monthComparison}
         categories={categories}
@@ -64,11 +62,7 @@ const AnalyticsView = () => {
         onMonthClick={drillDown.handleMonthClick}
       />
 
-      {/* Cash flow (income vs expense, year view) */}
-      <CashFlowSection selectedYear={analytics.selectedYear} />
-
-      {/* Annual export (CSV download for tax/records) */}
-      <AnnualExportCard selectedYear={analytics.selectedYear} />
+      {renderProSections(isPro, analytics.selectedYear, t)}
 
       {/* Category breakdown */}
       <div className="space-y-3">
@@ -106,6 +100,29 @@ export default AnalyticsView;
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
+
+// Cash flow and the annual CSV export cover more than the free 3-month
+// window, so free users get one upsell card in their place.
+const renderProSections = (isPro: boolean, selectedYear: number, t: TFunc) => {
+  if (!isPro) {
+    return (
+      <ProUpsellCard
+        title={t('pro.gate.analyticsTitle')}
+        description={t('pro.gate.analyticsBody')}
+      />
+    );
+  }
+
+  return (
+    <>
+      {/* Cash flow (income vs expense, year view) */}
+      <CashFlowSection selectedYear={selectedYear} />
+
+      {/* Annual export (CSV download for tax/records) */}
+      <AnnualExportCard selectedYear={selectedYear} />
+    </>
+  );
+};
 
 const renderCategoryBreakdown = (
   breakdown: CategoryRow[],

@@ -22,6 +22,9 @@ import { ErrorBoundary } from '@/components/ui/error-boundary';
 import Header from '@/components/layout/Header';
 import NavTabs from '@/components/layout/NavTabs';
 import MilestoneWatcher from '@/components/common/MilestoneWatcher';
+import ProRoute from '@/components/pro/ProRoute';
+import UpgradeDialog from '@/components/pro/UpgradeDialog';
+import { useCheckoutReturn } from '@/hooks/pro/useCheckoutReturn';
 import { shouldShowOnboarding } from '@/lib/onboarding';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import {
@@ -89,6 +92,7 @@ const LoadingSpinner = () => {
 const AuthenticatedLayout = () => {
   useOfflineSync();
   useIdleTabPrefetch();
+  useCheckoutReturn();
   const expenses = useExpensesData();
   const { categories } = useCategoriesData();
   const { isInitialized, monthlyBudget } = useDataConfig();
@@ -121,6 +125,7 @@ const AuthenticatedLayout = () => {
       </main>
       <NavTabs />
       <MilestoneWatcher />
+      <UpgradeDialog />
       {renderOnboarding(showOnboarding, () => setShowOnboarding(false))}
     </>
   );
@@ -443,9 +448,14 @@ const App = () => {
                 <Route
                   path="/goals"
                   element={
-                    <Suspense fallback={<GoalsLoadingState />}>
-                      <GoalsList />
-                    </Suspense>
+                    <ProRoute
+                      titleKey="pro.gate.goalsTitle"
+                      descriptionKey="pro.gate.goalsBody"
+                    >
+                      <Suspense fallback={<GoalsLoadingState />}>
+                        <GoalsList />
+                      </Suspense>
+                    </ProRoute>
                   }
                 />
                 <Route

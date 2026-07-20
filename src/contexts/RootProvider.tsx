@@ -1,6 +1,7 @@
 import type { ReactNode, ReactElement } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext.tsx';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext.tsx';
+import { UpgradeDialogProvider } from '@/contexts/UpgradeDialogContext.tsx';
 import { DataProvider } from '@/contexts/DataContext.tsx';
 
 type RootProviderProps = {
@@ -11,7 +12,9 @@ export const RootProvider = ({ children }: RootProviderProps): ReactElement => {
   return (
     <AuthProvider>
       <SubscriptionProvider>
-        <DataProvider>{children}</DataProvider>
+        <UpgradeDialogProvider>
+          <DataProvider>{children}</DataProvider>
+        </UpgradeDialogProvider>
       </SubscriptionProvider>
     </AuthProvider>
   );

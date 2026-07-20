@@ -6,6 +6,8 @@ import {
   useCategoriesData,
 } from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
+import { useIsPro } from '@/hooks/useIsPro';
+import { getFreeAnalyticsCutoff } from '@/lib/proLimits';
 import { monthsElapsedInYear } from '@/lib/utils';
 
 export type CategoryRow = {
@@ -27,10 +29,20 @@ export type MonthComparison = {
 };
 
 export const useAnalyticsData = () => {
-  const expenses = useExpensesData();
+  const allExpenses = useExpensesData();
   const { expenseCategories: categories } = useCategoriesData();
   const { monthlyBudget } = useDataConfig();
   const dateLocale = useDateLocale();
+  const isPro = useIsPro();
+
+  // Free tier sees the last 3 months only; everything downstream (year list,
+  // charts, breakdowns, month comparison) derives from this window.
+  const expenses = useMemo(() => {
+    if (isPro) return allExpenses;
+    const cutoff = getFreeAnalyticsCutoff();
+
+    return allExpenses.filter((e) => parseISO(e.date) >= cutoff);
+  }, [allExpenses, isPro]);
 
   const availableYears = useMemo(() => {
     const years = new Set(expenses.map((e) => getYear(parseISO(e.date))));
@@ -169,6 +181,7 @@ export const useAnalyticsData = () => {
     selectedYear,
     setSelectedYear,
     availableYears,
+    expenses,
     yearExpenses,
     monthlyData,
     monthComparison,

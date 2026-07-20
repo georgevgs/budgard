@@ -11,10 +11,15 @@ import MoreHorizontal from 'lucide-react/dist/esm/icons/more-horizontal';
 import Target from 'lucide-react/dist/esm/icons/target';
 import Wallet from 'lucide-react/dist/esm/icons/wallet';
 import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import { useIsPro } from '@/hooks/useIsPro';
+import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
 
 const AppMenu = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const isPro = useIsPro();
+  const { openUpgrade } = useUpgradeDialog();
 
   return (
     <DropdownMenu>
@@ -47,9 +52,27 @@ const AppMenu = () => {
           <CreditCard className="h-4 w-4" />
           {t('navigation.debts')}
         </DropdownMenuItem>
+        {renderUpgradeItem(isPro, openUpgrade, t)}
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
 export default AppMenu;
+
+// --- Helpers ---
+
+const renderUpgradeItem = (
+  isPro: boolean,
+  openUpgrade: () => void,
+  t: (key: string) => string,
+) => {
+  if (isPro) return null;
+
+  return (
+    <DropdownMenuItem onClick={openUpgrade}>
+      <Sparkles className="h-4 w-4 text-primary" />
+      {t('navigation.upgrade')}
+    </DropdownMenuItem>
+  );
+};

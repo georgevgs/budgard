@@ -8,6 +8,8 @@ import BudgetProgress from '@/components/budget/BudgetProgress';
 import ExpensesDashboard from '@/components/expenses/ExpensesDashboard';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useBudgetOps } from '@/hooks/dataOps/useBudgetOps';
+import { useIsPro } from '@/hooks/useIsPro';
+import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
@@ -31,6 +33,18 @@ const ExpensesDashboardPanel = ({
   const { t } = useTranslation();
   const { monthlyBudget, defaultCurrency } = useDataConfig();
   const { handleBudgetUpdate } = useBudgetOps();
+  const isPro = useIsPro();
+  const { openUpgrade } = useUpgradeDialog();
+
+  const handleExport = () => {
+    if (!isPro) {
+      openUpgrade();
+
+      return;
+    }
+
+    downloadExpensesAsCSV({ expenses, categories, selectedMonth });
+  };
 
   return (
     <div
@@ -60,7 +74,7 @@ const ExpensesDashboardPanel = ({
             <Upload className="h-4 w-4 mr-2" />
             {t('import.importCSV')}
           </Button>
-          {renderExportButton(expenses, categories, selectedMonth, t)}
+          {renderExportButton(expenses.length, handleExport, t)}
         </div>
       </div>
     </div>
@@ -89,20 +103,17 @@ const renderDashboard = (expenses: Expense[], categories: Category[]) => {
 };
 
 const renderExportButton = (
-  expenses: Expense[],
-  categories: Category[],
-  selectedMonth: string,
+  expenseCount: number,
+  onExport: () => void,
   t: TranslateFunction,
 ) => {
-  if (expenses.length === 0) return null;
+  if (expenseCount === 0) return null;
 
   return (
     <Button
       variant="outline"
       size="sm"
-      onClick={() =>
-        downloadExpensesAsCSV({ expenses, categories, selectedMonth })
-      }
+      onClick={onExport}
       className="text-muted-foreground hover:text-foreground"
     >
       <Download className="h-4 w-4 mr-2" />

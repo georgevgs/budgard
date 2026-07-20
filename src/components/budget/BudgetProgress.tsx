@@ -18,6 +18,8 @@ import {
   useCategoryBudgetsData,
 } from '@/contexts/DataContext';
 import { useCurrentMonthSpendingByCategory } from '@/hooks/useCurrentMonthSpendingByCategory';
+import { useIsPro } from '@/hooks/useIsPro';
+import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
 import type { Category } from '@/types/Category';
 import type { CategoryBudget } from '@/types/CategoryBudget';
 
@@ -37,6 +39,8 @@ const BudgetProgress = ({
   const { t } = useTranslation();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isManagerOpen, setIsManagerOpen] = useState(false);
+  const isPro = useIsPro();
+  const { openUpgrade } = useUpgradeDialog();
   const { expenseCategories } = useCategoriesData();
   const categoryBudgets = useCategoryBudgetsData();
   const expenses = useExpensesData();
@@ -48,8 +52,17 @@ const BudgetProgress = ({
 
   const openForm = () => setIsFormOpen(true);
   const closeForm = () => setIsFormOpen(false);
-  const openManager = () => setIsManagerOpen(true);
   const closeManager = () => setIsManagerOpen(false);
+
+  const openManager = () => {
+    if (!isPro) {
+      openUpgrade();
+
+      return;
+    }
+
+    setIsManagerOpen(true);
+  };
 
   if (monthlyBudget === null) {
     return renderNoBudgetState({
