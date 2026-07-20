@@ -7,7 +7,7 @@ import Reveal from '@/components/landing/Reveal';
 import Check from 'lucide-react/dist/esm/icons/check';
 import { cn } from '@/lib/utils';
 import { useProPlans, type ProPlansDisplay } from '@/hooks/pro/useProPlans';
-import type { ProPlanId } from '@/lib/proPlans';
+import { yearlySavingsPercent, type ProPlanId } from '@/lib/proPlans';
 
 type Props = {
   onGetStarted: () => void;
@@ -25,7 +25,7 @@ const Pricing = ({ onGetStarted, onGetPro }: Props) => {
   return (
     <SectionShell id="pricing" tone="default">
       <Reveal>{renderHeader(t)}</Reveal>
-      <Reveal delay={100}>{renderToggle(t, cycle, setCycle)}</Reveal>
+      <Reveal delay={100}>{renderToggle(t, cycle, setCycle, plans)}</Reveal>
       <div className="mt-10 grid md:grid-cols-2 gap-5 max-w-4xl mx-auto">
         <Reveal delay={150}>{renderFreeCard(t, onGetStarted)}</Reveal>
         <Reveal delay={250}>{renderProCard(t, cycle, plans, onGetPro)}</Reveal>
@@ -48,11 +48,16 @@ const renderHeader = (t: Tx) => (
   </div>
 );
 
-const renderToggle = (t: Tx, cycle: Cycle, setCycle: (c: Cycle) => void) => (
+const renderToggle = (
+  t: Tx,
+  cycle: Cycle,
+  setCycle: (c: Cycle) => void,
+  plans: ProPlansDisplay,
+) => (
   <div className="mt-8 flex justify-center">
     <div className="inline-flex p-1 rounded-full bg-muted border border-border/60">
-      {renderToggleButton(t, 'monthly', cycle, setCycle)}
-      {renderToggleButton(t, 'yearly', cycle, setCycle)}
+      {renderToggleButton(t, 'monthly', cycle, setCycle, plans)}
+      {renderToggleButton(t, 'yearly', cycle, setCycle, plans)}
     </div>
   </div>
 );
@@ -62,6 +67,7 @@ const renderToggleButton = (
   value: Cycle,
   current: Cycle,
   setCycle: (c: Cycle) => void,
+  plans: ProPlansDisplay,
 ) => {
   const isActive = current === value;
   const labelKey = getLabelKey(value);
@@ -77,7 +83,7 @@ const renderToggleButton = (
       )}
     >
       {t(labelKey)}
-      {renderSaveBadge(t, value)}
+      {renderSaveBadge(t, value, plans)}
     </button>
   );
 };
@@ -90,12 +96,17 @@ const getLabelKey = (value: Cycle): string => {
   return 'landing.pricing.yearly';
 };
 
-const renderSaveBadge = (t: Tx, value: Cycle) => {
+// Computed from the live prices so the badge can never drift from what
+// checkout actually charges — same basis as the paywall's savings badge.
+const renderSaveBadge = (t: Tx, value: Cycle, plans: ProPlansDisplay) => {
   if (value !== 'yearly') return null;
+
+  const percent = yearlySavingsPercent(plans.prices);
+  if (percent <= 0) return null;
 
   return (
     <span className="ml-2 text-[10px] font-semibold uppercase tracking-wider text-primary">
-      {t('landing.pricing.save')}
+      {t('landing.pricing.savePercent', { percent })}
     </span>
   );
 };

@@ -1293,7 +1293,7 @@
       "body": "Start free. Upgrade when you want more. No hidden fees, no annual rituals.",
       "monthly": "Monthly",
       "yearly": "Yearly",
-      "save": "−17%",
+      "savePercent": "Save {{percent}}%",
       "perMonth": "/ month",
       "billedYearly": "Billed {{price}} once a year",
       "forever": "forever",
