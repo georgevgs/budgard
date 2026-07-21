@@ -46,15 +46,18 @@ Deno.serve(async (req) => {
 
     // Durable per-user rate limit (5 attempts / 10 min, enforced in
     // Postgres). Checkout creates real Stripe objects, so it must not be
-    // hammerable. Fail open on RPC errors for the same reason as the
-    // subscription read below: a transient failure must not lose a sale.
+    // hammerable. Fail closed: a rate limiter that skips itself on errors is
+    // only a soft control, and a 429 is retryable by the user — unlike the
+    // subscription read below, where failing closed would lose the sale.
     const { data: allowed, error: rateError } = await userClient.rpc(
       'consume_checkout_attempt',
     );
     if (rateError) {
       console.error('stripe-checkout: rate limit check failed:', rateError);
+
+      return jsonResponse({ error: 'Too many attempts. Try again soon.' }, 429);
     }
-    if (!rateError && allowed === false) {
+    if (allowed === false) {
       return jsonResponse({ error: 'Too many attempts. Try again soon.' }, 429);
     }
 

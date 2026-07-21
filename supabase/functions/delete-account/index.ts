@@ -39,6 +39,18 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Deletion is irreversible, so a valid JWT alone is not enough: the
+    // session's last authentication event (amr claim) must be recent. Session
+    // refreshes keep the original amr timestamp, so a hijacked long-lived
+    // session cannot destroy the account without access to the user's inbox.
+    // The client verifies a fresh OTP right before calling this function.
+    if (!isRecentlyAuthenticated(authHeader)) {
+      return new Response(
+        JSON.stringify({ error: 'reauth_required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
+    }
+
     // Use the service role client to delete user data and auth record
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -88,3 +100,40 @@ Deno.serve(async (req) => {
     );
   }
 });
+
+// --- Helpers ---
+
+// How recent the session's newest authentication event must be for deletion
+// to proceed. The client's re-verify flow completes in seconds; 10 minutes
+// leaves room for slow typing and clock skew.
+const REAUTH_WINDOW_SECONDS = 10 * 60;
+
+type AmrEntry = { method?: string; timestamp?: number };
+
+// Reads the amr (authentication methods reference) claim from the JWT that
+// getUser() already validated, and checks its newest timestamp against the
+// re-auth window. Fails closed: a token without a readable amr claim is
+// treated as stale.
+const isRecentlyAuthenticated = (authHeader: string): boolean => {
+  try {
+    const token = authHeader.replace(/^Bearer\s+/i, '');
+    const payloadSegment = token.split('.')[1];
+    if (!payloadSegment) return false;
+
+    const payloadJson = atob(
+      payloadSegment.replace(/-/g, '+').replace(/_/g, '/'),
+    );
+    const payload = JSON.parse(payloadJson) as { amr?: AmrEntry[] };
+    const timestamps = (payload.amr ?? [])
+      .map((entry) => entry.timestamp)
+      .filter((ts): ts is number => typeof ts === 'number');
+    if (timestamps.length === 0) return false;
+
+    const newestSeconds = Math.max(...timestamps);
+    const ageSeconds = Date.now() / 1000 - newestSeconds;
+
+    return ageSeconds <= REAUTH_WINDOW_SECONDS;
+  } catch {
+    return false;
+  }
+};

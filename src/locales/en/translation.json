@@ -443,6 +443,9 @@
       "deleteAccountConfirmTitle": "Delete Account",
       "deleteAccountConfirmDescription": "This will permanently delete your account and all your data including expenses, categories, tags, and recurring expenses. This action cannot be undone.",
       "deleteAccountConfirmButton": "Delete My Account",
+      "deleteAccountCodeNotice": "To confirm it's you, we'll email a 6-digit verification code to {{email}}.",
+      "deleteAccountVerifyTitle": "Confirm Deletion",
+      "deleteAccountVerifyButton": "Verify & Delete",
       "deleteAccountSuccess": "Account deleted successfully",
       "deleteAccountFailed": "Failed to delete account"
     },

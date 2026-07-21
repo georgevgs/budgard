@@ -443,6 +443,9 @@
       "deleteAccountConfirmTitle": "Διαγραφή Λογαριασμού",
       "deleteAccountConfirmDescription": "Αυτό θα διαγράψει μόνιμα τον λογαριασμό σας και όλα τα δεδομένα σας, συμπεριλαμβανομένων εξόδων, κατηγοριών, ετικετών και επαναλαμβανόμενων εξόδων. Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.",
       "deleteAccountConfirmButton": "Διαγραφή Λογαριασμού Μου",
+      "deleteAccountCodeNotice": "Για επιβεβαίωση της ταυτότητάς σας, θα σας στείλουμε έναν 6ψήφιο κωδικό επαλήθευσης στο {{email}}.",
+      "deleteAccountVerifyTitle": "Επιβεβαίωση Διαγραφής",
+      "deleteAccountVerifyButton": "Επαλήθευση & Διαγραφή",
       "deleteAccountSuccess": "Ο λογαριασμός διαγράφηκε επιτυχώς",
       "deleteAccountFailed": "Αποτυχία διαγραφής λογαριασμού"
     },

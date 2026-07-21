@@ -1,16 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import DeleteAccountDialog from '@/components/settings/DeleteAccountDialog';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
@@ -27,11 +18,6 @@ const DataManagementSection = ({
   t,
 }: DataManagementSectionProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
-  const handleConfirm = async () => {
-    await onConfirmDelete();
-    setShowDeleteDialog(false);
-  };
 
   return (
     <section className="space-y-2">
@@ -54,31 +40,12 @@ const DataManagementSection = ({
         </CardContent>
       </Card>
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent
-          className="sm:max-w-[425px]"
-          onOpenChange={setShowDeleteDialog}
-        >
-          <AlertDialogHeader data-draggable-area>
-            <AlertDialogTitle>
-              {t('settings.data.deleteAccountConfirmTitle')}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('settings.data.deleteAccountConfirmDescription')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirm}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t('settings.data.deleteAccountConfirmButton')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteAccountDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirmDelete={onConfirmDelete}
+        isDeleting={isDeleting}
+      />
     </section>
   );
 };

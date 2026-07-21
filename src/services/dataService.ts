@@ -356,42 +356,6 @@ export const dataService = {
     return data as RecurringExpense;
   },
 
-  async processRecurringExpenses(targetDate?: string) {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session?.access_token) {
-      throw new Error('Not authenticated');
-    }
-
-    const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-recurring-expenses`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          target_date: targetDate || new Date().toISOString().split('T')[0],
-        }),
-      },
-    );
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to process recurring expenses');
-    }
-
-    return response.json() as Promise<{
-      success: boolean;
-      generated_count: number;
-      processed_recurring_ids: string[];
-      target_date: string;
-    }>;
-  },
-
   async getBudget(signal?: AbortSignal) {
     let query = supabase.from('user_budgets').select('*');
     if (signal) query = query.abortSignal(signal);

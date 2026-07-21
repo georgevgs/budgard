@@ -332,62 +332,6 @@ describe('dataService', () => {
     expect(user).toEqual({ id: 'user-1', email: 'test@test.com' });
   });
 
-  // --- processRecurringExpenses ---
-  it('calls edge function with auth token', async () => {
-    vi.mocked(supabase.auth.getSession).mockResolvedValue({
-      data: { session: { access_token: 'my-token' } },
-    } as never);
-
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ success: true, generated_count: 2 }),
-    });
-    vi.stubGlobal('fetch', mockFetch);
-
-    const result = await dataService.processRecurringExpenses('2026-03-15');
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('process-recurring-expenses'),
-      expect.objectContaining({
-        method: 'POST',
-        headers: expect.objectContaining({
-          Authorization: 'Bearer my-token',
-        }),
-      }),
-    );
-    expect(result.success).toBe(true);
-
-    vi.unstubAllGlobals();
-  });
-
-  it('throws when not authenticated for processRecurringExpenses', async () => {
-    vi.mocked(supabase.auth.getSession).mockResolvedValue({
-      data: { session: null },
-    } as never);
-
-    await expect(dataService.processRecurringExpenses()).rejects.toThrow(
-      'Not authenticated',
-    );
-  });
-
-  it('throws on edge function error response', async () => {
-    vi.mocked(supabase.auth.getSession).mockResolvedValue({
-      data: { session: { access_token: 'tok' } },
-    } as never);
-
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: false,
-        json: () => Promise.resolve({ error: 'Processing failed' }),
-      }),
-    );
-
-    await expect(dataService.processRecurringExpenses()).rejects.toThrow(
-      'Processing failed',
-    );
-    vi.unstubAllGlobals();
-  });
-
   it('throws when getUser fails', async () => {
     vi.mocked(supabase.auth.getUser).mockResolvedValue({
       data: { user: null },
