@@ -7,6 +7,7 @@ import {
 } from '@/contexts/DataContext';
 import { useBudgetAlerts } from '@/hooks/useBudgetAlerts';
 import { useCategoryBudgetAlerts } from '@/hooks/useCategoryBudgetAlerts';
+import { useIsPro } from '@/hooks/useIsPro';
 import { useCurrentMonthSpendingByCategory } from '@/hooks/useCurrentMonthSpendingByCategory';
 
 type UseExpenseAlertsArgs = {
@@ -24,6 +25,7 @@ export const useExpenseAlerts = ({
   const { expenseCategories: categories } = useCategoriesData();
   const categoryBudgets = useCategoryBudgetsData();
   const { monthlyBudget, defaultCurrency } = useDataConfig();
+  const isPro = useIsPro();
 
   useBudgetAlerts({
     monthlyBudget,
@@ -52,10 +54,12 @@ export const useExpenseAlerts = ({
       .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
   }, [categoryBudgets, categories, spendingByCategory]);
 
+  // Per-category budgets are a Pro feature — a downgraded user keeps their
+  // old caps in the DB, but they shouldn't keep getting the alerts.
   useCategoryBudgetAlerts({
     alerts: categoryAlertInputs,
     defaultCurrency,
-    enabled: selectedMonth === currentMonth,
+    enabled: selectedMonth === currentMonth && isPro,
   });
 };
 

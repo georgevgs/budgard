@@ -7,6 +7,7 @@ import {
 } from '@/contexts/DataContext';
 import { useAllGoalProgress } from '@/hooks/useGoalProgress';
 import { useCompletionCelebration } from '@/hooks/useCompletionCelebration';
+import { useIsPro } from '@/hooks/useIsPro';
 import { celebrate } from '@/lib/confetti';
 import { haptics } from '@/lib/haptics';
 import { toast } from '@/hooks/useToast';
@@ -18,6 +19,7 @@ import { toast } from '@/hooks/useToast';
 const MilestoneWatcher = () => {
   const { t } = useTranslation();
   const { isInitialized, isSecondaryLoaded } = useDataConfig();
+  const isPro = useIsPro();
   const goals = useGoalsData();
   const debts = useDebtsData();
   const goalProgress = useAllGoalProgress();
@@ -66,7 +68,9 @@ const MilestoneWatcher = () => {
     [debts, t],
   );
 
-  useCompletionCelebration(completedGoalIds, armed, celebrateGoal);
+  // Savings goals are a Pro feature — free users can't open /goals, so they
+  // get no goal celebrations either. Debt tracking stays free for everyone.
+  useCompletionCelebration(completedGoalIds, armed && isPro, celebrateGoal);
   useCompletionCelebration(clearedDebtIds, armed, celebrateDebt);
 
   return null;

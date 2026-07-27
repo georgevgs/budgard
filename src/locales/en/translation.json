@@ -1094,7 +1094,8 @@
       "goalsBody": "Set targets, watch them fill up, and celebrate when you hit them. Upgrade to start saving with intent.",
       "analyticsTitle": "See beyond 3 months",
       "analyticsBody": "The free plan shows your last 3 months. Pro unlocks your full history, cash flow, and CSV exports.",
-      "recurringLimit": "The free plan includes up to {{limit}} recurring expenses. Upgrade for unlimited."
+      "recurringLimit": "The free plan includes up to {{limit}} recurring expenses. Upgrade for unlimited.",
+      "analyticsWindow": "Showing your last 3 months — unlock full history with Pro"
     },
     "successTitle": "Welcome to Pro!",
     "successBody": "Your subscription is active. Enjoy the full picture.",

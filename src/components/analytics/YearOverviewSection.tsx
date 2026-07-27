@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Lock } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Select,
@@ -9,7 +10,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useDataConfig } from '@/contexts/DataContext';
+import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
+import { useIsPro } from '@/hooks/useIsPro';
 import { formatCurrency } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
 import { lazyWithRetry } from '@/lib/lazyWithRetry';
@@ -52,6 +55,8 @@ const YearOverviewSection = ({
 }: Props) => {
   const { t } = useTranslation();
   const { monthlyBudget, defaultCurrency } = useDataConfig();
+  const isPro = useIsPro();
+  const { openUpgrade } = useUpgradeDialog();
   const animatedYearTotal = useAnimatedNumber(totalSpent);
   const currencySymbol = getCurrencySymbol(defaultCurrency);
 
@@ -77,6 +82,8 @@ const YearOverviewSection = ({
           </SelectContent>
         </Select>
       </div>
+
+      {renderFreeWindowHint(isPro, t, openUpgrade)}
 
       {renderYearSummary(
         animatedYearTotal,
@@ -111,6 +118,28 @@ export default YearOverviewSection;
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
+
+// Free analytics cover only the last 3 months (see useAnalyticsData), yet the
+// section still renders a year frame — say so where the year is picked, and
+// offer the unlock right there instead of relying on the upsell further down.
+const renderFreeWindowHint = (
+  isPro: boolean,
+  t: TFunc,
+  onUpgrade: () => void,
+) => {
+  if (isPro) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onUpgrade()}
+      className="flex items-center gap-1.5 -mt-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+    >
+      <Lock className="h-3 w-3 shrink-0" aria-hidden />
+      <span className="text-left">{t('pro.gate.analyticsWindow')}</span>
+    </button>
+  );
+};
 
 const renderYearSummary = (
   totalSpent: number,
