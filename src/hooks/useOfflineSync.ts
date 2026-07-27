@@ -6,6 +6,7 @@ import { dataService } from '@/services/dataService';
 import { useDataActions } from '@/contexts/DataContext';
 import { toast } from '@/hooks/useToast';
 import { isOfflineError } from '@/lib/offlineError';
+import type { ExpenseWritePayload } from '@/services/dataService';
 import type { Expense } from '@/types/Expense';
 
 // A permanently-failing mutation (validation, RLS, unknown type) is retried a
@@ -125,12 +126,14 @@ const applyMutation = async (mutation: QueuedMutation): Promise<void> => {
   >;
 
   switch (mutation.type) {
+    // Expense payloads replay as ExpenseWritePayload so queued extra_tag_ids
+    // (Pro multi-tag) survive the offline round-trip.
     case 'createExpense':
-      await dataService.createExpense(payload as Partial<Expense>);
+      await dataService.createExpense(payload as ExpenseWritePayload);
       break;
     case 'updateExpense':
       await dataService.updateExpense(
-        payload as Partial<Expense>,
+        payload as ExpenseWritePayload,
         payload.id as string,
       );
       break;

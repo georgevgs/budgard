@@ -1,5 +1,6 @@
 import { useState, useMemo, useDeferredValue } from 'react';
 import { format, subDays, startOfQuarter, startOfYear } from 'date-fns';
+import { expenseHasTag } from '@/lib/expenseTags';
 import type { Expense } from '@/types/Expense';
 
 // ISO-8601 timestamps and YYYY-MM-DD dates sort lexicographically.
@@ -24,8 +25,24 @@ const matchesSearch = (expense: Expense, criteria: FilterCriteria): boolean => {
   if (expense.tag?.name.toLowerCase().includes(criteria.searchLower)) {
     return true;
   }
+  if (matchesExtraTagName(expense, criteria.searchLower)) {
+    return true;
+  }
 
   return false;
+};
+
+const matchesExtraTagName = (
+  expense: Expense,
+  searchLower: string,
+): boolean => {
+  if (!expense.extra_tags) {
+    return false;
+  }
+
+  return expense.extra_tags.some((tag) =>
+    tag.name.toLowerCase().includes(searchLower),
+  );
 };
 
 export const UNCATEGORIZED_VALUE = 'uncategorized';
@@ -52,7 +69,8 @@ const matchesTag = (
     return true;
   }
 
-  return expense.tag_id === selectedTagId;
+  // Primary OR extra tags — a filtered tag matches wherever it sits.
+  return expenseHasTag(expense, selectedTagId);
 };
 
 const matchesAllFilters = (

@@ -1,66 +1,32 @@
-import Tag from 'lucide-react/dist/esm/icons/tag';
 import X from 'lucide-react/dist/esm/icons/x';
 import { useTranslation } from 'react-i18next';
+import type { EmbeddedTag } from '@/types/Tag';
 
-type TagInfo = {
-  name: string;
-  color: string;
+type TagChipProps = {
+  tag: EmbeddedTag;
+  onRemove: () => void;
 };
 
-type TagButtonContentProps = {
-  selectedTag: TagInfo | undefined;
-};
-
-export const TagButtonContent = ({ selectedTag }: TagButtonContentProps) => {
+// Removable chip for a selected tag in the expense form's multi-select.
+export const TagChip = ({ tag, onRemove }: TagChipProps) => {
   const { t } = useTranslation();
 
-  if (!selectedTag) {
-    return (
-      <span className="flex items-center gap-2">
-        <Tag className="h-4 w-4" />
-        {t('expenses.noTag')}
-      </span>
-    );
-  }
-
   return (
-    <span className="flex items-center gap-2">
-      <div
-        className="w-3 h-3 rounded-full"
-        style={{ backgroundColor: selectedTag.color }}
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/50 py-0.5 pl-2 pr-1 text-xs">
+      <span
+        className="w-2 h-2 rounded-full shrink-0"
+        style={{ backgroundColor: tag.color }}
+        aria-hidden="true"
       />
-      {selectedTag.name}
-    </span>
-  );
-};
-
-type TagClearButtonProps = {
-  onClear: () => void;
-};
-
-export const TagClearButton = ({ onClear }: TagClearButtonProps) => {
-  const { t } = useTranslation();
-
-  const handleActivate = (event: React.SyntheticEvent) => {
-    event.stopPropagation();
-    onClear();
-  };
-
-  return (
-    <span
-      role="button"
-      tabIndex={0}
-      aria-label={t('expenses.clearTag')}
-      className="ml-auto p-1 -mr-1 shrink-0 opacity-50 hover:opacity-100 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      onClick={handleActivate}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          handleActivate(event);
-        }
-      }}
-    >
-      <X className="h-3.5 w-3.5" />
+      {tag.name}
+      <button
+        type="button"
+        aria-label={t('expenses.removeTag', { name: tag.name })}
+        className="p-0.5 rounded-full opacity-60 hover:opacity-100 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        onClick={onRemove}
+      >
+        <X className="h-3 w-3" />
+      </button>
     </span>
   );
 };

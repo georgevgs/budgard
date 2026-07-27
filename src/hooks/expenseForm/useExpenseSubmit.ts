@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { parseCurrencyInput } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { collectExpenseTagIds } from '@/lib/expenseTags';
 import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 import type { CurrencyConversionApi } from '@/hooks/expenseForm/useCurrencyConversion';
 import type { ExpenseFormData } from '@/lib/validations';
+import type { ExpenseWritePayload } from '@/services/dataService';
 import type { Expense } from '@/types/Expense';
 
 type UseExpenseSubmitArgs = {
@@ -13,7 +15,7 @@ type UseExpenseSubmitArgs = {
   receiptFile: File | null;
   removeExistingReceipt: boolean;
   onSubmit: (
-    data: Partial<Expense>,
+    data: ExpenseWritePayload,
     expenseId?: string,
     receiptOptions?: ReceiptOptions,
   ) => void;
@@ -51,14 +53,23 @@ export const useExpenseSubmit = ({
         exchangeRateValue = rate;
       }
 
-      const expenseData: Partial<Expense> = {
+      // Primary tag first, extras after — re-derived here so the "extras
+      // never exist without a primary" invariant holds even if the form
+      // cleared tag_id while extras were still selected.
+      const orderedTagIds = collectExpenseTagIds(
+        values.tag_id,
+        values.extra_tag_ids,
+      );
+
+      const expenseData: ExpenseWritePayload = {
         amount: finalAmount,
         original_amount: originalAmount,
         original_currency: originalCurrency,
         exchange_rate: exchangeRateValue,
         description: values.description,
         category_id: normalizeCategoryId(values.category_id),
-        tag_id: values.tag_id || null,
+        tag_id: orderedTagIds[0] ?? null,
+        extra_tag_ids: pickExtraTagIds(orderedTagIds, Boolean(expense)),
         date: dateStr,
         user_id: session.user.id,
       };
@@ -85,4 +96,18 @@ const normalizeCategoryId = (categoryId: string): string | null => {
   if (categoryId === 'none') return null;
 
   return categoryId;
+};
+
+// Edits always send the array (an empty one clears stale extras server-side);
+// creates omit it when there is nothing to attach.
+const pickExtraTagIds = (
+  orderedTagIds: string[],
+  isEditing: boolean,
+): string[] | undefined => {
+  const extraTagIds = orderedTagIds.slice(1);
+  if (isEditing) return extraTagIds;
+
+  if (extraTagIds.length === 0) return undefined;
+
+  return extraTagIds;
 };

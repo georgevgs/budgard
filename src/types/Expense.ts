@@ -27,6 +27,9 @@ export type Expense = {
   // Savings nudge: portion of an income row earmarked as savings.
   savings_allocation_amount?: number | null;
   category?: EmbeddedCategory;
+  // Primary tag (the free tier's single tag). Additional tags — Pro only —
+  // arrive flattened from the expense_tags join table.
   tag?: EmbeddedTag;
+  extra_tags?: EmbeddedTag[];
   debt?: Debt;
 }

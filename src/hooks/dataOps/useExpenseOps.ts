@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
+import type { ExpenseWritePayload } from '@/services/dataService';
 import { uploadReceipt, deleteReceipt } from '@/services/receiptService';
 import { haptics } from '@/lib/haptics';
 import { offlineQueue, createTempId } from '@/lib/offlineQueue';
@@ -35,7 +36,7 @@ export const useExpenseOps = () => {
 
   const handleExpenseSubmit = useCallback(
     async (
-      expenseData: Partial<Expense>,
+      expenseData: ExpenseWritePayload,
       expenseId?: string,
       receiptOptions?: ReceiptOptions,
     ) => {
@@ -167,18 +168,21 @@ export const useExpenseOps = () => {
             ...expenseData,
             ...idPayload,
           } as Record<string, unknown>);
+          // The queued payload keeps extra_tag_ids for replay; the local
+          // optimistic row must not carry the write-only field.
+          const { extra_tag_ids: _extras, ...offlineRow } = expenseData;
           const isDebtPayment = expenseData.type === 'debt_payment';
           setExpenses((prev) => {
             if (expenseId) {
               if (isDebtPayment) return prev.filter((e) => e.id !== expenseId);
 
-              return patchById(prev, expenseId, expenseData);
+              return patchById(prev, expenseId, offlineRow);
             }
 
             if (isDebtPayment) return prev;
 
             const optimistic = {
-              ...expenseData,
+              ...offlineRow,
               id: tempId as string,
               created_at: new Date().toISOString(),
             } as Expense;

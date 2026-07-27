@@ -9,8 +9,10 @@ import {
 import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
 import { useTemplateOps } from '@/hooks/dataOps/useTemplateOps';
 import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
+import type { ExpenseWritePayload } from '@/services/dataService';
 import type { Expense } from '@/types/Expense';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
+import type { EmbeddedTag, Tag } from '@/types/Tag';
 
 export const useOptimisticExpenseActions = () => {
   const { session } = useAuth();
@@ -41,20 +43,31 @@ export const useOptimisticExpenseActions = () => {
 
   const handleExpenseFormSubmit = useCallback(
     (
-      data: Partial<Expense>,
+      data: ExpenseWritePayload,
       expenseId?: string,
       receiptOptions?: ReceiptOptions,
     ) => {
       startTransition(async () => {
-        const category = categories.find((c) => c.id === data.category_id);
-        const tag = tags.find((t) => t.id === data.tag_id);
+        // extra_tag_ids is a write-only field — strip it from the optimistic
+        // row and mirror it as resolved extra_tags so the UI is correct
+        // before the server responds.
+        const { extra_tag_ids, ...rowData } = data;
+        const category = categories.find((c) => c.id === rowData.category_id);
+        const tag = tags.find((t) => t.id === rowData.tag_id);
+        const extraTags = resolveExtraTags(extra_tag_ids, tags);
 
         if (expenseId) {
           const existing = optimisticExpenses.find((e) => e.id === expenseId);
           if (existing) {
             addOptimisticExpense({
               type: 'update',
-              expense: { ...existing, ...data, category, tag },
+              expense: {
+                ...existing,
+                ...rowData,
+                category,
+                tag,
+                extra_tags: extraTags ?? existing.extra_tags,
+              },
             });
           }
         } else {
@@ -62,14 +75,15 @@ export const useOptimisticExpenseActions = () => {
             type: 'add',
             expense: {
               id: `temp-${Date.now()}`,
-              user_id: data.user_id!,
-              amount: data.amount!,
-              description: data.description!,
-              date: data.date!,
-              category_id: data.category_id,
-              tag_id: data.tag_id,
+              user_id: rowData.user_id!,
+              amount: rowData.amount!,
+              description: rowData.description!,
+              date: rowData.date!,
+              category_id: rowData.category_id,
+              tag_id: rowData.tag_id,
               category,
               tag,
+              extra_tags: extraTags ?? [],
               receipt_path: null,
               created_at: new Date().toISOString(),
             },
@@ -145,6 +159,23 @@ export const useOptimisticExpenseActions = () => {
 };
 
 // --- Helpers ---
+
+const resolveExtraTags = (
+  extraTagIds: string[] | undefined,
+  tags: Tag[],
+): EmbeddedTag[] | undefined => {
+  if (!extraTagIds) return undefined;
+
+  const resolved: EmbeddedTag[] = [];
+  for (const id of extraTagIds) {
+    const tag = tags.find((candidate) => candidate.id === id);
+    if (tag) {
+      resolved.push({ id: tag.id, name: tag.name, color: tag.color });
+    }
+  }
+
+  return resolved;
+};
 
 type OptimisticAction =
   | { type: 'add'; expense: Expense }

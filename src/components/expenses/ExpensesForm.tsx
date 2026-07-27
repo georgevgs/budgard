@@ -17,6 +17,7 @@ import { useTagPicker } from '@/hooks/expenseForm/useTagPicker';
 import { useExpenseSubmit } from '@/hooks/expenseForm/useExpenseSubmit';
 import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 import { expenseSchema, type ExpenseFormData } from '@/lib/validations';
+import type { ExpenseWritePayload } from '@/services/dataService';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import ExpenseAmountField from '@/components/expenses/ExpenseAmountField';
@@ -27,6 +28,7 @@ import ExpenseFormDetails from '@/components/expenses/ExpenseFormDetails';
 import {
   getInitialAmount,
   getInitialDate,
+  getInitialExtraTagIds,
   renderFormTitle,
   renderSaveButtonLabel,
 } from '@/components/expenses/ExpensesForm.helpers';
@@ -36,7 +38,7 @@ type ExpensesFormProps = {
   categories: Category[];
   onClose: () => void;
   onSubmit: (
-    data: Partial<Expense>,
+    data: ExpenseWritePayload,
     expenseId?: string,
     receiptOptions?: ReceiptOptions,
   ) => void;
@@ -64,6 +66,7 @@ const ExpensesForm = ({
       description: expense?.description || '',
       category_id: expense?.category_id || 'none',
       tag_id: expense?.tag_id || undefined,
+      extra_tag_ids: getInitialExtraTagIds(expense),
       date: getInitialDate(expense),
     },
   });

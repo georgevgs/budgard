@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { UseFormReturn } from 'react-hook-form';
+import Tag from 'lucide-react/dist/esm/icons/tag';
 import {
   FormControl,
   FormField,
@@ -14,9 +15,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { TagButtonContent } from '@/components/expenses/TagPicker';
+import { TagChip } from '@/components/expenses/TagPicker';
 import {
-  renderTagClearIndicator,
   renderCreateTagOption,
   renderNoTagsMessage,
 } from '@/components/expenses/ExpensesForm.helpers';
@@ -42,6 +42,7 @@ const ExpenseTagField = ({ form, tagPicker }: Props) => {
       name="tag_id"
       render={() => (
         <FormItem>
+          {renderSelectedTagChips(tagPicker)}
           <Popover
             open={tagPicker.tagPopoverOpen}
             onOpenChange={tagPicker.setTagPopoverOpen}
@@ -52,16 +53,12 @@ const ExpenseTagField = ({ form, tagPicker }: Props) => {
                 <Button
                   type="button"
                   variant="outline"
-                  className={cn(
-                    'w-full justify-between font-normal',
-                    !tagPicker.selectedTag && 'text-muted-foreground',
-                  )}
+                  className="w-full justify-start font-normal text-muted-foreground"
                 >
-                  <TagButtonContent selectedTag={tagPicker.selectedTag} />
-                  {renderTagClearIndicator(
-                    tagPicker.selectedTag,
-                    tagPicker.handleTagClear,
-                  )}
+                  <span className="flex items-center gap-2">
+                    <Tag className="h-4 w-4" />
+                    {t('expenses.addTag')}
+                  </span>
                 </Button>
               </FormControl>
             </PopoverTrigger>
@@ -109,6 +106,22 @@ const ExpenseTagField = ({ form, tagPicker }: Props) => {
 export default ExpenseTagField;
 
 // ─── Helper render functions ──────────────────────────────────────────────────
+
+const renderSelectedTagChips = (tagPicker: TagPickerApi) => {
+  if (tagPicker.selectedTags.length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {tagPicker.selectedTags.map((tag) => (
+        <TagChip
+          key={tag.id}
+          tag={tag}
+          onRemove={() => tagPicker.handleTagRemove(tag.id)}
+        />
+      ))}
+    </div>
+  );
+};
 
 const renderTagOptions = (tagPicker: TagPickerApi, nav: TagListboxNavApi) =>
   tagPicker.filteredTags.map((tag, index) => (

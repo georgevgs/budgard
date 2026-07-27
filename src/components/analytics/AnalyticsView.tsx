@@ -9,6 +9,7 @@ import { MonthDrillDown } from '@/components/analytics/MonthDrillDown';
 import MonthSnapshotCard from '@/components/analytics/MonthSnapshotCard';
 import YearOverviewSection from '@/components/analytics/YearOverviewSection';
 import CashFlowSection from '@/components/analytics/CashFlowSection';
+import ForecastSection from '@/components/analytics/ForecastSection';
 import AnnualExportCard from '@/components/analytics/AnnualExportCard';
 import ProUpsellCard from '@/components/pro/ProUpsellCard';
 import { useAnalyticsData } from '@/hooks/analytics/useAnalyticsData';
@@ -117,6 +118,9 @@ const renderProSections = (isPro: boolean, selectedYear: number, t: TFunc) => {
     <>
       {/* Cash flow (income vs expense, year view) */}
       <CashFlowSection selectedYear={selectedYear} />
+
+      {/* Forecast (12-month projection + safe-to-spend) */}
+      <ForecastSection />
 
       {/* Annual export (CSV download for tax/records) */}
       <AnnualExportCard selectedYear={selectedYear} />

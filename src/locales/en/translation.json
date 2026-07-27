@@ -82,6 +82,8 @@
     "selectCategory": "Select a category",
     "noCategory": "No category",
     "noTag": "No tag",
+    "addTag": "Add tag",
+    "removeTag": "Remove tag {{name}}",
     "tagSearchPlaceholder": "Search or create tag...",
     "clearTag": "Clear tag",
     "creatingTag": "Creating...",
@@ -229,6 +231,24 @@
     "exportedDescription_one": "Downloaded {{count}} transaction from {{year}}.",
     "exportedDescription_other": "Downloaded {{count}} transactions from {{year}}.",
     "exportedSummaryDescription": "Downloaded the {{year}} category summary.",
+    "exportPdf": "PDF report",
+    "generatingPdf": "Preparing PDF…",
+    "exportedPdfDescription": "Downloaded the {{year}} PDF report.",
+    "pdfFailedTitle": "PDF export failed",
+    "pdfFailedDescription": "Something went wrong while building the PDF. Please try again.",
+    "pdf": {
+      "generatedOn": "Generated on {{date}}",
+      "summary": "Summary",
+      "totalSpent": "Total spent",
+      "totalIncome": "Total income",
+      "monthlyAverage": "Monthly average",
+      "monthlyTotals": "Monthly totals",
+      "month": "Month",
+      "amount": "Amount",
+      "categories": "Categories",
+      "category": "Category",
+      "percent": "Share"
+    },
     "csv": {
       "date": "Date",
       "type": "Type",
@@ -920,6 +940,16 @@
     "budgetUsed": "{{percent}}% of budget used",
     "avgPerMonth": "avg {{amount}}/mo",
     "categoryTrends": "Category Breakdown",
+    "forecast": {
+      "title": "Forecast",
+      "safeToSpend": "Safe to spend this month",
+      "safeToSpendHint": "Your budget minus what you have spent and the recurring bills still due this month.",
+      "chartTitle": "Next 12 months",
+      "projectedIncome": "Projected income",
+      "projectedSpending": "Projected spending",
+      "projectedNet": "Projected net",
+      "methodNote": "Based on your active recurring items plus your average non-recurring activity over the last six months."
+    },
     "insights": {
       "sectionTitle": "Spending Insights",
       "dailyBudgetRemaining": "{{amount}}/day left for the next {{days}} days",
@@ -1098,8 +1128,8 @@
     "features": {
       "f1": "Per-category budgets",
       "f2": "Savings goals",
-      "f3": "Unlimited recurring expenses",
-      "f4": "Full analytics history and cash-flow trends",
+      "f3": "Unlimited recurring expenses and multiple tags",
+      "f4": "Full history, cash flow and 12-month forecast",
       "f5": "CSV exports",
       "f6": "Early access to new features",
       "f7": "Unlimited accounts and investment analytics",
@@ -1117,6 +1147,7 @@
       "investTitle": "Investment analytics is a Pro feature",
       "investBody": "See your allocation, returns, YTD and annualized performance across your investments.",
       "investKpis": "Unlock returns, YTD and annualized performance with Pro",
+      "tagLimit": "The free plan includes one tag per expense. Upgrade for multiple tags.",
       "debtPlanTitle": "The payoff planner is a Pro feature",
       "debtPlanBody": "Compare snowball vs avalanche, add a monthly extra, and see your debt-free date. Upgrade to plan your payoff."
     },
@@ -1431,8 +1462,8 @@
         "feature1": "Everything in Free",
         "feature2": "Per-category budgets",
         "feature3": "Savings goals",
-        "feature4": "Unlimited recurring expenses",
-        "feature5": "Full analytics history and cash-flow trends",
+        "feature4": "Unlimited recurring expenses and multiple tags",
+        "feature5": "Full analytics history, cash flow and 12-month forecast",
         "feature6": "Unlimited accounts and investment analytics",
         "feature7": "Debt payoff planner",
         "feature8": "CSV exports of your full history",
@@ -1448,7 +1479,7 @@
       },
       "q2": {
         "question": "What's actually different on Pro?",
-        "answer": "Per-category budgets, savings goals, unlimited recurring expenses, unlimited accounts with investment analytics, a debt payoff planner, full all-time analytics with cash-flow trends, and CSV exports. The full list is in the pricing card above."
+        "answer": "Per-category budgets, savings goals, unlimited recurring expenses, multiple tags per expense, unlimited accounts with investment analytics, a debt payoff planner, full all-time analytics with cash-flow trends and a 12-month forecast, and CSV exports. The full list is in the pricing card above."
       },
       "q3": {
         "question": "Can I cancel anytime?",

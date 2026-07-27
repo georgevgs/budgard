@@ -299,6 +299,73 @@ describe('useExpensesFilter', () => {
     expect(result.current.dateRangePreset).toBeNull();
   });
 
+  // --- Multi-tag (primary vs extra) matching ---
+  const taxiWithExtras = makeExpense({
+    id: '6',
+    date: '2026-01-11',
+    amount: 25,
+    description: 'Taxi',
+    tag_id: 'tag-2',
+    tag: { id: 'tag-2', name: 'Work', color: '#0FF' },
+    extra_tags: [{ id: 'tag-1', name: 'Daily', color: '#00F' }],
+  });
+
+  it('matches the selected tag as primary OR as an extra tag', () => {
+    const { result } = renderHook(() =>
+      useExpensesFilter({
+        expenses: [...expenses, taxiWithExtras],
+        selectedMonth: '2026-01',
+      }),
+    );
+
+    act(() => {
+      result.current.setSelectedTagId('tag-1');
+    });
+
+    const descriptions = result.current.filteredExpenses.map(
+      (e) => e.description,
+    );
+    // Coffee carries tag-1 as primary; Taxi carries it only in extra_tags
+    expect(descriptions).toContain('Coffee');
+    expect(descriptions).toContain('Taxi');
+    expect(result.current.filteredExpenses).toHaveLength(2);
+  });
+
+  it('does not match expenses that carry the tag neither as primary nor extra', () => {
+    const { result } = renderHook(() =>
+      useExpensesFilter({
+        expenses: [...expenses, taxiWithExtras],
+        selectedMonth: '2026-01',
+      }),
+    );
+
+    act(() => {
+      result.current.setSelectedTagId('tag-2');
+    });
+
+    expect(result.current.filteredExpenses).toHaveLength(1);
+    expect(result.current.filteredExpenses[0].description).toBe('Taxi');
+  });
+
+  it('finds extra tag names via text search', () => {
+    const { result } = renderHook(() =>
+      useExpensesFilter({
+        expenses: [...expenses, taxiWithExtras],
+        selectedMonth: '2026-01',
+      }),
+    );
+
+    act(() => {
+      result.current.setSearch('daily');
+    });
+
+    const descriptions = result.current.filteredExpenses.map(
+      (e) => e.description,
+    );
+    expect(descriptions).toContain('Coffee');
+    expect(descriptions).toContain('Taxi');
+  });
+
   it('filters uncategorized expenses', () => {
     const withUncategorized: Expense[] = [
       ...expenses,

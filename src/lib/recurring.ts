@@ -65,7 +65,9 @@ export const getMonthlyAmount = (expense: RecurringExpense): number => {
 
 // --- Helpers ---
 
-const advanceByFrequency = (
+// Exported for lib/forecast.ts, which needs to walk occurrences from an
+// injectable `now` (calculateNextOccurrence reads the real clock).
+export const advanceByFrequency = (
   fromDate: Date,
   frequency: RecurringExpense['frequency'],
 ): Date => {

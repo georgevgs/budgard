@@ -4,6 +4,7 @@ import {
   useIncomesData,
   useGoalsData,
 } from '@/contexts/DataContext';
+import { expenseHasTag } from '@/lib/expenseTags';
 import type { Expense } from '@/types/Expense';
 import type { Goal } from '@/types/Goal';
 
@@ -107,6 +108,7 @@ const sumCurrentsForGoals = (
         amount,
       );
     }
+    addExtraTagAmounts(currents, goalsByTag, expense, amount);
     // net_delta counts every expense as an outflow.
     addToMatchingGoals(currents, netDeltaGoals, expense.date, -amount);
   }
@@ -117,6 +119,27 @@ const sumCurrentsForGoals = (
   }
 
   return currents;
+}
+
+// Pro multi-tag: extras count toward tag goals too. An extra that duplicates
+// the primary is skipped so the same expense can't be added to a goal twice.
+const addExtraTagAmounts = (
+  currents: Map<string, number>,
+  goalsByTag: Map<string, Goal[]>,
+  expense: Expense,
+  amount: number,
+): void => {
+  if (!expense.extra_tags) return;
+
+  for (const extraTag of expense.extra_tags) {
+    if (extraTag.id === expense.tag_id) continue;
+    addToMatchingGoals(
+      currents,
+      goalsByTag.get(extraTag.id),
+      expense.date,
+      amount,
+    );
+  }
 }
 
 const appendToBucket = (
@@ -205,9 +228,11 @@ const sumForSource = (
   if (goal.source_type === 'tag') {
     if (!goal.tag_id) return 0;
 
+    const goalTagId = goal.tag_id;
+
     return sumExpenses(
       expenses.filter(
-        (e) => e.tag_id === goal.tag_id && e.date >= startDate,
+        (e) => e.date >= startDate && expenseHasTag(e, goalTagId),
       ),
     );
   }

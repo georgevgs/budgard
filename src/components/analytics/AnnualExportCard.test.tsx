@@ -27,6 +27,8 @@ vi.mock('@/contexts/DataContext', () => ({
     incomeCategories: [],
   }),
   useTagsData: () => dataState.tags,
+  // Needed by useAnnualPdfExport (PDF report button).
+  useDataConfig: () => ({ defaultCurrency: 'EUR' }),
 }));
 
 vi.mock('@/hooks/useToast', () => ({

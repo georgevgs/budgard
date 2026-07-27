@@ -7,7 +7,6 @@ import {
 } from '@/lib/utils';
 import type { Expense } from '@/types/Expense';
 import type { Category, EmbeddedCategory } from '@/types/Category';
-import { TagClearButton } from '@/components/expenses/TagPicker';
 
 export type TranslateFunction = (
   key: string,
@@ -40,6 +39,14 @@ export const getInitialDate = (expense: Expense | undefined): Date => {
   if (expense) return parseISO(expense.date);
 
   return new Date();
+};
+
+export const getInitialExtraTagIds = (
+  expense: Expense | undefined,
+): string[] => {
+  if (!expense?.extra_tags) return [];
+
+  return expense.extra_tags.map((tag) => tag.id);
 };
 
 export const getDetailsRowsClass = (showDetails: boolean): string => {
@@ -107,15 +114,6 @@ export const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {
   if (isEditing) return t('expenses.editExpense');
 
   return t('expenses.addExpense');
-};
-
-export const renderTagClearIndicator = (
-  selectedTag: { name: string; color: string } | undefined,
-  onClear: () => void,
-) => {
-  if (!selectedTag) return null;
-
-  return <TagClearButton onClear={onClear} />;
 };
 
 export const renderCreateTagOption = (

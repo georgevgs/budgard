@@ -1,66 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { TagClearButton, TagButtonContent } from '@/components/expenses/TagPicker';
+import { TagChip } from '@/components/expenses/TagPicker';
 
-describe('TagClearButton', () => {
-  it('renders a span, not a button, to avoid nested button issues', () => {
-    const { container } = render(<TagClearButton onClear={vi.fn()} />);
+const tag = { id: 'tag-1', name: 'Groceries', color: '#22c55e' };
 
-    const clearElement = container.querySelector(
-      '[aria-label="expenses.clearTag"]',
-    );
-    expect(clearElement).not.toBeNull();
-    expect(clearElement!.tagName).toBe('SPAN');
-    expect(clearElement!.getAttribute('role')).toBe('button');
-    expect(clearElement!.getAttribute('tabindex')).toBe('0');
-  });
-
-  it('calls onClear when clicked', () => {
-    const onClear = vi.fn();
-    render(<TagClearButton onClear={onClear} />);
-
-    fireEvent.click(screen.getByLabelText('expenses.clearTag'));
-    expect(onClear).toHaveBeenCalledOnce();
-  });
-
-  it('calls onClear on Enter key', () => {
-    const onClear = vi.fn();
-    render(<TagClearButton onClear={onClear} />);
-
-    fireEvent.keyDown(screen.getByLabelText('expenses.clearTag'), {
-      key: 'Enter',
-    });
-    expect(onClear).toHaveBeenCalledOnce();
-  });
-
-  it('calls onClear on Space key', () => {
-    const onClear = vi.fn();
-    render(<TagClearButton onClear={onClear} />);
-
-    fireEvent.keyDown(screen.getByLabelText('expenses.clearTag'), { key: ' ' });
-    expect(onClear).toHaveBeenCalledOnce();
-  });
-
-  it('does not call onClear on other keys', () => {
-    const onClear = vi.fn();
-    render(<TagClearButton onClear={onClear} />);
-
-    fireEvent.keyDown(screen.getByLabelText('expenses.clearTag'), {
-      key: 'Tab',
-    });
-    expect(onClear).not.toHaveBeenCalled();
-  });
-});
-
-describe('TagButtonContent', () => {
-  it('renders placeholder when no tag selected', () => {
-    render(<TagButtonContent selectedTag={undefined} />);
-    expect(screen.getByText('expenses.noTag')).toBeInTheDocument();
-  });
-
-  it('renders tag name and color dot when tag is selected', () => {
-    const tag = { name: 'Groceries', color: '#22c55e' };
-    render(<TagButtonContent selectedTag={tag} />);
+describe('TagChip', () => {
+  it('renders the tag name and color dot', () => {
+    render(<TagChip tag={tag} onRemove={vi.fn()} />);
 
     expect(screen.getByText('Groceries')).toBeInTheDocument();
     const dot = document.querySelector('[style*="background-color"]');
@@ -68,5 +14,29 @@ describe('TagButtonContent', () => {
     expect((dot as HTMLElement).style.backgroundColor).toBe(
       'rgb(34, 197, 94)',
     );
+  });
+
+  it('renders a real remove button (chips live outside the popover trigger)', () => {
+    render(<TagChip tag={tag} onRemove={vi.fn()} />);
+
+    const removeButton = screen.getByLabelText('expenses.removeTag');
+    expect(removeButton.tagName).toBe('BUTTON');
+    expect(removeButton.getAttribute('type')).toBe('button');
+  });
+
+  it('calls onRemove when the remove button is clicked', () => {
+    const onRemove = vi.fn();
+    render(<TagChip tag={tag} onRemove={onRemove} />);
+
+    fireEvent.click(screen.getByLabelText('expenses.removeTag'));
+    expect(onRemove).toHaveBeenCalledOnce();
+  });
+
+  it('does not call onRemove when other parts of the chip are clicked', () => {
+    const onRemove = vi.fn();
+    render(<TagChip tag={tag} onRemove={onRemove} />);
+
+    fireEvent.click(screen.getByText('Groceries'));
+    expect(onRemove).not.toHaveBeenCalled();
   });
 });

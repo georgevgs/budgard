@@ -108,6 +108,55 @@ describe('useGoalProgress', () => {
 
       expect(result.current.current).toBe(350);
     });
+
+    it('counts expenses whose extra tags match, without double-counting', () => {
+      dataMock = {
+        expenses: [
+          // Primary match
+          makeExpense('2026-02-01', 100, { tag_id: 'travel' }),
+          // Extra-tag match only
+          makeExpense('2026-03-01', 40, {
+            tag_id: 'other',
+            extra_tags: [{ id: 'travel', name: 'Travel', color: '#00F' }],
+          }),
+          // Same tag as primary AND extra — must count once
+          makeExpense('2026-03-10', 10, {
+            tag_id: 'travel',
+            extra_tags: [{ id: 'travel', name: 'Travel', color: '#00F' }],
+          }),
+        ],
+        incomes: [],
+        goals: [],
+      };
+      const goal = makeGoal({ source_type: 'tag', tag_id: 'travel' });
+
+      const { result } = renderHook(() => useGoalProgress(goal));
+
+      expect(result.current.current).toBe(150);
+    });
+
+    it('counts extra-tag matches in the batched useAllGoalProgress path', () => {
+      const goal = makeGoal({ id: 'g-tag', source_type: 'tag', tag_id: 'travel' });
+      dataMock = {
+        expenses: [
+          makeExpense('2026-02-01', 100, { tag_id: 'travel' }),
+          makeExpense('2026-03-01', 40, {
+            tag_id: 'other',
+            extra_tags: [{ id: 'travel', name: 'Travel', color: '#00F' }],
+          }),
+          makeExpense('2026-03-10', 10, {
+            tag_id: 'travel',
+            extra_tags: [{ id: 'travel', name: 'Travel', color: '#00F' }],
+          }),
+        ],
+        incomes: [],
+        goals: [goal],
+      };
+
+      const { result } = renderHook(() => useAllGoalProgress());
+
+      expect(result.current['g-tag'].current).toBe(150);
+    });
   });
 
   describe('source: net_delta', () => {

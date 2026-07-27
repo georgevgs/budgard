@@ -1,6 +1,7 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
+import type { ExpenseWritePayload } from '@/services/dataService';
 import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 import ExpensesForm from '@/components/expenses/ExpensesForm';
 import { CategoryManager } from '@/components/categories/CategoryManager';
@@ -19,7 +20,7 @@ type FormsManagerProps = {
   onClose: () => void;
   selectedExpense?: Expense;
   onExpenseSubmit: (
-    data: Partial<Expense>,
+    data: ExpenseWritePayload,
     expenseId?: string,
     receiptOptions?: ReceiptOptions,
   ) => void;
@@ -87,7 +88,7 @@ const renderExpenseForm = (
   categories: Category[],
   onClose: () => void,
   onSubmit: (
-    data: Partial<Expense>,
+    data: ExpenseWritePayload,
     expenseId?: string,
     receiptOptions?: ReceiptOptions,
   ) => void,

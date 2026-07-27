@@ -143,7 +143,30 @@ const renderCategoryLabel = (expense: Expense) => {
 const renderTagLabel = (expense: Expense) => {
   if (!expense.tag) return null;
 
-  return <> · {expense.tag.name}</>;
+  return (
+    <>
+      {' · '}
+      {expense.tag.name}
+      {renderExtraTagsPill(expense)}
+    </>
+  );
+};
+
+const renderExtraTagsPill = (expense: Expense) => {
+  const extraTags = expense.extra_tags ?? [];
+  if (extraTags.length === 0) return null;
+
+  const extraTagNames = extraTags.map((tag) => tag.name).join(', ');
+
+  return (
+    <span
+      className="ml-1 inline-flex items-center rounded-full bg-muted px-1.5 text-[10px] leading-4 text-muted-foreground align-middle"
+      title={extraTagNames}
+      aria-label={extraTagNames}
+    >
+      +{extraTags.length}
+    </span>
+  );
 };
 
 const renderRecurringIcon = (expense: Expense) => {

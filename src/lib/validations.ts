@@ -188,6 +188,9 @@ export const expenseSchema = z.object({
     .refine((str) => str.length > 0, 'Description cannot be empty'),
   category_id: z.string(),
   tag_id: z.string().optional(),
+  // Additional tags beyond the primary (Pro). The form enforces the free
+  // tier's single-tag limit; the expense_tags table enforces it server-side.
+  extra_tag_ids: z.array(z.string()).optional(),
   date: z.date({
     required_error: 'Date is required',
   }),

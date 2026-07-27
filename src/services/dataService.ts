@@ -4,7 +4,7 @@ import type { CategoryBudget } from '@/types/CategoryBudget';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
-import type { Tag } from '@/types/Tag';
+import type { Tag, EmbeddedTag } from '@/types/Tag';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 import type { Goal } from '@/types/Goal';
 import type { Account } from '@/types/Account';
@@ -17,8 +17,19 @@ import type { Debt } from '@/types/Debt';
 // snapshot for no benefit.
 const CATEGORY_EMBED = 'category:categories(id, name, color, icon, type, kind)';
 const TAG_EMBED = 'tag:tags(id, name, color)';
-const SELECT_WITH_CATEGORY_AND_TAG = `*, ${CATEGORY_EMBED}, ${TAG_EMBED}`;
+const EXTRA_TAGS_EMBED = 'extra_tags:expense_tags(tag:tags(id, name, color))';
+const SELECT_WITH_CATEGORY_AND_TAG = `*, ${CATEGORY_EMBED}, ${TAG_EMBED}, ${EXTRA_TAGS_EMBED}`;
 const SELECT_WITH_CATEGORY = `*, ${CATEGORY_EMBED}`;
+// Templates embed category+tag but NOT extra_tags — expense_tags references
+// expenses, so that embed only resolves on the expenses table.
+const SELECT_TEMPLATE = `*, ${CATEGORY_EMBED}, ${TAG_EMBED}`;
+
+// Write payload for expenses: the row columns plus the Pro-only additional
+// tag ids, which land in expense_tags rather than on the row itself. The
+// offline queue replays these payloads verbatim, so extras survive offline.
+export type ExpenseWritePayload = Partial<Expense> & {
+  extra_tag_ids?: string[];
+};
 
 export const dataService = {
   async getUser() {
@@ -68,7 +79,7 @@ export const dataService = {
     sinceDate?: string,
     beforeDate?: string,
   ) {
-    return fetchAllPages<Expense>((from, to) => {
+    const rows = await fetchAllPages<Expense>((from, to) => {
       let query = supabase
         .from('expenses')
         .select(SELECT_WITH_CATEGORY_AND_TAG)
@@ -83,6 +94,8 @@ export const dataService = {
 
       return query;
     });
+
+    return rows.map(flattenExtraTags);
   },
 
   async getIncomes(
@@ -142,10 +155,18 @@ export const dataService = {
     if (error) throw error;
   },
 
-  async updateExpense(expenseData: Partial<Expense>, expenseId: string) {
+  async updateExpense(expenseData: ExpenseWritePayload, expenseId: string) {
     // Strip immutable fields — user_id, id, created_at must never be changed via update.
     // RLS WITH CHECK also enforces this server-side, but stripping client-side is defence-in-depth.
-    const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = expenseData;
+    // extra_tag_ids/extra_tags are not row columns; extras are synced below.
+    const {
+      user_id: _u,
+      id: _i,
+      created_at: _c,
+      extra_tag_ids,
+      extra_tags: _e,
+      ...safeUpdate
+    } = expenseData;
     const { data, error } = await supabase
       .from('expenses')
       .update(safeUpdate)
@@ -155,19 +176,64 @@ export const dataService = {
 
     if (error) throw error;
 
-    return data as Expense;
+    // undefined = caller didn't touch tags; [] = caller cleared the extras.
+    if (extra_tag_ids === undefined) {
+      return flattenExtraTags(data as Expense);
+    }
+
+    await this.setExpenseExtraTags(expenseId, extra_tag_ids);
+
+    return this.getExpenseById(expenseId);
   },
 
-  async createExpense(expenseData: Partial<Expense>) {
+  async createExpense(expenseData: ExpenseWritePayload) {
+    const { extra_tag_ids, extra_tags: _e, ...rowData } = expenseData;
     const { data, error } = await supabase
       .from('expenses')
-      .insert(expenseData)
+      .insert(rowData)
       .select(SELECT_WITH_CATEGORY_AND_TAG)
       .single();
 
     if (error) throw error;
 
-    return data as Expense;
+    const created = data as Expense;
+    if (!extra_tag_ids || extra_tag_ids.length === 0) {
+      return flattenExtraTags(created);
+    }
+
+    await this.setExpenseExtraTags(created.id, extra_tag_ids);
+
+    return this.getExpenseById(created.id);
+  },
+
+  // Replaces the full extras set for one expense. Delete-then-insert keeps
+  // the logic obvious; the sets involved are tiny.
+  async setExpenseExtraTags(expenseId: string, tagIds: string[]) {
+    const { error: deleteError } = await supabase
+      .from('expense_tags')
+      .delete()
+      .eq('expense_id', expenseId);
+
+    if (deleteError) throw deleteError;
+    if (tagIds.length === 0) return;
+
+    const { error: insertError } = await supabase
+      .from('expense_tags')
+      .insert(tagIds.map((tagId) => ({ expense_id: expenseId, tag_id: tagId })));
+
+    if (insertError) throw insertError;
+  },
+
+  async getExpenseById(expenseId: string) {
+    const { data, error } = await supabase
+      .from('expenses')
+      .select(SELECT_WITH_CATEGORY_AND_TAG)
+      .eq('id', expenseId)
+      .single();
+
+    if (error) throw error;
+
+    return flattenExtraTags(data as Expense);
   },
 
   async createExpensesBulk(
@@ -185,7 +251,7 @@ export const dataService = {
 
     if (error) throw error;
 
-    return data as Expense[];
+    return (data as Expense[]).map(flattenExtraTags);
   },
 
   async deleteExpense(expenseId: string) {
@@ -533,7 +599,7 @@ export const dataService = {
   async getTemplates(signal?: AbortSignal) {
     let query = supabase
       .from('expense_templates')
-      .select(SELECT_WITH_CATEGORY_AND_TAG)
+      .select(SELECT_TEMPLATE)
       .order('created_at', { ascending: false });
     if (signal) query = query.abortSignal(signal);
     const { data, error } = await query;
@@ -547,7 +613,7 @@ export const dataService = {
     const { data, error } = await supabase
       .from('expense_templates')
       .insert(templateData)
-      .select(SELECT_WITH_CATEGORY_AND_TAG)
+      .select(SELECT_TEMPLATE)
       .single();
 
     if (error) throw error;
@@ -901,6 +967,22 @@ export const dataService = {
 // grow past that (transaction history, balance snapshots, debt payments) must
 // page until a short page arrives — otherwise older rows just vanish.
 const SUPABASE_PAGE_SIZE = 1000;
+
+// PostgREST returns the expense_tags embed as [{ tag: {...} }]; the app wants
+// a plain EmbeddedTag[]. Rows from sources without the embed (incomes, cached
+// snapshots) pass through with an empty array.
+type RawExtraTag = { tag: EmbeddedTag | null };
+
+const flattenExtraTags = (row: Expense): Expense => {
+  const raw = (row.extra_tags ?? []) as unknown as RawExtraTag[];
+
+  return {
+    ...row,
+    extra_tags: raw
+      .map((entry) => entry.tag)
+      .filter((tag): tag is EmbeddedTag => tag !== null && tag !== undefined),
+  };
+};
 
 type PageResult = {
   data: unknown;

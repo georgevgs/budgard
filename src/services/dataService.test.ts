@@ -92,7 +92,7 @@ describe('dataService', () => {
     const result = await dataService.getExpenses();
     expect(supabase.from).toHaveBeenCalledWith('expenses');
     expect(chain.select).toHaveBeenCalled();
-    expect(result).toEqual([{ id: 'e1', amount: 10 }]);
+    expect(result).toEqual([{ id: 'e1', amount: 10, extra_tags: [] }]);
   });
 
   it('pages past the PostgREST 1000-row cap until a short page arrives', async () => {
@@ -124,7 +124,7 @@ describe('dataService', () => {
       amount: 50,
       description: 'Test',
     });
-    expect(result).toEqual(expense);
+    expect(result).toEqual({ ...expense, extra_tags: [] });
   });
 
   // --- updateExpense ---
@@ -136,7 +136,7 @@ describe('dataService', () => {
     const result = await dataService.updateExpense({ amount: 75 }, 'e1');
     expect(chain.update).toHaveBeenCalledWith({ amount: 75 });
     expect(chain.eq).toHaveBeenCalledWith('id', 'e1');
-    expect(result).toEqual(updated);
+    expect(result).toEqual({ ...updated, extra_tags: [] });
   });
 
   // --- deleteExpense ---
@@ -161,7 +161,7 @@ describe('dataService', () => {
     ];
     const result = await dataService.createExpensesBulk(data);
     expect(chain.insert).toHaveBeenCalledWith(data);
-    expect(result).toEqual(bulk);
+    expect(result).toEqual(bulk.map((row) => ({ ...row, extra_tags: [] })));
   });
 
   // --- createCategory ---
