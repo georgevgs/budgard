@@ -18,6 +18,7 @@ import {
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import { useDateLocale } from '@/hooks/useDateLocale';
+import { useIsPro } from '@/hooks/useIsPro';
 
 const VALUE_COLOR = 'hsl(var(--primary))';
 const BASIS_COLOR = 'hsl(var(--muted-foreground))';
@@ -40,7 +41,11 @@ type Point = {
 const AccountHistoryChart = ({ account, snapshots }: Props) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
+  const isPro = useIsPro();
   const isInvestment = account.kind === 'investment';
+  // The cost-basis overlay is investment analytics — Pro only. The balance
+  // area chart itself stays free for every account kind.
+  const showBasis = isInvestment && isPro;
   const [range, setRange] = useState<RangeKey>('all');
 
   const data = useMemo<Point[]>(
@@ -94,7 +99,7 @@ const AccountHistoryChart = ({ account, snapshots }: Props) => {
               renderTooltip({
                 active: Boolean(active),
                 payload,
-                isInvestment,
+                isInvestment: showBasis,
                 currency: account.default_currency,
                 t,
               })
@@ -107,7 +112,7 @@ const AccountHistoryChart = ({ account, snapshots }: Props) => {
             strokeWidth={2}
             fill="url(#accountValueGradient)"
           />
-          {renderCostBasisLine(isInvestment)}
+          {renderCostBasisLine(showBasis)}
         </ComposedChart>
       </ResponsiveContainer>
     </div>

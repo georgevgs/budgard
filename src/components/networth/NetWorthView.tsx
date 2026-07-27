@@ -4,6 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import { useDataConfig } from '@/contexts/DataContext';
+import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
+import { useIsPro } from '@/hooks/useIsPro';
+import { toast } from '@/hooks/useToast';
+import { canAddAccount, FREE_ACCOUNT_LIMIT } from '@/lib/proLimits';
 import { useNetWorth } from '@/hooks/useNetWorth';
 import {
   useGroupedAccounts,
@@ -19,20 +23,34 @@ import InvestmentAllocationCard from '@/components/networth/InvestmentAllocation
 import AccountGroup from '@/components/networth/AccountGroup';
 import AccountForm from '@/components/networth/AccountForm';
 import AccountDetailSheet from '@/components/networth/AccountDetailSheet';
+import ProUpsellCard from '@/components/pro/ProUpsellCard';
 
 const NetWorthView = () => {
   const { t } = useTranslation();
   const { accounts, grouped, latestSnapshotByAccount } = useGroupedAccounts();
   const { defaultCurrency, isInitialized, isSecondaryLoaded } = useDataConfig();
   const { summary, series } = useNetWorth();
+  const isPro = useIsPro();
+  const { openUpgrade } = useUpgradeDialog();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | undefined>();
   const [detailAccount, setDetailAccount] = useState<Account | undefined>();
 
+  // The free tier tracks up to 3 active accounts; `accounts` is active-only
+  // (getAccounts filters archived), so its length is the count that matters.
   const handleAddClick = useCallback(() => {
+    if (!canAddAccount(isPro, accounts.length)) {
+      toast({
+        title: t('pro.gate.accountLimit', { limit: FREE_ACCOUNT_LIMIT }),
+      });
+      openUpgrade();
+
+      return;
+    }
+
     setSelectedAccount(undefined);
     setIsFormOpen(true);
-  }, []);
+  }, [isPro, accounts.length, openUpgrade, t]);
 
   const handleAccountClick = useCallback((account: Account) => {
     setDetailAccount(account);
@@ -70,6 +88,7 @@ const NetWorthView = () => {
           handleAccountClick,
           handleAddClick,
           t,
+          isPro,
         )}
       </div>
 
@@ -115,6 +134,7 @@ const renderBody = (
   onAccountClick: (account: Account) => void,
   onAddClick: () => void,
   t: TranslateFunction,
+  isPro: boolean,
 ) => {
   if (accountCount === 0) {
     return <NetWorthEmpty onAddClick={onAddClick} />;
@@ -130,7 +150,7 @@ const renderBody = (
         latestSnapshotByAccount={latestSnapshotByAccount}
         onAccountClick={onAccountClick}
       />
-      {renderInvestmentsBlock(grouped.investments, latestSnapshotByAccount, onAccountClick, t)}
+      {renderInvestmentsBlock(grouped.investments, latestSnapshotByAccount, onAccountClick, t, isPro)}
       <AccountGroup
         title={t('networth.groups.liabilities')}
         accounts={grouped.liabilities}
@@ -146,12 +166,13 @@ const renderInvestmentsBlock = (
   latestSnapshotByAccount: Map<string, AccountBalance>,
   onAccountClick: (account: Account) => void,
   t: TranslateFunction,
+  isPro: boolean,
 ) => {
   if (investments.length === 0) return null;
 
   return (
     <>
-      <InvestmentAllocationCard accounts={investments} />
+      {renderAllocationCard(investments, isPro, t)}
       <AccountGroup
         title={t('networth.groups.investments')}
         accounts={investments}
@@ -160,6 +181,25 @@ const renderInvestmentsBlock = (
       />
     </>
   );
+}
+
+// Allocation analytics are Pro depth; the investment account list itself
+// stays free.
+const renderAllocationCard = (
+  investments: Account[],
+  isPro: boolean,
+  t: TranslateFunction,
+) => {
+  if (!isPro) {
+    return (
+      <ProUpsellCard
+        title={t('pro.gate.investTitle')}
+        description={t('pro.gate.investBody')}
+      />
+    );
+  }
+
+  return <InvestmentAllocationCard accounts={investments} />;
 }
 
 const renderDetailSheet = (

@@ -7,6 +7,7 @@ import ArrowDownLeft from 'lucide-react/dist/esm/icons/arrow-down-left';
 import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import Lock from 'lucide-react/dist/esm/icons/lock';
 import { cn, formatCurrency, formatPercent } from '@/lib/utils';
 import { computeAccountXirr } from '@/lib/xirr';
 import { computeAccountYtd, type YtdResult } from '@/lib/ytd';
@@ -126,6 +127,8 @@ export const renderInvestmentDetail = (
   isInvestment: boolean,
   snapshots: AccountBalance[],
   t: TranslateFunction,
+  isPro: boolean,
+  onUpgrade: () => void,
 ) => {
   if (!isInvestment) return null;
 
@@ -142,6 +145,21 @@ export const renderInvestmentDetail = (
 
   if (!hasBasis && !ytd) {
     return null;
+  }
+
+  // The KPI strip (cost basis, gain, YTD, XIRR) is investment analytics —
+  // Pro depth. Free users see what they'd unlock instead of the numbers.
+  if (!isPro) {
+    return (
+      <button
+        type="button"
+        onClick={() => onUpgrade()}
+        className="flex items-center gap-1.5 pt-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <Lock className="h-3 w-3 shrink-0" aria-hidden />
+        <span className="text-left">{t('pro.gate.investKpis')}</span>
+      </button>
+    );
   }
 
   return (

@@ -4,6 +4,8 @@ import ChartPie from 'lucide-react/dist/esm/icons/chart-pie';
 import Target from 'lucide-react/dist/esm/icons/target';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
+import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
+import Wallet from 'lucide-react/dist/esm/icons/wallet';
 import FileDown from 'lucide-react/dist/esm/icons/file-down';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 
@@ -14,11 +16,14 @@ type Feature = {
   Icon: FeatureIcon;
 };
 
+// Array order is display order; keys are stable i18n ids (pro.features.*).
 const FEATURES: Feature[] = [
   { key: 'f1', Icon: ChartPie },
   { key: 'f2', Icon: Target },
   { key: 'f3', Icon: Repeat },
   { key: 'f4', Icon: TrendingUp },
+  { key: 'f7', Icon: Wallet },
+  { key: 'f8', Icon: TrendingDown },
   { key: 'f5', Icon: FileDown },
   { key: 'f6', Icon: Sparkles },
 ];

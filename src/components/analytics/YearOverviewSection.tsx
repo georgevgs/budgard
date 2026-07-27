@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Lock } from 'lucide-react';
+import Lock from 'lucide-react/dist/esm/icons/lock';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Select,

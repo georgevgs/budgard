@@ -765,6 +765,18 @@
     "percentPaid": "{{percent}}% paid",
     "cleared": "Paid off",
     "celebrate": "🎉 Debt paid off — {{name}}! You did it!",
+    "planner": {
+      "title": "Payoff planner",
+      "snowball": "Snowball",
+      "avalanche": "Avalanche",
+      "monthlyExtraLabel": "Monthly extra payment",
+      "debtFreeIn": "Debt-free in",
+      "monthsCount_one": "{{count}} month",
+      "monthsCount_other": "{{count}} months",
+      "totalInterest": "Total interest paid",
+      "comparison": "{{winner}} saves {{amount}} in interest vs {{loser}}",
+      "unpayable": "Minimum payments don't cover the interest — this plan never pays off. Add a monthly extra."
+    },
     "balanceOverOriginal": "{{amount}} above original",
     "archive": "Archive",
     "archiveTitle": "Archive debt",
@@ -1087,7 +1099,9 @@
       "f3": "Unlimited recurring expenses",
       "f4": "Full analytics history and cash-flow trends",
       "f5": "CSV exports",
-      "f6": "Early access to new features"
+      "f6": "Early access to new features",
+      "f7": "Unlimited accounts and investment analytics",
+      "f8": "Debt payoff planner"
     },
     "gate": {
       "goalsTitle": "Savings goals are a Pro feature",
@@ -1095,7 +1109,14 @@
       "analyticsTitle": "See beyond 3 months",
       "analyticsBody": "The free plan shows your last 3 months. Pro unlocks your full history, cash flow, and CSV exports.",
       "recurringLimit": "The free plan includes up to {{limit}} recurring expenses. Upgrade for unlimited.",
-      "analyticsWindow": "Showing your last 3 months — unlock full history with Pro"
+      "analyticsWindow": "Showing your last 3 months — unlock full history with Pro",
+      "accountLimit": "The free plan tracks up to {{limit}} accounts. Upgrade for unlimited.",
+      "categoryLimit": "The free plan includes up to {{limit}} categories. Upgrade for unlimited.",
+      "investTitle": "Investment analytics is a Pro feature",
+      "investBody": "See your allocation, returns, YTD and annualized performance across your investments.",
+      "investKpis": "Unlock returns, YTD and annualized performance with Pro",
+      "debtPlanTitle": "The payoff planner is a Pro feature",
+      "debtPlanBody": "Compare snowball vs avalanche, add a monthly extra, and see your debt-free date. Upgrade to plan your payoff."
     },
     "successTitle": "Welcome to Pro!",
     "successBody": "Your subscription is active. Enjoy the full picture.",
@@ -1396,8 +1417,9 @@
         "feature2": "Monthly total budget",
         "feature3": "Up to 3 recurring expenses",
         "feature4": "Last 3 months of analytics",
-        "feature5": "PWA on iOS, Android, and desktop",
-        "feature6": "EU-hosted, encrypted, ad-free"
+        "feature5": "Net worth & debt tracking (up to 3 accounts)",
+        "feature6": "PWA on iOS, Android, and desktop",
+        "feature7": "EU-hosted, encrypted, ad-free"
       },
       "pro": {
         "title": "Pro",
@@ -1408,8 +1430,10 @@
         "feature3": "Savings goals",
         "feature4": "Unlimited recurring expenses",
         "feature5": "Full analytics history and cash-flow trends",
-        "feature6": "CSV exports of your full history",
-        "feature7": "Early access to new features"
+        "feature6": "Unlimited accounts and investment analytics",
+        "feature7": "Debt payoff planner",
+        "feature8": "CSV exports of your full history",
+        "feature9": "Early access to new features"
       }
     },
     "faq": {
@@ -1421,7 +1445,7 @@
       },
       "q2": {
         "question": "What's actually different on Pro?",
-        "answer": "Per-category budgets, savings goals, unlimited recurring expenses, full all-time analytics with cash-flow trends, and CSV exports. The full list is in the pricing card above."
+        "answer": "Per-category budgets, savings goals, unlimited recurring expenses, unlimited accounts with investment analytics, a debt payoff planner, full all-time analytics with cash-flow trends, and CSV exports. The full list is in the pricing card above."
       },
       "q3": {
         "question": "Can I cancel anytime?",

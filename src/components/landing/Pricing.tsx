@@ -135,7 +135,7 @@ const renderFreeCard = (t: Tx, onGetStarted: () => void) => (
       {t('landing.pricing.free.cta')}
     </Button>
     <ul className="mt-8 space-y-3">
-      {[1, 2, 3, 4, 5, 6].map((n) =>
+      {[1, 2, 3, 4, 5, 6, 7].map((n) =>
         renderFeature(t(`landing.pricing.free.feature${n}`)),
       )}
     </ul>
@@ -163,7 +163,7 @@ const renderProCard = (
       {t('landing.pricing.pro.cta')}
     </Button>
     <ul className="mt-8 space-y-3">
-      {[1, 2, 3, 4, 5, 6, 7].map((n) =>
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) =>
         renderFeature(t(`landing.pricing.pro.feature${n}`)),
       )}
     </ul>

@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import {
   canAddAccount,
+  canAddCategory,
   canAddRecurringExpense,
   getFreeAnalyticsCutoff,
   FREE_ACCOUNT_LIMIT,
+  FREE_CATEGORY_LIMIT,
   FREE_RECURRING_EXPENSE_LIMIT,
 } from '@/lib/proLimits';
 
@@ -44,6 +46,23 @@ describe('canAddAccount', () => {
   it('blocks free users at the cap', () => {
     expect(canAddAccount(false, FREE_ACCOUNT_LIMIT)).toBe(false);
     expect(canAddAccount(false, FREE_ACCOUNT_LIMIT + 2)).toBe(false);
+  });
+});
+
+describe('canAddCategory', () => {
+  it('always allows Pro users', () => {
+    expect(canAddCategory(true, 0)).toBe(true);
+    expect(canAddCategory(true, 50)).toBe(true);
+  });
+
+  it('allows free users below the cap', () => {
+    expect(canAddCategory(false, 0)).toBe(true);
+    expect(canAddCategory(false, FREE_CATEGORY_LIMIT - 1)).toBe(true);
+  });
+
+  it('blocks free users at the cap', () => {
+    expect(canAddCategory(false, FREE_CATEGORY_LIMIT)).toBe(false);
+    expect(canAddCategory(false, FREE_CATEGORY_LIMIT + 2)).toBe(false);
   });
 });
 

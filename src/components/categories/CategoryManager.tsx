@@ -12,7 +12,11 @@ import {
 } from '@/components/ui/dialog';
 import ConfirmDestructiveDialog from '@/components/common/ConfirmDestructiveDialog';
 import { useCategoriesData } from '@/contexts/DataContext';
+import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
 import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
+import { useIsPro } from '@/hooks/useIsPro';
+import { toast } from '@/hooks/useToast';
+import { canAddCategory, FREE_CATEGORY_LIMIT } from '@/lib/proLimits';
 import type { Category } from '@/types/Category';
 import CategoryForm from '@/components/categories/CategoryForm';
 
@@ -29,6 +33,8 @@ export const CategoryManager = ({
   const { t } = useTranslation();
   const { expenseCategories, incomeCategories } = useCategoriesData();
   const { handleCategoryDelete } = useCategoryOps();
+  const isPro = useIsPro();
+  const { openUpgrade } = useUpgradeDialog();
   const [view, setView] = useState<View>({ type: 'list' });
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
 
@@ -37,6 +43,20 @@ export const CategoryManager = ({
     expenseCategories,
     incomeCategories,
   );
+
+  // The free cap counts each type separately (expense vs income sources).
+  const handleAddClick = () => {
+    if (!canAddCategory(isPro, categories.length)) {
+      toast({
+        title: t('pro.gate.categoryLimit', { limit: FREE_CATEGORY_LIMIT }),
+      });
+      openUpgrade();
+
+      return;
+    }
+
+    setView({ type: 'form' });
+  };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -98,7 +118,7 @@ export const CategoryManager = ({
           variant="outline"
           size="sm"
           className="w-full"
-          onClick={() => setView({ type: 'form' })}
+          onClick={handleAddClick}
         >
           <Plus className="h-4 w-4 mr-2" />
           {renderAddButtonLabel(categoryType, t)}

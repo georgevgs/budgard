@@ -13,6 +13,7 @@ import DebtsHeader from '@/components/debts/DebtsHeader';
 import DebtsEmpty from '@/components/debts/DebtsEmpty';
 import DebtsLoadingState from '@/components/debts/DebtsLoading';
 import DebtCard from '@/components/debts/DebtCard';
+import DebtPayoffPlanner from '@/components/debts/DebtPayoffPlanner';
 import DebtForm from '@/components/debts/DebtForm';
 import DebtDetailSheet from '@/components/debts/DebtDetailSheet';
 
@@ -145,6 +146,8 @@ const renderBody = (
         monthsToDebtFree={monthsToDebtFree}
         payoffDate={payoffDate}
       />
+
+      <DebtPayoffPlanner debts={sortedDebts} />
 
       <div className="space-y-3">
         {sortedDebts.map((d, index) => (
