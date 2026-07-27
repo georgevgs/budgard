@@ -17,8 +17,13 @@ import type { Debt } from '@/types/Debt';
 // snapshot for no benefit.
 const CATEGORY_EMBED = 'category:categories(id, name, color, icon, type, kind)';
 const TAG_EMBED = 'tag:tags(id, name, color)';
+// Since expense_tags landed, expenses has two relationships to tags (the
+// direct tag_id FK and the many-to-many through the junction table), so the
+// primary-tag embed must name its FK or PostgREST rejects it as ambiguous
+// (PGRST201).
+const EXPENSE_TAG_EMBED = 'tag:tags!expenses_tag_id_fkey(id, name, color)';
 const EXTRA_TAGS_EMBED = 'extra_tags:expense_tags(tag:tags(id, name, color))';
-const SELECT_WITH_CATEGORY_AND_TAG = `*, ${CATEGORY_EMBED}, ${TAG_EMBED}, ${EXTRA_TAGS_EMBED}`;
+const SELECT_WITH_CATEGORY_AND_TAG = `*, ${CATEGORY_EMBED}, ${EXPENSE_TAG_EMBED}, ${EXTRA_TAGS_EMBED}`;
 const SELECT_WITH_CATEGORY = `*, ${CATEGORY_EMBED}`;
 // Templates embed category+tag but NOT extra_tags — expense_tags references
 // expenses, so that embed only resolves on the expenses table.
