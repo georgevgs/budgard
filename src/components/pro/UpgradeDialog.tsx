@@ -15,7 +15,12 @@ import type { CheckoutPlan } from '@/services/subscriptionService';
 const UpgradeDialog = () => {
   const { t } = useTranslation();
   const { isUpgradeOpen, closeUpgrade, preferredPlan } = useUpgradeDialog();
-  const { startCheckout } = useSubscription();
+  const { subscription, startCheckout } = useSubscription();
+
+  // No subscription row means the user never subscribed — the server gives
+  // first-timers a free trial, so the CTA should say so. The server is the
+  // authority; this only picks the label.
+  const isTrialEligible = subscription === null;
   const { toast } = useToast();
   const plans = useProPlans();
   const [plan, setPlan] = useState<CheckoutPlan>(preferredPlan);
@@ -65,7 +70,7 @@ const UpgradeDialog = () => {
             disabled={isRedirecting}
             className="h-12 w-full rounded-full text-base font-semibold shadow-lg shadow-primary/25"
           >
-            {renderCtaLabel(isRedirecting, t)}
+            {renderCtaLabel(isRedirecting, isTrialEligible, t)}
           </Button>
           {renderFootnote(t, closeUpgrade)}
         </div>
@@ -80,8 +85,13 @@ export default UpgradeDialog;
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-const renderCtaLabel = (isRedirecting: boolean, t: TFunc): string => {
+const renderCtaLabel = (
+  isRedirecting: boolean,
+  isTrialEligible: boolean,
+  t: TFunc,
+): string => {
   if (isRedirecting) return t('pro.redirecting');
+  if (isTrialEligible) return t('pro.trialCta');
 
   return t('pro.cta');
 };

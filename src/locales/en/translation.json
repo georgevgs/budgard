@@ -512,6 +512,7 @@
       "endsLabel": "Ends on",
       "cancelScheduled": "Your subscription is set to end then. You keep Pro until that date.",
       "pastDue": "We couldn't collect your last payment. Update your payment method to keep Pro.",
+      "trialing": "Free trial — first charge on {{date}}.",
       "manage": "Manage subscription",
       "opening": "Opening…",
       "manageHint": "Cancel, switch plan, update payment details or download invoices — handled securely by Stripe.",
@@ -1091,6 +1092,7 @@
       "privacy": "Privacy"
     },
     "cta": "Continue to checkout",
+    "trialCta": "Start 7-day free trial",
     "redirecting": "Taking you to checkout…",
     "checkoutError": "Couldn't start checkout. Please try again.",
     "features": {
@@ -1425,6 +1427,7 @@
         "title": "Pro",
         "subtitle": "For people who want the full picture.",
         "cta": "Get Pro",
+        "trialNote": "7-day free trial for first-time subscribers",
         "feature1": "Everything in Free",
         "feature2": "Per-category budgets",
         "feature3": "Savings goals",

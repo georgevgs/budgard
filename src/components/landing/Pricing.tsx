@@ -162,6 +162,9 @@ const renderProCard = (
     <Button onClick={() => onGetPro(cycle)} className="mt-6 rounded-full h-11">
       {t('landing.pricing.pro.cta')}
     </Button>
+    <p className="mt-2 text-center text-xs text-muted-foreground">
+      {t('landing.pricing.pro.trialNote')}
+    </p>
     <ul className="mt-8 space-y-3">
       {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) =>
         renderFeature(t(`landing.pricing.pro.feature${n}`)),

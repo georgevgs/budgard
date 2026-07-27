@@ -117,6 +117,7 @@ const renderProContent = (
       getPlanName(subscription, prices, t),
     )}
     {renderPeriodRow(subscription, dateLocale, t)}
+    {renderTrialNotice(subscription, dateLocale, t)}
     {renderPastDueNotice(subscription, t)}
     <Button
       variant="outline"
@@ -167,6 +168,26 @@ const renderPeriodRow = (
   }
 
   return renderRow(t('settings.billing.renewsLabel'), date);
+};
+
+const renderTrialNotice = (
+  subscription: Subscription,
+  dateLocale: Locale,
+  t: TFunc,
+) => {
+  if (subscription.status !== 'trialing') return null;
+  if (!subscription.trial_ends_at) return null;
+
+  const trialEnd = new Date(subscription.trial_ends_at);
+  if (!Number.isFinite(trialEnd.getTime())) return null;
+
+  return (
+    <p className="text-xs text-muted-foreground">
+      {t('settings.billing.trialing', {
+        date: format(trialEnd, 'PPP', { locale: dateLocale }),
+      })}
+    </p>
+  );
 };
 
 const renderPastDueNotice = (subscription: Subscription, t: TFunc) => {

@@ -22,6 +22,10 @@ type Plan = 'monthly' | 'yearly';
 // second Stripe subscription and a double charge.
 const ACTIVE_STATUSES = ['trialing', 'active', 'past_due'];
 
+// First-time subscribers get a free trial; anyone with a subscription row —
+// whatever its status — has already had one.
+const TRIAL_PERIOD_DAYS = 7;
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -72,6 +76,11 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Already subscribed' }, 409);
     }
 
+    // No row at all means this user has never subscribed — they get the
+    // trial. Same fail-open stance as the 409 check above: a transient read
+    // error grants a trial rather than blocking the sale.
+    const trialEligible = !existing;
+
     const plan = await readPlan(req);
     if (!plan) {
       return jsonResponse({ error: 'plan must be "monthly" or "yearly"' }, 400);
@@ -92,7 +101,7 @@ Deno.serve(async (req) => {
         'Stripe-Version': STRIPE_API_VERSION,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: buildSessionParams(priceId, user.id, user.email),
+      body: buildSessionParams(priceId, user.id, user.email, trialEligible),
     });
 
     if (!stripeResponse.ok) {
@@ -152,6 +161,7 @@ const buildSessionParams = (
   priceId: string,
   userId: string,
   email: string | undefined,
+  trialEligible: boolean,
 ): URLSearchParams => {
   const params = new URLSearchParams({
     mode: 'subscription',
@@ -165,6 +175,15 @@ const buildSessionParams = (
   });
   if (email) {
     params.set('customer_email', email);
+  }
+  // Card is still collected up front (Checkout default); Stripe charges it
+  // automatically when the trial ends. Managed Payments supports trials on
+  // Checkout and sends the trial confirmation email itself.
+  if (trialEligible) {
+    params.set(
+      'subscription_data[trial_period_days]',
+      String(TRIAL_PERIOD_DAYS),
+    );
   }
 
   return params;

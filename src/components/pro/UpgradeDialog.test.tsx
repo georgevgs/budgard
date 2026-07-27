@@ -1,10 +1,14 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import UpgradeDialog from '@/components/pro/UpgradeDialog';
+import type { Subscription } from '@/types/Subscription';
 
 const startCheckoutMock = vi.fn();
 const closeUpgradeMock = vi.fn();
+
+// null = never subscribed (trial-eligible); any row means no trial CTA.
+let mockSubscription: Subscription | null = null;
 
 // jsdom cannot navigate; replace location so the redirect after checkout
 // creation is observable instead of throwing.
@@ -15,7 +19,7 @@ Object.defineProperty(window, 'location', {
 
 vi.mock('@/contexts/SubscriptionContext', () => ({
   useSubscription: () => ({
-    subscription: null,
+    subscription: mockSubscription,
     isPro: false,
     isLoading: false,
     refresh: vi.fn(),
@@ -41,6 +45,10 @@ const renderDialog = () =>
   );
 
 describe('UpgradeDialog', () => {
+  beforeEach(() => {
+    mockSubscription = null;
+  });
+
   it('shows both plan cards with the yearly plan selected by default', () => {
     renderDialog();
 
@@ -64,7 +72,7 @@ describe('UpgradeDialog', () => {
     startCheckoutMock.mockResolvedValue('https://checkout.example/session');
     renderDialog();
 
-    fireEvent.click(screen.getByText('pro.cta'));
+    fireEvent.click(screen.getByText('pro.trialCta'));
 
     await waitFor(() => {
       expect(startCheckoutMock).toHaveBeenCalledWith('yearly');
@@ -76,7 +84,7 @@ describe('UpgradeDialog', () => {
     renderDialog();
 
     fireEvent.click(screen.getByText('pro.monthly'));
-    fireEvent.click(screen.getByText('pro.cta'));
+    fireEvent.click(screen.getByText('pro.trialCta'));
 
     await waitFor(() => {
       expect(startCheckoutMock).toHaveBeenCalledWith('monthly');
@@ -89,6 +97,22 @@ describe('UpgradeDialog', () => {
     expect(screen.getByText('pro.features.f1')).toBeInTheDocument();
     expect(screen.getByText('pro.features.f5')).toBeInTheDocument();
     expect(screen.getByText('pro.features.f6')).toBeInTheDocument();
+    expect(screen.getByText('pro.features.f7')).toBeInTheDocument();
+    expect(screen.getByText('pro.features.f8')).toBeInTheDocument();
+  });
+
+  it('shows the trial CTA only for first-time subscribers', () => {
+    renderDialog();
+
+    expect(screen.getByText('pro.trialCta')).toBeInTheDocument();
+  });
+
+  it('shows the plain checkout CTA when a subscription row exists', () => {
+    mockSubscription = { status: 'canceled' } as unknown as Subscription;
+    renderDialog();
+
+    expect(screen.getByText('pro.cta')).toBeInTheDocument();
+    expect(screen.queryByText('pro.trialCta')).not.toBeInTheDocument();
   });
 
   it('links to the legal pages and closes the dialog on the way out', () => {
