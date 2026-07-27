@@ -16,6 +16,23 @@ self.addEventListener('message', (event) => {
   self.skipWaiting();
 });
 
+// Build-identity handshake. The placeholder below is replaced at build time
+// (vite.config.ts stampPushSwBuildId) with the same build id the app bundle
+// receives via `define`. Before showing "Update available", the page messages
+// the WAITING worker with GET_BUILD_ID and compares ids — equal ids mean iOS
+// re-installed our own bytes (a known WebKit quirk after process kills), not
+// a new version, and the prompt is suppressed.
+const BUILD_ID = '__BUDGARD_BUILD_ID__';
+
+self.addEventListener('message', (event) => {
+  if (!event.data || event.data.type !== 'GET_BUILD_ID') return;
+
+  const replyPort = event.ports && event.ports[0];
+  if (!replyPort) return;
+
+  replyPort.postMessage(BUILD_ID);
+});
+
 self.addEventListener('activate', (event) => {
   if (!claimOnActivate) return;
 

@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import path from "path";
-import { readdir, rm } from "node:fs/promises";
+import { readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type PluginOption } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
@@ -72,6 +73,52 @@ const chunkForModule = (id: string): string | undefined => {
   return undefined;
 };
 
+// One id per deploy, present in BOTH the app bundle (via `define` →
+// `__BUILD_ID__`) and the service worker (stamped into dist/push-sw.js by
+// stampPushSwBuildId below). Before offering an update, the app asks the
+// waiting worker for its build id and compares — that's how a genuinely new
+// deploy is told apart from iOS re-installing the same bytes after a process
+// kill (which parks an identical worker in the waiting slot and used to
+// trigger a false "Update available" prompt). Netlify exposes the commit SHA
+// as COMMIT_REF; local builds ask git directly.
+const resolveBuildId = (): string => {
+  if (process.env.COMMIT_REF) {
+    return process.env.COMMIT_REF;
+  }
+
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"]).toString().trim();
+  } catch {
+    return "dev";
+  }
+};
+
+const buildId = resolveBuildId();
+
+const BUILD_ID_PLACEHOLDER = "__BUDGARD_BUILD_ID__";
+
+// Replaces the placeholder in dist/push-sw.js with the real build id.
+// Runs in closeBundle with normal enforce, so it executes BEFORE
+// vite-plugin-pwa:build (enforce "post") generates sw.js — the precache
+// manifest revision for push-sw.js is therefore computed from the final,
+// stamped bytes.
+const stampPushSwBuildId = (): PluginOption => ({
+  name: "stamp-push-sw-build-id",
+  apply: "build",
+  closeBundle: async () => {
+    const file = path.resolve(__dirname, "dist/push-sw.js");
+    const source = await readFile(file, "utf8");
+
+    if (!source.includes(BUILD_ID_PLACEHOLDER)) {
+      throw new Error(
+        "push-sw.js is missing the build-id placeholder — the update-prompt handshake would silently break"
+      );
+    }
+
+    await writeFile(file, source.replaceAll(BUILD_ID_PLACEHOLDER, buildId));
+  },
+});
+
 // Belt-and-braces: Sentry's plugin deletes maps after upload, but only when
 // SENTRY_AUTH_TOKEN is set. A deploy without the token (e.g. preview build)
 // would otherwise ship .map files alongside the JS bundle, leaking source.
@@ -101,9 +148,11 @@ const stripSourceMaps = (): PluginOption => ({
 export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
+    __BUILD_ID__: JSON.stringify(buildId),
   },
   plugins: [
     react(),
+    stampPushSwBuildId(),
     VitePWA({
       registerType: "prompt",
       manifest: false,

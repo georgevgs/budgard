@@ -3,6 +3,7 @@ import { useRegisterSW } from 'virtual:pwa-register/react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { swRegistration } from '@/lib/swRegistration';
+import { isSameBuildAsPage } from '@/lib/swBuildId';
 
 const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
 const MIN_VISIBILITY_CHECK_INTERVAL_MS = 30 * 60 * 1000;
@@ -142,13 +143,37 @@ export const usePwaUpdate = (): void => {
       return;
     }
 
-    // Fast path: a waiting worker is already observable, show immediately.
+    let cancelled = false;
+
+    // A waiting worker alone doesn't prove there's anything new: iOS can
+    // re-install the SAME bytes after killing the PWA process, parking an
+    // identical worker in the waiting slot. Ask the worker for its build id
+    // first — our own build re-installed is suppressed silently (it activates
+    // harmlessly on the next full app close); anything unverifiable is
+    // offered as before.
+    const offerIfActuallyNewer = (worker: ServiceWorker): void => {
+      void isSameBuildAsPage(worker).then((sameBuild) => {
+        if (cancelled) return;
+
+        if (sameBuild) {
+          setNeedRefresh(false);
+
+          return;
+        }
+
+        if (toastDismissedRef.current) return;
+        showUpdateToast();
+      });
+    };
+
+    // Fast path: a waiting worker is already observable.
     const reg = swRegistration.get();
     if (reg?.waiting) {
-      if (toastDismissedRef.current) return;
-      showUpdateToast();
+      offerIfActuallyNewer(reg.waiting);
 
-      return;
+      return () => {
+        cancelled = true;
+      };
     }
 
     // Slow path: needRefresh fired but registration.waiting hasn't been
@@ -165,11 +190,13 @@ export const usePwaUpdate = (): void => {
         return;
       }
 
-      if (toastDismissedRef.current) return;
-      showUpdateToast();
+      offerIfActuallyNewer(latest.waiting);
     }, 1500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [needRefresh, showUpdateToast, showStuckToast, setNeedRefresh]);
 
   // Check for SW updates when the app returns to foreground.
