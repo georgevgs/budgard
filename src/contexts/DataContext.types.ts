@@ -11,31 +11,8 @@ import type { Debt } from '@/types/Debt';
 import type { CategoryBudget } from '@/types/CategoryBudget';
 import type { NotificationPreferences } from '@/types/Budget';
 
-export type DataState = {
-  categories: Category[];
-  // Derived: categories.type === 'expense' (or null/undefined for legacy rows)
-  expenseCategories: Category[];
-  // Derived: categories.type === 'income'
-  incomeCategories: Category[];
-  expenses: Expense[];
-  incomes: Expense[];
-  recurringExpenses: RecurringExpense[];
-  recurringIncomes: RecurringExpense[];
-  tags: Tag[];
-  templates: ExpenseTemplate[];
-  goals: Goal[];
-  accounts: Account[];
-  accountBalances: AccountBalance[];
-  debts: Debt[];
-  categoryBudgets: CategoryBudget[];
-  monthlyBudget: number | null;
-  defaultCurrency: string;
-  defaultSavingsPct: number | null;
-  dailyReminderHour: number | null;
-  notificationPreferences: NotificationPreferences;
-  isInitialized: boolean;
-  isSecondaryLoaded: boolean;
-};
+// The combined DataState/DataContextType pair died with the useData() shim —
+// consumers subscribe to the per-slice contexts in DataContext.tsx instead.
 
 // Actions never change reference after mount (setters are stable, refresh
 // callbacks have stable deps). Splitting them into their own context lets
@@ -83,8 +60,6 @@ export type DataConfig = {
   dailyReminderHour: number | null;
   notificationPreferences: NotificationPreferences;
 };
-
-export type DataContextType = DataState & DataActions;
 
 export type CategoriesSlice = {
   categories: Category[];

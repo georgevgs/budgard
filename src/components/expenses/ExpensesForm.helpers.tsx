@@ -24,7 +24,7 @@ export const getInitialAmount = (
   return formatCurrencyInput(sourceAmount.toString().replace('.', ','));
 };
 
-export const pickSourceAmount = (
+const pickSourceAmount = (
   expense: Expense,
   defaultCurrency: string,
 ): number => {

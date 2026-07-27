@@ -7,8 +7,8 @@ import type { RecurringExpense } from '@/types/RecurringExpense';
 // values most household-budgeting tools display. The drift is ≤0.5% per
 // conversion and is acceptable for projection-style UIs that already round to
 // the nearest unit. Do not change without updating tests that pin these.
-export const WEEKS_PER_MONTH = 4.33;
-export const BIWEEKLY_PERIODS_PER_MONTH = 2.17;
+const WEEKS_PER_MONTH = 4.33;
+const BIWEEKLY_PERIODS_PER_MONTH = 2.17;
 
 // Belt-and-braces cap. With a weekly cadence this covers ~19 years of
 // catch-up; anything beyond that points to bad data (start_date in the

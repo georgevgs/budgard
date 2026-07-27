@@ -8,7 +8,7 @@ import type { Debt, PayoffStrategy } from '@/types/Debt';
 //      from already-paid-off debts at the top of the list, cascading overflow.
 //   4. Stop when all balances reach zero, or after MAX_MONTHS as a safety cap.
 
-export type DebtMonth = {
+type DebtMonth = {
   debtId: string;
   payment: number;
   principal: number;
@@ -16,7 +16,7 @@ export type DebtMonth = {
   remaining: number;
 };
 
-export type ScheduleEntry = {
+type ScheduleEntry = {
   month: number;
   payments: DebtMonth[];
   totalRemaining: number;

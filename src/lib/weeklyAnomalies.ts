@@ -18,8 +18,8 @@ const MIN_BASELINE_TRANSACTIONS = 3;
 const MIN_BASELINE_WEEKLY_AVG = 5;
 
 // Ratio thresholds for flagging as an anomaly.
-export const UP_RATIO_THRESHOLD = 1.5;
-export const DOWN_RATIO_THRESHOLD = 0.5;
+const UP_RATIO_THRESHOLD = 1.5;
+const DOWN_RATIO_THRESHOLD = 0.5;
 
 const MAX_ANOMALIES = 3;
 

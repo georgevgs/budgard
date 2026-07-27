@@ -27,7 +27,6 @@ import { useToast } from '@/hooks/useToast';
 import type {
   DataActions,
   DataConfig,
-  DataContextType,
   CategoriesSlice,
   RecurringSlice,
   AccountsSlice,
@@ -45,14 +44,12 @@ import {
   getRecentCutoff,
 } from '@/lib/dataCache';
 
-const DataContext = createContext<DataContextType | null>(null);
 const DataActionsContext = createContext<DataActions | null>(null);
 const DataConfigContext = createContext<DataConfig | null>(null);
 
 // Per-slice contexts. Granular subscriptions: a component reading
 // ExpensesDataContext only re-renders when expenses change, not when incomes
-// or tags do. The combined DataContext above is kept for back-compat; new
-// consumers should prefer these scoped hooks.
+// or tags do.
 const ExpensesDataContext = createContext<Expense[] | null>(null);
 const IncomesDataContext = createContext<Expense[] | null>(null);
 const CategoriesDataContext = createContext<CategoriesSlice | null>(null);
@@ -636,57 +633,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     ],
   );
 
-  const value = useMemo(
-    () => ({
-      categories,
-      expenseCategories,
-      incomeCategories,
-      expenses,
-      incomes,
-      recurringExpenses,
-      recurringIncomes,
-      tags,
-      templates,
-      goals,
-      accounts,
-      accountBalances,
-      debts,
-      categoryBudgets,
-      monthlyBudget,
-      defaultCurrency,
-      defaultSavingsPct,
-      dailyReminderHour,
-      notificationPreferences,
-      isInitialized,
-      isSecondaryLoaded,
-      ...actions,
-    }),
-    [
-      categories,
-      expenseCategories,
-      incomeCategories,
-      expenses,
-      incomes,
-      recurringExpenses,
-      recurringIncomes,
-      tags,
-      templates,
-      goals,
-      accounts,
-      accountBalances,
-      debts,
-      categoryBudgets,
-      monthlyBudget,
-      defaultCurrency,
-      defaultSavingsPct,
-      dailyReminderHour,
-      notificationPreferences,
-      isInitialized,
-      isSecondaryLoaded,
-      actions,
-    ],
-  );
-
   const categoriesSlice = useMemo<CategoriesSlice>(
     () => ({ categories, expenseCategories, incomeCategories }),
     [categories, expenseCategories, incomeCategories],
@@ -715,9 +661,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
                           <CategoryBudgetsDataContext.Provider
                             value={categoryBudgets}
                           >
-                            <DataContext.Provider value={value}>
-                              {children}
-                            </DataContext.Provider>
+                            {children}
                           </CategoryBudgetsDataContext.Provider>
                         </DebtsDataContext.Provider>
                       </AccountsDataContext.Provider>
@@ -733,15 +677,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useData = () => {
-  const context = useContext(DataContext);
-
-  if (!context) {
-    throw new Error('useData must be used within a DataProvider');
-  }
-
-  return context;
-};
 
 // Use this when a component only needs setters/refresh callbacks. Skips
 // re-renders triggered by data mutations.

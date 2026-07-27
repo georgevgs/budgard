@@ -21,7 +21,3 @@ export type Budget = {
   created_at: string;
   updated_at: string;
 };
-
-export type BudgetFormData = {
-  amount: string;
-};

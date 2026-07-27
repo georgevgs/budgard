@@ -16,7 +16,7 @@ type Props = {
   onComplete: () => void;
 };
 
-export const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
+const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
   const { defaultCurrency } = useDataConfig();
   const [step, setStep] = useState(0);
   const currencySymbol = getCurrencySymbol(defaultCurrency || 'EUR');

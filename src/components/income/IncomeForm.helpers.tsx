@@ -33,7 +33,7 @@ export const getInitialAmount = (
   return formatCurrencyInput(sourceAmount.toString().replace('.', ','));
 };
 
-export const pickSourceAmount = (
+const pickSourceAmount = (
   income: Expense,
   defaultCurrency: string,
 ): number => {
@@ -50,7 +50,7 @@ export const getInitialDate = (income: Expense | undefined): Date => {
   return new Date();
 };
 
-export const getQuickCreateLabel = (
+const getQuickCreateLabel = (
   isCreating: boolean,
   trimmedSearch: string,
   t: TranslateFunction,

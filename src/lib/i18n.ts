@@ -72,5 +72,3 @@ const initI18n = async (): Promise<void> => {
 };
 
 export const i18nReady = initI18n();
-
-export default i18n;

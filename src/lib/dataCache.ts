@@ -70,7 +70,7 @@ const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 // Exported so DataContext's fetch pipeline uses the identical window — a
 // single source of truth prevents the cache and the network fetch from
 // trimming to different horizons (which would make rows flicker on boot).
-export const RECENT_MONTHS = 12;
+const RECENT_MONTHS = 12;
 
 export const getRecentCutoff = (): string => {
   const cutoff = new Date();

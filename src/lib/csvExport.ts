@@ -3,7 +3,7 @@ import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import type { Tag } from '@/types/Tag';
 
-export type CsvCell = string | number | null | undefined;
+type CsvCell = string | number | null | undefined;
 
 export type CsvRow = CsvCell[];
 

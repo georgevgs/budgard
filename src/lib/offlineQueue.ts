@@ -34,7 +34,7 @@ const TEMP_ID_PREFIX = 'temp-';
 export const createTempId = (): string =>
   `${TEMP_ID_PREFIX}${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-export const isTempId = (id: string): boolean => id.startsWith(TEMP_ID_PREFIX);
+const isTempId = (id: string): boolean => id.startsWith(TEMP_ID_PREFIX);
 
 const openDb = (): Promise<IDBDatabase> => {
   return new Promise((resolve, reject) => {

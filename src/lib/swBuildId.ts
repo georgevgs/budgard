@@ -12,7 +12,7 @@
 
 const REPLY_TIMEOUT_MS = 1200;
 
-export const getPageBuildId = (): string | null => {
+const getPageBuildId = (): string | null => {
   if (typeof __BUILD_ID__ !== 'string') return null;
 
   return __BUILD_ID__;

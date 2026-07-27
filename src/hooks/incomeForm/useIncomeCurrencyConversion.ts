@@ -12,5 +12,3 @@ export const useIncomeCurrencyConversion = (
     form.watch('date'),
     income?.original_currency,
   );
-
-export type { CurrencyConversionApi } from '@/hooks/currency/useCurrencyConversionCore';

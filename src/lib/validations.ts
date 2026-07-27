@@ -279,28 +279,6 @@ export const categoryBudgetSchema = z.object({
     }, 'Amount must be between 0 and 10.000.000'),
 });
 
-// Expense template validation schema
-export const templateSchema = z.object({
-  amount: z
-    .string()
-    .min(1, 'Amount is required')
-    .regex(AMOUNT_PATTERN, 'Invalid amount format')
-    .refine((val) => {
-      const amount = parseCurrencyInput(val);
-
-      return amount > 0 && amount <= 1000000;
-    }, 'Amount must be between 0 and 1.000.000'),
-  description: z
-    .string()
-    .min(1, 'Description is required')
-    .max(100, 'Description must be less than 100 characters')
-    .regex(SAFE_STRING, 'Description contains invalid characters')
-    .transform((str) => str.trim())
-    .refine((str) => str.length > 0, 'Description cannot be empty'),
-  category_id: z.string().optional(),
-  tag_id: z.string().optional(),
-});
-
 // Income validation schema — same shape as expense for now
 export const incomeSchema = z.object({
   amount: z
@@ -324,48 +302,6 @@ export const incomeSchema = z.object({
     required_error: 'Date is required',
   }),
 });
-
-// Recurring income validation schema — mirrors recurring expense
-export const recurringIncomeSchema = z
-  .object({
-    amount: z
-      .string()
-      .min(1, 'Amount is required')
-      .regex(AMOUNT_PATTERN, 'Invalid amount format')
-      .refine((val) => {
-        const amount = parseCurrencyInput(val);
-
-        return amount > 0 && amount <= 1000000;
-      }, 'Amount must be between 0 and 1.000.000'),
-    description: z
-      .string()
-      .min(1, 'Description is required')
-      .max(100, 'Description must be less than 100 characters')
-      .regex(SAFE_STRING, 'Description contains invalid characters')
-      .transform((str) => str.trim())
-      .refine((str) => str.length > 0, 'Description cannot be empty'),
-    category_id: z.string(),
-    frequency: z.enum([
-      'weekly',
-      'biweekly',
-      'monthly',
-      'quarterly',
-      'yearly',
-    ] as const),
-    start_date: z
-      .date({
-        required_error: 'Start date is required',
-      })
-      .min(new Date('2000-01-01'), 'Start date cannot be before 2000'),
-    end_date: z.date().optional(),
-  })
-  .refine((data) => !data.end_date || data.end_date >= data.start_date, {
-    message: 'End date must be after start date',
-    path: ['end_date'],
-  });
-
-// Income category validation schema — same shape as category
-export const incomeCategorySchema = categorySchema;
 
 // Goal validation schema
 export const goalSchema = z
@@ -540,12 +476,8 @@ export const debtPaymentSchema = z.object({
 export type ExpenseFormData = z.infer<typeof expenseSchema>;
 export type IncomeFormData = z.infer<typeof incomeSchema>;
 export type CategoryFormData = z.infer<typeof categorySchema>;
-export type TagFormData = z.infer<typeof tagSchema>;
 export type RecurringExpenseFormData = z.infer<typeof recurringExpenseSchema>;
-export type RecurringIncomeFormData = z.infer<typeof recurringIncomeSchema>;
 export type BudgetFormData = z.infer<typeof budgetSchema>;
-export type CategoryBudgetFormData = z.infer<typeof categoryBudgetSchema>;
-export type TemplateFormData = z.infer<typeof templateSchema>;
 export type GoalFormData = z.infer<typeof goalSchema>;
 export type AccountFormData = z.infer<typeof accountSchema>;
 export type AccountBalanceFormData = z.infer<typeof accountBalanceSchema>;

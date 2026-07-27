@@ -1,6 +1,6 @@
 // Free-tier caps. Enforced in the UI; the paid tier removes them.
 export const FREE_RECURRING_EXPENSE_LIMIT = 3;
-export const FREE_ANALYTICS_MONTHS = 3;
+const FREE_ANALYTICS_MONTHS = 3;
 export const FREE_ACCOUNT_LIMIT = 3;
 export const FREE_CATEGORY_LIMIT = 10;
 

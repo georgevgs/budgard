@@ -24,7 +24,7 @@ export type Account = {
   updated_at: string;
 }
 
-export const LIABILITY_KINDS: ReadonlyArray<AccountKind> = ['credit_card', 'loan'];
+const LIABILITY_KINDS: ReadonlyArray<AccountKind> = ['credit_card', 'loan'];
 
 export const isLiability = (kind: AccountKind): boolean =>
   LIABILITY_KINDS.includes(kind);

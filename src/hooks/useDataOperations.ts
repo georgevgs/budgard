@@ -12,8 +12,6 @@ import { useRecurringIncomeOps } from '@/hooks/dataOps/useRecurringIncomeOps';
 import { useBudgetOps } from '@/hooks/dataOps/useBudgetOps';
 import { useSettingsOps } from '@/hooks/dataOps/useSettingsOps';
 
-export type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
-
 // Aggregates every domain ops hook so existing consumers can keep importing a
 // single hook. New consumers should prefer the per-domain hooks under
 // `./dataOps/` so they only subscribe to the slice they actually need.

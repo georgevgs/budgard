@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export const RESEND_COOLDOWN_SECONDS = 60;
+const RESEND_COOLDOWN_SECONDS = 60;
 
 // Countdown gate for OTP re-sends. Restarts whenever `lastSentAt` changes
 // (a code was just sent) and ticks down to zero once per second.
