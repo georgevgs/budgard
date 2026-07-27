@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
 import { useTranslation } from 'react-i18next';
 import { offlineQueue, type QueuedMutation } from '@/lib/offlineQueue';
 import { dataService } from '@/services/dataService';

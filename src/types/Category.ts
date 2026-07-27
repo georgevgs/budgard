@@ -13,3 +13,10 @@ export type Category = {
   type?: CategoryType;
   kind?: CategoryKind | null;
 }
+
+// Shape of a category embedded on a transaction row. Fetches select only the
+// columns the UI renders, so embeds must not claim user_id/created_at exist.
+export type EmbeddedCategory = Pick<
+  Category,
+  'id' | 'name' | 'color' | 'icon' | 'type' | 'kind'
+>;

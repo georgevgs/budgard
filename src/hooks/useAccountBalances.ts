@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
 import { dataService } from '@/services/dataService';
 import type { AccountBalance } from '@/types/AccountBalance';
 
 type UseAccountBalancesResult = {
   snapshots: AccountBalance[];
   isLoading: boolean;
+  hasError: boolean;
+  retry: () => void;
   removeSnapshot: (snapshotId: string) => void;
 };
 
@@ -19,6 +21,8 @@ export const useAccountBalances = (
 ): UseAccountBalancesResult => {
   const [snapshots, setSnapshots] = useState<AccountBalance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     if (!isActive) {
@@ -27,6 +31,7 @@ export const useAccountBalances = (
 
     let cancelled = false;
     setIsLoading(true);
+    setHasError(false);
 
     (async () => {
       try {
@@ -39,6 +44,9 @@ export const useAccountBalances = (
         Sentry.captureException(error, {
           tags: { context: 'useAccountBalances.load' },
         });
+        if (!cancelled) {
+          setHasError(true);
+        }
       } finally {
         if (!cancelled) {
           setIsLoading(false);
@@ -49,11 +57,15 @@ export const useAccountBalances = (
     return () => {
       cancelled = true;
     };
-  }, [accountId, updatedAt, isActive]);
+  }, [accountId, updatedAt, isActive, retryCount]);
+
+  const retry = () => {
+    setRetryCount((count) => count + 1);
+  };
 
   const removeSnapshot = (snapshotId: string) => {
     setSnapshots((prev) => prev.filter((s) => s.id !== snapshotId));
   };
 
-  return { snapshots, isLoading, removeSnapshot };
+  return { snapshots, isLoading, hasError, retry, removeSnapshot };
 };

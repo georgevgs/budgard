@@ -7,7 +7,7 @@ import ArrowDownLeft from 'lucide-react/dist/esm/icons/arrow-down-left';
 import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn, formatCurrency, formatPercent } from '@/lib/utils';
 import { computeAccountXirr } from '@/lib/xirr';
 import { computeAccountYtd, type YtdResult } from '@/lib/ytd';
 import type { Account } from '@/types/Account';
@@ -92,7 +92,7 @@ export const renderSinceLast = (
   let pctText = '';
   if (previous.balance > 0) {
     const pct = (delta / previous.balance) * 100;
-    pctText = ` (${renderGainSign(isPositive)}${pct.toFixed(1)}%)`;
+    pctText = ` (${renderGainSign(isPositive)}${formatPercent(pct, 1)}%)`;
   }
 
   return (
@@ -189,7 +189,7 @@ const renderAllTimeReturnKpi = (
         {renderGainSign(isPositive)}
         {formatCurrency(gain, account.default_currency)} (
         {renderGainSign(isPositive)}
-        {returnPct.toFixed(1)}%)
+        {formatPercent(returnPct, 1)}%)
       </p>
     </div>
   );
@@ -224,7 +224,7 @@ const renderYtd = (
         {renderGainSign(isPositive)}
         {formatCurrency(ytd.growth, currency)} (
         {renderGainSign(isPositive)}
-        {ytd.pct.toFixed(1)}%)
+        {formatPercent(ytd.pct, 1)}%)
       </p>
     </div>
   );
@@ -246,7 +246,7 @@ const renderAnnualized = (
       </p>
       <p className={cn('font-medium tabular-nums', getGainClass(isPositive))}>
         {renderGainSign(isPositive)}
-        {pct.toFixed(1)}%
+        {formatPercent(pct, 1)}%
       </p>
     </div>
   );
@@ -284,22 +284,51 @@ const renderGainSign = (isPositive: boolean): string => {
   return '';
 };
 
-export const renderHistoryList = (
-  isLoading: boolean,
-  isInvestment: boolean,
-  snapshots: AccountBalance[],
-  currency: string,
-  accountName: string,
-  dateLocale: Locale,
-  onDelete: (id: string) => void,
-  setMode: (mode: SnapshotMode) => void,
-  t: TranslateFunction,
-) => {
+type HistoryListArgs = {
+  isLoading: boolean;
+  hasError: boolean;
+  isInvestment: boolean;
+  snapshots: AccountBalance[];
+  currency: string;
+  accountName: string;
+  dateLocale: Locale;
+  onDelete: (id: string) => void;
+  onRetry: () => void;
+  setMode: (mode: SnapshotMode) => void;
+  t: TranslateFunction;
+};
+
+export const renderHistoryList = ({
+  isLoading,
+  hasError,
+  isInvestment,
+  snapshots,
+  currency,
+  accountName,
+  dateLocale,
+  onDelete,
+  onRetry,
+  setMode,
+  t,
+}: HistoryListArgs) => {
   if (isLoading) {
     return (
       <p className="text-center text-sm text-muted-foreground py-6">
         {t('common.loading')}
       </p>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-6">
+        <p className="text-center text-sm text-muted-foreground">
+          {t('networth.detail.historyLoadFailed')}
+        </p>
+        <Button size="sm" variant="outline" onClick={onRetry}>
+          {t('common.tryAgain')}
+        </Button>
+      </div>
     );
   }
 
@@ -345,7 +374,7 @@ export const renderHistoryList = (
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
+            className="h-11 w-11 -m-2 text-muted-foreground hover:text-destructive shrink-0"
             onClick={() => onDelete(s.id)}
             aria-label={t('common.delete')}
           >

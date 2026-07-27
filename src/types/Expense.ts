@@ -1,6 +1,6 @@
-import { Category } from '@/types/Category.ts';
+import { EmbeddedCategory } from '@/types/Category.ts';
 import { Debt } from '@/types/Debt.ts';
-import { Tag } from '@/types/Tag.ts';
+import { EmbeddedTag } from '@/types/Tag.ts';
 
 export type TransactionType = 'expense' | 'income' | 'debt_payment';
 
@@ -26,7 +26,7 @@ export type Expense = {
   type?: TransactionType;
   // Savings nudge: portion of an income row earmarked as savings.
   savings_allocation_amount?: number | null;
-  category?: Category;
-  tag?: Tag;
+  category?: EmbeddedCategory;
+  tag?: EmbeddedTag;
   debt?: Debt;
 }

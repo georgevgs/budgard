@@ -26,8 +26,6 @@ const expenses: Expense[] = [
       name: 'Food',
       color: '#F00',
       icon: null,
-      user_id: 'u1',
-      created_at: '',
     },
   }),
   makeExpense({
@@ -41,8 +39,6 @@ const expenses: Expense[] = [
       name: 'Transport',
       color: '#0F0',
       icon: null,
-      user_id: 'u1',
-      created_at: '',
     },
   }),
   makeExpense({
@@ -56,8 +52,6 @@ const expenses: Expense[] = [
       name: 'Food',
       color: '#F00',
       icon: null,
-      user_id: 'u1',
-      created_at: '',
     },
   }),
   makeExpense({
@@ -77,8 +71,6 @@ const expenses: Expense[] = [
       id: 'tag-1',
       name: 'Daily',
       color: '#00F',
-      user_id: 'u1',
-      created_at: '',
     },
   }),
 ];

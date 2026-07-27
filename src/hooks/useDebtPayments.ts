@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
 import { dataService } from '@/services/dataService';
 import type { Expense } from '@/types/Expense';
 
 type UseDebtPaymentsResult = {
   payments: Expense[];
   isLoading: boolean;
+  hasError: boolean;
+  retry: () => void;
   removePayment: (paymentId: string) => void;
 };
 
@@ -19,6 +21,8 @@ export const useDebtPayments = (
 ): UseDebtPaymentsResult => {
   const [payments, setPayments] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     if (!isActive) {
@@ -27,6 +31,7 @@ export const useDebtPayments = (
 
     let cancelled = false;
     setIsLoading(true);
+    setHasError(false);
 
     (async () => {
       try {
@@ -39,6 +44,9 @@ export const useDebtPayments = (
         Sentry.captureException(error, {
           tags: { context: 'useDebtPayments.load' },
         });
+        if (!cancelled) {
+          setHasError(true);
+        }
       } finally {
         if (!cancelled) {
           setIsLoading(false);
@@ -49,11 +57,15 @@ export const useDebtPayments = (
     return () => {
       cancelled = true;
     };
-  }, [debtId, updatedAt, isActive]);
+  }, [debtId, updatedAt, isActive, retryCount]);
+
+  const retry = () => {
+    setRetryCount((count) => count + 1);
+  };
 
   const removePayment = (paymentId: string) => {
     setPayments((prev) => prev.filter((p) => p.id !== paymentId));
   };
 
-  return { payments, isLoading, removePayment };
+  return { payments, isLoading, hasError, retry, removePayment };
 };

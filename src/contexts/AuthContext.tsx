@@ -5,7 +5,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
 import type { Session } from '@supabase/supabase-js';
 import { authStore } from '@/lib/authStore';
 

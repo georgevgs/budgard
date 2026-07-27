@@ -81,8 +81,10 @@ export default memo(ExpensesCard);
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 const resolveDateFormat = (showFullDate: boolean | undefined): string => {
+  // 'PP' is date-fns's locale-aware medium date, so Greek reads "3 Ιουν 2026"
+  // instead of a US-ordered "Ιουν 3, 2026".
   if (showFullDate) {
-    return 'MMM d, yyyy';
+    return 'PP';
   }
 
   return 'MMM d';

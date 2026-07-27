@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
@@ -13,6 +14,7 @@ export const useAccountOps = () => {
   const { isInitialized } = useDataConfig();
   const { setAccounts, setAccountBalances, refreshAccounts } = useDataActions();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const showErrorToast = useShowErrorToast();
 
   const handleAccountSubmit = useCallback(
@@ -47,7 +49,11 @@ export const useAccountOps = () => {
 
         toast({
           variant: 'success',
-          title: pickByEdit(accountId, 'Account updated', 'Account added'),
+          title: pickByEdit(
+            accountId,
+            t('networth.toasts.accountUpdated'),
+            t('networth.toasts.accountAdded'),
+          ),
         });
 
         return saved;
@@ -59,12 +65,16 @@ export const useAccountOps = () => {
           },
         });
         showErrorToast(
-          `Failed to ${pickByEdit(accountId, 'update', 'add')} account`,
+          pickByEdit(
+            accountId,
+            t('networth.toasts.accountUpdateFailed'),
+            t('networth.toasts.accountAddFailed'),
+          ),
         );
         throw error;
       }
     },
-    [isInitialized, setAccounts, refreshAccounts, showErrorToast, toast],
+    [isInitialized, setAccounts, refreshAccounts, showErrorToast, toast, t],
   );
 
   const handleAccountArchive = useCallback(
@@ -88,11 +98,11 @@ export const useAccountOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'archiveAccount' },
         });
-        showErrorToast('Failed to archive account');
+        showErrorToast(t('networth.toasts.archiveFailed'));
         throw error;
       }
     },
-    [isInitialized, setAccounts, showErrorToast],
+    [isInitialized, setAccounts, showErrorToast, t],
   );
 
   const handleSnapshotCreate = useCallback(
@@ -118,7 +128,7 @@ export const useAccountOps = () => {
         });
         setAccounts((prev) => replaceById(prev, accountId, updatedAccount));
 
-        toast({ variant: 'success', title: 'Balance updated' });
+        toast({ variant: 'success', title: t('networth.toasts.balanceUpdated') });
 
         return saved;
       } catch (error) {
@@ -126,11 +136,11 @@ export const useAccountOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'createAccountBalance' },
         });
-        showErrorToast('Failed to update balance');
+        showErrorToast(t('networth.toasts.balanceUpdateFailed'));
         throw error;
       }
     },
-    [isInitialized, setAccounts, setAccountBalances, showErrorToast, toast],
+    [isInitialized, setAccounts, setAccountBalances, showErrorToast, toast, t],
   );
 
   const handleSnapshotDelete = useCallback(
@@ -156,11 +166,11 @@ export const useAccountOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'deleteAccountBalance' },
         });
-        showErrorToast('Failed to delete snapshot');
+        showErrorToast(t('networth.toasts.snapshotDeleteFailed'));
         throw error;
       }
     },
-    [isInitialized, setAccounts, setAccountBalances, showErrorToast],
+    [isInitialized, setAccounts, setAccountBalances, showErrorToast, t],
   );
 
   return useMemo(

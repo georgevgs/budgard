@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
@@ -49,6 +50,7 @@ const getRegistration = async (): Promise<ServiceWorkerRegistration | null> => {
 export const usePushNotifications = (): UsePushNotificationsReturn => {
   const { session } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [state, setState] = useState<PushState>('loading');
 
   useEffect(() => {
@@ -101,7 +103,7 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
       if (!reg) {
         toast({
           variant: 'destructive',
-          description: 'Service worker not available. Try reloading the app.',
+          description: t('settings.notifications.swUnavailable'),
         });
 
         return;
@@ -132,10 +134,10 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
     } catch {
       toast({
         variant: 'destructive',
-        description: 'Failed to enable notifications. Please try again.',
+        description: t('settings.notifications.enableFailed'),
       });
     }
-  }, [session, toast]);
+  }, [session, toast, t]);
 
   const unsubscribe = useCallback(async () => {
     try {
@@ -160,10 +162,10 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
     } catch {
       toast({
         variant: 'destructive',
-        description: 'Failed to disable notifications.',
+        description: t('settings.notifications.disableFailed'),
       });
     }
-  }, [toast]);
+  }, [toast, t]);
 
   return { state, subscribe, unsubscribe };
 };

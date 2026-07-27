@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
 import { getReceiptUrl } from '@/services/receiptService';
 
 // Loads a signed receipt URL when `enabled` is true. Keeps service access

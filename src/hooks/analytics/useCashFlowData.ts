@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { useExpensesData, useIncomesData } from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import { monthsElapsedInYear } from '@/lib/utils';
@@ -13,16 +13,16 @@ export const useCashFlowData = (selectedYear: number) => {
     const expByMonth = new Array(12).fill(0);
     const incByMonth = new Array(12).fill(0);
 
+    // YYYY-MM-DD dates: slicing the year/month straight off the string is
+    // ~10x faster than parseISO per row (see useExpensesFilter).
     for (const e of expenses) {
-      const d = parseISO(e.date);
-      if (d.getFullYear() !== selectedYear) continue;
-      expByMonth[d.getMonth()] += e.amount;
+      if (Number(e.date.slice(0, 4)) !== selectedYear) continue;
+      expByMonth[Number(e.date.slice(5, 7)) - 1] += e.amount;
     }
 
     for (const i of incomes) {
-      const d = parseISO(i.date);
-      if (d.getFullYear() !== selectedYear) continue;
-      incByMonth[d.getMonth()] += i.amount;
+      if (Number(i.date.slice(0, 4)) !== selectedYear) continue;
+      incByMonth[Number(i.date.slice(5, 7)) - 1] += i.amount;
     }
 
     return Array.from({ length: 12 }, (_, idx) => {

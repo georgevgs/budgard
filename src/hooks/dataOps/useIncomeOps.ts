@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
@@ -43,7 +43,11 @@ export const useIncomeOps = () => {
         });
         toast({
           variant: 'success',
-          title: pickByEdit(incomeId, 'Income updated', 'Income added'),
+          title: pickByEdit(
+            incomeId,
+            t('income.toasts.updated'),
+            t('income.toasts.added'),
+          ),
         });
 
         return savedIncome;
@@ -96,7 +100,11 @@ export const useIncomeOps = () => {
           },
         });
         showErrorToast(
-          `Failed to ${pickByEdit(incomeId, 'update', 'add')} income`,
+          pickByEdit(
+            incomeId,
+            t('income.toasts.updateFailed'),
+            t('income.toasts.addFailed'),
+          ),
         );
         throw error;
       }
@@ -131,7 +139,7 @@ export const useIncomeOps = () => {
         }
         haptics.error();
         Sentry.captureException(error, { tags: { operation: 'deleteIncome' } });
-        showErrorToast('Failed to delete income');
+        showErrorToast(t('income.toasts.deleteFailed'));
         throw error;
       }
     },

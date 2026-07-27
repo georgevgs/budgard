@@ -8,7 +8,8 @@ import {
   type ReactNode,
   useCallback,
 } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { dataService } from '@/services/dataService';
 import type { Category } from '@/types/Category';
@@ -33,6 +34,7 @@ import type {
 } from '@/contexts/DataContext.types';
 import {
   mergeUniqueById,
+  replaceRecentWindow,
   isAbortError,
   isExpiredJwtError,
 } from '@/contexts/DataContext.helpers';
@@ -67,6 +69,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
   const toastRef = useRef(toast);
   toastRef.current = toast;
+  const { t } = useTranslation();
+  const tRef = useRef(t);
+  tRef.current = t;
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -133,6 +138,15 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   // User id whose boot sequence (cache hydration + initial fetch) already
   // ran, so token refreshes re-triggering the boot effect don't refetch.
   const bootedUserIdRef = useRef<string | null>(null);
+  // User id whose stage-2 top-up (pre-cutoff history) completed this boot.
+  // Old rows change rarely, so re-downloading the full history on every
+  // foreground refetch is pure waste — stage 2 runs once per boot and the
+  // recent window alone refreshes afterwards.
+  const stage2DoneForUserRef = useRef<string | null>(null);
+  // Lets the load-failure toast's "Try again" action re-invoke fetchData from
+  // inside its own catch block (the callback can't reference itself while it
+  // is being defined). Kept current via the assignment right below fetchData.
+  const fetchDataRef = useRef<() => Promise<void>>(async () => {});
 
   const fetchData = useCallback(async () => {
     if (!session?.user?.id) {
@@ -182,10 +196,24 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         dataService.getAccounts(controller.signal),
       ]);
 
+      const stage2AlreadyDone =
+        stage2DoneForUserRef.current === session.user.id;
+
       // React 18+ automatically batches these state updates
       setCategories(categoriesData);
-      setExpenses(expensesData);
-      setIncomes(incomesData);
+      if (stage2AlreadyDone) {
+        // The pre-cutoff tail already lives in state; a plain replace with
+        // the recent window would wipe it until the next boot.
+        setExpenses((prev) =>
+          replaceRecentWindow(prev, expensesData, recentCutoff),
+        );
+        setIncomes((prev) =>
+          replaceRecentWindow(prev, incomesData, recentCutoff),
+        );
+      } else {
+        setExpenses(expensesData);
+        setIncomes(incomesData);
+      }
       setRecurringExpenses(recurringExpensesData);
       setRecurringIncomes(recurringIncomesData);
       setTags(tagsData);
@@ -233,34 +261,40 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
       // Stage 2: top up older expenses/incomes in the background. Append
       // to whatever is in state now (which may include user mutations made
-      // during stage 2).
-      Promise.all([
-        dataService.getExpenses(controller.signal, undefined, recentCutoff),
-        dataService.getIncomes(controller.signal, undefined, recentCutoff),
-      ])
-        .then(([olderExpenses, olderIncomes]) => {
-          if (controller.signal.aborted) {
-            return;
-          }
-          // Dedupe by id: if a refreshExpenses/refreshIncomes ran concurrently
-          // (e.g. user deleted a recurring expense, bulk-imported, or rolled
-          // back a category delete) it will have replaced state with full
-          // history, so older* may already be present.
-          if (olderExpenses.length > 0) {
-            setExpenses((prev) => mergeUniqueById(prev, olderExpenses));
-          }
-          if (olderIncomes.length > 0) {
-            setIncomes((prev) => mergeUniqueById(prev, olderIncomes));
-          }
-        })
-        .catch((error) => {
-          if (isAbortError(error) || isExpiredJwtError(error)) {
-            return;
-          }
-          Sentry.captureException(error, {
-            tags: { context: 'fetchOlderTransactions' },
+      // during stage 2). Runs once per boot — the pre-cutoff history barely
+      // changes, and re-downloading all of it on every foreground refetch
+      // costs a long-history user their whole archive in bandwidth daily.
+      if (!stage2AlreadyDone) {
+        Promise.all([
+          dataService.getExpenses(controller.signal, undefined, recentCutoff),
+          dataService.getIncomes(controller.signal, undefined, recentCutoff),
+        ])
+          .then(([olderExpenses, olderIncomes]) => {
+            if (controller.signal.aborted) {
+              return;
+            }
+            stage2DoneForUserRef.current = session.user.id;
+            // Dedupe by id: if a refreshExpenses/refreshIncomes ran
+            // concurrently (e.g. user deleted a recurring expense,
+            // bulk-imported, or rolled back a category delete) it will have
+            // replaced state with full history, so older* may already be
+            // present.
+            if (olderExpenses.length > 0) {
+              setExpenses((prev) => mergeUniqueById(prev, olderExpenses));
+            }
+            if (olderIncomes.length > 0) {
+              setIncomes((prev) => mergeUniqueById(prev, olderIncomes));
+            }
+          })
+          .catch((error) => {
+            if (isAbortError(error) || isExpiredJwtError(error)) {
+              return;
+            }
+            Sentry.captureException(error, {
+              tags: { context: 'fetchOlderTransactions' },
+            });
           });
-        });
+      }
     } catch (error) {
       // iOS PWA aborts in-flight requests when the app is backgrounded. The
       // AbortError may be a raw DOMException or wrapped by Supabase into an
@@ -286,12 +320,19 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
       toastRef.current({
-        title: 'Error',
-        description: 'Failed to load data',
+        title: tRef.current('common.error'),
+        description: tRef.current('common.loadDataFailed'),
         variant: 'destructive',
+        action: {
+          label: tRef.current('common.tryAgain'),
+          onClick: () => {
+            void fetchDataRef.current();
+          },
+        },
       });
     }
   }, [session?.user?.id]);
+  fetchDataRef.current = fetchData;
 
   const refreshData = useCallback(async () => {
     await fetchData();
@@ -389,6 +430,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
     if (!session) {
       bootedUserIdRef.current = null;
+      stage2DoneForUserRef.current = null;
       hydratedFromCacheRef.current = false;
       // Never leave financial data behind on a shared device after sign-out.
       clearDataSnapshot();

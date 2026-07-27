@@ -1,4 +1,4 @@
-import { Category } from '@/types/Category';
+import { EmbeddedCategory } from '@/types/Category';
 
 type RecurringExpenseFrequency =
   | 'weekly'
@@ -21,5 +21,5 @@ export type RecurringExpense = {
   created_at: string;
   active: boolean;
   type?: 'expense' | 'income';
-  category?: Category;
+  category?: EmbeddedCategory;
 }

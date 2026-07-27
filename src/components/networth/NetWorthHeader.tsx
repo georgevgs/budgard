@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn, formatCurrency, formatPercent } from '@/lib/utils';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right';
 import ArrowDownLeft from 'lucide-react/dist/esm/icons/arrow-down-left';
@@ -144,7 +144,7 @@ const renderInvestmentRow = (
         </p>
         <p className="text-xs text-muted-foreground tabular-nums">
           {renderSignPrefix(isPositive)}
-          {returnPct.toFixed(1)}%
+          {formatPercent(returnPct, 1)}%
         </p>
       </div>
     </div>

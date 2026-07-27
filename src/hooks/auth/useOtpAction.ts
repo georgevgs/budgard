@@ -9,9 +9,15 @@ export type OtpState = {
   step: 'request' | 'verify';
   email: string;
   error: string | null;
+  lastSentAt: number | null;
 };
 
-const initialState: OtpState = { step: 'request', email: '', error: null };
+const initialState: OtpState = {
+  step: 'request',
+  email: '',
+  error: null,
+  lastSentAt: null,
+};
 
 export const useOtpAction = (onSuccess?: () => void) => {
   const { toast } = useToast();
@@ -22,11 +28,40 @@ export const useOtpAction = (onSuccess?: () => void) => {
 
   const [state, formAction] = useActionState(
     async (prev: OtpState, formData: FormData): Promise<OtpState> => {
-      // Handle go-back action
+      // Handle go-back action — keep the email so the user edits it
+      // instead of retyping from scratch
       if (formData.get('_action') === 'back') {
         setOtp('');
 
-        return { ...initialState };
+        return {
+          step: 'request',
+          email: prev.email,
+          error: null,
+          lastSentAt: null,
+        };
+      }
+
+      // Handle re-send action from the verify step
+      if (formData.get('_action') === 'resend') {
+        const captchaToken = formData.get('turnstile_token') as string;
+        if (!captchaToken) {
+          return { ...prev, error: t('auth.securityCheck') };
+        }
+
+        const { error } = await requestOTP(prev.email, captchaToken);
+        turnstileRef.current?.reset();
+        setTurnstileToken(null);
+        if (error) {
+          return { ...prev, error: t('auth.sendFailed') };
+        }
+
+        setOtp('');
+        toast({
+          title: t('auth.codeSent'),
+          description: t('auth.checkEmail'),
+        });
+
+        return { ...prev, error: null, lastSentAt: Date.now() };
       }
 
       // Step: request OTP
@@ -42,6 +77,7 @@ export const useOtpAction = (onSuccess?: () => void) => {
             step: 'request',
             email: '',
             error: t('auth.securityCheck'),
+            lastSentAt: null,
           };
         }
 
@@ -53,6 +89,7 @@ export const useOtpAction = (onSuccess?: () => void) => {
             step: 'request',
             email: '',
             error: t('auth.invalidEmail'),
+            lastSentAt: null,
           };
         }
 
@@ -62,15 +99,24 @@ export const useOtpAction = (onSuccess?: () => void) => {
           turnstileRef.current?.reset();
           setTurnstileToken(null);
 
-          return { step: 'request', email: '', error: t('auth.sendFailed') };
+          return {
+            step: 'request',
+            email: '',
+            error: t('auth.sendFailed'),
+            lastSentAt: null,
+          };
         }
+
+        // The token was consumed by the send — the verify step mounts a fresh
+        // widget for a potential re-send
+        setTurnstileToken(null);
 
         toast({
           title: t('auth.codeSent'),
           description: t('auth.checkEmail'),
         });
 
-        return { step: 'verify', email, error: null };
+        return { step: 'verify', email, error: null, lastSentAt: Date.now() };
       }
 
       // Step: verify OTP
@@ -79,17 +125,16 @@ export const useOtpAction = (onSuccess?: () => void) => {
 
       const { error } = await signInWithOTP(email, otpValue);
       if (error) {
-        return {
-          step: 'verify',
-          email: prev.email,
-          error: t('auth.invalidCode'),
-        };
+        // Clear the stale code so the user can type the next attempt directly
+        setOtp('');
+
+        return { ...prev, error: t('auth.invalidCode') };
       }
 
       toast({ title: t('common.success'), description: t('auth.signedIn') });
       onSuccess?.();
 
-      return { step: 'verify', email: prev.email, error: null };
+      return { ...prev, error: null };
     },
     initialState,
   );

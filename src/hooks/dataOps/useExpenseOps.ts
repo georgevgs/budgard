@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
@@ -10,6 +10,7 @@ import { offlineQueue, createTempId } from '@/lib/offlineQueue';
 import { isOfflineError } from '@/lib/offlineError';
 import type { Expense } from '@/types/Expense';
 import { replaceById, patchById, pickByEdit } from '@/hooks/dataOps/helpers';
+import { mergeUniqueById } from '@/contexts/DataContext.helpers';
 import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
 
 export type ReceiptOptions = {
@@ -27,8 +28,7 @@ type BulkExpenseRow = {
 
 export const useExpenseOps = () => {
   const { isInitialized } = useDataConfig();
-  const { setExpenses, refreshExpenses, refreshDebts, expensesRef } =
-    useDataActions();
+  const { setExpenses, refreshDebts, expensesRef } = useDataActions();
   const { toast } = useToast();
   const { t } = useTranslation();
   const showErrorToast = useShowErrorToast();
@@ -134,12 +134,16 @@ export const useExpenseOps = () => {
         if (receiptFailed) {
           toast({
             variant: 'destructive',
-            description: 'Expense saved but receipt upload failed',
+            description: t('expenses.toasts.receiptUploadFailed'),
           });
         } else {
           toast({
             variant: 'success',
-            title: pickByEdit(expenseId, 'Expense updated', 'Expense added'),
+            title: pickByEdit(
+              expenseId,
+              t('expenses.toasts.updated'),
+              t('expenses.toasts.added'),
+            ),
           });
         }
       } catch (error) {
@@ -197,7 +201,11 @@ export const useExpenseOps = () => {
           },
         });
         showErrorToast(
-          `Failed to ${pickByEdit(expenseId, 'update', 'add')} expense`,
+          pickByEdit(
+            expenseId,
+            t('expenses.toasts.updateFailed'),
+            t('expenses.toasts.addFailed'),
+          ),
         );
         throw error;
       }
@@ -252,7 +260,7 @@ export const useExpenseOps = () => {
         }
         haptics.error();
         Sentry.captureException(error, { tags: { operation: 'deleteExpense' } });
-        showErrorToast('Failed to delete expense');
+        showErrorToast(t('expenses.toasts.deleteFailed'));
         throw error;
       }
     },
@@ -263,10 +271,13 @@ export const useExpenseOps = () => {
     async (expensesData: BulkExpenseRow[]) => {
       if (!isInitialized) return;
 
-      await dataService.createExpensesBulk(expensesData);
-      await refreshExpenses();
+      // The insert returns the created rows with their embeds, so merging
+      // them into state replaces a full-history re-download. Consumers sort
+      // before display, so append order doesn't matter.
+      const created = await dataService.createExpensesBulk(expensesData);
+      setExpenses((prev) => mergeUniqueById(prev, created));
     },
-    [isInitialized, refreshExpenses],
+    [isInitialized, setExpenses],
   );
 
   return useMemo(

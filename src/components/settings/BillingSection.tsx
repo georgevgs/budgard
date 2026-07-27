@@ -151,7 +151,9 @@ const renderPeriodRow = (
   const periodEnd = getPeriodEnd(subscription);
   if (!periodEnd) return null;
 
-  const date = format(periodEnd, 'd MMMM yyyy', { locale: dateLocale });
+  // 'PPP' is date-fns's locale-aware long date, matching how the detail
+  // sheets render dates in each language.
+  const date = format(periodEnd, 'PPP', { locale: dateLocale });
 
   if (subscription.cancel_at_period_end) {
     return (

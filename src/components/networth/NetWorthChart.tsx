@@ -11,12 +11,11 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn, formatCurrency, formatCurrencyCompact } from '@/lib/utils';
 import {
   ChartTooltipShell,
   ChartTooltipRow,
 } from '@/components/common/ChartTooltip';
-import { getCurrencySymbol } from '@/lib/currencies';
 import type { NetWorthPoint } from '@/hooks/useNetWorth';
 import { useDateLocale } from '@/hooks/useDateLocale';
 
@@ -30,7 +29,6 @@ type Props = {
 const NetWorthChart = ({ series, defaultCurrency }: Props) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
-  const currencySymbol = getCurrencySymbol(defaultCurrency);
 
   const data = useMemo(
     () =>
@@ -78,7 +76,7 @@ const NetWorthChart = ({ series, defaultCurrency }: Props) => {
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(value) =>
-                  `${Math.abs(value).toLocaleString()}${currencySymbol}`
+                  formatCurrencyCompact(Math.abs(value), defaultCurrency)
                 }
                 width={60}
               />

@@ -21,6 +21,10 @@ import {
   renderNoTagsMessage,
 } from '@/components/expenses/ExpensesForm.helpers';
 import type { TagPickerApi } from '@/hooks/expenseForm/useTagPicker';
+import {
+  useTagListboxNav,
+  type TagListboxNavApi,
+} from '@/hooks/expenseForm/useTagListboxNav';
 import type { ExpenseFormData } from '@/lib/validations';
 
 type Props = {
@@ -30,17 +34,7 @@ type Props = {
 
 const ExpenseTagField = ({ form, tagPicker }: Props) => {
   const { t } = useTranslation();
-
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key !== 'Enter') return;
-
-    e.preventDefault();
-    if (tagPicker.filteredTags.length === 1 && !tagPicker.showCreateOption) {
-      tagPicker.handleTagSelect(tagPicker.filteredTags[0].id);
-    } else if (tagPicker.showCreateOption) {
-      tagPicker.handleTagCreateInline();
-    }
-  };
+  const nav = useTagListboxNav(tagPicker);
 
   return (
     <FormField
@@ -77,25 +71,19 @@ const ExpenseTagField = ({ form, tagPicker }: Props) => {
                   placeholder={t('expenses.tagSearchPlaceholder')}
                   value={tagPicker.tagSearch}
                   onChange={(e) => tagPicker.setTagSearch(e.target.value)}
-                  onKeyDown={handleSearchKeyDown}
+                  onKeyDown={nav.handleSearchKeyDown}
+                  role="combobox"
+                  aria-expanded={tagPicker.tagPopoverOpen}
+                  aria-controls={nav.listboxId}
+                  aria-activedescendant={nav.getActiveDescendant()}
+                  aria-autocomplete="list"
                   autoFocus
                 />
               </div>
               <div className="max-h-[200px] overflow-y-auto">
-                {tagPicker.filteredTags.map((tag) => (
-                  <button
-                    key={tag.id}
-                    type="button"
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left focus-visible:outline-none focus-visible:bg-accent"
-                    onClick={() => tagPicker.handleTagSelect(tag.id)}
-                  >
-                    <div
-                      className="w-3 h-3 rounded-full shrink-0"
-                      style={{ backgroundColor: tag.color }}
-                    />
-                    {tag.name}
-                  </button>
-                ))}
+                <div id={nav.listboxId} role="listbox">
+                  {renderTagOptions(tagPicker, nav)}
+                </div>
                 {renderCreateTagOption(
                   tagPicker.showCreateOption,
                   tagPicker.isCreatingTag,
@@ -119,3 +107,27 @@ const ExpenseTagField = ({ form, tagPicker }: Props) => {
 };
 
 export default ExpenseTagField;
+
+// ─── Helper render functions ──────────────────────────────────────────────────
+
+const renderTagOptions = (tagPicker: TagPickerApi, nav: TagListboxNavApi) =>
+  tagPicker.filteredTags.map((tag, index) => (
+    <button
+      key={tag.id}
+      id={nav.getOptionId(index)}
+      type="button"
+      role="option"
+      aria-selected={index === nav.activeIndex}
+      className={cn(
+        'w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left focus-visible:outline-none focus-visible:bg-accent',
+        index === nav.activeIndex && 'bg-accent',
+      )}
+      onClick={() => tagPicker.handleTagSelect(tag.id)}
+    >
+      <div
+        className="w-3 h-3 rounded-full shrink-0"
+        style={{ backgroundColor: tag.color }}
+      />
+      {tag.name}
+    </button>
+  ));

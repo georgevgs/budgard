@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
@@ -12,6 +13,7 @@ export const useGoalOps = () => {
   const { isInitialized } = useDataConfig();
   const { setGoals } = useDataActions();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const showErrorToast = useShowErrorToast();
 
   const handleGoalCreate = useCallback(
@@ -32,16 +34,16 @@ export const useGoalOps = () => {
         const saved = await dataService.createGoal(goalData);
         haptics.success();
         setGoals((prev) => replaceById(prev, optimisticGoal.id, saved));
-        toast({ variant: 'success', title: 'Goal created' });
+        toast({ variant: 'success', title: t('goals.toasts.created') });
       } catch (error) {
         haptics.error();
         setGoals((prev) => prev.filter((g) => g.id !== optimisticGoal.id));
         Sentry.captureException(error, { tags: { operation: 'createGoal' } });
-        showErrorToast('Failed to create goal');
+        showErrorToast(t('goals.toasts.createFailed'));
         throw error;
       }
     },
-    [isInitialized, setGoals, showErrorToast, toast],
+    [isInitialized, setGoals, showErrorToast, toast, t],
   );
 
   const handleGoalUpdate = useCallback(
@@ -63,11 +65,11 @@ export const useGoalOps = () => {
         haptics.error();
         setGoals(previousGoals);
         Sentry.captureException(error, { tags: { operation: 'updateGoal' } });
-        showErrorToast('Failed to update goal');
+        showErrorToast(t('goals.toasts.updateFailed'));
         throw error;
       }
     },
-    [isInitialized, setGoals, showErrorToast],
+    [isInitialized, setGoals, showErrorToast, t],
   );
 
   const handleGoalDelete = useCallback(
@@ -89,11 +91,11 @@ export const useGoalOps = () => {
         haptics.error();
         setGoals(previousGoals);
         Sentry.captureException(error, { tags: { operation: 'deleteGoal' } });
-        showErrorToast('Failed to delete goal');
+        showErrorToast(t('goals.toasts.deleteFailed'));
         throw error;
       }
     },
-    [isInitialized, setGoals, showErrorToast],
+    [isInitialized, setGoals, showErrorToast, t],
   );
 
   return useMemo(

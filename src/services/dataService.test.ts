@@ -13,6 +13,7 @@ const mockChain = (finalData: unknown = null, finalError: unknown = null) => {
     'upsert',
     'eq',
     'order',
+    'range',
     'single',
     'maybeSingle',
     'abortSignal',
@@ -92,6 +93,21 @@ describe('dataService', () => {
     expect(supabase.from).toHaveBeenCalledWith('expenses');
     expect(chain.select).toHaveBeenCalled();
     expect(result).toEqual([{ id: 'e1', amount: 10 }]);
+  });
+
+  it('pages past the PostgREST 1000-row cap until a short page arrives', async () => {
+    const fullPage = Array.from({ length: 1000 }, (_, i) => ({ id: `e${i}` }));
+    const lastPage = [{ id: 'e1000' }];
+    const chains = [mockChain(fullPage), mockChain(lastPage)];
+    let call = 0;
+    vi.mocked(supabase.from).mockImplementation(
+      () => chains[call++] as never,
+    );
+
+    const result = await dataService.getExpenses();
+    expect(result).toHaveLength(1001);
+    expect(chains[0].range).toHaveBeenCalledWith(0, 999);
+    expect(chains[1].range).toHaveBeenCalledWith(1000, 1999);
   });
 
   // --- createExpense ---
@@ -292,10 +308,9 @@ describe('dataService', () => {
 
   // --- upsertBudget ---
   it('upserts budget for current user', async () => {
-    // Mock getUser
-    vi.mocked(supabase.auth.getUser).mockResolvedValue({
-      data: { user: { id: 'user-1' } },
-      error: null,
+    // Mock the local session read (no network round trip)
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: { user: { id: 'user-1' } } },
     } as never);
 
     const budget = { id: 'b1', monthly_amount: 3000 };
@@ -311,9 +326,8 @@ describe('dataService', () => {
   });
 
   it('throws when upsertBudget called without authenticated user', async () => {
-    vi.mocked(supabase.auth.getUser).mockResolvedValue({
-      data: { user: null },
-      error: null,
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: null },
     } as never);
 
     await expect(dataService.upsertBudget(1000)).rejects.toThrow(

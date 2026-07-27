@@ -13,6 +13,8 @@
     "saving": "Saving...",
     "loading": "Loading...",
     "error": "Error",
+    "loadDataFailed": "Failed to load data",
+    "tryAgain": "Try again",
     "success": "Success",
     "update": "Update",
     "create": "Create",
@@ -43,7 +45,9 @@
     "codeEmailSent": "Enter the 6-digit code sent to {{email}}",
     "sending": "Sending...",
     "verifying": "Verifying...",
-    "useDifferentEmail": "Use Different Email"
+    "useDifferentEmail": "Use Different Email",
+    "resendCode": "Resend code",
+    "resendCodeIn": "Resend code in {{seconds}}s"
   },
   "expenses": {
     "recurring": "Recurring",
@@ -130,6 +134,15 @@
       "last90Days": "Last 90 days",
       "thisQuarter": "This quarter",
       "thisYear": "This year"
+    },
+    "toasts": {
+      "updated": "Expense updated",
+      "added": "Expense added",
+      "updateFailed": "Failed to update expense",
+      "addFailed": "Failed to add expense",
+      "deleteFailed": "Failed to delete expense",
+      "receiptUploadFailed": "Expense saved but receipt upload failed",
+      "tagCreateFailed": "Failed to create tag"
     }
   },
   "income": {
@@ -183,6 +196,14 @@
       "refund": "Refund",
       "gift": "Gift",
       "investment": "Investment"
+    },
+    "toasts": {
+      "updated": "Income updated",
+      "added": "Income added",
+      "updateFailed": "Failed to update income",
+      "addFailed": "Failed to add income",
+      "deleteFailed": "Failed to delete income",
+      "savingsRateUpdateFailed": "Failed to update savings rate"
     }
   },
   "insights": {
@@ -256,6 +277,12 @@
       "need": "Need",
       "want": "Want",
       "savings": "Savings"
+    },
+    "toasts": {
+      "addFailed": "Failed to add category",
+      "updateFailed": "Failed to update category",
+      "deleteFailed": "Failed to delete category",
+      "bulkCreateFailed": "Failed to create categories"
     }
   },
   "budget": {
@@ -306,6 +333,11 @@
       "warningDescription": "You've used {{percent}}% of {{category}}. {{remaining}} remaining.",
       "exceeded": "{{category}} over budget",
       "exceededDescription": "You've spent {{spent}} against a {{cap}} cap for {{category}}."
+    },
+    "toasts": {
+      "updateFailed": "Failed to update budget",
+      "categoryUpdateFailed": "Failed to update category budget",
+      "categoryRemoveFailed": "Failed to remove category budget"
     }
   },
   "recurring": {
@@ -372,6 +404,20 @@
       "empty": "No recurring income set up yet",
       "emptyDescription": "Salary, dividends, the side gig that finally pays — log it once and watch it land.",
       "addFirstRecurring": "Add Your First Recurring Income"
+    },
+    "toasts": {
+      "expenseUpdated": "Recurring expense updated",
+      "expenseAdded": "Recurring expense added",
+      "expenseUpdateFailed": "Failed to update recurring expense",
+      "expenseAddFailed": "Failed to add recurring expense",
+      "expenseDeleteFailed": "Failed to delete recurring expense",
+      "expenseToggleFailed": "Failed to update recurring expense status",
+      "incomeUpdated": "Recurring income updated",
+      "incomeAdded": "Recurring income added",
+      "incomeUpdateFailed": "Failed to update recurring income",
+      "incomeAddFailed": "Failed to add recurring income",
+      "incomeDeleteFailed": "Failed to delete recurring income",
+      "incomeToggleFailed": "Failed to update recurring income status"
     }
   },
   "weeklyRecap": {
@@ -433,7 +479,11 @@
       "prefBudgetExceededDescription": "Alert the day you cross a budget cap",
       "prefDebtPaymentLabel": "Debt payments",
       "prefDebtPaymentDescription": "Reminder the day before a minimum payment is due",
-      "preferenceUpdateFailed": "Failed to update preference"
+      "preferenceUpdateFailed": "Failed to update preference",
+      "preferencesUpdateFailed": "Failed to update notification preferences",
+      "swUnavailable": "Service worker not available. Try reloading the app.",
+      "enableFailed": "Failed to enable notifications. Please try again.",
+      "disableFailed": "Failed to disable notifications."
     },
     "data": {
       "title": "Data Management",
@@ -575,6 +625,12 @@
       "title": "No goals yet",
       "description": "Pick a target — vacation, emergency fund, new espresso machine — and watch the progress build.",
       "cta": "Create your first goal"
+    },
+    "toasts": {
+      "created": "Goal created",
+      "createFailed": "Failed to create goal",
+      "updateFailed": "Failed to update goal",
+      "deleteFailed": "Failed to delete goal"
     }
   },
   "networth": {
@@ -650,6 +706,7 @@
       "history": "Activity",
       "addSnapshot": "Update value",
       "noHistory": "No activity yet — add a deposit or value update to start tracking.",
+      "historyLoadFailed": "Couldn't load activity. Check your connection.",
       "deleteSnapshotTitle": "Delete entry",
       "deleteSnapshotDescription": "Remove this entry? Earlier activity is unaffected.",
       "costBasis": "Invested",
@@ -683,6 +740,16 @@
     },
     "allocation": {
       "title": "Investment allocation"
+    },
+    "toasts": {
+      "accountUpdated": "Account updated",
+      "accountAdded": "Account added",
+      "accountUpdateFailed": "Failed to update account",
+      "accountAddFailed": "Failed to add account",
+      "archiveFailed": "Failed to archive account",
+      "balanceUpdated": "Balance updated",
+      "balanceUpdateFailed": "Failed to update balance",
+      "snapshotDeleteFailed": "Failed to delete snapshot"
     }
   },
   "debts": {
@@ -754,6 +821,7 @@
       "history": "Payment history",
       "logPayment": "Log payment",
       "noHistory": "No payments yet — log one to start tracking progress.",
+      "historyLoadFailed": "Couldn't load payment history. Check your connection.",
       "deletePaymentTitle": "Delete payment",
       "deletePaymentDescription": "Remove this payment? Your debt balance will recompute."
     },
@@ -781,12 +849,21 @@
       "paidInMonth": "Month {{month}}",
       "unpayableTitle": "Payments aren't keeping up with interest",
       "unpayableDescription": "At least one debt's interest outpaces the current minimums and extra payment, so the balance keeps growing. Increase your monthly extra to find a workable plan."
+    },
+    "toasts": {
+      "updated": "Debt updated",
+      "added": "Debt added",
+      "updateFailed": "Failed to update debt",
+      "addFailed": "Failed to add debt",
+      "archiveFailed": "Failed to archive debt"
     }
   },
   "templates": {
     "title": "Templates",
     "saveAsTemplate": "Save as template",
     "saved": "Template saved",
+    "saveFailed": "Failed to save template",
+    "deleteFailed": "Failed to delete template",
     "used": "Expense added from template",
     "deleteTitle": "Delete Template",
     "deleteConfirmation": "Are you sure you want to delete this template?",
@@ -902,6 +979,8 @@
     "amountColumn": "Amount",
     "categoryColumn": "Category (optional)",
     "noCategory": "No category column",
+    "columnN": "Column {{n}}",
+    "colN": "Col {{n}}",
     "skipIncome": "Skip income transactions",
     "skipIncomeDescription": "Auto-detects: if CSV has negative amounts, positive = income",
     "sampleData": "Sample data ({{count}} rows total)",
@@ -942,6 +1021,12 @@
     "deleteSavedOffline": "Delete saved offline",
     "willSync": "We'll sync it when you're back online",
     "pending": "{{count}} change(s) pending sync"
+  },
+  "pwa": {
+    "updateAvailableTitle": "Update available",
+    "updateAvailableDescription": "A new version is ready.",
+    "stuckTitle": "Almost up to date",
+    "stuckDescription": "Fully close and reopen Budgard to finish updating."
   },
   "onboarding": {
     "welcomeTitle": "Welcome to Budgard",

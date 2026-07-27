@@ -1,31 +1,47 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { browserTracingIntegration, init } from '@sentry/react';
 import { RootProvider } from '@/contexts/RootProvider';
 import App from '@/App';
 import { i18nReady } from '@/lib/i18n';
+import { captureException, loadSentry } from '@/lib/sentry';
 import './index.css';
 
-// Init with only the lightweight tracing integration on the critical path.
-// Session Replay (DOM observers, mutation buffering) and Profiling
-// (sampling worker) do non-trivial setup, so they're added after first
-// paint via a dynamic import that puts them in their own chunk.
-init({
-  dsn: import.meta.env.VITE_SENTRY_DSN,
-  enabled: import.meta.env.PROD && !!import.meta.env.VITE_SENTRY_DSN,
-  integrations: [browserTracingIntegration()],
-  tracesSampleRate: 0.1,
-  profileSessionSampleRate: 0.1,
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
-  ignoreErrors: [
-    // Cloudflare Turnstile's bootstrap script triggers `eval` in some paths
-    // (mostly older Safari). Our CSP intentionally omits `unsafe-eval`, so the
-    // rejection bubbles up here as noise — Turnstile still works.
-    /Refused to evaluate a string as JavaScript/,
-    /'unsafe-eval' is not an allowed source/,
-  ],
-});
+// The Sentry SDK loads lazily (see the idle scheduling below), so genuinely
+// early crashes would otherwise be lost. Stash them with plain listeners
+// right away; once the SDK is up they're forwarded and the listeners removed.
+const EARLY_CRASH_LIMIT = 50;
+const earlyCrashes: unknown[] = [];
+
+const stashEarlyCrash = (value: unknown) => {
+  if (earlyCrashes.length >= EARLY_CRASH_LIMIT) {
+    return;
+  }
+
+  earlyCrashes.push(value);
+};
+
+const onEarlyError = (event: ErrorEvent) => {
+  stashEarlyCrash(event.error ?? event.message);
+};
+
+const onEarlyRejection = (event: PromiseRejectionEvent) => {
+  stashEarlyCrash(event.reason);
+};
+
+window.addEventListener('error', onEarlyError);
+window.addEventListener('unhandledrejection', onEarlyRejection);
+
+const forwardEarlyCrashes = () => {
+  // Remove first so the SDK's own global handlers are the single reporter
+  // for anything that fires from here on.
+  window.removeEventListener('error', onEarlyError);
+  window.removeEventListener('unhandledrejection', onEarlyRejection);
+
+  for (const crash of earlyCrashes) {
+    captureException(crash);
+  }
+  earlyCrashes.length = 0;
+};
 
 const scheduleIdleWork = (cb: () => void) => {
   if ('requestIdleCallback' in window) {
@@ -36,9 +52,28 @@ const scheduleIdleWork = (cb: () => void) => {
   setTimeout(cb, 2000);
 };
 
+// The whole Sentry SDK stays off the critical path: `loadSentry` dynamically
+// imports it at idle, runs init (lightweight tracing integration only), then
+// flushes calls buffered by the facade. Session Replay (DOM observers,
+// mutation buffering) and Profiling (sampling worker) do non-trivial setup,
+// so they chain after init via their own chunk.
 scheduleIdleWork(() => {
-  if (!import.meta.env.PROD || !import.meta.env.VITE_SENTRY_DSN) return;
-  import('@/lib/sentryHeavy').then((m) => m.initHeavySentryIntegrations());
+  if (!import.meta.env.PROD || !import.meta.env.VITE_SENTRY_DSN) {
+    return;
+  }
+
+  loadSentry().then((loaded) => {
+    forwardEarlyCrashes();
+    if (!loaded) {
+      return;
+    }
+
+    import('@/lib/sentryHeavy')
+      .then((m) => m.initHeavySentryIntegrations())
+      .catch(() => {
+        // Best-effort: replay/profiling must never block or break the app.
+      });
+  });
 });
 
 // Recover from stale SW cache causing chunk load failures (common on iOS PWA after

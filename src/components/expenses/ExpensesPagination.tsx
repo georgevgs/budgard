@@ -51,7 +51,12 @@ const ExpensesPagination = ({
   const safePage = Math.min(currentPage, Math.max(totalPages, 1));
   const startIndex = (safePage - 1) * ITEMS_PER_PAGE;
   const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
-  const currentExpenses = expenses.slice(startIndex, endIndex);
+  // Memoized so an unrelated re-render keeps the same array reference and
+  // the dateGroups memo below doesn't recompute.
+  const currentExpenses = useMemo(
+    () => expenses.slice(startIndex, endIndex),
+    [expenses, startIndex, endIndex],
+  );
 
   const dateGroups = useMemo(
     () => groupExpensesByDate(currentExpenses, dateLocale, t, showFullDate),

@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
+import { useTranslation } from 'react-i18next';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
@@ -9,6 +10,7 @@ import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
 export const useBudgetOps = () => {
   const { isInitialized, monthlyBudget } = useDataConfig();
   const { setMonthlyBudget, setCategoryBudgets } = useDataActions();
+  const { t } = useTranslation();
   const showErrorToast = useShowErrorToast();
 
   const handleBudgetUpdate = useCallback(
@@ -22,11 +24,11 @@ export const useBudgetOps = () => {
         haptics.error();
         setMonthlyBudget(previousBudget);
         Sentry.captureException(error, { tags: { operation: 'upsertBudget' } });
-        showErrorToast('Failed to update budget');
+        showErrorToast(t('budget.toasts.updateFailed'));
         throw error;
       }
     },
-    [monthlyBudget, setMonthlyBudget, showErrorToast],
+    [monthlyBudget, setMonthlyBudget, showErrorToast, t],
   );
 
   const handleCategoryBudgetUpsert = useCallback(
@@ -73,11 +75,11 @@ export const useBudgetOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'upsertCategoryBudget' },
         });
-        showErrorToast('Failed to update category budget');
+        showErrorToast(t('budget.toasts.categoryUpdateFailed'));
         throw error;
       }
     },
-    [isInitialized, setCategoryBudgets, showErrorToast],
+    [isInitialized, setCategoryBudgets, showErrorToast, t],
   );
 
   const handleCategoryBudgetDelete = useCallback(
@@ -100,11 +102,11 @@ export const useBudgetOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'deleteCategoryBudget' },
         });
-        showErrorToast('Failed to remove category budget');
+        showErrorToast(t('budget.toasts.categoryRemoveFailed'));
         throw error;
       }
     },
-    [isInitialized, setCategoryBudgets, showErrorToast],
+    [isInitialized, setCategoryBudgets, showErrorToast, t],
   );
 
   return useMemo(

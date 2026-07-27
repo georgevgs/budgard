@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
@@ -12,6 +13,7 @@ export const useDebtOps = () => {
   const { isInitialized } = useDataConfig();
   const { setDebts } = useDataActions();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const showErrorToast = useShowErrorToast();
 
   const handleDebtSubmit = useCallback(
@@ -38,7 +40,11 @@ export const useDebtOps = () => {
 
         toast({
           variant: 'success',
-          title: pickByEdit(debtId, 'Debt updated', 'Debt added'),
+          title: pickByEdit(
+            debtId,
+            t('debts.toasts.updated'),
+            t('debts.toasts.added'),
+          ),
         });
 
         return saved;
@@ -48,12 +54,16 @@ export const useDebtOps = () => {
           tags: { operation: pickByEdit(debtId, 'updateDebt', 'createDebt') },
         });
         showErrorToast(
-          `Failed to ${pickByEdit(debtId, 'update', 'add')} debt`,
+          pickByEdit(
+            debtId,
+            t('debts.toasts.updateFailed'),
+            t('debts.toasts.addFailed'),
+          ),
         );
         throw error;
       }
     },
-    [isInitialized, setDebts, showErrorToast, toast],
+    [isInitialized, setDebts, showErrorToast, toast, t],
   );
 
   const handleDebtArchive = useCallback(
@@ -77,11 +87,11 @@ export const useDebtOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'archiveDebt' },
         });
-        showErrorToast('Failed to archive debt');
+        showErrorToast(t('debts.toasts.archiveFailed'));
         throw error;
       }
     },
-    [isInitialized, setDebts, showErrorToast],
+    [isInitialized, setDebts, showErrorToast, t],
   );
 
   return useMemo(

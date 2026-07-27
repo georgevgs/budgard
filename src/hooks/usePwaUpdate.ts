@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { swRegistration } from '@/lib/swRegistration';
 
@@ -8,6 +9,7 @@ const MIN_VISIBILITY_CHECK_INTERVAL_MS = 30 * 60 * 1000;
 
 export const usePwaUpdate = (): void => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const needRefreshRef = useRef(false);
   const lastUpdateCheckRef = useRef<number>(0);
   const toastDismissedRef = useRef(false);
@@ -53,11 +55,11 @@ export const usePwaUpdate = (): void => {
   const showStuckToast = useCallback((): void => {
     toast({
       id: 'pwa-update',
-      title: 'Almost up to date',
-      description: 'Fully close and reopen Budgard to finish updating.',
+      title: t('pwa.stuckTitle'),
+      description: t('pwa.stuckDescription'),
       duration: 10000,
     });
-  }, [toast]);
+  }, [toast, t]);
 
   const applyUpdate = useCallback((): void => {
     // A previous apply already looped this session — reloading again would just
@@ -98,18 +100,18 @@ export const usePwaUpdate = (): void => {
       // Stable id → at most one update toast ever exists; a repeat call
       // replaces it rather than stacking a second "Update available".
       id: 'pwa-update',
-      title: 'Update available',
-      description: 'A new version is ready.',
+      title: t('pwa.updateAvailableTitle'),
+      description: t('pwa.updateAvailableDescription'),
       duration: 15000,
       action: {
-        label: 'Update',
+        label: t('common.update'),
         onClick: applyUpdate,
       },
       onDismiss() {
         toastDismissedRef.current = true;
       },
     });
-  }, [toast, applyUpdate]);
+  }, [toast, applyUpdate, t]);
 
   // Keep ref in sync so the visibility handler can read it
   useEffect(() => {

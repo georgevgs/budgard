@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
@@ -12,6 +13,7 @@ export const useRecurringExpenseOps = () => {
   const { isInitialized } = useDataConfig();
   const { setRecurringExpenses, refreshExpenses } = useDataActions();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const showErrorToast = useShowErrorToast();
 
   const handleRecurringExpenseSubmit = useCallback(
@@ -36,8 +38,8 @@ export const useRecurringExpenseOps = () => {
           variant: 'success',
           title: pickByEdit(
             expenseId,
-            'Recurring expense updated',
-            'Recurring expense added',
+            t('recurring.toasts.expenseUpdated'),
+            t('recurring.toasts.expenseAdded'),
           ),
         });
         setRecurringExpenses((prev) => {
@@ -57,12 +59,16 @@ export const useRecurringExpenseOps = () => {
           },
         });
         showErrorToast(
-          `Failed to ${pickByEdit(expenseId, 'update', 'add')} recurring expense`,
+          pickByEdit(
+            expenseId,
+            t('recurring.toasts.expenseUpdateFailed'),
+            t('recurring.toasts.expenseAddFailed'),
+          ),
         );
         throw error;
       }
     },
-    [isInitialized, setRecurringExpenses, showErrorToast, toast],
+    [isInitialized, setRecurringExpenses, showErrorToast, toast, t],
   );
 
   const handleRecurringExpenseDelete = useCallback(
@@ -97,11 +103,11 @@ export const useRecurringExpenseOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'deleteRecurringExpense' },
         });
-        showErrorToast('Failed to delete recurring expense');
+        showErrorToast(t('recurring.toasts.expenseDeleteFailed'));
         throw error;
       }
     },
-    [isInitialized, setRecurringExpenses, refreshExpenses, showErrorToast],
+    [isInitialized, setRecurringExpenses, refreshExpenses, showErrorToast, t],
   );
 
   const handleRecurringExpenseToggle = useCallback(
@@ -127,11 +133,11 @@ export const useRecurringExpenseOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'toggleRecurringExpense' },
         });
-        showErrorToast('Failed to update recurring expense status');
+        showErrorToast(t('recurring.toasts.expenseToggleFailed'));
         throw error;
       }
     },
-    [isInitialized, setRecurringExpenses, showErrorToast],
+    [isInitialized, setRecurringExpenses, showErrorToast, t],
   );
 
   return useMemo(

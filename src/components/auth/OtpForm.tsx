@@ -14,6 +14,7 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
       <OtpRequestStep
         formAction={otpFlow.formAction}
         error={otpFlow.state.error}
+        initialEmail={otpFlow.state.email}
         turnstileToken={otpFlow.turnstileToken}
         onTokenChange={otpFlow.setTurnstileToken}
         turnstileRef={otpFlow.turnstileRef}
@@ -28,6 +29,10 @@ const OtpForm = ({ onSuccess }: OtpFormProps) => {
       error={otpFlow.state.error}
       otp={otpFlow.otp}
       onOtpChange={otpFlow.setOtp}
+      lastSentAt={otpFlow.state.lastSentAt}
+      turnstileToken={otpFlow.turnstileToken}
+      onTokenChange={otpFlow.setTurnstileToken}
+      turnstileRef={otpFlow.turnstileRef}
     />
   );
 };

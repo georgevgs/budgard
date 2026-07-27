@@ -28,7 +28,7 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const progress = useDebtProgress(debt);
-  const { payments, isLoading, removePayment } = useDebtPayments(
+  const { payments, isLoading, hasError, retry, removePayment } = useDebtPayments(
     debt.id,
     open,
     debt.updated_at,
@@ -40,7 +40,7 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
     <>
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden flex flex-col max-h-[85dvh]"
+          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden sm:[&>button]:inline-flex flex flex-col max-h-[85dvh]"
           aria-describedby="debt-detail-description"
           onOpenChange={onClose}
         >
@@ -76,10 +76,12 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
 
             {renderHistoryList(
               isLoading,
+              hasError,
               payments,
               debt.currency,
               dateLocale,
               (id) => actions.setPaymentToDelete(id),
+              retry,
               t,
             )}
           </div>
@@ -126,10 +128,12 @@ type TranslateFunction = (
 
 const renderHistoryList = (
   isLoading: boolean,
+  hasError: boolean,
   payments: Expense[],
   currency: string,
   dateLocale: Locale,
   onDelete: (id: string) => void,
+  onRetry: () => void,
   t: TranslateFunction,
 ) => {
   if (isLoading) {
@@ -137,6 +141,19 @@ const renderHistoryList = (
       <p className="text-center text-sm text-muted-foreground py-6">
         {t('common.loading')}
       </p>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-6">
+        <p className="text-center text-sm text-muted-foreground">
+          {t('debts.detail.historyLoadFailed')}
+        </p>
+        <Button size="sm" variant="outline" onClick={onRetry}>
+          {t('common.tryAgain')}
+        </Button>
+      </div>
     );
   }
 
@@ -167,7 +184,7 @@ const renderHistoryList = (
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
+            className="h-11 w-11 -m-2 text-muted-foreground hover:text-destructive shrink-0"
             onClick={() => onDelete(p.id)}
             aria-label={t('common.delete')}
           >

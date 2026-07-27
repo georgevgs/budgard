@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
 import { format } from 'date-fns';
 import {
   useAccountsData,

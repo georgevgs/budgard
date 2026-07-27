@@ -1,5 +1,5 @@
-import type { Category } from '@/types/Category';
-import type { Tag } from '@/types/Tag';
+import type { EmbeddedCategory } from '@/types/Category';
+import type { EmbeddedTag } from '@/types/Tag';
 
 export type ExpenseTemplate = {
   id: string;
@@ -10,6 +10,6 @@ export type ExpenseTemplate = {
   tag_id: string | null;
   original_currency: string | null;
   created_at: string;
-  category?: Category;
-  tag?: Tag;
+  category?: EmbeddedCategory;
+  tag?: EmbeddedTag;
 };

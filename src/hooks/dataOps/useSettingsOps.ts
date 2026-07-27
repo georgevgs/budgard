@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
+import { useTranslation } from 'react-i18next';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
@@ -20,6 +21,7 @@ export const useSettingsOps = () => {
     setDailyReminderHour,
     setNotificationPreferences,
   } = useDataActions();
+  const { t } = useTranslation();
   const showErrorToast = useShowErrorToast();
 
   const handleCurrencyUpdate = useCallback(
@@ -35,11 +37,11 @@ export const useSettingsOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'updateDefaultCurrency' },
         });
-        showErrorToast('Failed to update currency');
+        showErrorToast(t('settings.currency.updateFailed'));
         throw error;
       }
     },
-    [defaultCurrency, setDefaultCurrency, showErrorToast],
+    [defaultCurrency, setDefaultCurrency, showErrorToast, t],
   );
 
   const handleDailyReminderHourUpdate = useCallback(
@@ -55,11 +57,11 @@ export const useSettingsOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'updateDailyReminderHour' },
         });
-        showErrorToast('Failed to update daily reminder');
+        showErrorToast(t('settings.notifications.dailyReminderFailed'));
         throw error;
       }
     },
-    [dailyReminderHour, setDailyReminderHour, showErrorToast],
+    [dailyReminderHour, setDailyReminderHour, showErrorToast, t],
   );
 
   const handleNotificationPreferenceUpdate = useCallback(
@@ -76,11 +78,11 @@ export const useSettingsOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'updateNotificationPreferences' },
         });
-        showErrorToast('Failed to update notification preferences');
+        showErrorToast(t('settings.notifications.preferencesUpdateFailed'));
         throw error;
       }
     },
-    [notificationPreferences, setNotificationPreferences, showErrorToast],
+    [notificationPreferences, setNotificationPreferences, showErrorToast, t],
   );
 
   const handleSavingsPctUpdate = useCallback(
@@ -96,11 +98,11 @@ export const useSettingsOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'updateDefaultSavingsPct' },
         });
-        showErrorToast('Failed to update savings rate');
+        showErrorToast(t('income.toasts.savingsRateUpdateFailed'));
         throw error;
       }
     },
-    [defaultSavingsPct, setDefaultSavingsPct, showErrorToast],
+    [defaultSavingsPct, setDefaultSavingsPct, showErrorToast, t],
   );
 
   const handleDeleteAccount = useCallback(async () => {
@@ -110,10 +112,10 @@ export const useSettingsOps = () => {
     } catch (error) {
       haptics.error();
       Sentry.captureException(error, { tags: { operation: 'deleteAccount' } });
-      showErrorToast('Failed to delete account');
+      showErrorToast(t('settings.data.deleteAccountFailed'));
       throw error;
     }
-  }, [showErrorToast]);
+  }, [showErrorToast, t]);
 
   return useMemo(
     () => ({

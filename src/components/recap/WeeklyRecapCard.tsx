@@ -77,7 +77,7 @@ const renderHeader = (
         variant="ghost"
         size="icon"
         onClick={onDismiss}
-        className="h-7 w-7 -mr-1.5"
+        className="h-11 w-11 -m-2 -mr-3.5"
         aria-label={t('weeklyRecap.dismissAria')}
       >
         <X className="h-4 w-4" />

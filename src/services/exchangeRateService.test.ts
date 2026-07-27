@@ -24,6 +24,9 @@ describe('fetchExchangeRate', () => {
 
   beforeEach(async () => {
     vi.resetModules();
+    // The cache is persisted to localStorage; clear it so entries written by
+    // one test never satisfy a lookup in the next.
+    localStorage.clear();
     ({ fetchExchangeRate } = await import('@/services/exchangeRateService'));
   });
 
@@ -148,5 +151,58 @@ describe('fetchExchangeRate', () => {
     await fetchExchangeRate('USD', '2024-01-15', controller.signal);
     const callArgs = vi.mocked(fetch).mock.calls[0];
     expect((callArgs[1] as RequestInit)?.signal).toBe(controller.signal);
+  });
+
+  it('serves a historic rate from localStorage after a reload', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockReturnValue(makeOkResponse(0.9234)));
+    await fetchExchangeRate('USD', '2024-01-15');
+
+    // Fresh module = fresh in-memory Map, simulating an app reload.
+    vi.resetModules();
+    ({ fetchExchangeRate } = await import('@/services/exchangeRateService'));
+    vi.stubGlobal('fetch', vi.fn());
+
+    const rate = await fetchExchangeRate('USD', '2024-01-15');
+    expect(rate).toBe(0.9234);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('re-fetches a latest rate that was cached on a previous day', async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    localStorage.setItem(
+      'budgard-exchange-rates',
+      JSON.stringify({
+        version: 1,
+        rates: { [`USD-EUR-${today}`]: { rate: 0.5, fetchedOn: '2020-01-01' } },
+      }),
+    );
+    vi.stubGlobal('fetch', vi.fn().mockReturnValue(makeOkResponse(0.92)));
+
+    const rate = await fetchExchangeRate('USD', today);
+    expect(rate).toBe(0.92);
+    expect(vi.mocked(fetch)).toHaveBeenCalledOnce();
+  });
+
+  it('falls back to network when the persisted cache is corrupt', async () => {
+    localStorage.setItem('budgard-exchange-rates', 'not-json');
+    vi.stubGlobal('fetch', vi.fn().mockReturnValue(makeOkResponse(0.91)));
+
+    const rate = await fetchExchangeRate('USD', '2024-01-15');
+    expect(rate).toBe(0.91);
+  });
+
+  it('discards a persisted cache with a different version', async () => {
+    localStorage.setItem(
+      'budgard-exchange-rates',
+      JSON.stringify({
+        version: 999,
+        rates: { 'USD-EUR-2024-01-15': { rate: 0.5 } },
+      }),
+    );
+    vi.stubGlobal('fetch', vi.fn().mockReturnValue(makeOkResponse(0.92)));
+
+    const rate = await fetchExchangeRate('USD', '2024-01-15');
+    expect(rate).toBe(0.92);
+    expect(vi.mocked(fetch)).toHaveBeenCalledOnce();
   });
 });

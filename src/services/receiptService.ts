@@ -1,4 +1,3 @@
-import imageCompression from 'browser-image-compression';
 import { supabase } from '@/lib/supabase';
 
 const COMPRESSION_OPTIONS = {
@@ -11,6 +10,12 @@ const COMPRESSION_OPTIONS = {
 const SKIP_COMPRESSION_THRESHOLD = 500 * 1024; // 500KB
 
 export const compressImage = async (file: File): Promise<File> => {
+  // Lazy import: the compression lib (~55 KB min) is only needed when a
+  // receipt is actually attached, so keep it out of the ExpensesList chunk.
+  const { default: imageCompression } = await import(
+    'browser-image-compression'
+  );
+
   let options = COMPRESSION_OPTIONS;
   if (file.size <= SKIP_COMPRESSION_THRESHOLD) {
     options = { ...COMPRESSION_OPTIONS, maxSizeMB: Infinity };

@@ -1,4 +1,6 @@
+import type { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { Button } from '@/components/ui/button';
 import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 import {
@@ -8,6 +10,7 @@ import {
 } from '@/components/ui/input-otp';
 import FormSubmitButton from '@/components/ui/form-submit-button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useResendCooldown } from '@/hooks/auth/useResendCooldown';
 
 type Props = {
   formAction: (formData: FormData) => void;
@@ -15,11 +18,29 @@ type Props = {
   error: string | null;
   otp: string;
   onOtpChange: (otp: string) => void;
+  lastSentAt: number | null;
+  turnstileToken: string | null;
+  onTokenChange: (token: string | null) => void;
+  turnstileRef: RefObject<TurnstileInstance | null>;
 };
 
-const OtpVerifyStep = ({ formAction, email, error, otp, onOtpChange }: Props) => {
+const OtpVerifyStep = ({
+  formAction,
+  email,
+  error,
+  otp,
+  onOtpChange,
+  lastSentAt,
+  turnstileToken,
+  onTokenChange,
+  turnstileRef,
+}: Props) => {
   const { isLoading: isAuthLoading } = useAuth();
   const { t } = useTranslation();
+  const cooldownSeconds = useResendCooldown(lastSentAt);
+
+  const isResendDisabled =
+    isAuthLoading || cooldownSeconds > 0 || !turnstileToken;
 
   return (
     <div className="space-y-4">
@@ -67,6 +88,25 @@ const OtpVerifyStep = ({ formAction, email, error, otp, onOtpChange }: Props) =>
         </div>
       </form>
 
+      {/* Separate form to re-send the code to the same email */}
+      <form action={formAction} className="space-y-2">
+        <input type="hidden" name="_action" value="resend" />
+        <input
+          type="hidden"
+          name="turnstile_token"
+          value={turnstileToken ?? ''}
+        />
+        {renderResendCaptcha(turnstileRef, onTokenChange)}
+        <Button
+          type="submit"
+          variant="ghost"
+          className="w-full h-10"
+          disabled={isResendDisabled}
+        >
+          {getResendLabel(cooldownSeconds, t)}
+        </Button>
+      </form>
+
       {/* Separate form to submit the back action */}
       <form action={formAction}>
         <input type="hidden" name="_action" value="back" />
@@ -87,6 +127,11 @@ export default OtpVerifyStep;
 
 // ─── Helper render functions ──────────────────────────────────────────────────
 
+type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
 const renderOtpError = (error: string | null) => {
   if (!error) return null;
 
@@ -95,4 +140,33 @@ const renderOtpError = (error: string | null) => {
       {error}
     </p>
   );
+};
+
+// A re-send consumes a fresh captcha token, so the verify step keeps its own
+// Turnstile widget alive — the request step's widget unmounted with that step.
+const renderResendCaptcha = (
+  turnstileRef: RefObject<TurnstileInstance | null>,
+  onTokenChange: (token: string | null) => void,
+) => (
+  <div className="flex justify-center">
+    <Turnstile
+      ref={turnstileRef}
+      siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+      onSuccess={onTokenChange}
+      onError={() => onTokenChange(null)}
+      onExpire={() => onTokenChange(null)}
+      options={{ theme: 'auto', size: 'normal' }}
+    />
+  </div>
+);
+
+const getResendLabel = (
+  cooldownSeconds: number,
+  t: TranslateFunction,
+): string => {
+  if (cooldownSeconds > 0) {
+    return t('auth.resendCodeIn', { seconds: cooldownSeconds });
+  }
+
+  return t('auth.resendCode');
 };

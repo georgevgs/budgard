@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { format } from 'date-fns';
 import FormsManager from '@/components/layout/FormsManager';
 import { useDataConfig, useTemplatesData } from '@/contexts/DataContext';
@@ -14,9 +14,15 @@ import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
 import ExpensesOverviewSection from '@/components/expenses/ExpensesOverviewSection';
 import ExpensesContent from '@/components/expenses/ExpensesContent';
 import FilterResultsAnnouncer from '@/components/expenses/FilterResultsAnnouncer';
-import CsvImportDialog from '@/components/expenses/CsvImportDialog';
 import TemplatesBar from '@/components/expenses/TemplatesBar';
 import WeeklyRecapCard from '@/components/recap/WeeklyRecapCard';
+import { lazyWithRetry } from '@/lib/lazyWithRetry';
+
+// Lazy: the CSV import flow (~35 KB min incl. parsing logic) is a rare,
+// user-initiated action — no reason to ship it with the primary route chunk.
+const CsvImportDialog = lazyWithRetry(
+  () => import('@/components/expenses/CsvImportDialog'),
+);
 
 const ExpensesList = () => {
   const templates = useTemplatesData();
@@ -103,10 +109,9 @@ const ExpensesList = () => {
         onExpenseSubmit={handleExpenseFormSubmit}
       />
 
-      <CsvImportDialog
-        open={isImportDialogOpen}
-        onClose={() => setIsImportDialogOpen(false)}
-      />
+      {renderImportDialog(isImportDialogOpen, () =>
+        setIsImportDialogOpen(false),
+      )}
 
       <SpeedDial
         onAddExpense={formState.openNewExpenseForm}
@@ -117,3 +122,17 @@ const ExpensesList = () => {
 };
 
 export default ExpensesList;
+
+// --- Helpers ---
+
+const renderImportDialog = (open: boolean, onClose: () => void) => {
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <Suspense fallback={null}>
+      <CsvImportDialog open={open} onClose={onClose} />
+    </Suspense>
+  );
+};

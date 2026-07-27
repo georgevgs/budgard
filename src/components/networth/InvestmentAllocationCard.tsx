@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatPercent } from '@/lib/utils';
 import { ChartTooltipShell } from '@/components/common/ChartTooltip';
 import type { Account } from '@/types/Account';
 
@@ -87,7 +87,7 @@ const InvestmentAllocationCard = ({ accounts }: Props) => {
                 />
                 <span className="truncate flex-1">{s.name}</span>
                 <span className="tabular-nums text-muted-foreground shrink-0">
-                  {s.pct.toFixed(0)}%
+                  {formatPercent(s.pct, 0)}%
                 </span>
                 <span className="tabular-nums font-medium shrink-0">
                   {formatCurrency(s.value, s.currency)}
@@ -121,7 +121,7 @@ const renderTooltip = (
   return (
     <ChartTooltipShell title={slice.name}>
       <p className="tabular-nums text-muted-foreground">
-        {formatCurrency(slice.value, slice.currency)} · {slice.pct.toFixed(1)}%
+        {formatCurrency(slice.value, slice.currency)} · {formatPercent(slice.pct, 1)}%
       </p>
     </ChartTooltipShell>
   );

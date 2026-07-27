@@ -663,8 +663,13 @@ describe('useDataOperations', () => {
         current_balance: 5000,
       });
       expect(mockSetDebts).toHaveBeenCalled();
+      // The global react-i18next mock returns keys verbatim, so the toast
+      // title is the translation key rather than the English copy.
       expect(mockToast).toHaveBeenCalledWith(
-        expect.objectContaining({ variant: 'success', title: 'Debt added' }),
+        expect.objectContaining({
+          variant: 'success',
+          title: 'debts.toasts.added',
+        }),
       );
     });
 
@@ -680,7 +685,7 @@ describe('useDataOperations', () => {
 
       expect(mockUpdateDebt).toHaveBeenCalledWith('d1', { name: 'Renamed' });
       expect(mockToast).toHaveBeenCalledWith(
-        expect.objectContaining({ title: 'Debt updated' }),
+        expect.objectContaining({ title: 'debts.toasts.updated' }),
       );
     });
 

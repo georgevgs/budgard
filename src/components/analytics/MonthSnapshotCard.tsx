@@ -6,7 +6,7 @@ import Minus from 'lucide-react/dist/esm/icons/minus';
 import { Card, CardContent } from '@/components/ui/card';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatPercent } from '@/lib/utils';
 import type { MonthComparison } from '@/hooks/analytics/useAnalyticsData';
 
 type Props = {
@@ -74,7 +74,7 @@ const renderMonthChangeBadge = (
     return (
       <span className="inline-flex items-center gap-1 text-xs font-medium text-destructive bg-destructive/10 rounded-full px-2.5 py-0.5">
         <TrendingUp className="h-3 w-3" />
-        {t('analytics.vsLastMonthUp', { percent: percentChange.toFixed(1) })}
+        {t('analytics.vsLastMonthUp', { percent: formatPercent(percentChange, 1) })}
       </span>
     );
   }
@@ -84,7 +84,7 @@ const renderMonthChangeBadge = (
       <span className="inline-flex items-center gap-1 text-xs font-medium text-income bg-income/10 rounded-full px-2.5 py-0.5">
         <TrendingDown className="h-3 w-3" />
         {t('analytics.vsLastMonthDown', {
-          percent: Math.abs(percentChange).toFixed(1),
+          percent: formatPercent(Math.abs(percentChange), 1),
         })}
       </span>
     );

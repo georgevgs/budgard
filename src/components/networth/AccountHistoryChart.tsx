@@ -10,12 +10,11 @@ import {
   YAxis,
   Tooltip,
 } from 'recharts';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn, formatCurrency, formatCurrencyCompact } from '@/lib/utils';
 import {
   ChartTooltipShell,
   ChartTooltipRow,
 } from '@/components/common/ChartTooltip';
-import { getCurrencySymbol } from '@/lib/currencies';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import { useDateLocale } from '@/hooks/useDateLocale';
@@ -41,7 +40,6 @@ type Point = {
 const AccountHistoryChart = ({ account, snapshots }: Props) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
-  const currencySymbol = getCurrencySymbol(account.default_currency);
   const isInvestment = account.kind === 'investment';
   const [range, setRange] = useState<RangeKey>('all');
 
@@ -86,7 +84,7 @@ const AccountHistoryChart = ({ account, snapshots }: Props) => {
             tickLine={false}
             axisLine={false}
             tickFormatter={(value) =>
-              `${Math.abs(value).toLocaleString()}${currencySymbol}`
+              formatCurrencyCompact(Math.abs(value), account.default_currency)
             }
             width={60}
           />

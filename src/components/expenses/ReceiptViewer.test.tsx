@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 vi.mock('@/services/receiptService', () => ({ getReceiptUrl: vi.fn() }));
-vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
+vi.mock('@/lib/sentry', () => ({ captureException: vi.fn() }));
 
 import ReceiptViewer from '@/components/expenses/ReceiptViewer';
 import { getReceiptUrl } from '@/services/receiptService';

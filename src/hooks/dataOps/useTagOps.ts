@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
+import { useTranslation } from 'react-i18next';
 import { useDataActions } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
@@ -8,6 +9,7 @@ import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
 
 export const useTagOps = () => {
   const { setTags } = useDataActions();
+  const { t } = useTranslation();
   const showErrorToast = useShowErrorToast();
 
   const handleTagCreate = useCallback(
@@ -38,11 +40,11 @@ export const useTagOps = () => {
         haptics.error();
         setTags((prev) => prev.filter((t) => t.id !== optimisticTag.id));
         Sentry.captureException(error, { tags: { operation: 'createTag' } });
-        showErrorToast('Failed to create tag');
+        showErrorToast(t('expenses.toasts.tagCreateFailed'));
         throw error;
       }
     },
-    [setTags, showErrorToast],
+    [setTags, showErrorToast, t],
   );
 
   return useMemo(() => ({ handleTagCreate }), [handleTagCreate]);

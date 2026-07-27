@@ -27,6 +27,35 @@ export const formatCurrency = (amount: number, currencyCode: string = 'EUR'): st
   return formatted + getCurrencySymbol(currencyCode);
 };
 
+// Axis-tick variant of formatCurrency: same de-DE separators so chart axes
+// agree with tooltips, but without decimals to keep tick labels narrow.
+export const formatCurrencyCompact = (amount: number, currencyCode: string = 'EUR'): string => {
+  const formatted = amount.toLocaleString('de-DE', {
+    maximumFractionDigits: 0,
+  });
+
+  return formatted + getCurrencySymbol(currencyCode);
+};
+
+// Localized percent number without the % sign, so callers can compose it with
+// their own suffix or translation template. Keyed off the app language via
+// <html lang>, which src/lib/i18n.ts keeps in sync (importing the i18n module
+// here would drag its init side effects into every consumer of utils).
+export const formatPercent = (value: number, decimals: number = 1): string => {
+  return new Intl.NumberFormat(resolvePercentLocale(), {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(value);
+};
+
+const resolvePercentLocale = (): string => {
+  if (document.documentElement.lang === 'el') {
+    return 'el-GR';
+  }
+
+  return 'en-US';
+};
+
 export const formatCurrencyInput = (value: string): string => {
   // Remove everything except digits and comma
   const cleaned = value.replace(/[^\d,]/g, '');

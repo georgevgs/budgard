@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatPercent } from '@/lib/utils';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import Calendar from 'lucide-react/dist/esm/icons/calendar';
@@ -46,7 +46,7 @@ const DebtsHeader = ({
             {t('debts.avgAprLabel')}
           </div>
           <p className="text-base font-semibold tabular-nums mt-0.5">
-            {summary.weightedAverageApr.toFixed(2)}%
+            {formatPercent(summary.weightedAverageApr, 2)}%
           </p>
         </div>
       </div>

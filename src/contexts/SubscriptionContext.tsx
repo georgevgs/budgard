@@ -3,6 +3,8 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -41,6 +43,7 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
     return loadSubscriptionSnapshot(userId);
   });
   const [isLoading, setIsLoading] = useState(subscription === null);
+  const lastFetchedAtRef = useRef(0);
 
   const refresh = useCallback(async () => {
     if (!userId) {
@@ -54,6 +57,7 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       const data = await subscriptionService.getSubscription();
+      lastFetchedAtRef.current = Date.now();
       setSubscription(data);
       saveSubscriptionSnapshot(userId, data);
     } catch {
@@ -85,10 +89,17 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!userId) return;
 
+    // Skip refetch on foreground if the last successful fetch is recent —
+    // quick alt-tabs must not trigger a refetch storm (mirrors DataContext).
+    const FRESH_WINDOW_MS = 30_000;
+
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        void refresh();
-      }
+      if (document.visibilityState !== 'visible') return;
+
+      const sinceLastFetch = Date.now() - lastFetchedAtRef.current;
+      if (sinceLastFetch < FRESH_WINDOW_MS) return;
+
+      void refresh();
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
@@ -106,14 +117,17 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
     [],
   );
 
-  const value = {
-    subscription,
-    isPro: isSubscriptionPro(subscription),
-    isLoading,
-    refresh,
-    startCheckout,
-    startPortal,
-  };
+  const value = useMemo(
+    () => ({
+      subscription,
+      isPro: isSubscriptionPro(subscription),
+      isLoading,
+      refresh,
+      startCheckout,
+      startPortal,
+    }),
+    [subscription, isLoading, refresh, startCheckout, startPortal],
+  );
 
   return (
     <SubscriptionContext.Provider value={value}>

@@ -128,6 +128,26 @@ const parseCategoryColumnValue = (v: string): number | null => {
   return parseInt(v);
 };
 
+const columnLabel = (
+  header: string,
+  idx: number,
+  t: TranslateFunction,
+): string => {
+  if (header) return header;
+
+  return t('import.columnN', { n: idx + 1 });
+};
+
+const shortColumnLabel = (
+  header: string,
+  idx: number,
+  t: TranslateFunction,
+): string => {
+  if (header) return header;
+
+  return t('import.colN', { n: idx + 1 });
+};
+
 const isMappedColumn = (cellIdx: number, mapping: ColumnMapping): boolean => {
   if (cellIdx === mapping.dateColumn) return true;
   if (cellIdx === mapping.descriptionColumn) return true;
@@ -202,7 +222,7 @@ const renderMappingStep = (
             <SelectContent>
               {csvPreview.headers.map((header, idx) => (
                 <SelectItem key={`date-${idx}`} value={idx.toString()}>
-                  {header || `Column ${idx + 1}`}
+                  {columnLabel(header, idx, t)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -219,7 +239,7 @@ const renderMappingStep = (
             <SelectContent>
               {csvPreview.headers.map((header, idx) => (
                 <SelectItem key={`desc-${idx}`} value={idx.toString()}>
-                  {header || `Column ${idx + 1}`}
+                  {columnLabel(header, idx, t)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -236,7 +256,7 @@ const renderMappingStep = (
             <SelectContent>
               {csvPreview.headers.map((header, idx) => (
                 <SelectItem key={`amount-${idx}`} value={idx.toString()}>
-                  {header || `Column ${idx + 1}`}
+                  {columnLabel(header, idx, t)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -256,7 +276,7 @@ const renderMappingStep = (
               <SelectItem value="_none">{t('import.noCategory')}</SelectItem>
               {csvPreview.headers.map((header, idx) => (
                 <SelectItem key={`cat-${idx}`} value={idx.toString()}>
-                  {header || `Column ${idx + 1}`}
+                  {columnLabel(header, idx, t)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -282,7 +302,7 @@ const renderMappingStep = (
               <tr>
                 {csvPreview.headers.map((header, idx) => (
                   <th key={`th-${idx}`} className="px-2 py-1 text-left font-medium whitespace-nowrap">
-                    {header || `Col ${idx + 1}`}
+                    {shortColumnLabel(header, idx, t)}
                   </th>
                 ))}
               </tr>

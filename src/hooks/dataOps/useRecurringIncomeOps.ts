@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
@@ -12,6 +13,7 @@ export const useRecurringIncomeOps = () => {
   const { isInitialized } = useDataConfig();
   const { setRecurringIncomes, refreshIncomes } = useDataActions();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const showErrorToast = useShowErrorToast();
 
   const handleRecurringIncomeSubmit = useCallback(
@@ -33,8 +35,8 @@ export const useRecurringIncomeOps = () => {
           variant: 'success',
           title: pickByEdit(
             incomeId,
-            'Recurring income updated',
-            'Recurring income added',
+            t('recurring.toasts.incomeUpdated'),
+            t('recurring.toasts.incomeAdded'),
           ),
         });
         setRecurringIncomes((prev) => {
@@ -54,12 +56,16 @@ export const useRecurringIncomeOps = () => {
           },
         });
         showErrorToast(
-          `Failed to ${pickByEdit(incomeId, 'update', 'add')} recurring income`,
+          pickByEdit(
+            incomeId,
+            t('recurring.toasts.incomeUpdateFailed'),
+            t('recurring.toasts.incomeAddFailed'),
+          ),
         );
         throw error;
       }
     },
-    [isInitialized, setRecurringIncomes, showErrorToast, toast],
+    [isInitialized, setRecurringIncomes, showErrorToast, toast, t],
   );
 
   const handleRecurringIncomeDelete = useCallback(
@@ -94,11 +100,11 @@ export const useRecurringIncomeOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'deleteRecurringIncome' },
         });
-        showErrorToast('Failed to delete recurring income');
+        showErrorToast(t('recurring.toasts.incomeDeleteFailed'));
         throw error;
       }
     },
-    [isInitialized, setRecurringIncomes, refreshIncomes, showErrorToast],
+    [isInitialized, setRecurringIncomes, refreshIncomes, showErrorToast, t],
   );
 
   const handleRecurringIncomeToggle = useCallback(
@@ -121,11 +127,11 @@ export const useRecurringIncomeOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'toggleRecurringIncome' },
         });
-        showErrorToast('Failed to update recurring income status');
+        showErrorToast(t('recurring.toasts.incomeToggleFailed'));
         throw error;
       }
     },
-    [isInitialized, setRecurringIncomes, showErrorToast],
+    [isInitialized, setRecurringIncomes, showErrorToast, t],
   );
 
   return useMemo(

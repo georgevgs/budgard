@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 type Props = {
   formAction: (formData: FormData) => void;
   error: string | null;
+  initialEmail: string;
   turnstileToken: string | null;
   onTokenChange: (token: string | null) => void;
   turnstileRef: RefObject<TurnstileInstance | null>;
@@ -17,6 +18,7 @@ type Props = {
 const OtpRequestStep = ({
   formAction,
   error,
+  initialEmail,
   turnstileToken,
   onTokenChange,
   turnstileRef,
@@ -31,6 +33,7 @@ const OtpRequestStep = ({
           <Input
             name="email"
             type="email"
+            defaultValue={initialEmail}
             placeholder={t('auth.enterEmail')}
             className={cn('w-full h-10', error && 'border-destructive')}
             disabled={isAuthLoading}

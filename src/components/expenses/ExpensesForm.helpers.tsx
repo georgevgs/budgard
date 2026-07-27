@@ -6,7 +6,7 @@ import {
   formatCurrencyInput,
 } from '@/lib/utils';
 import type { Expense } from '@/types/Expense';
-import type { Category } from '@/types/Category';
+import type { Category, EmbeddedCategory } from '@/types/Category';
 import { TagClearButton } from '@/components/expenses/TagPicker';
 
 export type TranslateFunction = (
@@ -158,7 +158,7 @@ export const renderSuggestionMeta = (suggestion: Expense) => {
   );
 };
 
-const renderSuggestionIcon = (category: Category) => {
+const renderSuggestionIcon = (category: EmbeddedCategory) => {
   if (category.icon) {
     return <span className="text-xs">{category.icon}</span>;
   }

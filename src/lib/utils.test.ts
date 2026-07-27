@@ -1,7 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import {
   cn,
   formatCurrency,
+  formatCurrencyCompact,
+  formatPercent,
   formatForeignAmount,
   formatCurrencyInput,
   parseCurrencyInput,
@@ -43,6 +45,56 @@ describe('formatCurrency', () => {
 
   it('rounds to two decimal places', () => {
     expect(formatCurrency(10.999)).toBe('11,00€');
+  });
+});
+
+describe('formatCurrencyCompact', () => {
+  it('drops decimals for axis ticks', () => {
+    expect(formatCurrencyCompact(1234.56)).toBe('1.235€');
+  });
+
+  it('keeps the de-DE thousand separator', () => {
+    expect(formatCurrencyCompact(999999)).toBe('999.999€');
+  });
+
+  it('formats zero', () => {
+    expect(formatCurrencyCompact(0)).toBe('0€');
+  });
+});
+
+describe('formatPercent', () => {
+  afterEach(() => {
+    document.documentElement.lang = '';
+  });
+
+  it('uses a dot decimal separator in English', () => {
+    document.documentElement.lang = 'en';
+    expect(formatPercent(12.34)).toBe('12.3');
+  });
+
+  it('uses a comma decimal separator in Greek', () => {
+    document.documentElement.lang = 'el';
+    expect(formatPercent(12.34)).toBe('12,3');
+  });
+
+  it('respects the requested decimal precision', () => {
+    document.documentElement.lang = 'en';
+    expect(formatPercent(5.678, 2)).toBe('5.68');
+    expect(formatPercent(5.678, 0)).toBe('6');
+  });
+
+  it('pads to the requested precision', () => {
+    document.documentElement.lang = 'el';
+    expect(formatPercent(7, 2)).toBe('7,00');
+  });
+
+  it('keeps the sign of negative values', () => {
+    document.documentElement.lang = 'en';
+    expect(formatPercent(-3.1)).toBe('-3.1');
+  });
+
+  it('falls back to English when the language is unset', () => {
+    expect(formatPercent(1.5)).toBe('1.5');
   });
 });
 

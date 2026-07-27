@@ -37,8 +37,15 @@ export const useAllGoalProgress = (): Record<string, GoalProgress> => {
 
   return useMemo(() => {
     const map: Record<string, GoalProgress> = {};
+    if (goals.length === 0) {
+      return map;
+    }
+
+    // Single pass over each transaction array, bucketing amounts into every
+    // goal at once — instead of re-filtering the full arrays per goal.
+    const currents = sumCurrentsForGoals(goals, expenses, incomes);
     for (const goal of goals) {
-      map[goal.id] = computeProgress(goal, expenses, incomes);
+      map[goal.id] = buildProgress(goal, currents.get(goal.id) ?? 0);
     }
 
     return map;
@@ -52,11 +59,101 @@ const computeProgress = (
   expenses: Expense[],
   incomes: Expense[],
 ): GoalProgress => {
+  const current = sumForSource(goal, expenses, incomes, goal.start_date);
+
+  return buildProgress(goal, current);
+}
+
+const sumCurrentsForGoals = (
+  goals: Goal[],
+  expenses: Expense[],
+  incomes: Expense[],
+): Map<string, number> => {
+  const currents = new Map<string, number>();
+  // Index goals by how a row contributes to them so each transaction is
+  // matched via map lookups instead of one full scan per goal.
+  const goalsByCategory = new Map<string, Goal[]>();
+  const goalsByTag = new Map<string, Goal[]>();
+  const netDeltaGoals: Goal[] = [];
+
+  for (const goal of goals) {
+    currents.set(goal.id, 0);
+    if (goal.source_type === 'category') {
+      if (!goal.category_id) continue;
+      appendToBucket(goalsByCategory, goal.category_id, goal);
+    } else if (goal.source_type === 'tag') {
+      if (!goal.tag_id) continue;
+      appendToBucket(goalsByTag, goal.tag_id, goal);
+    } else {
+      netDeltaGoals.push(goal);
+    }
+  }
+
+  for (const expense of expenses) {
+    const amount = Number(expense.amount ?? 0);
+    if (expense.category_id) {
+      addToMatchingGoals(
+        currents,
+        goalsByCategory.get(expense.category_id),
+        expense.date,
+        amount,
+      );
+    }
+    if (expense.tag_id) {
+      addToMatchingGoals(
+        currents,
+        goalsByTag.get(expense.tag_id),
+        expense.date,
+        amount,
+      );
+    }
+    // net_delta counts every expense as an outflow.
+    addToMatchingGoals(currents, netDeltaGoals, expense.date, -amount);
+  }
+
+  for (const income of incomes) {
+    const amount = Number(income.amount ?? 0);
+    addToMatchingGoals(currents, netDeltaGoals, income.date, amount);
+  }
+
+  return currents;
+}
+
+const appendToBucket = (
+  buckets: Map<string, Goal[]>,
+  key: string,
+  goal: Goal,
+): void => {
+  const existing = buckets.get(key);
+  if (existing) {
+    existing.push(goal);
+
+    return;
+  }
+
+  buckets.set(key, [goal]);
+}
+
+// YYYY-MM-DD dates sort lexicographically, so string comparison is safe.
+const addToMatchingGoals = (
+  currents: Map<string, number>,
+  goals: Goal[] | undefined,
+  date: string,
+  amount: number,
+): void => {
+  if (!goals) return;
+
+  for (const goal of goals) {
+    if (date < goal.start_date) continue;
+    currents.set(goal.id, (currents.get(goal.id) ?? 0) + amount);
+  }
+}
+
+const buildProgress = (goal: Goal, current: number): GoalProgress => {
   // Parse YYYY-MM-DD as local midnight; `new Date('YYYY-MM-DD')` parses as UTC
   // and shifts the day in negative-UTC timezones.
   const startDate = new Date(goal.start_date + 'T00:00:00');
 
-  const current = sumForSource(goal, expenses, incomes, goal.start_date);
   const target = Number(goal.target_amount);
   let ratio = 0;
   if (target > 0) {

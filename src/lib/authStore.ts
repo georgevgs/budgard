@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
 import { supabase } from '@/lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 

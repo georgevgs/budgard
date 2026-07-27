@@ -97,37 +97,6 @@ const AuthenticatedLayout = () => {
   useOfflineSync();
   useIdleTabPrefetch();
   useCheckoutReturn();
-  const expenses = useExpensesData();
-  const { categories } = useCategoriesData();
-  const { isInitialized, monthlyBudget } = useDataConfig();
-  const [showOnboarding, setShowOnboarding] = useState(false);
-
-  useEffect(() => {
-    if (
-      shouldShowOnboarding(
-        isInitialized,
-        expenses.length,
-        categories.length,
-        monthlyBudget,
-      )
-    ) {
-      setShowOnboarding(true);
-    }
-  }, [isInitialized, expenses.length, categories.length, monthlyBudget]);
-
-  // A landing-page "Get Pro" choice completes here after sign-in. Blocked
-  // until the data layer knows whether onboarding is due — and while it runs —
-  // so the upgrade dialog never opens underneath the onboarding flow.
-  useUpgradeIntent(
-    !isInitialized ||
-      showOnboarding ||
-      shouldShowOnboarding(
-        isInitialized,
-        expenses.length,
-        categories.length,
-        monthlyBudget,
-      ),
-  );
 
   return (
     <>
@@ -137,14 +106,14 @@ const AuthenticatedLayout = () => {
       <main
         id="main-content"
         tabIndex={-1}
-        className="flex-1 pt-2 pb-20 focus:outline-none"
+        className="flex-1 pt-2 pb-[calc(5rem+env(safe-area-inset-bottom))] focus:outline-none"
       >
         <Outlet />
       </main>
       <NavTabs />
       <MilestoneWatcher />
       <UpgradeDialog />
-      {renderOnboarding(showOnboarding, () => setShowOnboarding(false))}
+      <OnboardingGate />
     </>
   );
 };
@@ -177,6 +146,45 @@ const ScrollToTop = () => {
   }, [pathname]);
 
   return null;
+};
+
+// Subscribes to the data slices that decide whether onboarding is due. Kept
+// out of AuthenticatedLayout so expense/category mutations re-render only
+// this leaf instead of the whole authenticated shell.
+const OnboardingGate = () => {
+  const expenses = useExpensesData();
+  const { categories } = useCategoriesData();
+  const { isInitialized, monthlyBudget } = useDataConfig();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    if (
+      shouldShowOnboarding(
+        isInitialized,
+        expenses.length,
+        categories.length,
+        monthlyBudget,
+      )
+    ) {
+      setShowOnboarding(true);
+    }
+  }, [isInitialized, expenses.length, categories.length, monthlyBudget]);
+
+  // A landing-page "Get Pro" choice completes here after sign-in. Blocked
+  // until the data layer knows whether onboarding is due — and while it runs —
+  // so the upgrade dialog never opens underneath the onboarding flow.
+  useUpgradeIntent(
+    !isInitialized ||
+      showOnboarding ||
+      shouldShowOnboarding(
+        isInitialized,
+        expenses.length,
+        categories.length,
+        monthlyBudget,
+      ),
+  );
+
+  return renderOnboarding(showOnboarding, () => setShowOnboarding(false));
 };
 
 const renderOnboarding = (isOpen: boolean, onComplete: () => void) => {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { format, parseISO, getYear } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import {
   useDataConfig,
   useExpensesData,
@@ -44,8 +44,10 @@ export const useAnalyticsData = () => {
     return allExpenses.filter((e) => parseISO(e.date) >= cutoff);
   }, [allExpenses, isPro]);
 
+  // YYYY-MM-DD dates: slicing the year/month straight off the string is ~10x
+  // faster than parseISO per row (see useExpensesFilter for the same pattern).
   const availableYears = useMemo(() => {
-    const years = new Set(expenses.map((e) => getYear(parseISO(e.date))));
+    const years = new Set(expenses.map((e) => Number(e.date.slice(0, 4))));
     years.add(new Date().getFullYear());
 
     return Array.from(years).sort().reverse();
@@ -62,27 +64,28 @@ export const useAnalyticsData = () => {
   }, [availableYears, selectedYear]);
 
   const yearExpenses = useMemo(() => {
-    return expenses.filter((e) => getYear(parseISO(e.date)) === selectedYear);
+    return expenses.filter((e) => Number(e.date.slice(0, 4)) === selectedYear);
   }, [expenses, selectedYear]);
 
   const monthlyData = useMemo(() => {
-    const months = Array.from({ length: 12 }, (_, i) => {
+    // Single pass: bucket totals by the row's yyyy-MM prefix, then map the
+    // 12 month keys to human-readable labels (date-fns only for labels).
+    const totals = new Map<string, number>();
+    for (const e of yearExpenses) {
+      const key = e.date.slice(0, 7);
+      totals.set(key, (totals.get(key) ?? 0) + e.amount);
+    }
+
+    return Array.from({ length: 12 }, (_, i) => {
       const month = (i + 1).toString().padStart(2, '0');
-
-      return `${selectedYear}-${month}`;
-    });
-
-    return months.map((month) => {
-      const monthExpenses = yearExpenses.filter(
-        (e) => format(parseISO(e.date), 'yyyy-MM') === month,
-      );
+      const key = `${selectedYear}-${month}`;
 
       return {
-        month: format(parseISO(`${month}-01`), 'LLL', { locale: dateLocale }),
-        fullMonth: format(parseISO(`${month}-01`), 'LLLL', {
+        month: format(parseISO(`${key}-01`), 'LLL', { locale: dateLocale }),
+        fullMonth: format(parseISO(`${key}-01`), 'LLLL', {
           locale: dateLocale,
         }),
-        amount: monthExpenses.reduce((sum, e) => sum + e.amount, 0),
+        amount: totals.get(key) ?? 0,
       };
     });
   }, [yearExpenses, selectedYear, dateLocale]);
@@ -93,13 +96,16 @@ export const useAnalyticsData = () => {
     const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthKey = format(lastMonthDate, 'yyyy-MM');
 
-    const thisMonthAmount = expenses
-      .filter((e) => format(parseISO(e.date), 'yyyy-MM') === thisMonthKey)
-      .reduce((sum, e) => sum + e.amount, 0);
-
-    const lastMonthAmount = expenses
-      .filter((e) => format(parseISO(e.date), 'yyyy-MM') === lastMonthKey)
-      .reduce((sum, e) => sum + e.amount, 0);
+    let thisMonthAmount = 0;
+    let lastMonthAmount = 0;
+    for (const e of expenses) {
+      const key = e.date.slice(0, 7);
+      if (key === thisMonthKey) {
+        thisMonthAmount += e.amount;
+      } else if (key === lastMonthKey) {
+        lastMonthAmount += e.amount;
+      }
+    }
 
     const delta = thisMonthAmount - lastMonthAmount;
     let percentChange: number | null = null;
@@ -133,7 +139,7 @@ export const useAnalyticsData = () => {
         slot = { total: 0, monthly: new Array(12).fill(0) };
         byCat.set(e.category_id, slot);
       }
-      const monthIdx = parseISO(e.date).getMonth();
+      const monthIdx = Number(e.date.slice(5, 7)) - 1;
       slot.total += e.amount;
       slot.monthly[monthIdx] += e.amount;
     }

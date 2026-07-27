@@ -1,9 +1,9 @@
 import type { ReactElement, CSSProperties } from 'react';
 import { cn } from '@/lib/utils.ts';
-import type { Category } from '@/types/Category.ts';
+import type { EmbeddedCategory } from '@/types/Category.ts';
 
 type CategoryBadgeProps = {
-  category: Category;
+  category: EmbeddedCategory;
   className?: string;
 }
 

@@ -12,6 +12,25 @@ export const mergeUniqueById = <T extends { id: string }>(
   return [...prev, ...fresh];
 };
 
+// Replaces the recent-window slice of state with fresh server rows while
+// keeping the pre-cutoff tail that stage 2 already loaded. A plain replace
+// would wipe that tail on every foreground refetch; a plain merge would
+// resurrect rows deleted on another device. The id guard covers a row whose
+// date was edited across the cutoff on another device — it must not appear
+// in both halves.
+export const replaceRecentWindow = <T extends { id: string; date: string }>(
+  prev: T[],
+  recent: T[],
+  cutoff: string,
+): T[] => {
+  const recentIds = new Set(recent.map((row) => row.id));
+  const olderTail = prev.filter(
+    (row) => row.date < cutoff && !recentIds.has(row.id),
+  );
+
+  return [...recent, ...olderTail];
+};
+
 export const isAbortError = (error: unknown): boolean => {
   if (error instanceof DOMException && error.name === 'AbortError') return true;
   if (error instanceof Error && error.message.includes('AbortError'))

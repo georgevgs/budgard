@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
+import { useTranslation } from 'react-i18next';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
@@ -18,6 +19,7 @@ export const useCategoryOps = () => {
     setCategoryBudgets,
     refreshExpenses,
   } = useDataActions();
+  const { t } = useTranslation();
   const showErrorToast = useShowErrorToast();
 
   const handleCategoryAdd = useCallback(
@@ -49,11 +51,11 @@ export const useCategoryOps = () => {
           prev.filter((c) => c.id !== optimisticCategory.id),
         );
         Sentry.captureException(error, { tags: { operation: 'createCategory' } });
-        showErrorToast('Failed to add category');
+        showErrorToast(t('categories.toasts.addFailed'));
         throw error;
       }
     },
-    [isInitialized, setCategories, showErrorToast],
+    [isInitialized, setCategories, showErrorToast, t],
   );
 
   const handleCategoryUpdate = useCallback(
@@ -107,11 +109,11 @@ export const useCategoryOps = () => {
         setExpenses(previousExpenses);
         setIncomes(previousIncomes);
         Sentry.captureException(error, { tags: { operation: 'updateCategory' } });
-        showErrorToast('Failed to update category');
+        showErrorToast(t('categories.toasts.updateFailed'));
         throw error;
       }
     },
-    [isInitialized, setCategories, setExpenses, setIncomes, showErrorToast],
+    [isInitialized, setCategories, setExpenses, setIncomes, showErrorToast, t],
   );
 
   const handleCategoryDelete = useCallback(
@@ -145,7 +147,7 @@ export const useCategoryOps = () => {
         setCategoryBudgets(previousBudgets);
         refreshExpenses();
         Sentry.captureException(error, { tags: { operation: 'deleteCategory' } });
-        showErrorToast('Failed to delete category');
+        showErrorToast(t('categories.toasts.deleteFailed'));
         throw error;
       }
     },
@@ -156,6 +158,7 @@ export const useCategoryOps = () => {
       setCategoryBudgets,
       refreshExpenses,
       showErrorToast,
+      t,
     ],
   );
 
@@ -176,11 +179,11 @@ export const useCategoryOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'createCategoriesBulk' },
         });
-        showErrorToast('Failed to create categories');
+        showErrorToast(t('categories.toasts.bulkCreateFailed'));
         throw error;
       }
     },
-    [isInitialized, setCategories, showErrorToast],
+    [isInitialized, setCategories, showErrorToast, t],
   );
 
   return useMemo(

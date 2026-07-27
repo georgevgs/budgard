@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
-import * as Sentry from '@sentry/react';
+import * as Sentry from '@/lib/sentry';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
@@ -12,6 +13,7 @@ export const useTemplateOps = () => {
   const { isInitialized } = useDataConfig();
   const { setTemplates } = useDataActions();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const showErrorToast = useShowErrorToast();
 
   const handleTemplateCreate = useCallback(
@@ -30,7 +32,7 @@ export const useTemplateOps = () => {
         const saved = await dataService.createTemplate(templateData);
         haptics.success();
         setTemplates((prev) => replaceById(prev, optimisticTemplate.id, saved));
-        toast({ variant: 'success', title: 'Template saved' });
+        toast({ variant: 'success', title: t('templates.saved') });
       } catch (error) {
         haptics.error();
         setTemplates((prev) =>
@@ -39,11 +41,11 @@ export const useTemplateOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'createTemplate' },
         });
-        showErrorToast('Failed to save template');
+        showErrorToast(t('templates.saveFailed'));
         throw error;
       }
     },
-    [isInitialized, setTemplates, showErrorToast, toast],
+    [isInitialized, setTemplates, showErrorToast, toast, t],
   );
 
   const handleTemplateDelete = useCallback(
@@ -67,11 +69,11 @@ export const useTemplateOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'deleteTemplate' },
         });
-        showErrorToast('Failed to delete template');
+        showErrorToast(t('templates.deleteFailed'));
         throw error;
       }
     },
-    [isInitialized, setTemplates, showErrorToast],
+    [isInitialized, setTemplates, showErrorToast, t],
   );
 
   return useMemo(

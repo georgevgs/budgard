@@ -25,11 +25,8 @@ type Props = {
 const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
-  const { snapshots, isLoading, removeSnapshot } = useAccountBalances(
-    account.id,
-    open,
-    account.updated_at,
-  );
+  const { snapshots, isLoading, hasError, retry, removeSnapshot } =
+    useAccountBalances(account.id, open, account.updated_at);
   const [snapshotMode, setSnapshotMode] = useState<SnapshotMode | null>(null);
   const actions = useAccountDetailActions({ account, onClose, removeSnapshot });
 
@@ -39,7 +36,7 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
     <>
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden flex flex-col max-h-[85dvh]"
+          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden sm:[&>button]:inline-flex flex flex-col max-h-[85dvh]"
           aria-describedby="account-detail-description"
           onOpenChange={onClose}
         >
@@ -69,17 +66,19 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
               </h3>
             </div>
 
-            {renderHistoryList(
+            {renderHistoryList({
               isLoading,
+              hasError,
               isInvestment,
               snapshots,
-              account.default_currency,
-              account.name,
+              currency: account.default_currency,
+              accountName: account.name,
               dateLocale,
-              (id) => actions.setSnapshotToDelete(id),
-              setSnapshotMode,
+              onDelete: (id) => actions.setSnapshotToDelete(id),
+              onRetry: retry,
+              setMode: setSnapshotMode,
               t,
-            )}
+            })}
           </div>
         </DialogContent>
       </Dialog>
@@ -89,7 +88,7 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
         onOpenChange={() => setSnapshotMode(null)}
       >
         <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
+          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden sm:[&>button]:inline-flex"
           onOpenChange={() => setSnapshotMode(null)}
           onFocusOutside={(e) => e.preventDefault()}
         >

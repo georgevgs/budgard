@@ -7,6 +7,71 @@ import { VitePWA } from "vite-plugin-pwa";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import pkg from "./package.json" with { type: "json" };
 
+// Function-form manualChunks: the previous array form only captured each
+// package's entry module, so secondary entry points (e.g. react-dom/client's
+// actual implementation, ~170 KB min) leaked into the app entry chunk and got
+// cache-busted on every deploy. Matching on the package directory captures
+// every module of the package. Anything unmatched returns undefined so
+// dynamic-import-only packages (recharts, browser-image-compression, ...)
+// keep their natural lazy chunks.
+const matchesPackage = (id: string, packages: string[]): boolean =>
+  packages.some((pkg) => id.includes(`node_modules/${pkg}/`));
+
+const chunkForModule = (id: string): string | undefined => {
+  if (!id.includes("node_modules")) {
+    return undefined;
+  }
+
+  // Whole Sentry SDK (loaded lazily via src/lib/sentry.ts) in one chunk.
+  if (matchesPackage(id, ["@sentry", "@sentry-internal"])) {
+    return "sentry";
+  }
+
+  if (
+    matchesPackage(id, [
+      "react",
+      "react-dom",
+      "react-router",
+      "react-router-dom",
+      "scheduler",
+    ])
+  ) {
+    return "react-vendor";
+  }
+
+  if (
+    matchesPackage(id, [
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-select",
+      "@radix-ui/react-toast",
+      "@radix-ui/react-popover",
+    ])
+  ) {
+    return "ui-vendor";
+  }
+
+  // recharts intentionally NOT manualChunked — it's only used by lazy
+  // routes (AnalyticsView, NetWorthChart). Letting Vite chunk it
+  // naturally keeps it out of the entry's modulepreload list.
+  if (matchesPackage(id, ["react-hook-form", "@hookform/resolvers", "zod"])) {
+    return "form-vendor";
+  }
+
+  if (matchesPackage(id, ["date-fns", "react-day-picker"])) {
+    return "date-vendor";
+  }
+
+  // Supabase realtime client cannot be tree-shaken (statically imported
+  // by SupabaseClient), so isolate the whole scope into its own
+  // chunk. Entry shrinks; supabase parses in parallel.
+  if (matchesPackage(id, ["@supabase"])) {
+    return "supabase-vendor";
+  }
+
+  return undefined;
+};
+
 // Belt-and-braces: Sentry's plugin deletes maps after upload, but only when
 // SENTRY_AUTH_TOKEN is set. A deploy without the token (e.g. preview build)
 // would otherwise ship .map files alongside the JS bundle, leaking source.
@@ -93,25 +158,7 @@ export default defineConfig({
     sourcemap: 'hidden',
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-select',
-            '@radix-ui/react-toast',
-            '@radix-ui/react-popover'
-          ],
-          // recharts intentionally NOT manualChunked — it's only used by lazy
-          // routes (AnalyticsView, NetWorthChart). Letting Vite chunk it
-          // naturally keeps it out of the entry's modulepreload list.
-          'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          'date-vendor': ['date-fns', 'react-day-picker'],
-          // Supabase realtime client cannot be tree-shaken (statically imported
-          // by SupabaseClient), so isolate the whole package into its own
-          // chunk. Entry shrinks; supabase parses in parallel.
-          'supabase-vendor': ['@supabase/supabase-js'],
-        },
+        manualChunks: chunkForModule,
       },
     },
     chunkSizeWarningLimit: 500,
