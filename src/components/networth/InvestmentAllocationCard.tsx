@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
+import { ResponsiveContainer, PieChart, Pie, Tooltip } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency, formatPercent } from '@/lib/utils';
 import { ChartTooltipShell } from '@/components/common/ChartTooltip';
@@ -14,6 +14,8 @@ type Slice = {
   id: string;
   name: string;
   color: string;
+  // recharts Pie reads each slice's color from the data's `fill` key
+  fill: string;
   currency: string;
   value: number;
   pct: number;
@@ -34,6 +36,7 @@ const InvestmentAllocationCard = ({ accounts }: Props) => {
         id: a.id,
         name: a.name,
         color: a.color,
+        fill: a.color,
         currency: a.default_currency,
         value: a.current_balance,
         pct: (a.current_balance / total) * 100,
@@ -64,11 +67,7 @@ const InvestmentAllocationCard = ({ accounts }: Props) => {
                   paddingAngle={2}
                   stroke="hsl(var(--background))"
                   strokeWidth={2}
-                >
-                  {slices.map((s) => (
-                    <Cell key={s.id} fill={s.color} />
-                  ))}
-                </Pie>
+                />
                 <Tooltip
                   content={({ active, payload }) =>
                     renderTooltip(Boolean(active), payload)
