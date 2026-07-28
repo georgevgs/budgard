@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import {
   Select,
   SelectContent,
@@ -6,6 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { TagManager } from '@/components/tags/TagManager';
 import { cn } from '@/lib/utils';
 import type { Category } from '@/types/Category';
 import type { Tag } from '@/types/Tag';
@@ -43,6 +48,7 @@ const ExpensesFilterDrawer = ({
   onDateRangeChange,
 }: Props) => {
   const { t } = useTranslation();
+  const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
 
   const handleTagSelectChange = (value: string) => {
     if (value === 'all') {
@@ -100,6 +106,17 @@ const ExpensesFilterDrawer = ({
 
         {renderTagsSelect(tags, selectedTagId, t, handleTagSelectChange)}
 
+        {renderManageTagsButton(tags, t, () => setIsTagManagerOpen(true))}
+
+        <Dialog open={isTagManagerOpen} onOpenChange={setIsTagManagerOpen}>
+          <DialogContent
+            className="sm:max-w-[500px] p-0 gap-0"
+            onOpenChange={(open: boolean) => setIsTagManagerOpen(open)}
+          >
+            <TagManager />
+          </DialogContent>
+        </Dialog>
+
         {renderSortSelect(sortOrder, t, onSortChange)}
 
         {renderDateRangeSelect(dateRangePreset, t, handleDateRangeChange)}
@@ -116,6 +133,29 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const renderManageTagsButton = (
+  tags: Tag[],
+  t: TranslateFunction,
+  onOpen: () => void,
+) => {
+  if (tags.length === 0) return null;
+
+  return (
+    <div className="flex justify-end -mt-1">
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="text-xs text-muted-foreground hover:text-foreground"
+        onClick={onOpen}
+      >
+        <Pencil className="h-3 w-3 mr-1.5" />
+        {t('tags.manageTags')}
+      </Button>
+    </div>
+  );
+};
 
 const getDrawerClass = (isOpen: boolean): string => {
   if (isOpen) {

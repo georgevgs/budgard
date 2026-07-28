@@ -79,6 +79,27 @@ export const dataService = {
     return data as Tag;
   },
 
+  async updateTag(tagId: string, tagData: { name: string }) {
+    const { data, error } = await supabase
+      .from('tags')
+      .update(tagData)
+      .eq('id', tagId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return data as Tag;
+  },
+
+  // expenses.tag_id is ON DELETE SET NULL and expense_tags cascades,
+  // so deleting a tag never touches the expenses themselves.
+  async deleteTag(tagId: string) {
+    const { error } = await supabase.from('tags').delete().eq('id', tagId);
+
+    if (error) throw error;
+  },
+
   async getExpenses(
     signal?: AbortSignal,
     sinceDate?: string,

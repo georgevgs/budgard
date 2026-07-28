@@ -142,7 +142,9 @@
       "addFailed": "Failed to add expense",
       "deleteFailed": "Failed to delete expense",
       "receiptUploadFailed": "Expense saved but receipt upload failed",
-      "tagCreateFailed": "Failed to create tag"
+      "tagCreateFailed": "Failed to create tag",
+      "tagUpdateFailed": "Could not rename the tag.",
+      "tagDeleteFailed": "Could not delete the tag."
     }
   },
   "income": {
@@ -1507,5 +1509,17 @@
     "tryAgain": "Try Again",
     "reload": "Reload Page",
     "details": "Technical details"
+  },
+  "tags": {
+    "title": "Tags",
+    "manageDescription": "Rename or delete your tags. Deleting a tag removes it from expenses, but keeps the expenses.",
+    "manageTags": "Manage tags",
+    "renameTag": "Rename tag",
+    "renameDescription": "The new name applies everywhere this tag is used.",
+    "tagName": "Tag name",
+    "deleteTag": "Delete tag",
+    "deleteConfirmation": "Delete \"{{name}}\"? It will be removed from all expenses that use it. The expenses themselves are kept.",
+    "noTags": "No tags yet",
+    "emptyHelp": "Create tags from the expense form to label and filter your spending."
   }
 }
