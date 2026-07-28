@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,7 @@ import { formatCurrencyInput } from '@/lib/utils';
 type Props = {
   isSubmitting: boolean;
   currencySymbol: string;
+  onBack: () => void;
   onSkip: () => void;
   onNext: (budgetInput: string) => void;
 };
@@ -20,6 +22,7 @@ type Props = {
 const OnboardingBudgetStep = ({
   isSubmitting,
   currencySymbol,
+  onBack,
   onSkip,
   onNext,
 }: Props) => {
@@ -54,6 +57,15 @@ const OnboardingBudgetStep = ({
       </div>
 
       <div className="flex gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onBack}
+          disabled={isSubmitting}
+          aria-label={t('common.back')}
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
         <Button
           variant="ghost"
           className="flex-1"

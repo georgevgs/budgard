@@ -89,6 +89,9 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
   const subscribe = useCallback(async () => {
     if (!session?.user?.id) return;
 
+    // Show the switch as pending while the permission prompt and push
+    // registration are in flight — otherwise it visibly snaps back off.
+    setState('loading');
     try {
       const permission = await Notification.requestPermission();
       if (permission === 'denied') {
@@ -97,10 +100,15 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
         return;
       }
 
-      if (permission !== 'granted') return;
+      if (permission !== 'granted') {
+        setState('unsubscribed');
+
+        return;
+      }
 
       const reg = await getRegistration();
       if (!reg) {
+        setState('unsubscribed');
         toast({
           variant: 'destructive',
           description: t('settings.notifications.swUnavailable'),
@@ -132,6 +140,7 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
 
       setState('subscribed');
     } catch {
+      setState('unsubscribed');
       toast({
         variant: 'destructive',
         description: t('settings.notifications.enableFailed'),
@@ -140,9 +149,14 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
   }, [session, toast, t]);
 
   const unsubscribe = useCallback(async () => {
+    setState('loading');
     try {
       const reg = await getRegistration();
-      if (!reg) return;
+      if (!reg) {
+        setState('unsubscribed');
+
+        return;
+      }
 
       const subscription = await reg.pushManager.getSubscription();
       if (!subscription) {
@@ -160,6 +174,7 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
 
       setState('unsubscribed');
     } catch {
+      setState('subscribed');
       toast({
         variant: 'destructive',
         description: t('settings.notifications.disableFailed'),

@@ -33,6 +33,7 @@ const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
         <OnboardingBudgetStep
           isSubmitting={isSubmitting}
           currencySymbol={currencySymbol}
+          onBack={() => setStep(0)}
           onSkip={() => setStep(2)}
           onNext={handleBudgetNext}
         />
@@ -42,20 +43,28 @@ const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
       return (
         <OnboardingCategoriesStep
           isSubmitting={isSubmitting}
+          onBack={() => setStep(1)}
           onSkip={() => setStep(3)}
           onNext={handleCategoriesNext}
         />
       );
     }
 
-    return <OnboardingFeaturesStep onComplete={handleComplete} />;
+    return (
+      <OnboardingFeaturesStep
+        onBack={() => setStep(2)}
+        onComplete={handleComplete}
+      />
+    );
   };
 
+  // Dismissing the flow (swipe/Esc/X) also marks onboarding as done —
+  // otherwise it re-opens on every app boot until the last step is reached.
   return (
-    <Dialog open={isOpen} onOpenChange={() => onComplete()}>
+    <Dialog open={isOpen} onOpenChange={() => handleComplete()}>
       <DialogContent
         className="sm:max-w-[420px] p-0 gap-0"
-        onOpenChange={() => onComplete()}
+        onOpenChange={() => handleComplete()}
       >
         {/* Mobile drag handle */}
         <div

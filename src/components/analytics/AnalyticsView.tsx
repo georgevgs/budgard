@@ -1,7 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
-import { useDataConfig, useCategoriesData } from '@/contexts/DataContext';
+import {
+  useDataConfig,
+  useCategoriesData,
+  useExpensesData,
+} from '@/contexts/DataContext';
 import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
+import AnalyticsEmpty from '@/components/analytics/AnalyticsEmpty';
 import SpendingInsights from '@/components/analytics/SpendingInsights';
 import CategorySparkline from '@/components/analytics/CategorySparkline';
 import { CategoryDrillDown } from '@/components/analytics/CategoryDrillDown';
@@ -25,6 +30,7 @@ const AnalyticsView = () => {
   const isPro = useIsPro();
   const { expenseCategories: categories } = useCategoriesData();
   const { monthlyBudget, defaultCurrency, isInitialized } = useDataConfig();
+  const allExpenses = useExpensesData();
 
   const analytics = useAnalyticsData();
   const drillDown = useAnalyticsDrillDown(
@@ -34,6 +40,12 @@ const AnalyticsView = () => {
 
   if (!isInitialized) {
     return <AnalyticsLoadingState />;
+  }
+
+  // First run: a wall of zeroed charts explains nothing — point the user
+  // at adding an expense instead.
+  if (allExpenses.length === 0) {
+    return <AnalyticsEmpty />;
   }
 
   return (

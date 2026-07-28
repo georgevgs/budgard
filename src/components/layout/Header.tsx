@@ -1,13 +1,20 @@
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
+import { Button } from '@/components/ui/button';
 import ProfileMenu from '@/components/layout/ProfileMenu';
 import AppMenu from '@/components/layout/AppMenu';
+
+// Routes outside the four bottom tabs — they get a back button so users
+// aren't stranded on screens where no tab is active.
+const SECONDARY_ROUTES = ['/goals', '/networth', '/debts', '/settings'];
 
 const Header = () => {
   const { session } = useAuth();
   const { t } = useTranslation();
+  const { pathname } = useLocation();
 
   // Initialize theme on mount (applies to document + meta theme-color)
   useTheme();
@@ -16,11 +23,13 @@ const Header = () => {
     return null;
   }
 
+  const isSecondaryRoute = SECONDARY_ROUTES.includes(pathname);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl pt-safe-t">
       <div className="container grid grid-cols-3 items-center h-16 px-4 pt-1">
         <div className="justify-self-start">
-          <ProfileMenu />
+          {renderLeftSlot(isSecondaryRoute)}
         </div>
         <Link
           to="/expenses"
@@ -46,3 +55,42 @@ const Header = () => {
 };
 
 export default Header;
+
+// ─── Helper render functions ──────────────────────────────────────────────────
+
+const renderLeftSlot = (isSecondaryRoute: boolean) => {
+  if (isSecondaryRoute) {
+    return <BackButton />;
+  }
+
+  return <ProfileMenu />;
+};
+
+const BackButton = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    // React Router stamps an index into history state; 0 means this entry
+    // was a direct load (deep link), where "back" would leave the app.
+    const historyIndex = (window.history.state as { idx?: number } | null)?.idx;
+    if (historyIndex && historyIndex > 0) {
+      navigate(-1);
+
+      return;
+    }
+    navigate('/expenses', { viewTransition: true });
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="w-10 h-10 rounded-full p-0 bg-muted text-foreground hover:bg-muted/80 ring-1 ring-border/40"
+      onClick={handleBack}
+      aria-label={t('common.back')}
+    >
+      <ArrowLeft className="h-5 w-5" />
+    </Button>
+  );
+};

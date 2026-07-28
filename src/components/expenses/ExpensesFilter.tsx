@@ -85,6 +85,8 @@ const ExpensesFilter = ({
           className="h-10 w-10 shrink-0"
           onClick={() => setIsOpen(!isOpen)}
           aria-label={t('expenses.filter.toggleFilters')}
+          aria-expanded={isOpen}
+          aria-controls="expenses-filter-drawer"
         >
           <Filter className="h-4 w-4" />
           {renderFilterCountBadge(hasActiveFilters, activeFilterCount)}

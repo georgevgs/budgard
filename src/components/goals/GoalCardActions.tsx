@@ -7,16 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import ConfirmDestructiveDialog from '@/components/common/ConfirmDestructiveDialog';
 import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import type { Goal } from '@/types/Goal';
 
@@ -74,28 +65,14 @@ const GoalCardActions = ({ goal, onEdit, onDelete }: Props) => {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent
-          className="sm:max-w-[425px]"
-          onOpenChange={setShowDeleteDialog}
-        >
-          <AlertDialogHeader data-draggable-area>
-            <AlertDialogTitle>{t('goals.deleteTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('goals.deleteConfirmation', { name: goal.name })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t('common.delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDestructiveDialog
+        open={showDeleteDialog}
+        title={t('goals.deleteTitle')}
+        description={t('goals.deleteConfirmation', { name: goal.name })}
+        confirmLabel={t('common.delete')}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleConfirmDelete}
+      />
     </>
   );
 };

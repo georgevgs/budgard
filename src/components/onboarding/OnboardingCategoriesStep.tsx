@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import Check from 'lucide-react/dist/esm/icons/check';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 import { Button } from '@/components/ui/button';
@@ -29,11 +30,17 @@ export const PRESET_CATEGORIES: PresetCategory[] = [
 
 type Props = {
   isSubmitting: boolean;
+  onBack: () => void;
   onSkip: () => void;
   onNext: (selectedIndices: number[]) => void;
 };
 
-const OnboardingCategoriesStep = ({ isSubmitting, onSkip, onNext }: Props) => {
+const OnboardingCategoriesStep = ({
+  isSubmitting,
+  onBack,
+  onSkip,
+  onNext,
+}: Props) => {
   const { t } = useTranslation();
   const [selectedCategories, setSelectedCategories] = useState<Set<number>>(
     new Set([0, 1, 2, 3]),
@@ -89,6 +96,15 @@ const OnboardingCategoriesStep = ({ isSubmitting, onSkip, onNext }: Props) => {
       </div>
 
       <div className="flex gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onBack}
+          disabled={isSubmitting}
+          aria-label={t('common.back')}
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
         <Button
           variant="ghost"
           className="flex-1"

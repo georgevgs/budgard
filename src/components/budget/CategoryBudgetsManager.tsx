@@ -76,8 +76,12 @@ const CategoryBudgetsManager = ({ isOpen, onClose }: Props) => {
   const handleSave = async () => {
     const diff = computeDiff(expenseCategories, categoryBudgets, drafts);
 
-    if (diff.invalid) {
-      setError(t('budget.categoryBudgets.invalidAmount'));
+    if (diff.invalidNames.length > 0) {
+      setError(
+        t('budget.categoryBudgets.invalidAmountFor', {
+          names: diff.invalidNames.join(', '),
+        }),
+      );
 
       return;
     }
@@ -232,7 +236,7 @@ const renderDialog = ({
 type Diff = {
   upserts: { categoryId: string; amount: number }[];
   deletes: string[];
-  invalid: boolean;
+  invalidNames: string[];
 };
 
 const buildInitialDrafts = (
@@ -282,7 +286,7 @@ const computeDiff = (
   const byCategoryId = new Map(budgets.map((b) => [b.category_id, b]));
   const upserts: { categoryId: string; amount: number }[] = [];
   const deletes: string[] = [];
-  let invalid = false;
+  const invalidNames: string[] = [];
 
   for (const cat of categories) {
     const raw = drafts[cat.id] ?? '';
@@ -295,7 +299,7 @@ const computeDiff = (
 
     const amount = parseCurrencyInput(raw);
     if (!Number.isFinite(amount) || amount <= 0 || amount > 10000000) {
-      invalid = true;
+      invalidNames.push(cat.name);
       continue;
     }
 
@@ -304,7 +308,7 @@ const computeDiff = (
     }
   }
 
-  return { upserts, deletes, invalid };
+  return { upserts, deletes, invalidNames };
 };
 
 const renderTotalsBar = (
@@ -498,7 +502,9 @@ const renderError = (error: string | null) => {
   if (!error) return null;
 
   return (
-    <p className="text-xs text-destructive px-6 pb-2 shrink-0">{error}</p>
+    <p role="alert" className="text-xs text-destructive px-6 pb-2 shrink-0">
+      {error}
+    </p>
   );
 };
 

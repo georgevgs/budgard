@@ -1,16 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import ConfirmDestructiveDialog from '@/components/common/ConfirmDestructiveDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -77,28 +68,14 @@ const IncomeCardActions = ({ income, onEdit, onDelete }: Props) => {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent
-          className="sm:max-w-[425px]"
-          onOpenChange={setShowDeleteDialog}
-        >
-          <AlertDialogHeader data-draggable-area>
-            <AlertDialogTitle>{t('income.deleteTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('income.deleteConfirmation') + t('common.actionUndone')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t('common.delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDestructiveDialog
+        open={showDeleteDialog}
+        title={t('income.deleteTitle')}
+        description={t('income.deleteConfirmation') + t('common.actionUndone')}
+        confirmLabel={t('common.delete')}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleConfirmDelete}
+      />
     </>
   );
 };

@@ -25,7 +25,8 @@
     "discardTitle": "Discard changes?",
     "discardBody": "You have unsaved changes. Closing this form will throw them away.",
     "discardConfirm": "Discard",
-    "refreshFailed": "Could not refresh your data."
+    "refreshFailed": "Could not refresh your data.",
+    "back": "Back"
   },
   "auth": {
     "signIn": "Sign In",
@@ -321,7 +322,8 @@
       "allocated": "{{count}} of {{total}} budgeted",
       "overGlobal": "Allocated more than your monthly budget.",
       "invalidAmount": "One or more amounts are invalid.",
-      "progressAria": "{{category}} is at {{percent}}% of its cap"
+      "progressAria": "{{category}} is at {{percent}}% of its cap",
+      "invalidAmountFor": "Invalid amount for: {{names}}"
     },
     "categoryAlerts": {
       "warning": "{{category}} budget warning",
@@ -927,7 +929,9 @@
       "byCategory": "By Category",
       "topExpenses": "Top Expenses",
       "uncategorized": "Uncategorized"
-    }
+    },
+    "emptyTitle": "No data to analyze yet",
+    "emptyDescription": "Add your first expenses and this screen fills with insights about your spending."
   },
   "import": {
     "title": "Import Expenses",

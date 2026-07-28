@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import FileText from 'lucide-react/dist/esm/icons/file-text';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
 import BarChart from 'lucide-react/dist/esm/icons/bar-chart';
@@ -18,10 +19,11 @@ const FEATURES = [
 ];
 
 type Props = {
+  onBack: () => void;
   onComplete: () => void;
 };
 
-const OnboardingFeaturesStep = ({ onComplete }: Props) => {
+const OnboardingFeaturesStep = ({ onBack, onComplete }: Props) => {
   const { t } = useTranslation();
 
   return (
@@ -56,9 +58,20 @@ const OnboardingFeaturesStep = ({ onComplete }: Props) => {
         ))}
       </div>
 
-      <Button className="w-full" size="lg" onClick={onComplete}>
-        {t('onboarding.startTracking')}
-      </Button>
+      <div className="flex gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-11 w-11 self-center"
+          onClick={onBack}
+          aria-label={t('common.back')}
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <Button className="flex-1" size="lg" onClick={onComplete}>
+          {t('onboarding.startTracking')}
+        </Button>
+      </div>
     </div>
   );
 };
