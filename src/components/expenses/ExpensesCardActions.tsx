@@ -12,9 +12,13 @@ import Bookmark from 'lucide-react/dist/esm/icons/bookmark';
 import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import Receipt from 'lucide-react/dist/esm/icons/receipt';
+import Split from 'lucide-react/dist/esm/icons/split';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
+import Undo2 from 'lucide-react/dist/esm/icons/undo-2';
 import ExpenseDeleteDialog from '@/components/expenses/ExpenseDeleteDialog';
 import ReceiptViewer from '@/components/expenses/ReceiptViewer';
+import SplitExpenseDialog from '@/components/expenses/SplitExpenseDialog';
+import RefundExpenseDialog from '@/components/expenses/RefundExpenseDialog';
 import type { Expense } from '@/types/Expense';
 
 type Props = {
@@ -34,11 +38,25 @@ const ExpensesCardActions = ({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [showSplit, setShowSplit] = useState(false);
+  const [showRefund, setShowRefund] = useState(false);
 
   const handleDeleteClick = () => {
     blurActiveElement();
     setMenuOpen(false);
     setTimeout(() => setShowDeleteDialog(true), 0);
+  };
+
+  const handleSplitClick = () => {
+    blurActiveElement();
+    setMenuOpen(false);
+    setTimeout(() => setShowSplit(true), 0);
+  };
+
+  const handleRefundClick = () => {
+    blurActiveElement();
+    setMenuOpen(false);
+    setTimeout(() => setShowRefund(true), 0);
   };
 
   const handleEditClick = () => {
@@ -76,6 +94,8 @@ const ExpensesCardActions = ({
         <DropdownMenuContent align="end">
           {renderEditMenuItem(expense, t, handleEditClick)}
           {renderTemplateMenuItem(onSaveAsTemplate, t, handleSaveAsTemplate)}
+          {renderSplitMenuItem(expense, t, handleSplitClick)}
+          {renderRefundMenuItem(expense, t, handleRefundClick)}
           {renderReceiptMenuItem(expense, t, () => setShowReceipt(true))}
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -96,6 +116,8 @@ const ExpensesCardActions = ({
       />
 
       {renderReceiptViewer(expense, showReceipt, () => setShowReceipt(false))}
+      {renderSplitDialog(expense, showSplit, setShowSplit)}
+      {renderRefundDialog(expense, showRefund, setShowRefund)}
     </>
   );
 };
@@ -142,6 +164,79 @@ const renderTemplateMenuItem = (
       <Bookmark className="h-4 w-4" />
       {t('templates.saveAsTemplate')}
     </DropdownMenuItem>
+  );
+};
+
+// Splitting rewrites the amount, so it follows the same rules as editing:
+// not for debt payments, recurring-generated rows, or refunds.
+const canSplit = (expense: Expense): boolean => {
+  if (expense.type === 'debt_payment' || expense.debt_id) return false;
+  if (expense.recurring_expense_id) return false;
+
+  return expense.amount > 0;
+};
+
+const canRefund = (expense: Expense): boolean => {
+  if (expense.type === 'debt_payment' || expense.debt_id) return false;
+
+  return expense.amount > 0;
+};
+
+const renderSplitMenuItem = (
+  expense: Expense,
+  t: TranslateFunction,
+  onClick: () => void,
+) => {
+  if (!canSplit(expense)) return null;
+
+  return (
+    <DropdownMenuItem onClick={onClick}>
+      <Split className="h-4 w-4" />
+      {t('expenses.split.action')}
+    </DropdownMenuItem>
+  );
+};
+
+const renderRefundMenuItem = (
+  expense: Expense,
+  t: TranslateFunction,
+  onClick: () => void,
+) => {
+  if (!canRefund(expense)) return null;
+
+  return (
+    <DropdownMenuItem onClick={onClick}>
+      <Undo2 className="h-4 w-4" />
+      {t('expenses.refund.action')}
+    </DropdownMenuItem>
+  );
+};
+
+const renderSplitDialog = (
+  expense: Expense,
+  isOpen: boolean,
+  setOpen: (open: boolean) => void,
+) => {
+  if (!isOpen) return null;
+
+  return (
+    <SplitExpenseDialog expense={expense} open={isOpen} onOpenChange={setOpen} />
+  );
+};
+
+const renderRefundDialog = (
+  expense: Expense,
+  isOpen: boolean,
+  setOpen: (open: boolean) => void,
+) => {
+  if (!isOpen) return null;
+
+  return (
+    <RefundExpenseDialog
+      expense={expense}
+      open={isOpen}
+      onOpenChange={setOpen}
+    />
   );
 };
 

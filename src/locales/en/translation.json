@@ -145,6 +145,28 @@
       "tagCreateFailed": "Failed to create tag",
       "tagUpdateFailed": "Could not rename the tag.",
       "tagDeleteFailed": "Could not delete the tag."
+    },
+    "split": {
+      "action": "Split",
+      "title": "Split expense",
+      "description": "\"{{description}}\" ({{amount}}) becomes separate expenses. The parts must add up to the original amount.",
+      "partAmount": "Amount for part {{index}}",
+      "partCategory": "Category for part {{index}}",
+      "addPart": "Add part",
+      "removePart": "Remove part",
+      "remaining": "Remaining: {{amount}}",
+      "confirm": "Split",
+      "success": "Split into {{count}} expenses",
+      "failed": "Could not split the expense."
+    },
+    "refund": {
+      "action": "Record refund",
+      "title": "Record a refund",
+      "description": "Adds a refund for \"{{description}}\" that reduces your spending in the same category.",
+      "amountLabel": "Refund amount",
+      "dateLabel": "Refund date",
+      "entryDescription": "Refund — {{description}}",
+      "confirm": "Record refund"
     }
   },
   "income": {

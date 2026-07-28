@@ -20,6 +20,11 @@ export type ReceiptOptions = {
   existingReceiptPath: string | null;
 };
 
+export type SplitPart = {
+  amount: number;
+  category_id: string | null;
+};
+
 type BulkExpenseRow = {
   date: string;
   description: string;
@@ -29,7 +34,8 @@ type BulkExpenseRow = {
 
 export const useExpenseOps = () => {
   const { isInitialized } = useDataConfig();
-  const { setExpenses, refreshDebts, expensesRef } = useDataActions();
+  const { setExpenses, refreshDebts, refreshExpenses, expensesRef } =
+    useDataActions();
   const { toast } = useToast();
   const { t } = useTranslation();
   const showErrorToast = useShowErrorToast();
@@ -290,9 +296,60 @@ export const useExpenseOps = () => {
     [isInitialized, setExpenses],
   );
 
+  // Splits one expense into several: the original row keeps its receipt,
+  // tags and recurring link and takes the first part; the rest are new rows
+  // with the same date and description.
+  const handleExpenseSplit = useCallback(
+    async (expense: Expense, parts: SplitPart[]) => {
+      if (!isInitialized || parts.length < 2) return;
+
+      const [firstPart, ...restParts] = parts;
+      try {
+        const updated = await dataService.updateExpense(
+          { amount: firstPart.amount, category_id: firstPart.category_id },
+          expense.id,
+        );
+        const created = await dataService.createExpensesBulk(
+          restParts.map((part) => ({
+            date: expense.date,
+            description: expense.description,
+            amount: part.amount,
+            category_id: part.category_id,
+          })),
+        );
+        setExpenses((prev) =>
+          mergeUniqueById(replaceById(prev, expense.id, updated), created),
+        );
+        haptics.success();
+        toast({
+          variant: 'success',
+          title: t('expenses.split.success', { count: parts.length }),
+        });
+      } catch (error) {
+        haptics.error();
+        // A partial split may already be on the server — resync rather than guess
+        refreshExpenses();
+        Sentry.captureException(error, { tags: { operation: 'splitExpense' } });
+        showErrorToast(t('expenses.split.failed'));
+        throw error;
+      }
+    },
+    [isInitialized, setExpenses, refreshExpenses, showErrorToast, toast, t],
+  );
+
   return useMemo(
-    () => ({ handleExpenseSubmit, handleExpenseDelete, handleBulkExpenseImport }),
-    [handleExpenseSubmit, handleExpenseDelete, handleBulkExpenseImport],
+    () => ({
+      handleExpenseSubmit,
+      handleExpenseDelete,
+      handleBulkExpenseImport,
+      handleExpenseSplit,
+    }),
+    [
+      handleExpenseSubmit,
+      handleExpenseDelete,
+      handleBulkExpenseImport,
+      handleExpenseSplit,
+    ],
   );
 };
 
