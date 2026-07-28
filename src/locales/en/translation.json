@@ -495,7 +495,12 @@
       "deleteAccountVerifyTitle": "Confirm Deletion",
       "deleteAccountVerifyButton": "Verify & Delete",
       "deleteAccountSuccess": "Account deleted successfully",
-      "deleteAccountFailed": "Failed to delete account"
+      "deleteAccountFailed": "Failed to delete account",
+      "exportDescription": "Download a copy of everything you have saved in Budgard as a JSON file. Receipt images are not included.",
+      "exportButton": "Download my data",
+      "exporting": "Preparing export...",
+      "exportReady": "Your data export has been downloaded.",
+      "exportFailed": "Could not export your data."
     },
     "billing": {
       "title": "Subscription",

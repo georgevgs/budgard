@@ -495,7 +495,12 @@
       "deleteAccountVerifyTitle": "Επιβεβαίωση Διαγραφής",
       "deleteAccountVerifyButton": "Επαλήθευση & Διαγραφή",
       "deleteAccountSuccess": "Ο λογαριασμός διαγράφηκε επιτυχώς",
-      "deleteAccountFailed": "Αποτυχία διαγραφής λογαριασμού"
+      "deleteAccountFailed": "Αποτυχία διαγραφής λογαριασμού",
+      "exportDescription": "Κατεβάστε ένα αντίγραφο όλων όσων έχετε αποθηκεύσει στο Budgard σε αρχείο JSON. Οι εικόνες αποδείξεων δεν περιλαμβάνονται.",
+      "exportButton": "Λήψη των δεδομένων μου",
+      "exporting": "Προετοιμασία εξαγωγής...",
+      "exportReady": "Η εξαγωγή των δεδομένων σας ολοκληρώθηκε.",
+      "exportFailed": "Δεν ήταν δυνατή η εξαγωγή των δεδομένων σας."
     },
     "billing": {
       "title": "Συνδρομή",
