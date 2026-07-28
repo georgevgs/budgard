@@ -9,6 +9,7 @@ import {
   renderDetailsToggleLabel,
 } from '@/components/expenses/ExpensesForm.helpers';
 import type { TagPickerApi } from '@/hooks/expenseForm/useTagPicker';
+import { useReceiptScan } from '@/hooks/expenseForm/useReceiptScan';
 import type { ExpenseFormData } from '@/lib/validations';
 
 type Props = {
@@ -35,6 +36,7 @@ const ExpenseFormDetails = ({
   onRemoveExistingReceipt,
 }: Props) => {
   const { t } = useTranslation();
+  const scan = useReceiptScan({ form, receiptFile });
 
   return (
     <>
@@ -67,6 +69,7 @@ const ExpenseFormDetails = ({
             isRemoving={isRemovingReceipt}
             onFileSelect={onReceiptSelect}
             onRemoveExisting={onRemoveExistingReceipt}
+            scan={scan}
           />
         </div>
       </div>

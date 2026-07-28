@@ -2,7 +2,9 @@ import { useTranslation } from 'react-i18next';
 import Camera from 'lucide-react/dist/esm/icons/camera';
 import X from 'lucide-react/dist/esm/icons/x';
 import { Button } from '@/components/ui/button';
+import ReceiptScanButton from '@/components/expenses/ReceiptScanButton';
 import { useReceiptUpload } from '@/hooks/expenseForm/useReceiptUpload';
+import type { ReceiptScanApi } from '@/hooks/expenseForm/useReceiptScan';
 
 type ReceiptUploadProps = {
   currentReceiptPath?: string | null;
@@ -10,6 +12,7 @@ type ReceiptUploadProps = {
   isRemoving: boolean;
   onFileSelect: (file: File | null) => void;
   onRemoveExisting: () => void;
+  scan: ReceiptScanApi;
 }
 
 const ReceiptUpload = ({
@@ -18,6 +21,7 @@ const ReceiptUpload = ({
   isRemoving,
   onFileSelect,
   onRemoveExisting,
+  scan,
 }: ReceiptUploadProps) => {
   const { t } = useTranslation();
   const {
@@ -38,37 +42,40 @@ const ReceiptUpload = ({
 
   if (hasReceipt) {
     return (
-      <div className="flex items-center gap-3 rounded-2xl border border-border/50 p-3">
-        {renderThumbnail(previewUrl, t)}
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">
-            {renderFileLabel(selectedFile, t)}
-          </p>
-          <button
+      <div className="space-y-2">
+        <div className="flex items-center gap-3 rounded-2xl border border-border/50 p-3">
+          {renderThumbnail(previewUrl, t)}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">
+              {renderFileLabel(selectedFile, t)}
+            </p>
+            <button
+              type="button"
+              onClick={openFilePicker}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              {t('receipt.changeReceipt')}
+            </button>
+          </div>
+          <Button
             type="button"
-            onClick={openFilePicker}
-            className="text-xs text-muted-foreground hover:text-foreground"
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 flex-shrink-0"
+            onClick={handleClear}
+            aria-label={t('receipt.removeReceipt')}
           >
-            {t('receipt.changeReceipt')}
-          </button>
+            <X className="h-4 w-4" />
+          </Button>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleChange}
+            className="hidden"
+          />
         </div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="h-10 w-10 flex-shrink-0"
-          onClick={handleClear}
-          aria-label={t('receipt.removeReceipt')}
-        >
-          <X className="h-4 w-4" />
-        </Button>
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleChange}
-          className="hidden"
-        />
+        <ReceiptScanButton scan={scan} visible={Boolean(selectedFile)} />
       </div>
     );
   }

@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import path from "path";
-import { readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
+import { copyFile, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type PluginOption } from "vite";
@@ -119,6 +120,91 @@ const stampPushSwBuildId = (): PluginOption => ({
   },
 });
 
+// Version-stamped base path for the self-hosted Tesseract OCR runtime
+// (worker + wasm cores, served under /ocr/). Deriving it from the installed
+// package keeps the served assets in lockstep with the tesseract.js API —
+// worker, core and JS entry are protocol-coupled, so checked-in copies could
+// silently drift on upgrade and break at runtime — and cache-busts the
+// immutable /ocr/* URLs whenever the package is bumped.
+const ocrAssetBase = ((): string => {
+  const { version } = JSON.parse(
+    readFileSync(
+      path.resolve(__dirname, "node_modules/tesseract.js/package.json"),
+      "utf8"
+    )
+  ) as { version: string };
+
+  return `/ocr/tesseract-${version}`;
+})();
+
+const OCR_VENDOR_FILES = [
+  "tesseract.js/dist/worker.min.js",
+  "tesseract.js-core/tesseract-core-lstm.wasm.js",
+  "tesseract.js-core/tesseract-core-simd-lstm.wasm.js",
+  "tesseract.js-core/tesseract-core-relaxedsimd-lstm.wasm.js",
+];
+
+// Ships the OCR runtime from node_modules: copied into dist/ocr/ on build,
+// streamed straight from node_modules in dev. Traineddata is NOT handled
+// here — it lives in public/ocr/tessdata/ (not npm-versioned; refresh by
+// re-downloading from tessdata_fast and renaming the folder, because /ocr/*
+// is served with immutable cache headers).
+const vendorOcrAssets = (): PluginOption => {
+  let isBuild = false;
+
+  return {
+    name: "vendor-ocr-assets",
+    configResolved: (config) => {
+      isBuild = config.command === "build";
+    },
+    configureServer: (server) => {
+      server.middlewares.use((req, res, next) => {
+        const url = req.url?.split("?")[0];
+
+        if (!url || !url.startsWith(`${ocrAssetBase}/`)) {
+          next();
+          return;
+        }
+
+        const requested = path.posix.basename(url);
+        const source = OCR_VENDOR_FILES.find(
+          (file) => path.posix.basename(file) === requested
+        );
+
+        if (!source) {
+          next();
+          return;
+        }
+
+        readFile(path.resolve(__dirname, "node_modules", source))
+          .then((contents) => {
+            res.setHeader("Content-Type", "text/javascript");
+            res.end(contents);
+          })
+          .catch(() => {
+            res.statusCode = 404;
+            res.end();
+          });
+      });
+    },
+    closeBundle: async () => {
+      if (!isBuild) {
+        return;
+      }
+
+      const outDir = path.resolve(__dirname, `dist${ocrAssetBase}`);
+      await mkdir(outDir, { recursive: true });
+
+      for (const file of OCR_VENDOR_FILES) {
+        await copyFile(
+          path.resolve(__dirname, "node_modules", file),
+          path.join(outDir, path.posix.basename(file))
+        );
+      }
+    },
+  };
+};
+
 // Belt-and-braces: Sentry's plugin deletes maps after upload, but only when
 // SENTRY_AUTH_TOKEN is set. A deploy without the token (e.g. preview build)
 // would otherwise ship .map files alongside the JS bundle, leaking source.
@@ -149,10 +235,12 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
     __BUILD_ID__: JSON.stringify(buildId),
+    __OCR_ASSET_BASE__: JSON.stringify(ocrAssetBase),
   },
   plugins: [
     react(),
     stampPushSwBuildId(),
+    vendorOcrAssets(),
     VitePWA({
       registerType: "prompt",
       manifest: false,
@@ -166,6 +254,10 @@ export default defineConfig({
         // control transfers — and the app reloads — only when asked.
         cleanupOutdatedCaches: true,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,json}"],
+        // The OCR runtime (worker + ~4 MB wasm cores + traineddata) must NOT
+        // be precached for every user at SW install — it's fetched on demand
+        // and kept via the ocr-assets runtime cache below.
+        globIgnores: ["**/ocr/**"],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
         runtimeCaching: [
@@ -177,6 +269,24 @@ export default defineConfig({
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 2
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          // OCR runtime assets: cached on first use so scans keep working
+          // offline. /ocr/* URLs are immutable (version-stamped core path,
+          // tessdata folder renamed on refresh), so CacheFirst is safe.
+          {
+            urlPattern: ({ sameOrigin, url }) =>
+              sameOrigin && url.pathname.startsWith("/ocr/"),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "ocr-assets",
+              expiration: {
+                maxEntries: 12,
+                maxAgeSeconds: 60 * 60 * 24 * 365
               },
               cacheableResponse: {
                 statuses: [0, 200]

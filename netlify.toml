@@ -24,7 +24,11 @@
     # The sha256 hash allows the inline theme-init script in index.html.
     # Recompute from dist/index.html whenever that script changes:
     #   node -e "const m=require('fs').readFileSync('dist/index.html','utf8').match(/<script>([\s\S]*?)<\/script>/);console.log('sha256-'+require('crypto').createHash('sha256').update(m[1]).digest('base64'))"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'sha256-IpXc3CDulBUR7HBuqVuRhXQPvcfsYlYLS0VR3r2OK8U=' https://static.cloudflareinsights.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://htamokfphaqudeivpowr.supabase.co wss://htamokfphaqudeivpowr.supabase.co https://cloudflareinsights.com https://challenges.cloudflare.com https://*.sentry.io https://api.frankfurter.dev; worker-src 'self' blob:; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self';"
+    # 'wasm-unsafe-eval' permits WebAssembly compilation only (NOT eval) —
+    # required by the self-hosted Tesseract OCR runtime; Chromium blocks
+    # WebAssembly.compile without it while Safari/Firefox don't enforce, so
+    # missing it would surface as a Chrome/Android-only scan failure.
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-IpXc3CDulBUR7HBuqVuRhXQPvcfsYlYLS0VR3r2OK8U=' https://static.cloudflareinsights.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://htamokfphaqudeivpowr.supabase.co wss://htamokfphaqudeivpowr.supabase.co https://cloudflareinsights.com https://challenges.cloudflare.com https://*.sentry.io https://api.frankfurter.dev; worker-src 'self' blob:; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self';"
 
 # no-cache (not no-store): the browser must revalidate, but can reuse the
 # cached body on a 304 and keep the page eligible for back/forward cache.
@@ -52,6 +56,14 @@
 
 [[headers]]
   for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# OCR runtime (Tesseract worker + wasm cores + traineddata). Immutable is
+# safe: the core path embeds the tesseract.js version (/ocr/tesseract-X.Y.Z/)
+# and the tessdata folder must be renamed whenever its files are refreshed.
+[[headers]]
+  for = "/ocr/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 

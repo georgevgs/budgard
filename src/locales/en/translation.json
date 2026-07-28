@@ -1017,7 +1017,13 @@
     "loadError": "Failed to load receipt",
     "invalidType": "Invalid file type. Please use JPEG, PNG, WebP, or HEIC",
     "fileTooLarge": "File is too large. Maximum size is 10MB",
-    "changeReceipt": "Change receipt"
+    "changeReceipt": "Change receipt",
+    "scanReceipt": "Scan receipt",
+    "scanning": "Scanning receipt…",
+    "cancelScan": "Cancel scan",
+    "scanSuccess": "Filled {{count}} field(s) from the receipt",
+    "scanNoData": "Couldn't find any details on this receipt",
+    "scanFailed": "Couldn't read this receipt. Try a clearer photo."
   },
   "offline": {
     "syncSuccess": "Synced {{count}} queued change(s)",
