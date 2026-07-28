@@ -37,7 +37,9 @@ export const useSettingsOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'updateDefaultCurrency' },
         });
-        showErrorToast(t('settings.currency.updateFailed'));
+        showErrorToast(t('settings.currency.updateFailed'), () => {
+          void handleCurrencyUpdate(currency).catch(() => undefined);
+        });
         throw error;
       }
     },
@@ -57,7 +59,9 @@ export const useSettingsOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'updateDailyReminderHour' },
         });
-        showErrorToast(t('settings.notifications.dailyReminderFailed'));
+        showErrorToast(t('settings.notifications.dailyReminderFailed'), () => {
+          void handleDailyReminderHourUpdate(hour).catch(() => undefined);
+        });
         throw error;
       }
     },
@@ -78,7 +82,9 @@ export const useSettingsOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'updateNotificationPreferences' },
         });
-        showErrorToast(t('settings.notifications.preferencesUpdateFailed'));
+        showErrorToast(t('settings.notifications.preferencesUpdateFailed'), () => {
+          void handleNotificationPreferenceUpdate(key, enabled).catch(() => undefined);
+        });
         throw error;
       }
     },
@@ -98,7 +104,9 @@ export const useSettingsOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'updateDefaultSavingsPct' },
         });
-        showErrorToast(t('income.toasts.savingsRateUpdateFailed'));
+        showErrorToast(t('income.toasts.savingsRateUpdateFailed'), () => {
+          void handleSavingsPctUpdate(pct).catch(() => undefined);
+        });
         throw error;
       }
     },

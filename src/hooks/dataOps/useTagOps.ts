@@ -40,7 +40,9 @@ export const useTagOps = () => {
         haptics.error();
         setTags((prev) => prev.filter((t) => t.id !== optimisticTag.id));
         Sentry.captureException(error, { tags: { operation: 'createTag' } });
-        showErrorToast(t('expenses.toasts.tagCreateFailed'));
+        showErrorToast(t('expenses.toasts.tagCreateFailed'), () => {
+          void handleTagCreate(name, color).catch(() => undefined);
+        });
         throw error;
       }
     },

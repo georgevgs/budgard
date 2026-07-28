@@ -61,6 +61,9 @@ export const useRecurringIncomeOps = () => {
             t('recurring.toasts.incomeUpdateFailed'),
             t('recurring.toasts.incomeAddFailed'),
           ),
+          () => {
+            void handleRecurringIncomeSubmit(incomeData, incomeId).catch(() => undefined);
+          },
         );
         throw error;
       }
@@ -100,7 +103,9 @@ export const useRecurringIncomeOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'deleteRecurringIncome' },
         });
-        showErrorToast(t('recurring.toasts.incomeDeleteFailed'));
+        showErrorToast(t('recurring.toasts.incomeDeleteFailed'), () => {
+          void handleRecurringIncomeDelete(incomeId).catch(() => undefined);
+        });
         throw error;
       }
     },
@@ -127,7 +132,9 @@ export const useRecurringIncomeOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'toggleRecurringIncome' },
         });
-        showErrorToast(t('recurring.toasts.incomeToggleFailed'));
+        showErrorToast(t('recurring.toasts.incomeToggleFailed'), () => {
+          void handleRecurringIncomeToggle(incomeId, active).catch(() => undefined);
+        });
         throw error;
       }
     },

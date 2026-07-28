@@ -105,6 +105,9 @@ export const useIncomeOps = () => {
             t('income.toasts.updateFailed'),
             t('income.toasts.addFailed'),
           ),
+          () => {
+            void handleIncomeSubmit(incomeData, incomeId).catch(() => undefined);
+          },
         );
         throw error;
       }
@@ -139,7 +142,9 @@ export const useIncomeOps = () => {
         }
         haptics.error();
         Sentry.captureException(error, { tags: { operation: 'deleteIncome' } });
-        showErrorToast(t('income.toasts.deleteFailed'));
+        showErrorToast(t('income.toasts.deleteFailed'), () => {
+          void handleIncomeDelete(incomeId).catch(() => undefined);
+        });
         throw error;
       }
     },

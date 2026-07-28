@@ -64,6 +64,9 @@ export const useRecurringExpenseOps = () => {
             t('recurring.toasts.expenseUpdateFailed'),
             t('recurring.toasts.expenseAddFailed'),
           ),
+          () => {
+            void handleRecurringExpenseSubmit(expenseData, expenseId).catch(() => undefined);
+          },
         );
         throw error;
       }
@@ -103,7 +106,9 @@ export const useRecurringExpenseOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'deleteRecurringExpense' },
         });
-        showErrorToast(t('recurring.toasts.expenseDeleteFailed'));
+        showErrorToast(t('recurring.toasts.expenseDeleteFailed'), () => {
+          void handleRecurringExpenseDelete(expenseId).catch(() => undefined);
+        });
         throw error;
       }
     },
@@ -133,7 +138,9 @@ export const useRecurringExpenseOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'toggleRecurringExpense' },
         });
-        showErrorToast(t('recurring.toasts.expenseToggleFailed'));
+        showErrorToast(t('recurring.toasts.expenseToggleFailed'), () => {
+          void handleRecurringExpenseToggle(expenseId, active).catch(() => undefined);
+        });
         throw error;
       }
     },

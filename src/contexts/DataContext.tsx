@@ -374,6 +374,17 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       Sentry.captureException(error, { tags: { context: 'refreshExpenses' } });
       console.error('Failed to refresh expenses:', error);
+      toastRef.current({
+        title: tRef.current('common.error'),
+        description: tRef.current('common.refreshFailed'),
+        variant: 'destructive',
+        action: {
+          label: tRef.current('common.tryAgain'),
+          onClick: () => {
+            void refreshExpenses();
+          },
+        },
+      });
     }
   }, []);
 
@@ -384,6 +395,17 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       Sentry.captureException(error, { tags: { context: 'refreshIncomes' } });
       console.error('Failed to refresh incomes:', error);
+      toastRef.current({
+        title: tRef.current('common.error'),
+        description: tRef.current('common.refreshFailed'),
+        variant: 'destructive',
+        action: {
+          label: tRef.current('common.tryAgain'),
+          onClick: () => {
+            void refreshIncomes();
+          },
+        },
+      });
     }
   }, []);
 
@@ -398,6 +420,17 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       Sentry.captureException(error, { tags: { context: 'refreshAccounts' } });
       console.error('Failed to refresh accounts:', error);
+      toastRef.current({
+        title: tRef.current('common.error'),
+        description: tRef.current('common.refreshFailed'),
+        variant: 'destructive',
+        action: {
+          label: tRef.current('common.tryAgain'),
+          onClick: () => {
+            void refreshAccounts();
+          },
+        },
+      });
     }
   }, []);
 
@@ -408,6 +441,17 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       Sentry.captureException(error, { tags: { context: 'refreshDebts' } });
       console.error('Failed to refresh debts:', error);
+      toastRef.current({
+        title: tRef.current('common.error'),
+        description: tRef.current('common.refreshFailed'),
+        variant: 'destructive',
+        action: {
+          label: tRef.current('common.tryAgain'),
+          onClick: () => {
+            void refreshDebts();
+          },
+        },
+      });
     }
   }, []);
 

@@ -59,6 +59,9 @@ export const useDebtOps = () => {
             t('debts.toasts.updateFailed'),
             t('debts.toasts.addFailed'),
           ),
+          () => {
+            void handleDebtSubmit(debtData, debtId).catch(() => undefined);
+          },
         );
         throw error;
       }
@@ -87,7 +90,9 @@ export const useDebtOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'archiveDebt' },
         });
-        showErrorToast(t('debts.toasts.archiveFailed'));
+        showErrorToast(t('debts.toasts.archiveFailed'), () => {
+          void handleDebtArchive(debtId).catch(() => undefined);
+        });
         throw error;
       }
     },

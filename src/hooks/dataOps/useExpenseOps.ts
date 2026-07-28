@@ -210,6 +210,10 @@ export const useExpenseOps = () => {
             t('expenses.toasts.updateFailed'),
             t('expenses.toasts.addFailed'),
           ),
+          () => {
+            void handleExpenseSubmit(expenseData, expenseId, receiptOptions)
+              .catch(() => undefined);
+          },
         );
         throw error;
       }
@@ -264,7 +268,9 @@ export const useExpenseOps = () => {
         }
         haptics.error();
         Sentry.captureException(error, { tags: { operation: 'deleteExpense' } });
-        showErrorToast(t('expenses.toasts.deleteFailed'));
+        showErrorToast(t('expenses.toasts.deleteFailed'), () => {
+          void handleExpenseDelete(expenseId).catch(() => undefined);
+        });
         throw error;
       }
     },

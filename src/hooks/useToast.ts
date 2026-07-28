@@ -36,6 +36,10 @@ const toast = ({ variant, title, description, duration, id, action, onDismiss }:
   }
 
   if (variant === 'destructive') {
+    // Errors need reading time — the 3s global default is too short,
+    // especially in a second language
+    if (opts.duration === undefined) opts.duration = 8000;
+
     return sonnerToast.error(message, opts);
   }
   if (variant === 'success') {

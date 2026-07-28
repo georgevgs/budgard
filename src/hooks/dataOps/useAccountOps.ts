@@ -70,6 +70,9 @@ export const useAccountOps = () => {
             t('networth.toasts.accountUpdateFailed'),
             t('networth.toasts.accountAddFailed'),
           ),
+          () => {
+            void handleAccountSubmit(accountData, accountId).catch(() => undefined);
+          },
         );
         throw error;
       }
@@ -98,7 +101,9 @@ export const useAccountOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'archiveAccount' },
         });
-        showErrorToast(t('networth.toasts.archiveFailed'));
+        showErrorToast(t('networth.toasts.archiveFailed'), () => {
+          void handleAccountArchive(accountId).catch(() => undefined);
+        });
         throw error;
       }
     },
@@ -136,7 +141,9 @@ export const useAccountOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'createAccountBalance' },
         });
-        showErrorToast(t('networth.toasts.balanceUpdateFailed'));
+        showErrorToast(t('networth.toasts.balanceUpdateFailed'), () => {
+          void handleSnapshotCreate(snapshot).catch(() => undefined);
+        });
         throw error;
       }
     },
@@ -166,7 +173,9 @@ export const useAccountOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'deleteAccountBalance' },
         });
-        showErrorToast(t('networth.toasts.snapshotDeleteFailed'));
+        showErrorToast(t('networth.toasts.snapshotDeleteFailed'), () => {
+          void handleSnapshotDelete(snapshotId, accountId).catch(() => undefined);
+        });
         throw error;
       }
     },

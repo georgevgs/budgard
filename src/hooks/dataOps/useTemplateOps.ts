@@ -41,7 +41,9 @@ export const useTemplateOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'createTemplate' },
         });
-        showErrorToast(t('templates.saveFailed'));
+        showErrorToast(t('templates.saveFailed'), () => {
+          void handleTemplateCreate(templateData).catch(() => undefined);
+        });
         throw error;
       }
     },
@@ -69,7 +71,9 @@ export const useTemplateOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'deleteTemplate' },
         });
-        showErrorToast(t('templates.deleteFailed'));
+        showErrorToast(t('templates.deleteFailed'), () => {
+          void handleTemplateDelete(templateId).catch(() => undefined);
+        });
         throw error;
       }
     },

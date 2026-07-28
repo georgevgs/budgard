@@ -24,7 +24,8 @@
     "skipToContent": "Skip to content",
     "discardTitle": "Discard changes?",
     "discardBody": "You have unsaved changes. Closing this form will throw them away.",
-    "discardConfirm": "Discard"
+    "discardConfirm": "Discard",
+    "refreshFailed": "Could not refresh your data."
   },
   "auth": {
     "signIn": "Sign In",

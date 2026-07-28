@@ -24,7 +24,9 @@ export const useBudgetOps = () => {
         haptics.error();
         setMonthlyBudget(previousBudget);
         Sentry.captureException(error, { tags: { operation: 'upsertBudget' } });
-        showErrorToast(t('budget.toasts.updateFailed'));
+        showErrorToast(t('budget.toasts.updateFailed'), () => {
+          void handleBudgetUpdate(amount).catch(() => undefined);
+        });
         throw error;
       }
     },
@@ -75,7 +77,9 @@ export const useBudgetOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'upsertCategoryBudget' },
         });
-        showErrorToast(t('budget.toasts.categoryUpdateFailed'));
+        showErrorToast(t('budget.toasts.categoryUpdateFailed'), () => {
+          void handleCategoryBudgetUpsert(categoryId, amount).catch(() => undefined);
+        });
         throw error;
       }
     },
@@ -102,7 +106,9 @@ export const useBudgetOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'deleteCategoryBudget' },
         });
-        showErrorToast(t('budget.toasts.categoryRemoveFailed'));
+        showErrorToast(t('budget.toasts.categoryRemoveFailed'), () => {
+          void handleCategoryBudgetDelete(categoryId).catch(() => undefined);
+        });
         throw error;
       }
     },

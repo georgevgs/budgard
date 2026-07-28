@@ -51,7 +51,9 @@ export const useCategoryOps = () => {
           prev.filter((c) => c.id !== optimisticCategory.id),
         );
         Sentry.captureException(error, { tags: { operation: 'createCategory' } });
-        showErrorToast(t('categories.toasts.addFailed'));
+        showErrorToast(t('categories.toasts.addFailed'), () => {
+          void handleCategoryAdd(categoryData).catch(() => undefined);
+        });
         throw error;
       }
     },
@@ -109,7 +111,9 @@ export const useCategoryOps = () => {
         setExpenses(previousExpenses);
         setIncomes(previousIncomes);
         Sentry.captureException(error, { tags: { operation: 'updateCategory' } });
-        showErrorToast(t('categories.toasts.updateFailed'));
+        showErrorToast(t('categories.toasts.updateFailed'), () => {
+          void handleCategoryUpdate(categoryId, categoryData).catch(() => undefined);
+        });
         throw error;
       }
     },
@@ -147,7 +151,9 @@ export const useCategoryOps = () => {
         setCategoryBudgets(previousBudgets);
         refreshExpenses();
         Sentry.captureException(error, { tags: { operation: 'deleteCategory' } });
-        showErrorToast(t('categories.toasts.deleteFailed'));
+        showErrorToast(t('categories.toasts.deleteFailed'), () => {
+          void handleCategoryDelete(categoryId).catch(() => undefined);
+        });
         throw error;
       }
     },
@@ -179,7 +185,9 @@ export const useCategoryOps = () => {
         Sentry.captureException(error, {
           tags: { operation: 'createCategoriesBulk' },
         });
-        showErrorToast(t('categories.toasts.bulkCreateFailed'));
+        showErrorToast(t('categories.toasts.bulkCreateFailed'), () => {
+          void handleCategoriesAddBulk(categoriesData).catch(() => undefined);
+        });
         throw error;
       }
     },

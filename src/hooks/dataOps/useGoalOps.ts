@@ -39,7 +39,9 @@ export const useGoalOps = () => {
         haptics.error();
         setGoals((prev) => prev.filter((g) => g.id !== optimisticGoal.id));
         Sentry.captureException(error, { tags: { operation: 'createGoal' } });
-        showErrorToast(t('goals.toasts.createFailed'));
+        showErrorToast(t('goals.toasts.createFailed'), () => {
+          void handleGoalCreate(goalData).catch(() => undefined);
+        });
         throw error;
       }
     },
@@ -65,7 +67,9 @@ export const useGoalOps = () => {
         haptics.error();
         setGoals(previousGoals);
         Sentry.captureException(error, { tags: { operation: 'updateGoal' } });
-        showErrorToast(t('goals.toasts.updateFailed'));
+        showErrorToast(t('goals.toasts.updateFailed'), () => {
+          void handleGoalUpdate(goalId, goalData).catch(() => undefined);
+        });
         throw error;
       }
     },
@@ -91,7 +95,9 @@ export const useGoalOps = () => {
         haptics.error();
         setGoals(previousGoals);
         Sentry.captureException(error, { tags: { operation: 'deleteGoal' } });
-        showErrorToast(t('goals.toasts.deleteFailed'));
+        showErrorToast(t('goals.toasts.deleteFailed'), () => {
+          void handleGoalDelete(goalId).catch(() => undefined);
+        });
         throw error;
       }
     },
