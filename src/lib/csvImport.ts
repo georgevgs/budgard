@@ -31,10 +31,13 @@ type CsvParseResult = {
   skippedIncomeCount: number;
 }
 
+// messageKey is an i18n key (import.rowErrors.*) resolved at render time,
+// so row errors follow the app language like every other user-facing string.
 export type CsvParseError = {
   rowNumber: number;
   field: string;
-  message: string;
+  messageKey: string;
+  messageParams?: Record<string, unknown>;
   rawValue: string;
 }
 
@@ -356,7 +359,8 @@ const processRow = (
       error: {
         rowNumber,
         field: 'row',
-        message: `Row must have at least ${minColumns} columns`,
+        messageKey: 'import.rowErrors.tooFewColumns',
+        messageParams: { count: minColumns },
         rawValue: rawLine,
       },
     };
@@ -381,7 +385,7 @@ const processRow = (
       error: {
         rowNumber,
         field: 'date',
-        message: 'Invalid date format. Expected yyyy-MM-dd or dd/MM/yyyy',
+        messageKey: 'import.rowErrors.invalidDate',
         rawValue: dateStr,
       },
     };
@@ -401,7 +405,7 @@ const processRow = (
       error: {
         rowNumber,
         field: 'amount',
-        message: 'Invalid amount. Must be a positive number',
+        messageKey: 'import.rowErrors.invalidAmount',
         rawValue: amountStr,
       },
     };
@@ -414,7 +418,7 @@ const processRow = (
       error: {
         rowNumber,
         field: 'amount',
-        message: 'Amount must be less than 1,000,000',
+        messageKey: 'import.rowErrors.amountTooLarge',
         rawValue: amountStr,
       },
     };
@@ -456,7 +460,7 @@ const validateDescription = (
     return {
       rowNumber,
       field: 'description',
-      message: 'Description is required',
+      messageKey: 'import.rowErrors.descriptionRequired',
       rawValue: raw,
     };
   }
@@ -464,7 +468,7 @@ const validateDescription = (
     return {
       rowNumber,
       field: 'description',
-      message: 'Description must be less than 100 characters',
+      messageKey: 'import.rowErrors.descriptionTooLong',
       rawValue: raw,
     };
   }
@@ -472,7 +476,7 @@ const validateDescription = (
     return {
       rowNumber,
       field: 'description',
-      message: 'Description contains invalid characters',
+      messageKey: 'import.rowErrors.descriptionInvalid',
       rawValue: raw,
     };
   }

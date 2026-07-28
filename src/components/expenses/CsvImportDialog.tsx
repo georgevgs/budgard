@@ -465,7 +465,8 @@ const renderErrorsList = (errors: CsvParseError[], t: TranslateFunction) => {
           <div key={error.rowNumber} className="flex items-start gap-2 text-xs text-destructive">
             <X className="h-3 w-3 mt-0.5 flex-shrink-0" />
             <span>
-              {t('import.errorRow', { row: error.rowNumber })}: {error.message}
+              {t('import.errorRow', { row: error.rowNumber })}:{' '}
+              {t(error.messageKey, error.messageParams)}
             </span>
           </div>
         ))}

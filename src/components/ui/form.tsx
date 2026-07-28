@@ -9,6 +9,7 @@ import {
   FormProvider,
   useFormContext,
 } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/lib/utils.ts';
 import { Label } from '@/components/ui/label';
@@ -145,8 +146,16 @@ const FormMessage = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, children, ...props }, ref) => {
+  const { t } = useTranslation();
   const { error, formMessageId } = useFormField();
-  const body = error ? String(error?.message) : children;
+  // Zod schemas emit i18n keys (validation.*); anything that isn't a known
+  // key falls through untouched via defaultValue.
+  const body = error
+    ? t(String(error?.message), {
+        defaultValue: String(error?.message),
+        nsSeparator: false,
+      })
+    : children;
 
   if (!body) {
     return null;
@@ -156,6 +165,7 @@ const FormMessage = React.forwardRef<
     <p
       ref={ref}
       id={formMessageId}
+      role="alert"
       className={cn('text-sm font-medium text-destructive', className)}
       {...props}
     >

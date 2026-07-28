@@ -959,7 +959,16 @@
     "importing": "Importing {{count}} expense(s)...",
     "successMessage": "Successfully imported {{count}} expense(s)",
     "importError": "Failed to import expenses",
-    "importCSV": "Import CSV"
+    "importCSV": "Import CSV",
+    "rowErrors": {
+      "tooFewColumns": "Row must have at least {{count}} columns",
+      "invalidDate": "Invalid date format. Expected yyyy-MM-dd or dd/MM/yyyy",
+      "invalidAmount": "Invalid amount. Must be a positive number",
+      "amountTooLarge": "Amount must be less than 1.000.000",
+      "descriptionRequired": "Description is required",
+      "descriptionTooLong": "Description must be less than 100 characters",
+      "descriptionInvalid": "Description contains invalid characters"
+    }
   },
   "receipt": {
     "receipt": "Receipt",
@@ -1436,5 +1445,59 @@
         "contact": "Contact"
       }
     }
+  },
+  "validation": {
+    "emailInvalid": "Please enter a valid email address",
+    "emailBlocked": "Please use a valid email address",
+    "tagNameRequired": "Tag name is required",
+    "tagNameTooLong": "Tag name must be less than 50 characters",
+    "tagNameInvalid": "Tag name contains invalid characters",
+    "tagNameEmpty": "Tag name cannot be empty",
+    "colorInvalid": "Invalid color format",
+    "amountRequired": "Amount is required",
+    "amountInvalid": "Invalid amount format",
+    "amountMax1M": "Amount must be between 0 and 1.000.000",
+    "amountMax10M": "Amount must be between 0 and 10.000.000",
+    "amountMax100M": "Amount must be between 0 and 100.000.000",
+    "descriptionRequired": "Description is required",
+    "descriptionTooLong100": "Description must be less than 100 characters",
+    "descriptionTooLong200": "Description must be less than 200 characters",
+    "descriptionInvalid": "Description contains invalid characters",
+    "descriptionEmpty": "Description cannot be empty",
+    "dateRequired": "Date is required",
+    "categoryRequired": "Category is required",
+    "categoryNameRequired": "Category name is required",
+    "categoryNameTooLong": "Category name must be less than 50 characters",
+    "categoryNameInvalid": "Category name contains invalid characters",
+    "categoryNameEmpty": "Category name cannot be empty",
+    "startDateRequired": "Start date is required",
+    "startDateTooEarly": "Start date cannot be before 2000",
+    "endDateBeforeStart": "End date must be after start date",
+    "nameRequired": "Name is required",
+    "nameTooLong60": "Name must be less than 60 characters",
+    "nameTooLong80": "Name must be less than 80 characters",
+    "nameInvalid": "Name contains invalid characters",
+    "nameEmpty": "Name cannot be empty",
+    "targetRequired": "Target is required",
+    "targetMax10M": "Target must be between 0 and 10.000.000",
+    "goalCategoryRequired": "Pick a category to track",
+    "goalTagRequired": "Pick a tag to track",
+    "currencyRequired": "Pick a currency",
+    "startingBalanceRequired": "Starting balance is required",
+    "balanceRequired": "Balance is required",
+    "noteTooLong": "Note must be less than 200 characters",
+    "noteInvalid": "Note contains invalid characters",
+    "aprRequired": "APR is required",
+    "aprRange": "APR must be between 0 and 100",
+    "minPaymentRequired": "Minimum payment is required"
+  },
+  "errorBoundary": {
+    "updateTitle": "Update Available",
+    "updateBody": "A new version of the app is available. Please reload to continue.",
+    "genericTitle": "Something went wrong",
+    "genericBody": "An unexpected error occurred. You can try again or reload the page.",
+    "tryAgain": "Try Again",
+    "reload": "Reload Page",
+    "details": "Technical details"
   }
 }

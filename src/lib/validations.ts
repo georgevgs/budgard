@@ -138,7 +138,7 @@ const BLOCKED_DOMAINS = [
 
 export const emailSchema = z
   .string()
-  .email('Please enter a valid email address')
+  .email('validation.emailInvalid')
   .refine(
     (email) => {
       const atIndex = email.lastIndexOf('@');
@@ -152,7 +152,7 @@ export const emailSchema = z
       );
     },
     {
-      message: 'Please use a valid email address',
+      message: 'validation.emailBlocked',
     },
   );
 
@@ -160,39 +160,39 @@ export const emailSchema = z
 export const tagSchema = z.object({
   name: z
     .string()
-    .min(1, 'Tag name is required')
-    .max(50, 'Tag name must be less than 50 characters')
-    .regex(SAFE_STRING, 'Tag name contains invalid characters')
+    .min(1, 'validation.tagNameRequired')
+    .max(50, 'validation.tagNameTooLong')
+    .regex(SAFE_STRING, 'validation.tagNameInvalid')
     .transform((s) => s.trim())
-    .refine((s) => s.length > 0, 'Tag name cannot be empty'),
-  color: z.string().regex(HEX_COLOR, 'Invalid color format'),
+    .refine((s) => s.length > 0, 'validation.tagNameEmpty'),
+  color: z.string().regex(HEX_COLOR, 'validation.colorInvalid'),
 });
 
 // Expense validation schema
 export const expenseSchema = z.object({
   amount: z
     .string()
-    .min(1, 'Amount is required')
-    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .min(1, 'validation.amountRequired')
+    .regex(AMOUNT_PATTERN, 'validation.amountInvalid')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
 
       return amount > 0 && amount <= 1000000;
-    }, 'Amount must be between 0 and 1.000.000'),
+    }, 'validation.amountMax1M'),
   description: z
     .string()
-    .min(1, 'Description is required')
-    .max(100, 'Description must be less than 100 characters')
-    .regex(SAFE_STRING, 'Description contains invalid characters')
+    .min(1, 'validation.descriptionRequired')
+    .max(100, 'validation.descriptionTooLong100')
+    .regex(SAFE_STRING, 'validation.descriptionInvalid')
     .transform((str) => str.trim())
-    .refine((str) => str.length > 0, 'Description cannot be empty'),
+    .refine((str) => str.length > 0, 'validation.descriptionEmpty'),
   category_id: z.string(),
   tag_id: z.string().optional(),
   // Additional tags beyond the primary (Pro). The form enforces the free
   // tier's single-tag limit; the expense_tags table enforces it server-side.
   extra_tag_ids: z.array(z.string()).optional(),
   date: z.date({
-    required_error: 'Date is required',
+    required_error: 'validation.dateRequired',
   }),
 });
 
@@ -200,12 +200,12 @@ export const expenseSchema = z.object({
 export const categorySchema = z.object({
   name: z
     .string()
-    .min(1, 'Category name is required')
-    .max(50, 'Category name must be less than 50 characters')
-    .regex(SAFE_STRING, 'Category name contains invalid characters')
+    .min(1, 'validation.categoryNameRequired')
+    .max(50, 'validation.categoryNameTooLong')
+    .regex(SAFE_STRING, 'validation.categoryNameInvalid')
     .transform((str) => str.trim())
-    .refine((str) => str.length > 0, 'Category name cannot be empty'),
-  color: z.string().regex(HEX_COLOR, 'Invalid color format'),
+    .refine((str) => str.length > 0, 'validation.categoryNameEmpty'),
+  color: z.string().regex(HEX_COLOR, 'validation.colorInvalid'),
   icon: z.string().max(4).optional(),
   kind: z.enum(['need', 'want', 'savings'] as const).optional(),
 });
@@ -215,20 +215,20 @@ export const recurringExpenseSchema = z
   .object({
     amount: z
       .string()
-      .min(1, 'Amount is required')
-      .regex(AMOUNT_PATTERN, 'Invalid amount format')
+      .min(1, 'validation.amountRequired')
+      .regex(AMOUNT_PATTERN, 'validation.amountInvalid')
       .refine((val) => {
         const amount = parseCurrencyInput(val);
 
         return amount > 0 && amount <= 1000000;
-      }, 'Amount must be between 0 and 1.000.000'),
+      }, 'validation.amountMax1M'),
     description: z
       .string()
-      .min(1, 'Description is required')
-      .max(100, 'Description must be less than 100 characters')
-      .regex(SAFE_STRING, 'Description contains invalid characters')
+      .min(1, 'validation.descriptionRequired')
+      .max(100, 'validation.descriptionTooLong100')
+      .regex(SAFE_STRING, 'validation.descriptionInvalid')
       .transform((str) => str.trim())
-      .refine((str) => str.length > 0, 'Description cannot be empty'),
+      .refine((str) => str.length > 0, 'validation.descriptionEmpty'),
     category_id: z.string(),
     frequency: z.enum([
       'weekly',
@@ -239,14 +239,14 @@ export const recurringExpenseSchema = z
     ] as const),
     start_date: z
       .date({
-        required_error: 'Start date is required',
+        required_error: 'validation.startDateRequired',
       })
-      .min(new Date('2000-01-01'), 'Start date cannot be before 2000'),
+      .min(new Date('2000-01-01'), 'validation.startDateTooEarly'),
     end_date: z.date().optional(),
     linked_account_id: z.string().nullable().optional(),
   })
   .refine((data) => !data.end_date || data.end_date >= data.start_date, {
-    message: 'End date must be after start date',
+    message: 'validation.endDateBeforeStart',
     path: ['end_date'],
   });
 
@@ -254,52 +254,52 @@ export const recurringExpenseSchema = z
 export const budgetSchema = z.object({
   amount: z
     .string()
-    .min(1, 'Amount is required')
-    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .min(1, 'validation.amountRequired')
+    .regex(AMOUNT_PATTERN, 'validation.amountInvalid')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
 
       return amount > 0 && amount <= 10000000;
-    }, 'Amount must be between 0 and 10.000.000'),
+    }, 'validation.amountMax10M'),
 });
 
 // Per-category budget validation schema. Empty string is treated as
 // "no cap for this category" by the caller (we delete the row instead of
 // inserting); this schema only validates non-empty inputs.
 export const categoryBudgetSchema = z.object({
-  category_id: z.string().min(1, 'Category is required'),
+  category_id: z.string().min(1, 'validation.categoryRequired'),
   amount: z
     .string()
-    .min(1, 'Amount is required')
-    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .min(1, 'validation.amountRequired')
+    .regex(AMOUNT_PATTERN, 'validation.amountInvalid')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
 
       return amount > 0 && amount <= 10000000;
-    }, 'Amount must be between 0 and 10.000.000'),
+    }, 'validation.amountMax10M'),
 });
 
 // Income validation schema — same shape as expense for now
 export const incomeSchema = z.object({
   amount: z
     .string()
-    .min(1, 'Amount is required')
-    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .min(1, 'validation.amountRequired')
+    .regex(AMOUNT_PATTERN, 'validation.amountInvalid')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
 
       return amount > 0 && amount <= 1000000;
-    }, 'Amount must be between 0 and 1.000.000'),
+    }, 'validation.amountMax1M'),
   description: z
     .string()
-    .min(1, 'Description is required')
-    .max(100, 'Description must be less than 100 characters')
-    .regex(SAFE_STRING, 'Description contains invalid characters')
+    .min(1, 'validation.descriptionRequired')
+    .max(100, 'validation.descriptionTooLong100')
+    .regex(SAFE_STRING, 'validation.descriptionInvalid')
     .transform((str) => str.trim())
-    .refine((str) => str.length > 0, 'Description cannot be empty'),
+    .refine((str) => str.length > 0, 'validation.descriptionEmpty'),
   category_id: z.string(),
   date: z.date({
-    required_error: 'Date is required',
+    required_error: 'validation.dateRequired',
   }),
 });
 
@@ -308,36 +308,36 @@ export const goalSchema = z
   .object({
     name: z
       .string()
-      .min(1, 'Name is required')
-      .max(80, 'Name must be less than 80 characters')
-      .regex(SAFE_STRING, 'Name contains invalid characters')
+      .min(1, 'validation.nameRequired')
+      .max(80, 'validation.nameTooLong80')
+      .regex(SAFE_STRING, 'validation.nameInvalid')
       .transform((s) => s.trim())
-      .refine((s) => s.length > 0, 'Name cannot be empty'),
+      .refine((s) => s.length > 0, 'validation.nameEmpty'),
     target_amount: z
       .string()
-      .min(1, 'Target is required')
-      .regex(AMOUNT_PATTERN, 'Invalid amount format')
+      .min(1, 'validation.targetRequired')
+      .regex(AMOUNT_PATTERN, 'validation.amountInvalid')
       .refine((val) => {
         const amount = parseCurrencyInput(val);
 
         return amount > 0 && amount <= 10000000;
-      }, 'Target must be between 0 and 10.000.000'),
+      }, 'validation.targetMax10M'),
     deadline: z.date().optional(),
     source_type: z.enum(['category', 'tag', 'net_delta'] as const),
     category_id: z.string().optional(),
     tag_id: z.string().optional(),
     icon: z.string().min(1).max(40),
-    color: z.string().regex(HEX_COLOR, 'Invalid color format'),
+    color: z.string().regex(HEX_COLOR, 'validation.colorInvalid'),
   })
   .refine(
     (data) => data.source_type !== 'category' || !!data.category_id,
     {
-      message: 'Pick a category to track',
+      message: 'validation.goalCategoryRequired',
       path: ['category_id'],
     },
   )
   .refine((data) => data.source_type !== 'tag' || !!data.tag_id, {
-    message: 'Pick a tag to track',
+    message: 'validation.goalTagRequired',
     path: ['tag_id'],
   });
 
@@ -345,11 +345,11 @@ export const goalSchema = z
 export const accountSchema = z.object({
   name: z
     .string()
-    .min(1, 'Name is required')
-    .max(60, 'Name must be less than 60 characters')
-    .regex(SAFE_STRING, 'Name contains invalid characters')
+    .min(1, 'validation.nameRequired')
+    .max(60, 'validation.nameTooLong60')
+    .regex(SAFE_STRING, 'validation.nameInvalid')
     .transform((s) => s.trim())
-    .refine((s) => s.length > 0, 'Name cannot be empty'),
+    .refine((s) => s.length > 0, 'validation.nameEmpty'),
   kind: z.enum([
     'cash',
     'bank',
@@ -358,17 +358,17 @@ export const accountSchema = z.object({
     'investment',
     'other',
   ] as const),
-  default_currency: z.string().length(3, 'Pick a currency'),
+  default_currency: z.string().length(3, 'validation.currencyRequired'),
   initial_balance: z
     .string()
-    .min(1, 'Starting balance is required')
-    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .min(1, 'validation.startingBalanceRequired')
+    .regex(AMOUNT_PATTERN, 'validation.amountInvalid')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
 
       return amount >= 0 && amount <= 100000000;
-    }, 'Amount must be between 0 and 100.000.000'),
-  color: z.string().regex(HEX_COLOR, 'Invalid color format'),
+    }, 'validation.amountMax100M'),
+  color: z.string().regex(HEX_COLOR, 'validation.colorInvalid'),
 });
 
 // Balance snapshot schema. balance is the new current value;
@@ -377,27 +377,27 @@ export const accountSchema = z.object({
 export const accountBalanceSchema = z.object({
   balance: z
     .string()
-    .min(1, 'Balance is required')
-    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .min(1, 'validation.balanceRequired')
+    .regex(AMOUNT_PATTERN, 'validation.amountInvalid')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
 
       return amount >= 0 && amount <= 100000000;
-    }, 'Amount must be between 0 and 100.000.000'),
+    }, 'validation.amountMax100M'),
   contribution_delta: z
     .string()
     .optional()
     .refine(
       (val) => !val || AMOUNT_PATTERN.test(val.replace(/^-/, '')),
-      'Invalid amount format',
+      'validation.amountInvalid',
     ),
   recorded_at: z.date({
-    required_error: 'Date is required',
+    required_error: 'validation.dateRequired',
   }),
   note: z
     .string()
-    .max(200, 'Note must be less than 200 characters')
-    .regex(SAFE_STRING, 'Note contains invalid characters')
+    .max(200, 'validation.noteTooLong')
+    .regex(SAFE_STRING, 'validation.noteInvalid')
     .optional(),
 });
 
@@ -407,11 +407,11 @@ export const accountBalanceSchema = z.object({
 export const debtSchema = z.object({
   name: z
     .string()
-    .min(1, 'Name is required')
-    .max(80, 'Name must be less than 80 characters')
-    .regex(SAFE_STRING, 'Name contains invalid characters')
+    .min(1, 'validation.nameRequired')
+    .max(80, 'validation.nameTooLong80')
+    .regex(SAFE_STRING, 'validation.nameInvalid')
     .transform((s) => s.trim())
-    .refine((s) => s.length > 0, 'Name cannot be empty'),
+    .refine((s) => s.length > 0, 'validation.nameEmpty'),
   kind: z.enum([
     'credit_card',
     'student_loan',
@@ -423,52 +423,52 @@ export const debtSchema = z.object({
   ] as const),
   current_balance: z
     .string()
-    .min(1, 'Balance is required')
-    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .min(1, 'validation.balanceRequired')
+    .regex(AMOUNT_PATTERN, 'validation.amountInvalid')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
 
       return amount > 0 && amount <= 100000000;
-    }, 'Amount must be between 0 and 100.000.000'),
+    }, 'validation.amountMax100M'),
   apr: z
     .string()
-    .min(1, 'APR is required')
+    .min(1, 'validation.aprRequired')
     .refine((val) => {
       const num = Number(val.replace(',', '.'));
 
       return !Number.isNaN(num) && num >= 0 && num <= 100;
-    }, 'APR must be between 0 and 100'),
+    }, 'validation.aprRange'),
   minimum_payment: z
     .string()
-    .min(1, 'Minimum payment is required')
-    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .min(1, 'validation.minPaymentRequired')
+    .regex(AMOUNT_PATTERN, 'validation.amountInvalid')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
 
       return amount >= 0 && amount <= 100000000;
-    }, 'Amount must be between 0 and 100.000.000'),
-  currency: z.string().length(3, 'Pick a currency'),
+    }, 'validation.amountMax100M'),
+  currency: z.string().length(3, 'validation.currencyRequired'),
   payoff_target_date: z.date().optional(),
   icon: z.string().min(1).max(40),
-  color: z.string().regex(HEX_COLOR, 'Invalid color format'),
+  color: z.string().regex(HEX_COLOR, 'validation.colorInvalid'),
 });
 
 // Debt payment schema (creates an expense linked to the debt).
 export const debtPaymentSchema = z.object({
   amount: z
     .string()
-    .min(1, 'Amount is required')
-    .regex(AMOUNT_PATTERN, 'Invalid amount format')
+    .min(1, 'validation.amountRequired')
+    .regex(AMOUNT_PATTERN, 'validation.amountInvalid')
     .refine((val) => {
       const amount = parseCurrencyInput(val);
 
       return amount > 0 && amount <= 100000000;
-    }, 'Amount must be between 0 and 100.000.000'),
-  date: z.date({ required_error: 'Date is required' }),
+    }, 'validation.amountMax100M'),
+  date: z.date({ required_error: 'validation.dateRequired' }),
   description: z
     .string()
-    .max(200, 'Description must be less than 200 characters')
-    .regex(SAFE_STRING, 'Description contains invalid characters')
+    .max(200, 'validation.descriptionTooLong200')
+    .regex(SAFE_STRING, 'validation.descriptionInvalid')
     .optional(),
 });
 

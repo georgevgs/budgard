@@ -1,8 +1,19 @@
 import { Component, type ReactNode } from 'react';
+import i18n from 'i18next';
 import * as Sentry from '@/lib/sentry';
 import { Button } from '@/components/ui/button';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
+
+// The boundary can render before (or because) i18n finished initializing,
+// so every string carries an English fallback via defaultValue.
+const tSafe = (key: string, fallback: string): string => {
+  try {
+    return i18n.t(key, { defaultValue: fallback });
+  } catch {
+    return fallback;
+  }
+};
 
 interface Props {
   children: ReactNode;
@@ -105,31 +116,39 @@ const ErrorFallback = ({ error, onReset, onReload }: ErrorFallbackProps) => {
 
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold tracking-tight">
-            {isChunkError ? 'Update Available' : 'Something went wrong'}
+            {isChunkError
+              ? tSafe('errorBoundary.updateTitle', 'Update Available')
+              : tSafe('errorBoundary.genericTitle', 'Something went wrong')}
           </h1>
           <p className="text-sm text-muted-foreground">
             {isChunkError
-              ? 'A new version of the app is available. Please reload to continue.'
-              : 'An unexpected error occurred. You can try again or reload the page.'}
+              ? tSafe(
+                  'errorBoundary.updateBody',
+                  'A new version of the app is available. Please reload to continue.',
+                )
+              : tSafe(
+                  'errorBoundary.genericBody',
+                  'An unexpected error occurred. You can try again or reload the page.',
+                )}
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           {!isChunkError && (
             <Button variant="outline" onClick={onReset}>
-              Try Again
+              {tSafe('errorBoundary.tryAgain', 'Try Again')}
             </Button>
           )}
           <Button onClick={onReload}>
             <RefreshCw className="mr-2 h-4 w-4" />
-            Reload Page
+            {tSafe('errorBoundary.reload', 'Reload Page')}
           </Button>
         </div>
 
         {error && !isChunkError && (
           <details className="text-left text-xs text-muted-foreground">
             <summary className="cursor-pointer hover:text-foreground">
-              Technical details
+              {tSafe('errorBoundary.details', 'Technical details')}
             </summary>
             <pre className="mt-2 p-3 bg-muted rounded-md overflow-auto">
               {error.message}
