@@ -4,6 +4,7 @@ import {
   suggestColumnMapping,
   parseExpensesCsv,
   mapRowsToExpenses,
+  mapRowsToIncomes,
 } from '@/lib/csvImport';
 import type { Category } from '@/types/Category';
 
@@ -273,6 +274,7 @@ describe('mapRowsToExpenses', () => {
         categoryName: 'Food',
         amount: 3.5,
         rowNumber: 2,
+        isIncome: false,
       },
     ];
     const result = mapRowsToExpenses(rows, categories, new Map());
@@ -288,6 +290,7 @@ describe('mapRowsToExpenses', () => {
         categoryName: 'Drinks',
         amount: 3.5,
         rowNumber: 2,
+        isIncome: false,
       },
     ];
     const manualMap = new Map([['Drinks', 'cat-1']]);
@@ -303,6 +306,7 @@ describe('mapRowsToExpenses', () => {
         categoryName: 'Unknown',
         amount: 3.5,
         rowNumber: 2,
+        isIncome: false,
       },
     ];
     const result = mapRowsToExpenses(rows, categories, new Map());
@@ -317,9 +321,80 @@ describe('mapRowsToExpenses', () => {
         categoryName: '',
         amount: 3.5,
         rowNumber: 2,
+        isIncome: false,
       },
     ];
     const result = mapRowsToExpenses(rows, categories, new Map());
     expect(result[0].category_id).toBeNull();
+  });
+});
+
+describe('income row import', () => {
+  const mapping = {
+    dateColumn: 0,
+    descriptionColumn: 1,
+    amountColumn: 3,
+    categoryColumn: 2,
+  };
+
+  it('keeps income rows in validRows when not skipping', () => {
+    const csv =
+      'Date,Description,Category,Amount\n2026-01-15,Salary,Food,500.00\n2026-01-16,Coffee,Food,-3.50';
+    const result = parseExpensesCsv(csv, categories, mapping, false, true);
+    expect(result.validRows).toHaveLength(2);
+    expect(result.skippedIncomeCount).toBe(0);
+    const salary = result.validRows.find((r) => r.description === 'Salary');
+    expect(salary?.isIncome).toBe(true);
+    const coffee = result.validRows.find((r) => r.description === 'Coffee');
+    expect(coffee?.isIncome).toBe(false);
+  });
+
+  it('mapRowsToIncomes returns only income rows without a category', () => {
+    const rows = [
+      {
+        date: '2026-01-15',
+        description: 'Salary',
+        categoryName: 'Food',
+        amount: 500,
+        rowNumber: 2,
+        isIncome: true,
+      },
+      {
+        date: '2026-01-16',
+        description: 'Coffee',
+        categoryName: 'Food',
+        amount: 3.5,
+        rowNumber: 3,
+        isIncome: false,
+      },
+    ];
+    const incomes = mapRowsToIncomes(rows);
+    expect(incomes).toHaveLength(1);
+    expect(incomes[0].description).toBe('Salary');
+    expect(incomes[0].category_id).toBeNull();
+  });
+
+  it('mapRowsToExpenses excludes income rows', () => {
+    const rows = [
+      {
+        date: '2026-01-15',
+        description: 'Salary',
+        categoryName: 'Food',
+        amount: 500,
+        rowNumber: 2,
+        isIncome: true,
+      },
+      {
+        date: '2026-01-16',
+        description: 'Coffee',
+        categoryName: 'Food',
+        amount: 3.5,
+        rowNumber: 3,
+        isIncome: false,
+      },
+    ];
+    const expenses = mapRowsToExpenses(rows, categories, new Map());
+    expect(expenses).toHaveLength(1);
+    expect(expenses[0].description).toBe('Coffee');
   });
 });

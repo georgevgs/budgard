@@ -7,6 +7,9 @@ export type ParsedExpenseRow = {
   categoryName: string;
   amount: number;
   rowNumber: number;
+  // True when the row's amount marks it as income (bank +/- convention or an
+  // explicit + prefix). Imported as an income transaction unless skipped.
+  isIncome: boolean;
 }
 
 export type ColumnMapping = {
@@ -298,26 +301,50 @@ export const mapRowsToExpenses = (
     categories.map((cat) => [cat.name.toLowerCase(), cat.id]),
   );
 
-  return rows.map((row) => {
-    let categoryId: string | null = null;
+  return rows
+    .filter((row) => !row.isIncome)
+    .map((row) => {
+      let categoryId: string | null = null;
 
-    if (row.categoryName) {
-      // First check if there's a manual mapping
-      if (categoryMappings.has(row.categoryName)) {
-        categoryId = categoryMappings.get(row.categoryName) || null;
-      } else {
-        // Fall back to existing category lookup
-        categoryId = categoryMap.get(row.categoryName.toLowerCase()) || null;
+      if (row.categoryName) {
+        // First check if there's a manual mapping
+        if (categoryMappings.has(row.categoryName)) {
+          categoryId = categoryMappings.get(row.categoryName) || null;
+        } else {
+          // Fall back to existing category lookup
+          categoryId = categoryMap.get(row.categoryName.toLowerCase()) || null;
+        }
       }
-    }
 
-    return {
+      return {
+        date: row.date,
+        description: row.description,
+        amount: row.amount,
+        category_id: categoryId,
+      };
+    });
+};
+
+/**
+ * Maps parsed income rows to income data ready for insertion. CSV category
+ * names refer to expense categories, so imported incomes start uncategorized.
+ */
+export const mapRowsToIncomes = (
+  rows: ParsedExpenseRow[],
+): Array<{
+  date: string;
+  description: string;
+  amount: number;
+  category_id: string | null;
+}> => {
+  return rows
+    .filter((row) => row.isIncome)
+    .map((row) => ({
       date: row.date,
       description: row.description,
       amount: row.amount,
-      category_id: categoryId,
-    };
-  });
+      category_id: null,
+    }));
 };
 
 /**
@@ -446,6 +473,7 @@ const processRow = (
       categoryName: rowCategoryName,
       amount,
       rowNumber,
+      isIncome,
     },
     unmatchedCategory,
   };

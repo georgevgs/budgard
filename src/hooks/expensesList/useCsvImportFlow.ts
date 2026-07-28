@@ -3,9 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { useCategoriesData } from '@/contexts/DataContext';
 import { useToast } from '@/hooks/useToast';
 import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
+import { useIncomeOps } from '@/hooks/dataOps/useIncomeOps';
 import {
   parseExpensesCsv,
   mapRowsToExpenses,
+  mapRowsToIncomes,
   readFileAsText,
   getCsvPreviewData,
   suggestColumnMapping,
@@ -29,6 +31,7 @@ export const useCsvImportFlow = (onClose: () => void) => {
   const { expenseCategories: categories } = useCategoriesData();
   const { toast } = useToast();
   const { handleBulkExpenseImport } = useExpenseOps();
+  const { handleBulkIncomeImport } = useIncomeOps();
 
   // Step state
   const [step, setStep] = useState<ImportStep>('upload');
@@ -177,12 +180,18 @@ export const useCsvImportFlow = (onClose: () => void) => {
         categories,
         categoryMappings,
       );
-      await handleBulkExpenseImport(expensesToImport);
+      const incomesToImport = mapRowsToIncomes(validRows);
+      if (expensesToImport.length > 0) {
+        await handleBulkExpenseImport(expensesToImport);
+      }
+      if (incomesToImport.length > 0) {
+        await handleBulkIncomeImport(incomesToImport);
+      }
 
       toast({
         title: t('common.success'),
         description: t('import.successMessage', {
-          count: expensesToImport.length,
+          count: expensesToImport.length + incomesToImport.length,
         }),
       });
 
@@ -196,6 +205,7 @@ export const useCsvImportFlow = (onClose: () => void) => {
     categories,
     categoryMappings,
     handleBulkExpenseImport,
+    handleBulkIncomeImport,
     toast,
     t,
     handleClose,

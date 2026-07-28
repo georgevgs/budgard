@@ -349,6 +349,17 @@ const renderSkippedCount = (count: number, t: TranslateFunction) => {
   );
 };
 
+const renderIncomeCount = (rows: ParsedExpenseRow[], t: TranslateFunction) => {
+  const count = rows.filter((row) => row.isIncome).length;
+  if (count === 0) return null;
+
+  return (
+    <div className="flex items-center gap-2 text-sm text-income">
+      <span>{t('import.incomeRows', { count })}</span>
+    </div>
+  );
+};
+
 const renderErrorCount = (count: number, t: TranslateFunction) => {
   if (count === 0) return null;
 
@@ -513,6 +524,7 @@ const renderPreviewStep = (
           <span>{t('import.validRows', { count: validRows.length })}</span>
         </div>
         {renderSkippedCount(skippedIncomeCount, t)}
+        {renderIncomeCount(validRows, t)}
         {renderErrorCount(errors.length, t)}
       </div>
       {renderUnmatchedCategories(unmatchedCategories, categories, categoryMappings, onCategoryMap, t)}

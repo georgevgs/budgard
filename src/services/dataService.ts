@@ -146,6 +146,24 @@ export const dataService = {
     });
   },
 
+  async createIncomesBulk(
+    incomesData: Array<{
+      date: string;
+      description: string;
+      amount: number;
+      category_id: string | null;
+    }>,
+  ) {
+    const { data, error } = await supabase
+      .from('expenses')
+      .insert(incomesData.map((row) => ({ ...row, type: 'income' })))
+      .select(SELECT_WITH_CATEGORY);
+
+    if (error) throw error;
+
+    return data as Expense[];
+  },
+
   async createIncome(incomeData: Partial<Expense>) {
     const { data, error } = await supabase
       .from('expenses')

@@ -9,7 +9,15 @@ import { offlineQueue, createTempId } from '@/lib/offlineQueue';
 import { isOfflineError } from '@/lib/offlineError';
 import type { Expense } from '@/types/Expense';
 import { replaceById, patchById, pickByEdit } from '@/hooks/dataOps/helpers';
+import { mergeUniqueById } from '@/contexts/DataContext.helpers';
 import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
+
+type BulkIncomeRow = {
+  date: string;
+  description: string;
+  amount: number;
+  category_id: string | null;
+};
 
 export const useIncomeOps = () => {
   const { isInitialized } = useDataConfig();
@@ -151,8 +159,20 @@ export const useIncomeOps = () => {
     [isInitialized, setIncomes, showErrorToast, toast, t],
   );
 
+  const handleBulkIncomeImport = useCallback(
+    async (incomesData: BulkIncomeRow[]) => {
+      if (!isInitialized) return;
+
+      // Mirrors handleBulkExpenseImport: the insert returns the created rows
+      // with their embeds, so merging replaces a full re-download.
+      const created = await dataService.createIncomesBulk(incomesData);
+      setIncomes((prev) => mergeUniqueById(prev, created));
+    },
+    [isInitialized, setIncomes],
+  );
+
   return useMemo(
-    () => ({ handleIncomeSubmit, handleIncomeDelete }),
-    [handleIncomeSubmit, handleIncomeDelete],
+    () => ({ handleIncomeSubmit, handleIncomeDelete, handleBulkIncomeImport }),
+    [handleIncomeSubmit, handleIncomeDelete, handleBulkIncomeImport],
   );
 };

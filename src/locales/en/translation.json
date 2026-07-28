@@ -956,7 +956,7 @@
     "columnN": "Column {{n}}",
     "colN": "Col {{n}}",
     "skipIncome": "Skip income transactions",
-    "skipIncomeDescription": "Auto-detects: if CSV has negative amounts, positive = income",
+    "skipIncomeDescription": "Off: income rows are imported as income. Auto-detected when the CSV uses negative amounts for expenses.",
     "sampleData": "Sample data ({{count}} rows total)",
     "continue": "Continue",
     "validRows": "{{count}} valid expense(s)",
@@ -983,7 +983,8 @@
       "descriptionRequired": "Description is required",
       "descriptionTooLong": "Description must be less than 100 characters",
       "descriptionInvalid": "Description contains invalid characters"
-    }
+    },
+    "incomeRows": "{{count}} rows will be imported as income"
   },
   "receipt": {
     "receipt": "Receipt",
