@@ -41,8 +41,8 @@ const IncomeList = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100dvh-4rem-env(safe-area-inset-top))] pb-20">
-      <div className="flex-1 container max-w-4xl mx-auto px-4 pt-5 pb-4">
+    <div className="pb-20">
+      <div className="container max-w-4xl mx-auto px-4 pt-5 pb-4">
         <div className="space-y-3 mb-4">
           <ExpensesMonthlySelector
             selectedMonth={selectedMonth}
@@ -75,7 +75,7 @@ const IncomeList = () => {
           </div>
         </div>
 
-        <div className="flex-1 space-y-2">
+        <div className="space-y-2">
           {renderIncomeContent(
             filteredIncomes,
             monthlyIncomes,

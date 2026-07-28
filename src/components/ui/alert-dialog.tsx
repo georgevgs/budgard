@@ -71,7 +71,8 @@ const AlertDialogContent = React.forwardRef<
           className={cn(
             'fixed z-50 grid w-full gap-4 border border-border/40 bg-card shadow-lg duration-200',
             // Mobile: drawer from bottom with rounded top corners
-            'bottom-0 left-0 right-0 rounded-t-[24px] p-6',
+            'bottom-0 left-0 right-0 rounded-t-[24px]',
+            'p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
             'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',

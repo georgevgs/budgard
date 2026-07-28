@@ -87,7 +87,7 @@ export const MonthDrillDown = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[480px]" onOpenChange={onClose}>
-        <DialogHeader className="px-6 pt-6" data-draggable-area>
+        <DialogHeader data-draggable-area>
           <DialogTitle className="capitalize">{monthLabel}</DialogTitle>
           <DialogDescription>
             {t('analytics.drillDown.monthTotal', {
@@ -97,7 +97,7 @@ export const MonthDrillDown = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="overflow-y-auto max-h-[60dvh] px-6 pb-6">
+        <div className="overflow-y-auto max-h-[60dvh]">
           {renderCategoryBreakdown(categoryBreakdown, totalAmount, t, defaultCurrency)}
           {renderTopExpenses(topExpenses, dateLocale, t, defaultCurrency)}
         </div>

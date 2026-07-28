@@ -61,7 +61,7 @@ export const CategoryDrillDown = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[480px]" onOpenChange={onClose}>
-        <DialogHeader className="px-6 pt-6" data-draggable-area>
+        <DialogHeader data-draggable-area>
           <div className="flex items-center gap-2.5">
             <div
               className="w-3 h-3 rounded-full shrink-0"
@@ -77,7 +77,7 @@ export const CategoryDrillDown = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="overflow-y-auto max-h-[60dvh] px-6 pb-6">
+        <div className="overflow-y-auto max-h-[60dvh]">
           {renderMonthlyBreakdown(monthlyBreakdown, categoryColor, t, defaultCurrency)}
 
           <p className="text-xs text-muted-foreground uppercase tracking-wide mt-5 mb-2">

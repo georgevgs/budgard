@@ -58,8 +58,8 @@ const ExpensesList = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100dvh-4rem-env(safe-area-inset-top))] pb-20">
-      <div className="flex-1 container max-w-4xl mx-auto px-4 pt-5 pb-4">
+    <div className="pb-20">
+      <div className="container max-w-4xl mx-auto px-4 pt-5 pb-4">
         <div className="mb-4 space-y-3">
           <WeeklyRecapCard />
         </div>
@@ -90,16 +90,14 @@ const ExpensesList = () => {
           active={filter.hasActiveFilters}
         />
 
-        <div className="flex-1">
-          <ExpensesContent
-            filter={filter}
-            selectedMonth={selectedMonth}
-            onAddClick={formState.openNewExpenseForm}
-            onEdit={formState.handleExpenseEdit}
-            onDelete={handleExpenseDelete}
-            onSaveAsTemplate={handleSaveAsTemplate}
-          />
-        </div>
+        <ExpensesContent
+          filter={filter}
+          selectedMonth={selectedMonth}
+          onAddClick={formState.openNewExpenseForm}
+          onEdit={formState.handleExpenseEdit}
+          onDelete={handleExpenseDelete}
+          onSaveAsTemplate={handleSaveAsTemplate}
+        />
       </div>
 
       <FormsManager
