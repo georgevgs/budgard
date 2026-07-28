@@ -6,6 +6,8 @@ import X from 'lucide-react/dist/esm/icons/x';
 import { cn } from '@/lib/utils.ts';
 import { useSwipeToClose } from '@/hooks/useSwipeToClose';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { DialogDirtyContext } from '@/hooks/useDialogDirty';
+import ConfirmDestructiveDialog from '@/components/common/ConfirmDestructiveDialog';
 
 const Dialog = ({
   modal = true,
@@ -50,9 +52,48 @@ const DialogContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
     onOpenChange?: (open: boolean) => void;
   }
->(({ className, children, onOpenChange, style, ...props }, ref) => {
+>(({
+  className,
+  children,
+  onOpenChange,
+  style,
+  onEscapeKeyDown,
+  onInteractOutside,
+  ...props
+}, ref) => {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
+
+  // Forms inside this dialog report unsaved changes via DialogDirtyContext;
+  // any implicit dismissal is then intercepted with a discard confirmation.
+  const dirtyRef = React.useRef(false);
+  const closeRef = React.useRef<HTMLButtonElement>(null);
+  const [confirmDiscard, setConfirmDiscard] = React.useState(false);
+  const setDirty = React.useCallback((dirty: boolean) => {
+    dirtyRef.current = dirty;
+  }, []);
+
+  const closeDiscarding = () => {
+    dirtyRef.current = false;
+    setConfirmDiscard(false);
+    if (onOpenChange) {
+      onOpenChange(false);
+
+      return;
+    }
+    // No controlled close handler — trigger Radix's own Close button now
+    // that the dirty flag no longer blocks it.
+    closeRef.current?.click();
+  };
+
+  const guardedClose = () => {
+    if (dirtyRef.current) {
+      setConfirmDiscard(true);
+
+      return;
+    }
+    onOpenChange?.(false);
+  };
 
   const {
     handleTouchStart,
@@ -61,7 +102,7 @@ const DialogContent = React.forwardRef<
     dragStyle,
     overlayStyle,
   } = useSwipeToClose({
-    onClose: () => onOpenChange?.(false),
+    onClose: guardedClose,
     threshold: 100,
     enabled: isMobile,
   });
@@ -75,6 +116,33 @@ const DialogContent = React.forwardRef<
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onEscapeKeyDown={(e) => {
+            onEscapeKeyDown?.(e);
+            if (e.defaultPrevented) return;
+            if (dirtyRef.current) {
+              e.preventDefault();
+              setConfirmDiscard(true);
+            }
+          }}
+          onInteractOutside={(e) => {
+            onInteractOutside?.(e);
+            if (e.defaultPrevented) return;
+            if (dirtyRef.current) {
+              e.preventDefault();
+              setConfirmDiscard(true);
+            }
+          }}
+          onFocusCapture={(e) => {
+            // Nudge the focused field into view once the mobile keyboard has
+            // had a moment to open — dvh doesn't shrink for the iOS keyboard.
+            if (!isMobile) return;
+            const target = e.target;
+            if (!(target instanceof HTMLElement)) return;
+            if (!target.matches('input, textarea, select')) return;
+            window.setTimeout(() => {
+              target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }, 300);
+          }}
           onOpenAutoFocus={(e) => {
             // Don't auto-focus the first input (would pop the mobile keyboard),
             // but still move focus into the dialog so a11y libs don't trip the
@@ -107,13 +175,35 @@ const DialogContent = React.forwardRef<
           }}
           {...props}
         >
-          {children}
-          <DialogPrimitive.Close className="absolute right-2 top-2 inline-flex h-10 w-10 items-center justify-center rounded-lg opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+          <DialogDirtyContext.Provider value={setDirty}>
+            {children}
+          </DialogDirtyContext.Provider>
+          <DialogPrimitive.Close
+            ref={closeRef}
+            onClick={(e) => {
+              // Radix skips its own close handler when defaultPrevented
+              if (dirtyRef.current) {
+                e.preventDefault();
+                setConfirmDiscard(true);
+              }
+            }}
+            className="absolute right-2 top-2 inline-flex h-10 w-10 items-center justify-center rounded-lg opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+          >
             <X className="h-4 w-4" />
             <span className="sr-only">{t('common.close')}</span>
           </DialogPrimitive.Close>
         </DialogPrimitive.Content>
       </DialogPortal>
+      <ConfirmDestructiveDialog
+        open={confirmDiscard}
+        title={t('common.discardTitle')}
+        description={t('common.discardBody')}
+        confirmLabel={t('common.discardConfirm')}
+        onOpenChange={(open) => {
+          if (!open) setConfirmDiscard(false);
+        }}
+        onConfirm={closeDiscarding}
+      />
     </SwipeContext.Provider>
   );
 });

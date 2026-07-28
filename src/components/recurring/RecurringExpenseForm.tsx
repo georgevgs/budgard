@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useDialogDirty } from '@/hooks/useDialogDirty';
 import { parseISO } from 'date-fns';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import {
@@ -45,6 +46,7 @@ const RecurringExpenseForm = ({
 
   const form = useForm<RecurringExpenseFormData>({
     resolver: zodResolver(recurringExpenseSchema),
+    mode: 'onTouched',
     defaultValues: {
       amount: resolveAmountDefault(expense),
       description: expense?.description ?? '',
@@ -55,6 +57,8 @@ const RecurringExpenseForm = ({
       linked_account_id: expense?.linked_account_id ?? null,
     },
   });
+
+  useDialogDirty(form.formState.isDirty);
 
   const isExpense = type === 'expense';
   const showLinkedAccount = isExpense && investmentAccounts.length > 0;
@@ -103,7 +107,7 @@ const RecurringExpenseForm = ({
               <Button type="button" variant="outline" onClick={onClose}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
+              <Button type="submit" disabled={form.formState.isSubmitting || !form.formState.isValid}>
                 {renderSubmitLabel(
                   form.formState.isSubmitting,
                   Boolean(expense),

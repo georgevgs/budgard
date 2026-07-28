@@ -41,8 +41,8 @@ const GoalSourceFields = ({ form, sourceType }: Props) => {
             <Select
               onValueChange={(value: GoalSourceType) => {
                 field.onChange(value);
-                form.setValue('category_id', undefined);
-                form.setValue('tag_id', undefined);
+                form.setValue('category_id', undefined, { shouldValidate: true, shouldDirty: true });
+                form.setValue('tag_id', undefined, { shouldValidate: true, shouldDirty: true });
               }}
               value={field.value}
             >

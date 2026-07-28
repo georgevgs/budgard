@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useForm, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useDialogDirty } from '@/hooks/useDialogDirty';
 import {
   DialogTitle,
   DialogHeader,
@@ -39,6 +40,7 @@ const AccountForm = ({ account, onClose }: Props) => {
 
   const form = useForm<AccountFormData>({
     resolver: zodResolver(accountSchema),
+    mode: 'onTouched',
     defaultValues: {
       name: account?.name ?? '',
       kind: account?.kind ?? 'bank',
@@ -47,6 +49,8 @@ const AccountForm = ({ account, onClose }: Props) => {
       color: account?.color ?? DEFAULT_COLOR,
     },
   });
+
+  useDialogDirty(form.formState.isDirty);
 
   const selectedCurrency = form.watch('default_currency');
   const selectedKind = form.watch('kind');
@@ -111,7 +115,7 @@ const AccountForm = ({ account, onClose }: Props) => {
             <Button type="button" variant="outline" onClick={onClose}>
               {t('common.cancel')}
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting || !form.formState.isValid}>
               {renderSubmitLabel(isSubmitting, t)}
             </Button>
           </div>

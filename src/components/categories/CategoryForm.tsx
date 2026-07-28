@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useDialogDirty } from '@/hooks/useDialogDirty';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
@@ -50,6 +51,7 @@ const CategoryForm = ({
 
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
+    mode: 'onTouched',
     defaultValues: {
       name: category?.name ?? '',
       color: category?.color ?? defaultColor,
@@ -57,6 +59,8 @@ const CategoryForm = ({
       kind: editableKind,
     },
   });
+
+  useDialogDirty(form.formState.isDirty);
 
   const isDisabled = getIsFormDisabled(
     form.formState.isSubmitting,
@@ -100,7 +104,7 @@ const CategoryForm = ({
               </Button>
               <Button
                 type="submit"
-                disabled={isDisabled}
+                disabled={isDisabled || !form.formState.isValid}
                 className={getSubmitButtonClass(isIncomeCategory)}
               >
                 {getSubmitButtonText(form.formState.isSubmitting, isEditing, t)}

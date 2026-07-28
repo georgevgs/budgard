@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useDialogDirty } from '@/hooks/useDialogDirty';
 import { parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
@@ -32,6 +33,7 @@ const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
 
   const form = useForm<GoalFormData>({
     resolver: zodResolver(goalSchema),
+    mode: 'onTouched',
     defaultValues: {
       name: goal?.name ?? '',
       target_amount: resolveTargetAmount(goal),
@@ -43,6 +45,8 @@ const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
       color: goal?.color ?? DEFAULT_GOAL_COLOR,
     },
   });
+
+  useDialogDirty(form.formState.isDirty);
 
   const sourceType = form.watch('source_type');
   const isEditing = Boolean(goal);
@@ -86,7 +90,7 @@ const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
             <Button type="button" variant="outline" onClick={onClose}>
               {t('common.cancel')}
             </Button>
-            <Button type="submit" disabled={form.formState.isSubmitting}>
+            <Button type="submit" disabled={form.formState.isSubmitting || !form.formState.isValid}>
               {renderSubmitLabel(form.formState.isSubmitting, isEditing, t)}
             </Button>
           </div>

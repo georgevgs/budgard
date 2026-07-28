@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useDialogDirty } from '@/hooks/useDialogDirty';
 import { budgetSchema, type BudgetFormData } from '@/lib/validations';
 import {
   formatCurrencyInput,
@@ -43,11 +44,14 @@ const BudgetForm = ({
     handleSubmit,
     setValue,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty, isValid },
   } = useForm<BudgetFormData>({
     resolver: zodResolver(budgetSchema),
+    mode: 'onTouched',
     defaultValues: { amount: getInitialAmount(currentBudget) },
   });
+
+  useDialogDirty(isDirty);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -119,7 +123,7 @@ const BudgetForm = ({
               <Button type="button" variant="outline" onClick={onClose}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting || !isValid}>
                 {renderSubmitContent(isSubmitting, isEditing, t)}
               </Button>
             </div>

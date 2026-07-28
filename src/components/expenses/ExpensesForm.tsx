@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useDialogDirty } from '@/hooks/useDialogDirty';
 import {
   DialogTitle,
   DialogDescription,
@@ -61,6 +62,7 @@ const ExpensesForm = ({
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
+    mode: 'onTouched',
     defaultValues: {
       amount: getInitialAmount(expense, defaultCurrency),
       description: expense?.description || '',
@@ -70,6 +72,8 @@ const ExpensesForm = ({
       date: getInitialDate(expense),
     },
   });
+
+  useDialogDirty(form.formState.isDirty);
 
   const conversion = useCurrencyConversion(form, expense);
   const suggestions = useDescriptionSuggestions(form);
@@ -129,7 +133,7 @@ const ExpensesForm = ({
               <Button type="button" variant="outline" onClick={onClose}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting || !form.formState.isValid}>
                 {renderSaveButtonLabel(isSubmitting, t)}
               </Button>
             </div>

@@ -38,7 +38,7 @@ export const useIncomeCategoryPicker = (
   const showCreateOption = trimmedSearch.length > 0 && !hasExactMatch;
 
   const handleCategorySelect = (id: string) => {
-    form.setValue('category_id', id);
+    form.setValue('category_id', id, { shouldValidate: true, shouldDirty: true });
     setCategoryPopoverOpen(false);
     setCategorySearch('');
   };

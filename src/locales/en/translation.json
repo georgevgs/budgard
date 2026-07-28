@@ -21,7 +21,10 @@
     "offline": "No internet connection",
     "backOnline": "Back online",
     "close": "Close",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "discardTitle": "Discard changes?",
+    "discardBody": "You have unsaved changes. Closing this form will throw them away.",
+    "discardConfirm": "Discard"
   },
   "auth": {
     "signIn": "Sign In",

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useDialogDirty } from '@/hooks/useDialogDirty';
 import { format } from 'date-fns';
 import {
   DialogTitle,
@@ -45,12 +46,15 @@ const DebtPaymentForm = ({ debt, onClose }: Props) => {
 
   const form = useForm<DebtPaymentFormData>({
     resolver: zodResolver(debtPaymentSchema),
+    mode: 'onTouched',
     defaultValues: {
       amount: suggested,
       date: new Date(),
       description: '',
     },
   });
+
+  useDialogDirty(form.formState.isDirty);
 
   const handleSubmit = async (values: DebtPaymentFormData) => {
     if (!session?.user?.id) return;
@@ -115,7 +119,7 @@ const DebtPaymentForm = ({ debt, onClose }: Props) => {
             <Button type="button" variant="outline" onClick={onClose}>
               {t('common.cancel')}
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting || !form.formState.isValid}>
               {renderSubmitLabel(isSubmitting, t)}
             </Button>
           </div>

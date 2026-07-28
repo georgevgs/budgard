@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useDialogDirty } from '@/hooks/useDialogDirty';
 import {
   Dialog,
   DialogContent,
@@ -41,6 +42,7 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
 
   const form = useForm<IncomeFormData>({
     resolver: zodResolver(incomeSchema),
+    mode: 'onTouched',
     defaultValues: {
       amount: getInitialAmount(income, defaultCurrency),
       description: income?.description || '',
@@ -48,6 +50,8 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
       date: getInitialDate(income),
     },
   });
+
+  useDialogDirty(form.formState.isDirty);
 
   const conversion = useIncomeCurrencyConversion(form, income);
   const picker = useIncomeCategoryPicker(form);
@@ -91,7 +95,7 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
               </Button>
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !form.formState.isValid}
                 className="bg-income text-income-foreground hover:bg-income/90"
               >
                 {renderSaveButtonLabel(isSubmitting, t)}

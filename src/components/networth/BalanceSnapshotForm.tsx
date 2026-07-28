@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useDialogDirty } from '@/hooks/useDialogDirty';
 import {
   DialogTitle,
   DialogHeader,
@@ -52,6 +53,7 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
 
   const form = useForm<AccountBalanceFormData>({
     resolver: zodResolver(accountBalanceSchema),
+    mode: 'onTouched',
     defaultValues: {
       balance: balanceDefault,
       contribution_delta: '',
@@ -59,6 +61,8 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
       note: '',
     },
   });
+
+  useDialogDirty(form.formState.isDirty);
 
   const { isSubmitting, handleSubmit } = useSnapshotSubmit({
     form,
@@ -115,7 +119,7 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
             <Button type="button" variant="outline" onClick={onClose}>
               {t('common.cancel')}
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting || !form.formState.isValid}>
               {renderSubmitLabel(isSubmitting, t)}
             </Button>
           </div>
