@@ -57,10 +57,7 @@ const ExpensesDashboard = ({
                 <span className="flex-1 text-sm font-medium truncate">
                   {category.name}
                 </span>
-                <span
-                  className="text-sm font-semibold shrink-0 tabular-nums"
-                  style={{ color: category.color }}
-                >
+                <span className="text-sm font-semibold shrink-0 tabular-nums">
                   {formatCurrency(category.amount, defaultCurrency)}
                 </span>
                 <span className="text-xs text-muted-foreground shrink-0 w-8 text-right tabular-nums">

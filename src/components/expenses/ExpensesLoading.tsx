@@ -45,7 +45,7 @@ export const AppLoadingSkeleton = () => (
 // from skeleton → real content feels seamless rather than jarring.
 export const ExpenseLoadingState = () => {
   return (
-    <div className="flex flex-col min-h-[calc(100vh-58px)]">
+    <div className="flex flex-col min-h-[calc(100dvh-4rem-env(safe-area-inset-top))] pb-20">
       <div className="container max-w-4xl mx-auto px-4 pt-4 pb-4 space-y-3">
         {/* Monthly selector */}
         <div className="flex items-center justify-between px-1">

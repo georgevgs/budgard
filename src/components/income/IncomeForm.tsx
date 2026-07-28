@@ -107,7 +107,7 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
         onOpenChange={(open) => picker.setIsManagerOpen(open)}
       >
         <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden flex flex-col max-h-[85dvh]"
+          className="sm:max-w-[500px] p-0 gap-0 flex flex-col max-h-[85dvh]"
           onOpenChange={(open: boolean) => picker.setIsManagerOpen(open)}
         >
           <CategoryManager categoryType="income" />

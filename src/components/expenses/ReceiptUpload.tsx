@@ -66,7 +66,6 @@ const ReceiptUpload = ({
           ref={inputRef}
           type="file"
           accept="image/*"
-          capture="environment"
           onChange={handleChange}
           className="hidden"
         />
@@ -92,7 +91,6 @@ const ReceiptUpload = ({
         ref={inputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         onChange={handleChange}
         className="hidden"
       />

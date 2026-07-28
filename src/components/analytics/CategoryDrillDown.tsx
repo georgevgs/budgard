@@ -151,7 +151,7 @@ const renderExpenseRow = (expense: Expense, dateLocale: Locale, currency: string
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium truncate">{expense.description}</p>
         <p className="text-xs text-muted-foreground">
-          {format(parseISO(expense.date), 'MMM d, yyyy', {
+          {format(parseISO(expense.date), 'PP', {
             locale: dateLocale,
           })}
           {renderTagInRow(expense)}

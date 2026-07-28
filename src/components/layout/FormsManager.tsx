@@ -66,9 +66,10 @@ const FormsManager = ({
         </DialogContent>
       </Dialog>
 
+      {/* Keeps the dialog X visible — CategoryManager has no Cancel of its own */}
       <Dialog open={isCategoryForm} onOpenChange={onClose}>
         <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
+          className="sm:max-w-[500px] p-0 gap-0"
           onOpenChange={onClose}
         >
           {renderCategoryManager(isCategoryForm)}

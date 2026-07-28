@@ -170,10 +170,7 @@ const renderCategoryBreakdown = (
                   color={cat.color}
                 />
               </div>
-              <span
-                className="text-sm font-semibold tabular-nums shrink-0"
-                style={{ color: cat.color }}
-              >
+              <span className="text-sm font-semibold tabular-nums shrink-0">
                 {formatCurrency(cat.amount, currency)}
               </span>
               <span className="text-xs text-muted-foreground tabular-nums w-8 text-right shrink-0">

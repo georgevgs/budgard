@@ -6,9 +6,11 @@ export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
 };
 
+// Same de-DE separator convention as formatCurrency, so an original-currency
+// line stacked under the converted amount reads with identical number format.
 export const formatForeignAmount = (amount: number, currencyCode: string): string => {
   try {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('de-DE', {
       style: 'currency',
       currency: currencyCode,
       maximumFractionDigits: 2,

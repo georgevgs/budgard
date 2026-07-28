@@ -248,13 +248,18 @@ describe('formatForeignAmount', () => {
 
   it('formats JPY without decimal places', () => {
     const result = formatForeignAmount(1500, 'JPY');
-    expect(result).toContain('1,500');
-    expect(result).not.toMatch(/\.\d{2}/);
+    expect(result).toContain('1.500');
+    expect(result).not.toMatch(/,\d{2}/);
   });
 
   it('formats amounts with two decimal places for standard currencies', () => {
     const result = formatForeignAmount(78.2, 'USD');
-    expect(result).toMatch(/78\.20/);
+    expect(result).toMatch(/78,20/);
+  });
+
+  it('uses the same separator convention as formatCurrency', () => {
+    const result = formatForeignAmount(1234.56, 'USD');
+    expect(result).toContain('1.234,56');
   });
 
   it('falls back gracefully for unknown currency codes', () => {

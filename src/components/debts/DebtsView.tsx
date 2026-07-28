@@ -57,7 +57,7 @@ const DebtsView = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-58px)]">
+    <div className="flex flex-col min-h-[calc(100dvh-4rem-env(safe-area-inset-top))] pb-20">
       <div className="flex-1 container max-w-4xl mx-auto px-4 pt-5 pb-4 space-y-4">
         {renderBody(
           debts.length,

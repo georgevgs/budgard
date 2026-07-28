@@ -106,7 +106,7 @@ const renderFooter = (
   if (!goal.deadline) return null;
 
   const deadlineDate = parseISO(goal.deadline);
-  const dateLabel = format(deadlineDate, 'MMM d, yyyy', { locale: dateLocale });
+  const dateLabel = format(deadlineDate, 'PP', { locale: dateLocale });
 
   return (
     <div className="flex items-center justify-between text-xs">

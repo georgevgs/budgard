@@ -121,7 +121,7 @@ const renderNextOccurrence = (
       <Clock className="h-3 w-3" />
       <span>
         {t('recurring.next', {
-          date: format(nextOccurrence, 'MMM d, yyyy', { locale: dateLocale }),
+          date: format(nextOccurrence, 'PP', { locale: dateLocale }),
         })}
       </span>
     </div>

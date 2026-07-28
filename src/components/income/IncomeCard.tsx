@@ -80,7 +80,8 @@ export default memo(IncomeCard);
 
 const resolveDateFormat = (showFullDate: boolean | undefined): string => {
   if (showFullDate) {
-    return 'MMM d, yyyy';
+    // Locale-aware medium date, so Greek reads "3 Ιουν 2026" not "Ιουν 3, 2026"
+    return 'PP';
   }
 
   return 'MMM d';

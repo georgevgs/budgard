@@ -73,7 +73,8 @@ const ExpensesPagination = ({
       {/* Date-grouped expenses */}
       {dateGroups.map((group) => (
         <div key={group.date}>
-          <div className="sticky top-0 z-10 -mx-1 px-1 py-2 bg-background/80 backdrop-blur-sm">
+          {/* Sticks below the 4rem app header (plus notch inset), which is z-50 */}
+          <div className="sticky top-[calc(4rem+env(safe-area-inset-top))] z-10 -mx-1 px-1 py-2 bg-background/80 backdrop-blur-sm">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               {group.label}
             </p>
