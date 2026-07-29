@@ -76,7 +76,7 @@ const NetWorthView = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100dvh-4rem-env(safe-area-inset-top))] pb-20">
+    <div className="flex flex-col min-h-[calc(100dvh-4rem-env(safe-area-inset-top)-var(--dock-inset))]">
       <div className="flex-1 container max-w-4xl mx-auto px-4 pt-5 pb-4 space-y-4">
         {renderBody(
           accounts.length,
@@ -227,7 +227,10 @@ const renderFab = (
   if (accountCount === 0) return null;
 
   return (
-    <div className="fixed bottom-24 right-4 z-50 pb-safe-b">
+    <div
+      data-dock-action
+      className="fixed bottom-[var(--dock-bottom)] right-4 z-50"
+    >
       <Button
         size="icon"
         onClick={onAddClick}

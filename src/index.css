@@ -46,6 +46,27 @@
     --info: 217 91% 53%;
     --info-foreground: 0 0% 100%;
     --radius: 0.875rem;
+
+    /* Floating dock geometry. Everything that sits at the bottom of the
+       screen anchors to these, so the bar can be resized in one place. */
+    --dock-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+    --dock-height: 3.5rem;
+    --dock-clearance: calc(var(--dock-bottom) + var(--dock-height));
+    --dock-action-slot: 4.25rem;
+    /* How far content must clear the dock: its exact footprint plus a little
+       air, the way a scroll view insets for an overlaying tab bar. This is the
+       ONLY bottom padding a page should carry — routes must not add their own
+       or the two stack into dead space at the end of the list. */
+    --dock-inset: calc(var(--dock-clearance) + 0.5rem);
+
+    /* Liquid-glass surface. WebKit can't refract — SVG filters are not
+       allowed in backdrop-filter — so the read is built from translucency,
+       a lit rim and real elevation instead. Tuned per theme. */
+    --glass-bg: 0 0% 100%;
+    --glass-alpha: 0.62;
+    --glass-sheen: 0.35;
+    --glass-rim: 0 0% 100% / 0.7;
+    --glass-drop: 220 40% 20% / 0.18;
   }
 
   .dark {
@@ -79,6 +100,12 @@
     --warning-foreground: 38 92% 10%;
     --info: 213 94% 68%;
     --info-foreground: 213 94% 12%;
+
+    --glass-bg: 224 18% 13%;
+    --glass-alpha: 0.62;
+    --glass-sheen: 0.08;
+    --glass-rim: 0 0% 100% / 0.1;
+    --glass-drop: 0 0% 0% / 0.55;
   }
 
   [data-theme='barbie'] {
@@ -113,6 +140,12 @@
     --info: 217 91% 53%;
     --info-foreground: 0 0% 100%;
     --radius: 1rem;
+
+    --glass-bg: 326 100% 97%;
+    --glass-alpha: 0.64;
+    --glass-sheen: 0.4;
+    --glass-rim: 0 0% 100% / 0.8;
+    --glass-drop: 326 60% 35% / 0.22;
   }
 }
 
@@ -192,6 +225,145 @@
   a:active,
   [role='button']:active {
     transform: scale(0.97);
+  }
+}
+
+@layer components {
+  /* Frosted capsule used by the floating bottom nav. Layered translucency
+     plus a lit top rim and a real drop shadow — the parts of Liquid Glass
+     that survive without backdrop refraction. */
+  .glass-capsule {
+    position: relative;
+    border-radius: 9999px;
+    background: hsl(var(--glass-bg) / var(--glass-alpha));
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    box-shadow:
+      inset 0 1px 0 0 hsl(var(--glass-rim)),
+      inset 0 -1px 0 0 hsl(0 0% 0% / 0.05),
+      0 0 0 0.5px hsl(var(--border) / 0.9),
+      0 10px 30px -8px hsl(var(--glass-drop)),
+      0 3px 8px -3px hsl(var(--glass-drop));
+  }
+
+  .glass-capsule::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      hsl(0 0% 100% / var(--glass-sheen)) 0%,
+      hsl(0 0% 100% / 0) 48%
+    );
+  }
+
+  /* Blur is an enhancement — without it the bar has to carry its own ground. */
+  @supports not (
+    (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+  ) {
+    .glass-capsule {
+      background: hsl(var(--glass-bg) / 0.94);
+    }
+  }
+
+  /* Routes that float an action button beside the dock hand it the slot, so
+     capsule and button share one baseline instead of stacking. Routes without
+     one — Recurring, Analytics, Goals, Settings — get the full width back.
+
+     The [hidden] test is load-bearing: MainTabsLayout keeps visited tabs
+     mounted behind `hidden` rather than unmounting them, so Expenses' button
+     is still in the DOM while you are on Recurring. Only a button that is
+     actually on screen may reserve the slot. */
+  body:has([data-dock-action]:not([hidden], [hidden] *)) .nav-dock {
+    padding-right: var(--dock-action-slot);
+  }
+
+  /* Auto-hide. Capsule and action button live in different React trees, so a
+     body attribute is what moves them as a single object. Both travel the same
+     distance so they never separate on the way out. */
+  .nav-dock {
+    transition:
+      transform 320ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 200ms ease,
+      padding-right 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  [data-dock-action] {
+    transition:
+      transform 320ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 200ms ease;
+  }
+
+  body[data-nav-hidden='true'] .nav-dock,
+  body[data-nav-hidden='true'] [data-dock-action] {
+    transform: translateY(calc(var(--dock-height) + var(--dock-bottom)));
+    opacity: 0;
+  }
+
+  body[data-nav-hidden='true'] .nav-scrim {
+    opacity: 0;
+  }
+
+  /* Keyboard focus must never land on something parked off-screen — but this
+     has to be :focus-visible, never :focus-within. Tapping a tab leaves that
+     link focused, so :focus-within pinned the capsule open for the rest of the
+     session while the action button still slid away. Both dock halves reveal
+     together so they can never desync. */
+  body[data-nav-hidden='true']:has(
+      :is(.nav-dock, [data-dock-action]) :focus-visible
+    )
+    :is(.nav-dock, [data-dock-action]) {
+    transform: none;
+    opacity: 1;
+  }
+
+  /* One indicator that travels between tabs. The overshoot curve is what
+     reads as "liquid" — Safari gives us no refraction to lean on. */
+  .nav-indicator {
+    border-radius: 9999px;
+    transition: transform 520ms cubic-bezier(0.34, 1.45, 0.5, 1);
+    will-change: transform;
+  }
+
+  .nav-indicator-skin {
+    display: block;
+    height: 100%;
+    width: 100%;
+    border-radius: 9999px;
+    background: hsl(var(--primary) / 0.16);
+    box-shadow: inset 0 0 0 0.5px hsl(var(--primary) / 0.22);
+    animation: nav-indicator-settle 520ms cubic-bezier(0.34, 1.45, 0.5, 1);
+  }
+
+  /* Content dissolves toward the bottom edge rather than colliding with
+     the dock, the way iOS fades content under a floating tab bar. */
+  .nav-scrim {
+    position: fixed;
+    inset: auto 0 0 0;
+    height: calc(var(--dock-clearance) + 2.5rem);
+    pointer-events: none;
+    z-index: 30;
+    transition: opacity 320ms ease;
+    background: linear-gradient(
+      to top,
+      hsl(var(--background)) 12%,
+      hsl(var(--background) / 0.75) 42%,
+      hsl(var(--background) / 0) 100%
+    );
+  }
+}
+
+@keyframes nav-indicator-settle {
+  0% {
+    transform: scale(1, 1);
+  }
+  35% {
+    transform: scale(1.08, 0.9);
+  }
+  100% {
+    transform: scale(1, 1);
   }
 }
 

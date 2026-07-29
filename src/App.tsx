@@ -106,10 +106,11 @@ const AuthenticatedLayout = () => {
       <main
         id="main-content"
         tabIndex={-1}
-        className="flex-1 pt-2 pb-[calc(5rem+env(safe-area-inset-bottom))] focus:outline-none"
+        className="flex-1 pt-2 pb-[var(--dock-inset)] focus:outline-none"
       >
         <Outlet />
       </main>
+      <div className="nav-scrim" aria-hidden="true" />
       <NavTabs />
       <MilestoneWatcher />
       <UpgradeDialog />
@@ -431,7 +432,7 @@ const ONLINE_PILL: StatusPillTone = {
 };
 
 const renderStatusPill = (tone: StatusPillTone, label: string) => (
-  <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+  <div className="fixed bottom-[calc(var(--dock-clearance)+0.75rem)] left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
     <div
       role="status"
       className={`flex items-center gap-2 rounded-full ${tone.pill} text-sm font-medium px-4 py-2 shadow-lg pointer-events-auto`}

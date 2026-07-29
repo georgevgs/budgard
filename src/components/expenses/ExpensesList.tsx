@@ -58,7 +58,7 @@ const ExpensesList = () => {
   }
 
   return (
-    <div className="pb-20">
+    <div>
       <div className="container max-w-4xl mx-auto px-4 pt-5 pb-4">
         <div className="mb-4 space-y-3">
           <WeeklyRecapCard />

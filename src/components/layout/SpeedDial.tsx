@@ -53,7 +53,10 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
     <>
       {renderOverlay(isOpen, closeMenu)}
 
-      <div className="fixed bottom-24 right-4 z-50 flex flex-col items-end gap-2 pb-safe-b pointer-events-none">
+      <div
+        data-dock-action
+        className="fixed bottom-[var(--dock-bottom)] right-4 z-50 flex flex-col items-end gap-2 pointer-events-none"
+      >
         {/* Action Buttons */}
         <div
           aria-hidden={!isOpen}

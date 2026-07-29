@@ -10,6 +10,9 @@ const renderAt = (path: string) =>
     </MemoryRouter>,
   );
 
+const indicatorAt = (path: string) =>
+  renderAt(path).container.querySelector('.nav-indicator');
+
 describe('NavTabs', () => {
   it('renders four tabs with localized labels', () => {
     renderAt('/expenses');
@@ -47,5 +50,28 @@ describe('NavTabs', () => {
   it('exposes an aria-label on the nav landmark', () => {
     renderAt('/expenses');
     expect(screen.getByLabelText('navigation.ariaLabel')).toBeInTheDocument();
+  });
+
+  it('slides the indicator to the slot matching the route', () => {
+    expect(indicatorAt('/expenses')).toHaveStyle({
+      transform: 'translateX(0%)',
+    });
+    expect(indicatorAt('/analytics')).toHaveStyle({
+      transform: 'translateX(300%)',
+    });
+  });
+
+  it('keeps the indicator on the tab when a nested route is open', () => {
+    expect(indicatorAt('/income/42')).toHaveStyle({
+      transform: 'translateX(100%)',
+    });
+  });
+
+  it('hides the indicator on routes that own no tab', () => {
+    expect(indicatorAt('/networth')).toBeNull();
+  });
+
+  it('hides the indicator on a route that merely prefixes a tab path', () => {
+    expect(indicatorAt('/incomes')).toBeNull();
   });
 });

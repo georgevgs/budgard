@@ -41,7 +41,7 @@ const IncomeList = () => {
   }
 
   return (
-    <div className="pb-20">
+    <div>
       <div className="container max-w-4xl mx-auto px-4 pt-5 pb-4">
         <div className="space-y-3 mb-4">
           <ExpensesMonthlySelector
@@ -96,7 +96,10 @@ const IncomeList = () => {
       />
 
       {/* FAB */}
-      <div className="fixed bottom-24 right-4 z-50 pb-safe-b">
+      <div
+        data-dock-action
+        className="fixed bottom-[var(--dock-bottom)] right-4 z-50"
+      >
         <Button
           size="icon"
           onClick={formState.handleAddClick}

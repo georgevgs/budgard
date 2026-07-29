@@ -20,17 +20,17 @@ export const AppLoadingSkeleton = () => (
     </div>
 
     {/* Content */}
-    <main className="flex-1 pt-2 pb-20">
+    <main className="flex-1 pt-2 pb-[var(--dock-inset)]">
       <ExpenseLoadingState />
     </main>
 
     {/* Nav tabs */}
-    <div className="fixed bottom-0 left-0 right-0 border-t bg-background">
-      <div className="flex items-center justify-around">
-        {[0, 1, 2].map((i) => (
+    <div className="fixed inset-x-4 bottom-[var(--dock-bottom)] pr-[var(--dock-action-slot)]">
+      <div className="glass-capsule flex h-[var(--dock-height)] items-stretch p-1">
+        {[0, 1, 2, 3].map((i) => (
           <div
             key={`nav-${i}`}
-            className="flex flex-1 flex-col items-center gap-1 py-2"
+            className="flex flex-1 flex-col items-center justify-center gap-1"
           >
             <Skeleton className="h-5 w-5 rounded-sm" />
             <Skeleton className="h-2 w-10" />
@@ -45,7 +45,7 @@ export const AppLoadingSkeleton = () => (
 // from skeleton → real content feels seamless rather than jarring.
 export const ExpenseLoadingState = () => {
   return (
-    <div className="flex flex-col min-h-[calc(100dvh-4rem-env(safe-area-inset-top))] pb-20">
+    <div className="flex flex-col min-h-[calc(100dvh-4rem-env(safe-area-inset-top)-var(--dock-inset))]">
       <div className="container max-w-4xl mx-auto px-4 pt-4 pb-4 space-y-3">
         {/* Monthly selector */}
         <div className="flex items-center justify-between px-1">
