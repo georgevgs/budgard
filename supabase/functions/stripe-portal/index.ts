@@ -1,14 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { corsHeadersFor, jsonResponder } from '../_shared/cors.ts';
 
 // Creates a Stripe customer portal session for the authenticated user and
 // returns its URL. The portal is Stripe-hosted and interoperates with Managed
 // Payments; it is where subscribers cancel, update payment details, and view
 // invoices — the app never implements those flows itself.
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://budgard.com',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
 
 const STRIPE_PORTAL_URL = 'https://api.stripe.com/v1/billing_portal/sessions';
 
@@ -19,8 +15,10 @@ const STRIPE_API_VERSION = '2025-03-31.basil';
 const RETURN_URL = 'https://budgard.com/settings';
 
 Deno.serve(async (req) => {
+  const jsonResponse = jsonResponder(req);
+
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeadersFor(req) });
   }
 
   try {
@@ -98,11 +96,3 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Internal server error' }, 500);
   }
 });
-
-// --- Helpers ---
-
-const jsonResponse = (body: Record<string, unknown>, status: number) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });

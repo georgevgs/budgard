@@ -5,10 +5,7 @@
 // shows them to signed-out visitors. Must be verify_jwt = false in
 // config.toml.
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://budgard.com',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeadersFor, jsonResponder } from '../_shared/cors.ts';
 
 const STRIPE_PRICE_URL = 'https://api.stripe.com/v1/prices';
 
@@ -35,8 +32,14 @@ let cachedPlans: PlansResponse | null = null;
 let cachedAt = 0;
 
 Deno.serve(async (req) => {
+  // Let browsers reuse the answer for an hour; the client additionally keeps a
+  // longer-lived localStorage copy with its own fallback.
+  const jsonResponse = jsonResponder(req, {
+    'Cache-Control': 'public, max-age=3600',
+  });
+
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeadersFor(req) });
   }
 
   if (req.method !== 'GET') {
@@ -78,18 +81,6 @@ Deno.serve(async (req) => {
 });
 
 // --- Helpers ---
-
-const jsonResponse = (body: Record<string, unknown>, status: number) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: {
-      ...corsHeaders,
-      'Content-Type': 'application/json',
-      // Let browsers reuse the answer for an hour; the client additionally
-      // keeps a longer-lived localStorage copy with its own fallback.
-      'Cache-Control': 'public, max-age=3600',
-    },
-  });
 
 const fetchPrice = async (
   priceId: string,

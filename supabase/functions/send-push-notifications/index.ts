@@ -1,11 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import webpush from 'npm:web-push';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://budgard.com',
-  'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeadersFor } from '../_shared/cors.ts';
 
 type RecurringDue = {
   user_id: string;
@@ -109,6 +104,10 @@ const formatAmount = (amount: number, currency: string): string => {
 };
 
 Deno.serve(async (req) => {
+  // pg_cron sends no Origin header, so this resolves to the production origin
+  // exactly as the previous hardcoded value did.
+  const corsHeaders = corsHeadersFor(req);
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }

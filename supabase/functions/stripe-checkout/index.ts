@@ -1,14 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { corsHeadersFor, jsonResponder } from '../_shared/cors.ts';
 
 // Creates a Stripe (Managed Payments) subscription Checkout Session for the
 // authenticated user and returns its URL. The user's id travels in
 // subscription_data.metadata so the stripe-webhook function can attribute the
 // resulting subscription back to them.
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://budgard.com',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
 
 const STRIPE_API_URL = 'https://api.stripe.com/v1/checkout/sessions';
 
@@ -27,8 +23,10 @@ const ACTIVE_STATUSES = ['trialing', 'active', 'past_due'];
 const TRIAL_PERIOD_DAYS = 7;
 
 Deno.serve(async (req) => {
+  const jsonResponse = jsonResponder(req);
+
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeadersFor(req) });
   }
 
   try {
@@ -129,12 +127,6 @@ Deno.serve(async (req) => {
 });
 
 // --- Helpers ---
-
-const jsonResponse = (body: Record<string, unknown>, status: number) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });
 
 const readPlan = async (req: Request): Promise<Plan | null> => {
   try {
