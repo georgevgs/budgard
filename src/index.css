@@ -47,6 +47,11 @@
     --info-foreground: 0 0% 100%;
     --radius: 0.875rem;
 
+    /* Highlight that sweeps across skeleton placeholders. White in both
+       themes — it reads as light catching the surface — but far more
+       transparent on dark, where the muted block is already close to black. */
+    --skeleton-sheen: 0 0% 100% / 0.75;
+
     /* Floating dock geometry. Everything that sits at the bottom of the
        screen anchors to these, so the bar can be resized in one place. */
     --dock-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
@@ -106,6 +111,7 @@
     --warning-foreground: 38 92% 10%;
     --info: 213 94% 68%;
     --info-foreground: 213 94% 12%;
+    --skeleton-sheen: 0 0% 100% / 0.07;
 
     --glass-bg: 224 18% 13%;
     --glass-alpha: 0.62;
@@ -207,6 +213,18 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
+    }
+
+    /* A spinner is essential system status, not decoration — WCAG 2.3.3 only
+       asks us to drop non-essential motion. Freezing one leaves a stuck icon
+       on a saving button, which reads as a hung app, so slow it right down
+       instead of stopping it. Higher specificity than the blanket rule above,
+       so it wins even though both are !important.
+       The skeleton sheen genuinely IS decoration and stays frozen: reduced
+       motion users get a plain static placeholder block. */
+    .animate-spin {
+      animation-duration: 1.6s !important;
+      animation-iteration-count: infinite !important;
     }
   }
 
@@ -422,6 +440,45 @@
 
 .card-enter {
   animation: card-enter 220ms ease-out both;
+}
+
+/* Skeleton placeholder: a muted block with a highlight that sweeps across it,
+   the pattern Revolut/Airbnb use on mobile. Timing follows the eBay design
+   system spec — an 833ms left-to-right pass, then a 667ms rest before the
+   next one, so it reads as gentle breathing rather than a strobe.
+   833 / 1500 = 55.5%, which is where the sweep finishes and the pause starts. */
+@keyframes skeleton-sheen {
+  0% {
+    transform: translateX(-100%);
+  }
+  55.5%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* In the components layer so a caller can still override the background with
+   a plain Tailwind utility — utilities are emitted after components. */
+@layer components {
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: hsl(var(--muted));
+  }
+
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--skeleton-sheen)),
+      transparent
+    );
+    animation: skeleton-sheen 1500ms ease-in-out infinite;
+  }
 }
 
 /* Progress bars grow in from the left on mount. Applied to the track, so the

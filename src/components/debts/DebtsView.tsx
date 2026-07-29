@@ -12,6 +12,7 @@ import type { SimResult } from '@/lib/debtPayoff';
 import DebtsHeader from '@/components/debts/DebtsHeader';
 import DebtsEmpty from '@/components/debts/DebtsEmpty';
 import DebtsLoadingState from '@/components/debts/DebtsLoading';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import DebtCard from '@/components/debts/DebtCard';
 import DebtPayoffPlanner from '@/components/debts/DebtPayoffPlanner';
 import DebtForm from '@/components/debts/DebtForm';
@@ -52,8 +53,11 @@ const DebtsView = () => {
     setDetailDebt(undefined);
   }, []);
 
-  if (!isInitialized || !isSecondaryLoaded) {
-    return <DebtsLoadingState />;
+  const isLoading = !isInitialized || !isSecondaryLoaded;
+  const showSkeleton = useDelayedLoading(isLoading);
+
+  if (isLoading) {
+    return renderLoading(showSkeleton);
   }
 
   return (
@@ -94,6 +98,14 @@ const DebtsView = () => {
 export default DebtsView;
 
 // --- Helpers ---
+
+const renderLoading = (showSkeleton: boolean) => {
+  if (!showSkeleton) {
+    return null;
+  }
+
+  return <DebtsLoadingState />;
+};
 
 type TranslateFunction = (
   key: string,

@@ -84,7 +84,10 @@ const ExpensesPagination = ({
               <div
                 key={expense.id}
                 className="card-enter"
-                style={{ animationDelay: `${index * 40}ms` }}
+                // Capped like every other list in the app: an uncapped ramp
+                // makes a heavy day (a bulk CSV import) cascade for over a
+                // second, and the last rows read as lag rather than polish.
+                style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
               >
                 <ExpensesCard
                   expense={expense}

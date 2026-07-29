@@ -20,6 +20,7 @@ import {
 import { formatCurrency } from '@/lib/utils';
 import { calculateNextOccurrence, getMonthlyAmount } from '@/lib/recurring';
 import RecurringLoadingState from '@/components/recurring/RecurringLoading';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { useTranslation } from 'react-i18next';
 import { useIsPro } from '@/hooks/useIsPro';
 import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
@@ -103,9 +104,10 @@ const RecurringExpensesList = () => {
     (sum, item) => sum + getMonthlyAmount(item),
     0,
   );
+  const showSkeleton = useDelayedLoading(!isInitialized);
 
   if (!isInitialized) {
-    return <RecurringLoadingState />;
+    return renderLoading(showSkeleton);
   }
 
   return (
@@ -157,6 +159,14 @@ const RecurringExpensesList = () => {
 export default RecurringExpensesList;
 
 // ─── Helper render functions ──────────────────────────────────────────────────
+
+const renderLoading = (showSkeleton: boolean) => {
+  if (!showSkeleton) {
+    return null;
+  }
+
+  return <RecurringLoadingState />;
+};
 
 type TranslateFunction = (
   key: string,

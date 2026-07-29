@@ -4,6 +4,7 @@ import {
   saveDataSnapshot,
   clearDataSnapshot,
   getRecentCutoff,
+  isMonthPendingHistory,
   type DataSnapshot,
 } from '@/lib/dataCache';
 import type { Expense } from '@/types/Expense';
@@ -174,6 +175,24 @@ describe('dataCache', () => {
     const expected = new Date();
     expected.setMonth(expected.getMonth() - 12);
     expect(cutoff).toBe(expected.toISOString().split('T')[0]);
+  });
+
+  it('isMonthPendingHistory flags months at or before the cutoff month', () => {
+    const cutoffMonth = getRecentCutoff().slice(0, 7);
+    const monthBefore = new Date(`${cutoffMonth}-01T00:00:00Z`);
+    monthBefore.setUTCMonth(monthBefore.getUTCMonth() - 1);
+    const monthAfter = new Date(`${cutoffMonth}-01T00:00:00Z`);
+    monthAfter.setUTCMonth(monthAfter.getUTCMonth() + 1);
+
+    const toMonth = (date: Date) => date.toISOString().slice(0, 7);
+
+    expect(isMonthPendingHistory(toMonth(monthBefore))).toBe(true);
+    // The cutoff falls mid-month, so stage 1 covers only part of that month.
+    expect(isMonthPendingHistory(cutoffMonth)).toBe(true);
+    expect(isMonthPendingHistory(toMonth(monthAfter))).toBe(false);
+    expect(isMonthPendingHistory(new Date().toISOString().slice(0, 7))).toBe(
+      false,
+    );
   });
 
   it('clearDataSnapshot removes the stored snapshot', () => {

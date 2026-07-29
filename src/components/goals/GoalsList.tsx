@@ -12,6 +12,7 @@ import type { Goal } from '@/types/Goal';
 import GoalCard from '@/components/goals/GoalCard';
 import GoalForm from '@/components/goals/GoalForm';
 import GoalsLoadingState from '@/components/goals/GoalsLoading';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 
 const GoalsList = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -46,8 +47,11 @@ const GoalsList = () => {
     setSelectedGoal(undefined);
   };
 
-  if (!isInitialized || !isSecondaryLoaded) {
-    return <GoalsLoadingState />;
+  const isLoading = !isInitialized || !isSecondaryLoaded;
+  const showSkeleton = useDelayedLoading(isLoading);
+
+  if (isLoading) {
+    return renderLoading(showSkeleton);
   }
 
   return (
@@ -89,6 +93,14 @@ const GoalsList = () => {
 export default GoalsList;
 
 // --- Helpers ---
+
+const renderLoading = (showSkeleton: boolean) => {
+  if (!showSkeleton) {
+    return null;
+  }
+
+  return <GoalsLoadingState />;
+};
 
 type TranslateFunction = (
   key: string,

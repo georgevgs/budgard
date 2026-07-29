@@ -26,7 +26,11 @@
     "discardBody": "You have unsaved changes. Closing this form will throw them away.",
     "discardConfirm": "Discard",
     "refreshFailed": "Could not refresh your data.",
-    "back": "Back"
+    "back": "Back",
+    "loadingSection": "Loading {{section}}…",
+    "loadingApp": "Loading Budgard…",
+    "loadingSettings": "Loading settings…",
+    "loadingOlderTransactions": "Loading older transactions…"
   },
   "auth": {
     "signIn": "Sign In",

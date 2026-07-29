@@ -19,11 +19,14 @@ import IncomeFormDialog from '@/components/income/IncomeFormDialog';
 import NetCashFlowCard from '@/components/income/NetCashFlowCard';
 import FiftyThirtyTwentyRing from '@/components/income/FiftyThirtyTwentyRing';
 import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
+import PendingHistoryNotice from '@/components/common/PendingHistoryNotice';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
+import { isMonthPendingHistory } from '@/lib/dataCache';
 import type { Expense } from '@/types/Expense';
 
 const IncomeList = () => {
   const { t } = useTranslation();
-  const { isInitialized, defaultCurrency } = useDataConfig();
+  const { isInitialized, isHistoryLoaded, defaultCurrency } = useDataConfig();
   const { handleIncomeDelete } = useIncomeOps();
   const currentMonth = format(new Date(), 'yyyy-MM');
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
@@ -35,9 +38,10 @@ const IncomeList = () => {
   const { monthlyIncomes, filteredIncomes, monthlyTotal, monthlyExpenseTotal } =
     useMonthlyIncomes(selectedMonth, search);
   const animatedTotal = useAnimatedNumber(monthlyTotal);
+  const showSkeleton = useDelayedLoading(!isInitialized);
 
   if (!isInitialized) {
-    return <ExpenseLoadingState />;
+    return renderLoading(showSkeleton);
   }
 
   return (
@@ -76,16 +80,17 @@ const IncomeList = () => {
         </div>
 
         <div className="space-y-2">
-          {renderIncomeContent(
+          {renderIncomeContent({
             filteredIncomes,
             monthlyIncomes,
             search,
             selectedMonth,
-            formState.handleAddClick,
-            formState.handleIncomeEdit,
-            handleIncomeDelete,
+            isHistoryPending: !isHistoryLoaded,
+            onAddClick: formState.handleAddClick,
+            onEdit: formState.handleIncomeEdit,
+            onDelete: handleIncomeDelete,
             t,
-          )}
+          })}
         </div>
       </div>
 
@@ -116,6 +121,14 @@ const IncomeList = () => {
 export default IncomeList;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const renderLoading = (showSkeleton: boolean) => {
+  if (!showSkeleton) {
+    return null;
+  }
+
+  return <ExpenseLoadingState section="income" />;
+};
 
 type TranslateFunction = (
   key: string,
@@ -153,17 +166,36 @@ const renderIncomeCount = (count: number, t: TranslateFunction) => {
   );
 };
 
-const renderIncomeContent = (
-  filteredIncomes: Expense[],
-  monthlyIncomes: Expense[],
-  search: string,
-  selectedMonth: string,
-  onAddClick: () => void,
-  onEdit: (income: Expense) => void,
-  onDelete: (id: string) => void,
-  t: TranslateFunction,
-) => {
+type IncomeContentArgs = {
+  filteredIncomes: Expense[];
+  monthlyIncomes: Expense[];
+  search: string;
+  selectedMonth: string;
+  isHistoryPending: boolean;
+  onAddClick: () => void;
+  onEdit: (income: Expense) => void;
+  onDelete: (id: string) => void;
+  t: TranslateFunction;
+};
+
+const renderIncomeContent = ({
+  filteredIncomes,
+  monthlyIncomes,
+  search,
+  selectedMonth,
+  isHistoryPending,
+  onAddClick,
+  onEdit,
+  onDelete,
+  t,
+}: IncomeContentArgs) => {
   if (monthlyIncomes.length === 0) {
+    // Months older than the stage-1 window are still streaming in — telling
+    // the user to add income they may already have would be wrong.
+    if (isHistoryPending && isMonthPendingHistory(selectedMonth)) {
+      return <PendingHistoryNotice />;
+    }
+
     return <IncomeEmpty selectedMonth={selectedMonth} onAddClick={onAddClick} />;
   }
 

@@ -37,6 +37,10 @@ import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
 import GoalsLoadingState from '@/components/goals/GoalsLoading';
 import NetWorthLoadingState from '@/components/networth/NetWorthLoading';
 import DebtsLoadingState from '@/components/debts/DebtsLoading';
+import SettingsLoadingState from '@/components/settings/SettingsLoading';
+import LandingLoadingState from '@/components/landing/LandingLoading';
+import LegalLoadingState from '@/pages/legal/LegalLoading';
+import DelayedFallback from '@/components/ui/delayed-fallback';
 import { lazyWithRetry } from '@/lib/lazyWithRetry';
 
 // Lazy load route-level components with retry on chunk failure
@@ -73,21 +77,18 @@ const OnboardingFlow = lazyWithRetry(
 );
 
 // ============================================================================
-// Loading Component
+// Route Fallbacks
 // ============================================================================
 
-const LoadingSpinner = () => {
-  const { t } = useTranslation();
-
-  return (
-    <div className="min-h-dvh bg-background flex items-center justify-center">
-      <div className="flex flex-col items-center gap-2" role="status">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-        <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
-      </div>
-    </div>
-  );
-};
+// Every route waits behind a skeleton shaped like the screen it is about to
+// become — never a centred spinner, which tells the user nothing about where
+// they are heading and reads as slower than the same wait spent on a skeleton.
+// DelayedFallback holds each one back ~200ms so a route whose chunk is already
+// in cache (the common case, thanks to useIdleTabPrefetch) swaps straight to
+// content instead of flashing a placeholder for two frames.
+const renderRouteFallback = (skeleton: ReactNode) => (
+  <DelayedFallback>{skeleton}</DelayedFallback>
+);
 
 // ============================================================================
 // Layout Components
@@ -230,8 +231,15 @@ const useIdleTabPrefetch = () => {
   }, []);
 };
 
+// The legal pages land here with no closer Suspense boundary, so the prose
+// skeleton is their fallback. PublicRoute nests its own boundary inside for
+// the landing page, which is a different shape entirely.
 const PublicLayout = ({ children }: { children: ReactNode }) => (
-  <main className="flex-1">{children}</main>
+  <main className="flex-1">
+    <Suspense fallback={renderRouteFallback(<LegalLoadingState />)}>
+      {children}
+    </Suspense>
+  </main>
 );
 
 // ============================================================================
@@ -256,7 +264,7 @@ const PublicRoute = () => {
   const { session, isLoading } = useAuth();
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <LandingLoadingState />;
   }
 
   if (session) {
@@ -265,7 +273,9 @@ const PublicRoute = () => {
 
   return (
     <PublicLayout>
-      <LandingPage />
+      <Suspense fallback={renderRouteFallback(<LandingLoadingState />)}>
+        <LandingPage />
+      </Suspense>
     </PublicLayout>
   );
 };
@@ -325,7 +335,7 @@ const MainTabsLayout = () => {
         '/income',
         pathname,
         visited,
-        <ExpenseLoadingState />,
+        <ExpenseLoadingState section="income" />,
         <IncomeList />,
       )}
       {renderKeepAliveTab(
@@ -359,7 +369,7 @@ const renderKeepAliveTab = (
 
   return (
     <div key={tabPath} hidden={!isActive}>
-      <Suspense fallback={fallback}>{element}</Suspense>
+      <Suspense fallback={renderRouteFallback(fallback)}>{element}</Suspense>
     </div>
   );
 };
@@ -454,7 +464,11 @@ const App = () => {
     <BrowserRouter>
       <div className="min-h-dvh bg-background flex flex-col">
         <ErrorBoundary>
-          <Suspense fallback={<LoadingSpinner />}>
+          {/* Last-resort net. Every route below now has a closer boundary with
+              a fallback shaped like its own screen, so this only catches a
+              lazy import nobody wrapped — the app shell is the safest guess
+              when we don't yet know which screen is coming. */}
+          <Suspense fallback={renderRouteFallback(<AppLoadingSkeleton />)}>
             <Routes>
               {/* Public route */}
               <Route path="/" element={<PublicRoute />} />
@@ -505,7 +519,9 @@ const App = () => {
                       titleKey="pro.gate.goalsTitle"
                       descriptionKey="pro.gate.goalsBody"
                     >
-                      <Suspense fallback={<GoalsLoadingState />}>
+                      <Suspense
+                        fallback={renderRouteFallback(<GoalsLoadingState />)}
+                      >
                         <GoalsList />
                       </Suspense>
                     </ProRoute>
@@ -514,7 +530,9 @@ const App = () => {
                 <Route
                   path="/networth"
                   element={
-                    <Suspense fallback={<NetWorthLoadingState />}>
+                    <Suspense
+                      fallback={renderRouteFallback(<NetWorthLoadingState />)}
+                    >
                       <NetWorthView />
                     </Suspense>
                   }
@@ -522,7 +540,9 @@ const App = () => {
                 <Route
                   path="/debts"
                   element={
-                    <Suspense fallback={<DebtsLoadingState />}>
+                    <Suspense
+                      fallback={renderRouteFallback(<DebtsLoadingState />)}
+                    >
                       <DebtsView />
                     </Suspense>
                   }
@@ -530,7 +550,9 @@ const App = () => {
                 <Route
                   path="/settings"
                   element={
-                    <Suspense fallback={<LoadingSpinner />}>
+                    <Suspense
+                      fallback={renderRouteFallback(<SettingsLoadingState />)}
+                    >
                       <SettingsView />
                     </Suspense>
                   }

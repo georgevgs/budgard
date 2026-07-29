@@ -9,6 +9,7 @@ import { useExpenseTotals } from '@/hooks/expensesList/useExpenseTotals';
 import { useExpenseFormState } from '@/hooks/expensesList/useExpenseFormState';
 import { useOpenFormFromUrl } from '@/hooks/expensesList/useOpenFormFromUrl';
 import { useExpensesFilter } from '@/hooks/useExpensesFilter';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import SpeedDial from '@/components/layout/SpeedDial';
 import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
 import ExpensesOverviewSection from '@/components/expenses/ExpensesOverviewSection';
@@ -26,7 +27,7 @@ const CsvImportDialog = lazyWithRetry(
 
 const ExpensesList = () => {
   const templates = useTemplatesData();
-  const { isInitialized, defaultCurrency } = useDataConfig();
+  const { isInitialized, isHistoryLoaded, defaultCurrency } = useDataConfig();
   const { handleTemplateDelete } = useTemplateOps();
   const formState = useExpenseFormState();
   const [isDashboardVisible, setIsDashboardVisible] = useState(false);
@@ -53,8 +54,12 @@ const ExpensesList = () => {
 
   useExpenseAlerts({ selectedMonth, currentMonth, monthlyTotal });
 
+  // Boot usually hydrates from the local snapshot in well under a frame, so
+  // the skeleton is held back briefly rather than flashed and yanked away.
+  const showSkeleton = useDelayedLoading(!isInitialized);
+
   if (!isInitialized) {
-    return <ExpenseLoadingState />;
+    return renderLoading(showSkeleton);
   }
 
   return (
@@ -93,6 +98,7 @@ const ExpensesList = () => {
         <ExpensesContent
           filter={filter}
           selectedMonth={selectedMonth}
+          isHistoryPending={!isHistoryLoaded}
           onAddClick={formState.openNewExpenseForm}
           onEdit={formState.handleExpenseEdit}
           onDelete={handleExpenseDelete}
@@ -122,6 +128,14 @@ const ExpensesList = () => {
 export default ExpensesList;
 
 // --- Helpers ---
+
+const renderLoading = (showSkeleton: boolean) => {
+  if (!showSkeleton) {
+    return null;
+  }
+
+  return <ExpenseLoadingState />;
+};
 
 const renderImportDialog = (open: boolean, onClose: () => void) => {
   if (!open) {

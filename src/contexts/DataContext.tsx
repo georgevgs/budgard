@@ -101,6 +101,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   // refetches, so /goals, /networth and /debts don't blank on foreground
   // visibility refreshes.
   const [isSecondaryLoaded, setIsSecondaryLoaded] = useState(false);
+  // Sticky in the same way: once the pre-cutoff tail is in state it stays
+  // there for the session, so a foreground refetch never re-opens the
+  // "loading older transactions" placeholder.
+  const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
 
   // Expose latest data via refs so handlers can read it inside async callbacks
   // without subscribing to context updates (keeps useDataOperations stable).
@@ -201,6 +205,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       if (stage2AlreadyDone) {
         // The pre-cutoff tail already lives in state; a plain replace with
         // the recent window would wipe it until the next boot.
+        setIsHistoryLoaded(true);
         setExpenses((prev) =>
           replaceRecentWindow(prev, expensesData, recentCutoff),
         );
@@ -271,6 +276,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
               return;
             }
             stage2DoneForUserRef.current = session.user.id;
+            setIsHistoryLoaded(true);
             // Dedupe by id: if a refreshExpenses/refreshIncomes ran
             // concurrently (e.g. user deleted a recurring expense,
             // bulk-imported, or rolled back a category delete) it will have
@@ -287,6 +293,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
             if (isAbortError(error) || isExpiredJwtError(error)) {
               return;
             }
+            // Resolve the flag even on failure. The tail isn't here and won't
+            // be until the next boot, so screens should fall back to their
+            // normal empty state rather than promise data that isn't coming.
+            setIsHistoryLoaded(true);
             Sentry.captureException(error, {
               tags: { context: 'fetchOlderTransactions' },
             });
@@ -473,6 +483,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       bootedUserIdRef.current = null;
       stage2DoneForUserRef.current = null;
       hydratedFromCacheRef.current = false;
+      setIsHistoryLoaded(false);
       // Never leave financial data behind on a shared device after sign-out.
       clearDataSnapshot();
       abortControllerRef.current?.abort();
@@ -660,6 +671,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     () => ({
       isInitialized,
       isSecondaryLoaded,
+      isHistoryLoaded,
       monthlyBudget,
       defaultCurrency,
       defaultSavingsPct,
@@ -669,6 +681,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     [
       isInitialized,
       isSecondaryLoaded,
+      isHistoryLoaded,
       monthlyBudget,
       defaultCurrency,
       defaultSavingsPct,

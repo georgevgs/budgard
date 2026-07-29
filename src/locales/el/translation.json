@@ -26,7 +26,11 @@
     "discardBody": "Έχετε μη αποθηκευμένες αλλαγές. Αν κλείσετε τη φόρμα, θα χαθούν.",
     "discardConfirm": "Απόρριψη",
     "refreshFailed": "Δεν ήταν δυνατή η ανανέωση των δεδομένων.",
-    "back": "Πίσω"
+    "back": "Πίσω",
+    "loadingSection": "Φόρτωση — {{section}}…",
+    "loadingApp": "Φόρτωση Budgard…",
+    "loadingSettings": "Φόρτωση ρυθμίσεων…",
+    "loadingOlderTransactions": "Φόρτωση παλαιότερων κινήσεων…"
   },
   "auth": {
     "signIn": "Σύνδεση",

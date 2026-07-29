@@ -79,6 +79,16 @@ export const getRecentCutoff = (): string => {
   return cutoff.toISOString().split('T')[0];
 };
 
+// True when a YYYY-MM month's rows only arrive with the stage-2 history
+// top-up, so an empty view means "not here yet" rather than "nothing here".
+// The cutoff month itself counts as pending: the cutoff falls mid-month, so
+// stage 1 covers only part of it. Erring this way costs one extra month of
+// placeholder during the couple of seconds stage 2 is in flight, where the
+// other direction would show a month as empty while rows were still landing.
+export const isMonthPendingHistory = (month: string): boolean => {
+  return month <= getRecentCutoff().slice(0, 7);
+};
+
 export const loadDataSnapshot = (userId: string): DataSnapshot | null => {
   try {
     const raw = localStorage.getItem(CACHE_KEY);

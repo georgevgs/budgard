@@ -18,6 +18,7 @@ import type { AccountBalance } from '@/types/AccountBalance';
 import NetWorthHeader from '@/components/networth/NetWorthHeader';
 import NetWorthEmpty from '@/components/networth/NetWorthEmpty';
 import NetWorthLoadingState from '@/components/networth/NetWorthLoading';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import NetWorthChart from '@/components/networth/NetWorthChart';
 import InvestmentAllocationCard from '@/components/networth/InvestmentAllocationCard';
 import AccountGroup from '@/components/networth/AccountGroup';
@@ -71,8 +72,11 @@ const NetWorthView = () => {
     setDetailAccount(undefined);
   }, []);
 
-  if (!isInitialized || !isSecondaryLoaded) {
-    return <NetWorthLoadingState />;
+  const isLoading = !isInitialized || !isSecondaryLoaded;
+  const showSkeleton = useDelayedLoading(isLoading);
+
+  if (isLoading) {
+    return renderLoading(showSkeleton);
   }
 
   return (
@@ -116,6 +120,14 @@ const NetWorthView = () => {
 export default NetWorthView;
 
 // --- Helpers ---
+
+const renderLoading = (showSkeleton: boolean) => {
+  if (!showSkeleton) {
+    return null;
+  }
+
+  return <NetWorthLoadingState />;
+};
 
 type TranslateFunction = (
   key: string,

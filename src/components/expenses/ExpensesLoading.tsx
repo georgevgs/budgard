@@ -1,84 +1,129 @@
+import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
+import LoadingScreen from '@/components/ui/loading-screen';
+
+type Section = 'expenses' | 'income';
+
+type Props = {
+  section?: Section;
+};
 
 // Full-page skeleton shown during the auth check phase so users never
 // see a spinner — the skeleton is visible from the very first frame.
-export const AppLoadingSkeleton = () => (
-  <div className="min-h-dvh bg-background flex flex-col">
-    {/* Header */}
-    <div className="sticky top-0 z-50 w-full border-b bg-background">
-      <div className="container flex h-14 items-center justify-between px-4">
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-7 w-7 rounded-md" />
-          <Skeleton className="h-5 w-20" />
-        </div>
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-8 w-8 rounded-md" />
-          <Skeleton className="h-8 w-8 rounded-md" />
-          <Skeleton className="h-8 w-8 rounded-md" />
-        </div>
-      </div>
-    </div>
+export const AppLoadingSkeleton = () => {
+  const { t } = useTranslation();
 
-    {/* Content */}
-    <main className="flex-1 pt-2 pb-[var(--dock-inset)]">
-      <ExpenseLoadingState />
-    </main>
-
-    {/* Nav tabs */}
-    <div className="fixed inset-x-[var(--dock-edge)] bottom-[var(--dock-bottom)] pr-[var(--dock-action-slot)]">
-      <div className="glass-capsule flex h-[var(--dock-height)] items-stretch p-1">
-        {[0, 1, 2, 3].map((i) => (
-          <div
-            key={`nav-${i}`}
-            className="flex flex-1 flex-col items-center justify-center gap-1"
-          >
-            <Skeleton className="h-5 w-5 rounded-sm" />
-            <Skeleton className="h-2 w-10" />
+  return (
+    <LoadingScreen
+      label={t('common.loadingApp')}
+      className="min-h-dvh bg-background flex flex-col"
+    >
+      {/* Header */}
+      <div className="sticky top-0 z-50 w-full border-b bg-background">
+        <div className="container flex h-14 items-center justify-between px-4">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-7 w-7 rounded-md" />
+            <Skeleton className="h-5 w-20" />
           </div>
-        ))}
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-8 w-8 rounded-md" />
+            <Skeleton className="h-8 w-8 rounded-md" />
+            <Skeleton className="h-8 w-8 rounded-md" />
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-);
+
+      {/* Content */}
+      <main className="flex-1 pt-2 pb-[var(--dock-inset)]">
+        {renderTransactionsBody()}
+      </main>
+
+      {/* Nav tabs */}
+      <div className="fixed inset-x-[var(--dock-edge)] bottom-[var(--dock-bottom)] pr-[var(--dock-action-slot)]">
+        <div className="glass-capsule flex h-[var(--dock-height)] items-stretch p-1">
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={`nav-${i}`}
+              className="flex flex-1 flex-col items-center justify-center gap-1"
+            >
+              <Skeleton className="h-5 w-5 rounded-sm" />
+              <Skeleton className="h-2 w-10" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </LoadingScreen>
+  );
+};
 
 // Mirrors the exact structure of the expenses page so the transition
 // from skeleton → real content feels seamless rather than jarring.
-export const ExpenseLoadingState = () => {
+// Income reuses it — the two lists share a layout — and only differs in
+// what gets announced to assistive tech.
+export const ExpenseLoadingState = ({ section = 'expenses' }: Props) => {
+  const { t } = useTranslation();
+
   return (
-    <div className="flex flex-col min-h-[calc(100dvh-4rem-env(safe-area-inset-top)-var(--dock-inset))]">
-      <div className="container max-w-4xl mx-auto px-4 pt-4 pb-4 space-y-3">
-        {/* Monthly selector */}
-        <div className="flex items-center justify-between px-1">
-          <Skeleton className="h-8 w-8 rounded-full" />
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-8 w-8 rounded-full" />
-        </div>
-
-        {/* Monthly overview card */}
-        <div className="rounded-2xl border border-border/50 p-4 space-y-3">
-          <Skeleton className="h-3 w-24" />
-          <Skeleton className="h-8 w-36" />
-          <div className="grid grid-cols-2 gap-4 pt-2 border-t">
-            <div className="space-y-1.5">
-              <Skeleton className="h-3 w-20" />
-              <Skeleton className="h-5 w-10" />
-            </div>
-            <div className="space-y-1.5">
-              <Skeleton className="h-3 w-24" />
-              <Skeleton className="h-5 w-16" />
-            </div>
-          </div>
-        </div>
-
-        {/* Search bar */}
-        <Skeleton className="h-10 w-full rounded-lg" />
-
-        {/* Expense card skeletons — varying widths feel natural */}
-        {renderSkeletonCards()}
-      </div>
-    </div>
+    <LoadingScreen
+      label={t('common.loadingSection', {
+        section: resolveSectionName(section, t),
+      })}
+      className="flex flex-col min-h-[calc(100dvh-4rem-env(safe-area-inset-top)-var(--dock-inset))]"
+    >
+      {renderTransactionsBody()}
+    </LoadingScreen>
   );
 };
+
+// --- Helpers ---
+
+type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
+const resolveSectionName = (section: Section, t: TranslateFunction): string => {
+  if (section === 'income') {
+    return t('navigation.income');
+  }
+
+  return t('navigation.expenses');
+};
+
+// Shared by both exports above. Kept announcement-free so AppLoadingSkeleton
+// can wrap it in a single live region instead of nesting two.
+const renderTransactionsBody = () => (
+  <div className="container max-w-4xl mx-auto px-4 pt-4 pb-4 space-y-3">
+    {/* Monthly selector */}
+    <div className="flex items-center justify-between px-1">
+      <Skeleton className="h-8 w-8 rounded-full" />
+      <Skeleton className="h-4 w-32" />
+      <Skeleton className="h-8 w-8 rounded-full" />
+    </div>
+
+    {/* Monthly overview card */}
+    <div className="rounded-2xl border border-border/50 p-4 space-y-3">
+      <Skeleton className="h-3 w-24" />
+      <Skeleton className="h-8 w-36" />
+      <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+        <div className="space-y-1.5">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="h-5 w-10" />
+        </div>
+        <div className="space-y-1.5">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-5 w-16" />
+        </div>
+      </div>
+    </div>
+
+    {/* Search bar */}
+    <Skeleton className="h-10 w-full rounded-lg" />
+
+    {/* Expense card skeletons — varying widths feel natural */}
+    {renderSkeletonCards()}
+  </div>
+);
 
 const SKELETON_ROWS = [
   { desc: 'w-2/5', badge: 'w-20', amount: 'w-14' },

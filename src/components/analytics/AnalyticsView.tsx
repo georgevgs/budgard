@@ -6,6 +6,7 @@ import {
   useExpensesData,
 } from '@/contexts/DataContext';
 import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import AnalyticsEmpty from '@/components/analytics/AnalyticsEmpty';
 import SpendingInsights from '@/components/analytics/SpendingInsights';
 import CategorySparkline from '@/components/analytics/CategorySparkline';
@@ -37,9 +38,10 @@ const AnalyticsView = () => {
     analytics.yearExpenses,
     analytics.selectedYear,
   );
+  const showSkeleton = useDelayedLoading(!isInitialized);
 
   if (!isInitialized) {
-    return <AnalyticsLoadingState />;
+    return renderLoading(showSkeleton);
   }
 
   // First run: a wall of zeroed charts explains nothing — point the user
@@ -111,6 +113,14 @@ const AnalyticsView = () => {
 export default AnalyticsView;
 
 // ─── Helper render functions ──────────────────────────────────────────────────
+
+const renderLoading = (showSkeleton: boolean) => {
+  if (!showSkeleton) {
+    return null;
+  }
+
+  return <AnalyticsLoadingState />;
+};
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import {
   Dialog,
   DialogContent,
@@ -8,6 +7,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useReceiptUrl } from '@/hooks/useReceiptUrl';
 
 type ReceiptViewerProps = {
@@ -45,7 +45,7 @@ const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
           </DialogHeader>
 
           <div className="flex items-center justify-center min-h-[200px] mt-4">
-            {renderLoadingState(isLoading)}
+            {renderLoadingState(isLoading, t)}
             {renderErrorState(hasError, t)}
             {renderReceiptImage(url, hasError, () => setImageFailed(true), t)}
           </div>
@@ -61,13 +61,19 @@ export default ReceiptViewer;
 
 type TranslateFunction = (key: string) => string;
 
-const renderLoadingState = (loading: boolean) => {
+// An image arriving is content loading, not a system operation, so it gets a
+// placeholder in the receipt's own shape rather than a spinner. Portrait
+// aspect, because that is what a photographed till receipt looks like.
+const renderLoadingState = (loading: boolean, t: TranslateFunction) => {
   if (!loading) return null;
 
   return (
-    <div className="animate-spin">
-      <Loader2 className="h-8 w-8 text-muted-foreground" />
-    </div>
+    <>
+      <span role="status" className="sr-only">
+        {t('receipt.receiptImage')}
+      </span>
+      <Skeleton className="h-[320px] w-full max-w-[240px] rounded-xl" />
+    </>
   );
 };
 
