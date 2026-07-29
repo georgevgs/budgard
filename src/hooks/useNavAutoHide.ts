@@ -35,7 +35,7 @@ export const useNavAutoHide = (pathname: string): void => {
       // direction of travel.
       if (currentY <= HIDE_THRESHOLD_PX || isAtBottomOfPage(currentY)) {
         lastY = currentY;
-        document.body.removeAttribute(HIDDEN_ATTRIBUTE);
+        setHidden(false);
 
         return;
       }
@@ -45,14 +45,7 @@ export const useNavAutoHide = (pathname: string): void => {
       if (Math.abs(delta) < DIRECTION_DELTA_PX) return;
 
       lastY = currentY;
-
-      if (delta > 0) {
-        document.body.setAttribute(HIDDEN_ATTRIBUTE, 'true');
-
-        return;
-      }
-
-      document.body.removeAttribute(HIDDEN_ATTRIBUTE);
+      setHidden(delta > 0);
     };
 
     const handleScroll = () => {
@@ -77,6 +70,21 @@ export const useNavAutoHide = (pathname: string): void => {
 };
 
 // --- Helpers ---
+
+// Scroll fires many times a second at both ends of a page, so only touch the
+// DOM when the state actually flips — an attribute write invalidates the
+// :has() rules that drive the dock.
+const setHidden = (next: boolean): void => {
+  if (next === document.body.hasAttribute(HIDDEN_ATTRIBUTE)) return;
+
+  if (next) {
+    document.body.setAttribute(HIDDEN_ATTRIBUTE, 'true');
+
+    return;
+  }
+
+  document.body.removeAttribute(HIDDEN_ATTRIBUTE);
+};
 
 const isAtBottomOfPage = (currentY: number): boolean => {
   const pageHeight = document.documentElement.scrollHeight;

@@ -55,7 +55,7 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
 
       <div
         data-dock-action
-        className="fixed bottom-[var(--dock-bottom)] right-4 z-50 flex flex-col items-end gap-2 pointer-events-none"
+        className="fixed bottom-[var(--dock-bottom)] right-[var(--dock-edge)] z-50 flex flex-col items-end gap-2 pointer-events-none"
       >
         {/* Action Buttons */}
         <div

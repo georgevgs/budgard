@@ -53,6 +53,12 @@
     --dock-height: 3.5rem;
     --dock-clearance: calc(var(--dock-bottom) + var(--dock-height));
     --dock-action-slot: 4.25rem;
+    /* Phone-first: 1rem from each edge. Past ~32rem the dock stops stretching
+       and centres instead, so it never spans a tablet or desktop window while
+       the content column stays capped. Nav and action button both anchor to
+       this, which is what keeps them on one baseline at every width. */
+    --dock-max-width: 30rem;
+    --dock-edge: max(1rem, calc((100% - var(--dock-max-width)) / 2));
     /* How far content must clear the dock: its exact footprint plus a little
        air, the way a scroll view insets for an overlaying tab bar. This is the
        ONLY bottom padding a page should carry — routes must not add their own
@@ -282,24 +288,22 @@
 
   /* Auto-hide. Capsule and action button live in different React trees, so a
      body attribute is what moves them as a single object. Both travel the same
-     distance so they never separate on the way out. */
-  .nav-dock {
-    transition:
-      transform 320ms cubic-bezier(0.4, 0, 0.2, 1),
-      opacity 200ms ease,
-      padding-right 320ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
+     distance so they never separate on the way out.
 
+     Transform only. `padding-right` is deliberately NOT transitioned — it is a
+     layout property, so animating it relaid out the capsule and all four tabs
+     every frame; the route's view transition already covers that change. And
+     opacity is left alone because fading a backdrop-filter surface makes the
+     blur drop out mid-flight, revealing sharp content behind it. Sliding fully
+     off-screen is enough. */
+  .nav-dock,
   [data-dock-action] {
-    transition:
-      transform 320ms cubic-bezier(0.4, 0, 0.2, 1),
-      opacity 200ms ease;
+    transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   body[data-nav-hidden='true'] .nav-dock,
   body[data-nav-hidden='true'] [data-dock-action] {
     transform: translateY(calc(var(--dock-height) + var(--dock-bottom)));
-    opacity: 0;
   }
 
   body[data-nav-hidden='true'] .nav-scrim {
@@ -316,7 +320,6 @@
     )
     :is(.nav-dock, [data-dock-action]) {
     transform: none;
-    opacity: 1;
   }
 
   /* One indicator that travels between tabs. The overshoot curve is what
@@ -339,17 +342,20 @@
 
   /* Content dissolves toward the bottom edge rather than colliding with
      the dock, the way iOS fades content under a floating tab bar. */
+  /* Height is exactly the dock footprint so the gradient reaches full
+     transparency at the capsule's top edge. Taller than that and the fade
+     bleeds upward, greying out the last card in the list. */
   .nav-scrim {
     position: fixed;
     inset: auto 0 0 0;
-    height: calc(var(--dock-clearance) + 2.5rem);
+    height: var(--dock-clearance);
     pointer-events: none;
     z-index: 30;
     transition: opacity 320ms ease;
     background: linear-gradient(
       to top,
-      hsl(var(--background)) 12%,
-      hsl(var(--background) / 0.75) 42%,
+      hsl(var(--background)) 25%,
+      hsl(var(--background) / 0.6) 60%,
       hsl(var(--background) / 0) 100%
     );
   }

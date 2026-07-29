@@ -46,7 +46,7 @@ const NavTabs = () => {
 
   return (
     <nav
-      className="nav-dock pointer-events-none fixed inset-x-4 bottom-[var(--dock-bottom)] z-50"
+      className="nav-dock pointer-events-none fixed inset-x-[var(--dock-edge)] bottom-[var(--dock-bottom)] z-50"
       aria-label={t('navigation.ariaLabel')}
     >
       <div className="glass-capsule pointer-events-auto relative flex h-[var(--dock-height)] items-stretch p-1">

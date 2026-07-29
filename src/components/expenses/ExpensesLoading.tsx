@@ -25,7 +25,7 @@ export const AppLoadingSkeleton = () => (
     </main>
 
     {/* Nav tabs */}
-    <div className="fixed inset-x-4 bottom-[var(--dock-bottom)] pr-[var(--dock-action-slot)]">
+    <div className="fixed inset-x-[var(--dock-edge)] bottom-[var(--dock-bottom)] pr-[var(--dock-action-slot)]">
       <div className="glass-capsule flex h-[var(--dock-height)] items-stretch p-1">
         {[0, 1, 2, 3].map((i) => (
           <div
