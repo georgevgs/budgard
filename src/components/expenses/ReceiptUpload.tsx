@@ -61,7 +61,7 @@ const ReceiptUpload = ({
             type="button"
             variant="ghost"
             size="icon"
-            className="h-10 w-10 flex-shrink-0"
+            className="h-10 w-10 shrink-0"
             onClick={handleClear}
             aria-label={t('receipt.removeReceipt')}
           >

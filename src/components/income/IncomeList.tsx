@@ -103,7 +103,7 @@ const IncomeList = () => {
       {/* FAB */}
       <div
         data-dock-action
-        className="fixed bottom-[var(--dock-bottom)] right-[var(--dock-edge)] z-50"
+        className="fixed bottom-(--dock-bottom) right-(--dock-edge) z-50"
       >
         <Button
           size="icon"

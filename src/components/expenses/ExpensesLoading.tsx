@@ -34,13 +34,13 @@ export const AppLoadingSkeleton = () => {
       </div>
 
       {/* Content */}
-      <main className="flex-1 pt-2 pb-[var(--dock-inset)]">
+      <main className="flex-1 pt-2 pb-(--dock-inset)">
         {renderTransactionsBody()}
       </main>
 
       {/* Nav tabs */}
-      <div className="fixed inset-x-[var(--dock-edge)] bottom-[var(--dock-bottom)] pr-[var(--dock-action-slot)]">
-        <div className="glass-capsule flex h-[var(--dock-height)] items-stretch p-1">
+      <div className="fixed inset-x-(--dock-edge) bottom-(--dock-bottom) pr-(--dock-action-slot)">
+        <div className="glass-capsule flex h-(--dock-height) items-stretch p-1">
           {[0, 1, 2, 3].map((i) => (
             <div
               key={`nav-${i}`}

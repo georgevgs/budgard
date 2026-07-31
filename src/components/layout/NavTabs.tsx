@@ -46,10 +46,10 @@ const NavTabs = () => {
 
   return (
     <nav
-      className="nav-dock pointer-events-none fixed inset-x-[var(--dock-edge)] bottom-[var(--dock-bottom)] z-50"
+      className="nav-dock pointer-events-none fixed inset-x-(--dock-edge) bottom-(--dock-bottom) z-50"
       aria-label={t('navigation.ariaLabel')}
     >
-      <div className="glass-capsule pointer-events-auto relative flex h-[var(--dock-height)] items-stretch p-1">
+      <div className="glass-capsule pointer-events-auto relative flex h-(--dock-height) items-stretch p-1">
         {renderIndicator(getActiveIndex(pathname, tabs), tabs.length)}
         {tabs.map((tab) => renderTab(tab))}
       </div>

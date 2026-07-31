@@ -7,9 +7,34 @@ import { describe, it, expect, afterEach } from 'vitest';
  * a single CSS rule in index.css. Reading the selector straight out of the
  * stylesheet keeps this test honest — it can't drift from what ships.
  */
-const readDockSlotSelector = (): string => {
+/**
+ * Tailwind 4 defines the capsule as `@utility nav-dock`, so inside that block
+ * the class is written as `&`. Resolve it back to `.nav-dock` before asserting,
+ * so these tests keep checking the selector that actually ships rather than the
+ * authoring shorthand.
+ */
+const readCss = (): string => {
   const css = readFileSync(resolve(process.cwd(), 'src/index.css'), 'utf8');
-  const rule = css.match(/(body:has\([^{]*?\)\s*\.nav-dock)\s*\{/);
+  const start = css.indexOf('@utility nav-dock {');
+
+  if (start === -1) {
+    throw new Error('@utility nav-dock block not found in src/index.css');
+  }
+
+  // Inner rules are indented, so the first newline-brace closes the block.
+  const end = css.indexOf('\n}', start);
+
+  if (end === -1) {
+    throw new Error('@utility nav-dock block is unterminated in src/index.css');
+  }
+
+  const block = css.slice(start, end).replace(/&/g, '.nav-dock');
+
+  return css.slice(0, start) + block + css.slice(end);
+};
+
+const readDockSlotSelector = (): string => {
+  const rule = readCss().match(/(body:has\([^{]*?\)\s*\.nav-dock)\s*\{/);
 
   if (rule === null) {
     throw new Error('Dock action slot rule not found in src/index.css');
@@ -19,9 +44,6 @@ const readDockSlotSelector = (): string => {
 };
 
 const SELECTOR = readDockSlotSelector();
-
-const readCss = (): string =>
-  readFileSync(resolve(process.cwd(), 'src/index.css'), 'utf8');
 
 const isSlotReserved = () => document.querySelector(SELECTOR) !== null;
 

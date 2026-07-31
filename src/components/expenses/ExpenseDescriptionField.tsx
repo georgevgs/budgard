@@ -46,13 +46,13 @@ const ExpenseDescriptionField = ({ form, suggestions }: Props) => {
                   }}
                   onFocus={() => suggestions.setSuggestionsOpen(true)}
                   autoComplete="off"
-                  className="overflow-ellipsis"
+                  className="text-ellipsis"
                   aria-label={t('expenses.descriptionLabel')}
                 />
               </FormControl>
             </PopoverAnchor>
             <PopoverContent
-              className="w-[var(--radix-popover-trigger-width)] p-0"
+              className="w-(--radix-popover-trigger-width) p-0"
               align="start"
               onOpenAutoFocus={(e) => e.preventDefault()}
               onInteractOutside={() => suggestions.setSuggestionsOpen(false)}

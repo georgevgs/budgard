@@ -137,7 +137,6 @@ const BLOCKED_DOMAINS = [
 ];
 
 export const emailSchema = z
-  .string()
   .email('validation.emailInvalid')
   .refine(
     (email) => {
@@ -192,7 +191,7 @@ export const expenseSchema = z.object({
   // tier's single-tag limit; the expense_tags table enforces it server-side.
   extra_tag_ids: z.array(z.string()).optional(),
   date: z.date({
-    required_error: 'validation.dateRequired',
+    error: 'validation.dateRequired',
   }),
 });
 
@@ -239,7 +238,7 @@ export const recurringExpenseSchema = z
     ] as const),
     start_date: z
       .date({
-        required_error: 'validation.startDateRequired',
+        error: 'validation.startDateRequired',
       })
       .min(new Date('2000-01-01'), 'validation.startDateTooEarly'),
     end_date: z.date().optional(),
@@ -299,7 +298,7 @@ export const incomeSchema = z.object({
     .refine((str) => str.length > 0, 'validation.descriptionEmpty'),
   category_id: z.string(),
   date: z.date({
-    required_error: 'validation.dateRequired',
+    error: 'validation.dateRequired',
   }),
 });
 
@@ -392,7 +391,7 @@ export const accountBalanceSchema = z.object({
       'validation.amountInvalid',
     ),
   recorded_at: z.date({
-    required_error: 'validation.dateRequired',
+    error: 'validation.dateRequired',
   }),
   note: z
     .string()
@@ -464,7 +463,7 @@ export const debtPaymentSchema = z.object({
 
       return amount > 0 && amount <= 100000000;
     }, 'validation.amountMax100M'),
-  date: z.date({ required_error: 'validation.dateRequired' }),
+  date: z.date({ error: 'validation.dateRequired' }),
   description: z
     .string()
     .max(200, 'validation.descriptionTooLong200')

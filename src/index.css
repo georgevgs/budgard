@@ -1,15 +1,251 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-@layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
+@plugin 'tailwindcss-animate';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --padding-safe-t: env(safe-area-inset-top);
+  --padding-safe-b: env(safe-area-inset-bottom);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-income: hsl(var(--income));
+  --color-income-foreground: hsl(var(--income-foreground));
+
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+
+  --color-info: hsl(var(--info));
+  --color-info-foreground: hsl(var(--info-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --animate-float: float 2s ease-in-out infinite;
+  --animate-fade-up: fade-up 0.5s ease-out;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+  @keyframes fade-up {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/*
+  Tailwind v4 changed the default border color to `currentcolor`. This project
+  never relied on v3's gray-200 default — it defaults borders to the themed
+  `--border` token (see the `@apply border-border` rule further down), which is
+  what keeps borders correct across light, dark and the barbie theme. The
+  pseudo-elements are covered here because that rule only targets `*`.
+*/
+@layer base {
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: hsl(var(--border));
+  }
+}
+
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
     display: none;
   }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+@utility glass-capsule {
+  /* Frosted capsule used by the floating bottom nav. Layered translucency
+     plus a lit top rim and a real drop shadow — the parts of Liquid Glass
+     that survive without backdrop refraction. */
+  position: relative;
+  border-radius: 9999px;
+  background: hsl(var(--glass-bg) / var(--glass-alpha));
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 0 hsl(var(--glass-rim)),
+    inset 0 -1px 0 0 hsl(0 0% 0% / 0.05),
+    0 0 0 0.5px hsl(var(--border) / 0.9),
+    0 10px 30px -8px hsl(var(--glass-drop)),
+    0 3px 8px -3px hsl(var(--glass-drop));
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      hsl(0 0% 100% / var(--glass-sheen)) 0%,
+      hsl(0 0% 100% / 0) 48%
+    );
+  }
+  @supports not (
+    (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+  ) {
+    background: hsl(var(--glass-bg) / 0.94);
+  }
+}
+
+@utility nav-dock {
+  /* Blur is an enhancement — without it the bar has to carry its own ground. */
+
+  /* Routes that float an action button beside the dock hand it the slot, so
+     capsule and button share one baseline instead of stacking. Routes without
+     one — Recurring, Analytics, Goals, Settings — get the full width back.
+
+     The [hidden] test is load-bearing: MainTabsLayout keeps visited tabs
+     mounted behind `hidden` rather than unmounting them, so Expenses' button
+     is still in the DOM while you are on Recurring. Only a button that is
+     actually on screen may reserve the slot. */
+  body:has([data-dock-action]:not([hidden], [hidden] *)) & {
+    padding-right: var(--dock-action-slot);
+  }
+
+  /* Auto-hide. Capsule and action button live in different React trees, so a
+     body attribute is what moves them as a single object. Both travel the same
+     distance so they never separate on the way out.
+
+     Transform only. `padding-right` is deliberately NOT transitioned — it is a
+     layout property, so animating it relaid out the capsule and all four tabs
+     every frame; the route's view transition already covers that change. And
+     opacity is left alone because fading a backdrop-filter surface makes the
+     blur drop out mid-flight, revealing sharp content behind it. Sliding fully
+     off-screen is enough. */
+  transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  body[data-nav-hidden='true'] & {
+    transform: translateY(calc(var(--dock-height) + var(--dock-bottom)));
+  }
+
+  /* Keyboard focus must never land on something parked off-screen — but this
+     has to be :focus-visible, never :focus-within. Tapping a tab leaves that
+     link focused, so :focus-within pinned the capsule open for the rest of the
+     session while the action button still slid away. Both dock halves reveal
+     together so they can never desync. */
+  body[data-nav-hidden='true']:has(:is(&, [data-dock-action]) :focus-visible)
+    :is(&, [data-dock-action]) {
+    transform: none;
+  }
+}
+
+@utility nav-scrim {
+  body[data-nav-hidden='true'] & {
+    opacity: 0;
+  }
+
+  /* Content dissolves toward the bottom edge rather than colliding with
+     the dock, the way iOS fades content under a floating tab bar. */
+  /* Height is exactly the dock footprint so the gradient reaches full
+     transparency at the capsule's top edge. Taller than that and the fade
+     bleeds upward, greying out the last card in the list. */
+  position: fixed;
+  inset: auto 0 0 0;
+  height: var(--dock-clearance);
+  pointer-events: none;
+  z-index: 30;
+  transition: opacity 320ms ease;
+  background: linear-gradient(
+    to top,
+    hsl(var(--background)) 25%,
+    hsl(var(--background) / 0.6) 60%,
+    hsl(var(--background) / 0) 100%
+  );
+}
+
+@utility nav-indicator {
+  /* One indicator that travels between tabs. The overshoot curve is what
+     reads as "liquid" — Safari gives us no refraction to lean on. */
+  border-radius: 9999px;
+  transition: transform 520ms cubic-bezier(0.34, 1.45, 0.5, 1);
+  will-change: transform;
+}
+
+@utility nav-indicator-skin {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 9999px;
+  background: hsl(var(--primary) / 0.16);
+  box-shadow: inset 0 0 0 0.5px hsl(var(--primary) / 0.22);
+  animation: nav-indicator-settle 520ms cubic-bezier(0.34, 1.45, 0.5, 1);
+}
+
+/* In the components layer so a caller can still override the background with
+   a plain Tailwind utility — utilities are emitted after components. Kept as
+   @layer components rather than @utility for exactly that reason: a custom
+   @utility would land in the same layer as bg-*, and precedence would come
+   down to emission order instead of the layer cascade. */
+@layer components {
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: hsl(var(--muted));
+  }
+
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--skeleton-sheen)),
+      transparent
+    );
+    animation: skeleton-sheen 1500ms ease-in-out infinite;
   }
 }
 
@@ -252,233 +488,87 @@
   }
 }
 
-@layer components {
-  /* Frosted capsule used by the floating bottom nav. Layered translucency
-     plus a lit top rim and a real drop shadow — the parts of Liquid Glass
-     that survive without backdrop refraction. */
-  .glass-capsule {
-    position: relative;
-    border-radius: 9999px;
-    background: hsl(var(--glass-bg) / var(--glass-alpha));
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    backdrop-filter: blur(24px) saturate(180%);
-    box-shadow:
-      inset 0 1px 0 0 hsl(var(--glass-rim)),
-      inset 0 -1px 0 0 hsl(0 0% 0% / 0.05),
-      0 0 0 0.5px hsl(var(--border) / 0.9),
-      0 10px 30px -8px hsl(var(--glass-drop)),
-      0 3px 8px -3px hsl(var(--glass-drop));
-  }
-
-  .glass-capsule::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(
-      to bottom,
-      hsl(0 0% 100% / var(--glass-sheen)) 0%,
-      hsl(0 0% 100% / 0) 48%
-    );
-  }
-
-  /* Blur is an enhancement — without it the bar has to carry its own ground. */
-  @supports not (
-    (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
-  ) {
-    .glass-capsule {
-      background: hsl(var(--glass-bg) / 0.94);
+@layer utilities {
+  @keyframes nav-indicator-settle {
+    0% {
+      transform: scale(1, 1);
+    }
+    35% {
+      transform: scale(1.08, 0.9);
+    }
+    100% {
+      transform: scale(1, 1);
     }
   }
 
-  /* Routes that float an action button beside the dock hand it the slot, so
-     capsule and button share one baseline instead of stacking. Routes without
-     one — Recurring, Analytics, Goals, Settings — get the full width back.
-
-     The [hidden] test is load-bearing: MainTabsLayout keeps visited tabs
-     mounted behind `hidden` rather than unmounting them, so Expenses' button
-     is still in the DOM while you are on Recurring. Only a button that is
-     actually on screen may reserve the slot. */
-  body:has([data-dock-action]:not([hidden], [hidden] *)) .nav-dock {
-    padding-right: var(--dock-action-slot);
+  /* Toast — safe-area offset for iOS notch / Dynamic Island */
+  [data-sonner-toaster][data-y-position='top'] {
+    top: env(safe-area-inset-top, 0px) !important;
   }
 
-  /* Auto-hide. Capsule and action button live in different React trees, so a
-     body attribute is what moves them as a single object. Both travel the same
-     distance so they never separate on the way out.
-
-     Transform only. `padding-right` is deliberately NOT transitioned — it is a
-     layout property, so animating it relaid out the capsule and all four tabs
-     every frame; the route's view transition already covers that change. And
-     opacity is left alone because fading a backdrop-filter surface makes the
-     blur drop out mid-flight, revealing sharp content behind it. Sliding fully
-     off-screen is enough. */
-  .nav-dock,
-  [data-dock-action] {
-    transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Toast — frosted glass style matching app design */
+  .toast-custom {
+    background: hsl(var(--card) / 0.85) !important;
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
   }
 
-  body[data-nav-hidden='true'] .nav-dock,
-  body[data-nav-hidden='true'] [data-dock-action] {
-    transform: translateY(calc(var(--dock-height) + var(--dock-bottom)));
+  .dark .toast-custom {
+    background: hsl(224 18% 13% / 0.9) !important;
   }
 
-  body[data-nav-hidden='true'] .nav-scrim {
-    opacity: 0;
+  [data-theme='barbie'] .toast-custom {
+    background: hsl(var(--card) / 0.9) !important;
   }
 
-  /* Keyboard focus must never land on something parked off-screen — but this
-     has to be :focus-visible, never :focus-within. Tapping a tab leaves that
-     link focused, so :focus-within pinned the capsule open for the rest of the
-     session while the action button still slid away. Both dock halves reveal
-     together so they can never desync. */
-  body[data-nav-hidden='true']:has(
-      :is(.nav-dock, [data-dock-action]) :focus-visible
-    )
-    :is(.nav-dock, [data-dock-action]) {
-    transform: none;
+  /* Override Sonner's default icon colors for success/error */
+  [data-sonner-toast][data-type='success'] [data-icon] {
+    color: #10b981 !important;
   }
 
-  /* One indicator that travels between tabs. The overshoot curve is what
-     reads as "liquid" — Safari gives us no refraction to lean on. */
-  .nav-indicator {
-    border-radius: 9999px;
-    transition: transform 520ms cubic-bezier(0.34, 1.45, 0.5, 1);
-    will-change: transform;
+  [data-sonner-toast][data-type='error'] [data-icon] {
+    color: hsl(var(--destructive)) !important;
   }
 
-  .nav-indicator-skin {
-    display: block;
-    height: 100%;
-    width: 100%;
-    border-radius: 9999px;
-    background: hsl(var(--primary) / 0.16);
-    box-shadow: inset 0 0 0 0.5px hsl(var(--primary) / 0.22);
-    animation: nav-indicator-settle 520ms cubic-bezier(0.34, 1.45, 0.5, 1);
+  /* Default toast (no type) uses foreground color */
+  [data-sonner-toast]:not([data-type]) {
+    background: hsl(var(--card) / 0.85) !important;
+    color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border) / 0.5) !important;
   }
 
-  /* Content dissolves toward the bottom edge rather than colliding with
-     the dock, the way iOS fades content under a floating tab bar. */
-  /* Height is exactly the dock footprint so the gradient reaches full
-     transparency at the capsule's top edge. Taller than that and the fade
-     bleeds upward, greying out the last card in the list. */
-  .nav-scrim {
-    position: fixed;
-    inset: auto 0 0 0;
-    height: var(--dock-clearance);
-    pointer-events: none;
-    z-index: 30;
-    transition: opacity 320ms ease;
-    background: linear-gradient(
-      to top,
-      hsl(var(--background)) 25%,
-      hsl(var(--background) / 0.6) 60%,
-      hsl(var(--background) / 0) 100%
-    );
+  @keyframes card-enter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
-}
 
-@keyframes nav-indicator-settle {
-  0% {
-    transform: scale(1, 1);
+  .card-enter {
+    animation: card-enter 220ms ease-out both;
   }
-  35% {
-    transform: scale(1.08, 0.9);
-  }
-  100% {
-    transform: scale(1, 1);
-  }
-}
 
-/* Toast — safe-area offset for iOS notch / Dynamic Island */
-[data-sonner-toaster][data-y-position='top'] {
-  top: env(safe-area-inset-top, 0px) !important;
-}
-
-/* Toast — frosted glass style matching app design */
-.toast-custom {
-  background: hsl(var(--card) / 0.85) !important;
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  backdrop-filter: saturate(180%) blur(20px);
-}
-
-.dark .toast-custom {
-  background: hsl(224 18% 13% / 0.9) !important;
-}
-
-[data-theme='barbie'] .toast-custom {
-  background: hsl(var(--card) / 0.9) !important;
-}
-
-/* Override Sonner's default icon colors for success/error */
-[data-sonner-toast][data-type='success'] [data-icon] {
-  color: #10b981 !important;
-}
-
-[data-sonner-toast][data-type='error'] [data-icon] {
-  color: hsl(var(--destructive)) !important;
-}
-
-/* Default toast (no type) uses foreground color */
-[data-sonner-toast]:not([data-type]) {
-  background: hsl(var(--card) / 0.85) !important;
-  color: hsl(var(--foreground)) !important;
-  border-color: hsl(var(--border) / 0.5) !important;
-}
-
-@keyframes card-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.card-enter {
-  animation: card-enter 220ms ease-out both;
-}
-
-/* Skeleton placeholder: a muted block with a highlight that sweeps across it,
+  /* Skeleton placeholder: a muted block with a highlight that sweeps across it,
    the pattern Revolut/Airbnb use on mobile. Timing follows the eBay design
    system spec — an 833ms left-to-right pass, then a 667ms rest before the
    next one, so it reads as gentle breathing rather than a strobe.
    833 / 1500 = 55.5%, which is where the sweep finishes and the pause starts. */
-@keyframes skeleton-sheen {
-  0% {
-    transform: translateX(-100%);
+  @keyframes skeleton-sheen {
+    0% {
+      transform: translateX(-100%);
+    }
+    55.5%,
+    100% {
+      transform: translateX(100%);
+    }
   }
-  55.5%,
-  100% {
-    transform: translateX(100%);
-  }
-}
 
-/* In the components layer so a caller can still override the background with
+  /* In the components layer so a caller can still override the background with
    a plain Tailwind utility — utilities are emitted after components. */
-@layer components {
-  .skeleton {
-    position: relative;
-    overflow: hidden;
-    background-color: hsl(var(--muted));
-  }
-
-  .skeleton::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    transform: translateX(-100%);
-    background-image: linear-gradient(
-      90deg,
-      transparent,
-      hsl(var(--skeleton-sheen)),
-      transparent
-    );
-    animation: skeleton-sheen 1500ms ease-in-out infinite;
-  }
 }
 
 /* Progress bars grow in from the left on mount. Applied to the track, so the

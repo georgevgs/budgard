@@ -98,7 +98,7 @@ const renderAccentSection = (
               key={color.key}
               type="button"
               onClick={() => setAccent(color.key)}
-              className="relative h-6 w-6 rounded-full transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 after:absolute after:-inset-y-2.5 after:-inset-x-[3px] after:content-['']"
+              className="relative h-6 w-6 rounded-full transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 after:absolute after:-inset-y-2.5 after:inset-x-[-3px] after:content-['']"
               style={{ backgroundColor: color.values.swatch }}
               aria-label={t(`accent.colors.${color.key}`)}
               aria-pressed={isSelected}

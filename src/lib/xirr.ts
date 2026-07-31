@@ -83,7 +83,7 @@ const bisection = (sorted: Cashflow[]): number | null => {
   let lo = MIN_RATE;
   let hi = MAX_RATE;
   let fLo = npv(lo, sorted);
-  let fHi = npv(hi, sorted);
+  const fHi = npv(hi, sorted);
   if (fLo * fHi > 0) {
     return null;
   }
@@ -96,7 +96,6 @@ const bisection = (sorted: Cashflow[]): number | null => {
     }
     if (fLo * fMid < 0) {
       hi = mid;
-      fHi = fMid;
       continue;
     }
     lo = mid;

@@ -67,7 +67,7 @@ const IncomeCategoryField = ({ form, picker }: Props) => {
               </FormControl>
             </PopoverTrigger>
             <PopoverContent
-              className="w-[var(--radix-popover-trigger-width)] p-0 flex flex-col"
+              className="w-(--radix-popover-trigger-width) p-0 flex flex-col"
               align="start"
               style={{
                 maxHeight:

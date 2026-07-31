@@ -36,15 +36,15 @@ export function Toaster() {
         duration: 3000,
         classNames: {
           toast:
-            'toast-custom !rounded-xl !shadow-lg !border !border-border/50 !backdrop-blur-xl !px-4 !py-3 !gap-2 !text-sm !font-medium',
-          title: '!text-sm !font-semibold !text-foreground',
-          description: '!text-xs !text-muted-foreground',
+            'toast-custom rounded-xl! shadow-lg! border! border-border/50! backdrop-blur-xl! px-4! py-3! gap-2! text-sm! font-medium!',
+          title: 'text-sm! font-semibold! text-foreground!',
+          description: 'text-xs! text-muted-foreground!',
           actionButton:
-            '!bg-primary !text-primary-foreground !rounded-lg !text-xs !font-semibold !px-3 !py-1.5',
+            'bg-primary! text-primary-foreground! rounded-lg! text-xs! font-semibold! px-3! py-1.5!',
           success:
-            '!bg-income/10 !text-income !border-income/20',
-          error: '!bg-destructive/10 !text-destructive !border-destructive/20',
-          icon: '!text-current',
+            'bg-income/10! text-income! border-income/20!',
+          error: 'bg-destructive/10! text-destructive! border-destructive/20!',
+          icon: 'text-current!',
         },
       }}
     />
