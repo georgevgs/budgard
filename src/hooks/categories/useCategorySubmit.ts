@@ -38,7 +38,7 @@ export const useCategorySubmit = ({
       }
       onClose();
     } catch {
-      // Hook already shows error toast via useDataOperations
+      // Hook already shows error toast via useCategoryOps
     }
   };
 

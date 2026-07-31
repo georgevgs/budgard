@@ -155,18 +155,6 @@ export const emailSchema = z
     },
   );
 
-// Tag validation schema
-export const tagSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'validation.tagNameRequired')
-    .max(50, 'validation.tagNameTooLong')
-    .regex(SAFE_STRING, 'validation.tagNameInvalid')
-    .transform((s) => s.trim())
-    .refine((s) => s.length > 0, 'validation.tagNameEmpty'),
-  color: z.string().regex(HEX_COLOR, 'validation.colorInvalid'),
-});
-
 // Expense validation schema
 export const expenseSchema = z.object({
   amount: z
@@ -251,22 +239,6 @@ export const recurringExpenseSchema = z
 
 // Budget validation schema
 export const budgetSchema = z.object({
-  amount: z
-    .string()
-    .min(1, 'validation.amountRequired')
-    .regex(AMOUNT_PATTERN, 'validation.amountInvalid')
-    .refine((val) => {
-      const amount = parseCurrencyInput(val);
-
-      return amount > 0 && amount <= 10000000;
-    }, 'validation.amountMax10M'),
-});
-
-// Per-category budget validation schema. Empty string is treated as
-// "no cap for this category" by the caller (we delete the row instead of
-// inserting); this schema only validates non-empty inputs.
-export const categoryBudgetSchema = z.object({
-  category_id: z.string().min(1, 'validation.categoryRequired'),
   amount: z
     .string()
     .min(1, 'validation.amountRequired')

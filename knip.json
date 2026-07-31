@@ -1,6 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "ignore": ["supabase/functions/**", "public/push-sw.js", "public/reset.js"],
+  "ignore": [
+    "supabase/functions/**",
+    "public/push-sw.js",
+    "public/reset.js",
+    "src/types/lucide-react-icons.d.ts"
+  ],
   "ignoreDependencies": ["supabase"],
   "ignoreExportsUsedInFile": true
 }

@@ -28,7 +28,7 @@
     # required by the self-hosted Tesseract OCR runtime; Chromium blocks
     # WebAssembly.compile without it while Safari/Firefox don't enforce, so
     # missing it would surface as a Chrome/Android-only scan failure.
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-IpXc3CDulBUR7HBuqVuRhXQPvcfsYlYLS0VR3r2OK8U=' https://static.cloudflareinsights.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://htamokfphaqudeivpowr.supabase.co wss://htamokfphaqudeivpowr.supabase.co https://cloudflareinsights.com https://challenges.cloudflare.com https://*.sentry.io https://api.frankfurter.dev; worker-src 'self' blob:; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self';"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-spysep1/V1ppBbF/gVu5gl6WCnLucOZLWJX5aUNRwnk=' https://static.cloudflareinsights.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://htamokfphaqudeivpowr.supabase.co wss://htamokfphaqudeivpowr.supabase.co https://cloudflareinsights.com https://challenges.cloudflare.com https://*.sentry.io https://api.frankfurter.dev; worker-src 'self' blob:; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self';"
 
 # no-cache (not no-store): the browser must revalidate, but can reuse the
 # cached body on a 304 and keep the page eligible for back/forward cache.
@@ -82,16 +82,6 @@
 
 [[headers]]
   for = "/favicon.ico"
-  [headers.values]
-    Cache-Control = "public, max-age=604800"
-
-[[headers]]
-  for = "/favicon-16x16.png"
-  [headers.values]
-    Cache-Control = "public, max-age=604800"
-
-[[headers]]
-  for = "/favicon-32x32.png"
   [headers.values]
     Cache-Control = "public, max-age=604800"
 

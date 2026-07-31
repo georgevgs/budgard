@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useDebtProgress, useAllDebtProgress } from '@/hooks/useDebtProgress';
+import { useDebtProgress } from '@/hooks/useDebtProgress';
 import type { Debt } from '@/types/Debt';
 
 const makeDebt = (overrides: Partial<Debt> = {}): Debt => ({
@@ -92,20 +92,5 @@ describe('useDebtProgress', () => {
 
     expect(result.current.monthsRemaining).toBe(0);
     expect(result.current.projectedTotalInterest).toBe(0);
-  });
-});
-
-describe('useAllDebtProgress', () => {
-  it('returns a record keyed by debt id', () => {
-    const debts = [
-      makeDebt({ id: 'a', current_balance: 1000, original_principal: 2000 }),
-      makeDebt({ id: 'b', current_balance: 500, original_principal: 500 }),
-    ];
-
-    const { result } = renderHook(() => useAllDebtProgress(debts));
-
-    expect(Object.keys(result.current)).toHaveLength(2);
-    expect(result.current.a.percentPaid).toBeCloseTo(0.5, 5);
-    expect(result.current.b.percentPaid).toBe(0);
   });
 });

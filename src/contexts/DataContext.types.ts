@@ -16,7 +16,7 @@ import type { NotificationPreferences } from '@/types/Budget';
 
 // Actions never change reference after mount (setters are stable, refresh
 // callbacks have stable deps). Splitting them into their own context lets
-// action-only consumers (forms, useDataOperations) skip re-renders triggered
+// action-only consumers (forms, dataOps hooks) skip re-renders triggered
 // by data mutations.
 export type DataActions = {
   refreshData: () => Promise<void>;

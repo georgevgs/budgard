@@ -109,7 +109,7 @@ const CategoryBudgetsManager = ({ isOpen, onClose }: Props) => {
       });
       onClose();
     } catch {
-      // Error toast already handled by useDataOperations
+      // Error toast already handled by useBudgetOps
     } finally {
       setIsSaving(false);
     }

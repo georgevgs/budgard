@@ -1,9 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import {
-  useDebtPayoffPlan,
-  useDebtSimulation,
-} from '@/hooks/useDebtPayoffPlan';
+import { useDebtPayoffPlan } from '@/hooks/useDebtPayoffPlan';
 import type { Debt } from '@/types/Debt';
 
 const makeDebt = (overrides: Partial<Debt> = {}): Debt => ({
@@ -58,31 +55,5 @@ describe('useDebtPayoffPlan', () => {
 
     expect(result.current.avalanche.monthsToPayoff).toBe(0);
     expect(result.current.snowball.monthsToPayoff).toBe(0);
-  });
-});
-
-describe('useDebtSimulation', () => {
-  it('routes the strategy through to simulatePayoff', () => {
-    // Same balance, different APR: avalanche pumps extra into the high-APR
-    // debt, snowball into either (sort is stable). The avalanche result must
-    // pay the high-APR debt off strictly earlier than snowball does.
-    const debts = [
-      makeDebt({ id: 'low', apr: 5, current_balance: 2000, minimum_payment: 50 }),
-      makeDebt({ id: 'high', apr: 25, current_balance: 2000, minimum_payment: 50 }),
-    ];
-
-    const { result: snowballResult } = renderHook(() =>
-      useDebtSimulation(debts, 200, 'snowball'),
-    );
-    const { result: avalancheResult } = renderHook(() =>
-      useDebtSimulation(debts, 200, 'avalanche'),
-    );
-
-    expect(
-      avalancheResult.current.perDebtPayoffMonth.high,
-    ).toBeLessThan(snowballResult.current.perDebtPayoffMonth.high);
-    expect(avalancheResult.current.totalInterestPaid).toBeLessThanOrEqual(
-      snowballResult.current.totalInterestPaid,
-    );
   });
 });

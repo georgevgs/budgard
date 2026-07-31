@@ -6,7 +6,6 @@
 
 @theme {
   --padding-safe-t: env(safe-area-inset-top);
-  --padding-safe-b: env(safe-area-inset-bottom);
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
@@ -48,35 +47,6 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-
-  --color-chart-1: hsl(var(--chart-1));
-  --color-chart-2: hsl(var(--chart-2));
-  --color-chart-3: hsl(var(--chart-3));
-  --color-chart-4: hsl(var(--chart-4));
-  --color-chart-5: hsl(var(--chart-5));
-
-  --animate-float: float 2s ease-in-out infinite;
-  --animate-fade-up: fade-up 0.5s ease-out;
-
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-5px);
-    }
-  }
-  @keyframes fade-up {
-    0% {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 }
 
 /*
@@ -93,14 +63,6 @@
   ::file-selector-button {
     border-color: hsl(var(--border));
   }
-}
-
-@utility no-scrollbar {
-  &::-webkit-scrollbar {
-    display: none;
-  }
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
 
 @utility glass-capsule {
@@ -270,11 +232,6 @@
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 24 90% 50%;
-    --chart-1: 24 90% 50%;
-    --chart-2: 197 58% 42%;
-    --chart-3: 43 74% 56%;
-    --chart-4: 280 65% 55%;
-    --chart-5: 12 76% 61%;
     --income: 160 70% 38%;
     --income-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
@@ -336,11 +293,6 @@
     --border: 224 12% 16%;
     --input: 224 12% 16%;
     --ring: 24 90% 55%;
-    --chart-1: 24 90% 55%;
-    --chart-2: 197 60% 50%;
-    --chart-3: 43 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 12 76% 61%;
     --income: 160 65% 50%;
     --income-foreground: 160 70% 8%;
     --warning: 43 96% 56%;
@@ -376,11 +328,6 @@
     --border: 326 100% 90%;
     --input: 326 100% 90%;
     --ring: 326 73% 55%;
-    --chart-1: 326 73% 55%;
-    --chart-2: 326 83% 65%;
-    --chart-3: 326 93% 75%;
-    --chart-4: 326 100% 85%;
-    --chart-5: 326 100% 95%;
     --income: 160 60% 42%;
     --income-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
@@ -566,9 +513,6 @@
       transform: translateX(100%);
     }
   }
-
-  /* In the components layer so a caller can still override the background with
-   a plain Tailwind utility — utilities are emitted after components. */
 }
 
 /* Progress bars grow in from the left on mount. Applied to the track, so the

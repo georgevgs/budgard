@@ -64,7 +64,7 @@ export const CategoryManager = ({
     try {
       await handleCategoryDelete(deleteTarget.id);
     } catch {
-      // error toast handled by useDataOperations
+      // error toast handled by useCategoryOps
     }
     setDeleteTarget(null);
   };

@@ -20,7 +20,7 @@ const getInitialTheme = (): Theme => {
   }
 };
 
-const ACCENT_CSS_PROPS = ['--primary', '--primary-foreground', '--ring', '--chart-1'];
+const ACCENT_CSS_PROPS = ['--primary', '--primary-foreground', '--ring'];
 
 const applyThemeToDocument = (theme: Theme): void => {
   const root = window.document.documentElement;

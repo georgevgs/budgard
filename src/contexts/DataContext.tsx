@@ -107,7 +107,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
 
   // Expose latest data via refs so handlers can read it inside async callbacks
-  // without subscribing to context updates (keeps useDataOperations stable).
+  // without subscribing to context updates (keeps the dataOps hooks stable).
   const expensesRef = useRef<Expense[]>(expenses);
   expensesRef.current = expenses;
   const incomesRef = useRef<Expense[]>(incomes);

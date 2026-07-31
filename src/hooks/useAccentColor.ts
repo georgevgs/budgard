@@ -135,7 +135,6 @@ const applyAccentToDocument = (key: AccentColorKey): void => {
     root.style.removeProperty('--primary');
     root.style.removeProperty('--primary-foreground');
     root.style.removeProperty('--ring');
-    root.style.removeProperty('--chart-1');
 
     return;
   }
@@ -146,7 +145,6 @@ const applyAccentToDocument = (key: AccentColorKey): void => {
   root.style.setProperty('--primary', primary);
   root.style.setProperty('--primary-foreground', primaryFg);
   root.style.setProperty('--ring', primary);
-  root.style.setProperty('--chart-1', primary);
 };
 
 export const useAccentColor = (): {

@@ -27,19 +27,6 @@ export const useDebtProgress = (debt: Debt): DebtProgress => {
   return useMemo(() => computeProgress(debt), [debt]);
 };
 
-export const useAllDebtProgress = (
-  debts: Debt[],
-): Record<string, DebtProgress> => {
-  return useMemo(() => {
-    const map: Record<string, DebtProgress> = {};
-    for (const debt of debts) {
-      map[debt.id] = computeProgress(debt);
-    }
-
-    return map;
-  }, [debts]);
-};
-
 // --- Helpers ---
 
 const computeProgress = (debt: Debt): DebtProgress => {
