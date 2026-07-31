@@ -61,7 +61,6 @@ Thumbs.db
 .supabase
 
 # Claude Code
-CLAUDE.md
 .agents
 .claude
 skills-lock.json
