@@ -16,18 +16,20 @@ import type { Debt } from '@/types/Debt';
 // transaction row, which inflates history fetches and the localStorage
 // snapshot for no benefit.
 const CATEGORY_EMBED = 'category:categories(id, name, color, icon, type, kind)';
-const TAG_EMBED = 'tag:tags(id, name, color)';
-// Since expense_tags landed, expenses has two relationships to tags (the
-// direct tag_id FK and the many-to-many through the junction table), so the
-// primary-tag embed must name its FK or PostgREST rejects it as ambiguous
-// (PGRST201).
+// Every tag embed names its FK explicitly. The bare `tags` embed name turned
+// ambiguous for expenses when expense_tags landed (two relationships →
+// PGRST201, HTTP 300) and broke months-stale PWA bundles that still sent it;
+// 20260731165831_restore_legacy_tags_embed.sql shims those legacy clients
+// with a computed relationship. Naming the FK keeps today's bundles immune
+// if a second relationship path to tags ever appears on these tables.
 const EXPENSE_TAG_EMBED = 'tag:tags!expenses_tag_id_fkey(id, name, color)';
+const TEMPLATE_TAG_EMBED = 'tag:tags!expense_templates_tag_id_fkey(id, name, color)';
 const EXTRA_TAGS_EMBED = 'extra_tags:expense_tags(tag:tags(id, name, color))';
 const SELECT_WITH_CATEGORY_AND_TAG = `*, ${CATEGORY_EMBED}, ${EXPENSE_TAG_EMBED}, ${EXTRA_TAGS_EMBED}`;
 const SELECT_WITH_CATEGORY = `*, ${CATEGORY_EMBED}`;
 // Templates embed category+tag but NOT extra_tags — expense_tags references
 // expenses, so that embed only resolves on the expenses table.
-const SELECT_TEMPLATE = `*, ${CATEGORY_EMBED}, ${TAG_EMBED}`;
+const SELECT_TEMPLATE = `*, ${CATEGORY_EMBED}, ${TEMPLATE_TAG_EMBED}`;
 
 // Write payload for expenses: the row columns plus the Pro-only additional
 // tag ids, which land in expense_tags rather than on the row itself. The
