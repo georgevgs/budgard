@@ -18,125 +18,137 @@ export const useRecurringIncomeOps = () => {
 
   const handleRecurringIncomeSubmit = useCallback(
     async (incomeData: Partial<RecurringExpense>, incomeId?: string) => {
-      if (!isInitialized) {
-        return;
-      }
-
-      try {
-        let saved: RecurringExpense;
-        if (incomeId) {
-          saved = await dataService.updateRecurringIncome(incomeData, incomeId);
-        } else {
-          saved = await dataService.createRecurringIncome(incomeData);
+      const run = async () => {
+        if (!isInitialized) {
+          return;
         }
 
-        haptics.success();
-        toast({
-          variant: 'success',
-          title: pickByEdit(
-            incomeId,
-            t('recurring.toasts.incomeUpdated'),
-            t('recurring.toasts.incomeAdded'),
-          ),
-        });
-        setRecurringIncomes((prev) => {
-          if (incomeId) return replaceById(prev, incomeId, saved);
+        try {
+          let saved: RecurringExpense;
+          if (incomeId) {
+            saved = await dataService.updateRecurringIncome(incomeData, incomeId);
+          } else {
+            saved = await dataService.createRecurringIncome(incomeData);
+          }
 
-          return [saved, ...prev];
-        });
-      } catch (error) {
-        haptics.error();
-        Sentry.captureException(error, {
-          tags: {
-            operation: pickByEdit(
+          haptics.success();
+          toast({
+            variant: 'success',
+            title: pickByEdit(
               incomeId,
-              'updateRecurringIncome',
-              'createRecurringIncome',
+              t('recurring.toasts.incomeUpdated'),
+              t('recurring.toasts.incomeAdded'),
             ),
-          },
-        });
-        showErrorToast(
-          pickByEdit(
-            incomeId,
-            t('recurring.toasts.incomeUpdateFailed'),
-            t('recurring.toasts.incomeAddFailed'),
-          ),
-          () => {
-            void handleRecurringIncomeSubmit(incomeData, incomeId).catch(() => undefined);
-          },
-        );
-        throw error;
-      }
+          });
+          setRecurringIncomes((prev) => {
+            if (incomeId) return replaceById(prev, incomeId, saved);
+
+            return [saved, ...prev];
+          });
+        } catch (error) {
+          haptics.error();
+          Sentry.captureException(error, {
+            tags: {
+              operation: pickByEdit(
+                incomeId,
+                'updateRecurringIncome',
+                'createRecurringIncome',
+              ),
+            },
+          });
+          showErrorToast(
+            pickByEdit(
+              incomeId,
+              t('recurring.toasts.incomeUpdateFailed'),
+              t('recurring.toasts.incomeAddFailed'),
+            ),
+            () => {
+              void run().catch(() => undefined);
+            },
+          );
+          throw error;
+        }
+      };
+
+      return run();
     },
     [isInitialized, setRecurringIncomes, showErrorToast, toast, t],
   );
 
   const handleRecurringIncomeDelete = useCallback(
     async (incomeId: string) => {
-      if (!isInitialized) {
-        return;
-      }
+      const run = async () => {
+        if (!isInitialized) {
+          return;
+        }
 
-      haptics.warning();
+        haptics.warning();
 
-      let previousRecurring: RecurringExpense[] = [];
-      setRecurringIncomes((prev) => {
-        previousRecurring = prev;
+        let previousRecurring: RecurringExpense[] = [];
+        setRecurringIncomes((prev) => {
+          previousRecurring = prev;
 
-        return prev.filter((e) => e.id !== incomeId);
-      });
+          return prev.filter((e) => e.id !== incomeId);
+        });
 
-      try {
-        await dataService.deleteRecurringIncome(incomeId);
-        haptics.success();
-        refreshIncomes().catch((err) => {
-          Sentry.captureException(err, {
-            tags: {
-              operation: 'refreshIncomes',
-              context: 'afterRecurringIncomeDelete',
-            },
+        try {
+          await dataService.deleteRecurringIncome(incomeId);
+          haptics.success();
+          refreshIncomes().catch((err) => {
+            Sentry.captureException(err, {
+              tags: {
+                operation: 'refreshIncomes',
+                context: 'afterRecurringIncomeDelete',
+              },
+            });
           });
-        });
-      } catch (error) {
-        haptics.error();
-        setRecurringIncomes(previousRecurring);
-        Sentry.captureException(error, {
-          tags: { operation: 'deleteRecurringIncome' },
-        });
-        showErrorToast(t('recurring.toasts.incomeDeleteFailed'), () => {
-          void handleRecurringIncomeDelete(incomeId).catch(() => undefined);
-        });
-        throw error;
-      }
+        } catch (error) {
+          haptics.error();
+          setRecurringIncomes(previousRecurring);
+          Sentry.captureException(error, {
+            tags: { operation: 'deleteRecurringIncome' },
+          });
+          showErrorToast(t('recurring.toasts.incomeDeleteFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [isInitialized, setRecurringIncomes, refreshIncomes, showErrorToast, t],
   );
 
   const handleRecurringIncomeToggle = useCallback(
     async (incomeId: string, active: boolean) => {
-      if (!isInitialized) {
-        return;
-      }
+      const run = async () => {
+        if (!isInitialized) {
+          return;
+        }
 
-      setRecurringIncomes((prev) => patchById(prev, incomeId, { active }));
+        setRecurringIncomes((prev) => patchById(prev, incomeId, { active }));
 
-      try {
-        const saved = await dataService.toggleRecurringIncome(incomeId, active);
-        haptics.success();
-        setRecurringIncomes((prev) => replaceById(prev, incomeId, saved));
-      } catch (error) {
-        haptics.error();
-        setRecurringIncomes((prev) =>
-          patchById(prev, incomeId, { active: !active }),
-        );
-        Sentry.captureException(error, {
-          tags: { operation: 'toggleRecurringIncome' },
-        });
-        showErrorToast(t('recurring.toasts.incomeToggleFailed'), () => {
-          void handleRecurringIncomeToggle(incomeId, active).catch(() => undefined);
-        });
-        throw error;
-      }
+        try {
+          const saved = await dataService.toggleRecurringIncome(incomeId, active);
+          haptics.success();
+          setRecurringIncomes((prev) => replaceById(prev, incomeId, saved));
+        } catch (error) {
+          haptics.error();
+          setRecurringIncomes((prev) =>
+            patchById(prev, incomeId, { active: !active }),
+          );
+          Sentry.captureException(error, {
+            tags: { operation: 'toggleRecurringIncome' },
+          });
+          showErrorToast(t('recurring.toasts.incomeToggleFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [isInitialized, setRecurringIncomes, showErrorToast, t],
   );

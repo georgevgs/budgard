@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useForm, type UseFormReturn } from 'react-hook-form';
+import { useForm, useWatch, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDialogDirty } from '@/hooks/useDialogDirty';
 import {
@@ -57,7 +57,10 @@ const DebtForm = ({ debt, onClose }: Props) => {
 
   useDialogDirty(form.formState.isDirty);
 
-  const selectedCurrency = form.watch('currency');
+  const selectedCurrency = useWatch({
+    control: form.control,
+    name: 'currency',
+  });
 
   return (
     <>

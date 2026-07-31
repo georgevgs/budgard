@@ -20,18 +20,27 @@ export const useDebtPayments = (
   updatedAt: string,
 ): UseDebtPaymentsResult => {
   const [payments, setPayments] = useState<Expense[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [settled, setSettled] = useState<{
+    key: string;
+    failed: boolean;
+  } | null>(null);
+
+  const requestKey = `${debtId}|${updatedAt}|${retryCount}`;
+
+  // Closing the sheet invalidates what we settled on, so the next open
+  // starts from the skeleton again instead of flashing stale rows.
+  if (!isActive && settled !== null) {
+    setSettled(null);
+  }
 
   useEffect(() => {
     if (!isActive) {
       return;
     }
 
+    const key = `${debtId}|${updatedAt}|${retryCount}`;
     let cancelled = false;
-    setIsLoading(true);
-    setHasError(false);
 
     (async () => {
       try {
@@ -40,16 +49,13 @@ export const useDebtPayments = (
           return;
         }
         setPayments(data);
+        setSettled({ key, failed: false });
       } catch (error) {
         Sentry.captureException(error, {
           tags: { context: 'useDebtPayments.load' },
         });
         if (!cancelled) {
-          setHasError(true);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
+          setSettled({ key, failed: true });
         }
       }
     })();
@@ -58,6 +64,10 @@ export const useDebtPayments = (
       cancelled = true;
     };
   }, [debtId, updatedAt, isActive, retryCount]);
+
+  const isLoading = settled === null || settled.key !== requestKey;
+  const hasError =
+    settled !== null && settled.key === requestKey && settled.failed;
 
   const retry = () => {
     setRetryCount((count) => count + 1);

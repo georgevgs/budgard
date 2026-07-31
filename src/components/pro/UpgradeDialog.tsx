@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -28,11 +28,19 @@ const UpgradeDialog = () => {
 
   // Each open starts on the caller's preferred plan (e.g. the plan chosen on
   // the landing page) instead of whatever the last visit left selected.
-  useEffect(() => {
+  const [prevInputs, setPrevInputs] = useState({
+    isUpgradeOpen,
+    preferredPlan,
+  });
+  const inputsChanged =
+    prevInputs.isUpgradeOpen !== isUpgradeOpen ||
+    prevInputs.preferredPlan !== preferredPlan;
+  if (inputsChanged) {
+    setPrevInputs({ isUpgradeOpen, preferredPlan });
     if (isUpgradeOpen) {
       setPlan(preferredPlan);
     }
-  }, [isUpgradeOpen, preferredPlan]);
+  }
 
   const handleOpenChange = (open: boolean) => {
     if (!open) closeUpgrade();

@@ -1,8 +1,8 @@
 import type { ReactNode, ReactElement } from 'react';
-import { AuthProvider } from '@/contexts/AuthContext.tsx';
-import { SubscriptionProvider } from '@/contexts/SubscriptionContext.tsx';
-import { UpgradeDialogProvider } from '@/contexts/UpgradeDialogContext.tsx';
-import { DataProvider } from '@/contexts/DataContext.tsx';
+import { AuthProvider } from '@/contexts/AuthProvider.tsx';
+import { SubscriptionProvider } from '@/contexts/SubscriptionProvider.tsx';
+import { UpgradeDialogProvider } from '@/contexts/UpgradeDialogProvider.tsx';
+import { DataProvider } from '@/contexts/DataProvider.tsx';
 
 type RootProviderProps = {
   children: ReactNode;

@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+import { useId, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import type { TagPickerApi } from '@/hooks/expenseForm/useTagPicker';
 
@@ -8,11 +8,22 @@ import type { TagPickerApi } from '@/hooks/expenseForm/useTagPicker';
 export const useTagListboxNav = (tagPicker: TagPickerApi) => {
   const listboxId = useId();
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [prevInputs, setPrevInputs] = useState({
+    tagSearch: tagPicker.tagSearch,
+    tagPopoverOpen: tagPicker.tagPopoverOpen,
+  });
 
   // A changed filter or a reopened popover invalidates the highlighted option
-  useEffect(() => {
+  const inputsChanged =
+    prevInputs.tagSearch !== tagPicker.tagSearch ||
+    prevInputs.tagPopoverOpen !== tagPicker.tagPopoverOpen;
+  if (inputsChanged) {
+    setPrevInputs({
+      tagSearch: tagPicker.tagSearch,
+      tagPopoverOpen: tagPicker.tagPopoverOpen,
+    });
     setActiveIndex(-1);
-  }, [tagPicker.tagSearch, tagPicker.tagPopoverOpen]);
+  }
 
   const getOptionId = (index: number): string => {
     return `${listboxId}-option-${index}`;

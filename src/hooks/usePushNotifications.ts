@@ -51,18 +51,14 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
   const { session } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const [state, setState] = useState<PushState>('loading');
+  const [state, setState] = useState<PushState>(() => resolveInitialPushState());
 
   useEffect(() => {
     if (!('PushManager' in window) || !('Notification' in window)) {
-      setState('unsupported');
-
       return;
     }
 
     if (Notification.permission === 'denied') {
-      setState('denied');
-
       return;
     }
 
@@ -183,4 +179,21 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
   }, [toast, t]);
 
   return { state, subscribe, unsubscribe };
+};
+
+// --- Helpers ---
+
+// Environment support and permission denial are known synchronously, so they
+// resolve during the first render; the mount effect only handles the async
+// subscription lookup.
+const resolveInitialPushState = (): PushState => {
+  if (!('PushManager' in window) || !('Notification' in window)) {
+    return 'unsupported';
+  }
+
+  if (Notification.permission === 'denied') {
+    return 'denied';
+  }
+
+  return 'loading';
 };

@@ -16,15 +16,12 @@ export const useExchangeRate = (
   date: string | undefined,
   toCurrency: string,
 ): UseExchangeRateResult => {
-  const [rate, setRate] = useState<number | null>(null);
-  const [isFetching, setIsFetching] = useState(false);
-  const [error, setError] = useState(false);
+  const [fetched, setFetched] = useState<FetchedRate | null>(null);
+
+  const requestKey = `${fromCurrency}|${date}|${toCurrency}`;
 
   useEffect(() => {
     if (fromCurrency === toCurrency) {
-      setRate(null);
-      setError(false);
-
       return;
     }
 
@@ -32,33 +29,32 @@ export const useExchangeRate = (
       return;
     }
 
+    const key = `${fromCurrency}|${date}|${toCurrency}`;
     const controller = new AbortController();
-    setIsFetching(true);
-    setError(false);
 
     fetchExchangeRate(fromCurrency, date, controller.signal, toCurrency)
       .then((next) => {
         if (controller.signal.aborted) {
           return;
         }
-        setRate(next);
+        setFetched({ key, rate: next, error: false });
       })
       .catch(() => {
         if (controller.signal.aborted) {
           return;
         }
-        setError(true);
-        setRate(null);
-      })
-      .finally(() => {
-        if (controller.signal.aborted) {
-          return;
-        }
-        setIsFetching(false);
+        setFetched({ key, rate: null, error: true });
       });
 
     return () => controller.abort();
   }, [fromCurrency, date, toCurrency]);
+
+  const { rate, isFetching, error } = deriveRateView(
+    fetched,
+    requestKey,
+    fromCurrency === toCurrency,
+    Boolean(date),
+  );
 
   const ensureRate = useCallback(async (): Promise<number> => {
     if (rate !== null) {
@@ -69,4 +65,42 @@ export const useExchangeRate = (
   }, [rate, fromCurrency, date, toCurrency]);
 
   return { rate, isFetching, error, ensureRate };
+};
+
+// --- Helpers ---
+
+type FetchedRate = {
+  key: string;
+  rate: number | null;
+  error: boolean;
+};
+
+type RateView = {
+  rate: number | null;
+  isFetching: boolean;
+  error: boolean;
+};
+
+const deriveRateView = (
+  fetched: FetchedRate | null,
+  requestKey: string,
+  sameCurrency: boolean,
+  hasDate: boolean,
+): RateView => {
+  if (sameCurrency) {
+    return { rate: null, isFetching: false, error: false };
+  }
+
+  if (!hasDate) {
+    // No date selected — keep returning the last fetched value.
+    return { rate: fetched?.rate ?? null, isFetching: false, error: false };
+  }
+
+  if (fetched !== null && fetched.key === requestKey) {
+    return { rate: fetched.rate, isFetching: false, error: fetched.error };
+  }
+
+  // The fetch for this key is still in flight — keep showing the previous
+  // rate (stale-while-refetching) instead of blanking it.
+  return { rate: fetched?.rate ?? null, isFetching: true, error: false };
 };

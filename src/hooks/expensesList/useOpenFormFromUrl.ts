@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { FORM_TYPES, type FormType } from '@/components/layout/FormsManager';
+import { FORM_TYPES, type FormType } from '@/components/layout/formTypes';
 
 // Open add-expense form when navigated with ?action=add (e.g. from push notification)
 export const useOpenFormFromUrl = (

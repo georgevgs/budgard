@@ -24,138 +24,150 @@ export const useCategoryOps = () => {
 
   const handleCategoryAdd = useCallback(
     async (categoryData: Partial<Category>) => {
-      if (!isInitialized) {
-        return;
-      }
+      const run = async () => {
+        if (!isInitialized) {
+          return;
+        }
 
-      const optimisticCategory = {
-        ...categoryData,
-        id: `temp-${Date.now()}`,
-        created_at: new Date().toISOString(),
-      } as Category;
+        const optimisticCategory = {
+          ...categoryData,
+          id: `temp-${Date.now()}`,
+          created_at: new Date().toISOString(),
+        } as Category;
 
-      setCategories((prev) => [...prev, optimisticCategory]);
+        setCategories((prev) => [...prev, optimisticCategory]);
 
-      try {
-        const savedCategory = await dataService.createCategory(categoryData);
-        haptics.success();
-        setCategories((prev) =>
-          [
-            ...prev.filter((c) => c.id !== optimisticCategory.id),
-            savedCategory,
-          ].sort((a, b) => a.name.localeCompare(b.name)),
-        );
-      } catch (error) {
-        haptics.error();
-        setCategories((prev) =>
-          prev.filter((c) => c.id !== optimisticCategory.id),
-        );
-        Sentry.captureException(error, { tags: { operation: 'createCategory' } });
-        showErrorToast(t('categories.toasts.addFailed'), () => {
-          void handleCategoryAdd(categoryData).catch(() => undefined);
-        });
-        throw error;
-      }
+        try {
+          const savedCategory = await dataService.createCategory(categoryData);
+          haptics.success();
+          setCategories((prev) =>
+            [
+              ...prev.filter((c) => c.id !== optimisticCategory.id),
+              savedCategory,
+            ].sort((a, b) => a.name.localeCompare(b.name)),
+          );
+        } catch (error) {
+          haptics.error();
+          setCategories((prev) =>
+            prev.filter((c) => c.id !== optimisticCategory.id),
+          );
+          Sentry.captureException(error, { tags: { operation: 'createCategory' } });
+          showErrorToast(t('categories.toasts.addFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [isInitialized, setCategories, showErrorToast, t],
   );
 
   const handleCategoryUpdate = useCallback(
     async (categoryId: string, categoryData: Partial<Category>) => {
-      if (!isInitialized) {
-        return;
-      }
+      const run = async () => {
+        if (!isInitialized) {
+          return;
+        }
 
-      let previousCategories: Category[] = [];
-      setCategories((prev) => {
-        previousCategories = prev;
+        let previousCategories: Category[] = [];
+        setCategories((prev) => {
+          previousCategories = prev;
 
-        return patchById(prev, categoryId, categoryData).sort((a, b) =>
-          a.name.localeCompare(b.name),
-        );
-      });
-
-      let previousExpenses: Expense[] = [];
-      let previousIncomes: Expense[] = [];
-      setExpenses((prev) => {
-        previousExpenses = prev;
-
-        return prev.map((e) => mergeCategoryPatch(e, categoryId, categoryData));
-      });
-      setIncomes((prev) => {
-        previousIncomes = prev;
-
-        return prev.map((i) => mergeCategoryPatch(i, categoryId, categoryData));
-      });
-
-      try {
-        const saved = await dataService.updateCategory(
-          categoryId,
-          categoryData,
-        );
-        haptics.success();
-        setCategories((prev) =>
-          replaceById(prev, categoryId, saved).sort((a, b) =>
+          return patchById(prev, categoryId, categoryData).sort((a, b) =>
             a.name.localeCompare(b.name),
-          ),
-        );
-        setExpenses((prev) =>
-          prev.map((e) => assignCategory(e, categoryId, saved)),
-        );
-        setIncomes((prev) =>
-          prev.map((i) => assignCategory(i, categoryId, saved)),
-        );
-      } catch (error) {
-        haptics.error();
-        setCategories(previousCategories);
-        setExpenses(previousExpenses);
-        setIncomes(previousIncomes);
-        Sentry.captureException(error, { tags: { operation: 'updateCategory' } });
-        showErrorToast(t('categories.toasts.updateFailed'), () => {
-          void handleCategoryUpdate(categoryId, categoryData).catch(() => undefined);
+          );
         });
-        throw error;
-      }
+
+        let previousExpenses: Expense[] = [];
+        let previousIncomes: Expense[] = [];
+        setExpenses((prev) => {
+          previousExpenses = prev;
+
+          return prev.map((e) => mergeCategoryPatch(e, categoryId, categoryData));
+        });
+        setIncomes((prev) => {
+          previousIncomes = prev;
+
+          return prev.map((i) => mergeCategoryPatch(i, categoryId, categoryData));
+        });
+
+        try {
+          const saved = await dataService.updateCategory(
+            categoryId,
+            categoryData,
+          );
+          haptics.success();
+          setCategories((prev) =>
+            replaceById(prev, categoryId, saved).sort((a, b) =>
+              a.name.localeCompare(b.name),
+            ),
+          );
+          setExpenses((prev) =>
+            prev.map((e) => assignCategory(e, categoryId, saved)),
+          );
+          setIncomes((prev) =>
+            prev.map((i) => assignCategory(i, categoryId, saved)),
+          );
+        } catch (error) {
+          haptics.error();
+          setCategories(previousCategories);
+          setExpenses(previousExpenses);
+          setIncomes(previousIncomes);
+          Sentry.captureException(error, { tags: { operation: 'updateCategory' } });
+          showErrorToast(t('categories.toasts.updateFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [isInitialized, setCategories, setExpenses, setIncomes, showErrorToast, t],
   );
 
   const handleCategoryDelete = useCallback(
     async (categoryId: string) => {
-      if (!isInitialized) {
-        return;
-      }
+      const run = async () => {
+        if (!isInitialized) {
+          return;
+        }
 
-      let previousCategories: Category[] = [];
-      setCategories((prev) => {
-        previousCategories = prev;
+        let previousCategories: Category[] = [];
+        setCategories((prev) => {
+          previousCategories = prev;
 
-        return prev.filter((c) => c.id !== categoryId);
-      });
-
-      setExpenses((prev) => prev.map((e) => clearCategoryRef(e, categoryId)));
-
-      let previousBudgets: CategoryBudget[] = [];
-      setCategoryBudgets((prev) => {
-        previousBudgets = prev;
-
-        return prev.filter((b) => b.category_id !== categoryId);
-      });
-
-      try {
-        await dataService.deleteCategory(categoryId);
-        haptics.success();
-      } catch (error) {
-        haptics.error();
-        setCategories(previousCategories);
-        setCategoryBudgets(previousBudgets);
-        refreshExpenses();
-        Sentry.captureException(error, { tags: { operation: 'deleteCategory' } });
-        showErrorToast(t('categories.toasts.deleteFailed'), () => {
-          void handleCategoryDelete(categoryId).catch(() => undefined);
+          return prev.filter((c) => c.id !== categoryId);
         });
-        throw error;
-      }
+
+        setExpenses((prev) => prev.map((e) => clearCategoryRef(e, categoryId)));
+
+        let previousBudgets: CategoryBudget[] = [];
+        setCategoryBudgets((prev) => {
+          previousBudgets = prev;
+
+          return prev.filter((b) => b.category_id !== categoryId);
+        });
+
+        try {
+          await dataService.deleteCategory(categoryId);
+          haptics.success();
+        } catch (error) {
+          haptics.error();
+          setCategories(previousCategories);
+          setCategoryBudgets(previousBudgets);
+          refreshExpenses();
+          Sentry.captureException(error, { tags: { operation: 'deleteCategory' } });
+          showErrorToast(t('categories.toasts.deleteFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [
       isInitialized,
@@ -170,26 +182,30 @@ export const useCategoryOps = () => {
 
   const handleCategoriesAddBulk = useCallback(
     async (categoriesData: Partial<Category>[]) => {
-      if (!isInitialized) return;
+      const run = async () => {
+        if (!isInitialized) return;
 
-      try {
-        const created = await Promise.all(
-          categoriesData.map((cat) => dataService.createCategory(cat)),
-        );
-        haptics.success();
-        setCategories((prev) =>
-          [...prev, ...created].sort((a, b) => a.name.localeCompare(b.name)),
-        );
-      } catch (error) {
-        haptics.error();
-        Sentry.captureException(error, {
-          tags: { operation: 'createCategoriesBulk' },
-        });
-        showErrorToast(t('categories.toasts.bulkCreateFailed'), () => {
-          void handleCategoriesAddBulk(categoriesData).catch(() => undefined);
-        });
-        throw error;
-      }
+        try {
+          const created = await Promise.all(
+            categoriesData.map((cat) => dataService.createCategory(cat)),
+          );
+          haptics.success();
+          setCategories((prev) =>
+            [...prev, ...created].sort((a, b) => a.name.localeCompare(b.name)),
+          );
+        } catch (error) {
+          haptics.error();
+          Sentry.captureException(error, {
+            tags: { operation: 'createCategoriesBulk' },
+          });
+          showErrorToast(t('categories.toasts.bulkCreateFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [isInitialized, setCategories, showErrorToast, t],
   );

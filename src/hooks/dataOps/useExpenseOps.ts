@@ -46,239 +46,246 @@ export const useExpenseOps = () => {
       expenseId?: string,
       receiptOptions?: ReceiptOptions,
     ) => {
-      if (!isInitialized) {
-        return;
-      }
-
-      try {
-        let savedExpense: Expense;
-        if (expenseId) {
-          savedExpense = await dataService.updateExpense(expenseData, expenseId);
-        } else {
-          savedExpense = await dataService.createExpense(expenseData);
+      const run = async () => {
+        if (!isInitialized) {
+          return;
         }
 
-        let receiptPath = savedExpense.receipt_path ?? null;
-        let receiptFailed = false;
-        let oldPathToDelete: string | null = null;
+        try {
+          let savedExpense: Expense;
+          if (expenseId) {
+            savedExpense = await dataService.updateExpense(expenseData, expenseId);
+          } else {
+            savedExpense = await dataService.createExpense(expenseData);
+          }
 
-        if (receiptOptions && expenseData.user_id) {
-          let uploadedNewPath: string | null = null;
-          ({
-            receiptPath,
-            receiptFailed,
-            uploadedNewPath,
-            oldPathToDelete,
-          } = await processReceipt(
-            savedExpense,
-            receiptOptions,
-            expenseData.user_id,
-          ));
+          let receiptPath = savedExpense.receipt_path ?? null;
+          let receiptFailed = false;
+          let oldPathToDelete: string | null = null;
 
-          if (
-            !receiptFailed &&
-            receiptPath !== (savedExpense.receipt_path ?? null)
-          ) {
-            try {
-              const updated = await dataService.updateExpense(
-                { receipt_path: receiptPath },
-                savedExpense.id,
-              );
-              receiptPath = updated.receipt_path ?? null;
-            } catch (err) {
-              if (uploadedNewPath) {
-                deleteReceipt(uploadedNewPath).catch((cleanupErr) => {
-                  Sentry.captureException(cleanupErr, {
-                    tags: {
-                      operation: 'deleteReceipt',
-                      context: 'rollbackAfterReceiptUpdateFail',
-                    },
+          if (receiptOptions && expenseData.user_id) {
+            let uploadedNewPath: string | null = null;
+            ({
+              receiptPath,
+              receiptFailed,
+              uploadedNewPath,
+              oldPathToDelete,
+            } = await processReceipt(
+              savedExpense,
+              receiptOptions,
+              expenseData.user_id,
+            ));
+
+            if (
+              !receiptFailed &&
+              receiptPath !== (savedExpense.receipt_path ?? null)
+            ) {
+              try {
+                const updated = await dataService.updateExpense(
+                  { receipt_path: receiptPath },
+                  savedExpense.id,
+                );
+                receiptPath = updated.receipt_path ?? null;
+              } catch (err) {
+                if (uploadedNewPath) {
+                  deleteReceipt(uploadedNewPath).catch((cleanupErr) => {
+                    Sentry.captureException(cleanupErr, {
+                      tags: {
+                        operation: 'deleteReceipt',
+                        context: 'rollbackAfterReceiptUpdateFail',
+                      },
+                    });
                   });
-                });
+                }
+                throw err;
               }
-              throw err;
             }
           }
-        }
 
-        if (oldPathToDelete) {
-          deleteReceipt(oldPathToDelete).catch((err) => {
-            Sentry.captureException(err, {
-              tags: {
-                operation: 'deleteReceipt',
-                context: 'afterReceiptUpdateSuccess',
-              },
+          if (oldPathToDelete) {
+            deleteReceipt(oldPathToDelete).catch((err) => {
+              Sentry.captureException(err, {
+                tags: {
+                  operation: 'deleteReceipt',
+                  context: 'afterReceiptUpdateSuccess',
+                },
+              });
             });
-          });
-        }
-
-        const finalExpense = { ...savedExpense, receipt_path: receiptPath };
-
-        haptics.success();
-
-        const previousDebtId = getPreviousDebtId(expenseId, expensesRef.current);
-        const isDebtPayment = finalExpense.type === 'debt_payment';
-        setExpenses((prev) => {
-          if (expenseId) {
-            if (isDebtPayment) return prev.filter((e) => e.id !== expenseId);
-
-            return replaceById(prev, expenseId, finalExpense);
           }
 
-          if (isDebtPayment) return prev;
+          const finalExpense = { ...savedExpense, receipt_path: receiptPath };
 
-          return [finalExpense, ...prev];
-        });
+          haptics.success();
 
-        if (finalExpense.debt_id || previousDebtId) {
-          refreshDebts().catch((err) => {
-            Sentry.captureException(err, {
-              tags: { context: 'afterExpenseSubmitDebt' },
-            });
-          });
-        }
-
-        if (receiptFailed) {
-          toast({
-            variant: 'destructive',
-            description: t('expenses.toasts.receiptUploadFailed'),
-          });
-        } else {
-          toast({
-            variant: 'success',
-            title: pickByEdit(
-              expenseId,
-              t('expenses.toasts.updated'),
-              t('expenses.toasts.added'),
-            ),
-          });
-        }
-      } catch (error) {
-        if (isOfflineError(error)) {
-          const mutationType = pickByEdit(
-            expenseId,
-            'updateExpense',
-            'createExpense',
-          );
-          const tempId = pickByEdit<string | null>(
-            expenseId,
-            null,
-            createTempId(),
-          );
-          const idPayload = pickByEdit<Record<string, unknown>>(
-            expenseId,
-            { id: expenseId },
-            { __tempId: tempId },
-          );
-          await offlineQueue.enqueueWithReconcile(mutationType, {
-            ...expenseData,
-            ...idPayload,
-          } as Record<string, unknown>);
-          // The queued payload keeps extra_tag_ids for replay; the local
-          // optimistic row must not carry the write-only field.
-          const { extra_tag_ids: _extras, ...offlineRow } = expenseData;
-          const isDebtPayment = expenseData.type === 'debt_payment';
+          const previousDebtId = getPreviousDebtId(expenseId, expensesRef.current);
+          const isDebtPayment = finalExpense.type === 'debt_payment';
           setExpenses((prev) => {
             if (expenseId) {
               if (isDebtPayment) return prev.filter((e) => e.id !== expenseId);
 
-              return patchById(prev, expenseId, offlineRow);
+              return replaceById(prev, expenseId, finalExpense);
             }
 
             if (isDebtPayment) return prev;
 
-            const optimistic = {
-              ...offlineRow,
-              id: tempId as string,
-              created_at: new Date().toISOString(),
-            } as Expense;
-
-            return [optimistic, ...prev];
-          });
-          haptics.success();
-          toast({
-            variant: 'success',
-            title: t('offline.savedOffline'),
-            description: t('offline.willSync'),
+            return [finalExpense, ...prev];
           });
 
-          return;
+          if (finalExpense.debt_id || previousDebtId) {
+            refreshDebts().catch((err) => {
+              Sentry.captureException(err, {
+                tags: { context: 'afterExpenseSubmitDebt' },
+              });
+            });
+          }
+
+          if (receiptFailed) {
+            toast({
+              variant: 'destructive',
+              description: t('expenses.toasts.receiptUploadFailed'),
+            });
+          } else {
+            toast({
+              variant: 'success',
+              title: pickByEdit(
+                expenseId,
+                t('expenses.toasts.updated'),
+                t('expenses.toasts.added'),
+              ),
+            });
+          }
+        } catch (error) {
+          if (isOfflineError(error)) {
+            const mutationType = pickByEdit(
+              expenseId,
+              'updateExpense',
+              'createExpense',
+            );
+            const tempId = pickByEdit<string | null>(
+              expenseId,
+              null,
+              createTempId(),
+            );
+            const idPayload = pickByEdit<Record<string, unknown>>(
+              expenseId,
+              { id: expenseId },
+              { __tempId: tempId },
+            );
+            await offlineQueue.enqueueWithReconcile(mutationType, {
+              ...expenseData,
+              ...idPayload,
+            } as Record<string, unknown>);
+            // The queued payload keeps extra_tag_ids for replay; the local
+            // optimistic row must not carry the write-only field.
+            const { extra_tag_ids: _extras, ...offlineRow } = expenseData;
+            const isDebtPayment = expenseData.type === 'debt_payment';
+            setExpenses((prev) => {
+              if (expenseId) {
+                if (isDebtPayment) return prev.filter((e) => e.id !== expenseId);
+
+                return patchById(prev, expenseId, offlineRow);
+              }
+
+              if (isDebtPayment) return prev;
+
+              const optimistic = {
+                ...offlineRow,
+                id: tempId as string,
+                created_at: new Date().toISOString(),
+              } as Expense;
+
+              return [optimistic, ...prev];
+            });
+            haptics.success();
+            toast({
+              variant: 'success',
+              title: t('offline.savedOffline'),
+              description: t('offline.willSync'),
+            });
+
+            return;
+          }
+          haptics.error();
+          Sentry.captureException(error, {
+            tags: {
+              operation: pickByEdit(expenseId, 'updateExpense', 'createExpense'),
+            },
+          });
+          showErrorToast(
+            pickByEdit(
+              expenseId,
+              t('expenses.toasts.updateFailed'),
+              t('expenses.toasts.addFailed'),
+            ),
+            () => {
+              void run().catch(() => undefined);
+            },
+          );
+          throw error;
         }
-        haptics.error();
-        Sentry.captureException(error, {
-          tags: {
-            operation: pickByEdit(expenseId, 'updateExpense', 'createExpense'),
-          },
-        });
-        showErrorToast(
-          pickByEdit(
-            expenseId,
-            t('expenses.toasts.updateFailed'),
-            t('expenses.toasts.addFailed'),
-          ),
-          () => {
-            void handleExpenseSubmit(expenseData, expenseId, receiptOptions)
-              .catch(() => undefined);
-          },
-        );
-        throw error;
-      }
+      };
+
+      return run();
     },
     [isInitialized, expensesRef, setExpenses, refreshDebts, showErrorToast, toast, t],
   );
 
   const handleExpenseDelete = useCallback(
     async (expenseId: string) => {
-      if (!isInitialized) {
-        return;
-      }
-
-      haptics.warning();
-      const existing = expensesRef.current.find((e) => e.id === expenseId);
-      const receiptPath = existing?.receipt_path ?? null;
-      const deletedDebtId = existing?.debt_id ?? null;
-      try {
-        await dataService.deleteExpense(expenseId);
-
-        setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
-
-        if (deletedDebtId) {
-          refreshDebts().catch((err) => {
-            Sentry.captureException(err, {
-              tags: { context: 'afterExpenseDeleteDebt' },
-            });
-          });
-        }
-
-        if (receiptPath) {
-          deleteReceipt(receiptPath).catch((err) => {
-            Sentry.captureException(err, {
-              tags: { operation: 'deleteReceipt', context: 'afterExpenseDelete' },
-            });
-          });
-        }
-      } catch (error) {
-        if (isOfflineError(error)) {
-          await offlineQueue.enqueueWithReconcile('deleteExpense', {
-            id: expenseId,
-          });
-          setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
-          haptics.success();
-          toast({
-            variant: 'success',
-            title: t('offline.deleteSavedOffline'),
-            description: t('offline.willSync'),
-          });
-
+      const run = async () => {
+        if (!isInitialized) {
           return;
         }
-        haptics.error();
-        Sentry.captureException(error, { tags: { operation: 'deleteExpense' } });
-        showErrorToast(t('expenses.toasts.deleteFailed'), () => {
-          void handleExpenseDelete(expenseId).catch(() => undefined);
-        });
-        throw error;
-      }
+
+        haptics.warning();
+        const existing = expensesRef.current.find((e) => e.id === expenseId);
+        const receiptPath = existing?.receipt_path ?? null;
+        const deletedDebtId = existing?.debt_id ?? null;
+        try {
+          await dataService.deleteExpense(expenseId);
+
+          setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
+
+          if (deletedDebtId) {
+            refreshDebts().catch((err) => {
+              Sentry.captureException(err, {
+                tags: { context: 'afterExpenseDeleteDebt' },
+              });
+            });
+          }
+
+          if (receiptPath) {
+            deleteReceipt(receiptPath).catch((err) => {
+              Sentry.captureException(err, {
+                tags: { operation: 'deleteReceipt', context: 'afterExpenseDelete' },
+              });
+            });
+          }
+        } catch (error) {
+          if (isOfflineError(error)) {
+            await offlineQueue.enqueueWithReconcile('deleteExpense', {
+              id: expenseId,
+            });
+            setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
+            haptics.success();
+            toast({
+              variant: 'success',
+              title: t('offline.deleteSavedOffline'),
+              description: t('offline.willSync'),
+            });
+
+            return;
+          }
+          haptics.error();
+          Sentry.captureException(error, { tags: { operation: 'deleteExpense' } });
+          showErrorToast(t('expenses.toasts.deleteFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [isInitialized, expensesRef, setExpenses, refreshDebts, showErrorToast, toast, t],
   );

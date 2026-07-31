@@ -21,80 +21,88 @@ export const useDebtOps = () => {
       debtData: Partial<Debt>,
       debtId?: string,
     ): Promise<Debt | null> => {
-      if (!isInitialized) return null;
+      const run = async (): Promise<Debt | null> => {
+        if (!isInitialized) return null;
 
-      try {
-        let saved: Debt;
-        if (debtId) {
-          saved = await dataService.updateDebt(debtId, debtData);
-        } else {
-          saved = await dataService.createDebt(debtData);
+        try {
+          let saved: Debt;
+          if (debtId) {
+            saved = await dataService.updateDebt(debtId, debtData);
+          } else {
+            saved = await dataService.createDebt(debtData);
+          }
+
+          haptics.success();
+          setDebts((prev) => {
+            if (debtId) return replaceById(prev, debtId, saved);
+
+            return [...prev, saved];
+          });
+
+          toast({
+            variant: 'success',
+            title: pickByEdit(
+              debtId,
+              t('debts.toasts.updated'),
+              t('debts.toasts.added'),
+            ),
+          });
+
+          return saved;
+        } catch (error) {
+          haptics.error();
+          Sentry.captureException(error, {
+            tags: { operation: pickByEdit(debtId, 'updateDebt', 'createDebt') },
+          });
+          showErrorToast(
+            pickByEdit(
+              debtId,
+              t('debts.toasts.updateFailed'),
+              t('debts.toasts.addFailed'),
+            ),
+            () => {
+              void run().catch(() => undefined);
+            },
+          );
+          throw error;
         }
+      };
 
-        haptics.success();
-        setDebts((prev) => {
-          if (debtId) return replaceById(prev, debtId, saved);
-
-          return [...prev, saved];
-        });
-
-        toast({
-          variant: 'success',
-          title: pickByEdit(
-            debtId,
-            t('debts.toasts.updated'),
-            t('debts.toasts.added'),
-          ),
-        });
-
-        return saved;
-      } catch (error) {
-        haptics.error();
-        Sentry.captureException(error, {
-          tags: { operation: pickByEdit(debtId, 'updateDebt', 'createDebt') },
-        });
-        showErrorToast(
-          pickByEdit(
-            debtId,
-            t('debts.toasts.updateFailed'),
-            t('debts.toasts.addFailed'),
-          ),
-          () => {
-            void handleDebtSubmit(debtData, debtId).catch(() => undefined);
-          },
-        );
-        throw error;
-      }
+      return run();
     },
     [isInitialized, setDebts, showErrorToast, toast, t],
   );
 
   const handleDebtArchive = useCallback(
     async (debtId: string) => {
-      if (!isInitialized) return;
+      const run = async () => {
+        if (!isInitialized) return;
 
-      haptics.warning();
-      let previousDebts: Debt[] = [];
-      setDebts((prev) => {
-        previousDebts = prev;
+        haptics.warning();
+        let previousDebts: Debt[] = [];
+        setDebts((prev) => {
+          previousDebts = prev;
 
-        return prev.filter((d) => d.id !== debtId);
-      });
-
-      try {
-        await dataService.archiveDebt(debtId);
-        haptics.success();
-      } catch (error) {
-        haptics.error();
-        setDebts(previousDebts);
-        Sentry.captureException(error, {
-          tags: { operation: 'archiveDebt' },
+          return prev.filter((d) => d.id !== debtId);
         });
-        showErrorToast(t('debts.toasts.archiveFailed'), () => {
-          void handleDebtArchive(debtId).catch(() => undefined);
-        });
-        throw error;
-      }
+
+        try {
+          await dataService.archiveDebt(debtId);
+          haptics.success();
+        } catch (error) {
+          haptics.error();
+          setDebts(previousDebts);
+          Sentry.captureException(error, {
+            tags: { operation: 'archiveDebt' },
+          });
+          showErrorToast(t('debts.toasts.archiveFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [isInitialized, setDebts, showErrorToast, t],
   );

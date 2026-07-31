@@ -38,7 +38,8 @@ vi.mock('@/components/categories/CategoryManager', () => ({
   ),
 }));
 
-import FormsManager, { FORM_TYPES } from '@/components/layout/FormsManager';
+import FormsManager from '@/components/layout/FormsManager';
+import { FORM_TYPES } from '@/components/layout/formTypes';
 
 const expense: Expense = {
   id: 'e1',

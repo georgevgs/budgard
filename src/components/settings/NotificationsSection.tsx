@@ -74,13 +74,6 @@ const NotificationsSection = ({
 
 export default NotificationsSection;
 
-export const localToUtcHour = (localHour: number): number => {
-  const d = new Date();
-  d.setHours(localHour, 0, 0, 0);
-
-  return d.getUTCHours();
-};
-
 // --- Helpers ---
 
 const REMINDER_HOURS = Array.from({ length: 24 }, (_, i) => i);

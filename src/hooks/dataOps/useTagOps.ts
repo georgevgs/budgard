@@ -15,93 +15,105 @@ export const useTagOps = () => {
 
   const handleTagCreate = useCallback(
     async (name: string, color: string): Promise<Tag> => {
-      const optimisticTag: Tag = {
-        id: `temp-${Date.now()}`,
-        user_id: '',
-        name,
-        color,
-        created_at: new Date().toISOString(),
-      };
+      const run = async (): Promise<Tag> => {
+        const optimisticTag: Tag = {
+          id: `temp-${Date.now()}`,
+          user_id: '',
+          name,
+          color,
+          created_at: new Date().toISOString(),
+        };
 
-      setTags((prev) =>
-        [...prev, optimisticTag].sort((a, b) => a.name.localeCompare(b.name)),
-      );
-
-      try {
-        const savedTag = await dataService.createTag({ name, color });
-        haptics.success();
         setTags((prev) =>
-          [...prev.filter((t) => t.id !== optimisticTag.id), savedTag].sort(
-            (a, b) => a.name.localeCompare(b.name),
-          ),
+          [...prev, optimisticTag].sort((a, b) => a.name.localeCompare(b.name)),
         );
 
-        return savedTag;
-      } catch (error) {
-        haptics.error();
-        setTags((prev) => prev.filter((t) => t.id !== optimisticTag.id));
-        Sentry.captureException(error, { tags: { operation: 'createTag' } });
-        showErrorToast(t('expenses.toasts.tagCreateFailed'), () => {
-          void handleTagCreate(name, color).catch(() => undefined);
-        });
-        throw error;
-      }
+        try {
+          const savedTag = await dataService.createTag({ name, color });
+          haptics.success();
+          setTags((prev) =>
+            [...prev.filter((t) => t.id !== optimisticTag.id), savedTag].sort(
+              (a, b) => a.name.localeCompare(b.name),
+            ),
+          );
+
+          return savedTag;
+        } catch (error) {
+          haptics.error();
+          setTags((prev) => prev.filter((t) => t.id !== optimisticTag.id));
+          Sentry.captureException(error, { tags: { operation: 'createTag' } });
+          showErrorToast(t('expenses.toasts.tagCreateFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [setTags, showErrorToast, t],
   );
 
   const handleTagUpdate = useCallback(
     async (tagId: string, name: string) => {
-      let previousTags: Tag[] = [];
-      setTags((prev) => {
-        previousTags = prev;
+      const run = async () => {
+        let previousTags: Tag[] = [];
+        setTags((prev) => {
+          previousTags = prev;
 
-        return prev
-          .map((tag) => renameTag(tag, tagId, name))
-          .sort((a, b) => a.name.localeCompare(b.name));
-      });
-      setExpenses((prev) => prev.map((e) => renameTagRefs(e, tagId, name)));
-
-      try {
-        await dataService.updateTag(tagId, { name });
-        haptics.success();
-      } catch (error) {
-        haptics.error();
-        setTags(previousTags);
-        refreshExpenses();
-        Sentry.captureException(error, { tags: { operation: 'updateTag' } });
-        showErrorToast(t('expenses.toasts.tagUpdateFailed'), () => {
-          void handleTagUpdate(tagId, name).catch(() => undefined);
+          return prev
+            .map((tag) => renameTag(tag, tagId, name))
+            .sort((a, b) => a.name.localeCompare(b.name));
         });
-        throw error;
-      }
+        setExpenses((prev) => prev.map((e) => renameTagRefs(e, tagId, name)));
+
+        try {
+          await dataService.updateTag(tagId, { name });
+          haptics.success();
+        } catch (error) {
+          haptics.error();
+          setTags(previousTags);
+          refreshExpenses();
+          Sentry.captureException(error, { tags: { operation: 'updateTag' } });
+          showErrorToast(t('expenses.toasts.tagUpdateFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [setTags, setExpenses, refreshExpenses, showErrorToast, t],
   );
 
   const handleTagDelete = useCallback(
     async (tagId: string) => {
-      let previousTags: Tag[] = [];
-      setTags((prev) => {
-        previousTags = prev;
+      const run = async () => {
+        let previousTags: Tag[] = [];
+        setTags((prev) => {
+          previousTags = prev;
 
-        return prev.filter((tag) => tag.id !== tagId);
-      });
-      setExpenses((prev) => prev.map((e) => clearTagRefs(e, tagId)));
-
-      try {
-        await dataService.deleteTag(tagId);
-        haptics.success();
-      } catch (error) {
-        haptics.error();
-        setTags(previousTags);
-        refreshExpenses();
-        Sentry.captureException(error, { tags: { operation: 'deleteTag' } });
-        showErrorToast(t('expenses.toasts.tagDeleteFailed'), () => {
-          void handleTagDelete(tagId).catch(() => undefined);
+          return prev.filter((tag) => tag.id !== tagId);
         });
-        throw error;
-      }
+        setExpenses((prev) => prev.map((e) => clearTagRefs(e, tagId)));
+
+        try {
+          await dataService.deleteTag(tagId);
+          haptics.success();
+        } catch (error) {
+          haptics.error();
+          setTags(previousTags);
+          refreshExpenses();
+          Sentry.captureException(error, { tags: { operation: 'deleteTag' } });
+          showErrorToast(t('expenses.toasts.tagDeleteFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [setTags, setExpenses, refreshExpenses, showErrorToast, t],
   );

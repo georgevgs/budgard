@@ -159,32 +159,23 @@ const OnboardingGate = () => {
   const { isInitialized, monthlyBudget } = useDataConfig();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  useEffect(() => {
-    if (
-      shouldShowOnboarding(
-        isInitialized,
-        expenses.length,
-        categories.length,
-        monthlyBudget,
-      )
-    ) {
-      setShowOnboarding(true);
-    }
-  }, [isInitialized, expenses.length, categories.length, monthlyBudget]);
+  const onboardingDue = shouldShowOnboarding(
+    isInitialized,
+    expenses.length,
+    categories.length,
+    monthlyBudget,
+  );
+  // Latch during render (guarded): once due, the flow stays open even if data
+  // created mid-flow makes the condition false again. Completing the flow
+  // writes the onboarded flag before closing, so this never re-latches after.
+  if (onboardingDue && !showOnboarding) {
+    setShowOnboarding(true);
+  }
 
   // A landing-page "Get Pro" choice completes here after sign-in. Blocked
   // until the data layer knows whether onboarding is due — and while it runs —
   // so the upgrade dialog never opens underneath the onboarding flow.
-  useUpgradeIntent(
-    !isInitialized ||
-      showOnboarding ||
-      shouldShowOnboarding(
-        isInitialized,
-        expenses.length,
-        categories.length,
-        monthlyBudget,
-      ),
-  );
+  useUpgradeIntent(!isInitialized || showOnboarding || onboardingDue);
 
   return renderOnboarding(showOnboarding, () => setShowOnboarding(false));
 };
@@ -313,14 +304,15 @@ const isMainTabPath = (path: string): path is MainTabPath =>
 
 const MainTabsLayout = () => {
   const { pathname } = useLocation();
-  // Track which tabs have been visited via a ref so we can update during
-  // render — useState + useEffect would leave a one-frame gap where the
+  // Track which tabs have been visited. Recorded during render (guarded
+  // setState) — useState + useEffect would leave a one-frame gap where the
   // target tab isn't in the set yet.
-  const visitedRef = useRef<Set<MainTabPath>>(new Set());
-  if (isMainTabPath(pathname)) {
-    visitedRef.current.add(pathname);
+  const [visited, setVisited] = useState<ReadonlySet<MainTabPath>>(
+    () => new Set(),
+  );
+  if (isMainTabPath(pathname) && !visited.has(pathname)) {
+    setVisited((prev) => new Set(prev).add(pathname));
   }
-  const visited = visitedRef.current;
 
   return (
     <>
@@ -359,7 +351,7 @@ const MainTabsLayout = () => {
 const renderKeepAliveTab = (
   tabPath: MainTabPath,
   activePath: string,
-  visited: Set<MainTabPath>,
+  visited: ReadonlySet<MainTabPath>,
   fallback: ReactNode,
   element: ReactNode,
 ) => {

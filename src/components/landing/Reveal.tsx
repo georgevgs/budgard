@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { prefersReducedMotion } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -9,21 +10,12 @@ type Props = {
 
 const Reveal = ({ children, delay = 0, className }: Props) => {
   const ref = useRef<HTMLDivElement | null>(null);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(() => prefersReducedMotion());
 
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
-
-    const prefersReducedMotion = window.matchMedia(
-      '(prefers-reduced-motion: reduce)',
-    ).matches;
-
-    if (prefersReducedMotion) {
-      setVisible(true);
-
-      return;
-    }
+    if (prefersReducedMotion()) return;
 
     const observer = new IntersectionObserver(
       (entries) => {

@@ -6,14 +6,7 @@ import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 import ExpensesForm from '@/components/expenses/ExpensesForm';
 import { CategoryManager } from '@/components/categories/CategoryManager';
 import { useCategoriesData, useDataConfig } from '@/contexts/DataContext';
-
-export const FORM_TYPES = {
-  NEW_EXPENSE: 'newExpense',
-  EDIT_EXPENSE: 'editExpense',
-  NEW_CATEGORY: 'newCategory',
-} as const;
-
-export type FormType = (typeof FORM_TYPES)[keyof typeof FORM_TYPES] | null;
+import { FORM_TYPES, type FormType } from '@/components/layout/formTypes';
 
 type FormsManagerProps = {
   formType: FormType;

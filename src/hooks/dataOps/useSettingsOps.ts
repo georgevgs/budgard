@@ -26,89 +26,105 @@ export const useSettingsOps = () => {
 
   const handleCurrencyUpdate = useCallback(
     async (currency: string) => {
-      const previousCurrency = defaultCurrency;
-      setDefaultCurrency(currency);
+      const run = async () => {
+        const previousCurrency = defaultCurrency;
+        setDefaultCurrency(currency);
 
-      try {
-        await dataService.updateDefaultCurrency(currency);
-      } catch (error) {
-        haptics.error();
-        setDefaultCurrency(previousCurrency);
-        Sentry.captureException(error, {
-          tags: { operation: 'updateDefaultCurrency' },
-        });
-        showErrorToast(t('settings.currency.updateFailed'), () => {
-          void handleCurrencyUpdate(currency).catch(() => undefined);
-        });
-        throw error;
-      }
+        try {
+          await dataService.updateDefaultCurrency(currency);
+        } catch (error) {
+          haptics.error();
+          setDefaultCurrency(previousCurrency);
+          Sentry.captureException(error, {
+            tags: { operation: 'updateDefaultCurrency' },
+          });
+          showErrorToast(t('settings.currency.updateFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [defaultCurrency, setDefaultCurrency, showErrorToast, t],
   );
 
   const handleDailyReminderHourUpdate = useCallback(
     async (hour: number | null) => {
-      const previous = dailyReminderHour;
-      setDailyReminderHour(hour);
+      const run = async () => {
+        const previous = dailyReminderHour;
+        setDailyReminderHour(hour);
 
-      try {
-        await dataService.updateDailyReminderHour(hour);
-      } catch (error) {
-        haptics.error();
-        setDailyReminderHour(previous);
-        Sentry.captureException(error, {
-          tags: { operation: 'updateDailyReminderHour' },
-        });
-        showErrorToast(t('settings.notifications.dailyReminderFailed'), () => {
-          void handleDailyReminderHourUpdate(hour).catch(() => undefined);
-        });
-        throw error;
-      }
+        try {
+          await dataService.updateDailyReminderHour(hour);
+        } catch (error) {
+          haptics.error();
+          setDailyReminderHour(previous);
+          Sentry.captureException(error, {
+            tags: { operation: 'updateDailyReminderHour' },
+          });
+          showErrorToast(t('settings.notifications.dailyReminderFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [dailyReminderHour, setDailyReminderHour, showErrorToast, t],
   );
 
   const handleNotificationPreferenceUpdate = useCallback(
     async (key: NotificationPreferenceKey, enabled: boolean) => {
-      const previous = notificationPreferences;
-      const next = { ...previous, [key]: enabled };
-      setNotificationPreferences(next);
+      const run = async () => {
+        const previous = notificationPreferences;
+        const next = { ...previous, [key]: enabled };
+        setNotificationPreferences(next);
 
-      try {
-        await dataService.updateNotificationPreferences(next);
-      } catch (error) {
-        haptics.error();
-        setNotificationPreferences(previous);
-        Sentry.captureException(error, {
-          tags: { operation: 'updateNotificationPreferences' },
-        });
-        showErrorToast(t('settings.notifications.preferencesUpdateFailed'), () => {
-          void handleNotificationPreferenceUpdate(key, enabled).catch(() => undefined);
-        });
-        throw error;
-      }
+        try {
+          await dataService.updateNotificationPreferences(next);
+        } catch (error) {
+          haptics.error();
+          setNotificationPreferences(previous);
+          Sentry.captureException(error, {
+            tags: { operation: 'updateNotificationPreferences' },
+          });
+          showErrorToast(t('settings.notifications.preferencesUpdateFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [notificationPreferences, setNotificationPreferences, showErrorToast, t],
   );
 
   const handleSavingsPctUpdate = useCallback(
     async (pct: number | null) => {
-      const previous = defaultSavingsPct;
-      setDefaultSavingsPct(pct);
+      const run = async () => {
+        const previous = defaultSavingsPct;
+        setDefaultSavingsPct(pct);
 
-      try {
-        await dataService.updateDefaultSavingsPct(pct);
-      } catch (error) {
-        haptics.error();
-        setDefaultSavingsPct(previous);
-        Sentry.captureException(error, {
-          tags: { operation: 'updateDefaultSavingsPct' },
-        });
-        showErrorToast(t('income.toasts.savingsRateUpdateFailed'), () => {
-          void handleSavingsPctUpdate(pct).catch(() => undefined);
-        });
-        throw error;
-      }
+        try {
+          await dataService.updateDefaultSavingsPct(pct);
+        } catch (error) {
+          haptics.error();
+          setDefaultSavingsPct(previous);
+          Sentry.captureException(error, {
+            tags: { operation: 'updateDefaultSavingsPct' },
+          });
+          showErrorToast(t('income.toasts.savingsRateUpdateFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [defaultSavingsPct, setDefaultSavingsPct, showErrorToast, t],
   );

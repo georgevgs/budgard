@@ -18,88 +18,100 @@ export const useGoalOps = () => {
 
   const handleGoalCreate = useCallback(
     async (goalData: Partial<Goal>) => {
-      if (!isInitialized) return;
+      const run = async () => {
+        if (!isInitialized) return;
 
-      const optimisticGoal = {
-        ...goalData,
-        id: `temp-${Date.now()}`,
-        is_completed: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      } as Goal;
+        const optimisticGoal = {
+          ...goalData,
+          id: `temp-${Date.now()}`,
+          is_completed: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        } as Goal;
 
-      setGoals((prev) => [optimisticGoal, ...prev]);
+        setGoals((prev) => [optimisticGoal, ...prev]);
 
-      try {
-        const saved = await dataService.createGoal(goalData);
-        haptics.success();
-        setGoals((prev) => replaceById(prev, optimisticGoal.id, saved));
-        toast({ variant: 'success', title: t('goals.toasts.created') });
-      } catch (error) {
-        haptics.error();
-        setGoals((prev) => prev.filter((g) => g.id !== optimisticGoal.id));
-        Sentry.captureException(error, { tags: { operation: 'createGoal' } });
-        showErrorToast(t('goals.toasts.createFailed'), () => {
-          void handleGoalCreate(goalData).catch(() => undefined);
-        });
-        throw error;
-      }
+        try {
+          const saved = await dataService.createGoal(goalData);
+          haptics.success();
+          setGoals((prev) => replaceById(prev, optimisticGoal.id, saved));
+          toast({ variant: 'success', title: t('goals.toasts.created') });
+        } catch (error) {
+          haptics.error();
+          setGoals((prev) => prev.filter((g) => g.id !== optimisticGoal.id));
+          Sentry.captureException(error, { tags: { operation: 'createGoal' } });
+          showErrorToast(t('goals.toasts.createFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [isInitialized, setGoals, showErrorToast, toast, t],
   );
 
   const handleGoalUpdate = useCallback(
     async (goalId: string, goalData: Partial<Goal>) => {
-      if (!isInitialized) return;
+      const run = async () => {
+        if (!isInitialized) return;
 
-      let previousGoals: Goal[] = [];
-      setGoals((prev) => {
-        previousGoals = prev;
+        let previousGoals: Goal[] = [];
+        setGoals((prev) => {
+          previousGoals = prev;
 
-        return patchById(prev, goalId, goalData);
-      });
-
-      try {
-        const saved = await dataService.updateGoal(goalId, goalData);
-        haptics.success();
-        setGoals((prev) => replaceById(prev, goalId, saved));
-      } catch (error) {
-        haptics.error();
-        setGoals(previousGoals);
-        Sentry.captureException(error, { tags: { operation: 'updateGoal' } });
-        showErrorToast(t('goals.toasts.updateFailed'), () => {
-          void handleGoalUpdate(goalId, goalData).catch(() => undefined);
+          return patchById(prev, goalId, goalData);
         });
-        throw error;
-      }
+
+        try {
+          const saved = await dataService.updateGoal(goalId, goalData);
+          haptics.success();
+          setGoals((prev) => replaceById(prev, goalId, saved));
+        } catch (error) {
+          haptics.error();
+          setGoals(previousGoals);
+          Sentry.captureException(error, { tags: { operation: 'updateGoal' } });
+          showErrorToast(t('goals.toasts.updateFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [isInitialized, setGoals, showErrorToast, t],
   );
 
   const handleGoalDelete = useCallback(
     async (goalId: string) => {
-      if (!isInitialized) return;
+      const run = async () => {
+        if (!isInitialized) return;
 
-      haptics.warning();
-      let previousGoals: Goal[] = [];
-      setGoals((prev) => {
-        previousGoals = prev;
+        haptics.warning();
+        let previousGoals: Goal[] = [];
+        setGoals((prev) => {
+          previousGoals = prev;
 
-        return prev.filter((g) => g.id !== goalId);
-      });
-
-      try {
-        await dataService.deleteGoal(goalId);
-        haptics.success();
-      } catch (error) {
-        haptics.error();
-        setGoals(previousGoals);
-        Sentry.captureException(error, { tags: { operation: 'deleteGoal' } });
-        showErrorToast(t('goals.toasts.deleteFailed'), () => {
-          void handleGoalDelete(goalId).catch(() => undefined);
+          return prev.filter((g) => g.id !== goalId);
         });
-        throw error;
-      }
+
+        try {
+          await dataService.deleteGoal(goalId);
+          haptics.success();
+        } catch (error) {
+          haptics.error();
+          setGoals(previousGoals);
+          Sentry.captureException(error, { tags: { operation: 'deleteGoal' } });
+          showErrorToast(t('goals.toasts.deleteFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [isInitialized, setGoals, showErrorToast, t],
   );

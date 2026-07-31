@@ -1,13 +1,5 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useSyncExternalStore,
-  type ReactNode,
-} from 'react';
-import * as Sentry from '@/lib/sentry';
+import { createContext, useContext } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { authStore } from '@/lib/authStore';
 
 type AuthContextType = {
   session: Session | null;
@@ -15,31 +7,9 @@ type AuthContextType = {
   isAuthenticated: boolean;
 };
 
-const AuthContext = createContext<AuthContextType | null>(null);
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { session, isLoading } = useSyncExternalStore(
-    authStore.subscribe,
-    authStore.getSnapshot,
-    authStore.getServerSnapshot,
-  );
-
-  useEffect(() => {
-    if (session?.user) {
-      Sentry.setUser({ id: session.user.id });
-    } else {
-      Sentry.setUser(null);
-    }
-  }, [session]);
-
-  const value = {
-    session,
-    isLoading,
-    isAuthenticated: !!session?.user,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+// The provider component lives in AuthProvider.tsx so this module exports no
+// components and useAuth keeps fast refresh.
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);

@@ -124,6 +124,13 @@ export const loadDataSnapshot = (userId: string): DataSnapshot | null => {
   }
 };
 
+// True when loadDataSnapshot would hydrate for this user (same user, version,
+// age and shape checks). Lets the boot effect decide failure-toast suppression
+// without re-plumbing the render-time hydration result into the effect.
+export const hasDataSnapshot = (userId: string): boolean => {
+  return loadDataSnapshot(userId) !== null;
+};
+
 export const saveDataSnapshot = (userId: string, data: DataSnapshot): void => {
   const cutoff = getRecentCutoff();
   const stored: StoredSnapshot = {

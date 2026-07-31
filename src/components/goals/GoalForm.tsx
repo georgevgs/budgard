@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDialogDirty } from '@/hooks/useDialogDirty';
 import { parseISO } from 'date-fns';
@@ -48,7 +48,10 @@ const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
 
   useDialogDirty(form.formState.isDirty);
 
-  const sourceType = form.watch('source_type');
+  const sourceType = useWatch({
+    control: form.control,
+    name: 'source_type',
+  });
   const isEditing = Boolean(goal);
 
   const handleSubmit = async (values: GoalFormData) => {

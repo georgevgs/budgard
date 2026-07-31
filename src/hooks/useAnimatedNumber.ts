@@ -17,9 +17,13 @@ export const useAnimatedNumber = (target: number): number => {
     }
 
     if (prefersReducedMotion()) {
-      setDisplay(target);
+      animationRef.current = requestAnimationFrame(() => setDisplay(target));
 
-      return;
+      return () => {
+        if (animationRef.current !== null) {
+          cancelAnimationFrame(animationRef.current);
+        }
+      };
     }
 
     startValueRef.current = display;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import FolderOpen from 'lucide-react/dist/esm/icons/folder-open';
@@ -48,11 +48,22 @@ const CategoryBudgetsManager = ({ isOpen, onClose }: Props) => {
 
   // Reset drafts whenever the dialog opens or the underlying caps change
   // (e.g. another tab updated them).
-  useEffect(() => {
-    if (!isOpen) return;
-    setDrafts(buildInitialDrafts(expenseCategories, categoryBudgets));
-    setError(null);
-  }, [isOpen, expenseCategories, categoryBudgets]);
+  const [prevInputs, setPrevInputs] = useState({
+    isOpen,
+    expenseCategories,
+    categoryBudgets,
+  });
+  const inputsChanged =
+    prevInputs.isOpen !== isOpen ||
+    prevInputs.expenseCategories !== expenseCategories ||
+    prevInputs.categoryBudgets !== categoryBudgets;
+  if (inputsChanged) {
+    setPrevInputs({ isOpen, expenseCategories, categoryBudgets });
+    if (isOpen) {
+      setDrafts(buildInitialDrafts(expenseCategories, categoryBudgets));
+      setError(null);
+    }
+  }
 
   const sortedCategories = useMemo(
     () =>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import {
   useDataConfig,
@@ -57,11 +57,11 @@ export const useAnalyticsData = () => {
     () => availableYears[0] || new Date().getFullYear(),
   );
 
-  useEffect(() => {
-    if (availableYears.length > 0 && !availableYears.includes(selectedYear)) {
-      setSelectedYear(availableYears[0]);
-    }
-  }, [availableYears, selectedYear]);
+  // Clamp during render (guarded): if the selected year disappears (e.g. the
+  // free-tier window slid past it), snap to the newest available year.
+  if (availableYears.length > 0 && !availableYears.includes(selectedYear)) {
+    setSelectedYear(availableYears[0]);
+  }
 
   const yearExpenses = useMemo(() => {
     return expenses.filter((e) => Number(e.date.slice(0, 4)) === selectedYear);

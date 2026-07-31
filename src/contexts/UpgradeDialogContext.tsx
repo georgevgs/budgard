@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext } from 'react';
 import type { ProPlanId } from '@/lib/proPlans';
 
 // Global open/close state for the single app-wide UpgradeDialog instance, so
@@ -12,35 +12,9 @@ type UpgradeDialogContextType = {
   closeUpgrade: () => void;
 };
 
-const UpgradeDialogContext = createContext<UpgradeDialogContextType | null>(null);
-
-export const UpgradeDialogProvider = ({ children }: { children: ReactNode }) => {
-  const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
-  const [preferredPlan, setPreferredPlan] = useState<ProPlanId>('yearly');
-
-  const value = useMemo(
-    () => ({
-      isUpgradeOpen,
-      preferredPlan,
-      openUpgrade: (plan?: ProPlanId) => {
-        // Strict value check, not truthiness: call sites like
-        // onClick={openUpgrade} pass a MouseEvent as the first argument.
-        if (plan === 'monthly' || plan === 'yearly') {
-          setPreferredPlan(plan);
-        }
-        setIsUpgradeOpen(true);
-      },
-      closeUpgrade: () => setIsUpgradeOpen(false),
-    }),
-    [isUpgradeOpen, preferredPlan],
-  );
-
-  return (
-    <UpgradeDialogContext.Provider value={value}>
-      {children}
-    </UpgradeDialogContext.Provider>
-  );
-};
+// The provider component lives in UpgradeDialogProvider.tsx so this module
+// exports no components and useUpgradeDialog keeps fast refresh.
+export const UpgradeDialogContext = createContext<UpgradeDialogContextType | null>(null);
 
 export const useUpgradeDialog = () => {
   const context = useContext(UpgradeDialogContext);

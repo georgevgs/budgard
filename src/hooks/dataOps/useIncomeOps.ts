@@ -31,130 +31,138 @@ export const useIncomeOps = () => {
       incomeData: Partial<Expense>,
       incomeId?: string,
     ): Promise<Expense | null> => {
-      if (!isInitialized) {
-        return null;
-      }
-
-      try {
-        let savedIncome: Expense;
-        if (incomeId) {
-          savedIncome = await dataService.updateIncome(incomeData, incomeId);
-        } else {
-          savedIncome = await dataService.createIncome(incomeData);
-        }
-
-        haptics.success();
-        setIncomes((prev) => {
-          if (incomeId) return replaceById(prev, incomeId, savedIncome);
-
-          return [savedIncome, ...prev];
-        });
-        toast({
-          variant: 'success',
-          title: pickByEdit(
-            incomeId,
-            t('income.toasts.updated'),
-            t('income.toasts.added'),
-          ),
-        });
-
-        return savedIncome;
-      } catch (error) {
-        if (isOfflineError(error)) {
-          const mutationType = pickByEdit(
-            incomeId,
-            'updateIncome',
-            'createIncome',
-          );
-          const tempId = pickByEdit<string | null>(
-            incomeId,
-            null,
-            createTempId(),
-          );
-          const idPayload = pickByEdit<Record<string, unknown>>(
-            incomeId,
-            { id: incomeId },
-            { __tempId: tempId },
-          );
-          await offlineQueue.enqueueWithReconcile(mutationType, {
-            ...incomeData,
-            ...idPayload,
-          } as Record<string, unknown>);
-          setIncomes((prev) => {
-            if (incomeId) {
-              return patchById(prev, incomeId, incomeData);
-            }
-            const optimistic = {
-              ...incomeData,
-              id: tempId as string,
-              created_at: new Date().toISOString(),
-            } as Expense;
-
-            return [optimistic, ...prev];
-          });
-          haptics.success();
-          toast({
-            variant: 'success',
-            title: t('offline.savedOffline'),
-            description: t('offline.willSync'),
-          });
-
+      const run = async (): Promise<Expense | null> => {
+        if (!isInitialized) {
           return null;
         }
-        haptics.error();
-        Sentry.captureException(error, {
-          tags: {
-            operation: pickByEdit(incomeId, 'updateIncome', 'createIncome'),
-          },
-        });
-        showErrorToast(
-          pickByEdit(
-            incomeId,
-            t('income.toasts.updateFailed'),
-            t('income.toasts.addFailed'),
-          ),
-          () => {
-            void handleIncomeSubmit(incomeData, incomeId).catch(() => undefined);
-          },
-        );
-        throw error;
-      }
+
+        try {
+          let savedIncome: Expense;
+          if (incomeId) {
+            savedIncome = await dataService.updateIncome(incomeData, incomeId);
+          } else {
+            savedIncome = await dataService.createIncome(incomeData);
+          }
+
+          haptics.success();
+          setIncomes((prev) => {
+            if (incomeId) return replaceById(prev, incomeId, savedIncome);
+
+            return [savedIncome, ...prev];
+          });
+          toast({
+            variant: 'success',
+            title: pickByEdit(
+              incomeId,
+              t('income.toasts.updated'),
+              t('income.toasts.added'),
+            ),
+          });
+
+          return savedIncome;
+        } catch (error) {
+          if (isOfflineError(error)) {
+            const mutationType = pickByEdit(
+              incomeId,
+              'updateIncome',
+              'createIncome',
+            );
+            const tempId = pickByEdit<string | null>(
+              incomeId,
+              null,
+              createTempId(),
+            );
+            const idPayload = pickByEdit<Record<string, unknown>>(
+              incomeId,
+              { id: incomeId },
+              { __tempId: tempId },
+            );
+            await offlineQueue.enqueueWithReconcile(mutationType, {
+              ...incomeData,
+              ...idPayload,
+            } as Record<string, unknown>);
+            setIncomes((prev) => {
+              if (incomeId) {
+                return patchById(prev, incomeId, incomeData);
+              }
+              const optimistic = {
+                ...incomeData,
+                id: tempId as string,
+                created_at: new Date().toISOString(),
+              } as Expense;
+
+              return [optimistic, ...prev];
+            });
+            haptics.success();
+            toast({
+              variant: 'success',
+              title: t('offline.savedOffline'),
+              description: t('offline.willSync'),
+            });
+
+            return null;
+          }
+          haptics.error();
+          Sentry.captureException(error, {
+            tags: {
+              operation: pickByEdit(incomeId, 'updateIncome', 'createIncome'),
+            },
+          });
+          showErrorToast(
+            pickByEdit(
+              incomeId,
+              t('income.toasts.updateFailed'),
+              t('income.toasts.addFailed'),
+            ),
+            () => {
+              void run().catch(() => undefined);
+            },
+          );
+          throw error;
+        }
+      };
+
+      return run();
     },
     [isInitialized, setIncomes, showErrorToast, toast, t],
   );
 
   const handleIncomeDelete = useCallback(
     async (incomeId: string) => {
-      if (!isInitialized) {
-        return;
-      }
-
-      haptics.warning();
-      try {
-        await dataService.deleteIncome(incomeId);
-        setIncomes((prev) => prev.filter((e) => e.id !== incomeId));
-      } catch (error) {
-        if (isOfflineError(error)) {
-          await offlineQueue.enqueueWithReconcile('deleteIncome', {
-            id: incomeId,
-          });
-          setIncomes((prev) => prev.filter((e) => e.id !== incomeId));
-          haptics.success();
-          toast({
-            variant: 'success',
-            title: t('offline.deleteSavedOffline'),
-            description: t('offline.willSync'),
-          });
-
+      const run = async () => {
+        if (!isInitialized) {
           return;
         }
-        haptics.error();
-        Sentry.captureException(error, { tags: { operation: 'deleteIncome' } });
-        showErrorToast(t('income.toasts.deleteFailed'), () => {
-          void handleIncomeDelete(incomeId).catch(() => undefined);
-        });
-        throw error;
-      }
+
+        haptics.warning();
+        try {
+          await dataService.deleteIncome(incomeId);
+          setIncomes((prev) => prev.filter((e) => e.id !== incomeId));
+        } catch (error) {
+          if (isOfflineError(error)) {
+            await offlineQueue.enqueueWithReconcile('deleteIncome', {
+              id: incomeId,
+            });
+            setIncomes((prev) => prev.filter((e) => e.id !== incomeId));
+            haptics.success();
+            toast({
+              variant: 'success',
+              title: t('offline.deleteSavedOffline'),
+              description: t('offline.willSync'),
+            });
+
+            return;
+          }
+          haptics.error();
+          Sentry.captureException(error, { tags: { operation: 'deleteIncome' } });
+          showErrorToast(t('income.toasts.deleteFailed'), () => {
+            void run().catch(() => undefined);
+          });
+          throw error;
+        }
+      };
+
+      return run();
     },
     [isInitialized, setIncomes, showErrorToast, toast, t],
   );

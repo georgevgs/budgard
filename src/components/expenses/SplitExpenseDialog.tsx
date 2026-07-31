@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import X from 'lucide-react/dist/esm/icons/x';
@@ -45,9 +45,13 @@ const SplitExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
   const [parts, setParts] = useState<Part[]>(() => buildInitialParts(expense));
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
+  const [prevInputs, setPrevInputs] = useState({ open, expense });
+  const inputsChanged =
+    prevInputs.open !== open || prevInputs.expense !== expense;
+  if (inputsChanged) {
+    setPrevInputs({ open, expense });
     if (open) setParts(buildInitialParts(expense));
-  }, [open, expense]);
+  }
 
   const remaining = expense.amount - sumParts(parts);
   const partsValid = parts.every((part) => parseCurrencyInput(part.amount) > 0);

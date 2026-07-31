@@ -8,10 +8,16 @@ export const useResendCooldown = (lastSentAt: number | null): number => {
   const [cooldownSeconds, setCooldownSeconds] = useState(
     RESEND_COOLDOWN_SECONDS,
   );
+  const [prevSentAt, setPrevSentAt] = useState(lastSentAt);
+
+  // A new send restarts the countdown; adjusted during render so the reset
+  // is visible before the interval effect re-arms.
+  if (lastSentAt !== prevSentAt) {
+    setPrevSentAt(lastSentAt);
+    setCooldownSeconds(RESEND_COOLDOWN_SECONDS);
+  }
 
   useEffect(() => {
-    setCooldownSeconds(RESEND_COOLDOWN_SECONDS);
-
     const interval = window.setInterval(() => {
       setCooldownSeconds((previous) => {
         if (previous <= 1) {

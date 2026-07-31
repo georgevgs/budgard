@@ -6,7 +6,7 @@ import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { ONBOARDED_KEY } from '@/lib/onboarding';
-import { PRESET_CATEGORIES } from '@/components/onboarding/OnboardingCategoriesStep';
+import { PRESET_CATEGORIES } from '@/components/onboarding/presetCategories';
 
 type UseOnboardingActionsArgs = {
   onComplete: () => void;

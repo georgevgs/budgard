@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -35,12 +35,16 @@ const RefundExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
   const [date, setDate] = useState<Date>(new Date());
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
+  const [prevInputs, setPrevInputs] = useState({ open, expense });
+  const inputsChanged =
+    prevInputs.open !== open || prevInputs.expense !== expense;
+  if (inputsChanged) {
+    setPrevInputs({ open, expense });
     if (open) {
       setAmount(toAmountInput(expense.amount));
       setDate(new Date());
     }
-  }, [open, expense]);
+  }
 
   const parsed = parseCurrencyInput(amount);
   const canConfirm = parsed > 0 && parsed <= expense.amount && !isSaving;

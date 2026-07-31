@@ -41,23 +41,33 @@ const isLiveDebt = (d: Debt): boolean =>
 
 const RATE_KEY = (currency: string, date: string) => `${currency}|${date}`;
 
+type RateComputation = {
+  // Serialized `required` set this computation answered, so staleness is a
+  // plain key comparison instead of extra state juggled inside the effect.
+  key: string;
+  rates: Map<string, number>;
+  failedKeys: Set<string>;
+};
+
+// Stable empties so the derived values below don't bust the summary/series
+// memos with a fresh identity every render.
+const EMPTY_RATES: Map<string, number> = new Map();
+const EMPTY_FAILED_KEYS: Set<string> = new Set();
+
 export const useNetWorth = () => {
   const { accounts, accountBalances } = useAccountsData();
   const debts = useDebtsData();
   const { defaultCurrency } = useDataConfig();
-  const [rates, setRates] = useState<Map<string, number>>(new Map());
-  const [failedKeys, setFailedKeys] = useState<Set<string>>(new Set());
-  const [isComputing, setIsComputing] = useState(false);
+  const [rateComputation, setRateComputation] =
+    useState<RateComputation | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  // Collect every (currency, date) pair we'll need a rate for.
+  const required = useMemo(() => {
     const today = format(new Date(), 'yyyy-MM-dd');
-
-    // Collect every (currency, date) pair we'll need a rate for.
-    const required = new Set<string>();
+    const pairs = new Set<string>();
     accounts.forEach((a) => {
       if (a.default_currency !== defaultCurrency) {
-        required.add(RATE_KEY(a.default_currency, today));
+        pairs.add(RATE_KEY(a.default_currency, today));
       }
     });
     accountBalances.forEach((b) => {
@@ -66,7 +76,7 @@ export const useNetWorth = () => {
         return;
       }
       if (acc.default_currency !== defaultCurrency) {
-        required.add(RATE_KEY(acc.default_currency, b.recorded_at));
+        pairs.add(RATE_KEY(acc.default_currency, b.recorded_at));
       }
     });
     debts.forEach((d) => {
@@ -74,19 +84,24 @@ export const useNetWorth = () => {
         return;
       }
       if (d.currency !== defaultCurrency) {
-        required.add(RATE_KEY(d.currency, today));
+        pairs.add(RATE_KEY(d.currency, today));
       }
     });
 
-    if (required.size === 0) {
-      setRates(new Map());
-      setFailedKeys(new Set());
-      setIsComputing(false);
+    return pairs;
+  }, [accounts, accountBalances, debts, defaultCurrency]);
 
+  const requiredKey = useMemo(
+    () => Array.from(required).sort().join(','),
+    [required],
+  );
+
+  useEffect(() => {
+    if (required.size === 0) {
       return;
     }
 
-    setIsComputing(true);
+    let cancelled = false;
     (async () => {
       type RateResult = { key: string; rate: number; failed: boolean };
       const results = await Promise.all(
@@ -113,15 +128,26 @@ export const useNetWorth = () => {
       if (cancelled) {
         return;
       }
-      setRates(new Map(results.map((r) => [r.key, r.rate])));
-      setFailedKeys(new Set(results.filter((r) => r.failed).map((r) => r.key)));
-      setIsComputing(false);
+      setRateComputation({
+        key: requiredKey,
+        rates: new Map(results.map((r) => [r.key, r.rate])),
+        failedKeys: new Set(results.filter((r) => r.failed).map((r) => r.key)),
+      });
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [accounts, accountBalances, debts, defaultCurrency]);
+  }, [required, requiredKey, defaultCurrency]);
+
+  // Derived: nothing to convert means empty maps; while a new requirement set
+  // is being fetched the previous computation keeps serving (stale-while-
+  // computing, matching the old behavior of only replacing rates on
+  // completion).
+  const rates = deriveRates(required, rateComputation);
+  const failedKeys = deriveFailedKeys(required, rateComputation);
+  const isComputing =
+    required.size > 0 && rateComputation?.key !== requiredKey;
 
   const summary = useMemo<NetWorthSummary>(() => {
     const today = format(new Date(), 'yyyy-MM-dd');
@@ -277,4 +303,28 @@ export const useNetWorth = () => {
   }, [accounts, accountBalances, debts, rates, defaultCurrency]);
 
   return { summary, series, isComputing };
+};
+
+// --- Helpers ---
+
+const deriveRates = (
+  required: Set<string>,
+  computation: RateComputation | null,
+): Map<string, number> => {
+  if (required.size === 0 || computation === null) {
+    return EMPTY_RATES;
+  }
+
+  return computation.rates;
+};
+
+const deriveFailedKeys = (
+  required: Set<string>,
+  computation: RateComputation | null,
+): Set<string> => {
+  if (required.size === 0 || computation === null) {
+    return EMPTY_FAILED_KEYS;
+  }
+
+  return computation.failedKeys;
 };

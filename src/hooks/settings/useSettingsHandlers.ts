@@ -7,7 +7,7 @@ import { signOut } from '@/lib/auth';
 import { useToast } from '@/hooks/useToast';
 import { haptics, hapticsSettings } from '@/lib/haptics';
 import type { NotificationPreferenceKey } from '@/types/Budget';
-import { localToUtcHour } from '@/components/settings/NotificationsSection';
+import { localToUtcHour } from '@/lib/reminderTime';
 
 type Theme = 'light' | 'dark' | 'barbie';
 

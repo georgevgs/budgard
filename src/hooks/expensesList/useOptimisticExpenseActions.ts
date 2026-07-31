@@ -16,6 +16,7 @@ import type { EmbeddedTag, Tag } from '@/types/Tag';
 
 export const useOptimisticExpenseActions = () => {
   const { session } = useAuth();
+  const userId = session?.user?.id;
   const expenses = useExpensesData();
   const { expenseCategories: categories } = useCategoriesData();
   const tags = useTagsData();
@@ -111,9 +112,8 @@ export const useOptimisticExpenseActions = () => {
 
   const handleUseTemplate = useCallback(
     (template: ExpenseTemplate) => {
-      if (!session?.user?.id) return;
+      if (!userId) return;
 
-      const userId = session.user.id;
       const today = format(new Date(), 'yyyy-MM-dd');
       const category = categories.find((c) => c.id === template.category_id);
       const tag = tags.find((t) => t.id === template.tag_id);
@@ -146,7 +146,7 @@ export const useOptimisticExpenseActions = () => {
         });
       });
     },
-    [session?.user?.id, addOptimisticExpense, categories, tags, submitExpense],
+    [userId, addOptimisticExpense, categories, tags, submitExpense],
   );
 
   return {

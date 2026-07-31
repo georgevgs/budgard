@@ -12,7 +12,13 @@ export const useCompletionCelebration = (
 ): void => {
   const celebratedRef = useRef<Set<string> | null>(null);
   const callbackRef = useRef(onComplete);
-  callbackRef.current = onComplete;
+
+  // Mirrored after every commit (writing during render is illegal); effects
+  // run in declaration order, so the celebration effect below always reads
+  // the latest callback.
+  useEffect(() => {
+    callbackRef.current = onComplete;
+  });
 
   // Derive a primitive key so the effect only runs when the set changes.
   const key = completedIds.join('|');

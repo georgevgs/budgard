@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { FORM_TYPES, type FormType } from '@/components/layout/FormsManager';
+import { FORM_TYPES, type FormType } from '@/components/layout/formTypes';
 import type { Expense } from '@/types/Expense';
 
 export const useExpenseFormState = () => {
