@@ -107,7 +107,7 @@ const stampPushSwBuildId = (): PluginOption => ({
   name: "stamp-push-sw-build-id",
   apply: "build",
   closeBundle: async () => {
-    const file = path.resolve(__dirname, "dist/push-sw.js");
+    const file = path.resolve(import.meta.dirname, "dist/push-sw.js");
     const source = await readFile(file, "utf8");
 
     if (!source.includes(BUILD_ID_PLACEHOLDER)) {
@@ -129,7 +129,7 @@ const stampPushSwBuildId = (): PluginOption => ({
 const ocrAssetBase = ((): string => {
   const { version } = JSON.parse(
     readFileSync(
-      path.resolve(__dirname, "node_modules/tesseract.js/package.json"),
+      path.resolve(import.meta.dirname, "node_modules/tesseract.js/package.json"),
       "utf8"
     )
   ) as { version: string };
@@ -176,7 +176,7 @@ const vendorOcrAssets = (): PluginOption => {
           return;
         }
 
-        readFile(path.resolve(__dirname, "node_modules", source))
+        readFile(path.resolve(import.meta.dirname, "node_modules", source))
           .then((contents) => {
             res.setHeader("Content-Type", "text/javascript");
             res.end(contents);
@@ -192,12 +192,12 @@ const vendorOcrAssets = (): PluginOption => {
         return;
       }
 
-      const outDir = path.resolve(__dirname, `dist${ocrAssetBase}`);
+      const outDir = path.resolve(import.meta.dirname, `dist${ocrAssetBase}`);
       await mkdir(outDir, { recursive: true });
 
       for (const file of OCR_VENDOR_FILES) {
         await copyFile(
-          path.resolve(__dirname, "node_modules", file),
+          path.resolve(import.meta.dirname, "node_modules", file),
           path.join(outDir, path.posix.basename(file))
         );
       }
@@ -213,7 +213,7 @@ const stripSourceMaps = (): PluginOption => ({
   apply: "build",
   enforce: "post",
   closeBundle: async () => {
-    const dist = path.resolve(__dirname, "dist");
+    const dist = path.resolve(import.meta.dirname, "dist");
 
     const walk = async (dir: string): Promise<void> => {
       const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
@@ -310,7 +310,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
   build: {
