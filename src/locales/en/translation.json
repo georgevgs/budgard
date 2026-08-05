@@ -568,17 +568,17 @@
   "theme": {
     "light": "Light",
     "dark": "Dark",
-    "barbie": "Barbie"
+    "barbie": "Neon pink"
   },
   "accent": {
     "colors": {
-      "sunset": "Sunset",
-      "ocean": "Ocean",
-      "lavender": "Lavender",
-      "mint": "Mint",
-      "coral": "Coral",
-      "gold": "Gold",
-      "slate": "Slate"
+      "sunset": "Tangerine",
+      "ocean": "Electric blue",
+      "lavender": "Ultra violet",
+      "mint": "Neon mint",
+      "coral": "Hot pink",
+      "gold": "Solar",
+      "slate": "Graphite"
     }
   },
   "goals": {

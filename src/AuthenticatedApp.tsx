@@ -108,7 +108,6 @@ const AuthenticatedLayout = () => {
       >
         <Outlet />
       </main>
-      <div className="nav-scrim" aria-hidden="true" />
       <NavTabs />
       <MilestoneWatcher />
       <UpgradeDialog />

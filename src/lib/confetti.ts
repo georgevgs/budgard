@@ -14,7 +14,7 @@ type Particle = {
   color: string;
 };
 
-const COLORS = ['#f97316', '#22c55e', '#3b82f6', '#eab308', '#ec4899'];
+const COLORS = ['#7c4dff', '#1fdb8a', '#00b8f5', '#ffb800', '#ff3da6'];
 const PARTICLE_COUNT = 90;
 const GRAVITY = 0.18;
 const DRAG = 0.992;

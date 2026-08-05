@@ -152,7 +152,7 @@ describe('OnboardingFlow', () => {
     const foodCategory = categories.find((c) => c.name.includes('food'));
 
     expect(foodCategory?.name).toBe('onboarding.presetCategories.food');
-    expect(foodCategory?.color).toBe('#22c55e');
+    expect(foodCategory?.color).toBe('#1fdb8a');
     expect(foodCategory?.icon).toBe('🍔');
     expect(foodCategory?.user_id).toBe('user-123');
   });

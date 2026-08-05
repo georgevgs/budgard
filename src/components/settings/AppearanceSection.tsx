@@ -129,8 +129,11 @@ const renderAccentPicker = (
               key={color.key}
               type="button"
               onClick={() => setAccent(color.key)}
-              className="relative h-11 w-11 rounded-full transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              style={{ backgroundColor: color.values.swatch }}
+              className="relative h-11 w-11 rounded-full border-2 border-background ring-1 ring-border/60 transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              style={{
+                backgroundColor: color.values.swatch,
+                boxShadow: `0 10px 24px -12px ${color.values.swatch}`,
+              }}
               aria-label={t(`accent.colors.${color.key}`)}
               aria-pressed={isSelected}
             >
@@ -147,7 +150,9 @@ const renderAccentCheck = (isSelected: boolean) => {
   if (!isSelected) return null;
 
   return (
-    <Check className="absolute inset-0 m-auto h-3.5 w-3.5 text-white drop-shadow-sm" />
+    <span className="absolute inset-0 m-auto flex h-6 w-6 items-center justify-center rounded-full bg-black/20 backdrop-blur-sm">
+      <Check className="h-3.5 w-3.5 text-white drop-shadow-sm" />
+    </span>
   );
 };
 

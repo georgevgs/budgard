@@ -18,8 +18,8 @@ import type { Category } from '@/types/Category';
 import CategoryFormFields from '@/components/categories/CategoryFormFields';
 import { type CategoryKind } from '@/components/categories/CategoryKindSelector';
 
-const DEFAULT_CATEGORY_COLOR = '#6366f1';
-const DEFAULT_INCOME_COLOR = '#10b981';
+const DEFAULT_CATEGORY_COLOR = '#7c4dff';
+const DEFAULT_INCOME_COLOR = '#1fdb8a';
 
 type Props = {
   category?: Category;

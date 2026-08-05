@@ -9,12 +9,12 @@ import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
 export const INCOME_COLORS = [
-  '#10b981',
-  '#22c55e',
-  '#14b8a6',
-  '#06b6d4',
-  '#3b82f6',
-  '#84cc16',
+  '#1fdb8a',
+  '#38e27d',
+  '#00c9b7',
+  '#00d9f5',
+  '#00b8f5',
+  '#a6e22e',
 ];
 
 export type TranslateFunction = (

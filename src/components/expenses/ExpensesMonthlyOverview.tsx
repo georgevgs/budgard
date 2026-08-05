@@ -41,7 +41,7 @@ const ExpensesMonthlyOverview = ({
   const totalLabel = getTotalLabel(hasActiveFilters, t);
 
   return (
-    <div className="flex flex-col gap-4 bg-card border border-border/40 rounded-2xl p-5 shadow-sm">
+    <div className="glow-surface flex flex-col gap-4 border border-primary/15 rounded-2xl p-5">
       <button
         type="button"
         onClick={onMonthlyTotalClick}

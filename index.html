@@ -10,8 +10,8 @@
     <link rel="preconnect" href="https://htamokfphaqudeivpowr.supabase.co" crossorigin="">
     <link rel="icon" type="image/ico" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0e1015" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#faf9ff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0e0b18" media="(prefers-color-scheme: dark)">
     <meta name="description" content="A minimal and intuitive expense tracker that helps you manage your finances">
 
     <!-- Open Graph -->
@@ -61,13 +61,13 @@
 
   // Apply saved accent color to prevent flash
   var accents = {
-    sunset:   { light: ['24 75% 50%', '0 0% 100%'],  dark: ['22 78% 58%', '24 40% 6%'] },
-    ocean:    { light: ['215 68% 50%', '0 0% 100%'],  dark: ['213 70% 62%', '215 45% 6%'] },
-    lavender: { light: ['262 60% 56%', '0 0% 100%'],  dark: ['264 58% 66%', '262 35% 6%'] },
-    mint:     { light: ['162 55% 38%', '0 0% 100%'],  dark: ['160 50% 50%', '162 35% 6%'] },
-    coral:    { light: ['350 62% 52%', '0 0% 100%'],  dark: ['348 58% 62%', '350 35% 6%'] },
-    gold:     { light: ['40 70% 46%', '0 0% 100%'],   dark: ['42 65% 55%', '40 40% 6%'] },
-    slate:    { light: ['220 20% 42%', '0 0% 100%'],  dark: ['218 18% 58%', '220 15% 6%'] }
+    sunset:   { light: ['15 100% 61%', '248 32% 12%'], dark: ['15 100% 65%', '252 45% 9%'] },
+    ocean:    { light: ['199 100% 48%', '205 90% 12%'], dark: ['195 100% 65%', '205 90% 10%'] },
+    lavender: { light: ['257 92% 62%', '0 0% 100%'], dark: ['258 100% 72%', '252 45% 9%'] },
+    mint:     { light: ['162 83% 40%', '164 80% 10%'], dark: ['160 86% 50%', '164 80% 8%'] },
+    coral:    { light: ['340 100% 61%', '0 0% 100%'], dark: ['340 100% 68%', '340 60% 9%'] },
+    gold:     { light: ['43 100% 51%', '34 85% 12%'], dark: ['45 100% 60%', '34 85% 10%'] },
+    slate:    { light: ['235 24% 44%', '0 0% 100%'], dark: ['231 24% 65%', '240 28% 9%'] }
   };
   var key = localStorage.getItem('accent-color');
   var a = key && accents[key];

@@ -4,30 +4,30 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 const CATEGORY_COLORS = [
-  '#f43f5e',
-  '#f97316',
-  '#f59e0b',
-  '#eab308',
-  '#84cc16',
-  '#22c55e',
-  '#10b981',
-  '#14b8a6',
-  '#06b6d4',
-  '#0ea5e9',
-  '#3b82f6',
-  '#6366f1',
-  '#8b5cf6',
+  '#ff4d6d',
+  '#ff5c35',
+  '#ff9500',
+  '#ffb800',
+  '#d7f52e',
+  '#a6e22e',
+  '#38e27d',
+  '#1fdb8a',
+  '#00c9b7',
+  '#00d9f5',
+  '#00b8f5',
+  '#3d6bff',
+  '#635bff',
+  '#7c4dff',
   '#a855f7',
   '#d946ef',
-  '#ec4899',
-  '#f472b6',
-  '#fb923c',
-  '#64748b',
-  '#78716c',
-  '#a8a29e',
-  '#9ca3af',
-  '#1e293b',
-  '#334155',
+  '#ff3da6',
+  '#ff6bb5',
+  '#ff7ad9',
+  '#ff8e5e',
+  '#00a896',
+  '#5b8cff',
+  '#8892b0',
+  '#39415c',
 ] as const;
 
 const HEX_PATTERN = /^#[0-9A-Fa-f]{0,6}$/;
@@ -104,5 +104,9 @@ const renderColorButtonState = (isSelected: boolean) => {
 const renderSwatchCheck = (isSelected: boolean) => {
   if (!isSelected) return null;
 
-  return <Check className="h-3.5 w-3.5 text-white drop-shadow" />;
+  return (
+    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black/20 backdrop-blur-sm">
+      <Check className="h-3.5 w-3.5 text-white drop-shadow" />
+    </span>
+  );
 };

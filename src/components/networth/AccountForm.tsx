@@ -25,7 +25,7 @@ import { formatCurrencyInput } from '@/lib/utils';
 import { accountSchema, type AccountFormData } from '@/lib/validations';
 import type { Account, AccountKind } from '@/types/Account';
 
-const DEFAULT_COLOR = '#f97316';
+const DEFAULT_COLOR = '#00b8f5';
 
 type Props = {
   account?: Account;

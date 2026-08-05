@@ -54,21 +54,21 @@ const renderGrid = (t: Tx) => (
 );
 
 const tiles = (): Tile[] => [
-  { key: 'housing', emoji: '🏠', color: 'hsl(24 90% 55%)' },
-  { key: 'food', emoji: '🥗', color: 'hsl(142 70% 45%)' },
-  { key: 'transport', emoji: '🚇', color: 'hsl(280 60% 60%)' },
-  { key: 'subs', emoji: '📺', color: 'hsl(220 70% 55%)' },
-  { key: 'health', emoji: '💊', color: 'hsl(340 75% 55%)' },
-  { key: 'fun', emoji: '🎟️', color: 'hsl(48 90% 55%)' },
-  { key: 'travel', emoji: '✈️', color: 'hsl(195 75% 50%)' },
-  { key: 'gifts', emoji: '🎁', color: 'hsl(0 70% 55%)' },
-  { key: 'pets', emoji: '🐾', color: 'hsl(160 60% 45%)' },
+  { key: 'housing', emoji: '🏠', color: '#7c4dff' },
+  { key: 'food', emoji: '🥗', color: '#1fdb8a' },
+  { key: 'transport', emoji: '🚇', color: '#00b8f5' },
+  { key: 'subs', emoji: '📺', color: '#ff3da6' },
+  { key: 'health', emoji: '💊', color: '#00c9b7' },
+  { key: 'fun', emoji: '🎟️', color: '#ffb800' },
+  { key: 'travel', emoji: '✈️', color: '#3d6bff' },
+  { key: 'gifts', emoji: '🎁', color: '#ff4d6d' },
+  { key: 'pets', emoji: '🐾', color: '#a6e22e' },
 ];
 
 const renderTile = (tile: Tile, t: Tx) => (
   <div
     key={tile.key}
-    className="aspect-square rounded-2xl border border-border/60 bg-card flex flex-col items-center justify-center gap-2 transition-transform hover:-translate-y-0.5 hover:border-border"
+    className="glow-surface aspect-square rounded-2xl border border-border/60 flex flex-col items-center justify-center gap-2 transition-transform hover:-translate-y-0.5 hover:border-primary/30"
   >
     <span
       className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"

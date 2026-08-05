@@ -9,11 +9,11 @@ const DEFAULT_INCOME_CATEGORIES: Array<{
   color: string;
   icon: string;
 }> = [
-  { nameKey: 'income.defaults.salary', color: '#10b981', icon: '💼' },
-  { nameKey: 'income.defaults.freelance', color: '#22c55e', icon: '💻' },
-  { nameKey: 'income.defaults.refund', color: '#06b6d4', icon: '↩️' },
+  { nameKey: 'income.defaults.salary', color: '#1fdb8a', icon: '💼' },
+  { nameKey: 'income.defaults.freelance', color: '#38e27d', icon: '💻' },
+  { nameKey: 'income.defaults.refund', color: '#00d9f5', icon: '↩️' },
   { nameKey: 'income.defaults.gift', color: '#a855f7', icon: '🎁' },
-  { nameKey: 'income.defaults.investment', color: '#3b82f6', icon: '📈' },
+  { nameKey: 'income.defaults.investment', color: '#3d6bff', icon: '📈' },
 ];
 
 // Seed default income categories once when none exist

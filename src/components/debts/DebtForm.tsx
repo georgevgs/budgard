@@ -26,7 +26,7 @@ import { formatCurrencyInput } from '@/lib/utils';
 import { debtSchema, type DebtFormData } from '@/lib/validations';
 import { type Debt } from '@/types/Debt';
 
-const DEFAULT_COLOR = '#f97316';
+const DEFAULT_COLOR = '#ff4d6d';
 const DEFAULT_ICON = 'credit-card';
 
 type Props = {

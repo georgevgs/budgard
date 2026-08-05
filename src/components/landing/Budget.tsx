@@ -62,10 +62,10 @@ const renderCard = (t: Tx) => (
 );
 
 const rows = (t: Tx): CategoryRow[] => [
-  { name: t('landing.budget.cats.housing'), percent: 80, amount: '€800', color: 'hsl(24 90% 55%)' },
-  { name: t('landing.budget.cats.food'), percent: 39, amount: '€156', color: 'hsl(142 70% 45%)' },
-  { name: t('landing.budget.cats.transport'), percent: 50, amount: '€100', color: 'hsl(280 60% 60%)' },
-  { name: t('landing.budget.cats.subs'), percent: 13, amount: '€26', color: 'hsl(220 70% 55%)' },
+  { name: t('landing.budget.cats.housing'), percent: 80, amount: '€800', color: '#7c4dff' },
+  { name: t('landing.budget.cats.food'), percent: 39, amount: '€156', color: '#1fdb8a' },
+  { name: t('landing.budget.cats.transport'), percent: 50, amount: '€100', color: '#00b8f5' },
+  { name: t('landing.budget.cats.subs'), percent: 13, amount: '€26', color: '#ff3da6' },
 ];
 
 const renderRow = (row: CategoryRow) => (

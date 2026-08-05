@@ -21,84 +21,84 @@ type AccentColorOption = {
 
 /**
  * Each accent is hand-tuned per theme so it sits naturally against:
- *   light — cool-gray bg (220 20% 97%), white cards
- *   dark  — deep navy bg (224 20% 7%), dark cards
+ *   light — cool lilac canvas, white cards
+ *   dark  — deep plum canvas, ink-purple cards
  *
- * Saturations are moderate (55-75%) to feel refined, not neon.
- * Dark-mode lightness is bumped for legibility on dark surfaces.
+ * Saturation stays intentionally high. The brightest hues use ink-colored
+ * foregrounds, so primary controls feel luminous without losing their label.
  * Barbie theme keeps its own fixed pink palette (accent picker is hidden).
  */
 export const ACCENT_COLORS: AccentColorOption[] = [
   {
     key: 'sunset',
     values: {
-      light: { primary: '24 75% 36%', primaryFg: '0 0% 100%' },
-      dark: { primary: '22 78% 58%', primaryFg: '24 40% 6%' },
+      light: { primary: '15 100% 61%', primaryFg: '248 32% 12%' },
+      dark: { primary: '15 100% 65%', primaryFg: '252 45% 9%' },
 
-      swatch: 'hsl(24 75% 36%)',
+      swatch: 'hsl(15 100% 61%)',
     },
   },
   {
     key: 'ocean',
     values: {
-      light: { primary: '215 68% 45%', primaryFg: '0 0% 100%' },
-      dark: { primary: '213 70% 62%', primaryFg: '215 45% 6%' },
+      light: { primary: '199 100% 48%', primaryFg: '205 90% 12%' },
+      dark: { primary: '195 100% 65%', primaryFg: '205 90% 10%' },
 
-      swatch: 'hsl(215 68% 45%)',
+      swatch: 'hsl(199 100% 48%)',
     },
   },
   {
     key: 'lavender',
     values: {
-      light: { primary: '262 60% 56%', primaryFg: '0 0% 100%' },
-      dark: { primary: '264 58% 66%', primaryFg: '262 35% 6%' },
+      light: { primary: '257 92% 62%', primaryFg: '0 0% 100%' },
+      dark: { primary: '258 100% 72%', primaryFg: '252 45% 9%' },
 
-      swatch: 'hsl(262 60% 56%)',
+      swatch: 'hsl(257 92% 62%)',
     },
   },
   {
     key: 'mint',
     values: {
-      light: { primary: '162 55% 28%', primaryFg: '0 0% 100%' },
-      dark: { primary: '160 50% 50%', primaryFg: '162 35% 6%' },
+      light: { primary: '162 83% 40%', primaryFg: '164 80% 10%' },
+      dark: { primary: '160 86% 50%', primaryFg: '164 80% 8%' },
 
-      swatch: 'hsl(162 55% 28%)',
+      swatch: 'hsl(162 83% 40%)',
     },
   },
   {
     key: 'coral',
     values: {
-      light: { primary: '350 62% 48%', primaryFg: '0 0% 100%' },
-      dark: { primary: '348 58% 62%', primaryFg: '350 35% 6%' },
+      light: { primary: '340 100% 61%', primaryFg: '0 0% 100%' },
+      dark: { primary: '340 100% 68%', primaryFg: '340 60% 9%' },
 
-      swatch: 'hsl(350 62% 48%)',
+      swatch: 'hsl(340 100% 61%)',
     },
   },
   {
     key: 'gold',
     values: {
-      light: { primary: '40 70% 29%', primaryFg: '0 0% 100%' },
-      dark: { primary: '42 65% 55%', primaryFg: '40 40% 6%' },
+      light: { primary: '43 100% 51%', primaryFg: '34 85% 12%' },
+      dark: { primary: '45 100% 60%', primaryFg: '34 85% 10%' },
 
-      swatch: 'hsl(40 70% 29%)',
+      swatch: 'hsl(43 100% 51%)',
     },
   },
   {
     key: 'slate',
     values: {
-      light: { primary: '220 20% 42%', primaryFg: '0 0% 100%' },
-      dark: { primary: '218 18% 58%', primaryFg: '220 15% 6%' },
+      light: { primary: '235 24% 44%', primaryFg: '0 0% 100%' },
+      dark: { primary: '231 24% 65%', primaryFg: '240 28% 9%' },
 
-      swatch: 'hsl(220 20% 42%)',
+      swatch: 'hsl(235 24% 44%)',
     },
   },
 ];
 
-const DEFAULT_ACCENT: AccentColorKey = 'sunset';
+const DEFAULT_ACCENT: AccentColorKey = 'lavender';
 const STORAGE_KEY = 'accent-color';
 
 const findAccent = (key: string): AccentColorOption =>
-  ACCENT_COLORS.find((c) => c.key === key) ?? ACCENT_COLORS[0];
+  ACCENT_COLORS.find((color) => color.key === key) ?? ACCENT_COLORS[2];
 
 const getInitialKey = (): AccentColorKey => {
   try {

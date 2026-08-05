@@ -18,7 +18,7 @@ const NetWorthHeader = ({ summary, defaultCurrency }: Props) => {
   const isPositive = summary.total >= 0;
 
   return (
-    <div className="bg-card border border-border/40 rounded-2xl p-5 shadow-sm space-y-3">
+    <div className="glow-surface border border-primary/15 rounded-2xl p-5 space-y-3">
       <p className="text-sm font-medium text-muted-foreground">
         {t('networth.totalLabel')}
       </p>

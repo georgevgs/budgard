@@ -67,7 +67,7 @@ const renderBackdrop = () => (
     className="absolute inset-0 pointer-events-none"
     style={{
       backgroundImage:
-        'radial-gradient(1000px 500px at 50% -10%, hsl(var(--primary) / 0.10), transparent 70%)',
+        'radial-gradient(800px 440px at 30% -5%, hsl(var(--primary) / 0.18), transparent 70%), radial-gradient(720px 420px at 82% 8%, hsl(var(--info) / 0.12), transparent 68%), radial-gradient(620px 360px at 50% 44%, hsl(var(--destructive) / 0.06), transparent 72%)',
     }}
   />
 );
@@ -76,7 +76,7 @@ const renderHeading = (t: Tx) => (
   <h1 className="text-[44px] sm:text-6xl md:text-7xl font-semibold tracking-[-0.03em] leading-[1.02] text-foreground">
     {t('landing.hero.headingLine1')}
     <br />
-    <span className="text-muted-foreground">
+    <span className="text-aurora">
       {t('landing.hero.headingLine2')}
     </span>
   </h1>
@@ -152,25 +152,25 @@ const renderHeroShot = (t: Tx) => (
           t('landing.hero.preview.rent'),
           t('landing.hero.cat.housing'),
           '€800.00',
-          'hsl(24 90% 55%)',
+          '#7c4dff',
         )}
         {renderRow(
           t('landing.hero.preview.groceries'),
           t('landing.hero.cat.food'),
           '€78.40',
-          'hsl(142 70% 45%)',
+          '#1fdb8a',
         )}
         {renderRow(
           t('landing.hero.preview.streaming'),
           t('landing.hero.cat.subs'),
           '€12.99',
-          'hsl(220 70% 55%)',
+          '#ff3da6',
         )}
         {renderRow(
           t('landing.hero.preview.transit'),
           t('landing.hero.cat.transport'),
           '€30.00',
-          'hsl(280 60% 60%)',
+          '#00b8f5',
         )}
       </div>
     </DeviceFrame>

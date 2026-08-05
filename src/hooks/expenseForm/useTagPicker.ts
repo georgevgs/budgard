@@ -12,16 +12,16 @@ import type { ExpenseFormData } from '@/lib/validations';
 
 // Preset colors cycled when auto-assigning a color to a new tag
 const TAG_COLORS = [
-  '#6366f1',
-  '#ec4899',
-  '#f59e0b',
-  '#10b981',
-  '#3b82f6',
-  '#ef4444',
-  '#8b5cf6',
-  '#14b8a6',
-  '#f97316',
-  '#06b6d4',
+  '#7c4dff',
+  '#ff3da6',
+  '#ffb800',
+  '#1fdb8a',
+  '#00b8f5',
+  '#ff4d6d',
+  '#a855f7',
+  '#00c9b7',
+  '#ff5c35',
+  '#00d9f5',
 ];
 
 export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {

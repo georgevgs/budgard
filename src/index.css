@@ -142,30 +142,6 @@
   }
 }
 
-@utility nav-scrim {
-  body[data-nav-hidden='true'] & {
-    opacity: 0;
-  }
-
-  /* Content dissolves toward the bottom edge rather than colliding with
-     the dock, the way iOS fades content under a floating tab bar. */
-  /* Height is exactly the dock footprint so the gradient reaches full
-     transparency at the capsule's top edge. Taller than that and the fade
-     bleeds upward, greying out the last card in the list. */
-  position: fixed;
-  inset: auto 0 0 0;
-  height: var(--dock-clearance);
-  pointer-events: none;
-  z-index: 30;
-  transition: opacity 320ms ease;
-  background: linear-gradient(
-    to top,
-    hsl(var(--background)) 25%,
-    hsl(var(--background) / 0.6) 60%,
-    hsl(var(--background) / 0) 100%
-  );
-}
-
 @utility nav-indicator {
   /* One indicator travels between tabs while its inner skin briefly squishes,
      giving the dock one distinctive motion without delaying navigation. */
@@ -181,6 +157,36 @@
   background: hsl(var(--primary) / 0.16);
   box-shadow: inset 0 0 0 0.5px hsl(var(--primary) / 0.22);
   animation: nav-indicator-settle 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@utility text-aurora {
+  color: transparent;
+  background-image: linear-gradient(
+    100deg,
+    hsl(var(--primary)) 8%,
+    hsl(var(--info)) 52%,
+    hsl(var(--income)) 92%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+@utility glow-surface {
+  background-color: hsl(var(--card));
+  background-image:
+    radial-gradient(
+      120% 100% at 0% 0%,
+      hsl(var(--primary) / 0.12),
+      transparent 48%
+    ),
+    radial-gradient(
+      90% 90% at 100% 100%,
+      hsl(var(--info) / 0.08),
+      transparent 52%
+    );
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.58),
+    0 18px 42px -32px hsl(var(--primary) / 0.65);
 }
 
 /* In the components layer so a caller can still override the background with
@@ -212,32 +218,32 @@
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
-    --foreground: 220 20% 10%;
+    --background: 252 100% 98%;
+    --foreground: 248 32% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card-foreground: 248 32% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
-    --primary: 24 90% 36%;
+    --popover-foreground: 248 32% 12%;
+    --primary: 257 92% 62%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 94%;
-    --secondary-foreground: 220 20% 10%;
-    --muted: 220 14% 94%;
-    --muted-foreground: 220 10% 46%;
-    --accent: 220 14% 94%;
-    --accent-foreground: 220 20% 10%;
-    --destructive: 0 72% 46%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 24 90% 36%;
-    --income: 160 65% 28%;
-    --income-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 38 92% 10%;
-    --info: 217 91% 53%;
-    --info-foreground: 0 0% 100%;
-    --radius: 0.875rem;
+    --secondary: 249 54% 95%;
+    --secondary-foreground: 248 30% 20%;
+    --muted: 250 38% 94%;
+    --muted-foreground: 247 12% 48%;
+    --accent: 181 100% 92%;
+    --accent-foreground: 184 65% 17%;
+    --destructive: 348 100% 61%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 252 38% 89%;
+    --input: 252 38% 89%;
+    --ring: 257 92% 62%;
+    --income: 161 82% 38%;
+    --income-foreground: 164 80% 10%;
+    --warning: 40 100% 55%;
+    --warning-foreground: 34 85% 12%;
+    --info: 198 100% 52%;
+    --info-foreground: 205 90% 12%;
+    --radius: 1rem;
 
     /* Highlight that sweeps across skeleton placeholders. White in both
        themes — it reads as light catching the surface — but far more
@@ -269,83 +275,84 @@
     --glass-alpha: 0.62;
     --glass-sheen: 0.35;
     --glass-rim: 0 0% 100% / 0.7;
-    --glass-drop: 220 40% 20% / 0.18;
+    --glass-drop: 257 55% 28% / 0.22;
   }
 
   .dark {
-    --background: 224 20% 7%;
-    --foreground: 220 14% 96%;
-    --card: 224 18% 10%;
-    --card-foreground: 220 14% 96%;
-    --popover: 224 18% 10%;
-    --popover-foreground: 220 14% 96%;
-    --primary: 24 90% 55%;
-    --primary-foreground: 24 90% 5%;
-    --secondary: 224 14% 14%;
-    --secondary-foreground: 220 14% 96%;
-    --muted: 224 14% 14%;
-    --muted-foreground: 220 10% 56%;
-    --accent: 224 14% 14%;
-    --accent-foreground: 220 14% 96%;
-    --destructive: 0 72% 50%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 224 12% 16%;
-    --input: 224 12% 16%;
-    --ring: 24 90% 55%;
-    --income: 160 65% 50%;
-    --income-foreground: 160 70% 8%;
-    --warning: 43 96% 56%;
-    --warning-foreground: 38 92% 10%;
-    --info: 213 94% 68%;
-    --info-foreground: 213 94% 12%;
+    --background: 252 35% 7%;
+    --foreground: 250 40% 96%;
+    --card: 251 29% 11%;
+    --card-foreground: 250 40% 96%;
+    --popover: 251 29% 11%;
+    --popover-foreground: 250 40% 96%;
+    --primary: 258 100% 72%;
+    --primary-foreground: 252 45% 9%;
+    --secondary: 250 22% 16%;
+    --secondary-foreground: 250 40% 96%;
+    --muted: 250 20% 16%;
+    --muted-foreground: 248 14% 66%;
+    --accent: 184 50% 16%;
+    --accent-foreground: 176 80% 86%;
+    --destructive: 348 100% 66%;
+    --destructive-foreground: 252 45% 9%;
+    --border: 250 22% 22%;
+    --input: 250 22% 22%;
+    --ring: 258 100% 72%;
+    --income: 160 86% 50%;
+    --income-foreground: 164 80% 8%;
+    --warning: 43 100% 60%;
+    --warning-foreground: 34 85% 10%;
+    --info: 195 100% 65%;
+    --info-foreground: 205 90% 10%;
     --skeleton-sheen: 0 0% 100% / 0.07;
 
-    --glass-bg: 224 18% 13%;
-    --glass-alpha: 0.62;
-    --glass-sheen: 0.08;
-    --glass-rim: 0 0% 100% / 0.1;
+    --glass-bg: 251 29% 14%;
+    --glass-alpha: 0.68;
+    --glass-sheen: 0.1;
+    --glass-rim: 258 100% 88% / 0.14;
     --glass-drop: 0 0% 0% / 0.55;
   }
 
   [data-theme='barbie'] {
-    --background: 326 100% 95%;
-    --foreground: 326 73% 15%;
-    --card: 326 100% 97%;
-    --card-foreground: 326 73% 15%;
-    --popover: 326 100% 97%;
-    --popover-foreground: 326 73% 15%;
-    --primary: 326 73% 43%;
-    --primary-foreground: 326 100% 97%;
-    --secondary: 326 100% 92%;
-    --secondary-foreground: 326 73% 43%;
-    --muted: 326 100% 92%;
-    --muted-foreground: 326 73% 40%;
-    --accent: 326 100% 92%;
-    --accent-foreground: 326 73% 43%;
-    --destructive: 0 72% 46%;
-    --destructive-foreground: 326 100% 97%;
-    --border: 326 100% 90%;
-    --input: 326 100% 90%;
-    --ring: 326 73% 43%;
-    --income: 160 65% 28%;
-    --income-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 38 92% 10%;
-    --info: 217 91% 53%;
-    --info-foreground: 0 0% 100%;
-    --radius: 1rem;
+    --background: 324 100% 97%;
+    --foreground: 274 38% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 274 38% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 274 38% 13%;
+    --primary: 326 100% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 283 100% 95%;
+    --secondary-foreground: 284 56% 28%;
+    --muted: 318 66% 94%;
+    --muted-foreground: 306 23% 46%;
+    --accent: 174 100% 90%;
+    --accent-foreground: 179 68% 18%;
+    --destructive: 354 100% 61%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 316 66% 88%;
+    --input: 316 66% 88%;
+    --ring: 326 100% 60%;
+    --income: 161 82% 38%;
+    --income-foreground: 164 80% 10%;
+    --warning: 40 100% 55%;
+    --warning-foreground: 34 85% 12%;
+    --info: 198 100% 52%;
+    --info-foreground: 205 90% 12%;
+    --radius: 1.125rem;
 
-    --glass-bg: 326 100% 97%;
-    --glass-alpha: 0.64;
-    --glass-sheen: 0.4;
+    --glass-bg: 324 100% 98%;
+    --glass-alpha: 0.7;
+    --glass-sheen: 0.46;
     --glass-rim: 0 0% 100% / 0.8;
-    --glass-drop: 326 60% 35% / 0.22;
+    --glass-drop: 326 75% 42% / 0.25;
   }
 }
 
 @layer base {
   html {
     overscroll-behavior: none;
+    background-color: hsl(var(--background));
   }
 
   * {
@@ -354,11 +361,51 @@
 
   body {
     @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(
+        48rem 34rem at 105% -8%,
+        hsl(var(--primary) / 0.09),
+        transparent 62%
+      ),
+      radial-gradient(
+        40rem 30rem at -12% 38%,
+        hsl(var(--info) / 0.055),
+        transparent 64%
+      );
+    background-repeat: no-repeat;
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     /* Tabular (monospaced) numbers prevent layout shift as digits update */
     font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(
+        50rem 36rem at 108% -10%,
+        hsl(var(--primary) / 0.15),
+        transparent 62%
+      ),
+      radial-gradient(
+        42rem 32rem at -15% 42%,
+        hsl(var(--info) / 0.08),
+        transparent 66%
+      );
+  }
+
+  [data-theme='barbie'] body {
+    background-image:
+      radial-gradient(
+        46rem 34rem at 105% -8%,
+        hsl(var(--primary) / 0.13),
+        transparent 62%
+      ),
+      radial-gradient(
+        38rem 30rem at -12% 38%,
+        hsl(var(--info) / 0.07),
+        transparent 64%
+      );
   }
 
   /* Prevent text selection on UI shell, allow on content */
@@ -475,7 +522,7 @@
 
   /* Override Sonner's default icon colors for success/error */
   [data-sonner-toast][data-type='success'] [data-icon] {
-    color: #10b981 !important;
+    color: hsl(var(--income)) !important;
   }
 
   [data-sonner-toast][data-type='error'] [data-icon] {
