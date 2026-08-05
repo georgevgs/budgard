@@ -12,9 +12,10 @@ vi.mock('@/contexts/AuthContext', () => ({
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual<typeof import('react-router-dom')>(
-    'react-router-dom',
-  );
+  const actual =
+    await vi.importActual<typeof import('react-router-dom')>(
+      'react-router-dom',
+    );
 
   return {
     ...actual,
@@ -24,7 +25,9 @@ vi.mock('react-router-dom', async () => {
 
 vi.mock('@/components/ui/dropdown-menu', () => ({
   DropdownMenu: ({ children }: { children: ReactNode }) => <>{children}</>,
-  DropdownMenuTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
+  DropdownMenuTrigger: ({ children }: { children: ReactNode }) => (
+    <>{children}</>
+  ),
   DropdownMenuContent: ({ children }: { children: ReactNode }) => (
     <div role="menu">{children}</div>
   ),
@@ -98,6 +101,8 @@ describe('layout/ProfileMenu', () => {
       screen.getByRole('menuitem', { name: /navigation\.settings/ }),
     );
 
-    expect(mockNavigate).toHaveBeenCalledWith('/settings');
+    expect(mockNavigate).toHaveBeenCalledWith('/settings', {
+      viewTransition: true,
+    });
   });
 });

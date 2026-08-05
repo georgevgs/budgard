@@ -25,6 +25,7 @@ import { useCheckoutReturn } from '@/hooks/pro/useCheckoutReturn';
 import { useUpgradeIntent } from '@/hooks/pro/useUpgradeIntent';
 import { shouldShowOnboarding } from '@/lib/onboarding';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
+import { useRouteScrollRestoration } from '@/hooks/useRouteScrollRestoration';
 import {
   AppLoadingSkeleton,
   ExpenseLoadingState,
@@ -94,11 +95,11 @@ const AuthenticatedLayout = () => {
   useOfflineSync();
   useIdleTabPrefetch();
   useCheckoutReturn();
+  useRouteScrollRestoration();
 
   return (
     <>
       <SkipToContentLink />
-      <ScrollToTop />
       <Header />
       <main
         id="main-content"
@@ -128,21 +129,6 @@ const SkipToContentLink = () => {
       {t('common.skipToContent')}
     </a>
   );
-};
-
-// Reset window scroll when landing on a freshly-mounted secondary route. The
-// four keep-alive tabs share window scroll and preserve their own view state,
-// so they are intentionally skipped to avoid fighting that layout.
-const ScrollToTop = () => {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    if (isMainTabPath(pathname)) return;
-
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  return null;
 };
 
 // Subscribes to the data slices that decide whether onboarding is due. Kept

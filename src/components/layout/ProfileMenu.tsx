@@ -36,7 +36,9 @@ const ProfileMenu = () => {
       <DropdownMenuContent align="start" className="w-56">
         {renderEmail(session.user.email, t)}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate('/settings')}>
+        <DropdownMenuItem
+          onClick={() => navigate('/settings', { viewTransition: true })}
+        >
           <Settings className="h-4 w-4" />
           {t('navigation.settings')}
         </DropdownMenuItem>

@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import type { ComponentType } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -18,8 +19,14 @@ import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
 const AppMenu = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const isPro = useIsPro();
   const { openUpgrade } = useUpgradeDialog();
+  const items: AppMenuItem[] = [
+    { label: t('navigation.goals'), path: '/goals', icon: Target },
+    { label: t('navigation.networth'), path: '/networth', icon: Wallet },
+    { label: t('navigation.debts'), path: '/debts', icon: CreditCard },
+  ];
 
   return (
     <DropdownMenu>
@@ -34,24 +41,7 @@ const AppMenu = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem
-          onClick={() => navigate('/goals', { viewTransition: true })}
-        >
-          <Target className="h-4 w-4" />
-          {t('navigation.goals')}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => navigate('/networth', { viewTransition: true })}
-        >
-          <Wallet className="h-4 w-4" />
-          {t('navigation.networth')}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => navigate('/debts', { viewTransition: true })}
-        >
-          <CreditCard className="h-4 w-4" />
-          {t('navigation.debts')}
-        </DropdownMenuItem>
+        {items.map((item) => renderMenuItem(item, pathname, navigate))}
         {renderUpgradeItem(isPro, openUpgrade, t)}
       </DropdownMenuContent>
     </DropdownMenu>
@@ -61,6 +51,47 @@ const AppMenu = () => {
 export default AppMenu;
 
 // --- Helpers ---
+
+type AppMenuItem = {
+  label: string;
+  path: string;
+  icon: ComponentType<{ className?: string }>;
+};
+
+type Navigate = ReturnType<typeof useNavigate>;
+
+const renderMenuItem = (
+  item: AppMenuItem,
+  pathname: string,
+  navigate: Navigate,
+) => {
+  const Icon = item.icon;
+  const isCurrent = pathname === item.path;
+
+  return (
+    <DropdownMenuItem
+      key={item.path}
+      aria-current={getAriaCurrent(isCurrent)}
+      className={getMenuItemClass(isCurrent)}
+      onClick={() => navigate(item.path, { viewTransition: true })}
+    >
+      <Icon className="h-4 w-4" />
+      {item.label}
+    </DropdownMenuItem>
+  );
+};
+
+const getAriaCurrent = (isCurrent: boolean): 'page' | undefined => {
+  if (isCurrent) return 'page';
+
+  return undefined;
+};
+
+const getMenuItemClass = (isCurrent: boolean): string | undefined => {
+  if (isCurrent) return 'bg-accent text-accent-foreground';
+
+  return undefined;
+};
 
 const renderUpgradeItem = (
   isPro: boolean,
