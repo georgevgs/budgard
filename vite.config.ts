@@ -257,7 +257,18 @@ export default defineConfig({
         // The OCR runtime (worker + ~4 MB wasm cores + traineddata) must NOT
         // be precached for every user at SW install — it's fetched on demand
         // and kept via the ocr-assets runtime cache below.
-        globIgnores: ["**/ocr/**"],
+        // PDF generation and telemetry are optional, user-initiated or
+        // best-effort features. Preloading their ~2.3 MB of JavaScript during
+        // service-worker install slows every update, including for users who
+        // never export a PDF. PDF chunks move into a first-use runtime cache;
+        // telemetry stays network-only.
+        globIgnores: [
+          "**/ocr/**",
+          "**/assets/pdfmake-*.js",
+          "**/assets/vfs_fonts-*.js",
+          "**/assets/sentry-*.js",
+          "**/assets/sentryHeavy-*.js",
+        ],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
         runtimeCaching: [
@@ -286,6 +297,26 @@ export default defineConfig({
               cacheName: "ocr-assets",
               expiration: {
                 maxEntries: 12,
+                maxAgeSeconds: 60 * 60 * 24 * 365
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          // Annual PDF dependencies are immutable hashed chunks. Cache them
+          // after the first export so later exports work offline without
+          // charging every service-worker install for the initial download.
+          {
+            urlPattern: ({ sameOrigin, url }) =>
+              sameOrigin &&
+              (url.pathname.startsWith("/assets/pdfmake-") ||
+                url.pathname.startsWith("/assets/vfs_fonts-")),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "pdf-export-assets",
+              expiration: {
+                maxEntries: 4,
                 maxAgeSeconds: 60 * 60 * 24 * 365
               },
               cacheableResponse: {
