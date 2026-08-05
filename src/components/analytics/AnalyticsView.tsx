@@ -47,11 +47,17 @@ const AnalyticsView = () => {
   // First run: a wall of zeroed charts explains nothing — point the user
   // at adding an expense instead.
   if (allExpenses.length === 0) {
-    return <AnalyticsEmpty />;
+    return (
+      <>
+        <h1 className="sr-only">{t('navigation.analytics')}</h1>
+        <AnalyticsEmpty />
+      </>
+    );
   }
 
   return (
     <div className="container max-w-4xl mx-auto px-4 pt-4 pb-4 space-y-6">
+      <h1 className="sr-only">{t('navigation.analytics')}</h1>
       {/* Month snapshot */}
       <MonthSnapshotCard monthComparison={analytics.monthComparison} />
 
@@ -180,13 +186,13 @@ const renderCategoryBreakdown = (
               key={cat.id}
               type="button"
               onClick={() => onCategoryClick(cat)}
-              className="flex items-center gap-4 px-5 py-3.5 w-full text-left transition-colors hover:bg-accent/50 active:bg-accent/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset cursor-pointer"
+              className="flex min-h-11 w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-accent/50 active:bg-accent/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset cursor-pointer sm:gap-4 sm:px-5"
             >
               {renderCategoryIcon(cat)}
               <span className="flex-1 text-sm font-medium truncate min-w-0">
                 {cat.name}
               </span>
-              <div className="shrink-0 w-16">
+              <div className="hidden w-16 shrink-0 sm:block">
                 <CategorySparkline
                   values={cat.monthlyAmounts}
                   color={cat.color}
@@ -195,7 +201,7 @@ const renderCategoryBreakdown = (
               <span className="text-sm font-semibold tabular-nums shrink-0">
                 {formatCurrency(cat.amount, currency)}
               </span>
-              <span className="text-xs text-muted-foreground tabular-nums w-8 text-right shrink-0">
+              <span className="hidden w-8 shrink-0 text-right text-xs tabular-nums text-muted-foreground md:block">
                 {Math.round(pct)}%
               </span>
             </button>

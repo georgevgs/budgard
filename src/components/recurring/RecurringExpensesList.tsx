@@ -183,7 +183,7 @@ const renderHeader = (
 ) => (
   <div className="flex items-start justify-between gap-4">
     <div className="min-w-0">
-      <h2 className="text-lg font-semibold">{renderModeTitle(mode, t)}</h2>
+      <h1 className="text-lg font-semibold">{renderModeTitle(mode, t)}</h1>
       {renderMonthlySummary(activeCount, monthlyTotal, mode, t, currency)}
     </div>
     <Button
@@ -236,7 +236,10 @@ const renderModeTitle = (mode: RecurringMode, t: TranslateFunction): string => {
   return t('recurring.expensesTitle');
 };
 
-const renderAddCtaLabel = (mode: RecurringMode, t: TranslateFunction): string => {
+const renderAddCtaLabel = (
+  mode: RecurringMode,
+  t: TranslateFunction,
+): string => {
   if (mode === 'income') {
     return t('recurring.income.addRecurring');
   }

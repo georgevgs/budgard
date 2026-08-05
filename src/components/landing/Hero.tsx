@@ -16,8 +16,12 @@ type Tx = (key: string, opts?: Record<string, unknown>) => string;
 
 const Hero = ({ onGetStarted }: Props) => {
   const { t } = useTranslation();
-  const { isIosSafari, isAndroidInstallable, isStandalone, triggerAndroidInstall } =
-    useInstallPrompt();
+  const {
+    isIosSafari,
+    isAndroidInstallable,
+    isStandalone,
+    triggerAndroidInstall,
+  } = useInstallPrompt();
   const [showIosModal, setShowIosModal] = useState(false);
 
   const showInstall = !isStandalone && (isIosSafari || isAndroidInstallable);
@@ -144,22 +148,50 @@ const renderHeroShot = (t: Tx) => (
         </p>
       </div>
       <div className="px-3 pb-4 space-y-1">
-        {renderRow('Apartment rent', t('landing.hero.cat.housing'), '€800.00', 'hsl(24 90% 55%)')}
-        {renderRow('Weekly groceries', t('landing.hero.cat.food'), '€78.40', 'hsl(142 70% 45%)')}
-        {renderRow('Netflix', t('landing.hero.cat.subs'), '€12.99', 'hsl(220 70% 55%)')}
-        {renderRow('Metro pass', t('landing.hero.cat.transport'), '€30.00', 'hsl(280 60% 60%)')}
+        {renderRow(
+          t('landing.hero.preview.rent'),
+          t('landing.hero.cat.housing'),
+          '€800.00',
+          'hsl(24 90% 55%)',
+        )}
+        {renderRow(
+          t('landing.hero.preview.groceries'),
+          t('landing.hero.cat.food'),
+          '€78.40',
+          'hsl(142 70% 45%)',
+        )}
+        {renderRow(
+          t('landing.hero.preview.streaming'),
+          t('landing.hero.cat.subs'),
+          '€12.99',
+          'hsl(220 70% 55%)',
+        )}
+        {renderRow(
+          t('landing.hero.preview.transit'),
+          t('landing.hero.cat.transport'),
+          '€30.00',
+          'hsl(280 60% 60%)',
+        )}
       </div>
     </DeviceFrame>
   </div>
 );
 
-const renderRow = (label: string, sub: string, amount: string, color: string) => (
+const renderRow = (
+  label: string,
+  sub: string,
+  amount: string,
+  color: string,
+) => (
   <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl">
     <span
       className="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center"
       style={{ backgroundColor: `${color}1f` }}
     >
-      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+      <span
+        className="w-2.5 h-2.5 rounded-full"
+        style={{ backgroundColor: color }}
+      />
     </span>
     <span className="flex-1 min-w-0">
       <span className="block text-[13px] font-medium truncate">{label}</span>

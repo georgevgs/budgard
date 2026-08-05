@@ -25,9 +25,9 @@ const SettingsView = () => {
 
   return (
     <div className="container max-w-lg mx-auto p-4 pb-12 space-y-8">
-      <h2 className="text-lg font-semibold tracking-tight">
+      <h1 className="text-lg font-semibold tracking-tight">
         {t('settings.title')}
-      </h2>
+      </h1>
 
       <ProfileSection
         email={session?.user?.email}

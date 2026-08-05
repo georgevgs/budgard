@@ -83,7 +83,7 @@ const ExpensesFilterDrawer = ({
           value={selectedCategoryId || 'all'}
           onValueChange={onCategorySelect}
         >
-          <SelectTrigger>
+          <SelectTrigger aria-label={t('expenses.filter.selectCategory')}>
             <SelectValue placeholder={t('expenses.filter.selectCategory')} />
           </SelectTrigger>
           <SelectContent>
@@ -147,7 +147,7 @@ const renderManageTagsButton = (
         type="button"
         variant="ghost"
         size="sm"
-        className="text-xs text-muted-foreground hover:text-foreground"
+        className="min-h-11 text-xs text-muted-foreground hover:text-foreground"
         onClick={onOpen}
       >
         <Pencil className="h-3 w-3 mr-1.5" />
@@ -191,7 +191,7 @@ const renderTagsSelect = (
 
   return (
     <Select value={selectedTagId || 'all'} onValueChange={onValueChange}>
-      <SelectTrigger>
+      <SelectTrigger aria-label={t('expenses.filter.selectTag')}>
         <SelectValue
           placeholder={t('expenses.filter.selectTag', {
             defaultValue: 'All tags',
@@ -225,7 +225,7 @@ const renderSortSelect = (
 ) => {
   return (
     <Select value={sortOrder} onValueChange={onSortChange}>
-      <SelectTrigger>
+      <SelectTrigger aria-label={t('expenses.filter.sort')}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -249,7 +249,7 @@ const renderDateRangeSelect = (
 ) => {
   return (
     <Select value={dateRangePreset ?? 'none'} onValueChange={onValueChange}>
-      <SelectTrigger>
+      <SelectTrigger aria-label={t('expenses.filter.dateRange')}>
         <SelectValue placeholder={t('expenses.filter.dateRange')} />
       </SelectTrigger>
       <SelectContent>

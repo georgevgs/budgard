@@ -82,6 +82,7 @@ const NetWorthView = () => {
   return (
     <div className="flex flex-col min-h-[calc(100dvh-4rem-env(safe-area-inset-top)-var(--dock-inset))]">
       <div className="flex-1 container max-w-4xl mx-auto px-4 pt-5 pb-4 space-y-4">
+        <h1 className="sr-only">{t('navigation.networth')}</h1>
         {renderBody(
           accounts.length,
           summary,
@@ -110,12 +111,16 @@ const NetWorthView = () => {
         </DialogContent>
       </Dialog>
 
-      {renderDetailSheet(detailAccount, handleDetailClose, handleEditFromDetail)}
+      {renderDetailSheet(
+        detailAccount,
+        handleDetailClose,
+        handleEditFromDetail,
+      )}
 
       {renderFab(accounts.length, handleAddClick, t)}
     </div>
   );
-}
+};
 
 export default NetWorthView;
 
@@ -162,7 +167,13 @@ const renderBody = (
         latestSnapshotByAccount={latestSnapshotByAccount}
         onAccountClick={onAccountClick}
       />
-      {renderInvestmentsBlock(grouped.investments, latestSnapshotByAccount, onAccountClick, t, isPro)}
+      {renderInvestmentsBlock(
+        grouped.investments,
+        latestSnapshotByAccount,
+        onAccountClick,
+        t,
+        isPro,
+      )}
       <AccountGroup
         title={t('networth.groups.liabilities')}
         accounts={grouped.liabilities}
@@ -171,7 +182,7 @@ const renderBody = (
       />
     </>
   );
-}
+};
 
 const renderInvestmentsBlock = (
   investments: Account[],
@@ -193,7 +204,7 @@ const renderInvestmentsBlock = (
       />
     </>
   );
-}
+};
 
 // Allocation analytics are Pro depth; the investment account list itself
 // stays free.
@@ -212,7 +223,7 @@ const renderAllocationCard = (
   }
 
   return <InvestmentAllocationCard accounts={investments} />;
-}
+};
 
 const renderDetailSheet = (
   account: Account | undefined,
@@ -229,7 +240,7 @@ const renderDetailSheet = (
       onEdit={onEdit}
     />
   );
-}
+};
 
 const renderFab = (
   accountCount: number,
@@ -253,4 +264,4 @@ const renderFab = (
       </Button>
     </div>
   );
-}
+};

@@ -79,14 +79,14 @@ const OtpRequestStep = ({
           value={turnstileToken ?? ''}
         />
 
-        <div className="flex justify-center">
+        <div className="flex w-full justify-center">
           <Turnstile
             ref={turnstileRef}
             siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
             onSuccess={onTokenChange}
             onError={() => onTokenChange(null)}
             onExpire={() => onTokenChange(null)}
-            options={{ theme: 'auto', size: 'normal' }}
+            options={{ theme: 'auto', size: 'flexible' }}
           />
         </div>
 

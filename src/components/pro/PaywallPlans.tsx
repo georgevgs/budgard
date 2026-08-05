@@ -71,19 +71,15 @@ const buildSavingsBadge = (plans: ProPlansDisplay, t: TFunc): string | null => {
 };
 
 const renderPlanCard = (card: PlanCard) => (
-  <button
-    key={card.value}
-    type="button"
-    role="radio"
-    aria-checked={card.isSelected}
-    onClick={() => card.onSelect(card.value)}
-    className={cn(
-      'w-full rounded-2xl border p-4 text-left transition-colors',
-      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-      card.isSelected && 'border-primary bg-primary/5 ring-1 ring-primary',
-      !card.isSelected && 'border-border/60 hover:border-border',
-    )}
-  >
+  <label key={card.value} className={getPlanCardClass(card.isSelected)}>
+    <input
+      type="radio"
+      name="upgrade-plan"
+      value={card.value}
+      checked={card.isSelected}
+      onChange={() => card.onSelect(card.value)}
+      className="sr-only"
+    />
     <span className="flex items-center gap-3">
       {renderRadioDot(card.isSelected)}
       <span className="min-w-0 flex-1">
@@ -102,8 +98,20 @@ const renderPlanCard = (card: PlanCard) => (
         </span>
       </span>
     </span>
-  </button>
+  </label>
 );
+
+const getPlanCardClass = (isSelected: boolean): string => {
+  const base = cn(
+    'block w-full cursor-pointer rounded-2xl border p-4 text-left transition-colors',
+    'focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background',
+  );
+  if (isSelected) {
+    return cn(base, 'border-primary bg-primary/5 ring-1 ring-primary');
+  }
+
+  return cn(base, 'border-border/60 hover:border-border');
+};
 
 const renderRadioDot = (isSelected: boolean) => {
   if (isSelected) {

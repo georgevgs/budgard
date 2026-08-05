@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
@@ -17,12 +18,17 @@ type Props = {
 };
 
 const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
+  const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const [step, setStep] = useState(0);
   const currencySymbol = getCurrencySymbol(defaultCurrency || 'EUR');
 
-  const { isSubmitting, handleComplete, handleBudgetNext, handleCategoriesNext } =
-    useOnboardingActions({ onComplete, setStep });
+  const {
+    isSubmitting,
+    handleComplete,
+    handleBudgetNext,
+    handleCategoriesNext,
+  } = useOnboardingActions({ onComplete, setStep });
 
   const renderCurrentStep = () => {
     if (step === 0) {
@@ -74,8 +80,8 @@ const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
           <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
         </div>
 
-        <div className="px-6 pb-6 pt-2 sm:pt-6">
-          {renderStepIndicator(step)}
+        <div className="px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-2 sm:pb-6 sm:pt-6">
+          {renderStepIndicator(step, t)}
           {renderCurrentStep()}
         </div>
       </DialogContent>
@@ -87,18 +93,39 @@ export default OnboardingFlow;
 
 // ─── Helper render functions ──────────────────────────────────────────────────
 
-const renderStepIndicator = (step: number) => (
-  <div className="flex justify-center gap-1.5 mb-6">
+type TFunc = (key: string, options?: Record<string, unknown>) => string;
+
+const renderStepIndicator = (step: number, t: TFunc) => (
+  <div
+    role="progressbar"
+    aria-valuemin={1}
+    aria-valuemax={STEP_COUNT}
+    aria-valuenow={step + 1}
+    aria-valuetext={t('onboarding.progress', {
+      current: step + 1,
+      total: STEP_COUNT,
+    })}
+    className="mb-6 flex justify-center gap-1.5"
+  >
     {Array.from({ length: STEP_COUNT }, (_, i) => (
       <div
         key={`step-${i}`}
-        className={cn(
-          'h-1.5 rounded-full transition-all duration-300',
-          i === step && 'w-6 bg-primary',
-          i !== step && 'w-1.5 bg-muted-foreground/30',
-          i < step && 'bg-primary/50 w-1.5',
-        )}
+        aria-hidden="true"
+        className={getStepClass(i, step)}
       />
     ))}
   </div>
 );
+
+const getStepClass = (index: number, currentStep: number): string => {
+  const base =
+    'h-1.5 rounded-full transition-[width,background-color] duration-300';
+  if (index === currentStep) {
+    return cn(base, 'w-6 bg-primary');
+  }
+  if (index < currentStep) {
+    return cn(base, 'w-1.5 bg-primary/50');
+  }
+
+  return cn(base, 'w-1.5 bg-muted-foreground/30');
+};

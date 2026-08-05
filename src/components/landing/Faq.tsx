@@ -43,6 +43,8 @@ const renderItem = (
   t: Tx,
 ) => {
   const isOpen = openIndex === index;
+  const buttonId = `faq-question-${n}`;
+  const answerId = `faq-answer-${n}`;
   const handleClick = () => {
     if (isOpen) {
       setOpenIndex(null);
@@ -55,34 +57,51 @@ const renderItem = (
   return (
     <div key={n}>
       <button
+        id={buttonId}
         type="button"
         onClick={handleClick}
+        aria-expanded={isOpen}
+        aria-controls={answerId}
         className="w-full flex items-center justify-between gap-4 px-5 sm:px-6 py-5 text-left hover:bg-muted/30 transition-colors"
       >
         <span className="text-[15px] font-medium tracking-tight">
           {t(`landing.faq.q${n}.question`)}
         </span>
-        <Plus
-          className={cn(
-            'h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200',
-            isOpen && 'rotate-45',
-            !isOpen && 'rotate-0',
-          )}
-        />
+        <Plus aria-hidden="true" className={getIconClass(isOpen)} />
       </button>
-      {renderAnswer(isOpen, t(`landing.faq.q${n}.answer`))}
+      {renderAnswer(isOpen, t(`landing.faq.q${n}.answer`), answerId, buttonId)}
     </div>
   );
 };
 
-const renderAnswer = (isOpen: boolean, text: string) => {
+const renderAnswer = (
+  isOpen: boolean,
+  text: string,
+  answerId: string,
+  buttonId: string,
+) => {
   if (!isOpen) return null;
 
   return (
-    <div className="px-5 sm:px-6 pb-5 -mt-1">
+    <div
+      id={answerId}
+      role="region"
+      aria-labelledby={buttonId}
+      className="px-5 sm:px-6 pb-5 -mt-1"
+    >
       <p className="text-sm text-muted-foreground leading-relaxed max-w-prose">
         {text}
       </p>
     </div>
   );
+};
+
+const getIconClass = (isOpen: boolean): string => {
+  const base =
+    'h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200';
+  if (isOpen) {
+    return cn(base, 'rotate-45');
+  }
+
+  return cn(base, 'rotate-0');
 };

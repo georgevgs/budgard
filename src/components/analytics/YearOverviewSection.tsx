@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import Lock from 'lucide-react/dist/esm/icons/lock';
 import { Card, CardContent } from '@/components/ui/card';
@@ -70,7 +70,10 @@ const YearOverviewSection = ({
           value={selectedYear.toString()}
           onValueChange={(value) => onYearChange(parseInt(value))}
         >
-          <SelectTrigger className="w-[110px] h-8">
+          <SelectTrigger
+            className="h-11 w-[110px]"
+            aria-label={t('analytics.selectYear')}
+          >
             <SelectValue placeholder={t('analytics.selectYear')} />
           </SelectTrigger>
           <SelectContent>
@@ -95,7 +98,7 @@ const YearOverviewSection = ({
 
       <Card className="overflow-hidden">
         <CardContent className="p-5">
-          <div className="w-full">
+          <div className="w-full" aria-hidden="true">
             <Suspense fallback={<div className="h-[280px]" aria-hidden />}>
               <MonthlyTrendChart
                 data={monthlyData}
@@ -107,6 +110,12 @@ const YearOverviewSection = ({
               />
             </Suspense>
           </div>
+          {renderMonthDetailSelect(
+            monthlyData,
+            onMonthClick,
+            t,
+            defaultCurrency,
+          )}
         </CardContent>
       </Card>
     </div>
@@ -162,5 +171,45 @@ const renderYearSummary = (
         })}
       </span>
     </p>
+  );
+};
+
+const renderMonthDetailSelect = (
+  data: MonthlyDatum[],
+  onMonthClick: (index: number) => void,
+  t: TFunc,
+  currency: string,
+) => {
+  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const monthIndex = Number(event.target.value);
+    if (!Number.isInteger(monthIndex)) return;
+
+    onMonthClick(monthIndex);
+  };
+
+  return (
+    <div className="mt-3 flex flex-col gap-2 border-t border-border/40 pt-3 sm:flex-row sm:items-center sm:justify-between">
+      <label
+        htmlFor="analytics-month-details"
+        className="text-xs font-medium text-muted-foreground"
+      >
+        {t('analytics.viewMonthDetails')}
+      </label>
+      <select
+        id="analytics-month-details"
+        value=""
+        onChange={handleChange}
+        className="h-11 w-full rounded-xl border border-border/60 bg-card px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-56"
+      >
+        <option value="" disabled>
+          {t('analytics.chooseMonth')}
+        </option>
+        {data.map((point, index) => (
+          <option key={point.fullMonth} value={index}>
+            {point.fullMonth} — {formatCurrency(point.amount, currency)}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 };

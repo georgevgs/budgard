@@ -57,7 +57,8 @@ describe('UpgradeDialog', () => {
     expect(screen.getByText('€1.99')).toBeInTheDocument();
 
     const yearlyCard = screen.getByRole('radio', { checked: true });
-    expect(yearlyCard).toHaveTextContent('pro.yearly');
+    expect(yearlyCard).toHaveAccessibleName(/pro.yearly/);
+    expect(yearlyCard).toHaveAttribute('name', 'upgrade-plan');
   });
 
   it('advertises the yearly saving and billing total on the yearly card', () => {

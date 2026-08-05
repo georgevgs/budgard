@@ -72,7 +72,7 @@ const UpgradeDialog = () => {
             <PaywallPlans plan={plan} onSelect={setPlan} plans={plans} />
           </div>
         </div>
-        <div className="space-y-3 border-t border-border/40 px-6 pb-6 pt-4">
+        <div className="space-y-3 border-t border-border/40 px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-4 sm:pb-6">
           <Button
             onClick={handleCheckout}
             disabled={isRedirecting}

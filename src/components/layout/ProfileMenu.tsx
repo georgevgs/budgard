@@ -27,7 +27,7 @@ const ProfileMenu = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="w-10 h-10 rounded-full p-0 bg-primary/10 text-primary hover:bg-primary/20"
+          className="h-11 w-11 rounded-full p-0 bg-primary/10 text-primary hover:bg-primary/20"
           aria-label={t('navigation.openProfileMenu')}
         >
           <span className="text-sm font-semibold">{initial}</span>
@@ -43,7 +43,7 @@ const ProfileMenu = () => {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+};
 
 export default ProfileMenu;
 
@@ -58,12 +58,9 @@ const getInitial = (email: string | undefined): string => {
   if (!email) return '?';
 
   return email.charAt(0).toUpperCase();
-}
+};
 
-const renderEmail = (
-  email: string | undefined,
-  t: TranslateFunction,
-) => {
+const renderEmail = (email: string | undefined, t: TranslateFunction) => {
   if (!email) return null;
 
   return (
@@ -76,4 +73,4 @@ const renderEmail = (
       </div>
     </DropdownMenuLabel>
   );
-}
+};

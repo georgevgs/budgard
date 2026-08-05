@@ -27,7 +27,7 @@ const AppMenu = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="w-10 h-10 rounded-full p-0 bg-muted text-foreground hover:bg-muted/80 ring-1 ring-border/40"
+          className="h-11 w-11 rounded-full p-0 bg-muted text-foreground hover:bg-muted/80 ring-1 ring-border/40"
           aria-label={t('navigation.openAppMenu')}
         >
           <MoreHorizontal className="h-5 w-5" />
@@ -56,7 +56,7 @@ const AppMenu = () => {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+};
 
 export default AppMenu;
 

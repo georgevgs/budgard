@@ -1,4 +1,5 @@
 import { Suspense, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import FormsManager from '@/components/layout/FormsManager';
 import { useDataConfig, useTemplatesData } from '@/contexts/DataContext';
@@ -26,6 +27,7 @@ const CsvImportDialog = lazyWithRetry(
 );
 
 const ExpensesList = () => {
+  const { t } = useTranslation();
   const templates = useTemplatesData();
   const { isInitialized, isHistoryLoaded, defaultCurrency } = useDataConfig();
   const { handleTemplateDelete } = useTemplateOps();
@@ -65,6 +67,7 @@ const ExpensesList = () => {
   return (
     <div>
       <div className="container max-w-4xl mx-auto px-4 pt-5 pb-4">
+        <h1 className="sr-only">{t('expenses.title')}</h1>
         <div className="mb-4 space-y-3">
           <WeeklyRecapCard />
         </div>

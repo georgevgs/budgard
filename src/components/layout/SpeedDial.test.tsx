@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 vi.mock('@/lib/haptics', () => ({
   haptics: { light: vi.fn() },
@@ -7,10 +7,17 @@ vi.mock('@/lib/haptics', () => ({
 
 import SpeedDial from '@/components/layout/SpeedDial';
 
-const renderDial = (overrides: Partial<{ onAddExpense: () => void; onAddCategory: () => void }> = {}) => {
+const renderDial = (
+  overrides: Partial<{
+    onAddExpense: () => void;
+    onAddCategory: () => void;
+  }> = {},
+) => {
   const onAddExpense = overrides.onAddExpense ?? vi.fn();
   const onAddCategory = overrides.onAddCategory ?? vi.fn();
-  render(<SpeedDial onAddExpense={onAddExpense} onAddCategory={onAddCategory} />);
+  render(
+    <SpeedDial onAddExpense={onAddExpense} onAddCategory={onAddCategory} />,
+  );
 
   return { onAddExpense, onAddCategory };
 };
@@ -35,13 +42,25 @@ describe('SpeedDial', () => {
     );
   });
 
-  it('closes on escape', () => {
+  it('moves focus to the first action when opened', async () => {
+    renderDial();
+
+    fireEvent.click(screen.getByLabelText('speedDial.open'));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('expenses.addExpense')).toHaveFocus();
+    });
+  });
+
+  it('closes on escape and restores focus to the toggle', async () => {
     renderDial();
 
     fireEvent.click(screen.getByLabelText('speedDial.open'));
     fireEvent.keyDown(document, { key: 'Escape' });
 
-    expect(screen.getByLabelText('speedDial.open')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByLabelText('speedDial.open')).toHaveFocus();
+    });
   });
 
   it('fires the add-expense callback and closes the dial', () => {

@@ -5,10 +5,7 @@ import Moon from 'lucide-react/dist/esm/icons/moon';
 import Sun from 'lucide-react/dist/esm/icons/sun';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import Check from 'lucide-react/dist/esm/icons/check';
-import {
-  ACCENT_COLORS,
-  type AccentColorKey,
-} from '@/hooks/useAccentColor';
+import { ACCENT_COLORS, type AccentColorKey } from '@/hooks/useAccentColor';
 
 type Theme = 'light' | 'dark' | 'barbie';
 
@@ -96,9 +93,7 @@ const renderThemeButton = (
   );
 };
 
-const getThemeButtonVariant = (
-  isActive: boolean,
-): 'default' | 'outline' => {
+const getThemeButtonVariant = (isActive: boolean): 'default' | 'outline' => {
   if (isActive) {
     return 'default';
   }
@@ -125,7 +120,7 @@ const renderAccentPicker = (
   return (
     <div>
       <p className="text-sm mb-2">{t('settings.appearance.accentColor')}</p>
-      <div className="flex justify-between">
+      <div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
         {ACCENT_COLORS.map((color) => {
           const isSelected = color.key === accent;
 
@@ -134,7 +129,7 @@ const renderAccentPicker = (
               key={color.key}
               type="button"
               onClick={() => setAccent(color.key)}
-              className="relative h-10 w-10 rounded-full transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="relative h-11 w-11 rounded-full transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               style={{ backgroundColor: color.values.swatch }}
               aria-label={t(`accent.colors.${color.key}`)}
               aria-pressed={isSelected}

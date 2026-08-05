@@ -19,13 +19,7 @@ const SpeedDialAction = ({
 }: Props) => {
   return (
     <div className="flex items-center gap-2">
-      <div
-        className={cn(
-          'px-2 py-1 rounded-xl bg-card border border-border/40 shadow-sm',
-          'opacity-0 -translate-x-4 transition-all duration-200',
-          isOpen && cn('opacity-100 translate-x-0', labelDelayClass),
-        )}
-      >
+      <div className={getLabelClass(isOpen, labelDelayClass)}>
         <span className="text-sm font-medium">{label}</span>
       </div>
       <Button
@@ -51,4 +45,19 @@ const getTabIndex = (isOpen: boolean): number => {
   }
 
   return -1;
+};
+
+const getLabelClass = (
+  isOpen: boolean,
+  labelDelayClass: string | undefined,
+): string => {
+  const base = cn(
+    'px-2 py-1 rounded-xl bg-card border border-border/40 shadow-sm',
+    'opacity-0 -translate-x-4 transition-[opacity,transform] duration-200',
+  );
+  if (isOpen) {
+    return cn(base, 'opacity-100 translate-x-0', labelDelayClass);
+  }
+
+  return base;
 };

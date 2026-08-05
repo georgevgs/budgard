@@ -47,6 +47,7 @@ const IncomeList = () => {
   return (
     <div>
       <div className="container max-w-4xl mx-auto px-4 pt-5 pb-4">
+        <h1 className="sr-only">{t('income.title')}</h1>
         <div className="space-y-3 mb-4">
           <ExpensesMonthlySelector
             selectedMonth={selectedMonth}
@@ -196,7 +197,9 @@ const renderIncomeContent = ({
       return <PendingHistoryNotice />;
     }
 
-    return <IncomeEmpty selectedMonth={selectedMonth} onAddClick={onAddClick} />;
+    return (
+      <IncomeEmpty selectedMonth={selectedMonth} onAddClick={onAddClick} />
+    );
   }
 
   if (filteredIncomes.length === 0 && search.length > 0) {

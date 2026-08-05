@@ -136,7 +136,11 @@ const renderOtpError = (error: string | null) => {
   if (!error) return null;
 
   return (
-    <p id="otp-error" className="text-sm text-destructive text-center" role="alert">
+    <p
+      id="otp-error"
+      className="text-sm text-destructive text-center"
+      role="alert"
+    >
       {error}
     </p>
   );
@@ -148,14 +152,14 @@ const renderResendCaptcha = (
   turnstileRef: RefObject<TurnstileInstance | null>,
   onTokenChange: (token: string | null) => void,
 ) => (
-  <div className="flex justify-center">
+  <div className="flex w-full justify-center">
     <Turnstile
       ref={turnstileRef}
       siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
       onSuccess={onTokenChange}
       onError={() => onTokenChange(null)}
       onExpire={() => onTokenChange(null)}
-      options={{ theme: 'auto', size: 'normal' }}
+      options={{ theme: 'auto', size: 'flexible' }}
     />
   </div>
 );

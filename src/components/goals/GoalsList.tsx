@@ -58,7 +58,7 @@ const GoalsList = () => {
     <div className="container max-w-4xl mx-auto p-4 space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="text-lg font-semibold">{t('goals.title')}</h2>
+          <h1 className="text-lg font-semibold">{t('goals.title')}</h1>
           {renderSubtitle(goals.length, t)}
         </div>
         <Button
@@ -72,7 +72,9 @@ const GoalsList = () => {
         </Button>
       </div>
 
-      <div className="grid gap-4">{renderGoalsOrEmpty(goals, handleEdit, handleDelete, setIsFormOpen, t)}</div>
+      <div className="grid gap-4">
+        {renderGoalsOrEmpty(goals, handleEdit, handleDelete, setIsFormOpen, t)}
+      </div>
 
       <Dialog open={isFormOpen} onOpenChange={handleFormClose}>
         <DialogContent
@@ -88,7 +90,7 @@ const GoalsList = () => {
       </Dialog>
     </div>
   );
-}
+};
 
 export default GoalsList;
 
@@ -115,7 +117,7 @@ const renderSubtitle = (count: number, t: TranslateFunction) => {
       {t('goals.subtitle', { count })}
     </p>
   );
-}
+};
 
 const renderGoalsOrEmpty = (
   goals: Goal[],
@@ -137,7 +139,7 @@ const renderGoalsOrEmpty = (
       <GoalCard goal={goal} onEdit={onEdit} onDelete={onDelete} />
     </div>
   ));
-}
+};
 
 const renderEmptyState = (
   onOpenForm: (open: boolean) => void,

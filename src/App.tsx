@@ -56,15 +56,11 @@ const AnalyticsView = lazyWithRetry(
 const RecurringExpensesList = lazyWithRetry(
   () => import('@/components/recurring/RecurringExpensesList'),
 );
-const GoalsList = lazyWithRetry(
-  () => import('@/components/goals/GoalsList'),
-);
+const GoalsList = lazyWithRetry(() => import('@/components/goals/GoalsList'));
 const NetWorthView = lazyWithRetry(
   () => import('@/components/networth/NetWorthView'),
 );
-const DebtsView = lazyWithRetry(
-  () => import('@/components/debts/DebtsView'),
-);
+const DebtsView = lazyWithRetry(() => import('@/components/debts/DebtsView'));
 const SettingsView = lazyWithRetry(
   () => import('@/components/settings/SettingsView'),
 );
@@ -148,6 +144,33 @@ const ScrollToTop = () => {
   }, [pathname]);
 
   return null;
+};
+
+// Keep browser history, assistive technology and the visible route in sync.
+// The authenticated main landmark is focusable, so route changes start users
+// at the new content instead of leaving focus behind in a closed menu or tab.
+const RouteMetadata = () => {
+  const { pathname } = useLocation();
+  const { t } = useTranslation();
+  const pageTitle = resolvePageTitle(pathname, t);
+
+  useEffect(() => {
+    document.title = buildDocumentTitle(pageTitle);
+  }, [pageTitle]);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById('main-content')?.focus({ preventScroll: true });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [pathname]);
+
+  return (
+    <span className="sr-only" role="status" aria-live="polite">
+      {pageTitle}
+    </span>
+  );
 };
 
 // Subscribes to the data slices that decide whether onboarding is due. Kept
@@ -454,6 +477,7 @@ const App = () => {
 
   return (
     <BrowserRouter>
+      <RouteMetadata />
       <div className="min-h-dvh bg-background flex flex-col">
         <ErrorBoundary>
           {/* Last-resort net. Every route below now has a closer boundary with
@@ -564,3 +588,28 @@ const App = () => {
 };
 
 export default App;
+
+const resolvePageTitle = (
+  pathname: string,
+  t: (key: string) => string,
+): string => {
+  if (pathname === '/expenses') return t('navigation.expenses');
+  if (pathname === '/income') return t('navigation.income');
+  if (pathname === '/recurring') return t('navigation.recurring');
+  if (pathname === '/analytics') return t('navigation.analytics');
+  if (pathname === '/goals') return t('navigation.goals');
+  if (pathname === '/networth') return t('navigation.networth');
+  if (pathname === '/debts') return t('navigation.debts');
+  if (pathname === '/settings') return t('navigation.settings');
+  if (pathname === '/privacy') return t('legal.privacy.title');
+  if (pathname === '/terms') return t('legal.terms.title');
+  if (pathname === '/contact') return t('legal.contact.title');
+
+  return 'Budgard';
+};
+
+const buildDocumentTitle = (pageTitle: string): string => {
+  if (pageTitle === 'Budgard') return pageTitle;
+
+  return `${pageTitle} · Budgard`;
+};

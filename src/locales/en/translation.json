@@ -120,6 +120,7 @@
       "toggleFilters": "Toggle filters",
       "allTags": "All tags",
       "selectTag": "All tags",
+      "sort": "Sort expenses",
       "dateRange": "Date range",
       "noDateRange": "No date range",
       "last7Days": "Last 7 days",
@@ -873,6 +874,8 @@
   },
   "analytics": {
     "selectYear": "Select year",
+    "viewMonthDetails": "View month details",
+    "chooseMonth": "Choose a month",
     "noCategorizedExpenses": "No categorized expenses for {{year}}",
     "yearOverview": "Year overview",
     "vsLastMonthUp": "+{{percent}}% vs last month",
@@ -993,6 +996,7 @@
     "stuckDescription": "Fully close and reopen Budgard to finish updating."
   },
   "onboarding": {
+    "progress": "Step {{current}} of {{total}}",
     "welcomeTitle": "Welcome to Budgard",
     "welcomeDescription": "A calm way to know where your money goes. Under a minute to set up — no spreadsheets, no judgement.",
     "getStarted": "Let's go",
@@ -1248,9 +1252,7 @@
         },
         {
           "heading": "Contact",
-          "paragraphs": [
-            "Questions about these terms: {{email}}."
-          ]
+          "paragraphs": ["Questions about these terms: {{email}}."]
         }
       ]
     },
@@ -1279,6 +1281,12 @@
       "installCta": "Add to Home Screen",
       "trust": "Built in the EU · No ads · No tracking · Yours to keep",
       "previewMonthLabel": "This month",
+      "preview": {
+        "rent": "Apartment rent",
+        "groceries": "Weekly groceries",
+        "streaming": "Streaming plan",
+        "transit": "Metro pass"
+      },
       "cat": {
         "housing": "Housing",
         "food": "Food",

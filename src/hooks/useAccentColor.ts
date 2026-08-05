@@ -12,13 +12,7 @@ type AccentValues = {
 };
 
 export type AccentColorKey =
-  | 'sunset'
-  | 'ocean'
-  | 'lavender'
-  | 'mint'
-  | 'coral'
-  | 'gold'
-  | 'slate';
+  'sunset' | 'ocean' | 'lavender' | 'mint' | 'coral' | 'gold' | 'slate';
 
 type AccentColorOption = {
   key: AccentColorKey;
@@ -38,19 +32,19 @@ export const ACCENT_COLORS: AccentColorOption[] = [
   {
     key: 'sunset',
     values: {
-      light: { primary: '24 75% 50%', primaryFg: '0 0% 100%' },
+      light: { primary: '24 75% 36%', primaryFg: '0 0% 100%' },
       dark: { primary: '22 78% 58%', primaryFg: '24 40% 6%' },
 
-      swatch: 'hsl(24 75% 50%)',
+      swatch: 'hsl(24 75% 36%)',
     },
   },
   {
     key: 'ocean',
     values: {
-      light: { primary: '215 68% 50%', primaryFg: '0 0% 100%' },
+      light: { primary: '215 68% 45%', primaryFg: '0 0% 100%' },
       dark: { primary: '213 70% 62%', primaryFg: '215 45% 6%' },
 
-      swatch: 'hsl(215 68% 50%)',
+      swatch: 'hsl(215 68% 45%)',
     },
   },
   {
@@ -65,28 +59,28 @@ export const ACCENT_COLORS: AccentColorOption[] = [
   {
     key: 'mint',
     values: {
-      light: { primary: '162 55% 38%', primaryFg: '0 0% 100%' },
+      light: { primary: '162 55% 28%', primaryFg: '0 0% 100%' },
       dark: { primary: '160 50% 50%', primaryFg: '162 35% 6%' },
 
-      swatch: 'hsl(162 55% 38%)',
+      swatch: 'hsl(162 55% 28%)',
     },
   },
   {
     key: 'coral',
     values: {
-      light: { primary: '350 62% 52%', primaryFg: '0 0% 100%' },
+      light: { primary: '350 62% 48%', primaryFg: '0 0% 100%' },
       dark: { primary: '348 58% 62%', primaryFg: '350 35% 6%' },
 
-      swatch: 'hsl(350 62% 52%)',
+      swatch: 'hsl(350 62% 48%)',
     },
   },
   {
     key: 'gold',
     values: {
-      light: { primary: '40 70% 46%', primaryFg: '0 0% 100%' },
+      light: { primary: '40 70% 29%', primaryFg: '0 0% 100%' },
       dark: { primary: '42 65% 55%', primaryFg: '40 40% 6%' },
 
-      swatch: 'hsl(40 70% 46%)',
+      swatch: 'hsl(40 70% 29%)',
     },
   },
   {
