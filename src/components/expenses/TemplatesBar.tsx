@@ -57,7 +57,7 @@ const TemplatesBar = ({
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 px-2 text-xs text-muted-foreground"
+            className="px-2 text-xs text-muted-foreground"
             onClick={() => setIsManaging(!isManaging)}
           >
             {renderManageLabel(isManaging, t)}
@@ -67,38 +67,35 @@ const TemplatesBar = ({
         <div
           className={cn(
             'flex gap-2 overflow-x-auto pb-1 scrollbar-none',
-            isManaging && 'pt-2 pr-2',
+            getTemplatesListClass(isManaging),
           )}
         >
           {templates.map((template) => (
-            <button
-              key={template.id}
-              type="button"
-              onClick={() => handleTemplateClick(template)}
-              className={cn(
-                'relative flex items-center gap-2 px-3 py-2 rounded-xl border border-border/50',
-                'bg-card text-sm whitespace-nowrap shrink-0',
-                'transition-colors',
-                !isManaging &&
-                  'hover:bg-accent/50 active:bg-accent cursor-pointer',
-                isManaging && 'cursor-default',
-              )}
-              aria-label={t('templates.useTemplate', {
-                description: template.description,
-              })}
-            >
-              {renderCategoryIndicator(template)}
-              <span className="font-medium">
-                {template.description}
-              </span>
-              <span className="text-muted-foreground tabular-nums">
-                {formatCurrency(
-                  template.amount,
-                  template.original_currency ?? defaultCurrency,
+            <div key={template.id} className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => handleTemplateClick(template)}
+                disabled={isManaging}
+                className={cn(
+                  'flex items-center gap-2 rounded-xl border border-border/50 px-3 py-2',
+                  'bg-card text-sm whitespace-nowrap transition-colors',
+                  getTemplateButtonStateClass(isManaging),
                 )}
-              </span>
+                aria-label={t('templates.useTemplate', {
+                  description: template.description,
+                })}
+              >
+                {renderCategoryIndicator(template)}
+                <span className="font-medium">{template.description}</span>
+                <span className="text-muted-foreground tabular-nums">
+                  {formatCurrency(
+                    template.amount,
+                    template.original_currency ?? defaultCurrency,
+                  )}
+                </span>
+              </button>
               {renderDeleteButton(isManaging, template, handleDeleteClick, t)}
-            </button>
+            </div>
           ))}
         </div>
       </div>
@@ -125,6 +122,18 @@ const renderManageLabel = (
   }
 
   return t('templates.manage');
+};
+
+const getTemplateButtonStateClass = (isManaging: boolean): string => {
+  if (isManaging) return 'cursor-default';
+
+  return 'hover:bg-accent/50 active:bg-accent cursor-pointer';
+};
+
+const getTemplatesListClass = (isManaging: boolean): string | undefined => {
+  if (isManaging) return 'pt-2 pr-2';
+
+  return undefined;
 };
 
 const renderCategoryIndicator = (template: ExpenseTemplate) => {
@@ -157,7 +166,7 @@ const renderDeleteButton = (
     <button
       type="button"
       onClick={(e) => onClick(e, template)}
-      className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       aria-label={t('expenses.deleteTemplate', { name: template.description })}
     >
       <X className="h-3 w-3" />

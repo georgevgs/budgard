@@ -239,7 +239,7 @@ const renderActiveFiltersSection = (props: ActiveFiltersSectionProps) => {
         variant="ghost"
         size="sm"
         onClick={onClearFilters}
-        className="h-6 px-2 text-xs ml-auto"
+        className="px-2 text-xs ml-auto"
       >
         {t('expenses.filter.clearAll')}
       </Button>

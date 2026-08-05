@@ -172,9 +172,8 @@ const renderHeader = (
       <Button
         type="button"
         variant="ghost"
-        size="sm"
+        size="icon"
         onClick={onBack}
-        className="h-8 w-8 p-0"
         disabled={isDisabled}
       >
         <ArrowLeft className="h-4 w-4" />

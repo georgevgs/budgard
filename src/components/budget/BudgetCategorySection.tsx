@@ -46,7 +46,7 @@ const BudgetCategorySection = ({
           variant="ghost"
           size="sm"
           onClick={onManage}
-          className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+          className="px-2 text-xs text-muted-foreground hover:text-foreground"
         >
           <Settings2 className="h-3.5 w-3.5 mr-1.5" />
           {pickManageLabel(rows.length, t)}
@@ -88,7 +88,7 @@ const renderRowsOrEmpty = (
       <button
         type="button"
         onClick={onManage}
-        className="w-full text-left text-xs text-muted-foreground hover:text-foreground py-1.5 px-0.5 transition-colors"
+        className="flex min-h-11 w-full items-center px-0.5 text-left text-xs text-muted-foreground transition-colors hover:text-foreground"
       >
         {t('budget.categoryBudgets.emptyHint')}
       </button>

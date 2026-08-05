@@ -190,7 +190,6 @@ const renderBudgetState = ({
             variant="ghost"
             size="icon"
             onClick={onFormOpen}
-            className="h-8 w-8"
             aria-label={t('budget.editBudget')}
           >
             <Pencil className="h-3.5 w-3.5" />
