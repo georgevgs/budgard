@@ -137,7 +137,7 @@ const renderRow = (row: BudgetCategoryRow, currency: string, t: TFunc) => {
         })}
       >
         <div
-          className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+          className={`h-full rounded-full transition-[width] duration-500 ${barColor}`}
           style={{ width: `${barWidth}%` }}
         />
       </div>

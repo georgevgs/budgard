@@ -49,7 +49,7 @@ const ExpensesDashboardPanel = ({
   return (
     <div
       className={cn(
-        'grid transition-all duration-200 ease-in-out',
+        'grid transition-[grid-template-rows,opacity] duration-200 ease-in-out',
         getDashboardRowsClass(isVisible),
       )}
     >

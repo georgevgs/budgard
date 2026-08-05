@@ -39,9 +39,8 @@ const Reveal = ({ children, delay = 0, className }: Props) => {
       ref={ref}
       style={{ transitionDelay: `${delay}ms` }}
       className={cn(
-        'transition-all duration-700 ease-out will-change-transform',
-        visible && 'opacity-100 translate-y-0',
-        !visible && 'opacity-0 translate-y-4',
+        'transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+        getVisibilityClass(visible),
         className,
       )}
     >
@@ -51,3 +50,11 @@ const Reveal = ({ children, delay = 0, className }: Props) => {
 };
 
 export default Reveal;
+
+// --- Helpers ---
+
+const getVisibilityClass = (visible: boolean): string => {
+  if (visible) return 'opacity-100 translate-y-0';
+
+  return 'opacity-0 translate-y-3';
+};

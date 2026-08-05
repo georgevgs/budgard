@@ -103,7 +103,7 @@ const AuthenticatedLayout = () => {
       <main
         id="main-content"
         tabIndex={-1}
-        className="flex-1 pt-2 pb-(--dock-inset) focus:outline-none"
+        className="route-transition-content flex-1 pt-2 pb-(--dock-inset) focus:outline-none"
       >
         <Outlet />
       </main>

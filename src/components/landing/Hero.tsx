@@ -44,13 +44,13 @@ const Hero = ({ onGetStarted }: Props) => {
       <div className="relative max-w-6xl mx-auto px-5 sm:px-8 pt-20 sm:pt-28 pb-16 sm:pb-24">
         <div className="max-w-3xl mx-auto text-center">
           <Reveal>{renderHeading(t)}</Reveal>
-          <Reveal delay={120}>{renderSubtitle(t)}</Reveal>
-          <Reveal delay={220}>
+          <Reveal delay={80}>{renderSubtitle(t)}</Reveal>
+          <Reveal delay={160}>
             {renderCtas(t, onGetStarted, showInstall, handleInstall)}
           </Reveal>
-          <Reveal delay={320}>{renderTrustLine(t)}</Reveal>
+          <Reveal delay={240}>{renderTrustLine(t)}</Reveal>
         </div>
-        <Reveal delay={420} className="mt-16 sm:mt-20">
+        <Reveal delay={320} className="mt-16 sm:mt-20">
           {renderHeroShot(t)}
         </Reveal>
       </div>

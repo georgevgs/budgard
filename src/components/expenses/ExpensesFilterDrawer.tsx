@@ -76,7 +76,10 @@ const ExpensesFilterDrawer = ({
       // inert keeps the visually collapsed selects out of the tab order
       // and away from screen readers
       inert={!isOpen}
-      className={cn('grid transition-all duration-200', getDrawerClass(isOpen))}
+      className={cn(
+        'grid transition-[grid-template-rows,opacity] duration-200',
+        getDrawerClass(isOpen),
+      )}
     >
       <div className="overflow-hidden space-y-3">
         <Select

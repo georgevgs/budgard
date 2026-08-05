@@ -66,7 +66,7 @@ const ExpensesDashboard = ({
               </div>
               <div className="ml-5 h-1 rounded-full bg-muted overflow-hidden">
                 <div
-                  className="h-full rounded-full transition-all duration-700 ease-out"
+                  className="h-full rounded-full transition-[width] duration-500 ease-out"
                   style={{
                     width: `${category.percentage}%`,
                     backgroundColor: category.color,

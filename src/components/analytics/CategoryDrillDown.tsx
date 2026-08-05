@@ -127,7 +127,7 @@ const renderMonthlyBreakdown = (
               </span>
               <div className="flex-1 h-4 bg-muted/50 rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full transition-all duration-500"
+                  className="h-full rounded-full transition-[width] duration-500"
                   style={{ width: `${width}%`, backgroundColor: color }}
                 />
               </div>
@@ -169,4 +169,3 @@ const renderTagInRow = (expense: Expense) => {
 
   return <> · {expense.tag.name}</>;
 };
-

@@ -145,7 +145,7 @@ const renderBudgetProgress = (
       </div>
       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-700 ${barClass}`}
+          className={`h-full rounded-full transition-[width] duration-500 ${barClass}`}
           style={{ width: `${barWidth}%` }}
         />
       </div>
