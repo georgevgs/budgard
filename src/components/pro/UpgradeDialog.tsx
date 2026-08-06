@@ -76,7 +76,7 @@ const UpgradeDialog = () => {
           <Button
             onClick={handleCheckout}
             disabled={isRedirecting}
-            className="h-12 w-full rounded-full text-base font-semibold shadow-lg shadow-primary/25"
+            className="h-12 w-full rounded-full text-base font-semibold shadow-lg shadow-black/10 dark:shadow-black/40"
           >
             {renderCtaLabel(isRedirecting, isTrialEligible, t)}
           </Button>

@@ -259,7 +259,7 @@ const renderFab = (
       <Button
         size="icon"
         onClick={onAddClick}
-        className="h-14 w-14 rounded-full shadow-lg shadow-primary/30"
+        className="h-14 w-14 rounded-full shadow-lg shadow-black/10 dark:shadow-black/40"
         aria-label={t('networth.addAccount')}
       >
         <Plus className="h-6 w-6" />

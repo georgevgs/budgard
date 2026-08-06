@@ -44,7 +44,7 @@ const NetCashFlowCard = ({
     <button
       type="button"
       onClick={() => navigate('/analytics')}
-      className="glow-surface w-full text-left border border-primary/15 rounded-2xl p-5 space-y-3 hover:border-primary/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="w-full rounded-2xl border border-border/70 bg-card p-5 text-left space-y-3 transition-colors hover:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       aria-label={t('cashFlow.viewDetails')}
     >
       <div className="flex items-center justify-between">

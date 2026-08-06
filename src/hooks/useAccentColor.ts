@@ -21,8 +21,8 @@ type AccentColorOption = {
 
 /**
  * Each accent is hand-tuned per theme so it sits naturally against:
- *   light — cool lilac canvas, white cards
- *   dark  — deep plum canvas, ink-purple cards
+ *   light — neutral canvas, white cards
+ *   dark  — neutral black canvas, charcoal cards
  *
  * Saturation stays intentionally high. The brightest hues use ink-colored
  * foregrounds, so primary controls feel luminous without losing their label.
@@ -94,11 +94,11 @@ export const ACCENT_COLORS: AccentColorOption[] = [
   },
 ];
 
-const DEFAULT_ACCENT: AccentColorKey = 'lavender';
+const DEFAULT_ACCENT: AccentColorKey = 'sunset';
 const STORAGE_KEY = 'accent-color';
 
 const findAccent = (key: string): AccentColorOption =>
-  ACCENT_COLORS.find((color) => color.key === key) ?? ACCENT_COLORS[2];
+  ACCENT_COLORS.find((color) => color.key === key) ?? ACCENT_COLORS[0];
 
 const getInitialKey = (): AccentColorKey => {
   try {

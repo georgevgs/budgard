@@ -67,7 +67,7 @@ const renderBackdrop = () => (
     className="absolute inset-0 pointer-events-none"
     style={{
       backgroundImage:
-        'radial-gradient(800px 440px at 30% -5%, hsl(var(--primary) / 0.18), transparent 70%), radial-gradient(720px 420px at 82% 8%, hsl(var(--info) / 0.12), transparent 68%), radial-gradient(620px 360px at 50% 44%, hsl(var(--destructive) / 0.06), transparent 72%)',
+        'radial-gradient(900px 460px at 50% -10%, hsl(var(--primary) / 0.08), transparent 70%)',
     }}
   />
 );
@@ -76,9 +76,7 @@ const renderHeading = (t: Tx) => (
   <h1 className="text-[44px] sm:text-6xl md:text-7xl font-semibold tracking-[-0.03em] leading-[1.02] text-foreground">
     {t('landing.hero.headingLine1')}
     <br />
-    <span className="text-aurora">
-      {t('landing.hero.headingLine2')}
-    </span>
+    <span className="text-primary">{t('landing.hero.headingLine2')}</span>
   </h1>
 );
 
@@ -98,7 +96,7 @@ const renderCtas = (
     <Button
       size="lg"
       onClick={onGetStarted}
-      className="group rounded-full px-7 h-12 text-[15px] shadow-lg shadow-primary/25 w-full sm:w-auto"
+      className="group rounded-full px-7 h-12 text-[15px] shadow-lg shadow-black/10 dark:shadow-black/40 w-full sm:w-auto"
     >
       {t('landing.hero.primaryCta')}
       <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />

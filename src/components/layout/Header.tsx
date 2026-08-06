@@ -26,7 +26,7 @@ const Header = () => {
   const isSecondaryRoute = SECONDARY_ROUTES.includes(pathname);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl pt-safe-t">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/90 backdrop-blur-xl pt-safe-t">
       <div className="container grid grid-cols-3 items-center h-16 px-4 pt-1">
         <div className="justify-self-start">
           {renderLeftSlot(isSecondaryRoute)}

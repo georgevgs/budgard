@@ -169,7 +169,7 @@ const getActionsClass = (isOpen: boolean): string => {
 
 const getToggleClass = (isOpen: boolean): string => {
   const base =
-    'h-14 w-14 rounded-full shadow-lg shadow-primary/30 transition-transform duration-200 pointer-events-auto';
+    'h-14 w-14 rounded-full shadow-lg shadow-black/10 dark:shadow-black/40 transition-transform duration-200 pointer-events-auto';
   if (isOpen) {
     return cn(base, 'rotate-45');
   }

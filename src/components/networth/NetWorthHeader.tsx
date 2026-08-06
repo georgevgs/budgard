@@ -10,7 +10,7 @@ import type { NetWorthSummary } from '@/hooks/useNetWorth';
 type Props = {
   summary: NetWorthSummary;
   defaultCurrency: string;
-}
+};
 
 const NetWorthHeader = ({ summary, defaultCurrency }: Props) => {
   const { t } = useTranslation();
@@ -18,7 +18,7 @@ const NetWorthHeader = ({ summary, defaultCurrency }: Props) => {
   const isPositive = summary.total >= 0;
 
   return (
-    <div className="glow-surface border border-primary/15 rounded-2xl p-5 space-y-3">
+    <div className="rounded-2xl border border-border/70 bg-card p-5 space-y-3">
       <p className="text-sm font-medium text-muted-foreground">
         {t('networth.totalLabel')}
       </p>
@@ -57,7 +57,7 @@ const NetWorthHeader = ({ summary, defaultCurrency }: Props) => {
       {renderStaleRatesWarning(summary.staleCurrencies, t)}
     </div>
   );
-}
+};
 
 export default NetWorthHeader;
 
@@ -149,4 +149,4 @@ const renderInvestmentRow = (
       </div>
     </div>
   );
-}
+};

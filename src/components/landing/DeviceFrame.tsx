@@ -7,11 +7,11 @@ type Props = {
   glow?: boolean;
 };
 
-const DeviceFrame = ({ children, className, glow = true }: Props) => (
+const DeviceFrame = ({ children, className, glow = false }: Props) => (
   <div className={cn('relative', className)}>
     {renderGlow(glow)}
-    <div className="glow-surface relative rounded-[28px] border border-primary/15 shadow-2xl shadow-primary/15 overflow-hidden">
-      <div className="px-3 pt-3 pb-1.5 flex items-center gap-1.5 border-b border-border/30 bg-muted/20">
+    <div className="relative rounded-[28px] border border-border/70 bg-card shadow-2xl shadow-black/10 dark:shadow-black/50 overflow-hidden">
+      <div className="px-3 pt-3 pb-1.5 flex items-center gap-1.5 border-b border-border/60 bg-muted/20">
         <span className="w-2 h-2 rounded-full bg-foreground/15" />
         <span className="w-2 h-2 rounded-full bg-foreground/15" />
         <span className="w-2 h-2 rounded-full bg-foreground/15" />
@@ -32,7 +32,7 @@ const renderGlow = (enabled: boolean) => {
       className="absolute -inset-6 rounded-[36px] pointer-events-none"
       style={{
         background:
-          'radial-gradient(55% 65% at 34% 40%, hsl(var(--primary) / 0.24), transparent 72%), radial-gradient(48% 58% at 70% 55%, hsl(var(--info) / 0.16), transparent 74%)',
+          'radial-gradient(60% 60% at 50% 40%, hsl(var(--foreground) / 0.06), transparent 70%)',
         filter: 'blur(40px)',
       }}
     />

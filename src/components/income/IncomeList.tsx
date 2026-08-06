@@ -109,7 +109,7 @@ const IncomeList = () => {
         <Button
           size="icon"
           onClick={formState.handleAddClick}
-          className="h-14 w-14 rounded-full shadow-lg shadow-income/30 bg-income text-income-foreground hover:bg-income/90"
+          className="h-14 w-14 rounded-full shadow-lg shadow-black/10 dark:shadow-black/40 bg-income text-income-foreground hover:bg-income/90"
           aria-label={t('income.addIncome')}
         >
           <Plus className="h-6 w-6" />

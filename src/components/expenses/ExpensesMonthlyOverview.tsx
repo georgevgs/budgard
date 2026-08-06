@@ -35,13 +35,17 @@ const ExpensesMonthlyOverview = ({
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
 
-  const displayTotal = pickDisplayTotal(hasActiveFilters, filteredTotal, monthlyTotal);
+  const displayTotal = pickDisplayTotal(
+    hasActiveFilters,
+    filteredTotal,
+    monthlyTotal,
+  );
   const animatedTotal = useAnimatedNumber(displayTotal);
   const mostExpensive = findMostExpensive(expenses);
   const totalLabel = getTotalLabel(hasActiveFilters, t);
 
   return (
-    <div className="glow-surface flex flex-col gap-4 border border-primary/15 rounded-2xl p-5">
+    <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-5">
       <button
         type="button"
         onClick={onMonthlyTotalClick}
@@ -49,7 +53,8 @@ const ExpensesMonthlyOverview = ({
         aria-expanded={getAriaExpanded(hasExpenses, isExpanded)}
         className={cn(
           'w-full text-left transition-opacity rounded-lg',
-          hasExpenses && 'cursor-pointer hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+          hasExpenses &&
+            'cursor-pointer hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           !hasExpenses && 'cursor-default',
         )}
       >
@@ -59,13 +64,23 @@ const ExpensesMonthlyOverview = ({
         <p className="text-3xl font-bold tracking-tight tabular-nums">
           {formatCurrency(animatedTotal, defaultCurrency)}
         </p>
-        {renderFilteredSubtotalNote(hasActiveFilters, monthlyTotal, t, defaultCurrency)}
+        {renderFilteredSubtotalNote(
+          hasActiveFilters,
+          monthlyTotal,
+          t,
+          defaultCurrency,
+        )}
         {renderExpandHint(hasExpenses, isExpanded, t)}
       </button>
 
       {renderStats(hasExpenses, expenses, mostExpensive, t, defaultCurrency)}
 
-      {renderCurrentMonthButton(selectedMonth, currentMonth, onCurrentMonthClick, t)}
+      {renderCurrentMonthButton(
+        selectedMonth,
+        currentMonth,
+        onCurrentMonthClick,
+        t,
+      )}
     </div>
   );
 };

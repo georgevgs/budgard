@@ -68,7 +68,7 @@ const tiles = (): Tile[] => [
 const renderTile = (tile: Tile, t: Tx) => (
   <div
     key={tile.key}
-    className="glow-surface aspect-square rounded-2xl border border-border/60 flex flex-col items-center justify-center gap-2 transition-transform hover:-translate-y-0.5 hover:border-primary/30"
+    className="aspect-square rounded-2xl border border-border/70 bg-card flex flex-col items-center justify-center gap-2 transition-transform hover:-translate-y-0.5 hover:border-border"
   >
     <span
       className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"

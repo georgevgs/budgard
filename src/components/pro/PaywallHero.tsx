@@ -13,7 +13,7 @@ const PaywallHero = () => {
         aria-hidden
         className="pointer-events-none absolute -top-24 left-1/2 h-52 w-52 -translate-x-1/2 rounded-full bg-primary/25 blur-3xl"
       />
-      <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-primary/75 text-primary-foreground shadow-lg shadow-primary/30">
+      <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-primary/75 text-primary-foreground shadow-lg shadow-black/10 dark:shadow-black/40">
         <Crown className="h-7 w-7" />
       </div>
       <div className="relative space-y-1.5">

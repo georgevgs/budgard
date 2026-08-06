@@ -132,7 +132,6 @@ const renderAccentPicker = (
               className="relative h-11 w-11 rounded-full border-2 border-background ring-1 ring-border/60 transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               style={{
                 backgroundColor: color.values.swatch,
-                boxShadow: `0 10px 24px -12px ${color.values.swatch}`,
               }}
               aria-label={t(`accent.colors.${color.key}`)}
               aria-pressed={isSelected}
