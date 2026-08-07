@@ -1473,23 +1473,34 @@
         "subs": "Subscriptions"
       }
     },
-    "categories": {
-      "eyebrow": "Made for the way you spend",
-      "heading": "Categories and tags that fit your life.",
-      "body": "Start with a sensible default set. Bend it however you like. Tag a coffee, a date night, a rent payment — find them all again in seconds.",
-      "point1": "Custom categories with colors and emoji",
-      "point2": "Tags for one-off context — vacation, gift, work",
-      "point3": "Recurring expenses tracked automatically",
-      "tile": {
-        "housing": "Housing",
-        "food": "Food",
-        "transport": "Transport",
-        "subs": "Subscriptions",
-        "health": "Health",
-        "fun": "Fun",
-        "travel": "Travel",
-        "gifts": "Gifts",
-        "pets": "Pets"
+    "scan": {
+      "eyebrow": "Pro · Receipt scanning",
+      "heading": "Point at a receipt. Keep the evening.",
+      "body": "Photograph a receipt and Budgard reads the total, the date and the merchant, then fills the form in for you. All you do is check it and save.",
+      "point1": "Reads the total, date and merchant",
+      "point2": "Runs on your device — the scan needs no upload",
+      "point3": "Always shown for review; nothing is saved behind your back",
+      "receiptLabel": "Receipt",
+      "receiptTotal": "Total",
+      "resultLabel": "New expense",
+      "merchant": "Corner Market",
+      "resultDate": "Today",
+      "category": "Food"
+    },
+    "flow": {
+      "eyebrow": "The whole picture",
+      "heading": "Money in, money out, and what's left of it.",
+      "body": "Budgard tracks what arrives as carefully as what leaves. See income beside spending, watch net worth build across your accounts, and set goals that fill as you go.",
+      "point1": "Income and expenses in one timeline",
+      "point2": "Net worth, accounts, investments and debts",
+      "point3": "Bring your history — import a CSV from your old app",
+      "cardLabel": "Net worth",
+      "cardDelta": "+€640 this month",
+      "goal": "Emergency fund",
+      "rows": {
+        "salary": "Salary",
+        "freelance": "Freelance",
+        "spending": "Spending"
       }
     },
     "privacy": {
@@ -1545,7 +1556,8 @@
         "feature6": "Unlimited accounts and investment analytics",
         "feature7": "Debt payoff planner",
         "feature8": "CSV exports of your full history",
-        "feature9": "Early access to new features"
+        "feature9": "Receipt scanning that fills the form for you",
+        "feature10": "Early access to new features"
       }
     },
     "faq": {
@@ -1574,6 +1586,10 @@
       "q6": {
         "question": "Do you have an iOS or Android app?",
         "answer": "Budgard is a Progressive Web App. Add it to your Home Screen on iOS or install it on Android — it behaves like a native app, without the App Store middlemen."
+      },
+      "q7": {
+        "question": "Can I bring my data from another app?",
+        "answer": "Yes. Budgard imports expenses and income from CSV, so your history comes with you instead of starting from an empty month. Exports are available too, in CSV and JSON."
       }
     },
     "finalCta": {

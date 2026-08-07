@@ -166,7 +166,7 @@ const renderProCard = (
       {t('landing.pricing.pro.trialNote')}
     </p>
     <ul className="mt-8 space-y-3">
-      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) =>
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) =>
         renderFeature(t(`landing.pricing.pro.feature${n}`)),
       )}
     </ul>

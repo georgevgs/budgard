@@ -5,7 +5,8 @@ import Header from '@/components/landing/Header';
 import Hero from '@/components/landing/Hero';
 import Analytics from '@/components/landing/Analytics';
 import Budget from '@/components/landing/Budget';
-import Categories from '@/components/landing/Categories';
+import Scan from '@/components/landing/Scan';
+import MoneyFlow from '@/components/landing/MoneyFlow';
 import Privacy from '@/components/landing/Privacy';
 import Pricing from '@/components/landing/Pricing';
 import Faq from '@/components/landing/Faq';
@@ -44,7 +45,8 @@ const LandingPage = () => {
       <Hero onGetStarted={handleGetStarted} />
       <Analytics />
       <Budget />
-      <Categories />
+      <Scan />
+      <MoneyFlow />
       <Privacy />
       <Pricing onGetStarted={handleGetStarted} onGetPro={handleGetPro} />
       <Faq />

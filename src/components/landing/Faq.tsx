@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 
 type Tx = (key: string) => string;
 
-const QUESTION_KEYS = [1, 2, 3, 4, 5, 6] as const;
+const QUESTION_KEYS = [1, 2, 3, 4, 5, 6, 7] as const;
 
 const Faq = () => {
   const { t } = useTranslation();
