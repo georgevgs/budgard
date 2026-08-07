@@ -100,7 +100,6 @@
         "starting": "Small wins add up"
       },
       "daysSummary": "{{good}} of the last {{total}} days came in under your daily allowance",
-      "daysAriaLabel": "{{good}} of the last {{total}} days came in under your daily allowance",
       "claim": "I spent nothing today",
       "claimed": "Nothing spent today",
       "undo": "Undo",

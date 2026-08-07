@@ -13,6 +13,7 @@ import { useIsPro } from '@/hooks/useIsPro';
 import { celebrate } from '@/lib/confetti';
 import { haptics } from '@/lib/haptics';
 import { toast } from '@/hooks/useToast';
+import { formatCurrency } from '@/lib/utils';
 
 // Watches for milestones across the whole app — mounted in the authenticated
 // layout so it fires no matter which screen the user is on (a category goal can
@@ -20,7 +21,7 @@ import { toast } from '@/hooks/useToast';
 // nothing.
 const MilestoneWatcher = () => {
   const { t } = useTranslation();
-  const { isInitialized, isSecondaryLoaded } = useDataConfig();
+  const { isInitialized, isSecondaryLoaded, defaultCurrency } = useDataConfig();
   const isPro = useIsPro();
   const goals = useGoalsData();
   const debts = useDebtsData();
@@ -48,11 +49,16 @@ const MilestoneWatcher = () => {
       haptics.success();
       toast({
         variant: 'success',
-        title: t('today.rhythm.celebrate', { amount: id.split('-').pop() }),
+        // The rung is the trailing segment of the id. It is a bare number, so
+        // it has to be formatted before it reaches the user — "100 set aside"
+        // reads as a score, "€100 set aside" reads as money.
+        title: t('today.rhythm.celebrate', {
+          amount: formatCurrency(Number(id.split('-').pop()), defaultCurrency),
+        }),
         duration: 6000,
       });
     },
-    [t],
+    [t, defaultCurrency],
   );
 
   const celebrateGoal = useCallback(
