@@ -8,8 +8,8 @@ import { corsHeadersFor, jsonResponder } from '../_shared/cors.ts';
 
 const STRIPE_PORTAL_URL = 'https://api.stripe.com/v1/billing_portal/sessions';
 
-// Same version the stripe-checkout function charges with.
-const STRIPE_API_VERSION = '2025-03-31.basil';
+// Keep portal sessions on Stripe's current stable API version.
+const STRIPE_API_VERSION = '2026-07-29.dahlia';
 
 // Where the portal's "Return to Budgard" link points.
 const RETURN_URL = 'https://budgard.com/settings';
@@ -33,7 +33,10 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } },
     );
 
-    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    const {
+      data: { user },
+      error: userError,
+    } = await userClient.auth.getUser();
     if (userError || !user) {
       return jsonResponse({ error: 'Unauthorized' }, 401);
     }
@@ -53,6 +56,11 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'No subscription' }, 404);
     }
 
+    const portalParams = buildPortalParams(subscription.stripe_customer_id);
+    if (!portalParams) {
+      return jsonResponse({ error: 'Subscription has no Stripe billing' }, 409);
+    }
+
     const secretKey = Deno.env.get('STRIPE_SECRET_KEY');
     if (!secretKey) {
       console.error('stripe-portal: STRIPE_SECRET_KEY is not set');
@@ -67,10 +75,7 @@ Deno.serve(async (req) => {
         'Stripe-Version': STRIPE_API_VERSION,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        customer: subscription.stripe_customer_id,
-        return_url: RETURN_URL,
-      }),
+      body: portalParams,
     });
 
     if (!stripeResponse.ok) {
@@ -96,3 +101,21 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Internal server error' }, 500);
   }
 });
+
+// --- Helpers ---
+
+const buildPortalParams = (customerId: string): URLSearchParams | null => {
+  const params = new URLSearchParams({ return_url: RETURN_URL });
+  if (customerId.startsWith('cus_')) {
+    params.set('customer', customerId);
+
+    return params;
+  }
+  if (customerId.startsWith('acct_')) {
+    params.set('customer_account', customerId);
+
+    return params;
+  }
+
+  return null;
+};

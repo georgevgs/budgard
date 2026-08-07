@@ -525,6 +525,7 @@
       "manage": "Manage subscription",
       "opening": "Opening…",
       "manageHint": "Cancel, switch plan, update payment details or download invoices — handled securely by Stripe.",
+      "noBillingHint": "This Pro access has no recurring payment or Stripe subscription to manage.",
       "portalError": "Couldn't open subscription management. Please try again."
     },
     "about": {

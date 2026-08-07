@@ -5,7 +5,11 @@ import type { Subscription, SubscriptionStatus } from '@/types/Subscription';
 // A cancelled-but-paid-up subscription needs no special case here: Stripe
 // keeps status 'active' (with cancel_at_period_end set) until the period the
 // user already paid for ends, and only then flips it to 'canceled'.
-const ACTIVE_STATUSES: SubscriptionStatus[] = ['trialing', 'active', 'past_due'];
+const ACTIVE_STATUSES: SubscriptionStatus[] = [
+  'trialing',
+  'active',
+  'past_due',
+];
 
 // Status alone trusts that Stripe's terminal webhook (canceled/unpaid) always
 // arrives. If it never does, the row would stay 'active' forever, so access
@@ -30,6 +34,27 @@ export const isSubscriptionPro = (
   const graceMs = getGraceDays(subscription.status) * DAY_MS;
 
   return now.getTime() < paidThrough.getTime() + graceMs;
+};
+
+export const hasStripeBillingManagement = (
+  subscription: Subscription | null,
+): boolean => {
+  if (!subscription) {
+    return false;
+  }
+  if (!subscription.stripe_subscription_id.startsWith('sub_')) {
+    return false;
+  }
+
+  const customerId = subscription.stripe_customer_id;
+  if (customerId.startsWith('cus_')) {
+    return true;
+  }
+  if (customerId.startsWith('acct_')) {
+    return true;
+  }
+
+  return false;
 };
 
 // --- Helpers ---

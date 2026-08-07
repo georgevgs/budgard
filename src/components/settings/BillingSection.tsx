@@ -12,6 +12,7 @@ import { useDateLocale } from '@/hooks/useDateLocale';
 import { useProPlans } from '@/hooks/pro/useProPlans';
 import { useToast } from '@/hooks/useToast';
 import { planIdForPriceId, type ProPlanPrices } from '@/lib/proPlans';
+import { hasStripeBillingManagement } from '@/lib/subscription';
 import type { Subscription } from '@/types/Subscription';
 
 const BillingSection = () => {
@@ -119,20 +120,41 @@ const renderProContent = (
     {renderPeriodRow(subscription, dateLocale, t)}
     {renderTrialNotice(subscription, dateLocale, t)}
     {renderPastDueNotice(subscription, t)}
-    <Button
-      variant="outline"
-      className="w-full"
-      onClick={onManage}
-      disabled={isOpeningPortal}
-    >
-      <ExternalLink className="h-4 w-4 mr-2" />
-      {getManageLabel(isOpeningPortal, t)}
-    </Button>
-    <p className="text-xs text-muted-foreground">
-      {t('settings.billing.manageHint')}
-    </p>
+    {renderBillingManagement(subscription, isOpeningPortal, onManage, t)}
   </>
 );
+
+const renderBillingManagement = (
+  subscription: Subscription,
+  isOpeningPortal: boolean,
+  onManage: () => void,
+  t: TFunc,
+) => {
+  if (!hasStripeBillingManagement(subscription)) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        {t('settings.billing.noBillingHint')}
+      </p>
+    );
+  }
+
+  return (
+    <>
+      <Button
+        variant="outline"
+        className="w-full"
+        onClick={onManage}
+        disabled={isOpeningPortal}
+      >
+        <ExternalLink className="h-4 w-4 mr-2" />
+        {getManageLabel(isOpeningPortal, t)}
+      </Button>
+      <p className="text-xs text-muted-foreground">
+        {t('settings.billing.manageHint')}
+      </p>
+    </>
+  );
+};
 
 const renderRow = (label: string, value: string) => (
   <div className="flex items-center justify-between">

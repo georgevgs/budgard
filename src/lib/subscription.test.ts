@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { isSubscriptionPro } from '@/lib/subscription';
+import {
+  hasStripeBillingManagement,
+  isSubscriptionPro,
+} from '@/lib/subscription';
 import type { Subscription, SubscriptionStatus } from '@/types/Subscription';
 
 const NOW = new Date('2026-07-20T12:00:00Z');
@@ -124,5 +127,32 @@ describe('isSubscriptionPro', () => {
       });
       expect(isSubscriptionPro(subscription, NOW)).toBe(true);
     });
+  });
+});
+
+describe('hasStripeBillingManagement', () => {
+  it('returns true for a Stripe customer subscription', () => {
+    expect(hasStripeBillingManagement(makeSubscription())).toBe(true);
+  });
+
+  it('returns true for a Stripe customer account subscription', () => {
+    const subscription = makeSubscription({
+      stripe_customer_id: 'acct_456',
+    });
+
+    expect(hasStripeBillingManagement(subscription)).toBe(true);
+  });
+
+  it('returns false for complimentary access without Stripe billing', () => {
+    const subscription = makeSubscription({
+      stripe_subscription_id: 'manual_founder',
+      stripe_customer_id: 'manual_founder',
+    });
+
+    expect(hasStripeBillingManagement(subscription)).toBe(false);
+  });
+
+  it('returns false when there is no subscription', () => {
+    expect(hasStripeBillingManagement(null)).toBe(false);
   });
 });
