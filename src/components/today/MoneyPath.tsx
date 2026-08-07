@@ -20,7 +20,7 @@ const MoneyPath = ({
   everydayProgress,
 }: Props) => {
   const { t } = useTranslation();
-  const actualPoints = buildActualPoints(points, daysInMonth);
+  const actualPath = buildActualPath(points, daysInMonth);
   const todayX = scaleX(today, daysInMonth);
   const todayY = scaleY(everydayProgress);
 
@@ -35,17 +35,17 @@ const MoneyPath = ({
     >
       <svg viewBox="0 0 320 112" className="h-28 w-full" aria-hidden="true">
         <path
-          d="M 8 96 L 312 10 L 312 38 L 8 110 Z"
+          d="M 8 94 L 312 6 L 312 42 L 8 112 Z"
           className="fill-white/28 dark:fill-white/8"
         />
         <path
           d="M 8 103 L 312 24"
-          className="stroke-white/65 dark:stroke-white/18"
+          className="stroke-white/40 dark:stroke-white/12"
           strokeWidth="1"
           strokeDasharray="4 6"
           fill="none"
         />
-        {renderActualPath(actualPoints)}
+        {renderActualPath(actualPath)}
         {renderTodayMarker(todayX, todayY, status)}
       </svg>
       <div
@@ -95,25 +95,83 @@ const scaleY = (percent: number): number => {
   return VIEW_HEIGHT - PADDING - (bounded / 115) * (VIEW_HEIGHT - PADDING * 2);
 };
 
-const buildActualPoints = (
+type ScaledPoint = {
+  x: number;
+  y: number;
+};
+
+// A polyline put a hard vertex on every single day, which read as a chart
+// judging the month. The same data through a Catmull-Rom spline reads as one
+// continuous movement — the whole point of the hero's calmer tone.
+const buildActualPath = (
   points: MoneyPathPoint[],
   daysInMonth: number,
-): string =>
-  points
-    .map(
-      (point) =>
-        `${scaleX(point.day, daysInMonth)},${scaleY(point.budgetPercent)}`,
-    )
-    .join(' ');
+): string => {
+  const scaled = points.map((point) => ({
+    x: scaleX(point.day, daysInMonth),
+    y: scaleY(point.budgetPercent),
+  }));
 
-const renderActualPath = (points: string) => {
-  if (points.length === 0) {
+  if (scaled.length < 2) {
+    return '';
+  }
+
+  let path = `M ${round(scaled[0].x)} ${round(scaled[0].y)}`;
+  for (let index = 0; index < scaled.length - 1; index += 1) {
+    const previous = scaled[Math.max(index - 1, 0)];
+    const start = scaled[index];
+    const end = scaled[index + 1];
+    const next = scaled[Math.min(index + 2, scaled.length - 1)];
+    const control1 = buildControlPoint(
+      start.x + (end.x - previous.x) / 6,
+      start.y + (end.y - previous.y) / 6,
+      start.y,
+      end.y,
+    );
+    const control2 = buildControlPoint(
+      end.x - (next.x - start.x) / 6,
+      end.y - (next.y - start.y) / 6,
+      start.y,
+      end.y,
+    );
+
+    path += ` C ${control1.x} ${control1.y}, ${control2.x} ${control2.y}, ${round(end.x)} ${round(end.y)}`;
+  }
+
+  return path;
+};
+
+// Cumulative spending only ever goes up, so an unclamped spline is free to
+// overshoot below a segment and draw a dip the user never had — the curve would
+// claim money came back. Holding each control point inside its own segment's
+// range keeps the curve monotonic while staying smooth.
+const buildControlPoint = (
+  x: number,
+  y: number,
+  segmentStartY: number,
+  segmentEndY: number,
+): ScaledPoint => ({
+  x: round(x),
+  y: round(clampToSegment(y, segmentStartY, segmentEndY)),
+});
+
+const clampToSegment = (value: number, a: number, b: number): number => {
+  const min = Math.min(a, b);
+  const max = Math.max(a, b);
+
+  return Math.min(Math.max(value, min), max);
+};
+
+const round = (value: number): number => Math.round(value * 100) / 100;
+
+const renderActualPath = (path: string) => {
+  if (path.length === 0) {
     return null;
   }
 
   return (
-    <polyline
-      points={points}
+    <path
+      d={path}
       pathLength="1"
       fill="none"
       stroke="currentColor"

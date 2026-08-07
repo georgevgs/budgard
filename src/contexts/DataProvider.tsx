@@ -19,6 +19,7 @@ import type { Goal } from '@/types/Goal';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import type { Debt } from '@/types/Debt';
+import type { NoSpendDay } from '@/types/NoSpendDay';
 import type { CategoryBudget } from '@/types/CategoryBudget';
 import type { NotificationPreferences } from '@/types/Budget';
 import { useToast } from '@/hooks/useToast';
@@ -55,6 +56,7 @@ import {
   AccountsDataContext,
   DebtsDataContext,
   CategoryBudgetsDataContext,
+  NoSpendDaysDataContext,
 } from '@/contexts/DataContext';
 
 export const DataProvider = ({ children }: { children: ReactNode }) => {
@@ -75,6 +77,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     [],
   );
   const [tags, setTags] = useState<Tag[]>([]);
+  const [noSpendDays, setNoSpendDays] = useState<NoSpendDay[]>([]);
   const [templates, setTemplates] = useState<ExpenseTemplate[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -192,6 +195,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           templatesData,
           categoryBudgetsData,
           accountsData,
+          noSpendDaysData,
         ] = await Promise.all([
           dataService.getCategories(controller.signal),
           dataService.getExpenses(controller.signal, recentCutoff),
@@ -203,6 +207,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           dataService.getTemplates(controller.signal),
           dataService.getCategoryBudgets(controller.signal),
           dataService.getAccounts(controller.signal),
+          dataService.getNoSpendDays(controller.signal),
         ]);
 
         const stage2AlreadyDone = stage2DoneForUserRef.current === userId;
@@ -229,6 +234,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         setTemplates(templatesData);
         setCategoryBudgets(categoryBudgetsData);
         setAccounts(accountsData);
+        setNoSpendDays(noSpendDaysData);
         setMonthlyBudget(budgetData?.monthly_amount ?? null);
         setDefaultCurrency(budgetData?.default_currency ?? 'EUR');
         setDefaultSavingsPct(budgetData?.default_savings_pct ?? null);
@@ -376,6 +382,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     setGoals(snapshot.goals);
     setAccountBalances(snapshot.accountBalances);
     setDebts(snapshot.debts);
+    setNoSpendDays(snapshot.noSpendDays);
     setMonthlyBudget(snapshot.monthlyBudget);
     setDefaultCurrency(snapshot.defaultCurrency);
     setDefaultSavingsPct(snapshot.defaultSavingsPct);
@@ -515,6 +522,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setAccounts([]);
       setAccountBalances([]);
       setDebts([]);
+      setNoSpendDays([]);
       setCategoryBudgets([]);
       setMonthlyBudget(null);
       setDefaultCurrency('EUR');
@@ -625,6 +633,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         goals,
         accountBalances,
         debts,
+        noSpendDays,
         monthlyBudget,
         defaultCurrency,
         defaultSavingsPct,
@@ -653,6 +662,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     goals,
     accountBalances,
     debts,
+    noSpendDays,
     monthlyBudget,
     defaultCurrency,
     defaultSavingsPct,
@@ -699,6 +709,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setAccounts,
       setAccountBalances,
       setDebts,
+      setNoSpendDays,
       setCategoryBudgets,
       setMonthlyBudget,
       setDefaultCurrency,
@@ -760,7 +771,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
                           <CategoryBudgetsDataContext.Provider
                             value={categoryBudgets}
                           >
-                            {children}
+                            <NoSpendDaysDataContext.Provider
+                              value={noSpendDays}
+                            >
+                              {children}
+                            </NoSpendDaysDataContext.Provider>
                           </CategoryBudgetsDataContext.Provider>
                         </DebtsDataContext.Provider>
                       </AccountsDataContext.Provider>

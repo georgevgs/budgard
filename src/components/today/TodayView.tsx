@@ -4,6 +4,7 @@ import FormsManager from '@/components/layout/FormsManager';
 import SpeedDial from '@/components/layout/SpeedDial';
 import UpcomingBillsCard from '@/components/common/UpcomingBillsCard';
 import WeeklyRecapCard from '@/components/recap/WeeklyRecapCard';
+import SavingsRhythm from '@/components/today/SavingsRhythm';
 import RecentActivityPreview from '@/components/today/RecentActivityPreview';
 import TodayHero from '@/components/today/TodayHero';
 import TodayInsightList from '@/components/today/TodayInsightList';
@@ -15,6 +16,7 @@ import { useExpenseAlerts } from '@/hooks/expensesList/useExpenseAlerts';
 import { useExpenseFormState } from '@/hooks/expensesList/useExpenseFormState';
 import { useOpenFormFromUrl } from '@/hooks/expensesList/useOpenFormFromUrl';
 import { useOptimisticExpenseActions } from '@/hooks/expensesList/useOptimisticExpenseActions';
+import { useSavingsRhythm } from '@/hooks/today/useSavingsRhythm';
 import { useTodayGuidance } from '@/hooks/today/useTodayGuidance';
 
 const TodayView = () => {
@@ -24,6 +26,7 @@ const TodayView = () => {
   const { optimisticExpenses, handleExpenseFormSubmit } =
     useOptimisticExpenseActions();
   const guidance = useTodayGuidance(optimisticExpenses);
+  const rhythm = useSavingsRhythm(optimisticExpenses);
   const showSkeleton = useDelayedLoading(!isInitialized);
   const currentMonth = format(new Date(), 'yyyy-MM');
 
@@ -62,6 +65,7 @@ const TodayView = () => {
             })}
           />
           <TodayInsightList insights={guidance.insights} />
+          <SavingsRhythm rhythm={rhythm} currency={guidance.currency} />
           <RecentActivityPreview
             items={guidance.recentActivity}
             currency={guidance.currency}

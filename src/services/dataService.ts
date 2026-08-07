@@ -10,6 +10,7 @@ import type { Goal } from '@/types/Goal';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import type { Debt } from '@/types/Debt';
+import type { NoSpendDay } from '@/types/NoSpendDay';
 
 // Embeds select only the columns the UI renders (see EmbeddedCategory /
 // EmbeddedTag): a full categories(*)/tags(*) embed roughly doubles every
@@ -98,6 +99,43 @@ export const dataService = {
   // so deleting a tag never touches the expenses themselves.
   async deleteTag(tagId: string) {
     const { error } = await supabase.from('tags').delete().eq('id', tagId);
+
+    if (error) throw error;
+  },
+
+  async getNoSpendDays(signal?: AbortSignal) {
+    let query = supabase
+      .from('no_spend_days')
+      .select('*')
+      .order('day', { ascending: false });
+    if (signal) query = query.abortSignal(signal);
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return data as NoSpendDay[];
+  },
+
+  // Idempotent by primary key — a double tap or a replayed write banks the day
+  // once. onConflict/ignoreDuplicates keeps that from surfacing as an error the
+  // caller would have to special-case.
+  async createNoSpendDay(day: string) {
+    const { data, error } = await supabase
+      .from('no_spend_days')
+      .upsert({ day }, { onConflict: 'user_id,day', ignoreDuplicates: true })
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+
+    return data as NoSpendDay | null;
+  },
+
+  async deleteNoSpendDay(day: string) {
+    const { error } = await supabase
+      .from('no_spend_days')
+      .delete()
+      .eq('day', day);
 
     if (error) throw error;
   },

@@ -8,6 +8,7 @@ import type { Goal } from '@/types/Goal';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import type { Debt } from '@/types/Debt';
+import type { NoSpendDay } from '@/types/NoSpendDay';
 import type { CategoryBudget } from '@/types/CategoryBudget';
 import type { NotificationPreferences } from '@/types/Budget';
 
@@ -38,6 +39,7 @@ export type DataActions = {
   setAccounts: Dispatch<SetStateAction<Account[]>>;
   setAccountBalances: Dispatch<SetStateAction<AccountBalance[]>>;
   setDebts: Dispatch<SetStateAction<Debt[]>>;
+  setNoSpendDays: Dispatch<SetStateAction<NoSpendDay[]>>;
   setCategoryBudgets: Dispatch<SetStateAction<CategoryBudget[]>>;
   setMonthlyBudget: Dispatch<SetStateAction<number | null>>;
   setDefaultCurrency: Dispatch<SetStateAction<string>>;

@@ -93,6 +93,25 @@
       "title": "Recent activity",
       "viewAll": "View all"
     },
+    "rhythm": {
+      "tone": {
+        "thriving": "Saving well",
+        "building": "Finding your rhythm",
+        "starting": "Small wins add up"
+      },
+      "bankedLabel": "Banked this month",
+      "targetRemaining": "{{amount}} to beat last month",
+      "targetBeaten": "You've beaten last month",
+      "claim": "I spent nothing today",
+      "claimed": "Nothing spent today — banked",
+      "daysAriaLabel": "{{good}} of the last {{total}} days came in under your daily allowance",
+      "toasts": {
+        "claimFailed": "Couldn't save your no-spend day",
+        "undoFailed": "Couldn't undo your no-spend day"
+      },
+      "celebrate": "You've beaten last month's savings",
+      "undo": "Undo"
+    },
     "spentSoFar": "spent so far this month",
     "comparedLastMonth": {
       "more": "{{amount}} more than by this day last month",

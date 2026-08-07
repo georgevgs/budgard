@@ -7,6 +7,7 @@ import type { Goal } from '@/types/Goal';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import type { Debt } from '@/types/Debt';
+import type { NoSpendDay } from '@/types/NoSpendDay';
 import type { CategoryBudget } from '@/types/CategoryBudget';
 import type { NotificationPreferences } from '@/types/Budget';
 
@@ -26,6 +27,7 @@ export type DataSnapshot = {
   goals: Goal[];
   accountBalances: AccountBalance[];
   debts: Debt[];
+  noSpendDays: NoSpendDay[];
   monthlyBudget: number | null;
   defaultCurrency: string;
   defaultSavingsPct: number | null;
@@ -181,6 +183,7 @@ const ARRAY_FIELDS = [
   'goals',
   'accountBalances',
   'debts',
+  'noSpendDays',
 ] as const;
 
 const NULLABLE_NUMBER_FIELDS = [

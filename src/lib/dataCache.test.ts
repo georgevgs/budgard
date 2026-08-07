@@ -35,6 +35,7 @@ const makeSnapshot = (overrides: Partial<DataSnapshot> = {}): DataSnapshot => ({
   goals: [],
   accountBalances: [],
   debts: [],
+  noSpendDays: [],
   monthlyBudget: 1500,
   defaultCurrency: 'EUR',
   defaultSavingsPct: null,

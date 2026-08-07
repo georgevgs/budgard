@@ -5,6 +5,7 @@ import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 import type { Goal } from '@/types/Goal';
 import type { Debt } from '@/types/Debt';
 import type { CategoryBudget } from '@/types/CategoryBudget';
+import type { NoSpendDay } from '@/types/NoSpendDay';
 import type {
   DataActions,
   DataConfig,
@@ -38,6 +39,7 @@ export const DebtsDataContext = createContext<Debt[] | null>(null);
 export const CategoryBudgetsDataContext = createContext<
   CategoryBudget[] | null
 >(null);
+export const NoSpendDaysDataContext = createContext<NoSpendDay[] | null>(null);
 
 // Use this when a component only needs setters/refresh callbacks. Skips
 // re-renders triggered by data mutations.
@@ -153,6 +155,15 @@ export const useCategoryBudgetsData = () => {
   const ctx = useContext(CategoryBudgetsDataContext);
   if (ctx === null) {
     throw new Error('useCategoryBudgetsData must be used within a DataProvider');
+  }
+
+  return ctx;
+};
+
+export const useNoSpendDaysData = () => {
+  const ctx = useContext(NoSpendDaysDataContext);
+  if (ctx === null) {
+    throw new Error('useNoSpendDaysData must be used within a DataProvider');
   }
 
   return ctx;
