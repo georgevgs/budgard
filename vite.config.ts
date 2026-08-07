@@ -1,10 +1,10 @@
-/// <reference types="vitest/config" />
 import path from "path";
 import { readFileSync } from "node:fs";
 import { copyFile, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 import react from "@vitejs/plugin-react";
-import { defineConfig, type PluginOption } from "vite";
+import type { PluginOption } from "vite";
+import { defineConfig } from "vitest/config";
 import { VitePWA } from "vite-plugin-pwa";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import pkg from "./package.json" with { type: "json" };
