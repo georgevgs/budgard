@@ -5,7 +5,7 @@ import CalendarRange from 'lucide-react/dist/esm/icons/calendar-range';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import X from 'lucide-react/dist/esm/icons/x';
-import { Card, CardContent } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { Button } from '@/components/ui/button';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
@@ -26,8 +26,8 @@ const WeeklyRecapCard = () => {
   if (recap.anomalies.length === 0) return null;
 
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-4 sm:p-5">
+    <SurfaceCard flush>
+      <div className="p-4 sm:p-5">
         {renderHeader(
           recap.windowStart,
           recap.windowEnd,
@@ -43,8 +43,8 @@ const WeeklyRecapCard = () => {
         </p>
         {renderTotalComparison(recap.totalRatio, t)}
         {renderAnomalies(recap.anomalies, defaultCurrency, t)}
-      </CardContent>
-    </Card>
+      </div>
+    </SurfaceCard>
   );
 };
 

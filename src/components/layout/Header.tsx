@@ -9,7 +9,16 @@ import AppMenu from '@/components/layout/AppMenu';
 
 // Routes outside the four bottom tabs — they get a back button so users
 // aren't stranded on screens where no tab is active.
-const SECONDARY_ROUTES = ['/goals', '/networth', '/debts', '/settings'];
+const SECONDARY_ROUTES = [
+  '/expenses',
+  '/income',
+  '/recurring',
+  '/analytics',
+  '/goals',
+  '/networth',
+  '/debts',
+  '/settings',
+];
 
 const Header = () => {
   const { session } = useAuth();
@@ -26,13 +35,13 @@ const Header = () => {
   const isSecondaryRoute = SECONDARY_ROUTES.includes(pathname);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/90 backdrop-blur-xl pt-safe-t">
+    <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/78 backdrop-blur-2xl pt-safe-t">
       <div className="container grid grid-cols-3 items-center h-16 px-4 pt-1">
         <div className="justify-self-start">
           {renderLeftSlot(isSecondaryRoute)}
         </div>
         <Link
-          to="/expenses"
+          to="/today"
           viewTransition
           aria-label={t('navigation.goHome')}
           className="justify-self-center flex items-center gap-2 rounded-lg px-2 py-1 -mx-2 -my-1 transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -41,10 +50,12 @@ const Header = () => {
             src="/icon-512x512.png"
             alt=""
             aria-hidden="true"
-            className="h-7 w-7 rounded-lg mix-blend-multiply dark:invert dark:mix-blend-screen"
+            className="h-7 w-7 rounded-lg"
             style={{ objectFit: 'contain' }}
           />
-          <span className="text-lg font-semibold tracking-tight">Budgard</span>
+          <span className="font-display text-lg font-semibold tracking-[-0.025em]">
+            Budgard
+          </span>
         </Link>
         <div className="justify-self-end">
           <AppMenu />
@@ -79,7 +90,7 @@ const BackButton = () => {
 
       return;
     }
-    navigate('/expenses', { viewTransition: true });
+    navigate('/today', { viewTransition: true });
   };
 
   return (

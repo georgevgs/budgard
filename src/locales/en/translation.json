@@ -50,6 +50,120 @@
     "resendCode": "Resend code",
     "resendCodeIn": "Resend code in {{seconds}}s"
   },
+  "today": {
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "status": {
+      "comfortable": "Your month has room to breathe.",
+      "watchful": "Your spending pace needs a little attention.",
+      "tight": "This month is tighter than planned.",
+      "noBudget": "Here's how this month is going."
+    },
+    "chip": {
+      "comfortable": "On track",
+      "watchful": "Watch the pace",
+      "tight": "Over plan",
+      "noBudget": "No budget yet"
+    },
+    "setBudget": "Set a monthly budget",
+    "leftAfterBills": "left this month after planned bills",
+    "leftThisMonth": "left to spend this month",
+    "overPlan": "left this month — you're past your plan",
+    "perDay": "About {{amount}} a day from here",
+    "paceSummary": "{{percent}}% of your everyday budget used · day {{day}} of {{days}}",
+    "path": {
+      "ariaLabel": "Everyday spending through day {{day}} of {{days}}, with {{percent}} percent of your everyday budget used",
+      "monthStart": "Month start",
+      "today": "Today",
+      "monthEnd": "Month end"
+    },
+    "upcoming": {
+      "title": "Coming up",
+      "summary": "{{amount}} across {{count}} planned payments in the next 7 days",
+      "viewPlan": "See plan"
+    },
+    "insights": {
+      "title": "Worth noticing",
+      "viewTrends": "View trends"
+    },
+    "recent": {
+      "title": "Recent activity",
+      "viewAll": "View all"
+    },
+    "spentSoFar": "spent so far this month",
+    "comparedLastMonth": {
+      "more": "{{amount}} more than by this day last month",
+      "less": "{{amount}} less than by this day last month",
+      "same": "About the same as by this day last month"
+    }
+  },
+  "activity": {
+    "title": "Activity",
+    "netChange": "Net change",
+    "spent": "Spent",
+    "received": "Received",
+    "searchPlaceholder": "Search this period...",
+    "searchLabel": "Search activity",
+    "filterLabel": "Filter activity",
+    "filterByTag": "Filter activity by tag",
+    "allTags": "All tags",
+    "exportCsv": "Export CSV",
+    "importCsv": "Import CSV",
+    "proBadge": "Pro",
+    "exportedTitle": "CSV ready",
+    "exportedDescription_one": "Downloaded {{count}} matching transaction.",
+    "exportedDescription_other": "Downloaded {{count}} matching transactions.",
+    "filters": {
+      "all": "All",
+      "expense": "Spent",
+      "income": "Received"
+    },
+    "uncategorized": "Uncategorized",
+    "editTransaction": "Edit {{description}}",
+    "emptyTitle": "Nothing here yet",
+    "emptyBody": "Log money going out or coming in and it will appear here together.",
+    "loadMore": "Show more activity",
+    "filterByCategory": "Filter activity by category",
+    "allCategories": "All categories",
+    "searchEverywhere_one": "Look through all time ({{count}} match)",
+    "searchEverywhere_other": "Look through all time ({{count}} matches)",
+    "period": {
+      "label": "Time period",
+      "month": "By month",
+      "last7": "Last 7 days",
+      "last30": "Last 30 days",
+      "last90": "Last 90 days",
+      "thisQuarter": "This quarter",
+      "thisYear": "This year",
+      "all": "All time"
+    }
+  },
+  "plan": {
+    "title": "Plan",
+    "subtitle": "Give the month a shape, then let Budgard keep the moving parts together.",
+    "monthlyPlan": "This month's boundary",
+    "recurring": {
+      "title": "Planned payments",
+      "description": "{{count}} active recurring items"
+    },
+    "goals": {
+      "title": "Goals",
+      "value": "{{count}} in progress",
+      "description": "Keep the future visible"
+    },
+    "debts": {
+      "title": "Debt plan",
+      "value": "{{count}} active",
+      "description": "Turn balances into a route forward"
+    },
+    "commitments": {
+      "title": "Coming up this month",
+      "summary": "{{amount}} across {{count}} planned payments in the next 30 days"
+    }
+  },
   "expenses": {
     "deleteTitle": "Delete Expense",
     "deleteConfirmation": "Are you sure you want to delete this expense?",
@@ -61,8 +175,8 @@
     "description": "Description",
     "category": "Category",
     "date": "Date",
-    "monthlyTotal": "Monthly Total",
-    "filteredTotal": "Filtered Total",
+    "monthlyTotal": "Spent this month",
+    "filteredTotal": "Matching activity",
     "ofMonthlyTotal": "of {{total}} total",
     "showBreakdown": "Show breakdown",
     "hideBreakdown": "Hide breakdown",
@@ -95,8 +209,8 @@
     "noExpensesMatchFilter": "Your filters are picky — nothing matches. Try loosening them up.",
     "resultsCount_one": "{{count}} result",
     "resultsCount_other": "{{count}} results",
-    "totalCount": "Total Expenses",
-    "mostExpensive": "Most Expensive",
+    "totalCount": "Purchases",
+    "mostExpensive": "Largest purchase",
     "exportCSV": "Export CSV",
     "search": {
       "placeholder": "Search expenses...",
@@ -255,7 +369,7 @@
       "amount": "Amount",
       "category": "Category",
       "description": "Description",
-      "tag": "Tag",
+      "tag": "Tags",
       "total": "Total",
       "count": "Transactions",
       "income": "Income",
@@ -307,10 +421,10 @@
   "budget": {
     "setBudget": "Set Budget",
     "editBudget": "Edit Budget",
-    "remaining": "Remaining",
-    "monthlyBudget": "Monthly Budget",
+    "remaining": "Left",
+    "monthlyBudget": "Monthly boundary",
     "budgetProgress": "{{current}} / {{total}}",
-    "overBudget": "Over Budget",
+    "overBudget": "Over plan",
     "updateDescription": "Your current budget is {{amount}}. Enter a new amount to update it.",
     "setDescription": "Set your monthly budget amount",
     "amountLabel": "Budget Amount",
@@ -319,10 +433,10 @@
     "updateButton": "Update Budget",
     "setButton": "Set Budget",
     "alerts": {
-      "warning": "Budget Warning",
-      "warningDescription": "You've used {{percent}}% of your budget. {{remaining}} remaining.",
-      "exceeded": "Budget Exceeded",
-      "exceededDescription": "You've spent {{spent}} against a {{budget}} budget."
+      "warning": "Your spending pace is picking up",
+      "warningDescription": "You've used {{percent}}% of the plan, with {{remaining}} left.",
+      "exceeded": "This month is tighter than planned",
+      "exceededDescription": "You've spent {{spent}} against a {{budget}} monthly plan."
     },
     "categoryBudgets": {
       "title": "Category Budgets",
@@ -537,6 +651,9 @@
   "navigation": {
     "expenses": "Expenses",
     "income": "Income",
+    "activity": "Activity",
+    "plan": "Plan",
+    "trends": "Trends",
     "goals": "Goals",
     "networth": "Net worth",
     "debts": "Debts",
@@ -874,6 +991,7 @@
     "categoryBreakdown": "{{name}}: {{amount}}, {{percent}} of total expenses"
   },
   "analytics": {
+    "subtitle": "See the patterns behind your money without losing the bigger picture.",
     "selectYear": "Select year",
     "viewMonthDetails": "View month details",
     "chooseMonth": "Choose a month",
@@ -886,7 +1004,7 @@
     "budgetLabel": "Budget: {{amount}}",
     "budgetUsed": "{{percent}}% of budget used",
     "avgPerMonth": "avg {{amount}}/mo",
-    "categoryTrends": "Category Breakdown",
+    "categoryTrends": "Where your money went",
     "forecast": {
       "title": "Forecast",
       "safeToSpend": "Safe to spend this month",
@@ -1253,7 +1371,9 @@
         },
         {
           "heading": "Contact",
-          "paragraphs": ["Questions about these terms: {{email}}."]
+          "paragraphs": [
+            "Questions about these terms: {{email}}."
+          ]
         }
       ]
     },
@@ -1275,13 +1395,16 @@
       "getStarted": "Get started"
     },
     "hero": {
-      "headingLine1": "Know where",
-      "headingLine2": "your money goes.",
-      "subtitle": "Budgard turns spending into clarity. Track expenses, set budgets, and see exactly where your money lands — without spreadsheets, ads, or surveillance.",
+      "headingLine1": "Spend today.",
+      "headingLine2": "Stay kind to tomorrow.",
+      "subtitle": "Budgard turns budgets, bills, and daily spending into one calm answer: what is safe today.",
       "primaryCta": "Start free",
       "installCta": "Add to Home Screen",
       "trust": "Built in the EU · No ads · No tracking · Yours to keep",
       "previewMonthLabel": "This month",
+      "previewSafeAmount": "€742.00",
+      "previewUpcoming": "€88.40 planned this week",
+      "previewInsight": "Dining out is gentler than last month",
       "preview": {
         "rent": "Apartment rent",
         "groceries": "Weekly groceries",
@@ -1434,7 +1557,7 @@
       "cta": "Get Budgard"
     },
     "footer": {
-      "tagline": "A calm expense tracker for people who'd rather think in plans than in numbers.",
+      "tagline": "A calm money companion for people who would rather think in plans than in numbers.",
       "language": "Language",
       "builtIn": "Built in the EU",
       "copyright": "© {{year}} Budgard. All rights reserved.",
@@ -1512,5 +1635,8 @@
     "deleteConfirmation": "Delete \"{{name}}\"? It will be removed from all expenses that use it. The expenses themselves are kept.",
     "noTags": "No tags yet",
     "emptyHelp": "Create tags from the expense form to label and filter your spending."
+  },
+  "upcomingBills": {
+    "manage": "Manage"
   }
 }

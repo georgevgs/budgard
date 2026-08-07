@@ -126,7 +126,7 @@ const renderCategoryBreakdown = (
 
   return (
     <div>
-      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
         {t('analytics.drillDown.byCategory')}
       </p>
       <div className="space-y-2">
@@ -167,7 +167,7 @@ const renderTopExpenses = (
 
   return (
     <div className="mt-5">
-      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
         {t('analytics.drillDown.topExpenses')}
       </p>
       <div className="space-y-1">

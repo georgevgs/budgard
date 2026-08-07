@@ -126,9 +126,9 @@ const applyAccentToDocument = (key: AccentColorKey): void => {
 
   // Barbie theme has its own fixed palette — don't override
   if (root.getAttribute('data-theme') === 'barbie') {
-    root.style.removeProperty('--primary');
-    root.style.removeProperty('--primary-foreground');
-    root.style.removeProperty('--ring');
+    for (const property of ACCENT_PROPERTIES) {
+      root.style.removeProperty(property);
+    }
 
     return;
   }
@@ -140,6 +140,12 @@ const applyAccentToDocument = (key: AccentColorKey): void => {
   root.style.setProperty('--primary-foreground', primaryFg);
   root.style.setProperty('--ring', primary);
 };
+
+// --primary drives everything the accent touches — buttons, the nav indicator,
+// the FAB, the Today hero tint and the page glow — so there is exactly one
+// value to override and one to clear. Keep in sync with the inline theme-init
+// script in index.html, and with the CSP hash in netlify.toml when it changes.
+const ACCENT_PROPERTIES = ['--primary', '--primary-foreground', '--ring'];
 
 export const useAccentColor = (): {
   accent: AccentColorKey;

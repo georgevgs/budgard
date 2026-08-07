@@ -17,7 +17,7 @@ import {
 import type { ProjectionMonth } from '@/lib/forecast';
 
 const INCOME_COLOR = 'hsl(var(--income))';
-const EXPENSE_COLOR = 'hsl(var(--destructive))';
+const EXPENSE_COLOR = 'hsl(var(--primary))';
 
 type Props = {
   data: ProjectionMonth[];

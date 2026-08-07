@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import Clock from 'lucide-react/dist/esm/icons/clock';
@@ -34,13 +34,13 @@ const RecurringExpenseCard = ({
   const dateLocale = useDateLocale();
 
   return (
-    <Card
+    <SurfaceCard
       className={cn(
-        'transition-opacity hover:shadow-md',
+        'transition-[opacity,background-color] hover:bg-card',
         !expense.active && 'opacity-60 bg-muted/30',
       )}
     >
-      <CardContent className="p-4">
+      <div className="p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 min-w-0">
             <p className="font-medium truncate">{expense.description}</p>
@@ -74,8 +74,8 @@ const RecurringExpenseCard = ({
             />
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </SurfaceCard>
   );
 };
 

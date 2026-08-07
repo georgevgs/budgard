@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { parseISO, getYear } from 'date-fns';
 import Download from 'lucide-react/dist/esm/icons/download';
 import FileText from 'lucide-react/dist/esm/icons/file-text';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   useExpensesData,
@@ -67,12 +66,12 @@ const AnnualExportCard = ({ selectedYear }: Props) => {
 
   return (
     <div className="space-y-3">
-      <h3 className="text-base font-semibold text-foreground">
+      <h2 className="font-display text-xl font-semibold">
         {t('annualExport.title', { year: selectedYear })}
-      </h3>
+      </h2>
 
-      <Card>
-        <CardContent className="p-5 space-y-4">
+      <div className="surface-card">
+        <div className="p-5 space-y-4">
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">
               {t('annualExport.description', { year: selectedYear })}
@@ -112,8 +111,8 @@ const AnnualExportCard = ({ selectedYear }: Props) => {
               {renderPdfButtonLabel(pdfExport.isGenerating, t)}
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

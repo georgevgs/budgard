@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   useDataConfig,
   useCategoriesData,
@@ -49,15 +48,22 @@ const AnalyticsView = () => {
   if (allExpenses.length === 0) {
     return (
       <>
-        <h1 className="sr-only">{t('navigation.analytics')}</h1>
+        <h1 className="sr-only">{t('navigation.trends')}</h1>
         <AnalyticsEmpty />
       </>
     );
   }
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 pt-4 pb-4 space-y-6">
-      <h1 className="sr-only">{t('navigation.analytics')}</h1>
+    <div className="trends-shell container max-w-3xl mx-auto px-4 pt-4 pb-5 space-y-6 sm:px-6">
+      <div>
+        <h1 className="font-display text-3xl font-semibold tracking-[-0.035em]">
+          {t('navigation.trends')}
+        </h1>
+        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+          {t('analytics.subtitle')}
+        </p>
+      </div>
       {/* Month snapshot */}
       <MonthSnapshotCard monthComparison={analytics.monthComparison} />
 
@@ -87,9 +93,9 @@ const AnalyticsView = () => {
 
       {/* Category breakdown */}
       <div className="space-y-3">
-        <h3 className="text-base font-semibold text-foreground">
+        <h2 className="font-display text-xl font-semibold">
           {t('analytics.categoryTrends')}
-        </h3>
+        </h2>
         {renderCategoryBreakdown(
           analytics.yearlyStats.categoryBreakdown,
           analytics.yearlyStats.totalSpent,
@@ -173,8 +179,8 @@ const renderCategoryBreakdown = (
   }
 
   return (
-    <Card>
-      <CardContent className="p-0 divide-y divide-border/40">
+    <div className="surface-card-flush">
+      <div className="p-0 divide-y divide-border/40">
         {breakdown.map((cat) => {
           let pct = 0;
           if (totalSpent > 0) {
@@ -207,8 +213,8 @@ const renderCategoryBreakdown = (
             </button>
           );
         })}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { Switch } from '@/components/ui/switch';
 import {
   Select,
@@ -47,11 +47,11 @@ const NotificationsSection = ({
 }: NotificationsSectionProps) => {
   return (
     <section className="space-y-2">
-      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
         {t('settings.notifications.title')}
       </p>
-      <Card>
-        <CardContent className="p-4 space-y-4">
+      <SurfaceCard>
+        <div className="p-4 space-y-4">
           {renderNotificationToggle(pushState, onPushSubscribe, onPushUnsubscribe, t)}
           {renderDailyReminder(
             pushState,
@@ -66,8 +66,8 @@ const NotificationsSection = ({
             onPreferenceToggle,
             t,
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </SurfaceCard>
     </section>
   );
 };

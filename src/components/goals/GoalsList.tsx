@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Plus from 'lucide-react/dist/esm/icons/plus';
@@ -145,7 +145,7 @@ const renderEmptyState = (
   onOpenForm: (open: boolean) => void,
   t: TranslateFunction,
 ) => (
-  <Card className="p-8 text-center overflow-hidden">
+  <SurfaceCard flush className="p-8 text-center">
     <div className="flex flex-col items-center gap-3">
       <Target className="h-12 w-12 text-muted-foreground/50" />
       <div className="max-w-[280px]">
@@ -164,5 +164,5 @@ const renderEmptyState = (
         <span className="truncate">{t('goals.empty.cta')}</span>
       </Button>
     </div>
-  </Card>
+  </SurfaceCard>
 );

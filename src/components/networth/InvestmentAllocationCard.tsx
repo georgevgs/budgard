@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ResponsiveContainer, PieChart, Pie, Tooltip } from 'recharts';
-import { Card, CardContent } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { formatCurrency, formatPercent } from '@/lib/utils';
 import { ChartTooltipShell } from '@/components/common/ChartTooltip';
 import type { Account } from '@/types/Account';
@@ -49,8 +49,8 @@ const InvestmentAllocationCard = ({ accounts }: Props) => {
   }
 
   return (
-    <Card>
-      <CardContent className="p-4 space-y-3">
+    <SurfaceCard>
+      <div className="p-4 space-y-3">
         <h3 className="text-sm font-medium">
           {t('networth.allocation.title')}
         </h3>
@@ -95,8 +95,8 @@ const InvestmentAllocationCard = ({ accounts }: Props) => {
             ))}
           </ul>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </SurfaceCard>
   );
 }
 

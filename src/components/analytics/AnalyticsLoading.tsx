@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent } from '@/components/ui/card';
 import LoadingScreen from '@/components/ui/loading-screen';
 
 const AnalyticsLoadingState = () => {
@@ -31,18 +30,18 @@ const AnalyticsLoadingState = () => {
           <Skeleton className="h-10 w-[130px] rounded-md" />
           <Skeleton className="h-4 w-36" />
         </div>
-        <Card>
-          <CardContent className="p-6">
+        <div className="surface-card">
+          <div className="p-6">
             <Skeleton className="h-[280px] w-full rounded-md" />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Category breakdown */}
       <div className="space-y-3">
         <Skeleton className="h-3 w-32" />
-        <Card>
-          <CardContent className="p-0 divide-y divide-border/50">
+        <div className="surface-card">
+          <div className="p-0 divide-y divide-border/50">
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={`skeleton-${i}`}
@@ -55,8 +54,8 @@ const AnalyticsLoadingState = () => {
                 <Skeleton className="h-3 w-8 shrink-0" />
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </LoadingScreen>
   );

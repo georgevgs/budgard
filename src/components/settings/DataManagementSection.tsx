@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { Button } from '@/components/ui/button';
 import DeleteAccountDialog from '@/components/settings/DeleteAccountDialog';
 import { useDataExport } from '@/hooks/settings/useDataExport';
@@ -24,11 +24,11 @@ const DataManagementSection = ({
 
   return (
     <section className="space-y-2">
-      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
         {t('settings.data.title')}
       </p>
-      <Card>
-        <CardContent className="p-4 space-y-4">
+      <SurfaceCard>
+        <div className="p-4 space-y-4">
           <div>
             <p className="text-sm text-muted-foreground mb-3">
               {t('settings.data.exportDescription')}
@@ -57,8 +57,8 @@ const DataManagementSection = ({
               {t('settings.data.deleteAccount')}
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </SurfaceCard>
 
       <DeleteAccountDialog
         open={showDeleteDialog}

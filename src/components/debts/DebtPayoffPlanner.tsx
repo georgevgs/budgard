@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
-import { Card, CardContent } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { Input } from '@/components/ui/input';
 import ProUpsellCard from '@/components/pro/ProUpsellCard';
 import { useDataConfig } from '@/contexts/DataContext';
@@ -42,8 +42,8 @@ const DebtPayoffPlanner = ({ debts }: Props) => {
   }
 
   return (
-    <Card>
-      <CardContent className="p-5 space-y-4">
+    <SurfaceCard>
+      <div className="p-5 space-y-4">
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-sm font-semibold">{t('debts.planner.title')}</h3>
           {renderStrategyTabs(strategy, setStrategy, t)}
@@ -68,8 +68,8 @@ const DebtPayoffPlanner = ({ debts }: Props) => {
         </div>
 
         {renderResults(plan, strategy, defaultCurrency, dateLocale, t)}
-      </CardContent>
-    </Card>
+      </div>
+    </SurfaceCard>
   );
 };
 

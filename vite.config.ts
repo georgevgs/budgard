@@ -244,7 +244,7 @@ export default defineConfig({
     VitePWA({
       registerType: "prompt",
       manifest: false,
-      includeAssets: ["favicon.ico", "icon-192x192.png", "icon-512x512.png", "apple-touch-icon.png", "manifest.json"],
+      includeAssets: ["icon-192x192.png", "icon-512x512.png", "apple-touch-icon.png", "manifest.json"],
       workbox: {
         importScripts: ['/push-sw.js'],
         // NOTE: we intentionally do NOT set `clientsClaim: true`. That claims on

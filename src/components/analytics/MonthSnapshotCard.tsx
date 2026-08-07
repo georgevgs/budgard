@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import Minus from 'lucide-react/dist/esm/icons/minus';
-import { Card, CardContent } from '@/components/ui/card';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import { formatCurrency, formatPercent } from '@/lib/utils';
@@ -25,8 +24,8 @@ const MonthSnapshotCard = ({ monthComparison }: Props) => {
   }, [monthComparison.thisMonthAmount, monthlyBudget]);
 
   return (
-    <Card>
-      <CardContent className="p-5">
+    <div className="surface-card">
+      <div className="p-5">
         <p className="text-sm text-muted-foreground mb-1">
           {monthComparison.thisMonthLabel}
         </p>
@@ -52,8 +51,8 @@ const MonthSnapshotCard = ({ monthComparison }: Props) => {
           t,
           defaultCurrency,
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
@@ -74,7 +73,9 @@ const renderMonthChangeBadge = (
     return (
       <span className="inline-flex items-center gap-1 text-xs font-medium text-destructive bg-destructive/10 rounded-full px-2.5 py-0.5">
         <TrendingUp className="h-3 w-3" />
-        {t('analytics.vsLastMonthUp', { percent: formatPercent(percentChange, 1) })}
+        {t('analytics.vsLastMonthUp', {
+          percent: formatPercent(percentChange, 1),
+        })}
       </span>
     );
   }

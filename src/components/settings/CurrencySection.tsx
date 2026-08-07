@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import {
   Select,
   SelectContent,
@@ -37,11 +37,11 @@ const CurrencySection = () => {
 
   return (
     <section className="space-y-2">
-      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
         {t('settings.currency.title')}
       </p>
-      <Card>
-        <CardContent className="p-4 space-y-1">
+      <SurfaceCard>
+        <div className="p-4 space-y-1">
           <p className="text-sm">{t('settings.currency.default')}</p>
           <p className="text-xs text-muted-foreground mb-2">
             {t('settings.currency.defaultDescription')}
@@ -62,8 +62,8 @@ const CurrencySection = () => {
               ))}
             </SelectContent>
           </Select>
-        </CardContent>
-      </Card>
+        </div>
+      </SurfaceCard>
     </section>
   );
 };

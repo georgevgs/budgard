@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next';
-import { Card } from '@/components/ui/card';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import { useSpendingInsights, type Insight } from '@/hooks/useSpendingInsights';
@@ -25,9 +24,9 @@ const SpendingInsights = (props: SpendingInsightsProps) => {
 
   return (
     <div className="space-y-3">
-      <h3 className="text-base font-semibold text-foreground">
+      <h2 className="font-display text-xl font-semibold">
         {t('analytics.insights.sectionTitle')}
-      </h3>
+      </h2>
       {renderHeroCard(hero)}
       {renderSecondaryCards(rest)}
     </div>
@@ -45,7 +44,8 @@ const renderHeroCard = (insight: Insight) => {
 
   return (
     <div
-      className={`rounded-2xl p-4 shadow-sm flex items-start gap-3.5 ${bgClass}`}
+      data-insight="hero"
+      className={`rounded-[1.6rem] p-4 flex items-start gap-3.5 ${bgClass}`}
     >
       <div
         className={`mt-0.5 flex items-center justify-center h-8 w-8 rounded-full shrink-0 ${getIconBgClass(insight.variant)}`}
@@ -68,13 +68,14 @@ const renderSecondaryCards = (insights: Insight[]) => {
         const Icon = insight.icon;
 
         return (
-          <Card
+          <div
             key={insight.id}
-            className="px-3.5 py-3 flex items-center gap-3"
+            data-insight="secondary"
+            className="surface-card px-3.5 py-3 flex items-center gap-3"
           >
             <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">{insight.text}</p>
-          </Card>
+          </div>
         );
       })}
     </div>

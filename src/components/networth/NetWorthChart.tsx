@@ -10,7 +10,7 @@ import {
   Tooltip,
   ReferenceLine,
 } from 'recharts';
-import { Card, CardContent } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { cn, formatCurrency, formatCurrencyCompact } from '@/lib/utils';
 import {
   ChartTooltipShell,
@@ -45,8 +45,8 @@ const NetWorthChart = ({ series, defaultCurrency }: Props) => {
   }
 
   return (
-    <Card>
-      <CardContent className="p-4 space-y-2">
+    <SurfaceCard>
+      <div className="p-4 space-y-2">
         <p className="text-sm font-medium">{t('networth.chart.title')}</p>
         <div className="w-full">
           <ResponsiveContainer width="100%" height={220}>
@@ -97,8 +97,8 @@ const NetWorthChart = ({ series, defaultCurrency }: Props) => {
             </AreaChart>
           </ResponsiveContainer>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </SurfaceCard>
   );
 }
 

@@ -63,7 +63,7 @@ export const buildTransactionsCsv = (
       formatCsvAmount(signedAmount(tx)),
       lookupOrEmpty(tx.category_id, categoryById),
       tx.description,
-      lookupOrEmpty(tx.tag_id, tagById),
+      resolveTransactionTags(tx, tagById),
     ];
   });
 
@@ -218,6 +218,25 @@ const lookupOrEmpty = (
   if (!id) return '';
 
   return byId.get(id) ?? '';
+};
+
+const resolveTransactionTags = (
+  transaction: Expense,
+  tagById: Map<string, string>,
+): string => {
+  const names: string[] = [];
+  const primaryName = transaction.tag?.name ?? lookupOrEmpty(
+    transaction.tag_id,
+    tagById,
+  );
+  if (primaryName) {
+    names.push(primaryName);
+  }
+  if (transaction.extra_tags) {
+    names.push(...transaction.extra_tags.map((tag) => tag.name));
+  }
+
+  return [...new Set(names)].join(' | ');
 };
 
 const resolveCategoryName = (

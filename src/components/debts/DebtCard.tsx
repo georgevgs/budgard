@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { formatCurrency } from '@/lib/utils';
 import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
 import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
@@ -25,7 +25,7 @@ const DebtCard = ({ debt, onClick }: Props) => {
   const Icon = ICON_BY_KIND[debt.kind];
 
   return (
-    <Card
+    <SurfaceCard
       role="button"
       tabIndex={0}
       onClick={() => onClick(debt)}
@@ -35,9 +35,9 @@ const DebtCard = ({ debt, onClick }: Props) => {
           onClick(debt);
         }
       }}
-      className="border-border/50 cursor-pointer hover:bg-accent/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="cursor-pointer transition-colors hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
-      <CardContent className="p-4 space-y-3">
+      <div className="p-4 space-y-3">
         <div className="flex items-center gap-3">
           <div
             className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
@@ -59,8 +59,8 @@ const DebtCard = ({ debt, onClick }: Props) => {
         <DebtProgressBar progress={progress} currency={debt.currency} />
 
         {renderUnpayableHint(progress.isUnpayable, t)}
-      </CardContent>
-    </Card>
+      </div>
+    </SurfaceCard>
   );
 }
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -26,11 +26,11 @@ const ProfileSection = ({ email, onSignOut, t }: ProfileSectionProps) => {
 
   return (
     <section className="space-y-2">
-      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
         {t('settings.profile.title')}
       </p>
-      <Card>
-        <CardContent className="p-4 space-y-3">
+      <SurfaceCard>
+        <div className="p-4 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
               {t('settings.profile.email')}
@@ -45,8 +45,8 @@ const ProfileSection = ({ email, onSignOut, t }: ProfileSectionProps) => {
             <LogOut className="h-4 w-4 mr-2" />
             {t('settings.profile.signOut')}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </SurfaceCard>
 
       <AlertDialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
         <AlertDialogContent

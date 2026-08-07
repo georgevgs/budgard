@@ -1,6 +1,5 @@
 import { Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent } from '@/components/ui/card';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useCashFlowData } from '@/hooks/analytics/useCashFlowData';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -25,12 +24,12 @@ const CashFlowSection = ({ selectedYear }: Props) => {
 
   return (
     <div className="space-y-3">
-      <h3 className="text-base font-semibold text-foreground">
+      <h2 className="font-display text-xl font-semibold">
         {t('cashFlow.title')}
-      </h3>
+      </h2>
 
-      <Card>
-        <CardContent className="p-5 space-y-4">
+      <div className="surface-card">
+        <div className="p-5 space-y-4">
           <div className="space-y-3">
             <div>
               <p className="text-sm text-muted-foreground">
@@ -79,8 +78,8 @@ const CashFlowSection = ({ selectedYear }: Props) => {
               />
             </Suspense>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

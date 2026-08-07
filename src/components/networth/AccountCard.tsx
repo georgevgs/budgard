@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
-import { Card, CardContent } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { cn, formatCurrency } from '@/lib/utils';
 import { type Account, isLiability } from '@/types/Account';
 import Wallet from 'lucide-react/dist/esm/icons/wallet';
@@ -33,7 +33,7 @@ const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
   );
 
   return (
-    <Card
+    <SurfaceCard
       role="button"
       tabIndex={0}
       onClick={() => onClick(account)}
@@ -43,9 +43,9 @@ const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
           onClick(account);
         }
       }}
-      className="border-border/50 cursor-pointer hover:bg-accent/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="cursor-pointer transition-colors hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
-      <CardContent className="p-4 flex items-center gap-3">
+      <div className="p-4 flex items-center gap-3">
         <div
           className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
           style={{ backgroundColor: `${account.color}20`, color: account.color }}
@@ -68,8 +68,8 @@ const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
           {renderLiabilityPrefix(liability)}
           {formatCurrency(account.current_balance, account.default_currency)}
         </p>
-      </CardContent>
-    </Card>
+      </div>
+    </SurfaceCard>
   );
 }
 

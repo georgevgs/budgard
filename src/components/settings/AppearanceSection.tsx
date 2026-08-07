@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import Moon from 'lucide-react/dist/esm/icons/moon';
@@ -34,11 +34,11 @@ const AppearanceSection = ({
 }: AppearanceSectionProps) => {
   return (
     <section className="space-y-2">
-      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
         {t('settings.appearance.title')}
       </p>
-      <Card>
-        <CardContent className="p-4 space-y-4">
+      <SurfaceCard>
+        <div className="p-4 space-y-4">
           <div>
             <p className="text-sm mb-2">{t('settings.appearance.theme')}</p>
             <div className="flex flex-wrap gap-2">
@@ -54,8 +54,8 @@ const AppearanceSection = ({
             onHapticsToggle,
             t,
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </SurfaceCard>
     </section>
   );
 };

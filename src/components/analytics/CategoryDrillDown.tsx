@@ -80,7 +80,7 @@ export const CategoryDrillDown = ({
         <div className="overflow-y-auto max-h-[60dvh]">
           {renderMonthlyBreakdown(monthlyBreakdown, categoryColor, t, defaultCurrency)}
 
-          <p className="text-xs text-muted-foreground uppercase tracking-wide mt-5 mb-2">
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground mt-5 mb-2">
             {t('analytics.drillDown.allExpenses')}
           </p>
           <div className="space-y-1">
@@ -110,7 +110,7 @@ const renderMonthlyBreakdown = (
 
   return (
     <div>
-      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
         {t('analytics.drillDown.monthlyTrend')}
       </p>
       <div className="space-y-1.5">

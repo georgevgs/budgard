@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import type { Locale } from 'date-fns';
 import ExternalLink from 'lucide-react/dist/esm/icons/external-link';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import { Card, CardContent } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { Button } from '@/components/ui/button';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
@@ -40,11 +40,11 @@ const BillingSection = () => {
 
   return (
     <section className="space-y-2">
-      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
         {t('settings.billing.title')}
       </p>
-      <Card>
-        <CardContent className="p-4 space-y-3">
+      <SurfaceCard>
+        <div className="p-4 space-y-3">
           {renderContent(
             isPro,
             subscription,
@@ -55,8 +55,8 @@ const BillingSection = () => {
             () => openUpgrade(),
             t,
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </SurfaceCard>
     </section>
   );
 };

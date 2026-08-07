@@ -73,7 +73,7 @@ const renderBackdrop = () => (
 );
 
 const renderHeading = (t: Tx) => (
-  <h1 className="text-[44px] sm:text-6xl md:text-7xl font-semibold tracking-[-0.03em] leading-[1.02] text-foreground">
+  <h1 className="font-display text-[44px] sm:text-6xl md:text-7xl font-semibold tracking-[-0.035em] leading-[1.02] text-foreground">
     {t('landing.hero.headingLine1')}
     <br />
     <span className="text-primary">{t('landing.hero.headingLine2')}</span>
@@ -134,67 +134,75 @@ const renderTrustLine = (t: Tx) => (
 const renderHeroShot = (t: Tx) => (
   <div className="max-w-md mx-auto">
     <DeviceFrame>
-      <div className="px-5 pt-5 pb-4">
-        <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-          {t('navigation.expenses')}
-        </p>
-        <p className="text-[34px] font-semibold tabular-nums tracking-tight mt-1">
-          €1,058.49
-        </p>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {t('landing.hero.previewMonthLabel')}
-        </p>
-      </div>
-      <div className="px-3 pb-4 space-y-1">
-        {renderRow(
-          t('landing.hero.preview.rent'),
-          t('landing.hero.cat.housing'),
-          '€800.00',
-          '#7c4dff',
-        )}
-        {renderRow(
-          t('landing.hero.preview.groceries'),
-          t('landing.hero.cat.food'),
-          '€78.40',
-          '#1fdb8a',
-        )}
-        {renderRow(
-          t('landing.hero.preview.streaming'),
-          t('landing.hero.cat.subs'),
-          '€12.99',
-          '#ff3da6',
-        )}
-        {renderRow(
-          t('landing.hero.preview.transit'),
-          t('landing.hero.cat.transport'),
-          '€30.00',
-          '#00b8f5',
-        )}
+      <div className="p-3">
+        {/* Built from the same tone classes the real hero uses, so the shot
+            can never drift from the product — including in dark mode. */}
+        <div className="today-hero today-hero-comfortable rounded-[1.4rem] p-5">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-semibold opacity-65">
+              {t('today.greeting.morning')}
+            </p>
+            <span className="rounded-full bg-white/55 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ring-1 ring-black/5 dark:bg-white/10 dark:ring-white/10">
+              {t('today.chip.comfortable')}
+            </span>
+          </div>
+          <p className="mt-2 max-w-[16rem] font-display text-xl font-semibold leading-tight tracking-[-0.025em]">
+            {t('today.status.comfortable')}
+          </p>
+          <p className="mt-5 font-display text-[2.35rem] font-bold leading-none tracking-[-0.045em] tabular-nums">
+            {t('landing.hero.previewSafeAmount')}
+          </p>
+          <p className="mt-1 text-xs opacity-65">{t('today.leftAfterBills')}</p>
+          {renderPreviewPath()}
+        </div>
+        <div className="space-y-1 px-2 py-3">
+          {renderPreviewSummary(
+            t('today.upcoming.title'),
+            t('landing.hero.previewUpcoming'),
+          )}
+          {renderPreviewSummary(
+            t('today.insights.title'),
+            t('landing.hero.previewInsight'),
+          )}
+        </div>
       </div>
     </DeviceFrame>
   </div>
 );
 
-const renderRow = (
-  label: string,
-  sub: string,
-  amount: string,
-  color: string,
-) => (
-  <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl">
+const renderPreviewPath = () => (
+  <svg viewBox="0 0 280 78" className="mt-4 h-20 w-full" aria-hidden="true">
+    <path d="M 4 67 L 276 8 L 276 28 L 4 76 Z" className="fill-white/35" />
+    <path
+      d="M 4 72 L 276 18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1"
+      strokeDasharray="4 6"
+      className="opacity-25"
+    />
+    <path
+      d="M 4 72 C 38 68, 52 62, 82 60 S 124 49, 151 48 S 181 39, 207 38"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="4"
+      strokeLinecap="round"
+    />
+    <circle cx="207" cy="38" r="5" className="fill-primary" />
+  </svg>
+);
+
+const renderPreviewSummary = (label: string, value: string) => (
+  <div className="flex items-center justify-between gap-4 rounded-xl px-3 py-2.5">
+    <div className="min-w-0">
+      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-0.5 truncate text-xs font-medium">{value}</p>
+    </div>
     <span
-      className="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center"
-      style={{ backgroundColor: `${color}1f` }}
-    >
-      <span
-        className="w-2.5 h-2.5 rounded-full"
-        style={{ backgroundColor: color }}
-      />
-    </span>
-    <span className="flex-1 min-w-0">
-      <span className="block text-[13px] font-medium truncate">{label}</span>
-      <span className="block text-[11px] text-muted-foreground">{sub}</span>
-    </span>
-    <span className="text-[13px] font-semibold tabular-nums">{amount}</span>
+      className="h-2.5 w-2.5 shrink-0 rounded-full bg-primary"
+      aria-hidden="true"
+    />
   </div>
 );

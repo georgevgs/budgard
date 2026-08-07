@@ -1,9 +1,16 @@
 import { useTranslation } from 'react-i18next';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  type RefObject,
+} from 'react';
 import { Button } from '@/components/ui/button';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Receipt from 'lucide-react/dist/esm/icons/receipt';
 import Tag from 'lucide-react/dist/esm/icons/tag';
+import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import X from 'lucide-react/dist/esm/icons/x';
 import { cn } from '@/lib/utils';
 import { haptics } from '@/lib/haptics';
@@ -12,9 +19,14 @@ import SpeedDialAction from '@/components/layout/SpeedDialAction';
 type SpeedDialProps = {
   onAddExpense: () => void;
   onAddCategory: () => void;
+  onAddIncome?: () => void;
 };
 
-const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
+const SpeedDial = ({
+  onAddExpense,
+  onAddCategory,
+  onAddIncome,
+}: SpeedDialProps) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -32,6 +44,8 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
     window.requestAnimationFrame(() => toggleButtonRef.current?.focus());
   }, [closeMenu]);
 
+  useSpeedDialFocus(isOpen, actionsRef, closeMenuAndRestoreFocus);
+
   const handleAction = (callback: () => void) => {
     haptics.light();
     closeMenu();
@@ -40,36 +54,6 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
     }
     callback();
   };
-
-  // A disclosed action menu should continue the keyboard sequence at its
-  // first action, then return to the trigger when dismissed.
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const frame = window.requestAnimationFrame(() => {
-      const firstAction = actionsRef.current?.querySelector<HTMLButtonElement>(
-        'button:not([tabindex="-1"])',
-      );
-      firstAction?.focus();
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        closeMenuAndRestoreFocus();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, closeMenuAndRestoreFocus]);
 
   return (
     <>
@@ -93,6 +77,8 @@ const SpeedDial = ({ onAddExpense, onAddCategory }: SpeedDialProps) => {
             onClick={() => handleAction(onAddExpense)}
             labelDelayClass="delay-100"
           />
+
+          {renderIncomeAction(isOpen, onAddIncome, handleAction, t)}
 
           <SpeedDialAction
             isOpen={isOpen}
@@ -123,13 +109,55 @@ export default SpeedDial;
 
 // ─── Helper render functions ──────────────────────────────────────────────────
 
+const useSpeedDialFocus = (
+  isOpen: boolean,
+  actionsRef: RefObject<HTMLDivElement | null>,
+  closeMenuAndRestoreFocus: () => void,
+) => {
+  // A disclosed action menu should continue the keyboard sequence at its
+  // first action, then return to the trigger when dismissed.
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      const firstAction = actionsRef.current?.querySelector<HTMLButtonElement>(
+        'button:not([tabindex="-1"])',
+      );
+      firstAction?.focus();
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [actionsRef, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeMenuAndRestoreFocus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, closeMenuAndRestoreFocus]);
+};
+
 type OverlayProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
 const SpeedDialOverlay = ({ isOpen, onClose }: OverlayProps) => {
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div
@@ -141,7 +169,9 @@ const SpeedDialOverlay = ({ isOpen, onClose }: OverlayProps) => {
 };
 
 const renderToggleIcon = (isOpen: boolean) => {
-  if (isOpen) return <X className="h-6 w-6" />;
+  if (isOpen) {
+    return <X className="h-6 w-6" />;
+  }
 
   return <Plus className="h-6 w-6" />;
 };
@@ -175,4 +205,25 @@ const getToggleClass = (isOpen: boolean): string => {
   }
 
   return base;
+};
+
+const renderIncomeAction = (
+  isOpen: boolean,
+  onAddIncome: (() => void) | undefined,
+  handleAction: (callback: () => void) => void,
+  t: (key: string) => string,
+) => {
+  if (!onAddIncome) {
+    return null;
+  }
+
+  return (
+    <SpeedDialAction
+      isOpen={isOpen}
+      label={t('income.addIncome')}
+      icon={<TrendingUp className="h-5 w-5" />}
+      onClick={() => handleAction(onAddIncome)}
+      labelDelayClass="delay-75"
+    />
+  );
 };

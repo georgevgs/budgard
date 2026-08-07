@@ -45,12 +45,11 @@ import RouteMetadata from '@/components/common/RouteMetadata';
 import OfflineBanner from '@/components/common/OfflineBanner';
 
 // Lazy load route-level components with retry on chunk failure
-const ExpensesList = lazyWithRetry(
-  () => import('@/components/expenses/ExpensesList'),
+const TodayView = lazyWithRetry(() => import('@/components/today/TodayView'));
+const ActivityView = lazyWithRetry(
+  () => import('@/components/activity/ActivityView'),
 );
-const IncomeList = lazyWithRetry(
-  () => import('@/components/income/IncomeList'),
-);
+const PlanView = lazyWithRetry(() => import('@/components/plan/PlanView'));
 const AnalyticsView = lazyWithRetry(
   () => import('@/components/analytics/AnalyticsView'),
 );
@@ -161,7 +160,9 @@ const OnboardingGate = () => {
 };
 
 const renderOnboarding = (isOpen: boolean, onComplete: () => void) => {
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <Suspense fallback={null}>
@@ -183,8 +184,9 @@ const useIdleTabPrefetch = () => {
       // network blip on mobile throws "Importing a module script failed.").
       // The real navigation is still protected by lazyWithRetry → /reset.
       const swallow = () => {};
-      import('@/components/expenses/ExpensesList').catch(swallow);
-      import('@/components/income/IncomeList').catch(swallow);
+      import('@/components/today/TodayView').catch(swallow);
+      import('@/components/activity/ActivityView').catch(swallow);
+      import('@/components/plan/PlanView').catch(swallow);
       import('@/components/recurring/RecurringExpensesList').catch(swallow);
       import('@/components/analytics/AnalyticsView').catch(swallow);
     };
@@ -239,7 +241,7 @@ const PublicRoute = () => {
   }
 
   if (session) {
-    return <Navigate to="/expenses" replace />;
+    return <Navigate to="/today" replace />;
   }
 
   return (
@@ -251,11 +253,20 @@ const PublicRoute = () => {
   );
 };
 
+// Forwards a renamed tab path to its replacement, carrying the query string
+// with it. `replace` so the dead path never lands in history — a back tap from
+// /today would otherwise bounce straight through /expenses and back again.
+const LegacyRedirect = ({ to }: { to: string }) => {
+  const { search } = useLocation();
+
+  return <Navigate to={`${to}${search}`} replace />;
+};
+
 const CatchAllRedirect = () => {
   const { session } = useAuth();
   let target = '/';
   if (session) {
-    target = '/expenses';
+    target = '/today';
   }
 
   return <Navigate to={target} replace />;
@@ -267,16 +278,10 @@ const CatchAllRedirect = () => {
 // The four bottom-nav tabs share this layout so switching between them does
 // not unmount/remount the route. Each tab mounts on its first visit and is
 // hidden (display: none) when inactive. This preserves local UI state
-// (selected month, filters, expanded dashboard) and avoids re-running the
-// derived-state useMemos in heavy views (Analytics aggregates, expense
-// filtering pipeline) on every tab switch.
+// (selected month and filters) and avoids re-running the derived-state
+// calculations in Activity and Trends on every tab switch.
 
-const MAIN_TAB_PATHS = [
-  '/expenses',
-  '/income',
-  '/recurring',
-  '/analytics',
-] as const;
+const MAIN_TAB_PATHS = ['/today', '/activity', '/plan', '/trends'] as const;
 type MainTabPath = (typeof MAIN_TAB_PATHS)[number];
 
 const isMainTabPath = (path: string): path is MainTabPath =>
@@ -297,28 +302,28 @@ const MainTabsLayout = () => {
   return (
     <>
       {renderKeepAliveTab(
-        '/expenses',
+        '/today',
         pathname,
         visited,
         <ExpenseLoadingState />,
-        <ExpensesList />,
+        <TodayView />,
       )}
       {renderKeepAliveTab(
-        '/income',
+        '/activity',
         pathname,
         visited,
-        <ExpenseLoadingState section="income" />,
-        <IncomeList />,
+        <ExpenseLoadingState />,
+        <ActivityView />,
       )}
       {renderKeepAliveTab(
-        '/recurring',
+        '/plan',
         pathname,
         visited,
         <RecurringLoadingState />,
-        <RecurringExpensesList />,
+        <PlanView />,
       )}
       {renderKeepAliveTab(
-        '/analytics',
+        '/trends',
         pathname,
         visited,
         <AnalyticsLoadingState />,
@@ -335,7 +340,9 @@ const renderKeepAliveTab = (
   fallback: ReactNode,
   element: ReactNode,
 ) => {
-  if (!visited.has(tabPath)) return null;
+  if (!visited.has(tabPath)) {
+    return null;
+  }
 
   const isActive = activePath === tabPath;
 
@@ -400,11 +407,33 @@ const AuthenticatedApp = () => {
                     so each leaf route gets an empty element — its only job is
                     to participate in path matching. */}
                   <Route element={<MainTabsLayout />}>
-                    <Route path="/expenses" element={null} />
-                    <Route path="/income" element={null} />
-                    <Route path="/recurring" element={null} />
-                    <Route path="/analytics" element={null} />
+                    <Route path="/today" element={null} />
+                    <Route path="/activity" element={null} />
+                    <Route path="/plan" element={null} />
+                    <Route path="/trends" element={null} />
                   </Route>
+                  {/* Legacy tab paths. Push notifications and home-screen
+                      shortcuts installed before the rename still point here,
+                      and the notification edge function ships separately from
+                      the app — so these have to keep resolving indefinitely.
+                      The search string rides along because the add-expense
+                      notification arrives as /expenses?action=add. */}
+                  <Route
+                    path="/expenses"
+                    element={<LegacyRedirect to="/today" />}
+                  />
+                  <Route
+                    path="/income"
+                    element={<LegacyRedirect to="/activity" />}
+                  />
+                  <Route
+                    path="/analytics"
+                    element={<LegacyRedirect to="/trends" />}
+                  />
+                  <Route
+                    path="/recurring"
+                    element={<RecurringExpensesList />}
+                  />
                   <Route
                     path="/goals"
                     element={

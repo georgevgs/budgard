@@ -159,6 +159,11 @@
   animation: nav-indicator-settle 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+@utility font-display {
+  font-family:
+    ui-rounded, 'SF Pro Rounded', 'Nunito Sans', system-ui, sans-serif;
+}
+
 /* In the components layer so a caller can still override the background with
    a plain Tailwind utility — utilities are emitted after components. Kept as
    @layer components rather than @utility for exactly that reason: a custom
@@ -188,24 +193,26 @@
 
 @layer base {
   :root {
-    --background: 0 0% 97%;
-    --foreground: 0 0% 7%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 7%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 7%;
+    /* Warm sand base. Neutrals carry a little of the brand's hue so the
+       orange never looks stuck onto a cold grey app. */
+    --background: 30 33% 96%;
+    --foreground: 24 14% 8%;
+    --card: 36 60% 99%;
+    --card-foreground: 24 14% 8%;
+    --popover: 36 60% 99%;
+    --popover-foreground: 24 14% 8%;
     --primary: 15 100% 61%;
     --primary-foreground: 0 0% 8%;
-    --secondary: 0 0% 94%;
-    --secondary-foreground: 0 0% 12%;
-    --muted: 0 0% 94%;
-    --muted-foreground: 0 0% 43%;
-    --accent: 0 0% 93%;
-    --accent-foreground: 0 0% 9%;
+    --secondary: 30 24% 92%;
+    --secondary-foreground: 24 14% 12%;
+    --muted: 30 24% 92%;
+    --muted-foreground: 25 9% 42%;
+    --accent: 30 26% 91%;
+    --accent-foreground: 24 14% 9%;
     --destructive: 0 72% 46%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 78%;
-    --input: 0 0% 78%;
+    --border: 28 18% 80%;
+    --input: 28 18% 80%;
     --ring: 15 100% 61%;
     --income: 160 65% 31%;
     --income-foreground: 0 0% 100%;
@@ -249,24 +256,24 @@
   }
 
   .dark {
-    --background: 0 0% 6%;
-    --foreground: 0 0% 96%;
-    --card: 0 0% 9%;
-    --card-foreground: 0 0% 96%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 96%;
+    --background: 24 12% 5%;
+    --foreground: 30 14% 96%;
+    --card: 24 10% 10%;
+    --card-foreground: 30 14% 96%;
+    --popover: 24 10% 10%;
+    --popover-foreground: 30 14% 96%;
     --primary: 15 100% 65%;
     --primary-foreground: 0 0% 7%;
-    --secondary: 0 0% 14%;
-    --secondary-foreground: 0 0% 96%;
-    --muted: 0 0% 14%;
-    --muted-foreground: 0 0% 64%;
-    --accent: 0 0% 16%;
-    --accent-foreground: 0 0% 96%;
+    --secondary: 24 9% 15%;
+    --secondary-foreground: 30 14% 96%;
+    --muted: 24 9% 15%;
+    --muted-foreground: 28 8% 65%;
+    --accent: 24 9% 17%;
+    --accent-foreground: 30 14% 96%;
     --destructive: 0 72% 56%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 34%;
-    --input: 0 0% 34%;
+    --border: 26 8% 34%;
+    --input: 26 8% 34%;
     --ring: 15 100% 65%;
     --income: 160 65% 50%;
     --income-foreground: 160 70% 8%;
@@ -331,11 +338,32 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     /* Tabular (monospaced) numbers prevent layout shift as digits update */
     font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  /* A single warm bloom off the top-right corner. Fixed so it stays put while
+     content scrolls under it — the page reads as lit rather than papered. */
+  body {
+    background-image: radial-gradient(
+      44rem 32rem at 100% -10%,
+      hsl(var(--primary) / 0.1),
+      transparent 62%
+    );
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+  }
+
+  .dark body {
+    background-image: radial-gradient(
+      44rem 32rem at 100% -10%,
+      hsl(var(--primary) / 0.08),
+      transparent 62%
+    );
   }
 
   [data-theme='barbie'] body {
@@ -431,6 +459,123 @@
   }
 }
 
+@layer components {
+  /* The one surface every panel in the app is built from. Kept here rather
+     than repeated as `bg-card/72 ring-1 ring-border/30` at each call site so
+     radius, tint and rim can only ever drift in one place. In the components
+     layer so a caller can still override any single part with a utility. */
+  .surface-card {
+    border-radius: 1.6rem;
+    background-color: hsl(var(--card) / 0.72);
+    box-shadow: inset 0 0 0 1px hsl(var(--border) / 0.3);
+  }
+
+  .surface-card-flush {
+    border-radius: 1.6rem;
+    overflow: hidden;
+    background-color: hsl(var(--card) / 0.72);
+    box-shadow: inset 0 0 0 1px hsl(var(--border) / 0.3);
+  }
+
+  /* Status ramp. Every tone is a mix of a semantic token into the card, so the
+     hero follows the chosen accent and flips with the theme on its own — never
+     hand-painted literals, which is what previously left the hero orange while
+     the rest of the app turned blue. Ink stays --foreground because a tint of
+     the card is light on light and dark on dark by construction.
+     Colour is never the only signal — the hero carries a labelled status chip. */
+  .today-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 2rem;
+    padding: 1.5rem;
+    color: hsl(var(--foreground));
+    background-image: radial-gradient(
+      circle at 92% 4%,
+      hsl(var(--primary) / 0.18),
+      transparent 36%
+    );
+    box-shadow:
+      inset 0 0 0 1px hsl(var(--border) / 0.35),
+      0 18px 50px -38px hsl(0 0% 0% / 0.4);
+  }
+
+  .today-hero-comfortable {
+    background-color: color-mix(
+      in oklab,
+      hsl(var(--primary)) 20%,
+      hsl(var(--card))
+    );
+  }
+
+  .today-hero-watchful {
+    background-color: color-mix(
+      in oklab,
+      hsl(var(--warning)) 26%,
+      hsl(var(--card))
+    );
+  }
+
+  .today-hero-tight {
+    background-color: color-mix(
+      in oklab,
+      hsl(var(--destructive)) 24%,
+      hsl(var(--card))
+    );
+  }
+
+  .today-hero-neutral {
+    background-color: hsl(var(--card));
+  }
+
+  /* Day headers pin under the app header as their group scrolls past, so the
+     date a row belongs to is never off screen. 4rem is the header height. */
+  .activity-day-header {
+    position: sticky;
+    top: calc(4rem + env(safe-area-inset-top));
+    z-index: 10;
+    backdrop-filter: blur(12px);
+    background-color: hsl(var(--background) / 0.82);
+  }
+
+  .money-path-line {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: money-path-draw 720ms cubic-bezier(0.22, 1, 0.36, 1) 100ms both;
+  }
+
+  /* Dark needs a deeper drop and a slightly stronger tint — the card it mixes
+     into is nearly black, so the same percentage reads as less colour. */
+  .dark .today-hero {
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.06),
+      0 18px 50px -34px hsl(0 0% 0% / 0.8);
+  }
+
+  .dark .today-hero-comfortable {
+    background-color: color-mix(
+      in oklab,
+      hsl(var(--primary)) 26%,
+      hsl(var(--card))
+    );
+  }
+
+  .dark .today-hero-watchful {
+    background-color: color-mix(
+      in oklab,
+      hsl(var(--warning)) 30%,
+      hsl(var(--card))
+    );
+  }
+
+  .dark .today-hero-tight {
+    background-color: color-mix(
+      in oklab,
+      hsl(var(--destructive)) 30%,
+      hsl(var(--card))
+    );
+  }
+}
+
 @layer utilities {
   @keyframes nav-indicator-settle {
     0% {
@@ -480,6 +625,16 @@
     border-color: hsl(var(--border) / 0.5) !important;
   }
 
+  @keyframes money-path-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* List entrance for the card lists — Goals, Debts, Income and the expense
+     pages stagger their rows in on a capped 40ms ramp. Deliberately NOT used by
+     the Activity feed: its rows remount on every search keystroke, so the
+     entrance would re-fire as you type. */
   @keyframes card-enter {
     from {
       opacity: 0;

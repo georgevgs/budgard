@@ -212,6 +212,13 @@ describe('buildCsv', () => {
 describe('buildTransactionsCsv', () => {
   const tags: Tag[] = [
     { id: 'tag-1', name: 'Work', color: '#000', user_id: 'u1', created_at: '' },
+    {
+      id: 'tag-2',
+      name: 'Travel',
+      color: '#f60',
+      user_id: 'u1',
+      created_at: '',
+    },
   ];
 
   const transactions: Expense[] = [
@@ -232,6 +239,7 @@ describe('buildTransactionsCsv', () => {
       date: '2025-03-02',
       category_id: 'cat-1',
       tag_id: 'tag-1',
+      extra_tags: [{ id: 'tag-2', name: 'Travel', color: '#f60' }],
       user_id: 'u1',
       created_at: '',
       type: 'expense',
@@ -267,12 +275,12 @@ describe('buildTransactionsCsv', () => {
     expect(expense).toContain('-3.50');
   });
 
-  it('looks up category and tag names by id, leaves blank when missing', () => {
+  it('exports primary and extra tag names, leaving blank when missing', () => {
     const csv = buildTransactionsCsv(transactions, categories, tags, t);
     const lines = csv.split('\r\n');
 
     expect(lines[1]).toContain('Food');
-    expect(lines[2]).toContain('Work');
+    expect(lines[2]).toContain('Work | Travel');
     // Third transaction: no category, no tag → trailing empties
     expect(lines[3]).toMatch(/,No category,$/);
   });

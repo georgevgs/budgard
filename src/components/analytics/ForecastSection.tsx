@@ -1,6 +1,5 @@
 import { Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent } from '@/components/ui/card';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useForecastData } from '@/hooks/analytics/useForecastData';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -21,12 +20,12 @@ const ForecastSection = () => {
 
   return (
     <div className="space-y-3">
-      <h3 className="text-base font-semibold text-foreground">
+      <h2 className="font-display text-xl font-semibold">
         {t('analytics.forecast.title')}
-      </h3>
+      </h2>
 
-      <Card>
-        <CardContent className="p-5 space-y-4">
+      <div className="surface-card">
+        <div className="p-5 space-y-4">
           {renderSafeToSpend(safeToSpend, defaultCurrency, t)}
 
           <div>
@@ -45,8 +44,8 @@ const ForecastSection = () => {
           <p className="text-xs text-muted-foreground">
             {t('analytics.forecast.methodNote')}
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

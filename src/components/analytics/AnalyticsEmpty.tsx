@@ -21,7 +21,7 @@ const AnalyticsEmpty = () => {
         title={t('analytics.emptyTitle')}
         description={t('analytics.emptyDescription')}
         actionLabel={t('expenses.addExpense')}
-        onAction={() => navigate('/expenses?action=add')}
+        onAction={() => navigate('/today?action=add')}
       />
     </div>
   );

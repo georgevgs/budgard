@@ -42,7 +42,7 @@ describe('SpendingInsights', () => {
     const { container } = render(<SpendingInsights {...baseProps} />);
 
     expect(screen.getByText('Hero text')).toBeInTheDocument();
-    expect(container.querySelectorAll('.rounded-2xl')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-insight]')).toHaveLength(1);
   });
 
   it('renders hero plus secondary cards for multiple insights', () => {
@@ -62,7 +62,7 @@ describe('SpendingInsights', () => {
     mockInsights = [insight('a', 'warning', 'Hero')];
     const { container } = render(<SpendingInsights {...baseProps} />);
 
-    const hero = container.querySelector('.rounded-2xl');
+    const hero = container.querySelector('[data-insight="hero"]');
     expect(hero?.className).toContain('warning');
   });
 
@@ -70,7 +70,7 @@ describe('SpendingInsights', () => {
     mockInsights = [insight('a', 'positive', 'Hero')];
     const { container } = render(<SpendingInsights {...baseProps} />);
 
-    const hero = container.querySelector('.rounded-2xl');
+    const hero = container.querySelector('[data-insight="hero"]');
     expect(hero?.className).toContain('income');
   });
 
@@ -78,7 +78,7 @@ describe('SpendingInsights', () => {
     mockInsights = [insight('a', 'default', 'Hero')];
     const { container } = render(<SpendingInsights {...baseProps} />);
 
-    const hero = container.querySelector('.rounded-2xl');
+    const hero = container.querySelector('[data-insight="hero"]');
     expect(hero?.className).toContain('primary');
   });
 });

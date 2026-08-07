@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import {
   Select,
   SelectContent,
@@ -18,11 +18,11 @@ const LanguageSection = () => {
 
   return (
     <section className="space-y-2">
-      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
         {t('settings.language.title')}
       </p>
-      <Card>
-        <CardContent className="p-4">
+      <SurfaceCard>
+        <div className="p-4">
           <Select
             value={i18n.language}
             onValueChange={(lang) => i18n.changeLanguage(lang)}
@@ -38,8 +38,8 @@ const LanguageSection = () => {
               ))}
             </SelectContent>
           </Select>
-        </CardContent>
-      </Card>
+        </div>
+      </SurfaceCard>
     </section>
   );
 };

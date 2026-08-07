@@ -4,10 +4,10 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { haptics } from '@/lib/haptics';
 import { useNavAutoHide } from '@/hooks/useNavAutoHide';
-import FileText from 'lucide-react/dist/esm/icons/file-text';
-import BarChart from 'lucide-react/dist/esm/icons/bar-chart';
-import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
-import Repeat from 'lucide-react/dist/esm/icons/repeat';
+import House from 'lucide-react/dist/esm/icons/house';
+import List from 'lucide-react/dist/esm/icons/list';
+import CalendarRange from 'lucide-react/dist/esm/icons/calendar-range';
+import ChartSpline from 'lucide-react/dist/esm/icons/chart-spline';
 
 type Tab = {
   name: string;
@@ -23,24 +23,24 @@ const NavTabs = () => {
 
   const tabs: Tab[] = [
     {
-      name: t('navigation.expenses'),
-      path: '/expenses',
-      icon: FileText,
+      name: t('navigation.today'),
+      path: '/today',
+      icon: House,
     },
     {
-      name: t('navigation.income'),
-      path: '/income',
-      icon: TrendingUp,
+      name: t('navigation.activity'),
+      path: '/activity',
+      icon: List,
     },
     {
-      name: t('navigation.recurring'),
-      path: '/recurring',
-      icon: Repeat,
+      name: t('navigation.plan'),
+      path: '/plan',
+      icon: CalendarRange,
     },
     {
-      name: t('navigation.analytics'),
-      path: '/analytics',
-      icon: BarChart,
+      name: t('navigation.trends'),
+      path: '/trends',
+      icon: ChartSpline,
     },
   ];
 
@@ -97,7 +97,9 @@ const renderTab = (tab: Tab) => {
 // Nothing is highlighted on routes that live outside the tab set —
 // Goals, Net worth, Debts and Settings all reach the nav but own no tab.
 const renderIndicator = (activeIndex: number, tabCount: number) => {
-  if (activeIndex < 0) return null;
+  if (activeIndex < 0) {
+    return null;
+  }
 
   return (
     <span
@@ -117,7 +119,9 @@ const renderIndicator = (activeIndex: number, tabCount: number) => {
 
 const getActiveIndex = (pathname: string, tabs: Tab[]): number =>
   tabs.findIndex((tab) => {
-    if (pathname === tab.path) return true;
+    if (pathname === tab.path) {
+      return true;
+    }
 
     return pathname.startsWith(`${tab.path}/`);
   });

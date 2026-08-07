@@ -1,7 +1,6 @@
 import { Suspense, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import Lock from 'lucide-react/dist/esm/icons/lock';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -63,9 +62,9 @@ const YearOverviewSection = ({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-4">
-        <h3 className="text-base font-semibold text-foreground">
+        <h2 className="font-display text-xl font-semibold">
           {t('analytics.yearOverview')}
-        </h3>
+        </h2>
         <Select
           value={selectedYear.toString()}
           onValueChange={(value) => onYearChange(parseInt(value))}
@@ -96,8 +95,8 @@ const YearOverviewSection = ({
         defaultCurrency,
       )}
 
-      <Card className="overflow-hidden">
-        <CardContent className="p-5">
+      <div className="surface-card-flush">
+        <div className="p-5">
           <div className="w-full" aria-hidden="true">
             <Suspense fallback={<div className="h-[280px]" aria-hidden />}>
               <MonthlyTrendChart
@@ -116,8 +115,8 @@ const YearOverviewSection = ({
             t,
             defaultCurrency,
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

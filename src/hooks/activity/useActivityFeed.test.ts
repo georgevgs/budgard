@@ -1,0 +1,142 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
+import { useActivityFeed } from '@/hooks/activity/useActivityFeed';
+import { UNCATEGORIZED_VALUE } from '@/lib/expenseFilters';
+import type { Expense } from '@/types/Expense';
+
+let incomesMock: Expense[] = [];
+
+vi.mock('@/contexts/DataContext', () => ({
+  useIncomesData: () => incomesMock,
+}));
+
+const row = (over: Partial<Expense>): Expense =>
+  ({
+    id: 'x',
+    description: 'Something',
+    amount: 10,
+    date: '2026-08-05',
+    created_at: '2026-08-05T10:00:00Z',
+    category_id: 'cat-1',
+    category: { id: 'cat-1', name: 'Groceries' },
+    ...over,
+  }) as unknown as Expense;
+
+describe('useActivityFeed', () => {
+  beforeEach(() => {
+    incomesMock = [];
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-07T10:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('shows only the selected month by default', () => {
+    const { result } = renderHook(() =>
+      useActivityFeed([
+        row({ id: 'aug', date: '2026-08-05' }),
+        row({ id: 'jul', date: '2026-07-05' }),
+      ]),
+    );
+
+    expect(result.current.filteredRows.map((r) => r.id)).toEqual(['aug']);
+  });
+
+  it('reaches past the selected month once the period widens', () => {
+    const { result } = renderHook(() =>
+      useActivityFeed([
+        row({ id: 'aug', date: '2026-08-05' }),
+        row({ id: 'jan', date: '2026-01-05' }),
+      ]),
+    );
+
+    act(() => result.current.setPeriod('all'));
+
+    expect(result.current.filteredRows.map((r) => r.id)).toEqual(['aug', 'jan']);
+  });
+
+  it('honours rolling-day windows', () => {
+    const { result } = renderHook(() =>
+      useActivityFeed([
+        row({ id: 'recent', date: '2026-08-05' }),
+        row({ id: 'old', date: '2026-07-01' }),
+      ]),
+    );
+
+    act(() => result.current.setPeriod('last7'));
+
+    expect(result.current.filteredRows.map((r) => r.id)).toEqual(['recent']);
+  });
+
+  it('reports matches hiding outside a narrowed period', () => {
+    const { result } = renderHook(() =>
+      useActivityFeed([
+        row({ id: 'aug', description: 'Coffee', date: '2026-08-05' }),
+        row({ id: 'jun', description: 'Dentist', date: '2026-06-05' }),
+      ]),
+    );
+
+    act(() => result.current.setSearch('dentist'));
+
+    expect(result.current.filteredRows).toHaveLength(0);
+    expect(result.current.matchesOutsidePeriod).toBe(1);
+  });
+
+  it('reports no outside matches once the period is already everything', () => {
+    const { result } = renderHook(() =>
+      useActivityFeed([row({ id: 'jun', date: '2026-06-05' })]),
+    );
+
+    act(() => result.current.setPeriod('all'));
+    act(() => result.current.setSearch('nothing-matches-this'));
+
+    expect(result.current.matchesOutsidePeriod).toBe(0);
+  });
+
+  it('filters by category, including uncategorized', () => {
+    const { result } = renderHook(() =>
+      useActivityFeed([
+        row({ id: 'grocery', category_id: 'cat-1' }),
+        row({ id: 'loose', category_id: null, category: undefined }),
+      ]),
+    );
+
+    act(() => result.current.setSelectedCategoryId('cat-1'));
+    expect(result.current.filteredRows.map((r) => r.id)).toEqual(['grocery']);
+
+    act(() => result.current.setSelectedCategoryId(UNCATEGORIZED_VALUE));
+    expect(result.current.filteredRows.map((r) => r.id)).toEqual(['loose']);
+  });
+
+  it('separates expense and income totals', () => {
+    incomesMock = [row({ id: 'salary', amount: 100, date: '2026-08-03' })];
+    const { result } = renderHook(() =>
+      useActivityFeed([row({ id: 'spend', amount: 30, date: '2026-08-04' })]),
+    );
+
+    expect(result.current.expenseTotal).toBe(30);
+    expect(result.current.incomeTotal).toBe(100);
+  });
+
+  it('treats the month selector as scope, not as an active filter', () => {
+    const { result } = renderHook(() => useActivityFeed([row({})]));
+
+    expect(result.current.hasActiveFilters).toBe(false);
+
+    act(() => result.current.setSearch('coffee'));
+
+    expect(result.current.hasActiveFilters).toBe(true);
+  });
+
+  it('names the export after the period in view', () => {
+    const { result } = renderHook(() => useActivityFeed([row({})]));
+
+    expect(result.current.exportScope).toBe('2026-08');
+
+    act(() => result.current.setPeriod('thisYear'));
+
+    expect(result.current.exportScope).toBe('thisYear');
+  });
+});

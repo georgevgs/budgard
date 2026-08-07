@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import Plus from 'lucide-react/dist/esm/icons/plus';
-import { Card } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { Button } from '@/components/ui/button';
 
 type Variant = 'card' | 'page';
@@ -41,7 +41,7 @@ const renderCard = ({
   onAction,
 }: RenderArgs) => {
   return (
-    <Card className="border-border/50 rounded-2xl p-8 text-center overflow-hidden">
+    <SurfaceCard flush className="p-8 text-center">
       <div className="flex flex-col items-center gap-3">
         {media}
         <div className="max-w-[280px]">
@@ -58,7 +58,7 @@ const renderCard = ({
           <span className="truncate">{actionLabel}</span>
         </Button>
       </div>
-    </Card>
+    </SurfaceCard>
   );
 };
 

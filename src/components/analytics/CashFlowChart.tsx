@@ -18,8 +18,8 @@ import {
 } from '@/components/common/ChartTooltip';
 
 const INCOME_COLOR = 'hsl(var(--income))';
-const EXPENSE_COLOR = 'hsl(var(--destructive))';
-const NET_COLOR = 'hsl(var(--primary))';
+const EXPENSE_COLOR = 'hsl(var(--primary))';
+const NET_COLOR = 'hsl(var(--foreground))';
 
 type ChartPoint = {
   month: string;

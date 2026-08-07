@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import Wallet from 'lucide-react/dist/esm/icons/wallet';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -33,10 +32,15 @@ export default Footer;
 const renderBrandColumn = (t: Tx) => (
   <div>
     <div className="flex items-center gap-2.5">
-      <span className="w-7 h-7 rounded-lg bg-foreground text-background flex items-center justify-center">
-        <Wallet className="h-4 w-4" />
+      <img
+        src="/icon-192x192.png"
+        alt=""
+        aria-hidden="true"
+        className="h-7 w-7 rounded-lg"
+      />
+      <span className="font-display font-semibold tracking-[-0.025em] text-[15px]">
+        Budgard
       </span>
-      <span className="font-semibold tracking-tight text-[15px]">budgard</span>
     </div>
     <p className="mt-4 text-sm text-muted-foreground leading-relaxed max-w-[260px]">
       {t('landing.footer.tagline')}

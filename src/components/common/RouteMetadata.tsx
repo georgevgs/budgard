@@ -34,6 +34,10 @@ export default RouteMetadata;
 type TFunc = (key: string) => string;
 
 const resolvePageTitle = (pathname: string, t: TFunc): string => {
+  if (pathname === '/today') return t('navigation.today');
+  if (pathname === '/activity') return t('navigation.activity');
+  if (pathname === '/plan') return t('navigation.plan');
+  if (pathname === '/trends') return t('navigation.trends');
   if (pathname === '/expenses') return t('navigation.expenses');
   if (pathname === '/income') return t('navigation.income');
   if (pathname === '/recurring') return t('navigation.recurring');

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent } from '@/components/ui/card';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { Badge } from '@/components/ui/badge';
 import Target from 'lucide-react/dist/esm/icons/target';
 import Calendar from 'lucide-react/dist/esm/icons/calendar';
@@ -27,8 +27,8 @@ const GoalCard = ({ goal, onEdit, onDelete }: Props) => {
   const dateLocale = useDateLocale();
 
   return (
-    <Card className="transition-shadow hover:shadow-md">
-      <CardContent className="p-4 space-y-3">
+    <SurfaceCard className="transition-colors hover:bg-card">
+      <div className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <div
@@ -48,8 +48,8 @@ const GoalCard = ({ goal, onEdit, onDelete }: Props) => {
         <GoalProgressBar progress={progress} currency={goal.currency} />
 
         {renderFooter(goal, progress, dateLocale, t)}
-      </CardContent>
-    </Card>
+      </div>
+    </SurfaceCard>
   );
 }
 

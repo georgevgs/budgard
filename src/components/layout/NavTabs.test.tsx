@@ -15,33 +15,33 @@ const indicatorAt = (path: string) =>
 
 describe('NavTabs', () => {
   it('renders four tabs with localized labels', () => {
-    renderAt('/expenses');
+    renderAt('/today');
 
-    expect(screen.getByText('navigation.expenses')).toBeInTheDocument();
-    expect(screen.getByText('navigation.income')).toBeInTheDocument();
-    expect(screen.getByText('navigation.recurring')).toBeInTheDocument();
-    expect(screen.getByText('navigation.analytics')).toBeInTheDocument();
+    expect(screen.getByText('navigation.today')).toBeInTheDocument();
+    expect(screen.getByText('navigation.activity')).toBeInTheDocument();
+    expect(screen.getByText('navigation.plan')).toBeInTheDocument();
+    expect(screen.getByText('navigation.trends')).toBeInTheDocument();
   });
 
   it('points each tab to the right route', () => {
-    renderAt('/expenses');
+    renderAt('/today');
     const links = screen.getAllByRole('link');
 
-    expect(links[0]).toHaveAttribute('href', '/expenses');
-    expect(links[1]).toHaveAttribute('href', '/income');
-    expect(links[2]).toHaveAttribute('href', '/recurring');
-    expect(links[3]).toHaveAttribute('href', '/analytics');
+    expect(links[0]).toHaveAttribute('href', '/today');
+    expect(links[1]).toHaveAttribute('href', '/activity');
+    expect(links[2]).toHaveAttribute('href', '/plan');
+    expect(links[3]).toHaveAttribute('href', '/trends');
   });
 
   it('marks the current tab active via NavLink', () => {
-    renderAt('/analytics');
+    renderAt('/trends');
     const links = screen.getAllByRole('link');
 
     expect(links[3].className).toContain('active');
   });
 
   it('does not include Goals or Settings tabs (moved to header menus)', () => {
-    renderAt('/expenses');
+    renderAt('/today');
 
     expect(screen.queryByText('navigation.goals')).not.toBeInTheDocument();
     expect(screen.queryByText('navigation.settings')).not.toBeInTheDocument();
@@ -53,16 +53,16 @@ describe('NavTabs', () => {
   });
 
   it('slides the indicator to the slot matching the route', () => {
-    expect(indicatorAt('/expenses')).toHaveStyle({
+    expect(indicatorAt('/today')).toHaveStyle({
       transform: 'translateX(0%)',
     });
-    expect(indicatorAt('/analytics')).toHaveStyle({
+    expect(indicatorAt('/trends')).toHaveStyle({
       transform: 'translateX(300%)',
     });
   });
 
   it('keeps the indicator on the tab when a nested route is open', () => {
-    expect(indicatorAt('/income/42')).toHaveStyle({
+    expect(indicatorAt('/activity/42')).toHaveStyle({
       transform: 'translateX(100%)',
     });
   });
@@ -72,6 +72,6 @@ describe('NavTabs', () => {
   });
 
   it('hides the indicator on a route that merely prefixes a tab path', () => {
-    expect(indicatorAt('/incomes')).toBeNull();
+    expect(indicatorAt('/activities')).toBeNull();
   });
 });
