@@ -15,7 +15,7 @@ const Faq = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <SectionShell id="faq" tone="muted">
+    <SectionShell id="faq" tone="default">
       <Reveal>
         <div className="text-center max-w-2xl mx-auto">
           <EyebrowLabel>{t('landing.faq.eyebrow')}</EyebrowLabel>

@@ -14,7 +14,7 @@ const Privacy = () => {
   const { t } = useTranslation();
 
   return (
-    <SectionShell tone="muted">
+    <SectionShell tone="default">
       <div className="max-w-3xl">
         <Reveal>
           <EyebrowLabel>{t('landing.privacy.eyebrow')}</EyebrowLabel>

@@ -23,7 +23,7 @@ const Pricing = ({ onGetStarted, onGetPro }: Props) => {
   const [cycle, setCycle] = useState<Cycle>('yearly');
 
   return (
-    <SectionShell id="pricing" tone="default">
+    <SectionShell id="pricing" tone="muted">
       <Reveal>{renderHeader(t)}</Reveal>
       <Reveal delay={100}>{renderToggle(t, cycle, setCycle, plans)}</Reveal>
       <div className="mt-10 grid md:grid-cols-2 gap-5 max-w-4xl mx-auto">

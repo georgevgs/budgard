@@ -5,13 +5,13 @@ import Reveal from '@/components/landing/Reveal';
 
 type Tx = (key: string) => string;
 
-// The one feature that demonstrates itself in a single frame, so it gets the
-// page's only inverted band — it earns being the thing the eye lands on.
+// The one feature that demonstrates itself in a single frame: receipt on the
+// left, the expense it becomes on the right.
 const Scan = () => {
   const { t } = useTranslation();
 
   return (
-    <SectionShell tone="inverted">
+    <SectionShell tone="default">
       <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         <Reveal>{renderCopy(t)}</Reveal>
         <Reveal delay={120}>
@@ -30,10 +30,10 @@ const renderCopy = (t: Tx) => (
     <h2 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
       {t('landing.scan.heading')}
     </h2>
-    <p className="mt-5 text-base leading-relaxed max-w-md opacity-70">
+    <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-md">
       {t('landing.scan.body')}
     </p>
-    <ul className="mt-6 space-y-2.5 text-sm opacity-85">
+    <ul className="mt-6 space-y-2.5 text-sm text-foreground/80">
       {[1, 2, 3].map((n) => renderPoint(t(`landing.scan.point${n}`)))}
     </ul>
   </div>
@@ -52,7 +52,7 @@ const renderPoint = (text: string) => (
 const renderDemo = (t: Tx) => (
   <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-4">
     {renderReceipt(t)}
-    <span aria-hidden="true" className="text-2xl opacity-40">
+    <span aria-hidden="true" className="text-2xl text-muted-foreground">
       →
     </span>
     {renderResult(t)}
@@ -60,7 +60,7 @@ const renderDemo = (t: Tx) => (
 );
 
 const renderReceipt = (t: Tx) => (
-  <div className="rounded-2xl bg-background text-foreground p-4 shadow-lg">
+  <div className="rounded-2xl border border-border/70 bg-card p-4 shadow-lg">
     <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
       {t('landing.scan.receiptLabel')}
     </p>
@@ -79,7 +79,7 @@ const renderReceipt = (t: Tx) => (
 );
 
 const renderResult = (t: Tx) => (
-  <div className="rounded-2xl bg-background text-foreground p-4 shadow-lg">
+  <div className="rounded-2xl border border-border/70 bg-card p-4 shadow-lg">
     <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
       {t('landing.scan.resultLabel')}
     </p>

@@ -13,7 +13,7 @@ const MoneyFlow = () => {
   const { t } = useTranslation();
 
   return (
-    <SectionShell tone="default">
+    <SectionShell tone="muted">
       <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         <Reveal className="lg:order-2">{renderCopy(t)}</Reveal>
         <Reveal delay={120} className="lg:order-1">
