@@ -39,19 +39,21 @@ const MilestoneWatcher = () => {
     .filter((d) => d.is_completed && !d.is_archived)
     .map((d) => d.id);
 
-  // One id per month, so beating last month's savings celebrates once and
-  // cannot re-fire if the figure dips back under and recovers.
-  const beatenMonthIds = buildBeatenMonthIds(rhythm);
+  // Celebrates only real money reaching a round figure — never a score.
+  const crossedMilestoneIds = buildCrossedMilestoneIds(rhythm);
 
-  const celebrateSavings = useCallback(() => {
-    celebrate();
-    haptics.success();
-    toast({
-      variant: 'success',
-      title: t('today.rhythm.celebrate'),
-      duration: 6000,
-    });
-  }, [t]);
+  const celebrateSetAside = useCallback(
+    (id: string) => {
+      celebrate();
+      haptics.success();
+      toast({
+        variant: 'success',
+        title: t('today.rhythm.celebrate', { amount: id.split('-').pop() }),
+        duration: 6000,
+      });
+    },
+    [t],
+  );
 
   const celebrateGoal = useCallback(
     (id: string) => {
@@ -89,7 +91,7 @@ const MilestoneWatcher = () => {
   // get no goal celebrations either. Debt tracking stays free for everyone.
   useCompletionCelebration(completedGoalIds, armed && isPro, celebrateGoal);
   useCompletionCelebration(clearedDebtIds, armed, celebrateDebt);
-  useCompletionCelebration(beatenMonthIds, armed, celebrateSavings);
+  useCompletionCelebration(crossedMilestoneIds, armed, celebrateSetAside);
 
   return null;
 };
@@ -98,15 +100,23 @@ export default MilestoneWatcher;
 
 // --- Helpers ---
 
-const buildBeatenMonthIds = (
+// One id per milestone crossed, month-scoped so a fresh month can celebrate
+// the same rungs again. Crossing several at once (a large transfer) fires once
+// per rung, which is correct: each was a real threshold passed.
+const buildCrossedMilestoneIds = (
   rhythm: ReturnType<typeof useSavingsRhythm>,
 ): string[] => {
   if (!rhythm) {
     return [];
   }
-  if (rhythm.remainingToTarget !== 0) {
-    return [];
+
+  const month = new Date().toISOString().slice(0, 7);
+  const ids: string[] = [];
+  for (const rung of [25, 50, 100, 150, 200, 250, 500, 1000]) {
+    if (rhythm.setAside >= rung) {
+      ids.push(`set-aside-${month}-${rung}`);
+    }
   }
 
-  return [`saved-beat-${new Date().toISOString().slice(0, 7)}`];
+  return ids;
 };

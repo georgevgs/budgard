@@ -1,10 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { useNoSpendOps } from '@/hooks/dataOps/useNoSpendOps';
-import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
+import { useIsPro } from '@/hooks/useIsPro';
+import { useSetAsideGoal } from '@/hooks/today/useSavingsRhythm';
 import RhythmDots from '@/components/today/RhythmDots';
+import SetAsideCard from '@/components/today/SetAsideCard';
 import { Button } from '@/components/ui/button';
-import { formatCurrency } from '@/lib/utils';
 import type { SavingsRhythm as Rhythm } from '@/hooks/today/useSavingsRhythm';
+import type { Goal } from '@/types/Goal';
 
 type Props = {
   rhythm: Rhythm | null;
@@ -14,7 +16,8 @@ type Props = {
 const SavingsRhythm = ({ rhythm, currency }: Props) => {
   const { t } = useTranslation();
   const { handleNoSpendClaim, handleNoSpendUndo } = useNoSpendOps();
-  const bankedDisplay = useAnimatedNumber(rhythm?.banked ?? 0);
+  const isPro = useIsPro();
+  const goal = useSetAsideGoal();
 
   // No budget means no allowance, so there is nothing to score a day against.
   if (!rhythm) {
@@ -37,18 +40,19 @@ const SavingsRhythm = ({ rhythm, currency }: Props) => {
       >
         {t(`today.rhythm.tone.${rhythm.tone}`)}
       </h2>
-      <div className="surface-card space-y-4 px-4 py-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.08em] opacity-60">
-            {t('today.rhythm.bankedLabel')}
-          </p>
-          <p className="font-display text-3xl font-semibold tabular-nums">
-            {formatCurrency(bankedDisplay, currency)}
-          </p>
-        </div>
-        {renderTargetBar(rhythm, currency, t)}
+      <div className="surface-card px-4 py-4">
         <RhythmDots days={rhythm.days} />
+        {/* Days, not euros. Nothing moved when a day went well, and a currency
+            figure for money that never moved is one the user cannot spend,
+            withdraw or reconcile against anything. */}
+        <p className="mt-3 text-sm leading-relaxed opacity-75">
+          {t('today.rhythm.daysSummary', {
+            good: rhythm.goodDays,
+            total: rhythm.windowDays,
+          })}
+        </p>
         {renderClaim(rhythm, claimToday, undoToday, t)}
+        {renderSetAside(rhythm, isPro, goal, currency)}
       </div>
     </section>
   );
@@ -68,42 +72,28 @@ const todayKey = (): string => {
   return `${now.getFullYear()}-${month}-${day}`;
 };
 
-// Without a previous month there is nothing honest to aim at, so the bar drops
-// out rather than inventing a target for a first-time user to chase.
-const renderTargetBar = (rhythm: Rhythm, currency: string, t: TFunc) => {
-  if (rhythm.progress === null) {
+// Real transfers are Pro, and need a savings-category goal to land in. Without
+// either the card stays the honest day-counted version, rather than dangling an
+// action that cannot complete.
+const renderSetAside = (
+  rhythm: Rhythm,
+  isPro: boolean,
+  goal: Goal | null,
+  currency: string,
+) => {
+  if (!isPro) {
+    return null;
+  }
+  if (!goal) {
     return null;
   }
 
-  return (
-    <div>
-      <div className="h-2 overflow-hidden rounded-full bg-foreground/10">
-        <div
-          className="h-full rounded-full bg-primary transition-[width] duration-700 ease-out"
-          style={{ width: `${rhythm.progress}%` }}
-        />
-      </div>
-      <p className="mt-2 text-sm font-semibold opacity-75">
-        {renderTargetLabel(rhythm, currency, t)}
-      </p>
-    </div>
-  );
+  return <SetAsideCard rhythm={rhythm} goal={goal} currency={currency} />;
 };
 
-const renderTargetLabel = (rhythm: Rhythm, currency: string, t: TFunc) => {
-  if (rhythm.remainingToTarget === null || rhythm.remainingToTarget <= 0) {
-    return t('today.rhythm.targetBeaten');
-  }
-
-  return t('today.rhythm.targetRemaining', {
-    amount: formatCurrency(rhythm.remainingToTarget, currency),
-  });
-};
-
-// Offered only on a day with nothing logged. It is the one action that can
-// bank a full allowance, which is why it has to be claimed rather than assumed.
-// Claiming is one tap, so undoing has to be one tap too — a banked day the user
-// cannot take back is a lie the meter is then stuck with.
+// Offered only on a day with nothing logged. It is the one action that turns an
+// empty day into a scored one, which is why it has to be claimed rather than
+// assumed. Claiming is one tap, so undoing is one tap.
 const renderClaim = (
   rhythm: Rhythm,
   onClaim: () => void,
@@ -112,7 +102,7 @@ const renderClaim = (
 ) => {
   if (rhythm.todayClaimed) {
     return (
-      <div className="flex items-center justify-between gap-3">
+      <div className="mt-3 flex items-center justify-between gap-3">
         <p className="text-sm font-semibold text-primary">
           {t('today.rhythm.claimed')}
         </p>
@@ -127,7 +117,7 @@ const renderClaim = (
   }
 
   return (
-    <Button onClick={onClaim} variant="secondary" className="w-full">
+    <Button onClick={onClaim} variant="secondary" className="mt-3 w-full">
       {t('today.rhythm.claim')}
     </Button>
   );

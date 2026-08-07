@@ -1,15 +1,29 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useSavingsRhythm } from '@/hooks/today/useSavingsRhythm';
+import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { NoSpendDay } from '@/types/NoSpendDay';
 
 let monthlyBudget: number | null = 3100;
 let noSpendDays: NoSpendDay[] = [];
 
+const SAVINGS_CATEGORY: Category = {
+  id: 'savings-cat',
+  name: 'Savings',
+  color: '#000',
+  icon: null,
+  user_id: 'u',
+  created_at: '2026-01-01T00:00:00Z',
+  type: 'expense',
+  kind: 'savings',
+};
+
 vi.mock('@/contexts/DataContext', () => ({
   useNoSpendDaysData: () => noSpendDays,
   useRecurringData: () => ({ recurringExpenses: [] }),
+  useCategoriesData: () => ({ expenseCategories: [SAVINGS_CATEGORY] }),
+  useGoalsData: () => [],
   useDataConfig: () => ({ monthlyBudget }),
 }));
 
@@ -17,15 +31,23 @@ vi.mock('@/contexts/DataContext', () => ({
 // allowance of exactly 100 a day, which keeps the arithmetic below readable.
 const ALLOWANCE = 100;
 
-const spend = (date: string, amount: number, recurringId?: string): Expense =>
+const spend = (
+  date: string,
+  amount: number,
+  overrides: Partial<Expense> = {},
+): Expense =>
   ({
-    id: `${date}-${amount}`,
+    id: `${date}-${amount}-${overrides.category_id ?? 'x'}`,
     amount,
     date,
     description: 'x',
     created_at: `${date}T09:00:00Z`,
-    recurring_expense_id: recurringId ?? null,
+    recurring_expense_id: null,
+    ...overrides,
   }) as unknown as Expense;
+
+const setAside = (date: string, amount: number): Expense =>
+  spend(date, amount, { category_id: SAVINGS_CATEGORY.id });
 
 const claim = (day: string): NoSpendDay => ({
   user_id: 'u',
@@ -55,127 +77,188 @@ describe('useSavingsRhythm', () => {
     expect(result.current).toBeNull();
   });
 
-  it('banks the shortfall on a day that came in under the allowance', () => {
-    const { result } = renderHook(() =>
-      useSavingsRhythm([spend('2026-08-03', 40)]),
-    );
+  describe('day scoring', () => {
+    it('scores a day below the allowance as under', () => {
+      const { result } = renderHook(() =>
+        useSavingsRhythm([spend('2026-08-03', 40)]),
+      );
 
-    expect(outcomeFor(result.current, '2026-08-03')).toBe('under');
-    expect(result.current?.banked).toBeCloseTo(ALLOWANCE - 40);
+      expect(outcomeFor(result.current, '2026-08-03')).toBe('under');
+    });
+
+    it('scores a day above the allowance as over', () => {
+      const { result } = renderHook(() =>
+        useSavingsRhythm([spend('2026-08-03', 400)]),
+      );
+
+      expect(outcomeFor(result.current, '2026-08-03')).toBe('over');
+    });
+
+    // The core objection this card exists to answer: a day with no expenses is
+    // the best kind of day, and must not look like a day you failed to log.
+    it('scores a claimed empty day as a no-spend day', () => {
+      noSpendDays = [claim('2026-08-03')];
+      const { result } = renderHook(() => useSavingsRhythm([]));
+
+      expect(outcomeFor(result.current, '2026-08-03')).toBe('noSpend');
+    });
+
+    it('scores an unclaimed empty day as quiet', () => {
+      const { result } = renderHook(() => useSavingsRhythm([]));
+
+      expect(outcomeFor(result.current, '2026-08-03')).toBe('quiet');
+    });
+
+    it('lets a later expense override a stale claim', () => {
+      noSpendDays = [claim('2026-08-03')];
+      const { result } = renderHook(() =>
+        useSavingsRhythm([spend('2026-08-03', 400)]),
+      );
+
+      expect(outcomeFor(result.current, '2026-08-03')).toBe('over');
+    });
+
+    it('ignores recurring bills when scoring a day', () => {
+      const { result } = renderHook(() =>
+        useSavingsRhythm([
+          spend('2026-08-03', 900, { recurring_expense_id: 'rent' }),
+        ]),
+      );
+
+      expect(outcomeFor(result.current, '2026-08-03')).toBe('quiet');
+    });
+
+    // Without this the mechanic eats itself: setting aside the surplus would
+    // count as spending, destroying the surplus that earned it and flipping a
+    // good day to a bad one.
+    it('does not count a set-aside transfer as spending', () => {
+      const { result } = renderHook(() =>
+        useSavingsRhythm([setAside('2026-08-03', 400)]),
+      );
+
+      expect(outcomeFor(result.current, '2026-08-03')).toBe('quiet');
+    });
   });
 
-  // The pot is a record of the days that went well, not a running balance.
-  it('banks nothing — never a negative — on a day that ran over', () => {
-    const { result } = renderHook(() =>
-      useSavingsRhythm([spend('2026-08-03', 400)]),
-    );
+  describe('yesterday surplus', () => {
+    it('offers what a finished under day left over', () => {
+      const { result } = renderHook(() =>
+        useSavingsRhythm([spend('2026-08-09', 40)]),
+      );
 
-    expect(outcomeFor(result.current, '2026-08-03')).toBe('over');
-    expect(result.current?.banked).toBe(0);
+      expect(result.current?.surplusYesterday).toBeCloseTo(ALLOWANCE - 40);
+    });
+
+    it('offers a full allowance after a claimed no-spend day', () => {
+      noSpendDays = [claim('2026-08-09')];
+      const { result } = renderHook(() => useSavingsRhythm([]));
+
+      expect(result.current?.surplusYesterday).toBeCloseTo(ALLOWANCE);
+    });
+
+    it('offers nothing after a day that ran over', () => {
+      const { result } = renderHook(() =>
+        useSavingsRhythm([spend('2026-08-09', 400)]),
+      );
+
+      expect(result.current?.surplusYesterday).toBe(0);
+    });
+
+    // An unclaimed empty day could equally be a day the app was never opened,
+    // so it must not offer money.
+    it('offers nothing after an unclaimed quiet day', () => {
+      const { result } = renderHook(() => useSavingsRhythm([]));
+
+      expect(result.current?.surplusYesterday).toBe(0);
+    });
+
+    it('caps a refund day at one allowance', () => {
+      const { result } = renderHook(() =>
+        useSavingsRhythm([spend('2026-08-09', -500)]),
+      );
+
+      expect(result.current?.surplusYesterday).toBeCloseTo(ALLOWANCE);
+    });
   });
 
-  // The core objection this feature exists to answer: a day with no expenses
-  // is the best kind of day, and must not look like a day you failed to log.
-  it('banks a full allowance for a claimed no-spend day', () => {
-    noSpendDays = [claim('2026-08-03')];
-    const { result } = renderHook(() => useSavingsRhythm([]));
+  describe('set aside total', () => {
+    // Every figure in currency must be money that actually moved.
+    it('counts only real transfers into a savings category', () => {
+      const { result } = renderHook(() =>
+        useSavingsRhythm([
+          setAside('2026-08-02', 60),
+          setAside('2026-08-05', 40),
+          spend('2026-08-06', 20),
+        ]),
+      );
 
-    expect(outcomeFor(result.current, '2026-08-03')).toBe('noSpend');
-    expect(result.current?.banked).toBeCloseTo(ALLOWANCE);
+      expect(result.current?.setAside).toBeCloseTo(100);
+    });
+
+    it('ignores transfers made in another month', () => {
+      const { result } = renderHook(() =>
+        useSavingsRhythm([setAside('2026-07-20', 500)]),
+      );
+
+      expect(result.current?.setAside).toBe(0);
+    });
+
+    it('knows when today already has a transfer', () => {
+      const { result } = renderHook(() =>
+        useSavingsRhythm([setAside('2026-08-10', 20)]),
+      );
+
+      expect(result.current?.setAsideToday).toBe(true);
+    });
   });
 
-  it('scores an unclaimed empty day as quiet and banks nothing for it', () => {
-    const { result } = renderHook(() => useSavingsRhythm([]));
+  describe('milestone', () => {
+    // A near target that fills beats a distant one that looms.
+    it('aims at the next 25 rung while small', () => {
+      const { result } = renderHook(() =>
+        useSavingsRhythm([setAside('2026-08-02', 30)]),
+      );
 
-    expect(outcomeFor(result.current, '2026-08-03')).toBe('quiet');
-    expect(result.current?.banked).toBe(0);
+      expect(result.current?.milestone).toBe(50);
+      expect(result.current?.milestoneRemaining).toBeCloseTo(20);
+      expect(result.current?.milestoneProgress).toBeCloseTo(60);
+    });
+
+    it('steps up to 50s past a hundred', () => {
+      const { result } = renderHook(() =>
+        useSavingsRhythm([setAside('2026-08-02', 120)]),
+      );
+
+      expect(result.current?.milestone).toBe(150);
+    });
+
+    it('always leaves a rung ahead, even exactly on one', () => {
+      const { result } = renderHook(() =>
+        useSavingsRhythm([setAside('2026-08-02', 50)]),
+      );
+
+      expect(result.current?.milestone).toBe(75);
+      expect(result.current?.milestoneRemaining).toBeCloseTo(25);
+    });
   });
 
-  // A claim cannot outrank the ledger: logging an expense afterwards demotes
-  // the day to however it actually went.
-  it('lets a later expense override a stale claim', () => {
-    noSpendDays = [claim('2026-08-03')];
-    const { result } = renderHook(() =>
-      useSavingsRhythm([spend('2026-08-03', 400)]),
-    );
+  describe('claim availability', () => {
+    it('offers the claim only on a day with nothing logged', () => {
+      const { result: empty } = renderHook(() => useSavingsRhythm([]));
+      expect(empty.current?.canClaimToday).toBe(true);
 
-    expect(outcomeFor(result.current, '2026-08-03')).toBe('over');
-  });
+      const { result: spent } = renderHook(() =>
+        useSavingsRhythm([spend('2026-08-10', 5)]),
+      );
+      expect(spent.current?.canClaimToday).toBe(false);
+    });
 
-  it('ignores recurring bills when scoring a day', () => {
-    const { result } = renderHook(() =>
-      useSavingsRhythm([spend('2026-08-03', 900, 'rent')]),
-    );
+    it('does not re-offer a claim already made', () => {
+      noSpendDays = [claim('2026-08-10')];
+      const { result } = renderHook(() => useSavingsRhythm([]));
 
-    expect(outcomeFor(result.current, '2026-08-03')).toBe('quiet');
-  });
-
-  // Refunds are legal, so a day can net out negative. It must not mint savings
-  // above the allowance it was scored against.
-  it('caps a refund day at one allowance', () => {
-    const { result } = renderHook(() =>
-      useSavingsRhythm([spend('2026-08-03', -500)]),
-    );
-
-    expect(result.current?.banked).toBeCloseTo(ALLOWANCE);
-  });
-
-  it('offers the claim only on a day with nothing logged', () => {
-    const { result: empty } = renderHook(() => useSavingsRhythm([]));
-    expect(empty.current?.canClaimToday).toBe(true);
-
-    const { result: spent } = renderHook(() =>
-      useSavingsRhythm([spend('2026-08-10', 5)]),
-    );
-    expect(spent.current?.canClaimToday).toBe(false);
-  });
-
-  it('does not re-offer a claim already made', () => {
-    noSpendDays = [claim('2026-08-10')];
-    const { result } = renderHook(() => useSavingsRhythm([]));
-
-    expect(result.current?.canClaimToday).toBe(false);
-    expect(result.current?.todayClaimed).toBe(true);
-  });
-
-  it('has no target until there is a real month to beat', () => {
-    const { result } = renderHook(() => useSavingsRhythm([]));
-
-    expect(result.current?.target).toBeNull();
-    expect(result.current?.progress).toBeNull();
-  });
-
-  it('targets last month once that month banked something', () => {
-    const lastMonth = [spend('2026-07-01', 40), spend('2026-07-02', 60)];
-    const { result } = renderHook(() =>
-      useSavingsRhythm([...lastMonth, spend('2026-08-01', 50)]),
-    );
-
-    // July: 31 days, allowance 100 — two under days banked 60 + 40.
-    expect(result.current?.target).toBeCloseTo(100);
-    expect(result.current?.banked).toBeCloseTo(50);
-    expect(result.current?.remainingToTarget).toBeCloseTo(50);
-    expect(result.current?.progress).toBeCloseTo(50);
-  });
-
-  it('caps progress once last month is beaten', () => {
-    const august = Array.from({ length: 9 }, (_, index) =>
-      spend(`2026-08-0${index + 1}`, 10),
-    );
-    const { result } = renderHook(() =>
-      useSavingsRhythm([spend('2026-07-01', 90), ...august]),
-    );
-
-    expect(result.current?.progress).toBe(100);
-    expect(result.current?.remainingToTarget).toBe(0);
-  });
-
-  it('counts only elapsed days of the current month toward banked', () => {
-    const { result } = renderHook(() =>
-      useSavingsRhythm([spend('2026-08-25', 10)]),
-    );
-
-    // The 25th has not happened yet on the 10th, so it cannot have banked.
-    expect(result.current?.banked).toBe(0);
+      expect(result.current?.canClaimToday).toBe(false);
+      expect(result.current?.todayClaimed).toBe(true);
+    });
   });
 });
