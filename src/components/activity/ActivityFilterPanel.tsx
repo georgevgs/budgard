@@ -93,7 +93,7 @@ const ActivityFilterPanel = (props: Props) => {
               disabled={props.tags.length === 0}
             >
               <SelectTrigger
-                className="h-11 w-full rounded-xl border-border/35 bg-card/72 shadow-none"
+                className="h-11 w-full rounded-xl border-border/35 bg-card/72 shadow-none [&>span]:flex-1 [&>span]:text-left"
                 aria-label={t('activity.filterByTag')}
               >
                 <TagIcon className="mr-2 h-4 w-4 shrink-0 text-primary" />

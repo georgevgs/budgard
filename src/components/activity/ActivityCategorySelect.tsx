@@ -39,8 +39,11 @@ const ActivityCategorySelect = ({
       onValueChange={handleChange}
       disabled={categories.length === 0}
     >
+      {/* The trigger lays out icon / value / chevron with justify-between, so
+          a full-width trigger would strand the label in the middle. Letting the
+          value grow keeps it beside its icon, where it reads as a label. */}
       <SelectTrigger
-        className="h-11 w-full rounded-xl border-border/35 bg-card/72 shadow-none"
+        className="h-11 w-full rounded-xl border-border/35 bg-card/72 shadow-none [&>span]:flex-1 [&>span]:text-left"
         aria-label={t('activity.filterByCategory')}
       >
         <Shapes className="mr-2 h-4 w-4 shrink-0 text-primary" />
