@@ -336,6 +336,23 @@
 }
 
 @layer components {
+  /* The content column every screen sits in. Previously each screen picked its
+     own — max-w-lg on Settings, max-w-3xl on the tabs, max-w-4xl on Net worth,
+     Debts and Goals — so the column visibly jogged as you navigated between
+     them. One class, one width, one gutter. */
+  .page-shell {
+    width: 100%;
+    max-width: 48rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 1.25rem;
+
+    @media (width >= 40rem) {
+      padding-inline: 1.5rem;
+    }
+  }
+
   /* The one surface every panel in the app is built from. Kept here rather
      than repeated as `bg-card/72 ring-1 ring-border/30` at each call site so
      radius, tint and rim can only ever drift in one place. In the components
@@ -404,10 +421,12 @@
   }
 
   /* Day headers pin under the app header as their group scrolls past, so the
-     date a row belongs to is never off screen. 4rem is the header height. */
+     date a row belongs to is never off screen. The offset reads the header's
+     own height token rather than restating 4rem, which silently desynced the
+     moment the header's padding changed. */
   .activity-day-header {
     position: sticky;
-    top: calc(4rem + env(safe-area-inset-top));
+    top: calc(var(--header-height) + env(safe-area-inset-top));
     z-index: 10;
     backdrop-filter: blur(12px);
     background-color: hsl(var(--background) / 0.82);

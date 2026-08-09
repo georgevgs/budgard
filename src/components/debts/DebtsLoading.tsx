@@ -11,15 +11,16 @@ const DebtsLoadingState = () => {
   return (
     <LoadingScreen
       label={t('common.loadingSection', { section: t('navigation.debts') })}
-      className="container max-w-4xl mx-auto p-4 space-y-4"
+      className="page-shell space-y-4"
     >
+      <Skeleton className="h-9 w-36" />
       <SkeletonStatCard />
 
       <div className="space-y-3">
         {ROWS.map((width, i) => (
           <div
             key={`debts-skel-${i}`}
-            className="rounded-2xl border border-border/50 bg-card p-4 space-y-3"
+            className="surface-card p-4 space-y-3"
           >
             <div className="flex items-center gap-3">
               <Skeleton className="h-10 w-10 rounded-full shrink-0" />

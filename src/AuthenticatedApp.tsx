@@ -41,6 +41,8 @@ import LegalLoadingState from '@/pages/legal/LegalLoading';
 import DelayedFallback from '@/components/ui/delayed-fallback';
 import { lazyWithRetry } from '@/lib/lazyWithRetry';
 import AuthenticatedProviders from '@/contexts/AuthenticatedProviders';
+import QuickAddProvider from '@/contexts/QuickAddProvider';
+import { isMainTabPath, type MainTabPath } from '@/lib/routes';
 import RouteMetadata from '@/components/common/RouteMetadata';
 import OfflineBanner from '@/components/common/OfflineBanner';
 
@@ -97,7 +99,7 @@ const AuthenticatedLayout = () => {
   useRouteScrollRestoration();
 
   return (
-    <>
+    <QuickAddProvider>
       <SkipToContentLink />
       <Header />
       <main
@@ -111,7 +113,7 @@ const AuthenticatedLayout = () => {
       <MilestoneWatcher />
       <UpgradeDialog />
       <OnboardingGate />
-    </>
+    </QuickAddProvider>
   );
 };
 // Visually hidden until focused — the first Tab on the authenticated app jumps
@@ -280,12 +282,6 @@ const CatchAllRedirect = () => {
 // hidden (display: none) when inactive. This preserves local UI state
 // (selected month and filters) and avoids re-running the derived-state
 // calculations in Activity and Trends on every tab switch.
-
-const MAIN_TAB_PATHS = ['/today', '/activity', '/plan', '/trends'] as const;
-type MainTabPath = (typeof MAIN_TAB_PATHS)[number];
-
-const isMainTabPath = (path: string): path is MainTabPath =>
-  (MAIN_TAB_PATHS as readonly string[]).includes(path);
 
 const MainTabsLayout = () => {
   const { pathname } = useLocation();

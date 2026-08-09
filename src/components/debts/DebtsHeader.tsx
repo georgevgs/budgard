@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { formatCurrency, formatPercent } from '@/lib/utils';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
@@ -10,7 +11,7 @@ type Props = {
   defaultCurrency: string;
   monthsToDebtFree: number | null;
   payoffDate: string | null;
-}
+};
 
 const DebtsHeader = ({
   summary,
@@ -22,7 +23,7 @@ const DebtsHeader = ({
   const animatedTotal = useAnimatedNumber(summary.totalBalance);
 
   return (
-    <div className="bg-card border border-border/40 rounded-2xl p-5 shadow-sm space-y-3">
+    <SurfaceCard className="p-5 space-y-3">
       <p className="text-sm font-medium text-muted-foreground">
         {t('debts.totalLabel')}
       </p>
@@ -52,9 +53,9 @@ const DebtsHeader = ({
       </div>
 
       {renderPayoffRow(monthsToDebtFree, payoffDate, t)}
-    </div>
+    </SurfaceCard>
   );
-}
+};
 
 export default DebtsHeader;
 
@@ -89,4 +90,4 @@ const renderPayoffRow = (
       </div>
     </div>
   );
-}
+};

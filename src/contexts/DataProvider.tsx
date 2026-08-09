@@ -249,7 +249,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         lastFetchAtRef.current = Date.now();
         wasAbortedRef.current = false;
 
-        // Stage 1.5: domains used by AppMenu-only views (goals, networth,
+        // Stage 1.5: domains used by the Plan hub's child routes (goals, networth,
         // debts). Fired immediately after stage 1 but doesn't block first paint.
         Promise.all([
           dataService.getGoals(controller.signal),

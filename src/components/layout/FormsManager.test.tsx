@@ -28,16 +28,6 @@ vi.mock('@/components/expenses/ExpensesForm', () => ({
   ),
 }));
 
-vi.mock('@/components/categories/CategoryManager', () => ({
-  CategoryManager: () => (
-    <>
-      <DialogTitle className="sr-only">Category manager</DialogTitle>
-      <DialogDescription className="sr-only">Category manager</DialogDescription>
-      <div data-testid="category-manager" />
-    </>
-  ),
-}));
-
 import FormsManager from '@/components/layout/FormsManager';
 import { FORM_TYPES } from '@/components/layout/formTypes';
 
@@ -95,21 +85,7 @@ describe('FormsManager', () => {
     );
   });
 
-  it('renders the category manager for NEW_CATEGORY', () => {
-    dataState = { categories: [], isInitialized: true };
-    render(
-      <FormsManager
-        formType={FORM_TYPES.NEW_CATEGORY}
-        onClose={vi.fn()}
-        onExpenseSubmit={vi.fn()}
-      />,
-    );
-
-    expect(screen.getByTestId('category-manager')).toBeInTheDocument();
-    expect(screen.queryByTestId('expense-form')).not.toBeInTheDocument();
-  });
-
-  it('renders neither form when formType is null', () => {
+  it('renders no form when formType is null', () => {
     dataState = { categories: [], isInitialized: true };
     render(
       <FormsManager
@@ -120,6 +96,5 @@ describe('FormsManager', () => {
     );
 
     expect(screen.queryByTestId('expense-form')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('category-manager')).not.toBeInTheDocument();
   });
 });

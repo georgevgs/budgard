@@ -21,10 +21,6 @@ export const useExpenseFormState = () => {
     setFormType(FORM_TYPES.NEW_EXPENSE);
   }, []);
 
-  const openNewCategoryForm = useCallback(() => {
-    setFormType(FORM_TYPES.NEW_CATEGORY);
-  }, []);
-
   return {
     formType,
     setFormType,
@@ -32,6 +28,5 @@ export const useExpenseFormState = () => {
     handleFormClose,
     handleExpenseEdit,
     openNewExpenseForm,
-    openNewCategoryForm,
   };
 };

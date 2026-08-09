@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import SurfaceCard from '@/components/common/SurfaceCard';
 import { cn, formatCurrency, formatPercent } from '@/lib/utils';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right';
@@ -18,7 +19,7 @@ const NetWorthHeader = ({ summary, defaultCurrency }: Props) => {
   const isPositive = summary.total >= 0;
 
   return (
-    <div className="rounded-2xl border border-border/70 bg-card p-5 space-y-3">
+    <SurfaceCard className="p-5 space-y-3">
       <p className="text-sm font-medium text-muted-foreground">
         {t('networth.totalLabel')}
       </p>
@@ -55,7 +56,7 @@ const NetWorthHeader = ({ summary, defaultCurrency }: Props) => {
 
       {renderInvestmentRow(summary, defaultCurrency, t)}
       {renderStaleRatesWarning(summary.staleCurrencies, t)}
-    </div>
+    </SurfaceCard>
   );
 };
 

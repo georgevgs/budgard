@@ -4,7 +4,6 @@
 export const FORM_TYPES = {
   NEW_EXPENSE: 'newExpense',
   EDIT_EXPENSE: 'editExpense',
-  NEW_CATEGORY: 'newCategory',
 } as const;
 
 export type FormType = (typeof FORM_TYPES)[keyof typeof FORM_TYPES] | null;

@@ -19,6 +19,7 @@ import {
 } from '@/hooks/recurring/useRecurringActions';
 import { formatCurrency } from '@/lib/utils';
 import { calculateNextOccurrence, getMonthlyAmount } from '@/lib/recurring';
+import PageHeader from '@/components/common/PageHeader';
 import RecurringLoadingState from '@/components/recurring/RecurringLoading';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { useTranslation } from 'react-i18next';
@@ -111,7 +112,7 @@ const RecurringExpensesList = () => {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto p-4 space-y-4">
+    <div className="page-shell space-y-4">
       <div className="flex flex-col gap-4">
         {renderHeader(
           mode,
@@ -181,21 +182,20 @@ const renderHeader = (
   onAddClick: () => void,
   t: TranslateFunction,
 ) => (
-  <div className="flex items-start justify-between gap-4">
-    <div className="min-w-0">
-      <h1 className="text-lg font-semibold">{renderModeTitle(mode, t)}</h1>
-      {renderMonthlySummary(activeCount, monthlyTotal, mode, t, currency)}
-    </div>
-    <Button
-      onClick={onAddClick}
-      size="sm"
-      className="shrink-0"
-      aria-label={renderAddCtaLabel(mode, t)}
-    >
-      <Plus className="h-4 w-4 sm:mr-2" />
-      <span className="hidden sm:inline">{renderAddCtaLabel(mode, t)}</span>
-    </Button>
-  </div>
+  <PageHeader
+    title={renderModeTitle(mode, t)}
+    subtitle={renderMonthlySummary(activeCount, monthlyTotal, mode, t, currency)}
+    action={
+      <Button
+        onClick={onAddClick}
+        size="sm"
+        aria-label={renderAddCtaLabel(mode, t)}
+      >
+        <Plus className="h-4 w-4 sm:mr-2" />
+        <span className="hidden sm:inline">{renderAddCtaLabel(mode, t)}</span>
+      </Button>
+    }
+  />
 );
 
 const renderModeToggle = (
@@ -261,9 +261,9 @@ const renderMonthlySummary = (
   mode: RecurringMode,
   t: TranslateFunction,
   currency: string,
-) => {
+): string | undefined => {
   if (activeCount === 0) {
-    return null;
+    return undefined;
   }
 
   let key = 'recurring.monthlyFrom';
@@ -271,14 +271,10 @@ const renderMonthlySummary = (
     key = 'recurring.income.monthlyFrom';
   }
 
-  return (
-    <p className="text-sm text-muted-foreground">
-      {t(key, {
-        amount: formatCurrency(monthlyTotal, currency),
-        count: activeCount,
-      })}
-    </p>
-  );
+  return t(key, {
+    amount: formatCurrency(monthlyTotal, currency),
+    count: activeCount,
+  });
 };
 
 const renderExpensesList = (

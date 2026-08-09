@@ -27,6 +27,7 @@ import { useBudgetOps } from '@/hooks/dataOps/useBudgetOps';
 import { useToast } from '@/hooks/useToast';
 import type { Category } from '@/types/Category';
 import type { CategoryBudget } from '@/types/CategoryBudget';
+import { getColorTint } from '@/lib/categoryColor';
 
 type Props = {
   isOpen: boolean;
@@ -494,7 +495,7 @@ const renderCategoryIndicator = (category: Category) => {
     return (
       <div
         className="w-7 h-7 rounded-full flex items-center justify-center text-sm shrink-0"
-        style={{ backgroundColor: `${category.color}20` }}
+        style={{ backgroundColor: getColorTint(category.color) }}
       >
         {category.icon}
       </div>

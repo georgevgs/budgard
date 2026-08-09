@@ -1,6 +1,7 @@
 import type { ReactElement, CSSProperties } from 'react';
 import { cn } from '@/lib/utils.ts';
 import type { EmbeddedCategory } from '@/types/Category.ts';
+import { getColorTint } from '@/lib/categoryColor';
 
 type CategoryBadgeProps = {
   category: EmbeddedCategory;
@@ -28,7 +29,7 @@ const CategoryBadge = ({
 
 const getBadgeStyle = (color: string): CSSProperties => {
   return {
-    backgroundColor: `${color}20`,
+    backgroundColor: getColorTint(color),
     color: color,
   };
 };

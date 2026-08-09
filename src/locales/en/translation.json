@@ -82,8 +82,7 @@
     },
     "upcoming": {
       "title": "Coming up",
-      "summary": "{{amount}} across {{count}} planned payments in the next 7 days",
-      "viewPlan": "See plan"
+      "summary": "{{amount}} across {{count}} planned payments in the next 7 days"
     },
     "insights": {
       "title": "Worth noticing",
@@ -136,7 +135,6 @@
     "allTags": "All tags",
     "exportCsv": "Export CSV",
     "importCsv": "Import CSV",
-    "proBadge": "Pro",
     "exportedTitle": "CSV ready",
     "exportedDescription_one": "Downloaded {{count}} matching transaction.",
     "exportedDescription_other": "Downloaded {{count}} matching transactions.",
@@ -163,6 +161,17 @@
       "thisQuarter": "This quarter",
       "thisYear": "This year",
       "all": "All time"
+    },
+    "refine": {
+      "trigger": "Filters",
+      "triggerWithCount": "Filters ({{count}})",
+      "title": "Narrow this down",
+      "description": "Show only the transactions you care about right now.",
+      "clear": "Clear all",
+      "done": "Show results"
+    },
+    "tools": {
+      "label": "More actions"
     }
   },
   "plan": {
@@ -177,6 +186,11 @@
       "title": "Goals",
       "value": "{{count}} in progress",
       "description": "Keep the future visible"
+    },
+    "networth": {
+      "title": "Net worth",
+      "value": "{{count}} tracked",
+      "description": "See what you own and owe"
     },
     "debts": {
       "title": "Debt plan",
@@ -199,13 +213,6 @@
     "description": "Description",
     "category": "Category",
     "date": "Date",
-    "monthlyTotal": "Spent this month",
-    "filteredTotal": "Matching activity",
-    "ofMonthlyTotal": "of {{total}} total",
-    "showBreakdown": "Show breakdown",
-    "hideBreakdown": "Hide breakdown",
-    "noExpensesFor": "Nothing logged for {{month}}",
-    "addFirstExpense": "Tap + to log your first one. Your future self says thanks.",
     "formDescription": "Fill in the details for your expense. All fields except category are required.",
     "amountPlaceholder": "0,00",
     "amountLabel": "Amount",
@@ -230,43 +237,8 @@
       "rateError": "Could not fetch exchange rate",
       "convertedAmount": "≈ {{amount}}"
     },
-    "noExpensesMatchFilter": "Your filters are picky — nothing matches. Try loosening them up.",
     "resultsCount_one": "{{count}} result",
     "resultsCount_other": "{{count}} results",
-    "totalCount": "Purchases",
-    "mostExpensive": "Largest purchase",
-    "exportCSV": "Export CSV",
-    "search": {
-      "placeholder": "Search expenses...",
-      "label": "Search expenses",
-      "active": "Search: {{query}}",
-      "resultCount": "{{count}} of {{total}} expenses",
-      "thisMonth": "This month",
-      "allMonths": "All months"
-    },
-    "sort": {
-      "dateDesc": "Date (newest first)",
-      "dateAsc": "Date (oldest first)",
-      "amountDesc": "Amount (highest first)",
-      "amountAsc": "Amount (lowest first)"
-    },
-    "filter": {
-      "allCategories": "All Categories",
-      "selectCategory": "Select category",
-      "categoryFilter": "Category: {{name}}",
-      "clearAll": "Clear all",
-      "toggleFilters": "Toggle filters",
-      "allTags": "All tags",
-      "selectTag": "All tags",
-      "sort": "Sort expenses",
-      "dateRange": "Date range",
-      "noDateRange": "No date range",
-      "last7Days": "Last 7 days",
-      "last30Days": "Last 30 days",
-      "last90Days": "Last 90 days",
-      "thisQuarter": "This quarter",
-      "thisYear": "This year"
-    },
     "toasts": {
       "updated": "Expense updated",
       "added": "Expense added",
@@ -299,7 +271,8 @@
       "dateLabel": "Refund date",
       "entryDescription": "Refund — {{description}}",
       "confirm": "Record refund"
-    }
+    },
+    "saveHint": "Add an amount and a description to save"
   },
   "income": {
     "title": "Income",
@@ -415,6 +388,7 @@
     "addCategory": "Add Category",
     "editCategory": "Edit Category",
     "deleteCategory": "Delete Category",
+    "manageCategories": "Manage categories",
     "categoryName": "Category Name",
     "color": "Color",
     "icon": "Icon",
@@ -686,7 +660,6 @@
     "settings": "Settings",
     "upgrade": "Upgrade to Pro",
     "openProfileMenu": "Open profile menu",
-    "openAppMenu": "Open menu",
     "goHome": "Go to home",
     "signedInAs": "Signed in as",
     "ariaLabel": "Main navigation",
@@ -1214,7 +1187,6 @@
       "categoryLimit": "The free plan includes up to {{limit}} categories. Upgrade for unlimited.",
       "investTitle": "Investment analytics is a Pro feature",
       "investBody": "See your allocation, returns, YTD and annualized performance across your investments.",
-      "investKpis": "Unlock returns, YTD and annualized performance with Pro",
       "tagLimit": "The free plan includes one tag per expense. Upgrade for multiple tags.",
       "debtPlanTitle": "The payoff planner is a Pro feature",
       "debtPlanBody": "Compare snowball vs avalanche, add a monthly extra, and see your debt-free date. Upgrade to plan your payoff."

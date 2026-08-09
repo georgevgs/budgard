@@ -14,11 +14,11 @@ const GoalsLoadingState = () => {
   return (
     <LoadingScreen
       label={t('common.loadingSection', { section: t('navigation.goals') })}
-      className="container max-w-4xl mx-auto p-4 space-y-4"
+      className="page-shell space-y-4"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1.5">
-          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-9 w-40" />
           <Skeleton className="h-4 w-48" />
         </div>
         <Skeleton className="h-9 w-28 rounded-md shrink-0" />
@@ -28,7 +28,7 @@ const GoalsLoadingState = () => {
         {ROWS.map((row, i) => (
           <div
             key={`goal-skel-${i}`}
-            className="rounded-2xl border border-border/50 bg-card p-4 space-y-3"
+            className="surface-card p-4 space-y-3"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0 flex-1">

@@ -7,6 +7,7 @@
 
 @layer base {
   :root {
+    --header-height: 4rem;
     --dock-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
     --dock-height: 3.5rem;
     --dock-clearance: calc(var(--dock-bottom) + var(--dock-height));

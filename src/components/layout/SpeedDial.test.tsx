@@ -10,16 +10,14 @@ import SpeedDial from '@/components/layout/SpeedDial';
 const renderDial = (
   overrides: Partial<{
     onAddExpense: () => void;
-    onAddCategory: () => void;
+    onAddIncome: () => void;
   }> = {},
 ) => {
   const onAddExpense = overrides.onAddExpense ?? vi.fn();
-  const onAddCategory = overrides.onAddCategory ?? vi.fn();
-  render(
-    <SpeedDial onAddExpense={onAddExpense} onAddCategory={onAddCategory} />,
-  );
+  const onAddIncome = overrides.onAddIncome ?? vi.fn();
+  render(<SpeedDial onAddExpense={onAddExpense} onAddIncome={onAddIncome} />);
 
-  return { onAddExpense, onAddCategory };
+  return { onAddExpense, onAddIncome };
 };
 
 describe('SpeedDial', () => {
@@ -73,13 +71,13 @@ describe('SpeedDial', () => {
     expect(screen.getByLabelText('speedDial.open')).toBeInTheDocument();
   });
 
-  it('fires the add-category callback and closes the dial', () => {
-    const { onAddCategory } = renderDial();
+  it('fires the add-income callback and closes the dial', () => {
+    const { onAddIncome } = renderDial();
 
     fireEvent.click(screen.getByLabelText('speedDial.open'));
-    fireEvent.click(screen.getByLabelText('categories.addCategory'));
+    fireEvent.click(screen.getByLabelText('income.addIncome'));
 
-    expect(onAddCategory).toHaveBeenCalledOnce();
+    expect(onAddIncome).toHaveBeenCalledOnce();
     expect(screen.getByLabelText('speedDial.open')).toBeInTheDocument();
   });
 

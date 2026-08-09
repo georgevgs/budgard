@@ -15,6 +15,7 @@ import {
 } from '@/hooks/networth/useGroupedAccounts';
 import { type Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
+import PageHeader from '@/components/common/PageHeader';
 import NetWorthHeader from '@/components/networth/NetWorthHeader';
 import NetWorthEmpty from '@/components/networth/NetWorthEmpty';
 import NetWorthLoadingState from '@/components/networth/NetWorthLoading';
@@ -25,6 +26,7 @@ import AccountGroup from '@/components/networth/AccountGroup';
 import AccountForm from '@/components/networth/AccountForm';
 import AccountDetailSheet from '@/components/networth/AccountDetailSheet';
 import ProUpsellCard from '@/components/pro/ProUpsellCard';
+import type { NetWorthSummary, NetWorthPoint } from '@/hooks/useNetWorth';
 
 const NetWorthView = () => {
   const { t } = useTranslation();
@@ -80,11 +82,9 @@ const NetWorthView = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100dvh-4rem-env(safe-area-inset-top)-var(--dock-inset))]">
-      <div className="flex-1 container max-w-4xl mx-auto px-4 pt-5 pb-4 space-y-4">
-        <h1 className="text-lg font-semibold tracking-tight">
-          {t('navigation.networth')}
-        </h1>
+    <div className="flex flex-col min-h-[calc(100dvh-var(--header-height)-env(safe-area-inset-top)-var(--dock-inset))]">
+      <div className="page-shell flex-1 space-y-4">
+        <PageHeader title={t('navigation.networth')} />
         {renderBody(
           accounts.length,
           summary,
@@ -140,8 +140,6 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
-
-import type { NetWorthSummary, NetWorthPoint } from '@/hooks/useNetWorth';
 
 const renderBody = (
   accountCount: number,

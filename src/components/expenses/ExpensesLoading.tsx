@@ -68,7 +68,7 @@ export const ExpenseLoadingState = ({ section = 'expenses' }: Props) => {
       label={t('common.loadingSection', {
         section: resolveSectionName(section, t),
       })}
-      className="flex flex-col min-h-[calc(100dvh-4rem-env(safe-area-inset-top)-var(--dock-inset))]"
+      className="flex flex-col min-h-[calc(100dvh-var(--header-height)-env(safe-area-inset-top)-var(--dock-inset))]"
     >
       {renderTransactionsBody()}
     </LoadingScreen>
@@ -93,7 +93,7 @@ const resolveSectionName = (section: Section, t: TranslateFunction): string => {
 // Shared by both exports above. Kept announcement-free so AppLoadingSkeleton
 // can wrap it in a single live region instead of nesting two.
 const renderTransactionsBody = () => (
-  <div className="container max-w-4xl mx-auto px-4 pt-4 pb-4 space-y-3">
+  <div className="page-shell space-y-3">
     {/* Monthly selector */}
     <div className="flex items-center justify-between px-1">
       <Skeleton className="h-8 w-8 rounded-full" />

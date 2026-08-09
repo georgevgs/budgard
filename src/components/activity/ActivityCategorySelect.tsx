@@ -40,7 +40,7 @@ const ActivityCategorySelect = ({
       disabled={categories.length === 0}
     >
       <SelectTrigger
-        className="h-11 min-w-40 flex-1 rounded-xl border-border/35 bg-card/72 shadow-none"
+        className="h-11 w-full rounded-xl border-border/35 bg-card/72 shadow-none"
         aria-label={t('activity.filterByCategory')}
       >
         <Shapes className="mr-2 h-4 w-4 shrink-0 text-primary" />

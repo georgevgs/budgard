@@ -1,30 +1,26 @@
 import { useTranslation } from 'react-i18next';
+import PageHeader from '@/components/common/PageHeader';
 import ActivityFeed from '@/components/activity/ActivityFeed';
 import ActivityFilters from '@/components/activity/ActivityFilters';
 import ActivityPeriodSelector from '@/components/activity/ActivityPeriodSelector';
 import ActivitySummary from '@/components/activity/ActivitySummary';
 import ActivityTemplates from '@/components/activity/ActivityTemplates';
-import ActivityTools from '@/components/activity/ActivityTools';
+import ActivityFilterPanel from '@/components/activity/ActivityFilterPanel';
+import ActivityToolsMenu from '@/components/activity/ActivityToolsMenu';
 import FilterResultsAnnouncer from '@/components/expenses/FilterResultsAnnouncer';
 import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
-import IncomeFormDialog from '@/components/income/IncomeFormDialog';
-import FormsManager from '@/components/layout/FormsManager';
-import SpeedDial from '@/components/layout/SpeedDial';
 import {
   useCategoriesData,
   useDataConfig,
   useTagsData,
 } from '@/contexts/DataContext';
+import { useQuickAdd } from '@/contexts/QuickAddContext';
 import {
   useActivityFeed,
   type ActivityPeriod,
 } from '@/hooks/activity/useActivityFeed';
 import { useActivityCsvExport } from '@/hooks/activity/useActivityCsvExport';
-import { useIncomeOps } from '@/hooks/dataOps/useIncomeOps';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
-import { useExpenseFormState } from '@/hooks/expensesList/useExpenseFormState';
-import { useOptimisticExpenseActions } from '@/hooks/expensesList/useOptimisticExpenseActions';
-import { useIncomeFormState } from '@/hooks/incomeList/useIncomeFormState';
 import { useSeedIncomeCategories } from '@/hooks/incomeList/useSeedIncomeCategories';
 import { isMonthPendingHistory } from '@/lib/dataCache';
 
@@ -33,11 +29,8 @@ const ActivityView = () => {
   const { isInitialized, isHistoryLoaded, defaultCurrency } = useDataConfig();
   const { categories } = useCategoriesData();
   const tags = useTagsData();
-  const expenseForm = useExpenseFormState();
-  const incomeForm = useIncomeFormState();
-  const expenseActions = useOptimisticExpenseActions();
-  const { handleIncomeDelete } = useIncomeOps();
-  const activity = useActivityFeed(expenseActions.optimisticExpenses);
+  const quickAdd = useQuickAdd();
+  const activity = useActivityFeed(quickAdd.optimisticExpenses);
   const csvExport = useActivityCsvExport(
     activity.filteredRows,
     activity.exportScope,
@@ -52,10 +45,16 @@ const ActivityView = () => {
 
   return (
     <div>
-      <div className="mx-auto max-w-3xl px-4 pt-4 pb-5 sm:px-6">
-        <h1 className="font-display text-3xl font-semibold tracking-[-0.035em]">
-          {t('activity.title')}
-        </h1>
+      <div className="page-shell">
+        <PageHeader
+          title={t('activity.title')}
+          action={
+            <ActivityToolsMenu
+              isExportDisabled={csvExport.isExportDisabled}
+              onExport={csvExport.handleExport}
+            />
+          }
+        />
         <div className="mt-5 space-y-4">
           <ActivityPeriodSelector
             period={activity.period}
@@ -73,19 +72,18 @@ const ActivityView = () => {
             kind={activity.kind}
             onSearchChange={activity.setSearch}
             onKindChange={activity.setKind}
+            trailing={
+              <ActivityFilterPanel
+                categories={categories}
+                tags={tags}
+                selectedCategoryId={activity.selectedCategoryId}
+                selectedTagId={activity.selectedTagId}
+                onCategoryChange={activity.setSelectedCategoryId}
+                onTagChange={activity.setSelectedTagId}
+              />
+            }
           />
-          <ActivityTools
-            categories={categories}
-            tags={tags}
-            selectedCategoryId={activity.selectedCategoryId}
-            selectedTagId={activity.selectedTagId}
-            isExportDisabled={csvExport.isExportDisabled}
-            isPro={csvExport.isPro}
-            onCategoryChange={activity.setSelectedCategoryId}
-            onTagChange={activity.setSelectedTagId}
-            onExport={csvExport.handleExport}
-          />
-          <ActivityTemplates onUse={expenseActions.handleUseTemplate} />
+          <ActivityTemplates onUse={quickAdd.handleUseTemplate} />
         </div>
         <FilterResultsAnnouncer
           count={activity.filteredRows.length}
@@ -102,30 +100,14 @@ const ActivityView = () => {
               activity.selectedMonth,
             )}
             onSearchEverywhere={() => activity.setPeriod('all')}
-            onExpenseEdit={expenseForm.handleExpenseEdit}
-            onExpenseDelete={expenseActions.handleExpenseDelete}
-            onSaveAsTemplate={expenseActions.handleSaveAsTemplate}
-            onIncomeEdit={incomeForm.handleIncomeEdit}
-            onIncomeDelete={handleIncomeDelete}
+            onExpenseEdit={quickAdd.handleExpenseEdit}
+            onExpenseDelete={quickAdd.handleExpenseDelete}
+            onSaveAsTemplate={quickAdd.handleSaveAsTemplate}
+            onIncomeEdit={quickAdd.handleIncomeEdit}
+            onIncomeDelete={quickAdd.handleIncomeDelete}
           />
         </div>
       </div>
-      <FormsManager
-        formType={expenseForm.formType}
-        onClose={expenseForm.handleFormClose}
-        selectedExpense={expenseForm.selectedExpense}
-        onExpenseSubmit={expenseActions.handleExpenseFormSubmit}
-      />
-      <IncomeFormDialog
-        open={incomeForm.isFormOpen}
-        income={incomeForm.selectedIncome}
-        onClose={incomeForm.handleFormClose}
-      />
-      <SpeedDial
-        onAddExpense={expenseForm.openNewExpenseForm}
-        onAddCategory={expenseForm.openNewCategoryForm}
-        onAddIncome={incomeForm.handleAddClick}
-      />
     </div>
   );
 };

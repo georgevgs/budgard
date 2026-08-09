@@ -7,7 +7,7 @@ import {
   useExpensesData,
 } from '@/contexts/DataContext';
 import { useAllGoalProgress } from '@/hooks/useGoalProgress';
-import { useSavingsRhythm } from '@/hooks/today/useSavingsRhythm';
+import { useSavingsRhythm } from '@/hooks/savings/useSavingsRhythm';
 import { useCompletionCelebration } from '@/hooks/useCompletionCelebration';
 import { useIsPro } from '@/hooks/useIsPro';
 import { celebrate } from '@/lib/confetti';

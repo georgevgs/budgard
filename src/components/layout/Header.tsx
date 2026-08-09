@@ -5,10 +5,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
 import { Button } from '@/components/ui/button';
 import ProfileMenu from '@/components/layout/ProfileMenu';
-import AppMenu from '@/components/layout/AppMenu';
 
-// Routes outside the four bottom tabs — they get a back button so users
-// aren't stranded on screens where no tab is active.
+// Routes outside the four bottom tabs. They get a back button in the left
+// slot — the dock still marks which tab owns them (see NavTabs), but a
+// child route is somewhere you came *from* somewhere, so the way out is
+// explicit rather than a second guess at which tab to tap.
 const SECONDARY_ROUTES = [
   '/expenses',
   '/income',
@@ -36,7 +37,7 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/78 backdrop-blur-2xl pt-safe-t">
-      <div className="container grid grid-cols-3 items-center h-16 px-4 pt-1">
+      <div className="container grid grid-cols-3 items-center h-(--header-height) px-4 pt-1">
         <div className="justify-self-start">
           {renderLeftSlot(isSecondaryRoute)}
         </div>
@@ -47,7 +48,7 @@ const Header = () => {
           className="justify-self-center flex items-center gap-2 rounded-lg px-2 py-1 -mx-2 -my-1 transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <img
-            src="/icon-512x512.png"
+            src="/icon-192x192.png"
             alt=""
             aria-hidden="true"
             className="h-7 w-7 rounded-lg"
@@ -58,7 +59,7 @@ const Header = () => {
           </span>
         </Link>
         <div className="justify-self-end">
-          <AppMenu />
+          <ProfileMenu />
         </div>
       </div>
     </header>
@@ -74,7 +75,7 @@ const renderLeftSlot = (isSecondaryRoute: boolean) => {
     return <BackButton />;
   }
 
-  return <ProfileMenu />;
+  return null;
 };
 
 const BackButton = () => {

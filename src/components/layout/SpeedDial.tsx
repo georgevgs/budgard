@@ -9,24 +9,24 @@ import {
 import { Button } from '@/components/ui/button';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Receipt from 'lucide-react/dist/esm/icons/receipt';
-import Tag from 'lucide-react/dist/esm/icons/tag';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import X from 'lucide-react/dist/esm/icons/x';
 import { cn } from '@/lib/utils';
 import { haptics } from '@/lib/haptics';
 import SpeedDialAction from '@/components/layout/SpeedDialAction';
 
+// The two things a money app is for. Both are always present: this used to
+// hand out different actions per screen — income only on Activity, plus a
+// "New category" entry ranked as a peer of the daily ones — so the same
+// button did different things depending on where you tapped it, and most
+// people never found income at all. Category management now lives inside the
+// expense form's category picker, where you actually need it.
 type SpeedDialProps = {
   onAddExpense: () => void;
-  onAddCategory: () => void;
-  onAddIncome?: () => void;
+  onAddIncome: () => void;
 };
 
-const SpeedDial = ({
-  onAddExpense,
-  onAddCategory,
-  onAddIncome,
-}: SpeedDialProps) => {
+const SpeedDial = ({ onAddExpense, onAddIncome }: SpeedDialProps) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -75,16 +75,14 @@ const SpeedDial = ({
             label={t('expenses.addExpense')}
             icon={<Receipt className="h-5 w-5" />}
             onClick={() => handleAction(onAddExpense)}
-            labelDelayClass="delay-100"
+            labelDelayClass="delay-75"
           />
-
-          {renderIncomeAction(isOpen, onAddIncome, handleAction, t)}
 
           <SpeedDialAction
             isOpen={isOpen}
-            label={t('categories.addCategory')}
-            icon={<Tag className="h-5 w-5" />}
-            onClick={() => handleAction(onAddCategory)}
+            label={t('income.addIncome')}
+            icon={<TrendingUp className="h-5 w-5" />}
+            onClick={() => handleAction(onAddIncome)}
           />
         </div>
 
@@ -207,23 +205,3 @@ const getToggleClass = (isOpen: boolean): string => {
   return base;
 };
 
-const renderIncomeAction = (
-  isOpen: boolean,
-  onAddIncome: (() => void) | undefined,
-  handleAction: (callback: () => void) => void,
-  t: (key: string) => string,
-) => {
-  if (!onAddIncome) {
-    return null;
-  }
-
-  return (
-    <SpeedDialAction
-      isOpen={isOpen}
-      label={t('income.addIncome')}
-      icon={<TrendingUp className="h-5 w-5" />}
-      onClick={() => handleAction(onAddIncome)}
-      labelDelayClass="delay-75"
-    />
-  );
-};

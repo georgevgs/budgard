@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import type { DayOutcome, RhythmDay } from '@/hooks/today/useSavingsRhythm';
+import type { DayOutcome, RhythmDay } from '@/hooks/savings/useSavingsRhythm';
 
 type Props = {
   days: RhythmDay[];

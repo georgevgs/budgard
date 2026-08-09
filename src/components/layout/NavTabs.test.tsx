@@ -67,8 +67,23 @@ describe('NavTabs', () => {
     });
   });
 
+  it('keeps the indicator on Plan for the screens Plan links out to', () => {
+    expect(indicatorAt('/networth')).toHaveStyle({
+      transform: 'translateX(200%)',
+    });
+    expect(indicatorAt('/recurring')).toHaveStyle({
+      transform: 'translateX(200%)',
+    });
+    expect(indicatorAt('/goals')).toHaveStyle({
+      transform: 'translateX(200%)',
+    });
+    expect(indicatorAt('/debts')).toHaveStyle({
+      transform: 'translateX(200%)',
+    });
+  });
+
   it('hides the indicator on routes that own no tab', () => {
-    expect(indicatorAt('/networth')).toBeNull();
+    expect(indicatorAt('/settings')).toBeNull();
   });
 
   it('hides the indicator on a route that merely prefixes a tab path', () => {

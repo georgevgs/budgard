@@ -10,12 +10,22 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import Settings from 'lucide-react/dist/esm/icons/settings';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsPro } from '@/hooks/useIsPro';
+import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
 
+// The header's only menu. It used to sit opposite a second, identically
+// styled dropdown holding Goals / Net worth / Debts — two pill buttons that
+// looked the same and did different things. Those three destinations now live
+// on Plan, which is where you go to think ahead; what is left here is the
+// account itself.
 const ProfileMenu = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const navigate = useNavigate();
+  const isPro = useIsPro();
+  const { openUpgrade } = useUpgradeDialog();
 
   if (!session?.user) return null;
 
@@ -33,7 +43,7 @@ const ProfileMenu = () => {
           <span className="text-sm font-semibold">{initial}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-56">
+      <DropdownMenuContent align="end" className="w-56">
         {renderEmail(session.user.email, t)}
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -42,6 +52,7 @@ const ProfileMenu = () => {
           <Settings className="h-4 w-4" />
           {t('navigation.settings')}
         </DropdownMenuItem>
+        {renderUpgradeItem(isPro, openUpgrade, t)}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -74,5 +85,20 @@ const renderEmail = (email: string | undefined, t: TranslateFunction) => {
         <span className="text-sm font-medium truncate">{email}</span>
       </div>
     </DropdownMenuLabel>
+  );
+};
+
+const renderUpgradeItem = (
+  isPro: boolean,
+  openUpgrade: () => void,
+  t: TranslateFunction,
+) => {
+  if (isPro) return null;
+
+  return (
+    <DropdownMenuItem onClick={openUpgrade}>
+      <Sparkles className="h-4 w-4 text-primary" />
+      {t('navigation.upgrade')}
+    </DropdownMenuItem>
   );
 };

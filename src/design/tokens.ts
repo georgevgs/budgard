@@ -33,14 +33,17 @@ export type ThemeDefinition = {
 const ON_ACCENT: Hsl = neutral[0];
 
 /**
- * Theme-independent tokens. Geometry, not colour — these belong to the
- * floating dock, and everything pinned to the bottom of the screen anchors to
- * them so the bar can be resized in one place.
+ * Theme-independent tokens. Geometry, not colour — these belong to the app
+ * chrome, and everything pinned to an edge of the screen anchors to them so a
+ * bar can be resized in one place.
  *
  * `--dock-inset` is the ONLY bottom padding a page should carry; routes adding
  * their own stack the two into dead space at the end of the list.
  */
 export const BASE_TOKENS: TokenMap = {
+  // Anything that pins itself below the sticky header — the Activity feed's
+  // day dividers, for one — offsets by this rather than restating the number.
+  '--header-height': '4rem',
   '--dock-bottom': 'calc(env(safe-area-inset-bottom) + 0.75rem)',
   '--dock-height': '3.5rem',
   '--dock-clearance': 'calc(var(--dock-bottom) + var(--dock-height))',

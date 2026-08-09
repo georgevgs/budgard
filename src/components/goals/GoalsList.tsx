@@ -11,6 +11,7 @@ import { useGoalSubmit } from '@/hooks/goals/useGoalSubmit';
 import type { Goal } from '@/types/Goal';
 import GoalCard from '@/components/goals/GoalCard';
 import GoalForm from '@/components/goals/GoalForm';
+import PageHeader from '@/components/common/PageHeader';
 import GoalsLoadingState from '@/components/goals/GoalsLoading';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 
@@ -55,22 +56,21 @@ const GoalsList = () => {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto p-4 space-y-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h1 className="text-lg font-semibold">{t('goals.title')}</h1>
-          {renderSubtitle(goals.length, t)}
-        </div>
-        <Button
-          onClick={() => setIsFormOpen(true)}
-          size="sm"
-          className="shrink-0"
-          aria-label={t('goals.addGoal')}
-        >
-          <Plus className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">{t('goals.addGoal')}</span>
-        </Button>
-      </div>
+    <div className="page-shell space-y-4">
+      <PageHeader
+        title={t('goals.title')}
+        subtitle={renderSubtitle(goals.length, t)}
+        action={
+          <Button
+            onClick={() => setIsFormOpen(true)}
+            size="sm"
+            aria-label={t('goals.addGoal')}
+          >
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">{t('goals.addGoal')}</span>
+          </Button>
+        }
+      />
 
       <div className="grid gap-4">
         {renderGoalsOrEmpty(goals, handleEdit, handleDelete, setIsFormOpen, t)}
@@ -109,14 +109,15 @@ type TranslateFunction = (
   options?: Record<string, unknown>,
 ) => string;
 
-const renderSubtitle = (count: number, t: TranslateFunction) => {
-  if (count === 0) return null;
+const renderSubtitle = (
+  count: number,
+  t: TranslateFunction,
+): string | undefined => {
+  if (count === 0) {
+    return undefined;
+  }
 
-  return (
-    <p className="text-sm text-muted-foreground">
-      {t('goals.subtitle', { count })}
-    </p>
-  );
+  return t('goals.subtitle', { count });
 };
 
 const renderGoalsOrEmpty = (

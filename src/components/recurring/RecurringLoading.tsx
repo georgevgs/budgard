@@ -14,12 +14,12 @@ const RecurringLoadingState = () => {
   return (
     <LoadingScreen
       label={t('common.loadingSection', { section: t('navigation.recurring') })}
-      className="container max-w-4xl mx-auto p-4 space-y-4"
+      className="page-shell space-y-4"
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1.5">
-          <Skeleton className="h-6 w-40" />
+          <Skeleton className="h-9 w-48" />
           <Skeleton className="h-4 w-52" />
         </div>
         <Skeleton className="h-9 w-32 rounded-md shrink-0" />
@@ -30,7 +30,7 @@ const RecurringLoadingState = () => {
         {ROWS.map((row, i) => (
           <div
             key={`skeleton-${i}`}
-            className="rounded-2xl border border-border/50 bg-card p-4"
+            className="surface-card p-4"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1 space-y-2 min-w-0">

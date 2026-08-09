@@ -12,14 +12,14 @@ const SettingsLoadingState = () => {
   return (
     <LoadingScreen
       label={t('common.loadingSettings')}
-      className="container max-w-lg mx-auto p-4 pb-12 space-y-8"
+      className="page-shell pb-12 space-y-8"
     >
-      <Skeleton className="h-6 w-28" />
+      <Skeleton className="h-9 w-40" />
 
       {SECTIONS.map((rowCount, sectionIndex) => (
         <div key={`settings-skel-${sectionIndex}`} className="space-y-3">
           <Skeleton className="h-3 w-24" />
-          <div className="rounded-2xl border border-border/50 bg-card divide-y divide-border/50">
+          <div className="surface-card-flush divide-y divide-border/40">
             {renderRows(rowCount, sectionIndex)}
           </div>
         </div>

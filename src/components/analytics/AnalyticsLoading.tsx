@@ -8,7 +8,7 @@ const AnalyticsLoadingState = () => {
   return (
     <LoadingScreen
       label={t('common.loadingSection', { section: t('navigation.analytics') })}
-      className="container max-w-4xl mx-auto px-4 pt-4 pb-4 space-y-6"
+      className="page-shell space-y-6"
     >
       {/* Month snapshot */}
       <div className="rounded-2xl border border-border/50 bg-card p-5 space-y-3">

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import Search from 'lucide-react/dist/esm/icons/search';
 import { Input } from '@/components/ui/input';
@@ -9,6 +10,8 @@ type Props = {
   kind: ActivityKind;
   onSearchChange: (value: string) => void;
   onKindChange: (value: ActivityKind) => void;
+  /** Sits beside the search box — the category/tag filter entry point. */
+  trailing?: ReactNode;
 };
 
 const ActivityFilters = ({
@@ -16,20 +19,24 @@ const ActivityFilters = ({
   kind,
   onSearchChange,
   onKindChange,
+  trailing,
 }: Props) => {
   const { t } = useTranslation();
 
   return (
     <div className="space-y-3">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder={t('activity.searchPlaceholder')}
-          aria-label={t('activity.searchLabel')}
-          className="h-11 rounded-xl border-border/35 bg-card/72 pl-9 shadow-none"
-        />
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder={t('activity.searchPlaceholder')}
+            aria-label={t('activity.searchLabel')}
+            className="h-11 w-full rounded-xl border-border/35 bg-card/72 pl-9 shadow-none"
+          />
+        </div>
+        {trailing}
       </div>
       <div
         className="grid grid-cols-3 rounded-full bg-muted/72 p-1"

@@ -3,6 +3,7 @@ import ExpensesCardActions from '@/components/expenses/ExpensesCardActions';
 import IncomeCardActions from '@/components/income/IncomeCardActions';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { Expense } from '@/types/Expense';
+import { getColorTint } from '@/lib/categoryColor';
 
 type Props = {
   transaction: Expense;
@@ -72,15 +73,10 @@ const handleEdit = (props: Props, isIncome: boolean) => {
 };
 
 const renderCategoryMark = (transaction: Expense) => {
-  let backgroundColor = 'hsl(var(--muted))';
-  if (transaction.category?.color) {
-    backgroundColor = `${transaction.category.color}20`;
-  }
-
   return (
     <span
       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm"
-      style={{ backgroundColor }}
+      style={{ backgroundColor: getColorTint(transaction.category?.color) }}
       aria-hidden="true"
     >
       {transaction.category?.icon ?? '•'}

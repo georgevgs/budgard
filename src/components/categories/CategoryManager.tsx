@@ -19,6 +19,7 @@ import { toast } from '@/hooks/useToast';
 import { canAddCategory, FREE_CATEGORY_LIMIT } from '@/lib/proLimits';
 import type { Category } from '@/types/Category';
 import CategoryForm from '@/components/categories/CategoryForm';
+import { getColorTint } from '@/lib/categoryColor';
 
 type View = { type: 'list' } | { type: 'form'; category?: Category };
 type CategoryType = 'expense' | 'income';
@@ -251,7 +252,7 @@ const renderCategoryIndicator = (category: Category) => {
     return (
       <div
         className="w-7 h-7 rounded-full flex items-center justify-center text-sm shrink-0"
-        style={{ backgroundColor: `${category.color}20` }}
+        style={{ backgroundColor: getColorTint(category.color) }}
       >
         {category.icon}
       </div>

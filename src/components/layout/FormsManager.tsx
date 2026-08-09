@@ -4,7 +4,6 @@ import type { Category } from '@/types/Category';
 import type { ExpenseWritePayload } from '@/services/dataService';
 import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 import ExpensesForm from '@/components/expenses/ExpensesForm';
-import { CategoryManager } from '@/components/categories/CategoryManager';
 import { useCategoriesData, useDataConfig } from '@/contexts/DataContext';
 import { FORM_TYPES, type FormType } from '@/components/layout/formTypes';
 
@@ -34,7 +33,6 @@ const FormsManager = ({
 
   const isExpenseForm =
     formType === FORM_TYPES.NEW_EXPENSE || formType === FORM_TYPES.EDIT_EXPENSE;
-  const isCategoryForm = formType === FORM_TYPES.NEW_CATEGORY;
   const isEditingExpense = formType === FORM_TYPES.EDIT_EXPENSE;
   let expenseForEdit: Expense | undefined;
   if (isEditingExpense) {
@@ -42,33 +40,21 @@ const FormsManager = ({
   }
 
   return (
-    <>
-      <Dialog open={isExpenseForm} onOpenChange={onClose}>
-        <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
-          onOpenChange={onClose}
-          onFocusOutside={(e) => e.preventDefault()}
-        >
-          {renderExpenseForm(
-            isExpenseForm,
-            expenseForEdit,
-            categories,
-            onClose,
-            onExpenseSubmit,
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Keeps the dialog X visible — CategoryManager has no Cancel of its own */}
-      <Dialog open={isCategoryForm} onOpenChange={onClose}>
-        <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0"
-          onOpenChange={onClose}
-        >
-          {renderCategoryManager(isCategoryForm)}
-        </DialogContent>
-      </Dialog>
-    </>
+    <Dialog open={isExpenseForm} onOpenChange={onClose}>
+      <DialogContent
+        className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
+        onOpenChange={onClose}
+        onFocusOutside={(e) => e.preventDefault()}
+      >
+        {renderExpenseForm(
+          isExpenseForm,
+          expenseForEdit,
+          categories,
+          onClose,
+          onExpenseSubmit,
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -97,10 +83,4 @@ const renderExpenseForm = (
       onSubmit={onSubmit}
     />
   );
-};
-
-const renderCategoryManager = (isOpen: boolean) => {
-  if (!isOpen) return null;
-
-  return <CategoryManager />;
 };

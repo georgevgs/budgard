@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, cn } from '@/lib/utils';
+import { getColorTint } from '@/lib/categoryColor';
 
 const WARNING_THRESHOLD = 80;
 const EXCEEDED_THRESHOLD = 100;
@@ -150,7 +151,7 @@ const renderIndicator = (row: BudgetCategoryRow) => {
     return (
       <span
         className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] shrink-0"
-        style={{ backgroundColor: `${row.color}20` }}
+        style={{ backgroundColor: getColorTint(row.color) }}
         aria-hidden="true"
       >
         {row.icon}

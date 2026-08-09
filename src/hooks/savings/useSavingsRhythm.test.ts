@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useSavingsRhythm } from '@/hooks/today/useSavingsRhythm';
+import { useSavingsRhythm } from '@/hooks/savings/useSavingsRhythm';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { NoSpendDay } from '@/types/NoSpendDay';

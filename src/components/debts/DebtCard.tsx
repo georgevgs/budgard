@@ -13,6 +13,7 @@ import type { LucideIcon } from 'lucide-react';
 import type { Debt, DebtKind } from '@/types/Debt';
 import { useDebtProgress } from '@/hooks/useDebtProgress';
 import DebtProgressBar from '@/components/debts/DebtProgressBar';
+import { getColorTint } from '@/lib/categoryColor';
 
 type Props = {
   debt: Debt;
@@ -41,7 +42,7 @@ const DebtCard = ({ debt, onClick }: Props) => {
         <div className="flex items-center gap-3">
           <div
             className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
-            style={{ backgroundColor: `${debt.color}20`, color: debt.color }}
+            style={{ backgroundColor: getColorTint(debt.color), color: debt.color }}
           >
             <Icon className="h-5 w-5" />
           </div>

@@ -15,7 +15,6 @@ import {
 import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useIsPro } from '@/hooks/useIsPro';
-import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
 import { type Account, isLiability } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import {
@@ -40,7 +39,6 @@ const AccountDetailHeader = ({
 }: Props) => {
   const { t } = useTranslation();
   const isPro = useIsPro();
-  const { openUpgrade } = useUpgradeDialog();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const liability = isLiability(account.kind);
@@ -106,7 +104,6 @@ const AccountDetailHeader = ({
           snapshots,
           t,
           isPro,
-          openUpgrade,
         )}
       </div>
     </DialogHeader>

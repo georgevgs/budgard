@@ -94,8 +94,8 @@ const renderTab = (tab: Tab) => {
   );
 };
 
-// Nothing is highlighted on routes that live outside the tab set —
-// Goals, Net worth, Debts and Settings all reach the nav but own no tab.
+// Settings is the only screen with no owning tab — it hangs off the profile
+// menu, not off a section of the app, so the dock stays unlit there.
 const renderIndicator = (activeIndex: number, tabCount: number) => {
   if (activeIndex < 0) {
     return null;
@@ -117,14 +117,27 @@ const renderIndicator = (activeIndex: number, tabCount: number) => {
   );
 };
 
-const getActiveIndex = (pathname: string, tabs: Tab[]): number =>
-  tabs.findIndex((tab) => {
-    if (pathname === tab.path) {
+// Screens reached from a tab but living on their own route. Without this the
+// dock went dark the moment you opened Recurring or Debts, so a screen you
+// arrived at from Plan gave no clue which part of the app you were in.
+const TAB_OWNED_ROUTES: Record<string, string> = {
+  '/recurring': '/plan',
+  '/goals': '/plan',
+  '/debts': '/plan',
+  '/networth': '/plan',
+};
+
+const getActiveIndex = (pathname: string, tabs: Tab[]): number => {
+  const owningPath = TAB_OWNED_ROUTES[pathname] ?? pathname;
+
+  return tabs.findIndex((tab) => {
+    if (owningPath === tab.path) {
       return true;
     }
 
-    return pathname.startsWith(`${tab.path}/`);
+    return owningPath.startsWith(`${tab.path}/`);
   });
+};
 
 const getTabToneClassName = (isActive: boolean): string => {
   if (isActive) {

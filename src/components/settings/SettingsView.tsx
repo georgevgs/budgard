@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDataConfig } from '@/contexts/DataContext';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useSettingsHandlers } from '@/hooks/settings/useSettingsHandlers';
+import PageHeader from '@/components/common/PageHeader';
 import AppearanceSection from '@/components/settings/AppearanceSection';
 import BillingSection from '@/components/settings/BillingSection';
 import NotificationsSection from '@/components/settings/NotificationsSection';
@@ -24,10 +25,8 @@ const SettingsView = () => {
   const handlers = useSettingsHandlers();
 
   return (
-    <div className="container max-w-lg mx-auto p-4 pb-12 space-y-8">
-      <h1 className="text-lg font-semibold tracking-tight">
-        {t('settings.title')}
-      </h1>
+    <div className="page-shell pb-12 space-y-8">
+      <PageHeader title={t('settings.title')} />
 
       <ProfileSection
         email={session?.user?.email}

@@ -5,9 +5,19 @@ import { MemoryRouter } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 
 let session: Session | null = null;
+let isPro = true;
+const mockOpenUpgrade = vi.fn();
 
 vi.mock('@/contexts/AuthContext', () => ({
   useAuth: () => ({ session }),
+}));
+
+vi.mock('@/hooks/useIsPro', () => ({
+  useIsPro: () => isPro,
+}));
+
+vi.mock('@/contexts/UpgradeDialogContext', () => ({
+  useUpgradeDialog: () => ({ openUpgrade: mockOpenUpgrade }),
 }));
 
 const mockNavigate = vi.fn();
@@ -104,5 +114,24 @@ describe('layout/ProfileMenu', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/settings', {
       viewTransition: true,
     });
+  });
+
+  it('offers the upgrade entry only to free users', () => {
+    session = { user: { id: 'u1', email: 'jane@example.com' } } as Session;
+    isPro = true;
+    const proRender = renderMenu();
+
+    expect(
+      proRender.queryByRole('menuitem', { name: 'navigation.upgrade' }),
+    ).toBeNull();
+
+    isPro = false;
+    renderMenu();
+
+    fireEvent.click(
+      screen.getByRole('menuitem', { name: 'navigation.upgrade' }),
+    );
+
+    expect(mockOpenUpgrade).toHaveBeenCalled();
   });
 });

@@ -6,6 +6,7 @@ import {
 } from '@/contexts/DataContext';
 import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
+import PageHeader from '@/components/common/PageHeader';
 import AnalyticsEmpty from '@/components/analytics/AnalyticsEmpty';
 import SpendingInsights from '@/components/analytics/SpendingInsights';
 import CategorySparkline from '@/components/analytics/CategorySparkline';
@@ -55,15 +56,11 @@ const AnalyticsView = () => {
   }
 
   return (
-    <div className="trends-shell container max-w-3xl mx-auto px-4 pt-4 pb-5 space-y-6 sm:px-6">
-      <div>
-        <h1 className="font-display text-3xl font-semibold tracking-[-0.035em]">
-          {t('navigation.trends')}
-        </h1>
-        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-          {t('analytics.subtitle')}
-        </p>
-      </div>
+    <div className="page-shell space-y-6">
+      <PageHeader
+        title={t('navigation.trends')}
+        subtitle={t('analytics.subtitle')}
+      />
       {/* Month snapshot */}
       <MonthSnapshotCard monthComparison={analytics.monthComparison} />
 

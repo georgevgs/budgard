@@ -1,7 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const SkeletonStatCard = () => (
-  <div className="rounded-2xl border border-border/40 bg-card p-5 space-y-3 shadow-sm">
+  <div className="surface-card p-5 space-y-3">
     <Skeleton className="h-4 w-32" />
     <Skeleton className="h-9 w-48" />
     <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border/40">

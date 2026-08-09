@@ -13,6 +13,7 @@ import type { Locale } from 'date-fns';
 import type { AccountKind } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import { useDateLocale } from '@/hooks/useDateLocale';
+import { getColorTint } from '@/lib/categoryColor';
 
 type Props = {
   account: Account;
@@ -48,7 +49,7 @@ const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
       <div className="p-4 flex items-center gap-3">
         <div
           className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
-          style={{ backgroundColor: `${account.color}20`, color: account.color }}
+          style={{ backgroundColor: getColorTint(account.color), color: account.color }}
         >
           <Icon className="h-5 w-5" />
         </div>

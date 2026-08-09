@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PiggyBank from 'lucide-react/dist/esm/icons/piggy-bank';
-import { useSetAside } from '@/hooks/today/useSetAside';
+import { useSetAside } from '@/hooks/savings/useSetAside';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
-import type { SavingsRhythm } from '@/hooks/today/useSavingsRhythm';
+import type { SavingsRhythm } from '@/hooks/savings/useSavingsRhythm';
 import type { Goal } from '@/types/Goal';
 
 type Props = {

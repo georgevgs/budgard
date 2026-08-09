@@ -129,11 +129,19 @@ const ExpensesForm = ({
               onRemoveExistingReceipt={() => setRemoveExistingReceipt(true)}
             />
 
-            <div className="flex gap-3 justify-end pt-2 pb-2">
+            {/* A Save button that is disabled from the moment the form opens
+                is a dead end unless something says why — validation is
+                onTouched, so a pristine form has no field errors to read yet.
+                This line stands in until the fields can speak for themselves. */}
+            <div className="flex flex-wrap items-center justify-end gap-3 pt-2 pb-2">
+              {renderSaveHint(form.formState.isValid, t)}
               <Button type="button" variant="outline" onClick={onClose}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" disabled={isSubmitting || !form.formState.isValid}>
+              <Button
+                type="submit"
+                disabled={isSubmitting || !form.formState.isValid}
+              >
                 {renderSaveButtonLabel(isSubmitting, t)}
               </Button>
             </div>
@@ -145,3 +153,17 @@ const ExpensesForm = ({
 };
 
 export default ExpensesForm;
+
+// --- Helpers ---
+
+const renderSaveHint = (isValid: boolean, t: (key: string) => string) => {
+  if (isValid) {
+    return null;
+  }
+
+  return (
+    <p className="mr-auto text-xs leading-relaxed text-muted-foreground">
+      {t('expenses.saveHint')}
+    </p>
+  );
+};
