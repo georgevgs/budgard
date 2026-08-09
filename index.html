@@ -9,7 +9,7 @@
     <link rel="dns-prefetch" href="https://htamokfphaqudeivpowr.supabase.co">
     <link rel="preconnect" href="https://htamokfphaqudeivpowr.supabase.co" crossorigin="">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#f8f5f1" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0e0c0b" media="(prefers-color-scheme: dark)">
     <meta name="description" content="A calm money companion for everyday spending decisions">
 
@@ -42,41 +42,12 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/icon-512x512.png">
     <title>Budgard — Your calm money companion</title>
 
-    <!-- Theme initialization - runs before first paint to prevent flash.
-         Inlined (not a file) so it doesn't cost a render-blocking request.
-         IMPORTANT: any change to the inline script below (even whitespace)
-         requires recomputing the sha256 hash in the netlify.toml CSP from
-         the built dist/index.html. -->
-    <script>(function () {
-  var savedTheme = localStorage.getItem('theme') || 'light';
-  var root = document.documentElement;
-  root.setAttribute('data-theme', savedTheme);
-  if (savedTheme === 'dark') {
-    root.classList.add('dark');
-  }
-
-  // Barbie has its own fixed palette — skip accent override
-  if (savedTheme === 'barbie') return;
-
-  // Apply saved accent color to prevent flash
-  var accents = {
-    sunset:   { light: ['15 100% 61%', '248 32% 12%'], dark: ['15 100% 65%', '252 45% 9%'] },
-    ocean:    { light: ['199 100% 48%', '205 90% 12%'], dark: ['195 100% 65%', '205 90% 10%'] },
-    lavender: { light: ['257 92% 62%', '0 0% 100%'], dark: ['258 100% 72%', '252 45% 9%'] },
-    mint:     { light: ['162 83% 40%', '164 80% 10%'], dark: ['160 86% 50%', '164 80% 8%'] },
-    coral:    { light: ['340 100% 61%', '0 0% 100%'], dark: ['340 100% 68%', '340 60% 9%'] },
-    gold:     { light: ['43 100% 51%', '34 85% 12%'], dark: ['45 100% 60%', '34 85% 10%'] },
-    slate:    { light: ['235 24% 44%', '0 0% 100%'], dark: ['231 24% 65%', '240 28% 9%'] }
-  };
-  var key = localStorage.getItem('accent-color');
-  var a = key && accents[key];
-  if (a) {
-    var vals = savedTheme === 'dark' ? a.dark : a.light;
-    root.style.setProperty('--primary', vals[0]);
-    root.style.setProperty('--primary-foreground', vals[1]);
-    root.style.setProperty('--ring', vals[0]);
-  }
-})();</script>
+    <!-- Theme initialization — runs before first paint so the saved theme and
+         accent are on the element before the first frame. The script is
+         GENERATED from src/design/tokens.ts and injected here at build time by
+         plugins/designTokens.ts, which also keeps the netlify.toml CSP hash in
+         step. Do not inline a script by hand in its place. -->
+    <!--THEME_INIT-->
 
 <link rel="apple-touch-startup-image" href="/splash/apple-splash-2048-2732.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
     <link rel="apple-touch-startup-image" href="/splash/apple-splash-2732-2048.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">

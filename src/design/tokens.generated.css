@@ -1,0 +1,121 @@
+/*
+ * GENERATED FILE — DO NOT EDIT.
+ *
+ * Written from src/design/tokens.ts by plugins/designTokens.ts on every
+ * dev start and build. Edit the tokens; run the build; commit both.
+ */
+
+@layer base {
+  :root {
+    --dock-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+    --dock-height: 3.5rem;
+    --dock-clearance: calc(var(--dock-bottom) + var(--dock-height));
+    --dock-action-slot: 4.25rem;
+    --dock-max-width: 30rem;
+    --dock-edge: max(1rem, calc((100% - var(--dock-max-width)) / 2));
+    --dock-inset: calc(var(--dock-clearance) + 0.5rem);
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+    --primary: 15 92% 43%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 13%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 42%;
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 10%;
+    --destructive: 0 72% 44%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 15 92% 43%;
+    --income: 160 65% 30%;
+    --income-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 38 92% 10%;
+    --info: 217 76% 50%;
+    --info-foreground: 0 0% 100%;
+    --radius: 0.875rem;
+    --surface-ring: 0.85;
+    --skeleton-sheen: 0 0% 100% / 0.75;
+    --glass-bg: 0 0% 100%;
+    --glass-alpha: 0.62;
+    --glass-sheen: 0.35;
+    --glass-rim: 0 0% 100% / 0.7;
+    --glass-drop: 0 0% 0% / 0.16;
+  }
+
+  .dark {
+    --background: 24 12% 5%;
+    --foreground: 30 14% 96%;
+    --card: 24 10% 10%;
+    --card-foreground: 30 14% 96%;
+    --popover: 24 10% 10%;
+    --popover-foreground: 30 14% 96%;
+    --primary: 15 92% 44%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 24 9% 15%;
+    --secondary-foreground: 30 14% 96%;
+    --muted: 24 9% 15%;
+    --muted-foreground: 28 8% 65%;
+    --accent: 24 9% 17%;
+    --accent-foreground: 30 14% 96%;
+    --destructive: 0 72% 47%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 26 8% 34%;
+    --input: 26 8% 34%;
+    --ring: 15 92% 44%;
+    --income: 160 65% 31%;
+    --income-foreground: 0 0% 100%;
+    --warning: 43 96% 56%;
+    --warning-foreground: 38 92% 10%;
+    --info: 213 78% 66%;
+    --info-foreground: 213 94% 12%;
+    --surface-ring: 0.3;
+    --skeleton-sheen: 0 0% 100% / 0.07;
+    --glass-bg: 0 0% 11%;
+    --glass-alpha: 0.72;
+    --glass-sheen: 0.08;
+    --glass-rim: 0 0% 100% / 0.12;
+    --glass-drop: 0 0% 0% / 0.5;
+  }
+
+  [data-theme='barbie'] {
+    --background: 324 100% 97%;
+    --foreground: 274 38% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 274 38% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 274 38% 13%;
+    --primary: 326 92% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 283 100% 95%;
+    --secondary-foreground: 284 56% 28%;
+    --muted: 318 66% 94%;
+    --muted-foreground: 306 23% 46%;
+    --accent: 174 100% 90%;
+    --accent-foreground: 179 68% 18%;
+    --destructive: 354 90% 46%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 316 66% 88%;
+    --input: 316 66% 88%;
+    --ring: 326 92% 45%;
+    --income: 161 82% 28%;
+    --income-foreground: 0 0% 100%;
+    --warning: 40 100% 55%;
+    --warning-foreground: 34 85% 12%;
+    --info: 198 100% 52%;
+    --info-foreground: 205 90% 12%;
+    --radius: 1.125rem;
+    --surface-ring: 0.45;
+    --glass-bg: 324 100% 98%;
+    --glass-alpha: 0.7;
+    --glass-sheen: 0.46;
+    --glass-rim: 0 0% 100% / 0.8;
+    --glass-drop: 326 75% 42% / 0.25;
+  }
+}

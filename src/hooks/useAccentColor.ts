@@ -1,109 +1,36 @@
 import { useEffect, useState } from 'react';
 
-type ThemeValues = {
-  primary: string;
-  primaryFg: string;
-};
+import {
+  ACCENTS,
+  ACCENT_FOREGROUND,
+  ACCENT_PROPERTIES,
+  DEFAULT_ACCENT,
+  type AccentColor,
+  type AccentColorKey,
+} from '@/design/tokens';
 
-type AccentValues = {
-  light: ThemeValues;
-  dark: ThemeValues;
-  swatch: string;
-};
-
-export type AccentColorKey =
-  'sunset' | 'ocean' | 'lavender' | 'mint' | 'coral' | 'gold' | 'slate';
-
-type AccentColorOption = {
-  key: AccentColorKey;
-  values: AccentValues;
-};
+export type { AccentColorKey } from '@/design/tokens';
 
 /**
- * Each accent is hand-tuned per theme so it sits naturally against:
- *   light — neutral canvas, white cards
- *   dark  — neutral black canvas, charcoal cards
- *
- * Saturation stays intentionally high. The brightest hues use ink-colored
- * foregrounds, so primary controls feel luminous without losing their label.
- * Barbie theme keeps its own fixed pink palette (accent picker is hidden).
+ * The accent picker. Values live in src/design/tokens.ts — the same module the
+ * generated CSS and the pre-paint script in index.html are built from, so an
+ * accent can no longer be right in one place and stale in another.
  */
-export const ACCENT_COLORS: AccentColorOption[] = [
-  {
-    key: 'sunset',
-    values: {
-      light: { primary: '15 100% 61%', primaryFg: '248 32% 12%' },
-      dark: { primary: '15 100% 65%', primaryFg: '252 45% 9%' },
+export const ACCENT_COLORS = ACCENTS;
 
-      swatch: 'hsl(15 100% 61%)',
-    },
-  },
-  {
-    key: 'ocean',
-    values: {
-      light: { primary: '199 100% 48%', primaryFg: '205 90% 12%' },
-      dark: { primary: '195 100% 65%', primaryFg: '205 90% 10%' },
-
-      swatch: 'hsl(199 100% 48%)',
-    },
-  },
-  {
-    key: 'lavender',
-    values: {
-      light: { primary: '257 92% 62%', primaryFg: '0 0% 100%' },
-      dark: { primary: '258 100% 72%', primaryFg: '252 45% 9%' },
-
-      swatch: 'hsl(257 92% 62%)',
-    },
-  },
-  {
-    key: 'mint',
-    values: {
-      light: { primary: '162 83% 40%', primaryFg: '164 80% 10%' },
-      dark: { primary: '160 86% 50%', primaryFg: '164 80% 8%' },
-
-      swatch: 'hsl(162 83% 40%)',
-    },
-  },
-  {
-    key: 'coral',
-    values: {
-      light: { primary: '340 100% 61%', primaryFg: '0 0% 100%' },
-      dark: { primary: '340 100% 68%', primaryFg: '340 60% 9%' },
-
-      swatch: 'hsl(340 100% 61%)',
-    },
-  },
-  {
-    key: 'gold',
-    values: {
-      light: { primary: '43 100% 51%', primaryFg: '34 85% 12%' },
-      dark: { primary: '45 100% 60%', primaryFg: '34 85% 10%' },
-
-      swatch: 'hsl(43 100% 51%)',
-    },
-  },
-  {
-    key: 'slate',
-    values: {
-      light: { primary: '235 24% 44%', primaryFg: '0 0% 100%' },
-      dark: { primary: '231 24% 65%', primaryFg: '240 28% 9%' },
-
-      swatch: 'hsl(235 24% 44%)',
-    },
-  },
-];
-
-const DEFAULT_ACCENT: AccentColorKey = 'sunset';
 const STORAGE_KEY = 'accent-color';
 
-const findAccent = (key: string): AccentColorOption =>
-  ACCENT_COLORS.find((color) => color.key === key) ?? ACCENT_COLORS[0];
+const findAccent = (key: string): AccentColor =>
+  ACCENTS.find((color) => color.key === key) ?? ACCENTS[0];
+
+/** Swatch shown in Settings — always the accent's light-theme value. */
+export const accentSwatch = (accent: AccentColor): string =>
+  `hsl(${accent.light})`;
 
 const getInitialKey = (): AccentColorKey => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && ACCENT_COLORS.some((c) => c.key === saved)) {
+    if (saved && ACCENTS.some((color) => color.key === saved)) {
       return saved as AccentColorKey;
     }
   } catch {
@@ -113,14 +40,17 @@ const getInitialKey = (): AccentColorKey => {
   return DEFAULT_ACCENT;
 };
 
-const resolveThemeValues = (accent: AccentColorOption): ThemeValues => {
+const resolveColor = (accent: AccentColor): string => {
   if (document.documentElement.classList.contains('dark')) {
-    return accent.values.dark;
+    return accent.dark;
   }
 
-  return accent.values.light;
+  return accent.light;
 };
 
+// --primary drives everything the accent touches — buttons, the nav indicator,
+// the FAB, the Today hero tint and the page glow — so there is exactly one
+// value to override and one to clear.
 const applyAccentToDocument = (key: AccentColorKey): void => {
   const root = document.documentElement;
 
@@ -133,19 +63,12 @@ const applyAccentToDocument = (key: AccentColorKey): void => {
     return;
   }
 
-  const accent = findAccent(key);
-  const { primary, primaryFg } = resolveThemeValues(accent);
+  const color = resolveColor(findAccent(key));
 
-  root.style.setProperty('--primary', primary);
-  root.style.setProperty('--primary-foreground', primaryFg);
-  root.style.setProperty('--ring', primary);
+  root.style.setProperty('--primary', color);
+  root.style.setProperty('--primary-foreground', ACCENT_FOREGROUND);
+  root.style.setProperty('--ring', color);
 };
-
-// --primary drives everything the accent touches — buttons, the nav indicator,
-// the FAB, the Today hero tint and the page glow — so there is exactly one
-// value to override and one to clear. Keep in sync with the inline theme-init
-// script in index.html, and with the CSP hash in netlify.toml when it changes.
-const ACCENT_PROPERTIES = ['--primary', '--primary-foreground', '--ring'];
 
 export const useAccentColor = (): {
   accent: AccentColorKey;

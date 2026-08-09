@@ -8,6 +8,7 @@ import { defineConfig } from "vitest/config";
 import { VitePWA } from "vite-plugin-pwa";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import pkg from "./package.json" with { type: "json" };
+import { designTokens } from "./plugins/designTokens.ts";
 
 // Function-form manualChunks: the previous array form only captured each
 // package's entry module, so secondary entry points (e.g. react-dom/client's
@@ -239,6 +240,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    designTokens(),
     stampPushSwBuildId(),
     vendorOcrAssets(),
     VitePWA({

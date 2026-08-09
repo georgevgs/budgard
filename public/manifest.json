@@ -8,9 +8,12 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "categories": ["finance", "productivity"],
-  "background_color": "#fb591e",
-  "theme_color": "#f8f5f1",
+  "categories": [
+    "finance",
+    "productivity"
+  ],
+  "background_color": "#d33b09",
+  "theme_color": "#ffffff",
   "icons": [
     {
       "src": "/icon-192x192.png",

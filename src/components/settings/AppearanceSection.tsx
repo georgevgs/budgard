@@ -5,7 +5,11 @@ import Moon from 'lucide-react/dist/esm/icons/moon';
 import Sun from 'lucide-react/dist/esm/icons/sun';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import Check from 'lucide-react/dist/esm/icons/check';
-import { ACCENT_COLORS, type AccentColorKey } from '@/hooks/useAccentColor';
+import {
+  ACCENT_COLORS,
+  accentSwatch,
+  type AccentColorKey,
+} from '@/hooks/useAccentColor';
 
 type Theme = 'light' | 'dark' | 'barbie';
 
@@ -131,7 +135,7 @@ const renderAccentPicker = (
               onClick={() => setAccent(color.key)}
               className="relative h-11 w-11 rounded-full border-2 border-background ring-1 ring-border/60 transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               style={{
-                backgroundColor: color.values.swatch,
+                backgroundColor: accentSwatch(color),
               }}
               aria-label={t(`accent.colors.${color.key}`)}
               aria-pressed={isSelected}

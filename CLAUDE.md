@@ -24,8 +24,16 @@ Rules for working in this repository. Follow them exactly.
 - `src/hooks`: Data fetching and state logic
 - `src/services`: Pure API/Supabase logic
 - `src/lib/validations.ts`: All Zod schemas
+- `src/design/tokens.ts`: **Every colour in the app.** The only file to edit for a
+  theme change — the generated CSS, the pre-paint script in `index.html`, the CSP
+  hash in `netlify.toml` and the manifest colours are all built from it by
+  `plugins/designTokens.ts`. Components use `bg-primary` / `text-income` and never
+  a raw hue.
 
 ## Protected Files
+- Never hand-edit `src/design/tokens.generated.css`, the theme script in
+  `index.html`, or the CSP sha256 in `netlify.toml`. Change `src/design/tokens.ts`
+  and run `npm run build`; commit what it rewrites.
 - Do not edit `.env*` files unless the user explicitly requests an environment configuration change.
 - Do not edit dependency lockfiles unless the user explicitly requests a dependency change.
 
