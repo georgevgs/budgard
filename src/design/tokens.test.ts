@@ -4,13 +4,9 @@ import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { buildInlineHeadScript } from '../boot/inlineHeadScript';
 import { AA_LARGE, AA_TEXT, contrastRatio } from './contrast';
-import {
-  buildManifestColors,
-  buildThemeInitScript,
-  buildTokensCss,
-  hslToHex,
-} from './generate';
+import { buildManifestColors, buildTokensCss, hslToHex } from './generate';
 import { accent, dataColors, status, type Swatch } from './palette';
 import { ACCENTS, THEMES, accentValues, type ThemeName } from './tokens';
 
@@ -50,8 +46,10 @@ describe('generated artefacts', () => {
   });
 
   it('the netlify CSP allows the exact pre-paint script that gets inlined', () => {
+    // Builds inline theme init AND the boot guard as one script, so the hash
+    // must cover the composition, not just the theme half.
     const hash = createHash('sha256')
-      .update(buildThemeInitScript())
+      .update(buildInlineHeadScript())
       .digest('base64');
 
     expect(read('netlify.toml')).toContain(`'sha256-${hash}'`);

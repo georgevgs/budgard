@@ -3,18 +3,20 @@ import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { PluginOption } from "vite";
 
-import {
-  buildManifestColors,
-  buildThemeInitScript,
-  buildTokensCss,
-} from "../src/design/generate.ts";
+import { buildManifestColors, buildTokensCss } from "../src/design/generate.ts";
+import { buildThemeInitScript } from "../src/design/generate.ts";
+import { buildInlineHeadScript } from "../src/boot/inlineHeadScript.ts";
 
 // Every colour in the app comes from src/design/tokens.ts. This plugin is what
 // carries it to the four places outside the module graph that cannot import it:
 //
 //   src/design/tokens.generated.css  the custom properties themselves
-//   index.html                       the inlined pre-paint theme script
+//   index.html                       the inlined pre-paint head script
 //   netlify.toml                     the CSP sha256 that allows that script
+//
+// The injected script is theme init alone in dev, and theme init plus the boot
+// guard (src/boot/) in a build — so everything that reads or hashes it must go
+// through inlineScript() below rather than calling a builder directly.
 //   public/manifest.json             browser-chrome and splash colours
 //
 // Files are written only when their contents would change, so a normal build
@@ -81,8 +83,17 @@ const syncManifest = async (): Promise<string[]> => {
 };
 
 export const designTokens = (): PluginOption => {
-  const script = buildThemeInitScript();
   let isBuild = false;
+
+  // The boot guard is a 20-second watchdog that redirects to /reset; shipping
+  // it into the dev server would ambush anyone debugging a mount failure.
+  const inlineScript = (): string => {
+    if (!isBuild) {
+      return buildThemeInitScript();
+    }
+
+    return buildInlineHeadScript();
+  };
 
   return {
     name: "design-tokens",
@@ -100,7 +111,7 @@ export const designTokens = (): PluginOption => {
 
       const written = [
         ...(await syncTokensCss()),
-        ...(await syncCspHash(script)),
+        ...(await syncCspHash(inlineScript())),
         ...(await syncManifest()),
       ];
 
@@ -136,7 +147,7 @@ export const designTokens = (): PluginOption => {
           );
         }
 
-        return html.replace(THEME_INIT_PLACEHOLDER, `<script>${script}</script>`);
+        return html.replace(THEME_INIT_PLACEHOLDER, `<script>${inlineScript()}</script>`);
       },
     },
   };
