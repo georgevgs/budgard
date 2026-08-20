@@ -368,7 +368,7 @@ const renderOverWarning = (overGlobal: boolean, t: TFunc) => {
   if (!overGlobal) return null;
 
   return (
-    <p className="text-xs text-destructive mt-1">
+    <p className="text-xs text-destructive-ink mt-1">
       {t('budget.categoryBudgets.overGlobal')}
     </p>
   );
@@ -468,7 +468,7 @@ const renderClearButton = (
 };
 
 const pickAllocatedClass = (overGlobal: boolean) => {
-  if (overGlobal) return 'text-destructive font-medium';
+  if (overGlobal) return 'text-destructive-ink font-medium';
 
   return '';
 };
@@ -514,7 +514,7 @@ const renderError = (error: string | null) => {
   if (!error) return null;
 
   return (
-    <p role="alert" className="text-xs text-destructive px-6 pb-2 shrink-0">
+    <p role="alert" className="text-xs text-destructive-ink px-6 pb-2 shrink-0">
       {error}
     </p>
   );

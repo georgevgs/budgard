@@ -6,23 +6,10 @@ import { useTagOps } from '@/hooks/dataOps/useTagOps';
 import { useIsPro } from '@/hooks/useIsPro';
 import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
 import { useToast } from '@/hooks/useToast';
+import { dataColors } from '@/design/palette';
 import { collectExpenseTagIds } from '@/lib/expenseTags';
 import type { Tag } from '@/types/Tag';
 import type { ExpenseFormData } from '@/lib/validations';
-
-// Preset colors cycled when auto-assigning a color to a new tag
-const TAG_COLORS = [
-  '#7c4dff',
-  '#ff3da6',
-  '#ffb800',
-  '#1fdb8a',
-  '#00b8f5',
-  '#ff4d6d',
-  '#a855f7',
-  '#00c9b7',
-  '#ff5c35',
-  '#00d9f5',
-];
 
 export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
   const { t } = useTranslation();
@@ -98,7 +85,7 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
 
     startTagCreation(async () => {
       try {
-        const color = TAG_COLORS[tags.length % TAG_COLORS.length];
+        const color = dataColors[tags.length % dataColors.length];
         const newTag = await handleTagCreate(tagSearch.trim(), color);
         applySelection([...selectedTagIds, newTag.id]);
         setTagPopoverOpen(false);

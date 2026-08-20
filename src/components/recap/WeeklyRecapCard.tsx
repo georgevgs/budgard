@@ -65,7 +65,7 @@ const renderHeader = (
   return (
     <div className="flex items-center justify-between mb-3">
       <div className="flex items-center gap-2">
-        <CalendarRange className="h-4 w-4 text-primary" />
+        <CalendarRange className="h-4 w-4 text-primary-ink" />
         <h3 className="text-sm font-semibold tracking-tight">
           {t('weeklyRecap.title')}
         </h3>
@@ -135,10 +135,10 @@ const renderAnomalyRow = (
   const multiple = anomaly.ratio.toFixed(1).replace(/\.0$/, '');
 
   let Icon = TrendingDown;
-  let colorClass = 'text-income';
+  let colorClass = 'text-income-ink';
   if (anomaly.direction === 'up') {
     Icon = TrendingUp;
-    colorClass = 'text-warning';
+    colorClass = 'text-warning-ink';
   }
 
   return (

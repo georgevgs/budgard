@@ -42,8 +42,8 @@ export function Toaster() {
           actionButton:
             'bg-primary! text-primary-foreground! rounded-lg! text-xs! font-semibold! px-3! py-1.5!',
           success:
-            'bg-income/10! text-income! border-income/20!',
-          error: 'bg-destructive/10! text-destructive! border-destructive/20!',
+            'bg-income/10! text-income-ink! border-income/20!',
+          error: 'bg-destructive/10! text-destructive-ink! border-destructive/20!',
           icon: 'text-current!',
         },
       }}

@@ -76,7 +76,7 @@ const AccountDetailHeader = ({
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={handleArchiveClick}
-              className="text-destructive focus:text-destructive"
+              className="text-destructive-ink focus:text-destructive-ink"
             >
               {t('networth.archive')}
             </DropdownMenuItem>

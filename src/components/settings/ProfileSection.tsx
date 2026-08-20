@@ -39,7 +39,7 @@ const ProfileSection = ({ email, onSignOut, t }: ProfileSectionProps) => {
           </div>
           <Button
             variant="outline"
-            className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 focus-visible:ring-destructive"
+            className="w-full justify-start text-destructive-ink hover:text-destructive-ink hover:bg-destructive/10 focus-visible:ring-destructive"
             onClick={() => setShowSignOutDialog(true)}
           >
             <LogOut className="h-4 w-4 mr-2" />

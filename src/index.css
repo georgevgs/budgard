@@ -24,8 +24,14 @@
   --color-popover: hsl(var(--popover));
   --color-popover-foreground: hsl(var(--popover-foreground));
 
+  /* The three-role rule (see src/design/tokens.ts):
+       bg-primary + text-primary-foreground  a filled control
+       text-primary-ink                      the brand AS text, on the canvas
+     A bare `text-primary` paints the neon fill onto the page background and is
+     always a bug; the design tests grep for it. */
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-ink: hsl(var(--primary-ink));
 
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
@@ -38,15 +44,19 @@
 
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive-ink: hsl(var(--destructive-ink));
 
   --color-income: hsl(var(--income));
   --color-income-foreground: hsl(var(--income-foreground));
+  --color-income-ink: hsl(var(--income-ink));
 
   --color-warning: hsl(var(--warning));
   --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-warning-ink: hsl(var(--warning-ink));
 
   --color-info: hsl(var(--info));
   --color-info-foreground: hsl(var(--info-foreground));
+  --color-info-ink: hsl(var(--info-ink));
 
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
@@ -158,9 +168,31 @@
   height: 100%;
   width: 100%;
   border-radius: 9999px;
-  background: hsl(var(--primary) / 0.16);
-  box-shadow: inset 0 0 0 0.5px hsl(var(--primary) / 0.22);
+  background: hsl(var(--primary) / 0.18);
+  box-shadow:
+    inset 0 0 0 0.5px hsl(var(--primary) / 0.3),
+    0 2px 12px -4px hsl(var(--primary) / var(--glow-strength));
   animation: nav-indicator-settle 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@utility glow {
+  /* What makes a bright hue read as LIT rather than merely bright: a tight
+     coloured rim so the shape still has an edge on a pale canvas, then a wide
+     soft bloom falling off underneath it. Both are drawn from --primary, so
+     the glow follows the chosen accent for free.
+
+     --glow-strength is per-theme (see tokens.ts); dark carries more because a
+     bloom needs somewhere dark to fall off into. */
+  box-shadow:
+    0 0 0 1px hsl(var(--primary) / 0.22),
+    0 6px 18px -6px hsl(var(--primary) / var(--glow-strength)),
+    0 12px 40px -12px hsl(var(--primary) / var(--glow-strength));
+}
+
+@utility glow-soft {
+  /* Half the bloom, no rim — for something already sitting on a surface, like
+     the nav indicator, where a full glow would smear into the capsule. */
+  box-shadow: 0 4px 16px -6px hsl(var(--primary) / var(--glow-strength));
 }
 
 @utility font-display {
@@ -220,7 +252,7 @@
   body {
     background-image: radial-gradient(
       44rem 32rem at 100% -10%,
-      hsl(var(--primary) / 0.1),
+      hsl(var(--primary) / 0.16),
       transparent 62%
     );
     background-attachment: fixed;
@@ -229,8 +261,8 @@
 
   .dark body {
     background-image: radial-gradient(
-      44rem 32rem at 100% -10%,
-      hsl(var(--primary) / 0.08),
+      46rem 34rem at 100% -10%,
+      hsl(var(--primary) / 0.14),
       transparent 62%
     );
   }
@@ -532,13 +564,15 @@
     background: hsl(var(--card) / 0.9) !important;
   }
 
-  /* Override Sonner's default icon colors for success/error */
+  /* Override Sonner's default icon colors for success/error. The INK, not the
+     fill: these are drawn straight onto the toast surface, where the neon
+     would sit at roughly 2.5:1 and read as a smudge. */
   [data-sonner-toast][data-type='success'] [data-icon] {
-    color: hsl(var(--income)) !important;
+    color: hsl(var(--income-ink)) !important;
   }
 
   [data-sonner-toast][data-type='error'] [data-icon] {
-    color: hsl(var(--destructive)) !important;
+    color: hsl(var(--destructive-ink)) !important;
   }
 
   /* Default toast (no type) uses foreground color */

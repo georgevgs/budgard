@@ -216,7 +216,7 @@ const renderPastDueNotice = (subscription: Subscription, t: TFunc) => {
   if (subscription.status !== 'past_due') return null;
 
   return (
-    <p className="text-xs font-medium text-destructive">
+    <p className="text-xs font-medium text-destructive-ink">
       {t('settings.billing.pastDue')}
     </p>
   );

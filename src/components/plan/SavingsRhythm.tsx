@@ -103,7 +103,7 @@ const renderClaim = (
   if (rhythm.todayClaimed) {
     return (
       <div className="mt-3 flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-primary">
+        <p className="text-sm font-semibold text-primary-ink">
           {t('today.rhythm.claimed')}
         </p>
         <Button onClick={onUndo} variant="ghost" size="sm">

@@ -171,7 +171,7 @@ const renderUploadStep = (
     <div
       className={cn(
         'border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-colors mb-4',
-        isDragging && 'border-primary bg-primary/5',
+        isDragging && 'border-primary-ink bg-primary/5',
         !isDragging && 'border-muted-foreground/25',
       )}
       onDragOver={(e) => {
@@ -354,7 +354,7 @@ const renderIncomeCount = (rows: ParsedExpenseRow[], t: TranslateFunction) => {
   if (count === 0) return null;
 
   return (
-    <div className="flex items-center gap-2 text-sm text-income">
+    <div className="flex items-center gap-2 text-sm text-income-ink">
       <span>{t('import.incomeRows', { count })}</span>
     </div>
   );
@@ -365,7 +365,7 @@ const renderErrorCount = (count: number, t: TranslateFunction) => {
 
   return (
     <div className="flex items-center gap-2 text-sm">
-      <AlertCircle className="h-4 w-4 text-destructive" />
+      <AlertCircle className="h-4 w-4 text-destructive-ink" />
       <span>{t('import.errorRows', { count })}</span>
     </div>
   );
@@ -470,10 +470,10 @@ const renderErrorsList = (errors: CsvParseError[], t: TranslateFunction) => {
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium text-destructive">{t('import.errors')}</p>
+      <p className="text-sm font-medium text-destructive-ink">{t('import.errors')}</p>
       <div className="max-h-24 overflow-y-auto space-y-1">
         {errors.slice(0, 10).map((error) => (
-          <div key={error.rowNumber} className="flex items-start gap-2 text-xs text-destructive">
+          <div key={error.rowNumber} className="flex items-start gap-2 text-xs text-destructive-ink">
             <X className="h-3 w-3 mt-0.5 shrink-0" />
             <span>
               {t('import.errorRow', { row: error.rowNumber })}:{' '}
@@ -492,8 +492,8 @@ const renderImportErrorBanner = (error: string | null) => {
 
   return (
     <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 border border-destructive/20">
-      <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
-      <p className="text-sm text-destructive">{error}</p>
+      <AlertCircle className="h-4 w-4 text-destructive-ink shrink-0" />
+      <p className="text-sm text-destructive-ink">{error}</p>
     </div>
   );
 };
@@ -520,7 +520,7 @@ const renderPreviewStep = (
       {renderImportErrorBanner(importError)}
       <div className="flex flex-wrap gap-4">
         <div className="flex items-center gap-2 text-sm">
-          <CheckCircle2 className="h-4 w-4 text-income" />
+          <CheckCircle2 className="h-4 w-4 text-income-ink" />
           <span>{t('import.validRows', { count: validRows.length })}</span>
         </div>
         {renderSkippedCount(skippedIncomeCount, t)}

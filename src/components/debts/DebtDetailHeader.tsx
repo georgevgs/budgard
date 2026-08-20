@@ -63,7 +63,7 @@ const DebtDetailHeader = ({ debt, progress, onEdit, onArchiveRequest }: Props) =
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={handleArchiveClick}
-              className="text-destructive focus:text-destructive"
+              className="text-destructive-ink focus:text-destructive-ink"
             >
               {t('debts.archive')}
             </DropdownMenuItem>
@@ -75,7 +75,7 @@ const DebtDetailHeader = ({ debt, progress, onEdit, onArchiveRequest }: Props) =
         <p className="text-xs text-muted-foreground">
           {t('debts.detail.currentBalance')}
         </p>
-        <p className="text-2xl font-bold tabular-nums tracking-tight text-destructive">
+        <p className="text-2xl font-bold tabular-nums tracking-tight text-destructive-ink">
           {formatCurrency(debt.current_balance, debt.currency)}
         </p>
       </div>
@@ -137,12 +137,12 @@ const renderUnpayableCallout = (
 
   return (
     <div className="flex items-start gap-2 mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-      <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+      <AlertTriangle className="h-4 w-4 text-destructive-ink shrink-0 mt-0.5" />
       <div className="text-xs">
-        <p className="font-medium text-destructive">
+        <p className="font-medium text-destructive-ink">
           {t('debts.unpayable.title')}
         </p>
-        <p className="text-destructive/80 mt-0.5">
+        <p className="text-destructive-ink/80 mt-0.5">
           {t('debts.unpayable.description')}
         </p>
       </div>

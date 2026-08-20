@@ -45,7 +45,7 @@ const OtpVerifyStep = ({
   return (
     <div className="space-y-4">
       <div className="flex flex-col items-center gap-2 mb-4">
-        <CheckCircle2 className="h-8 w-8 text-primary" />
+        <CheckCircle2 className="h-8 w-8 text-primary-ink" />
         <p className="text-muted-foreground text-sm text-center px-4">
           {t('auth.codeEmailSent', { email })}
         </p>
@@ -138,7 +138,7 @@ const renderOtpError = (error: string | null) => {
   return (
     <p
       id="otp-error"
-      className="text-sm text-destructive text-center"
+      className="text-sm text-destructive-ink text-center"
       role="alert"
     >
       {error}

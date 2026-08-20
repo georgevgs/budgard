@@ -687,13 +687,14 @@
   },
   "accent": {
     "colors": {
-      "sunset": "Tangerine",
+      "sunset": "Fanta",
+      "coral": "Hot coral",
+      "gold": "Solar",
+      "lime": "Cyber lime",
+      "mint": "Neon mint",
       "ocean": "Electric blue",
       "lavender": "Ultra violet",
-      "mint": "Neon mint",
-      "coral": "Hot pink",
-      "gold": "Solar",
-      "slate": "Graphite"
+      "electric": "Voltage"
     }
   },
   "goals": {

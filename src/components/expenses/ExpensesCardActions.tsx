@@ -100,7 +100,7 @@ const ExpensesCardActions = ({
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={handleDeleteClick}
-            className="text-destructive focus:text-destructive"
+            className="text-destructive-ink focus:text-destructive-ink"
           >
             <Trash2 className="h-4 w-4" />
             {t('common.delete')}

@@ -24,8 +24,9 @@ import { getCurrencySymbol } from '@/lib/currencies';
 import { formatCurrencyInput } from '@/lib/utils';
 import { accountSchema, type AccountFormData } from '@/lib/validations';
 import type { Account, AccountKind } from '@/types/Account';
+import { swatch } from '@/design/palette';
 
-const DEFAULT_COLOR = '#00b8f5';
+const DEFAULT_COLOR = swatch.sky;
 
 type Props = {
   account?: Account;

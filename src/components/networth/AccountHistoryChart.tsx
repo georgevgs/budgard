@@ -192,7 +192,7 @@ const renderRangeTabs = (
 
 const getRangeButtonClass = (isActive: boolean): string => {
   if (isActive) {
-    return 'bg-primary/10 text-primary';
+    return 'bg-primary/10 text-primary-ink';
   }
 
   return 'text-muted-foreground hover:bg-muted/60';

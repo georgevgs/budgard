@@ -123,7 +123,7 @@ const getAmountPrefix = (isIncome: boolean): string => {
 
 const getAmountTone = (isIncome: boolean): string => {
   if (isIncome) {
-    return 'text-income';
+    return 'text-income-ink';
   }
 
   return 'text-foreground';

@@ -42,7 +42,7 @@ const ActivitySummary = ({ expenseTotal, incomeTotal, currency }: Props) => {
             <ArrowUpRight className="h-3.5 w-3.5" />
             {t('activity.received')}
           </dt>
-          <dd className="mt-1 text-sm font-bold text-income tabular-nums">
+          <dd className="mt-1 text-sm font-bold text-income-ink tabular-nums">
             {formatCurrency(incomeTotal, currency)}
           </dd>
         </div>
@@ -68,7 +68,7 @@ const getNetPrefix = (net: number): string => {
 
 const getNetTone = (net: number): string => {
   if (net > 0) {
-    return 'text-income';
+    return 'text-income-ink';
   }
   if (net < 0) {
     return 'text-foreground';

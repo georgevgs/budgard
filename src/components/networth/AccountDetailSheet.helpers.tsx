@@ -263,7 +263,7 @@ const renderAnnualized = (
 
 export const getBalanceClass = (liability: boolean): string => {
   if (liability) {
-    return 'text-destructive';
+    return 'text-destructive-ink';
   }
 
   return 'text-foreground';
@@ -279,10 +279,10 @@ export const renderLiabilitySign = (liability: boolean): string => {
 
 const getGainClass = (isPositive: boolean): string => {
   if (isPositive) {
-    return 'text-income';
+    return 'text-income-ink';
   }
 
-  return 'text-destructive';
+  return 'text-destructive-ink';
 };
 
 const renderGainSign = (isPositive: boolean): string => {
@@ -383,7 +383,7 @@ export const renderHistoryList = ({
           <Button
             variant="ghost"
             size="icon"
-            className="h-11 w-11 -m-2 text-muted-foreground hover:text-destructive shrink-0"
+            className="h-11 w-11 -m-2 text-muted-foreground hover:text-destructive-ink shrink-0"
             onClick={() => onDelete(s.id)}
             aria-label={t('common.delete')}
           >
@@ -402,7 +402,7 @@ const renderInvestmentEmpty = (
 ) => (
   <div className="flex flex-col items-center text-center gap-3 py-6 px-2">
     <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-      <Sparkles className="h-5 w-5 text-primary" />
+      <Sparkles className="h-5 w-5 text-primary-ink" />
     </div>
     <div>
       <p className="text-sm font-medium">
@@ -441,7 +441,7 @@ const renderActivityIcon = (s: AccountBalance) => {
 
   if (kind === 'deposit') {
     return (
-      <div className={cn(wrap, 'bg-income/10 text-income')}>
+      <div className={cn(wrap, 'bg-income/10 text-income-ink')}>
         <ArrowDownLeft className="h-4 w-4" />
       </div>
     );
@@ -449,14 +449,14 @@ const renderActivityIcon = (s: AccountBalance) => {
 
   if (kind === 'withdrawal') {
     return (
-      <div className={cn(wrap, 'bg-destructive/10 text-destructive')}>
+      <div className={cn(wrap, 'bg-destructive/10 text-destructive-ink')}>
         <ArrowUpRight className="h-4 w-4" />
       </div>
     );
   }
 
   return (
-    <div className={cn(wrap, 'bg-primary/10 text-primary')}>
+    <div className={cn(wrap, 'bg-primary/10 text-primary-ink')}>
       <TrendingUp className="h-4 w-4" />
     </div>
   );
@@ -486,8 +486,8 @@ const renderActivityAmount = (s: AccountBalance, currency: string) => {
 
 const getActivityAmountClass = (s: AccountBalance): string => {
   const kind = classifyActivity(s);
-  if (kind === 'deposit') return 'text-income';
-  if (kind === 'withdrawal') return 'text-destructive';
+  if (kind === 'deposit') return 'text-income-ink';
+  if (kind === 'withdrawal') return 'text-destructive-ink';
 
   return 'text-foreground';
 };

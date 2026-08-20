@@ -81,7 +81,7 @@ const renderErrorState = (error: boolean, t: TranslateFunction) => {
   if (!error) return null;
 
   return (
-    <p className="text-sm text-destructive">{t('receipt.loadError')}</p>
+    <p className="text-sm text-destructive-ink">{t('receipt.loadError')}</p>
   );
 };
 

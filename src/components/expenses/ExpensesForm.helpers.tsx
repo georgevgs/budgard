@@ -93,7 +93,7 @@ export const renderConversionPreview = (
 
   if (hasError) {
     return (
-      <p className="text-xs text-destructive mt-1">
+      <p className="text-xs text-destructive-ink mt-1">
         {t('expenses.currency.rateError')}
       </p>
     );
@@ -135,7 +135,7 @@ export const renderCreateTagOption = (
   return (
     <button
       type="button"
-      className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left text-primary focus-visible:outline-none focus-visible:bg-accent disabled:opacity-50 disabled:pointer-events-none"
+      className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left text-primary-ink focus-visible:outline-none focus-visible:bg-accent disabled:opacity-50 disabled:pointer-events-none"
       onClick={onCreate}
       disabled={isCreatingTag}
     >

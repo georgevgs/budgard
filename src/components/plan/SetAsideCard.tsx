@@ -52,7 +52,7 @@ const renderOffer = (
 ) => {
   if (rhythm.setAsideToday) {
     return (
-      <p className="mb-3 text-sm font-semibold text-primary">
+      <p className="mb-3 text-sm font-semibold text-primary-ink">
         {t('today.rhythm.setAside.done')}
       </p>
     );

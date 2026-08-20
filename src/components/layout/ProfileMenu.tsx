@@ -37,7 +37,7 @@ const ProfileMenu = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="h-11 w-11 rounded-full p-0 bg-primary/10 text-primary hover:bg-primary/20"
+          className="h-11 w-11 rounded-full p-0 bg-primary/10 text-primary-ink hover:bg-primary/20"
           aria-label={t('navigation.openProfileMenu')}
         >
           <span className="text-sm font-semibold">{initial}</span>
@@ -97,7 +97,7 @@ const renderUpgradeItem = (
 
   return (
     <DropdownMenuItem onClick={openUpgrade}>
-      <Sparkles className="h-4 w-4 text-primary" />
+      <Sparkles className="h-4 w-4 text-primary-ink" />
       {t('navigation.upgrade')}
     </DropdownMenuItem>
   );

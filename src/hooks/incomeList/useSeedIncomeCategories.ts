@@ -3,17 +3,18 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategoriesData, useDataConfig } from '@/contexts/DataContext';
 import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
+import { swatch } from '@/design/palette';
 
 const DEFAULT_INCOME_CATEGORIES: Array<{
   nameKey: string;
   color: string;
   icon: string;
 }> = [
-  { nameKey: 'income.defaults.salary', color: '#1fdb8a', icon: '💼' },
-  { nameKey: 'income.defaults.freelance', color: '#38e27d', icon: '💻' },
-  { nameKey: 'income.defaults.refund', color: '#00d9f5', icon: '↩️' },
-  { nameKey: 'income.defaults.gift', color: '#a855f7', icon: '🎁' },
-  { nameKey: 'income.defaults.investment', color: '#3d6bff', icon: '📈' },
+  { nameKey: 'income.defaults.salary', color: swatch.mint, icon: '💼' },
+  { nameKey: 'income.defaults.freelance', color: swatch.green, icon: '💻' },
+  { nameKey: 'income.defaults.refund', color: swatch.cyan, icon: '↩️' },
+  { nameKey: 'income.defaults.gift', color: swatch.purple, icon: '🎁' },
+  { nameKey: 'income.defaults.investment', color: swatch.azure, icon: '📈' },
 ];
 
 // Seed default income categories once when none exist

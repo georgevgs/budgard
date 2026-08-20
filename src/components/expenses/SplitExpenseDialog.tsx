@@ -258,7 +258,7 @@ const renderRemaining = (remaining: number, currency: string, t: TFunc) => {
       className={cn(
         'text-sm tabular-nums',
         settled && 'text-muted-foreground',
-        !settled && 'text-destructive',
+        !settled && 'text-destructive-ink',
       )}
     >
       {t('expenses.split.remaining', {

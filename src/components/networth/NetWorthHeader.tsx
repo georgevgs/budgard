@@ -27,7 +27,7 @@ const NetWorthHeader = ({ summary, defaultCurrency }: Props) => {
         className={cn(
           'text-3xl font-bold tracking-tight tabular-nums',
           isPositive && 'text-foreground',
-          !isPositive && 'text-destructive',
+          !isPositive && 'text-destructive-ink',
         )}
       >
         {formatCurrency(animatedTotal, defaultCurrency)}
@@ -36,7 +36,7 @@ const NetWorthHeader = ({ summary, defaultCurrency }: Props) => {
       <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border/40">
         <div>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <ArrowDownLeft className="h-3 w-3 text-income" />
+            <ArrowDownLeft className="h-3 w-3 text-income-ink" />
             {t('networth.assetsLabel')}
           </div>
           <p className="text-base font-semibold tabular-nums mt-0.5">
@@ -45,7 +45,7 @@ const NetWorthHeader = ({ summary, defaultCurrency }: Props) => {
         </div>
         <div>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <ArrowUpRight className="h-3 w-3 text-destructive" />
+            <ArrowUpRight className="h-3 w-3 text-destructive-ink" />
             {t('networth.liabilitiesLabel')}
           </div>
           <p className="text-base font-semibold tabular-nums mt-0.5">
@@ -86,7 +86,7 @@ const renderStaleRatesWarning = (
   }
 
   return (
-    <div className="flex items-start gap-2 pt-2 border-t border-border/40 text-xs text-warning">
+    <div className="flex items-start gap-2 pt-2 border-t border-border/40 text-xs text-warning-ink">
       <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
       <span>
         {t('networth.staleRatesWarning', {
@@ -136,8 +136,8 @@ const renderInvestmentRow = (
         <p
           className={cn(
             'text-sm font-semibold tabular-nums',
-            isPositive && 'text-income',
-            !isPositive && 'text-destructive',
+            isPositive && 'text-income-ink',
+            !isPositive && 'text-destructive-ink',
           )}
         >
           {renderSignPrefix(isPositive)}

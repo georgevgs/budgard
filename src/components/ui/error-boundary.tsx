@@ -110,7 +110,7 @@ const ErrorFallback = ({ error, onReset, onReload }: ErrorFallbackProps) => {
       <div className="max-w-md w-full text-center space-y-6">
         <div className="flex justify-center">
           <div className="rounded-full bg-destructive/10 p-4">
-            <AlertTriangle className="h-8 w-8 text-destructive" />
+            <AlertTriangle className="h-8 w-8 text-destructive-ink" />
           </div>
         </div>
 

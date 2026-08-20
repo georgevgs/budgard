@@ -141,7 +141,7 @@ const getActiveIndex = (pathname: string, tabs: Tab[]): number => {
 
 const getTabToneClassName = (isActive: boolean): string => {
   if (isActive) {
-    return 'text-primary';
+    return 'text-primary-ink';
   }
 
   return 'text-muted-foreground';

@@ -216,8 +216,8 @@ const renderBudgetState = ({
           <span
             className={cn(
               'font-medium',
-              isOverBudget && 'text-destructive',
-              isWarning && 'text-warning',
+              isOverBudget && 'text-destructive-ink',
+              isWarning && 'text-warning-ink',
             )}
           >
             {renderRemainingLabel(isOverBudget, remaining, t, currencyCode)}

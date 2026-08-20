@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { swatch } from '@/design/palette';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import OnboardingFlow from '@/components/onboarding/OnboardingFlow';
 import { shouldShowOnboarding } from '@/lib/onboarding';
@@ -131,7 +132,7 @@ describe('OnboardingFlow', () => {
 
     // Select it again
     fireEvent.click(foodButton);
-    expect(foodButton.className).toContain('border-primary');
+    expect(foodButton.className).toContain('border-primary-ink');
   });
 
   it('creates categories with translated names on continue', async () => {
@@ -152,7 +153,7 @@ describe('OnboardingFlow', () => {
     const foodCategory = categories.find((c) => c.name.includes('food'));
 
     expect(foodCategory?.name).toBe('onboarding.presetCategories.food');
-    expect(foodCategory?.color).toBe('#1fdb8a');
+    expect(foodCategory?.color).toBe(swatch.mint);
     expect(foodCategory?.icon).toBe('🍔');
     expect(foodCategory?.user_id).toBe('user-123');
   });

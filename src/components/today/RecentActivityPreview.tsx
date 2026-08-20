@@ -50,7 +50,7 @@ const RecentActivityPreview = ({
         <Link
           to="/activity"
           viewTransition
-          className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {t('today.recent.viewAll')}
           <ArrowRight className="h-4 w-4" />
@@ -153,7 +153,7 @@ const getAmountPrefix = (kind: RecentActivityItem['kind']): string => {
 
 const getAmountTone = (kind: RecentActivityItem['kind']): string => {
   if (kind === 'income') {
-    return 'text-income';
+    return 'text-income-ink';
   }
 
   return 'text-foreground';

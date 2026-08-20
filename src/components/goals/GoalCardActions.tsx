@@ -58,7 +58,7 @@ const GoalCardActions = ({ goal, onEdit, onDelete }: Props) => {
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={handleDeleteClick}
-            className="text-destructive focus:text-destructive"
+            className="text-destructive-ink focus:text-destructive-ink"
           >
             {t('common.delete')}
           </DropdownMenuItem>

@@ -90,7 +90,7 @@ const renderResult = (t: Tx) => (
     <p className="mt-3 text-[22px] font-semibold tabular-nums tracking-tight">
       €24.80
     </p>
-    <span className="mt-3 inline-flex items-center rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
+    <span className="mt-3 inline-flex items-center rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary-ink">
       {t('landing.scan.category')}
     </span>
   </div>

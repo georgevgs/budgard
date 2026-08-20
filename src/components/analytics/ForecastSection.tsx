@@ -91,8 +91,8 @@ const renderSafeToSpend = (
 
 const getSafeToSpendClass = (value: number): string => {
   if (value >= 0) {
-    return 'text-income';
+    return 'text-income-ink';
   }
 
-  return 'text-destructive';
+  return 'text-destructive-ink';
 };

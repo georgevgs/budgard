@@ -1,3 +1,4 @@
+import { celebrationColors } from '@/design/palette';
 import { prefersReducedMotion } from '@/lib/motion';
 
 // One-shot confetti burst on a transient, full-screen canvas. No dependencies.
@@ -14,7 +15,7 @@ type Particle = {
   color: string;
 };
 
-const COLORS = ['#7c4dff', '#1fdb8a', '#00b8f5', '#ffb800', '#ff3da6'];
+
 const PARTICLE_COUNT = 90;
 const GRAVITY = 0.18;
 const DRAG = 0.992;
@@ -87,7 +88,7 @@ const createParticles = (width: number, height: number): Particle[] => {
       rotation: Math.random() * Math.PI,
       spin: (Math.random() - 0.5) * 0.3,
       size: 6 + Math.random() * 6,
-      color: COLORS[i % COLORS.length],
+      color: celebrationColors[i % celebrationColors.length],
     });
   }
 

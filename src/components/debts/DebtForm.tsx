@@ -25,8 +25,9 @@ import { getCurrencySymbol } from '@/lib/currencies';
 import { formatCurrencyInput } from '@/lib/utils';
 import { debtSchema, type DebtFormData } from '@/lib/validations';
 import { type Debt } from '@/types/Debt';
+import { swatch } from '@/design/palette';
 
-const DEFAULT_COLOR = '#ff4d6d';
+const DEFAULT_COLOR = swatch.rose;
 const DEFAULT_ICON = 'credit-card';
 
 type Props = {

@@ -74,7 +74,7 @@ const renderStep = (
   label: React.ReactNode,
 ) => (
   <li key={number} className="flex items-start gap-4">
-    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold shrink-0 mt-0.5">
+    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary-ink text-sm font-bold shrink-0 mt-0.5">
       {number}
     </div>
     <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -100,7 +100,7 @@ const ShareIcon = () => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className="text-primary"
+    className="text-primary-ink"
   >
     <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
     <polyline points="16 6 12 2 8 6" />
@@ -118,7 +118,7 @@ const ChevronDownIcon = () => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className="text-primary"
+    className="text-primary-ink"
   >
     <polyline points="6 9 12 15 18 9" />
   </svg>
@@ -134,7 +134,7 @@ const PlusSquareIcon = () => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className="text-primary"
+    className="text-primary-ink"
   >
     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
     <line x1="12" y1="8" x2="12" y2="16" />
@@ -152,7 +152,7 @@ const CheckIcon = () => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className="text-primary"
+    className="text-primary-ink"
   >
     <polyline points="20 6 9 17 4 12" />
   </svg>

@@ -196,8 +196,12 @@ const getActionsClass = (isOpen: boolean): string => {
 };
 
 const getToggleClass = (isOpen: boolean): string => {
+  // `glow` rather than a neutral drop shadow: the FAB is the largest area of
+  // accent on any screen, and a coloured bloom is what makes it read as lit
+  // rather than merely bright. It follows --primary, so it retints itself
+  // whenever the accent or theme changes.
   const base =
-    'h-14 w-14 rounded-full shadow-lg shadow-black/10 dark:shadow-black/40 transition-transform duration-200 pointer-events-auto';
+    'h-14 w-14 rounded-full glow transition-transform duration-200 pointer-events-auto';
   if (isOpen) {
     return cn(base, 'rotate-45');
   }

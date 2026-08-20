@@ -107,7 +107,7 @@ const getPlanCardClass = (isSelected: boolean): string => {
     'focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background',
   );
   if (isSelected) {
-    return cn(base, 'border-primary bg-primary/5 ring-1 ring-primary');
+    return cn(base, 'border-primary-ink bg-primary/5 ring-1 ring-primary');
   }
 
   return cn(base, 'border-border/60 hover:border-border');
@@ -118,7 +118,7 @@ const renderRadioDot = (isSelected: boolean) => {
     return (
       <span
         aria-hidden
-        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-primary"
+        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-primary-ink"
       >
         <span className="h-2.5 w-2.5 rounded-full bg-primary" />
       </span>

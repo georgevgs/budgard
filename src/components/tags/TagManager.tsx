@@ -116,7 +116,7 @@ const renderTagList = (
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10 -my-1.5 text-muted-foreground hover:text-destructive shrink-0"
+            className="h-10 w-10 -my-1.5 text-muted-foreground hover:text-destructive-ink shrink-0"
             onClick={() => setDeleteTarget(tag)}
             aria-label={t('tags.deleteTag')}
           >

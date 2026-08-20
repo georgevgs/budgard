@@ -17,8 +17,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrencyInput } from '@/lib/utils';
 import { goalSchema, type GoalFormData } from '@/lib/validations';
 import type { Goal } from '@/types/Goal';
+import { swatch } from '@/design/palette';
 
-const DEFAULT_GOAL_COLOR = '#7c4dff';
+const DEFAULT_GOAL_COLOR = swatch.violet;
 const DEFAULT_GOAL_ICON = 'target';
 
 type Props = {

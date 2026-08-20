@@ -52,7 +52,7 @@ const DebtCard = ({ debt, onClick }: Props) => {
               {t(`debts.kind.${debt.kind}`)} · {t('debts.aprSuffix', { apr: debt.apr.toFixed(2) })}
             </p>
           </div>
-          <p className="text-base font-semibold tabular-nums shrink-0 text-destructive">
+          <p className="text-base font-semibold tabular-nums shrink-0 text-destructive-ink">
             {formatCurrency(debt.current_balance, debt.currency)}
           </p>
         </div>
@@ -88,7 +88,7 @@ const renderUnpayableHint = (isUnpayable: boolean, t: TranslateFunction) => {
   if (!isUnpayable) return null;
 
   return (
-    <div className="flex items-center gap-1.5 text-xs text-destructive">
+    <div className="flex items-center gap-1.5 text-xs text-destructive-ink">
       <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
       <span>{t('debts.unpayableShort')}</span>
     </div>

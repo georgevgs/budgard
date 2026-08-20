@@ -27,7 +27,7 @@ const DebtsHeader = ({
       <p className="text-sm font-medium text-muted-foreground">
         {t('debts.totalLabel')}
       </p>
-      <p className="text-3xl font-bold tracking-tight tabular-nums text-destructive">
+      <p className="text-3xl font-bold tracking-tight tabular-nums text-destructive-ink">
         {formatCurrency(animatedTotal, defaultCurrency)}
       </p>
 

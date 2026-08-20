@@ -123,7 +123,7 @@ const renderFooter = (
 const renderPaceBadge = (progress: GoalProgress, t: TranslateFunction) => {
   if (progress.percent >= 1) {
     return (
-      <Badge variant="secondary" className="text-xs bg-income/10 text-income">
+      <Badge variant="secondary" className="text-xs bg-income/10 text-income-ink">
         {t('goals.reached')}
       </Badge>
     );
@@ -149,7 +149,7 @@ const renderPaceBadge = (progress: GoalProgress, t: TranslateFunction) => {
     return (
       <Badge
         variant="secondary"
-        className="text-xs bg-warning/10 text-warning"
+        className="text-xs bg-warning/10 text-warning-ink"
       >
         {t('goals.behind')}
       </Badge>

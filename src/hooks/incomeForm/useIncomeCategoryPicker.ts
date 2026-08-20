@@ -3,7 +3,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategoriesData } from '@/contexts/DataContext';
 import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
-import { INCOME_COLORS } from '@/components/income/IncomeForm.helpers';
+import { incomeColors } from '@/design/palette';
 import type { IncomeFormData } from '@/lib/validations';
 
 export const useIncomeCategoryPicker = (
@@ -52,7 +52,7 @@ export const useIncomeCategoryPicker = (
       try {
         await handleCategoryAdd({
           name: categorySearch.trim(),
-          color: INCOME_COLORS[incomeCategories.length % INCOME_COLORS.length],
+          color: incomeColors[incomeCategories.length % incomeColors.length],
           icon: null,
           user_id: userId,
           type: 'income',

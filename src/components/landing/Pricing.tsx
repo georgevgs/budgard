@@ -105,7 +105,7 @@ const renderSaveBadge = (t: Tx, value: Cycle, plans: ProPlansDisplay) => {
   if (percent <= 0) return null;
 
   return (
-    <span className="ml-2 text-[10px] font-semibold uppercase tracking-wider text-primary">
+    <span className="ml-2 text-[10px] font-semibold uppercase tracking-wider text-primary-ink">
       {t('landing.pricing.savePercent', { percent })}
     </span>
   );
@@ -206,7 +206,7 @@ const renderProPrice = (t: Tx, cycle: Cycle, plans: ProPlansDisplay) => {
 
 const renderFeature = (label: string) => (
   <li key={label} className="flex items-start gap-3 text-sm">
-    <Check className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+    <Check className="h-4 w-4 mt-0.5 text-primary-ink shrink-0" />
     <span className="text-foreground/85">{label}</span>
   </li>
 );

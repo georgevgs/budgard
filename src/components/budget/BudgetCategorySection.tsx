@@ -115,8 +115,8 @@ const renderRow = (row: BudgetCategoryRow, currency: string, t: TFunc) => {
         <span
           className={cn(
             'tabular-nums shrink-0',
-            row.isOver && 'text-destructive font-medium',
-            row.isWarning && 'text-warning font-medium',
+            row.isOver && 'text-destructive-ink font-medium',
+            row.isWarning && 'text-warning-ink font-medium',
           )}
         >
           {formatCurrency(row.spent, currency)}

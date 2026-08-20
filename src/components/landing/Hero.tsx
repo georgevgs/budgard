@@ -76,7 +76,7 @@ const renderHeading = (t: Tx) => (
   <h1 className="font-display text-[44px] sm:text-6xl md:text-7xl font-semibold tracking-[-0.035em] leading-[1.02] text-foreground">
     {t('landing.hero.headingLine1')}
     <br />
-    <span className="text-primary">{t('landing.hero.headingLine2')}</span>
+    <span className="text-primary-ink">{t('landing.hero.headingLine2')}</span>
   </h1>
 );
 

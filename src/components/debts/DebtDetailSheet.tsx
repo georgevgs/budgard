@@ -184,7 +184,7 @@ const renderHistoryList = (
           <Button
             variant="ghost"
             size="icon"
-            className="h-11 w-11 -m-2 text-muted-foreground hover:text-destructive shrink-0"
+            className="h-11 w-11 -m-2 text-muted-foreground hover:text-destructive-ink shrink-0"
             onClick={() => onDelete(p.id)}
             aria-label={t('common.delete')}
           >

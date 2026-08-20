@@ -104,7 +104,7 @@ const PlanView = () => {
           })}
           path="/recurring"
           icon={Repeat}
-          toneClass="bg-primary/12 text-primary"
+          toneClass="bg-primary/12 text-primary-ink"
         />
         <PlanOverviewCard
           title={t('plan.goals.title')}
@@ -112,7 +112,7 @@ const PlanView = () => {
           description={t('plan.goals.description')}
           path="/goals"
           icon={Target}
-          toneClass="bg-income/12 text-income"
+          toneClass="bg-income/12 text-income-ink"
         />
         <PlanOverviewCard
           title={t('plan.debts.title')}
@@ -120,7 +120,7 @@ const PlanView = () => {
           description={t('plan.debts.description')}
           path="/debts"
           icon={CreditCard}
-          toneClass="bg-warning/14 text-warning-foreground"
+          toneClass="bg-warning/14 text-warning-ink"
         />
         <PlanOverviewCard
           title={t('plan.networth.title')}
@@ -128,7 +128,7 @@ const PlanView = () => {
           description={t('plan.networth.description')}
           path="/networth"
           icon={Wallet}
-          toneClass="bg-info/12 text-info"
+          toneClass="bg-info/12 text-info-ink"
         />
       </div>
     </div>

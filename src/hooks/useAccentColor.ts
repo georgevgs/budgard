@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 
 import {
   ACCENTS,
-  ACCENT_FOREGROUND,
   ACCENT_PROPERTIES,
   DEFAULT_ACCENT,
+  accentValues,
   type AccentColor,
   type AccentColorKey,
 } from '@/design/tokens';
@@ -23,9 +23,10 @@ const STORAGE_KEY = 'accent-color';
 const findAccent = (key: string): AccentColor =>
   ACCENTS.find((color) => color.key === key) ?? ACCENTS[0];
 
-/** Swatch shown in Settings — always the accent's light-theme value. */
+/** Dot shown in Settings — always the accent's light-theme fill, so the
+ *  picker keeps the same colours whichever theme is on. */
 export const accentSwatch = (accent: AccentColor): string =>
-  `hsl(${accent.light})`;
+  `hsl(${accent.swatch.solid})`;
 
 const getInitialKey = (): AccentColorKey => {
   try {
@@ -40,17 +41,11 @@ const getInitialKey = (): AccentColorKey => {
   return DEFAULT_ACCENT;
 };
 
-const resolveColor = (accent: AccentColor): string => {
-  if (document.documentElement.classList.contains('dark')) {
-    return accent.dark;
-  }
-
-  return accent.light;
-};
-
-// --primary drives everything the accent touches — buttons, the nav indicator,
-// the FAB, the Today hero tint and the page glow — so there is exactly one
-// value to override and one to clear.
+// The accent owns four properties, not one: the neon fill, the ink that rides
+// on it, the readable-on-canvas variant behind every `text-primary-ink`, and
+// the focus ring. Writing only the fill is what used to leave orange links on
+// a blue theme. `accentValues` returns them in ACCENT_PROPERTIES order so the
+// pre-paint script in index.html and this hook can never disagree.
 const applyAccentToDocument = (key: AccentColorKey): void => {
   const root = document.documentElement;
 
@@ -63,11 +58,12 @@ const applyAccentToDocument = (key: AccentColorKey): void => {
     return;
   }
 
-  const color = resolveColor(findAccent(key));
+  const isDark = root.classList.contains('dark');
+  const values = accentValues(findAccent(key).swatch, isDark);
 
-  root.style.setProperty('--primary', color);
-  root.style.setProperty('--primary-foreground', ACCENT_FOREGROUND);
-  root.style.setProperty('--ring', color);
+  ACCENT_PROPERTIES.forEach((property, index) => {
+    root.style.setProperty(property, values[index]);
+  });
 };
 
 export const useAccentColor = (): {

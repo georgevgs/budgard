@@ -83,10 +83,10 @@ const renderSecondaryCards = (insights: Insight[]) => {
 };
 
 const getIconClass = (variant: Insight['variant']): string => {
-  if (variant === 'warning') return 'text-warning';
-  if (variant === 'positive') return 'text-income';
+  if (variant === 'warning') return 'text-warning-ink';
+  if (variant === 'positive') return 'text-income-ink';
 
-  return 'text-primary';
+  return 'text-primary-ink';
 };
 
 const getHeroBgClass = (variant: Insight['variant']): string => {

@@ -27,7 +27,7 @@ const TodayInsightList = ({ insights }: Props) => {
         <Link
           to="/trends"
           viewTransition
-          className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {t('today.insights.viewTrends')}
           <ArrowRight className="h-4 w-4" />
@@ -77,11 +77,11 @@ const getDividerClass = (index: number): string => {
 
 const getIconClass = (variant: Insight['variant']): string => {
   if (variant === 'positive') {
-    return 'bg-income/12 text-income';
+    return 'bg-income/12 text-income-ink';
   }
   if (variant === 'warning') {
-    return 'bg-warning/14 text-warning-foreground';
+    return 'bg-warning/14 text-warning-ink';
   }
 
-  return 'bg-primary/12 text-primary';
+  return 'bg-primary/12 text-primary-ink';
 };

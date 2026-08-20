@@ -1,3 +1,4 @@
+import { swatch } from '@/design/palette';
 type PresetCategory = {
   nameKey: string;
   color: string;
@@ -5,12 +6,12 @@ type PresetCategory = {
 };
 
 export const PRESET_CATEGORIES: PresetCategory[] = [
-  { nameKey: 'food', color: '#1fdb8a', icon: '🍔' },
-  { nameKey: 'housing', color: '#7c4dff', icon: '🏠' },
-  { nameKey: 'transport', color: '#00b8f5', icon: '🚗' },
-  { nameKey: 'entertainment', color: '#ff5c35', icon: '🎬' },
-  { nameKey: 'subscriptions', color: '#ff3da6', icon: '📱' },
-  { nameKey: 'health', color: '#00c9b7', icon: '💊' },
-  { nameKey: 'shopping', color: '#a855f7', icon: '👕' },
-  { nameKey: 'utilities', color: '#ffb800', icon: '💡' },
+  { nameKey: 'food', color: swatch.mint, icon: '🍔' },
+  { nameKey: 'housing', color: swatch.violet, icon: '🏠' },
+  { nameKey: 'transport', color: swatch.sky, icon: '🚗' },
+  { nameKey: 'entertainment', color: swatch.flame, icon: '🎬' },
+  { nameKey: 'subscriptions', color: swatch.pink, icon: '📱' },
+  { nameKey: 'health', color: swatch.aqua, icon: '💊' },
+  { nameKey: 'shopping', color: swatch.purple, icon: '👕' },
+  { nameKey: 'utilities', color: swatch.gold, icon: '💡' },
 ];

@@ -63,11 +63,11 @@ const pickIndicatorClass = (progress: GoalProgress) => {
 
 const getPercentClass = (progress: GoalProgress) => {
   if (progress.isOverachieved || progress.percent >= 1) {
-    return 'text-income font-semibold';
+    return 'text-income-ink font-semibold';
   }
 
   if (progress.isOverdue) {
-    return 'text-destructive font-medium';
+    return 'text-destructive-ink font-medium';
   }
 
   return 'text-foreground';

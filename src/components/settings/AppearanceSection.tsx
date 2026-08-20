@@ -106,8 +106,10 @@ const getThemeButtonVariant = (isActive: boolean): 'default' | 'outline' => {
 };
 
 const getThemeButtonClass = (themeName: string, isActive: boolean): string => {
+  // The one place a theme's own colour is shown while that theme is NOT on, so
+  // it reads its swatch from the palette rather than from the live tokens.
   if (themeName === 'barbie' && !isActive) {
-    return 'text-pink-500';
+    return 'text-[hsl(var(--barbie-swatch))]';
   }
 
   return '';
@@ -124,7 +126,7 @@ const renderAccentPicker = (
   return (
     <div>
       <p className="text-sm mb-2">{t('settings.appearance.accentColor')}</p>
-      <div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
+      <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
         {ACCENT_COLORS.map((color) => {
           const isSelected = color.key === accent;
 

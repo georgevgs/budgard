@@ -126,7 +126,7 @@ const renderTooltipContent = (
       <ChartTooltipRow
         label={t('networth.totalLabel')}
         value={formatCurrency(point.total, defaultCurrency)}
-        valueClassName={cn('font-semibold', point.total < 0 && 'text-destructive')}
+        valueClassName={cn('font-semibold', point.total < 0 && 'text-destructive-ink')}
       />
       <ChartTooltipRow
         label={t('networth.assetsLabel')}

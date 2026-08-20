@@ -12,11 +12,34 @@
  * fails if any of them has drifted. Never hand-edit the generated CSS.
  *
  * Components never name a primitive and never name a hue — they use Tailwind
- * classes over these tokens (`bg-primary`, `text-income`, `border-border`),
+ * classes over these tokens (`bg-primary`, `text-income-ink`, `border-border`),
  * so a rethemed app is a rethemed file, not a sweep.
+ *
+ * ─── The three-role rule ─────────────────────────────────────────────────
+ * Every branded colour exists as three tokens, and picking the wrong one is
+ * the only way to write an illegible screen:
+ *
+ *   --x               the FILL. Neon. Goes behind something.   `bg-primary`
+ *   --x-foreground    the label riding ON that fill.           `text-primary-foreground`
+ *   --x-ink           the same hue, deep enough to BE text     `text-primary-ink`
+ *                     directly on the page canvas.
+ *
+ * `bg-primary` + `text-primary-foreground` are a pair and travel together.
+ * `text-primary-ink` stands alone on the canvas. A bare `text-primary` is
+ * always a bug — it paints neon on the page background — and `tokens.test.ts`
+ * greps for it so it cannot reach main.
  */
 
-import { accent, barbie, ink, neutral, status, type Hsl } from './palette.ts';
+import {
+  accent,
+  barbie,
+  glow,
+  ink,
+  neutral,
+  status,
+  type Hsl,
+  type Swatch,
+} from './palette.ts';
 
 export type ThemeName = 'light' | 'dark' | 'barbie';
 
@@ -28,9 +51,6 @@ export type ThemeDefinition = {
   selector: string;
   tokens: TokenMap;
 };
-
-/** Ink carried by every filled control, in every theme. See palette.accent. */
-const ON_ACCENT: Hsl = neutral[0];
 
 /**
  * Theme-independent tokens. Geometry, not colour — these belong to the app
@@ -53,47 +73,56 @@ export const BASE_TOKENS: TokenMap = {
   '--dock-max-width': '30rem',
   '--dock-edge': 'max(1rem, calc((100% - var(--dock-max-width)) / 2))',
   '--dock-inset': 'calc(var(--dock-clearance) + 0.5rem)',
+  // Barbie's pink, shown on the theme button while some OTHER theme is on —
+  // the only spot in the app that needs a theme's colour outside that theme.
+  '--barbie-swatch': accent.pink.solid,
 };
 
 /**
- * Light — a plain white canvas with neutral greys. The brand lives in the
- * accent, not in the page, so colour only ever means something.
+ * Light — a warm cream canvas with white cards floating on it.
  *
- * Card and canvas are the same white, which is why `--surface-ring` has to be
- * near-opaque here: the hairline rim is the only thing separating a panel from
- * the page. On the tinted themes the fill already does that work.
+ * The canvas is tinted rather than white so the app reads warm the moment it
+ * opens, and so a card has something to lift off. That also lets
+ * `--surface-ring` sit much lower than it used to: the panel is now separated
+ * by its fill, not by a hairline doing all the work alone.
  */
 const light: TokenMap = {
-  '--background': neutral[0],
+  '--background': neutral[25],
   '--foreground': neutral[900],
   '--card': neutral[0],
   '--card-foreground': neutral[900],
   '--popover': neutral[0],
   '--popover-foreground': neutral[900],
-  '--primary': accent.orange.base,
-  '--primary-foreground': ON_ACCENT,
+  '--primary': accent.orange.solid,
+  '--primary-foreground': accent.orange.on,
+  '--primary-ink': accent.orange.ink,
   '--secondary': neutral[50],
   '--secondary-foreground': neutral[700],
   '--muted': neutral[50],
   '--muted-foreground': neutral[500],
   '--accent': neutral[100],
   '--accent-foreground': neutral[800],
-  '--destructive': status.danger.light,
-  '--destructive-foreground': ON_ACCENT,
+  '--destructive': status.danger.solid,
+  '--destructive-foreground': status.danger.on,
+  '--destructive-ink': status.danger.ink,
   '--border': neutral[200],
   '--input': neutral[200],
-  '--ring': accent.orange.base,
-  '--income': status.income.light,
-  '--income-foreground': ON_ACCENT,
-  '--warning': status.warning.light,
-  // Warning and info ink stay dark: both are used as text ON A TINT
-  // (`bg-warning/14 text-warning-foreground`), never on the solid colour,
-  // so white here would disappear rather than read.
-  '--warning-foreground': status.warningInk.light,
-  '--info': status.info.light,
-  '--info-foreground': status.infoInk.light,
-  '--radius': '0.875rem',
-  '--surface-ring': '0.85',
+  // The focus ring is the ink, never the fill: a ring has to clear 3:1 against
+  // the canvas it is drawn on, which is exactly what the ink guarantees.
+  '--ring': accent.orange.ink,
+  '--income': status.income.solid,
+  '--income-foreground': status.income.on,
+  '--income-ink': status.income.ink,
+  '--warning': status.warning.solid,
+  '--warning-foreground': status.warning.on,
+  '--warning-ink': status.warning.ink,
+  '--info': status.info.solid,
+  '--info-foreground': status.info.on,
+  '--info-ink': status.info.ink,
+  '--radius': '1rem',
+  '--surface-ring': '0.5',
+  // How hard a neon fill bleeds into the page. See `.glow-*` in index.css.
+  '--glow-strength': glow.light,
   // Highlight sweeping across skeleton placeholders — light catching the
   // surface. White in every theme, far more transparent on dark where the
   // muted block already sits close to black.
@@ -105,10 +134,11 @@ const light: TokenMap = {
   '--glass-alpha': '0.62',
   '--glass-sheen': '0.35',
   '--glass-rim': '0 0% 100% / 0.7',
-  '--glass-drop': '0 0% 0% / 0.16',
+  '--glass-drop': '24 60% 12% / 0.16',
 };
 
-/** Dark — warm-tinted blacks, so the orange never looks stuck on cold grey. */
+/** Dark — warm-tinted blacks. The neon has somewhere to fall off into here,
+ *  so every fill runs a step brighter than it can on the light canvas. */
 const dark: TokenMap = {
   '--background': ink[950],
   '--foreground': ink[50],
@@ -116,28 +146,34 @@ const dark: TokenMap = {
   '--card-foreground': ink[50],
   '--popover': ink[900],
   '--popover-foreground': ink[50],
-  '--primary': accent.orange.bright,
-  '--primary-foreground': ON_ACCENT,
+  '--primary': accent.orange.solidDark,
+  '--primary-foreground': accent.orange.on,
+  '--primary-ink': accent.orange.inkDark,
   '--secondary': ink[800],
   '--secondary-foreground': ink[50],
   '--muted': ink[800],
   '--muted-foreground': ink[300],
   '--accent': ink[700],
   '--accent-foreground': ink[50],
-  '--destructive': status.danger.dark,
-  '--destructive-foreground': '0 0% 98%',
-  '--border': ink[500],
-  '--input': ink[500],
-  '--ring': accent.orange.bright,
-  '--income': status.income.dark,
-  '--income-foreground': ON_ACCENT,
-  '--warning': status.warning.dark,
-  '--warning-foreground': status.warningInk.dark,
-  '--info': status.info.dark,
-  '--info-foreground': status.infoInk.dark,
-  '--surface-ring': '0.3',
+  '--destructive': status.danger.solidDark,
+  '--destructive-foreground': status.danger.on,
+  '--destructive-ink': status.danger.inkDark,
+  '--border': ink[700],
+  '--input': ink[700],
+  '--ring': accent.orange.inkDark,
+  '--income': status.income.solidDark,
+  '--income-foreground': status.income.on,
+  '--income-ink': status.income.inkDark,
+  '--warning': status.warning.solidDark,
+  '--warning-foreground': status.warning.on,
+  '--warning-ink': status.warning.inkDark,
+  '--info': status.info.solidDark,
+  '--info-foreground': status.info.on,
+  '--info-ink': status.info.inkDark,
+  '--surface-ring': '0.4',
+  '--glow-strength': glow.dark,
   '--skeleton-sheen': '0 0% 100% / 0.07',
-  '--glass-bg': '0 0% 11%',
+  '--glass-bg': '26 24% 10%',
   '--glass-alpha': '0.72',
   '--glass-sheen': '0.08',
   '--glass-rim': '0 0% 100% / 0.12',
@@ -152,27 +188,33 @@ const barbieTheme: TokenMap = {
   '--card-foreground': barbie.ink,
   '--popover': neutral[0],
   '--popover-foreground': barbie.ink,
-  '--primary': accent.pink.base,
-  '--primary-foreground': ON_ACCENT,
+  '--primary': accent.pink.solid,
+  '--primary-foreground': accent.pink.on,
+  '--primary-ink': accent.pink.ink,
   '--secondary': barbie.secondary,
   '--secondary-foreground': barbie.secondaryInk,
   '--muted': barbie.muted,
   '--muted-foreground': barbie.mutedInk,
   '--accent': barbie.mint,
   '--accent-foreground': barbie.mintInk,
-  '--destructive': status.danger.barbie,
-  '--destructive-foreground': ON_ACCENT,
+  '--destructive': status.danger.solid,
+  '--destructive-foreground': status.danger.on,
+  '--destructive-ink': status.danger.ink,
   '--border': barbie.rule,
   '--input': barbie.rule,
-  '--ring': accent.pink.base,
-  '--income': status.income.barbie,
-  '--income-foreground': ON_ACCENT,
-  '--warning': status.warning.barbie,
-  '--warning-foreground': status.warningInk.barbie,
-  '--info': status.info.barbie,
-  '--info-foreground': status.infoInk.barbie,
-  '--radius': '1.125rem',
+  '--ring': accent.pink.ink,
+  '--income': status.income.solid,
+  '--income-foreground': status.income.on,
+  '--income-ink': status.income.ink,
+  '--warning': status.warning.solid,
+  '--warning-foreground': status.warning.on,
+  '--warning-ink': status.warning.ink,
+  '--info': status.info.solid,
+  '--info-foreground': status.info.on,
+  '--info-ink': status.info.ink,
+  '--radius': '1.25rem',
   '--surface-ring': '0.45',
+  '--glow-strength': glow.barbie,
   '--glass-bg': barbie.glass,
   '--glass-alpha': '0.7',
   '--glass-sheen': '0.46',
@@ -193,42 +235,62 @@ export const THEMES: ThemeDefinition[] = [
 
 export type AccentColorKey =
   | 'sunset'
-  | 'ocean'
-  | 'lavender'
-  | 'mint'
   | 'coral'
   | 'gold'
-  | 'slate';
+  | 'lime'
+  | 'mint'
+  | 'ocean'
+  | 'lavender'
+  | 'electric';
 
 export type AccentColor = {
   key: AccentColorKey;
-  /** Written to --primary/--ring on the light and dark themes respectively. */
-  light: Hsl;
-  dark: Hsl;
+  swatch: Swatch;
 };
 
 /**
- * User-selectable accents. Each replaces --primary and --ring only; the label
- * ink is always white, so a hue that cannot carry white is not a valid accent.
+ * User-selectable accents, ordered around the colour wheel so the picker grid
+ * reads as a spectrum rather than a bag of colours.
+ *
+ * Keys are stored in localStorage, so they outlive any renaming of the hue
+ * behind them — `sunset` has been the default since before it was Fanta.
  */
 export const ACCENTS: AccentColor[] = [
-  { key: 'sunset', light: accent.orange.base, dark: accent.orange.bright },
-  { key: 'ocean', light: accent.sky.base, dark: accent.sky.bright },
-  { key: 'lavender', light: accent.violet.base, dark: accent.violet.bright },
-  { key: 'mint', light: accent.emerald.base, dark: accent.emerald.bright },
-  { key: 'coral', light: accent.rose.base, dark: accent.rose.bright },
-  { key: 'gold', light: accent.amber.base, dark: accent.amber.bright },
-  { key: 'slate', light: accent.indigo.base, dark: accent.indigo.bright },
+  { key: 'sunset', swatch: accent.orange },
+  { key: 'coral', swatch: accent.coral },
+  { key: 'gold', swatch: accent.amber },
+  { key: 'lime', swatch: accent.lime },
+  { key: 'mint', swatch: accent.emerald },
+  { key: 'ocean', swatch: accent.sky },
+  { key: 'lavender', swatch: accent.violet },
+  { key: 'electric', swatch: accent.indigo },
 ];
 
 export const DEFAULT_ACCENT: AccentColorKey = 'sunset';
 
-/** The one ink value every accent, in every theme, puts on top of itself. */
-export const ACCENT_FOREGROUND: Hsl = ON_ACCENT;
+/** Ink every fill carries unless its own swatch says otherwise. */
+export const ACCENT_FOREGROUND: Hsl = neutral[0];
 
 /** Properties the accent owns — the full set to set, and to clear for barbie. */
 export const ACCENT_PROPERTIES = [
   '--primary',
   '--primary-foreground',
+  '--primary-ink',
   '--ring',
 ] as const;
+
+/**
+ * The four values `applyAccentToDocument` and the pre-paint script write, in
+ * the order `ACCENT_PROPERTIES` lists them. Kept here so the runtime hook and
+ * the inlined script cannot disagree about what an accent means.
+ */
+export const accentValues = (
+  swatch: Swatch,
+  isDark: boolean,
+): [Hsl, Hsl, Hsl, Hsl] => {
+  if (isDark) {
+    return [swatch.solidDark, swatch.on, swatch.inkDark, swatch.inkDark];
+  }
+
+  return [swatch.solid, swatch.on, swatch.ink, swatch.ink];
+};

@@ -62,7 +62,7 @@ const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
         <p
           className={cn(
             'text-base font-semibold tabular-nums shrink-0',
-            liability && 'text-destructive',
+            liability && 'text-destructive-ink',
             !liability && 'text-foreground',
           )}
         >

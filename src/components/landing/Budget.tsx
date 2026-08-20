@@ -3,6 +3,7 @@ import SectionShell from '@/components/landing/SectionShell';
 import EyebrowLabel from '@/components/landing/EyebrowLabel';
 import DeviceFrame from '@/components/landing/DeviceFrame';
 import Reveal from '@/components/landing/Reveal';
+import { swatch } from '@/design/palette';
 
 type Tx = (key: string) => string;
 
@@ -62,10 +63,10 @@ const renderCard = (t: Tx) => (
 );
 
 const rows = (t: Tx): CategoryRow[] => [
-  { name: t('landing.budget.cats.housing'), percent: 80, amount: '€800', color: '#7c4dff' },
-  { name: t('landing.budget.cats.food'), percent: 39, amount: '€156', color: '#1fdb8a' },
-  { name: t('landing.budget.cats.transport'), percent: 50, amount: '€100', color: '#00b8f5' },
-  { name: t('landing.budget.cats.subs'), percent: 13, amount: '€26', color: '#ff3da6' },
+  { name: t('landing.budget.cats.housing'), percent: 80, amount: '€800', color: swatch.violet },
+  { name: t('landing.budget.cats.food'), percent: 39, amount: '€156', color: swatch.mint },
+  { name: t('landing.budget.cats.transport'), percent: 50, amount: '€100', color: swatch.sky },
+  { name: t('landing.budget.cats.subs'), percent: 13, amount: '€26', color: swatch.pink },
 ];
 
 const renderRow = (row: CategoryRow) => (

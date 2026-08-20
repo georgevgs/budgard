@@ -107,12 +107,12 @@ const renderTooltipContent = (
     <ChartTooltipShell title={point.label}>
       <ChartTooltipRow
         label={t('analytics.forecast.projectedIncome')}
-        labelClassName="text-income"
+        labelClassName="text-income-ink"
         value={`+${formatCurrency(point.projectedIncome, currency)}`}
       />
       <ChartTooltipRow
         label={t('analytics.forecast.projectedSpending')}
-        labelClassName="text-destructive"
+        labelClassName="text-destructive-ink"
         value={`-${formatCurrency(point.projectedExpenses, currency)}`}
       />
       <ChartTooltipRow
@@ -128,10 +128,10 @@ const renderTooltipContent = (
 
 const getNetClass = (net: number): string => {
   if (net >= 0) {
-    return 'text-income';
+    return 'text-income-ink';
   }
 
-  return 'text-destructive';
+  return 'text-destructive-ink';
 };
 
 const renderNetSign = (net: number): string => {

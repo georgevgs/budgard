@@ -45,7 +45,7 @@ const UpcomingBillsCard = ({
         <Link
           to="/recurring"
           viewTransition
-          className="inline-flex min-h-11 shrink-0 items-center gap-1 text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1 text-sm font-semibold text-primary-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {t('upcomingBills.manage')}
           <ArrowRight className="h-4 w-4" />
@@ -84,7 +84,7 @@ const renderEntry = (
       key={entry.item.id}
       className={`flex items-center gap-3 px-4 py-3.5 ${borderClass}`}
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary-ink">
         <CalendarClock className="h-4 w-4" />
       </span>
       <div className="min-w-0 flex-1">

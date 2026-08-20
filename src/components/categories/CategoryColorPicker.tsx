@@ -1,34 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import Check from 'lucide-react/dist/esm/icons/check';
 import { Input } from '@/components/ui/input';
+import { dataColors } from '@/design/palette';
 import { cn } from '@/lib/utils';
-
-const CATEGORY_COLORS = [
-  '#ff4d6d',
-  '#ff5c35',
-  '#ff9500',
-  '#ffb800',
-  '#d7f52e',
-  '#a6e22e',
-  '#38e27d',
-  '#1fdb8a',
-  '#00c9b7',
-  '#00d9f5',
-  '#00b8f5',
-  '#3d6bff',
-  '#635bff',
-  '#7c4dff',
-  '#a855f7',
-  '#d946ef',
-  '#ff3da6',
-  '#ff6bb5',
-  '#ff7ad9',
-  '#ff8e5e',
-  '#00a896',
-  '#5b8cff',
-  '#8892b0',
-  '#39415c',
-] as const;
 
 const HEX_PATTERN = /^#[0-9A-Fa-f]{0,6}$/;
 
@@ -54,7 +28,7 @@ const CategoryColorPicker = ({
   return (
     <>
       <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 pt-1">
-        {CATEGORY_COLORS.map((color) => (
+        {dataColors.map((color) => (
           <button
             key={color}
             type="button"

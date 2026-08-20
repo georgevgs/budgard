@@ -91,7 +91,7 @@ const renderError = (error: string | null) => {
   if (!error) return null;
 
   return (
-    <p className="text-sm text-destructive text-center" role="alert">
+    <p className="text-sm text-destructive-ink text-center" role="alert">
       {error}
     </p>
   );

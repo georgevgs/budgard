@@ -134,7 +134,7 @@ const renderStrategyTabs = (
 
 const getStrategyTabClass = (isActive: boolean): string => {
   if (isActive) {
-    return 'bg-primary/10 text-primary';
+    return 'bg-primary/10 text-primary-ink';
   }
 
   return 'text-muted-foreground hover:bg-muted/60';
@@ -151,7 +151,7 @@ const renderResults = (
 
   if (selected.unpayable) {
     return (
-      <p className="text-xs text-destructive pt-3 border-t border-border/40">
+      <p className="text-xs text-destructive-ink pt-3 border-t border-border/40">
         {t('debts.planner.unpayable')}
       </p>
     );

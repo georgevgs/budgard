@@ -17,9 +17,10 @@ import { categorySchema, type CategoryFormData } from '@/lib/validations';
 import type { Category } from '@/types/Category';
 import CategoryFormFields from '@/components/categories/CategoryFormFields';
 import { type CategoryKind } from '@/components/categories/CategoryKindSelector';
+import { swatch } from '@/design/palette';
 
-const DEFAULT_CATEGORY_COLOR = '#7c4dff';
-const DEFAULT_INCOME_COLOR = '#1fdb8a';
+const DEFAULT_CATEGORY_COLOR = swatch.violet;
+const DEFAULT_INCOME_COLOR = swatch.mint;
 
 type Props = {
   category?: Category;

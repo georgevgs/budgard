@@ -55,9 +55,9 @@ const pickIndicatorClass = (progress: DebtProgress, isCleared: boolean) => {
 }
 
 const getPercentClass = (progress: DebtProgress, isCleared: boolean) => {
-  if (isCleared) return 'text-income font-semibold';
+  if (isCleared) return 'text-income-ink font-semibold';
   if (progress.isUnpayable || progress.balanceIncreased) {
-    return 'text-destructive font-medium';
+    return 'text-destructive-ink font-medium';
   }
 
   return 'text-foreground';

@@ -57,7 +57,7 @@ const renderCard = (t: Tx) => (
       <p className="mt-1 text-[32px] font-semibold tabular-nums tracking-tight">
         €18,420
       </p>
-      <p className="text-[11px] text-income">{t('landing.flow.cardDelta')}</p>
+      <p className="text-[11px] text-income-ink">{t('landing.flow.cardDelta')}</p>
       <div className="mt-6 space-y-3">
         {rows().map((row) => renderRow(row, t))}
       </div>
@@ -97,7 +97,7 @@ const renderRow = (row: Row, t: Tx) => (
 
 const amountClass = (isIncome: boolean): string => {
   if (isIncome) {
-    return 'tabular-nums font-semibold text-income';
+    return 'tabular-nums font-semibold text-income-ink';
   }
 
   return 'tabular-nums font-semibold';

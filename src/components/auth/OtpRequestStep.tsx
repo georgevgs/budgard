@@ -35,7 +35,7 @@ const OtpRequestStep = ({
             type="email"
             defaultValue={initialEmail}
             placeholder={t('auth.enterEmail')}
-            className={cn('w-full h-10', error && 'border-destructive')}
+            className={cn('w-full h-10', error && 'border-destructive-ink')}
             disabled={isAuthLoading}
             autoComplete="email"
             autoCorrect="off"
@@ -118,7 +118,7 @@ const renderEmailError = (error: string | null) => {
   if (!error) return null;
 
   return (
-    <p id="email-error" className="text-sm text-destructive">
+    <p id="email-error" className="text-sm text-destructive-ink">
       {error}
     </p>
   );

@@ -7,9 +7,10 @@
 
 import {
   ACCENTS,
-  ACCENT_FOREGROUND,
+  ACCENT_PROPERTIES,
   BASE_TOKENS,
   THEMES,
+  accentValues,
   type TokenMap,
 } from './tokens.ts';
 
@@ -21,6 +22,10 @@ const GENERATED_HEADER = [
   ' * dev start and build. Edit the tokens; run the build; commit both.',
   ' */',
 ].join('\n');
+
+/** A tuple of HSL triples as the JS array literal the init script embeds. */
+const quote = (values: readonly string[]): string =>
+  `[${values.map((value) => `'${value}'`).join(', ')}]`;
 
 const formatBlock = (selector: string, tokens: TokenMap): string => {
   const declarations = Object.entries(tokens)
@@ -53,9 +58,17 @@ export const buildTokensCss = (): string => {
  * be allow-listed in the CSP; the plugin keeps netlify.toml in step.
  */
 export const buildThemeInitScript = (): string => {
-  const accents = ACCENTS.map(
-    (item) => `    ${item.key}: ['${item.light}', '${item.dark}']`,
-  ).join(',\n');
+  // Each accent ships as the exact tuple of values the four ACCENT_PROPERTIES
+  // take, light first then dark, so the script does no colour reasoning of its
+  // own — it indexes a table this module built.
+  const accents = ACCENTS.map((item) => {
+    const light = accentValues(item.swatch, false);
+    const dark = accentValues(item.swatch, true);
+
+    return `    ${item.key}: [${quote(light)}, ${quote(dark)}]`;
+  }).join(',\n');
+
+  const properties = ACCENT_PROPERTIES.map((name) => `'${name}'`).join(', ');
 
   return `(function () {
   var root = document.documentElement;
@@ -78,6 +91,7 @@ export const buildThemeInitScript = (): string => {
   // Barbie has its own fixed palette — never override its primary.
   if (savedTheme === 'barbie') return;
 
+  var properties = [${properties}];
   var accents = {
 ${accents}
   };
@@ -85,10 +99,11 @@ ${accents}
   var accent = savedAccent && accents[savedAccent];
   if (!accent) return;
 
-  var color = savedTheme === 'dark' ? accent[1] : accent[0];
-  root.style.setProperty('--primary', color);
-  root.style.setProperty('--primary-foreground', '${ACCENT_FOREGROUND}');
-  root.style.setProperty('--ring', color);
+  var values = savedTheme === 'dark' ? accent[1] : accent[0];
+
+  for (var i = 0; i < properties.length; i++) {
+    root.style.setProperty(properties[i], values[i]);
+  }
 })();`;
 };
 

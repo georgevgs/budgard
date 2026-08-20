@@ -173,7 +173,7 @@ const renderDescription = (
 const renderAmountError = (message: string | undefined) => {
   if (!message) return null;
 
-  return <p className="text-sm text-destructive">{message}</p>;
+  return <p className="text-sm text-destructive-ink">{message}</p>;
 };
 
 const renderSubmitContent = (

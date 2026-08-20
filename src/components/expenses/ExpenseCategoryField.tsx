@@ -78,7 +78,7 @@ const ExpenseCategoryField = ({ form, categories }: Props) => {
                   value={MANAGE_VALUE}
                   className="mt-1 border-t border-border/40"
                 >
-                  <div className="flex items-center gap-2 text-primary">
+                  <div className="flex items-center gap-2 text-primary-ink">
                     <Settings2 className="h-4 w-4" />
                     {t('categories.manageCategories')}
                   </div>

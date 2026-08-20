@@ -8,15 +8,6 @@ import {
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
-export const INCOME_COLORS = [
-  '#1fdb8a',
-  '#38e27d',
-  '#00c9b7',
-  '#00d9f5',
-  '#00b8f5',
-  '#a6e22e',
-];
-
 export type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
@@ -95,7 +86,7 @@ export const renderConversionPreview = (
 
   if (hasError) {
     return (
-      <p className="text-xs text-destructive mt-1">
+      <p className="text-xs text-destructive-ink mt-1">
         {t('expenses.currency.rateError')}
       </p>
     );
@@ -156,7 +147,7 @@ export const renderBottomAction = (
     return (
       <button
         type="button"
-        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-accent focus-visible:outline-none focus-visible:bg-accent text-left text-primary border-t border-border/40 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-accent focus-visible:outline-none focus-visible:bg-accent text-left text-primary-ink border-t border-border/40 disabled:opacity-50 disabled:cursor-not-allowed"
         onClick={onCreate}
         disabled={isCreating}
       >

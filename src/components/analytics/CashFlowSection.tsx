@@ -50,7 +50,7 @@ const CashFlowSection = ({ selectedYear }: Props) => {
                 <p className="text-xs text-muted-foreground">
                   {t('cashFlow.totalIncome')}
                 </p>
-                <p className="text-base font-semibold tabular-nums text-income mt-0.5">
+                <p className="text-base font-semibold tabular-nums text-income-ink mt-0.5">
                   {formatCurrency(yearTotals.totalIncome, defaultCurrency)}
                 </p>
               </div>
@@ -58,7 +58,7 @@ const CashFlowSection = ({ selectedYear }: Props) => {
                 <p className="text-xs text-muted-foreground">
                   {t('cashFlow.totalExpense')}
                 </p>
-                <p className="text-base font-semibold tabular-nums text-destructive mt-0.5">
+                <p className="text-base font-semibold tabular-nums text-destructive-ink mt-0.5">
                   {formatCurrency(yearTotals.totalExpense, defaultCurrency)}
                 </p>
               </div>
@@ -95,10 +95,10 @@ type TranslateFunction = (
 
 const getNetClass = (net: number): string => {
   if (net >= 0) {
-    return 'text-income';
+    return 'text-income-ink';
   }
 
-  return 'text-destructive';
+  return 'text-destructive-ink';
 };
 
 const renderNetSign = (net: number): string => {

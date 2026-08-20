@@ -65,7 +65,7 @@ const OnboardingCategoriesStep = ({
               onClick={() => handleCategoryToggle(index)}
               className={cn(
                 'flex items-center gap-2.5 rounded-xl px-3 py-3 text-sm font-medium transition-all border',
-                isSelected && 'border-primary bg-primary/10 text-foreground',
+                isSelected && 'border-primary-ink bg-primary/10 text-foreground',
                 !isSelected && 'border-border/50 bg-card text-muted-foreground hover:border-border',
               )}
             >
@@ -117,5 +117,5 @@ export default OnboardingCategoriesStep;
 const renderCheckIcon = (isSelected: boolean) => {
   if (!isSelected) return null;
 
-  return <Check className="h-4 w-4 text-primary shrink-0" />;
+  return <Check className="h-4 w-4 text-primary-ink shrink-0" />;
 };
