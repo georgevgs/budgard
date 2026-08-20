@@ -4,6 +4,24 @@
   to = "/reset.html"
   status = 200
 
+# Content-hashed assets must 404 when they are missing — they must NOT reach
+# the SPA catch-all below. Netlify would otherwise answer a dead chunk URL with
+# index.html at status 200, and the immutable /assets/* header further down
+# stamps that HTML with a one-year cache. The browser then holds HTML under a
+# .js URL forever, fails to parse it as a module, and the app white-screens
+# until storage is cleared — which is why the failure survives a reload.
+# Real files are matched before redirects are evaluated, so live assets are
+# unaffected. /ocr/* carries the same immutable header and needs the same guard.
+[[redirects]]
+  from = "/assets/*"
+  to = "/assets/:splat"
+  status = 404
+
+[[redirects]]
+  from = "/ocr/*"
+  to = "/ocr/:splat"
+  status = 404
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
