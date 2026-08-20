@@ -2,7 +2,8 @@ import { EmbeddedCategory } from '@/types/Category.ts';
 import { Debt } from '@/types/Debt.ts';
 import { EmbeddedTag } from '@/types/Tag.ts';
 
-export type TransactionType = 'expense' | 'income' | 'debt_payment';
+// Only Expense.type consumes this; nothing imports it.
+type TransactionType = 'expense' | 'income' | 'debt_payment';
 
 export type Expense = {
   id: string;

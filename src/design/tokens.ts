@@ -268,9 +268,6 @@ export const ACCENTS: AccentColor[] = [
 
 export const DEFAULT_ACCENT: AccentColorKey = 'sunset';
 
-/** Ink every fill carries unless its own swatch says otherwise. */
-export const ACCENT_FOREGROUND: Hsl = neutral[0];
-
 /** Properties the accent owns — the full set to set, and to clear for barbie. */
 export const ACCENT_PROPERTIES = [
   '--primary',
