@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import BrandMark from '@/components/common/BrandMark';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -32,12 +33,7 @@ export default Footer;
 const renderBrandColumn = (t: Tx) => (
   <div>
     <div className="flex items-center gap-2.5">
-      <img
-        src="/icon-192x192.png"
-        alt=""
-        aria-hidden="true"
-        className="h-7 w-7 rounded-lg"
-      />
+      <BrandMark className="h-7 w-7" />
       <span className="font-display font-semibold tracking-[-0.025em] text-[15px]">
         Budgard
       </span>

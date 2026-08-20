@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#1B1613" />
+  <g transform="translate(420 91) scale(1.75)">
+    <path
+      fill="#FFFFFF"
+      fill-rule="evenodd"
+      d="M70 40h106c22.644 0 41 18.356 41 41v8h5c9.941 0 18 8.059 18 18v50c0 9.941-8.059 18-18 18h-5v3c0 20.987-17.013 38-38 38H70c-23.196 0-42-18.804-42-42V82c0-23.196 18.804-42 42-42Zm3 47a10 10 0 1 0 0 20h70a10 10 0 1 0 0-20H73Zm0 41a10 10 0 1 0 0 20h46a10 10 0 1 0 0-20H73Zm130-7a11 11 0 1 0 0 22 11 11 0 0 0 0-22Z"
+    />
+  </g>
+  <text
+    x="600"
+    y="535"
+    fill="#FFFFFF"
+    font-family="ui-rounded, 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, sans-serif"
+    font-size="72"
+    font-weight="650"
+    letter-spacing="-2"
+    text-anchor="middle"
+  >Budgard</text>
+</svg>

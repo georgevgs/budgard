@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import BrandMark from '@/components/common/BrandMark';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -34,12 +35,7 @@ export default Header;
 
 const renderWordmark = () => (
   <a href="#top" className="flex items-center gap-2.5 group">
-    <img
-      src="/icon-192x192.png"
-      alt=""
-      aria-hidden="true"
-      className="h-7 w-7 rounded-lg transition-transform group-hover:scale-105"
-    />
+    <BrandMark className="h-7 w-7 transition-transform group-hover:scale-105" />
     <span className="font-display font-semibold tracking-[-0.025em] text-[15px]">
       Budgard
     </span>

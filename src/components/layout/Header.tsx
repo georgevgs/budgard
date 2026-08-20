@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
+import BrandMark from '@/components/common/BrandMark';
 import { Button } from '@/components/ui/button';
 import ProfileMenu from '@/components/layout/ProfileMenu';
 
@@ -47,13 +48,7 @@ const Header = () => {
           aria-label={t('navigation.goHome')}
           className="justify-self-center flex items-center gap-2 rounded-lg px-2 py-1 -mx-2 -my-1 transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <img
-            src="/icon-192x192.png"
-            alt=""
-            aria-hidden="true"
-            className="h-7 w-7 rounded-lg"
-            style={{ objectFit: 'contain' }}
-          />
+          <BrandMark className="h-7 w-7" />
           <span className="font-display text-lg font-semibold tracking-[-0.025em]">
             Budgard
           </span>

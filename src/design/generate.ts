@@ -138,11 +138,11 @@ const lightTokens = (): TokenMap => {
   return light.tokens;
 };
 
-/** Browser chrome and PWA splash colours, both derived from the light theme. */
+/** Browser chrome and PWA launch colours, both derived from the light theme. */
 export const buildManifestColors = (): {
   theme_color: string;
   background_color: string;
 } => ({
   theme_color: hslToHex(lightTokens()['--background']),
-  background_color: hslToHex(lightTokens()['--primary']),
+  background_color: hslToHex(lightTokens()['--foreground']),
 });

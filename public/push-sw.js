@@ -52,7 +52,7 @@ self.addEventListener('push', (event) => {
   const options = {
     body: payload.body || '',
     icon: payload.icon || '/icon-192x192.png',
-    badge: '/icon-192x192.png',
+    badge: '/notification-badge.png',
     tag: payload.tag || 'budgard-notification',
     data: payload.data || { url: '/' },
     vibrate: [10, 40, 10],
