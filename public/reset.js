@@ -1,9 +1,29 @@
 var status = document.getElementById('status');
 var params = new URLSearchParams(window.location.search);
-var returnTo = params.get('from') || '/';
-if (!returnTo.startsWith('/') || returnTo.startsWith('//')) {
-  returnTo = '/';
-}
+
+// Resolve `?from=` against our own origin and keep only the path. A prefix
+// check is not enough: browsers fold backslashes into slashes for http(s)
+// URLs, so "/\\evil.com" survives a startsWith('//') test and then lands on
+// https://evil.com. Comparing the resolved origin also rejects absolute URLs
+// and javascript: (which resolves to a null origin).
+var resolveReturnTo = function (raw) {
+  if (!raw) {
+    return '/';
+  }
+
+  try {
+    var url = new URL(raw, window.location.origin);
+    if (url.origin !== window.location.origin) {
+      return '/';
+    }
+
+    return url.pathname + url.search + url.hash;
+  } catch (err) {
+    return '/';
+  }
+};
+
+var returnTo = resolveReturnTo(params.get('from'));
 
 var reset = async function () {
   try {

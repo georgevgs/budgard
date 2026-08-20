@@ -17,6 +17,18 @@ import { designTokens } from "./plugins/designTokens.ts";
 // every module of the package. Anything unmatched returns undefined so
 // dynamic-import-only packages (recharts, browser-image-compression, ...)
 // keep their natural lazy chunks.
+//
+// Only group a package here when it is EITHER genuinely needed at boot
+// (react, supabase) OR must be kept whole and off the critical path
+// (sentry). Grouping anything else backfires: rolldown hoists a shared
+// module into whichever named chunk already exists, so one eager import can
+// drag in the whole group. `@radix-ui/react-slot` (eager via Button) used to
+// land in a "ui-vendor" group holding dialog/select/popover/dropdown, and
+// that group in turn statically imported a "date-vendor" group — 192 KB raw
+// preloaded for a component that needs none of it. Removing the ui/form/date
+// groups cut the initial critical path from 260.7 to 204.0 kB gzip. Leave
+// react-hook-form, zod, date-fns, react-day-picker and radix unmatched:
+// Vite chunks them per-route, which is what we want.
 const matchesPackage = (id: string, packages: string[]): boolean =>
   packages.some((pkg) => id.includes(`node_modules/${pkg}/`));
 
@@ -40,29 +52,6 @@ const chunkForModule = (id: string): string | undefined => {
     ])
   ) {
     return "react-vendor";
-  }
-
-  if (
-    matchesPackage(id, [
-      "@radix-ui/react-dialog",
-      "@radix-ui/react-dropdown-menu",
-      "@radix-ui/react-select",
-      "@radix-ui/react-toast",
-      "@radix-ui/react-popover",
-    ])
-  ) {
-    return "ui-vendor";
-  }
-
-  // recharts intentionally NOT manualChunked — it's only used by lazy
-  // routes (AnalyticsView, NetWorthChart). Letting Vite chunk it
-  // naturally keeps it out of the entry's modulepreload list.
-  if (matchesPackage(id, ["react-hook-form", "@hookform/resolvers", "zod"])) {
-    return "form-vendor";
-  }
-
-  if (matchesPackage(id, ["date-fns", "react-day-picker"])) {
-    return "date-vendor";
   }
 
   // Supabase realtime client cannot be tree-shaken (statically imported
@@ -246,7 +235,13 @@ export default defineConfig({
     VitePWA({
       registerType: "prompt",
       manifest: false,
-      includeAssets: ["icon-192x192.png", "icon-512x512.png", "apple-touch-icon.png", "manifest.json"],
+      // No `includeAssets`: globPatterns below already matches every png and
+      // json in dist/. Listing them again added a redundant second precache
+      // entry for each (icon-512, icon-192, apple-touch-icon, manifest.json).
+      // Workbox deduplicates identical url+revision pairs, so this cost no
+      // extra bandwidth — but it is a live hazard: the moment the two sources
+      // disagree on a revision, workbox aborts install with
+      // add-to-cache-list-conflicting-entries and the SW never activates.
       workbox: {
         importScripts: ['/push-sw.js'],
         // NOTE: we intentionally do NOT set `clientsClaim: true`. That claims on
@@ -266,6 +261,9 @@ export default defineConfig({
         // telemetry stays network-only.
         globIgnores: [
           "**/ocr/**",
+          // Social-preview image: fetched by crawlers off our CDN, never by
+          // the app itself. No reason to spend 98 KB of every SW install.
+          "**/og-image.png",
           "**/assets/pdfmake-*.js",
           "**/assets/vfs_fonts-*.js",
           "**/assets/sentry-*.js",
