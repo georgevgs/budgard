@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import ActivityTransactionRow from '@/components/activity/ActivityTransactionRow';
+import SwipeableRow from '@/components/activity/SwipeableRow';
 import PendingHistoryNotice from '@/components/common/PendingHistoryNotice';
 import { groupExpensesByDate } from '@/lib/dateGrouping';
 import { useDateLocale } from '@/hooks/useDateLocale';
@@ -28,6 +30,13 @@ const ActivityFeed = (props: Props) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const hasMore = visibleCount < props.transactions.length;
+  // The list extends itself as it is scrolled. A "Show more" button asks the
+  // user to keep confirming that they do, in fact, want to keep reading.
+  const sentinelRef = useInfiniteScroll({
+    hasMore,
+    onLoadMore: () => setVisibleCount((current) => current + PAGE_SIZE),
+  });
   const groups = useMemo(
     () =>
       groupExpensesByDate(
@@ -68,14 +77,10 @@ const ActivityFeed = (props: Props) => {
 
   return (
     <div className="space-y-5">
-      {groups.map((group) => renderGroup(group, props))}
+      {groups.map((group) => renderGroup(group, props, t))}
       {renderPendingHistory(props.isHistoryPending)}
-      {renderLoadMore(
-        visibleCount,
-        props.transactions.length,
-        setVisibleCount,
-        t,
-      )}
+      <div ref={sentinelRef} aria-hidden="true" className="h-px" />
+      {renderLoadMore(hasMore, () => setVisibleCount(visibleCount + PAGE_SIZE), t)}
     </div>
   );
 };
@@ -120,8 +125,12 @@ const renderSearchEverywhere = (
   );
 };
 
-const renderGroup = (group: DateGroup, props: Props) => (
-  <section key={group.date} aria-labelledby={`activity-${group.date}`}>
+const renderGroup = (group: DateGroup, props: Props, t: TFunc) => (
+  <section
+    key={group.date}
+    aria-labelledby={`activity-${group.date}`}
+    className="activity-day-group"
+  >
     <div className="activity-day-header mb-2 flex items-baseline justify-between gap-3 rounded-full px-1 py-1.5">
       <h2
         id={`activity-${group.date}`}
@@ -133,20 +142,37 @@ const renderGroup = (group: DateGroup, props: Props) => (
     </div>
     <div className="surface-card-flush divide-y divide-border/30">
       {group.expenses.map((transaction) => (
-        <ActivityTransactionRow
+        <SwipeableRow
           key={transaction.id}
-          transaction={transaction}
-          currency={props.currency}
-          onExpenseEdit={props.onExpenseEdit}
-          onExpenseDelete={props.onExpenseDelete}
-          onSaveAsTemplate={props.onSaveAsTemplate}
-          onIncomeEdit={props.onIncomeEdit}
-          onIncomeDelete={props.onIncomeDelete}
-        />
+          deleteLabel={t('activity.deleteTransaction', {
+            description: transaction.description,
+          })}
+          onDelete={() => deleteTransaction(transaction, props)}
+        >
+          <ActivityTransactionRow
+            transaction={transaction}
+            currency={props.currency}
+            onExpenseEdit={props.onExpenseEdit}
+            onExpenseDelete={props.onExpenseDelete}
+            onSaveAsTemplate={props.onSaveAsTemplate}
+            onIncomeEdit={props.onIncomeEdit}
+            onIncomeDelete={props.onIncomeDelete}
+          />
+        </SwipeableRow>
       ))}
     </div>
   </section>
 );
+
+const deleteTransaction = (transaction: Expense, props: Props) => {
+  if (transaction.type === 'income') {
+    props.onIncomeDelete(transaction.id);
+
+    return;
+  }
+
+  props.onExpenseDelete(transaction.id);
+};
 
 // Only money that left the account is summed here. A mixed net figure on a day
 // that holds both a salary and a coffee reads as nonsense.
@@ -164,13 +190,11 @@ const renderDayTotal = (group: DateGroup, currency: string) => {
   );
 };
 
-const renderLoadMore = (
-  visibleCount: number,
-  total: number,
-  setVisibleCount: (count: number) => void,
-  t: TFunc,
-) => {
-  if (visibleCount >= total) {
+// Kept as a fallback for anyone whose browser has no IntersectionObserver,
+// and as a keyboard affordance — tabbing to the end of a list that only ever
+// extends on scroll would otherwise be a dead end.
+const renderLoadMore = (hasMore: boolean, onLoadMore: () => void, t: TFunc) => {
+  if (!hasMore) {
     return null;
   }
 
@@ -178,7 +202,7 @@ const renderLoadMore = (
     <Button
       variant="outline"
       className="w-full rounded-full bg-card/72 shadow-none"
-      onClick={() => setVisibleCount(visibleCount + PAGE_SIZE)}
+      onClick={onLoadMore}
     >
       {t('activity.loadMore')}
     </Button>

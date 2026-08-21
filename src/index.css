@@ -516,6 +516,20 @@
      date a row belongs to is never off screen. The offset reads the header's
      own height token rather than restating 4rem, which silently desynced the
      moment the header's padding changed. */
+  /* Browser-native windowing. A day the user has scrolled past still exists in
+     the DOM — so Find-in-page, Ctrl+End and the accessibility tree all still
+     reach it — but costs no layout or paint until it comes back on screen.
+     contain-intrinsic-size keeps the scrollbar honest by reserving a plausible
+     height for a skipped group instead of collapsing it to nothing.
+
+     Chosen over hand-rolled virtualisation: windowing variable-height grouped
+     rows means measuring every row and reimplementing anchoring, and it breaks
+     exactly the things above. */
+  .activity-day-group {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 220px;
+  }
+
   .activity-day-header {
     position: sticky;
     top: calc(var(--header-height) + env(safe-area-inset-top));

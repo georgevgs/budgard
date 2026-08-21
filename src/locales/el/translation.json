@@ -129,7 +129,7 @@
     "netChange": "Καθαρή μεταβολή",
     "spent": "Έξοδα",
     "received": "Έσοδα",
-    "searchPlaceholder": "Αναζήτηση σε αυτή την περίοδο...",
+    "searchPlaceholder": "Αναζήτηση περιγραφής, σημείωσης, ποσού…",
     "searchLabel": "Αναζήτηση κινήσεων",
     "filterLabel": "Φιλτράρισμα κινήσεων",
     "filterByTag": "Φιλτράρισμα κινήσεων ανά ετικέτα",
@@ -174,7 +174,8 @@
     "tools": {
       "label": "Περισσότερες ενέργειες"
     },
-    "openTransaction": "Άνοιγμα {{description}}"
+    "openTransaction": "Άνοιγμα {{description}}",
+    "deleteTransaction": "Διαγραφή {{description}}"
   },
   "plan": {
     "title": "Πλάνο",

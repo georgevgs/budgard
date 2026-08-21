@@ -230,8 +230,31 @@ const matchesSearch = (row: Expense, search: string): boolean => {
   if (row.category?.name.toLocaleLowerCase().includes(search)) {
     return true;
   }
+  if (row.note?.toLocaleLowerCase().includes(search)) {
+    return true;
+  }
+  if (matchesAmount(row, search)) {
+    return true;
+  }
 
   return doesTagMatch(row, search);
+};
+
+// People remember money as a number long after they have forgotten what they
+// called it — "about 45 euros, sometime in spring". Both separators are
+// accepted because the app formats with a comma and keyboards offer a dot.
+const matchesAmount = (row: Expense, search: string): boolean => {
+  const query = search.replace(/[^\d.,]/g, '').replace(',', '.');
+  if (query.length === 0) {
+    return false;
+  }
+
+  const amount = Math.abs(row.amount);
+
+  return (
+    amount.toFixed(2).startsWith(query) ||
+    String(Math.round(amount)) === query.replace(/\.$/, '')
+  );
 };
 
 const normalizeType = (row: Expense, type: 'expense' | 'income'): Expense => ({

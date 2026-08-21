@@ -129,7 +129,7 @@
     "netChange": "Net change",
     "spent": "Spent",
     "received": "Received",
-    "searchPlaceholder": "Search this period...",
+    "searchPlaceholder": "Search description, note, amount…",
     "searchLabel": "Search activity",
     "filterLabel": "Filter activity",
     "filterByTag": "Filter activity by tag",
@@ -174,7 +174,8 @@
     "tools": {
       "label": "More actions"
     },
-    "openTransaction": "Open {{description}}"
+    "openTransaction": "Open {{description}}",
+    "deleteTransaction": "Delete {{description}}"
   },
   "plan": {
     "title": "Plan",

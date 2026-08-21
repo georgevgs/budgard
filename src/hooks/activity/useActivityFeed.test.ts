@@ -139,4 +139,57 @@ describe('useActivityFeed', () => {
 
     expect(result.current.exportScope).toBe('thisYear');
   });
+
+  // Search reaches a note now that transactions carry one.
+  it('finds a transaction by its note', () => {
+    const { result } = renderHook(() =>
+      useActivityFeed([
+        row({ id: 'a', description: 'Card payment', note: 'Anna birthday' }),
+        row({ id: 'b', description: 'Card payment' }),
+      ]),
+    );
+
+    act(() => result.current.setSearch('birthday'));
+
+    expect(result.current.filteredRows.map((r) => r.id)).toEqual(['a']);
+  });
+
+  // People remember money as a number long after forgetting what they called it.
+  it('finds a transaction by its amount', () => {
+    const { result } = renderHook(() =>
+      useActivityFeed([
+        row({ id: 'a', description: 'Anonymous', amount: 45.9 }),
+        row({ id: 'b', description: 'Anonymous', amount: 12 }),
+      ]),
+    );
+
+    act(() => result.current.setSearch('45'));
+
+    expect(result.current.filteredRows.map((r) => r.id)).toEqual(['a']);
+  });
+
+  // The app formats with a comma; a phone keypad offers a dot. Both work.
+  it('accepts either decimal separator when searching an amount', () => {
+    const rows = [row({ id: 'a', description: 'Anonymous', amount: 45.9 })];
+
+    const comma = renderHook(() => useActivityFeed(rows));
+    act(() => comma.result.current.setSearch('45,90'));
+    expect(comma.result.current.filteredRows.map((r) => r.id)).toEqual(['a']);
+
+    const dot = renderHook(() => useActivityFeed(rows));
+    act(() => dot.result.current.setSearch('45.90'));
+    expect(dot.result.current.filteredRows.map((r) => r.id)).toEqual(['a']);
+  });
+
+  // A refund is stored as a negative expense; searching its size should still
+  // find it rather than requiring the user to type a minus sign.
+  it('matches a refund by its size', () => {
+    const { result } = renderHook(() =>
+      useActivityFeed([row({ id: 'a', description: 'Refund', amount: -30 })]),
+    );
+
+    act(() => result.current.setSearch('30'));
+
+    expect(result.current.filteredRows.map((r) => r.id)).toEqual(['a']);
+  });
 });
