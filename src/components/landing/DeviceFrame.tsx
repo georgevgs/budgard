@@ -23,17 +23,20 @@ const DeviceFrame = ({ children, className, glow = false }: Props) => (
 
 export default DeviceFrame;
 
+// Drawn from --primary rather than --foreground: a neutral haze behind a
+// phone reads as a printing artefact, while the brand hue reads as the screen
+// itself throwing light onto the page.
 const renderGlow = (enabled: boolean) => {
   if (!enabled) return null;
 
   return (
     <div
       aria-hidden
-      className="absolute -inset-6 rounded-[36px] pointer-events-none"
+      className="absolute -inset-10 rounded-[44px] pointer-events-none"
       style={{
         background:
-          'radial-gradient(60% 60% at 50% 40%, hsl(var(--foreground) / 0.06), transparent 70%)',
-        filter: 'blur(40px)',
+          'radial-gradient(58% 58% at 50% 42%, hsl(var(--primary) / 0.4), transparent 70%)',
+        filter: 'blur(52px)',
       }}
     />
   );

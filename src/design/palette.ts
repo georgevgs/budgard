@@ -15,29 +15,36 @@
 export type Hsl = string;
 
 /**
- * A hue in its three jobs. Splitting them is what lets the palette be neon at
+ * A hue in its four jobs. Splitting them is what lets the palette be neon at
  * all — see the note on `accent` below.
  *
- *   solid  the filled surface (button, FAB, progress bar). Carries `on`.
- *   ink    the same hue at a depth that can be READ as text on the canvas.
- *   on     the label that rides on top of `solid`.
+ *   solid      the filled surface on the LIGHT canvas.
+ *   solidDark  the same fill on the dark canvas, where it can run hotter.
+ *   ink        the same hue at a depth that can be READ as text on the canvas.
+ *   on         the label that rides on top of the fill.
  */
 export type Swatch = {
-  /** Filled surfaces, light theme. */
+  /** Filled surfaces, light theme. Capped by the cream canvas. */
   solid: Hsl;
-  /** Filled surfaces, dark theme. */
+  /** Filled surfaces, dark theme. Full neon — near-black gives it room. */
   solidDark: Hsl;
   /** Text and icons on the light canvas. */
   ink: Hsl;
   /** Text and icons on the dark canvas. */
   inkDark: Hsl;
-  /** Label riding on `solid`. White across the board — a deliberate product
-   *  call: white on saturated colour is the read every finance app trains
-   *  people on (Fanta's own wordmark, Monzo's coral, Revolut's blue), and it
-   *  looks right in a way a dark label on neon does not. The cost is real and
-   *  is paid in `solid` below, not hidden. Kept per-swatch rather than as one
-   *  global constant so a future hue can take a dark label without replumbing
-   *  every consumer. */
+  /**
+   * Label riding on the fill.
+   *
+   * White wherever white survives — white on saturated colour is the read
+   * every drinks can and every finance app trains people on, it is what makes
+   * Fanta orange look like Fanta orange, and it is a deliberate product call
+   * that a dark label would undo. It is priced honestly: see `accent`.
+   *
+   * The exception is the yellow-green band. White on `#bbff00` measures
+   * 1.2:1 — that is not a relaxed standard, it is an invisible label — so
+   * gold, lime and mint carry the app's own near-black instead, which is
+   * also what makes those three able to go full neon.
+   */
   on: Hsl;
 };
 
@@ -71,132 +78,140 @@ export const ink = {
  * Every value here is pinned by a test in `tokens.test.ts`, which is worth
  * knowing before nudging one:
  *
- *   `on` on `solid`/`solidDark`     >= 3.0  (see below — a deliberate bar)
- *   `ink`/`inkDark` on the canvas   >= 4.5  (links and eyebrow labels)
- *   `solid` on the light canvas     >= 2.2  (a fill that reads as a shape)
+ *   `on` on the fill                >= 2.3  (see below — a deliberate bar)
+ *   `ink`/`inkDark` on the canvas   >= 4.5  (links, amounts, eyebrow labels)
+ *   `solid` on the light canvas     >= 2.0  (a fill that reads as a shape)
  *   `solidDark` on the dark canvas  >= 3.0
  *
- * WHY THE FIRST BAR IS 3.0 AND NOT 4.5. Every fill carries a white label, by
- * product decision — white on saturated colour is what a finance app is
- * expected to look like, and it reads better to most people than a dark label
- * on neon does. White at 4.5:1 forces a hue down to a relative luminance of
- * about 0.18, which is the muddy mid-tone band this palette exists to escape,
- * so the bar is AA-large instead. Button labels are bold, which is what makes
- * that defensible; it is still a real trade and it is made on purpose.
+ * WHY THE FIRST BAR IS 2.3 AND NOT 4.5. `--primary` is Fanta's own orange,
+ * `#ff8300`, and Fanta's own can puts a white wordmark on it. That pairing
+ * measures 2.46:1. Holding white to 4.5:1 instead forces any hue down to a
+ * relative luminance of about 0.18 — the muddy mid-tone band this palette
+ * exists to escape, and the reason the previous orange came out `#e67700`.
+ * Button labels here are bold and short, which is what makes it defensible;
+ * it is still a real trade and it is made on purpose. Everything read at
+ * LENGTH — body copy, links, amounts, muted labels — is a `-ink` token and is
+ * still held to the full 4.5:1.
  *
- * That white label is also why `solid` and `solidDark` are equal for most
- * hues. Once white is the constraint, a fill cannot get brighter in dark mode
- * — so the neon lives everywhere else instead: in `inkDark` (full-strength
- * hue as text on near-black), in the alpha tints, and in the coloured glow.
- * Only violet, indigo and red are dark enough to have room to move.
+ * WHY `solid` AND `solidDark` DIFFER. The canvas caps the fill, not the label.
+ * Cream at 98% lightness leaves a bright hue nowhere to sit, so light mode
+ * takes each colour to the brightest value that still reads as a shape on it;
+ * near-black leaves all the room in the world, so dark mode runs the same hue
+ * at full neon. Dark mode is where this palette is loudest, and that is the
+ * correct place for neon to be loudest.
  */
 export const accent = {
-  /** Fanta. The brand, and the default accent. */
+  /** Fanta US, `#ff8300`, to the hue. The brand, and the default accent. */
   orange: {
-    solid: '31 100% 45%',
-    solidDark: '31 100% 45%',
-    ink: '27 100% 34%',
-    inkDark: '33 100% 60%',
+    solid: '30.8 100% 50%',
+    solidDark: '31 100% 52%',
+    ink: '25 100% 33%',
+    inkDark: '33 100% 62%',
     on: neutral[0],
   },
   /** Hot coral, the Monzo note — a red that reads as warm rather than alarming. */
   coral: {
-    solid: '4 100% 66%',
-    solidDark: '4 100% 66%',
-    ink: '357 85% 43%',
-    inkDark: '6 100% 68%',
+    solid: '8 100% 62%',
+    solidDark: '8 100% 64%',
+    ink: '357 90% 42%',
+    inkDark: '8 100% 70%',
     on: neutral[0],
   },
+  /** Gold, lime and mint are the yellow-green band: they take the near-black
+   *  label, which is exactly what buys them the room to be this bright. */
   amber: {
-    solid: '41 100% 39%',
-    solidDark: '41 100% 39%',
-    ink: '35 100% 30%',
-    inkDark: '44 100% 56%',
-    on: neutral[0],
+    solid: '44 100% 43%',
+    solidDark: '44 100% 52%',
+    ink: '36 100% 29%',
+    inkDark: '44 100% 58%',
+    on: neutral[900],
   },
   lime: {
-    solid: '74 92% 32.5%',
-    solidDark: '74 92% 32.5%',
-    ink: '82 95% 25%',
-    inkDark: '78 92% 55%',
-    on: neutral[0],
+    solid: '76 100% 38%',
+    solidDark: '76 100% 52%',
+    ink: '82 100% 24%',
+    inkDark: '76 100% 55%',
+    on: neutral[900],
   },
   emerald: {
-    solid: '156 100% 33%',
-    solidDark: '156 100% 33%',
-    ink: '162 100% 26%',
-    inkDark: '156 95% 52%',
-    on: neutral[0],
+    solid: '158 100% 38%',
+    solidDark: '158 100% 48%',
+    ink: '163 100% 25%',
+    inkDark: '158 100% 50%',
+    on: neutral[900],
   },
   sky: {
-    solid: '197 100% 43%',
-    solidDark: '197 100% 43%',
-    ink: '203 100% 32%',
-    inkDark: '197 100% 58%',
+    solid: '199 100% 50%',
+    solidDark: '199 100% 52%',
+    ink: '204 100% 31%',
+    inkDark: '199 100% 60%',
     on: neutral[0],
   },
-  /** Violet and indigo are dark enough that white sits on them comfortably,
-   *  so these two are the only accents that still brighten for dark mode. */
   violet: {
-    solid: '266 95% 58%',
-    solidDark: '268 100% 62%',
-    ink: '264 90% 50%',
-    inkDark: '268 100% 76%',
+    solid: '262 100% 60%',
+    solidDark: '264 100% 64%',
+    ink: '262 90% 50%',
+    inkDark: '264 100% 78%',
     on: neutral[0],
   },
   indigo: {
-    solid: '232 95% 58%',
-    solidDark: '234 100% 65%',
-    ink: '233 90% 48%',
-    inkDark: '234 100% 76%',
+    solid: '236 100% 62%',
+    solidDark: '236 100% 66%',
+    ink: '236 90% 50%',
+    inkDark: '236 100% 78%',
     on: neutral[0],
   },
   /** Barbie's own pink. Not in the accent picker — the theme owns it. */
   pink: {
-    solid: '330 100% 65%',
-    solidDark: '330 100% 65%',
-    ink: '332 90% 44%',
+    solid: '330 100% 62%',
+    solidDark: '330 100% 64%',
+    ink: '333 90% 43%',
     inkDark: '330 100% 74%',
     on: neutral[0],
   },
 } as const;
 
 /**
- * Status hues. Money-in green, caution amber, neutral-information blue, red.
+ * Status hues. Money-in green, caution gold, neutral-information blue, red.
  *
- * Same three-role shape as the accents, and for the same reason: `text-income`
+ * Same four-role shape as the accents, and for the same reason: `text-income`
  * outnumbers `bg-income` roughly three to one in the app, so the green has to
  * be readable AND fillable, and no single value is both.
+ *
+ * Income and warning sit in the yellow-green band, so they take the near-black
+ * label. In practice almost every solid `bg-income` / `bg-warning` in the app
+ * is a progress fill carrying no label at all; the one that does is the
+ * offline banner's pill.
  */
 export const status = {
   income: {
-    solid: '152 95% 34%',
-    solidDark: '152 95% 34%',
-    ink: '160 100% 24%',
-    inkDark: '152 95% 52%',
-    on: neutral[0],
+    solid: '158 100% 38%',
+    solidDark: '158 100% 46%',
+    ink: '163 100% 24%',
+    inkDark: '158 100% 50%',
+    on: neutral[900],
   },
   warning: {
-    solid: '38 100% 40%',
-    solidDark: '38 100% 40%',
+    solid: '44 100% 43%',
+    solidDark: '44 100% 52%',
     ink: '32 100% 30%',
-    inkDark: '41 100% 57%',
-    on: neutral[0],
+    inkDark: '42 100% 58%',
+    on: neutral[900],
   },
   info: {
-    solid: '203 100% 48%',
-    solidDark: '203 100% 48%',
-    ink: '208 100% 34%',
-    inkDark: '203 100% 62%',
+    solid: '199 100% 50%',
+    solidDark: '199 100% 52%',
+    ink: '207 100% 34%',
+    inkDark: '199 100% 62%',
     on: neutral[0],
   },
-  /** Red has the most headroom of any hue here — white clears 5:1 on it
+  /** Red has the most headroom of any hue here — white clears 3.4:1 on it
    *  without the fill having to give anything up. */
   danger: {
-    solid: '356 85% 47%',
-    solidDark: '356 88% 46%',
-    ink: '356 82% 45%',
-    inkDark: '356 100% 68%',
+    solid: '4 100% 58%',
+    solidDark: '4 100% 62%',
+    ink: '356 85% 45%',
+    inkDark: '4 100% 70%',
     on: neutral[0],
   },
 } as const;
@@ -221,12 +236,13 @@ export const barbie = {
  * the FAB, the nav indicator and the hero — the part that makes a bright hue
  * read as LIT rather than merely bright.
  *
- * Dark carries more because a glow needs somewhere dark to fall off into.
+ * Dark carries the most because a glow needs somewhere dark to fall off into,
+ * and dark is where the fills run hottest.
  */
 export const glow = {
-  light: '0.4',
-  dark: '0.6',
-  barbie: '0.45',
+  light: '0.5',
+  dark: '0.75',
+  barbie: '0.55',
 } as const;
 
 /**
@@ -246,7 +262,7 @@ export const swatch = {
   red: '#ff3b30',
   flame: '#ff6b35',
   /** The brand, as a data colour. */
-  orange: '#ff8400',
+  orange: '#ff8300',
   amber: '#ffa300',
   gold: '#ffc700',
   citron: '#ffe600',

@@ -148,7 +148,7 @@ const renderProCard = (
   plans: ProPlansDisplay,
   onGetPro: (plan: Cycle) => void,
 ) => (
-  <div className="relative rounded-3xl border-2 border-primary/60 bg-card p-8 flex flex-col">
+  <div className="relative rounded-3xl border-2 border-primary/60 bg-card p-8 flex flex-col glow-soft">
     <div className="absolute -top-3 left-8 px-2.5 h-6 inline-flex items-center rounded-full bg-primary text-primary-foreground text-[11px] font-semibold tracking-wide">
       {t('landing.pricing.recommended')}
     </div>

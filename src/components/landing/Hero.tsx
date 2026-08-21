@@ -61,22 +61,18 @@ const Hero = ({ onGetStarted }: Props) => {
 
 export default Hero;
 
+// The `aurora` utility carries the whole wash (see index.css) so the hero and
+// the app's lit surfaces cannot drift apart, and so the landing page turns
+// with the accent the way every other screen does.
 const renderBackdrop = () => (
-  <div
-    aria-hidden
-    className="absolute inset-0 pointer-events-none"
-    style={{
-      backgroundImage:
-        'radial-gradient(900px 460px at 50% -10%, hsl(var(--primary) / 0.08), transparent 70%)',
-    }}
-  />
+  <div aria-hidden className="aurora absolute inset-0 pointer-events-none" />
 );
 
 const renderHeading = (t: Tx) => (
   <h1 className="font-display text-[44px] sm:text-6xl md:text-7xl font-semibold tracking-[-0.035em] leading-[1.02] text-foreground">
     {t('landing.hero.headingLine1')}
     <br />
-    <span className="text-primary-ink">{t('landing.hero.headingLine2')}</span>
+    <span className="neon-ink">{t('landing.hero.headingLine2')}</span>
   </h1>
 );
 
@@ -96,7 +92,7 @@ const renderCtas = (
     <Button
       size="lg"
       onClick={onGetStarted}
-      className="group rounded-full px-7 h-12 text-[15px] shadow-lg shadow-black/10 dark:shadow-black/40 w-full sm:w-auto"
+      className="group rounded-full px-7 h-12 text-[15px] glow w-full sm:w-auto"
     >
       {t('landing.hero.primaryCta')}
       <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -133,7 +129,7 @@ const renderTrustLine = (t: Tx) => (
 
 const renderHeroShot = (t: Tx) => (
   <div className="max-w-md mx-auto">
-    <DeviceFrame>
+    <DeviceFrame glow>
       <div className="p-3">
         {/* Built from the same tone classes the real hero uses, so the shot
             can never drift from the product — including in dark mode. */}

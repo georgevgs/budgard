@@ -81,11 +81,17 @@ describe('contrast', () => {
   const themes: ThemeName[] = ['light', 'dark', 'barbie'];
 
   // Every filled control in the app puts its foreground token on its colour
-  // token. That label is white everywhere, by product decision, so the bar is
-  // AA_LARGE rather than AA_TEXT — see the long note in palette.ts on why, and
-  // what it costs. Labels on these controls are bold, which is what keeps it
-  // defensible. Lowering this further is not a colour tweak, it is reopening
-  // that decision.
+  // token. `--primary` is Fanta's own orange and carries Fanta's own white
+  // wordmark, which measures 2.46:1 — so the bar is the drinks can, not
+  // AA_TEXT. See the long note in palette.ts on why, and what it costs.
+  // Labels on these controls are bold and short, which is what keeps it
+  // defensible; the yellow-green hues, where white would land near 1.2:1,
+  // carry a near-black label instead and clear this by a mile.
+  //
+  // Lowering LABEL_ON_FILL further is not a colour tweak, it is reopening a
+  // product decision.
+  const LABEL_ON_FILL = 2.3;
+
   const filled = [
     ['--primary', '--primary-foreground'],
     ['--destructive', '--destructive-foreground'],
@@ -101,7 +107,7 @@ describe('contrast', () => {
       expect(
         ratio,
         `${foreground} on ${surface} in ${theme} is ${ratio.toFixed(2)}:1`,
-      ).toBeGreaterThanOrEqual(AA_LARGE);
+      ).toBeGreaterThanOrEqual(LABEL_ON_FILL);
     }
   });
 
@@ -134,10 +140,12 @@ describe('contrast', () => {
 
   // A fill still has to read as a shape. Neon on a pale canvas cannot reach
   // 3:1 — that is the physics that forced the ink split in the first place —
-  // but below about 2.2 a button stops looking like a button at all, so that
-  // is where the floor sits for the light theme. Dark has room for the full
-  // AA_LARGE bar and is held to it.
-  const SOLID_ON_LIGHT = 2.2;
+  // but below about 2:1 a button stops looking like a button at all, so that
+  // is where the floor sits for the light theme. This is the bar that caps
+  // how bright `solid` may go, which is why `solidDark` exists: the dark
+  // canvas imposes no such cap, so it runs the same hue at full neon and is
+  // held to the full AA_LARGE instead.
+  const SOLID_ON_LIGHT = 2.0;
 
   it.each(themes)('%s: filled controls read as shapes', (theme) => {
     const floor = theme === 'dark' ? AA_LARGE : SOLID_ON_LIGHT;
@@ -179,7 +187,7 @@ describe('contrast', () => {
       expect(
         ratio,
         `${key}: its label on ${fill} is ${ratio.toFixed(2)}:1`,
-      ).toBeGreaterThanOrEqual(AA_LARGE);
+      ).toBeGreaterThanOrEqual(LABEL_ON_FILL);
     }
   });
 

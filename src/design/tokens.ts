@@ -123,6 +123,11 @@ const light: TokenMap = {
   '--surface-ring': '0.5',
   // How hard a neon fill bleeds into the page. See `.glow-*` in index.css.
   '--glow-strength': glow.light,
+  // Alpha on the brand stop of the `.aurora` wash — the coloured light the
+  // landing page and the app's hero sections sit in. The other stops are
+  // secondary hues and are fixed; this is the one that carries the accent, so
+  // it is the one that has to answer to the canvas underneath it.
+  '--aurora': '0.38',
   // Highlight sweeping across skeleton placeholders — light catching the
   // surface. White in every theme, far more transparent on dark where the
   // muted block already sits close to black.
@@ -172,6 +177,9 @@ const dark: TokenMap = {
   '--info-ink': status.info.inkDark,
   '--surface-ring': '0.4',
   '--glow-strength': glow.dark,
+  // Near-black gives a wash somewhere to fall off into, so dark carries the
+  // most colour of the three themes. This is where the palette is loudest.
+  '--aurora': '0.5',
   '--skeleton-sheen': '0 0% 100% / 0.07',
   '--glass-bg': '26 24% 10%',
   '--glass-alpha': '0.72',
@@ -215,6 +223,7 @@ const barbieTheme: TokenMap = {
   '--radius': '1.25rem',
   '--surface-ring': '0.45',
   '--glow-strength': glow.barbie,
+  '--aurora': '0.34',
   '--glass-bg': barbie.glass,
   '--glass-alpha': '0.7',
   '--glass-sheen': '0.46',
