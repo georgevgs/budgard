@@ -2,6 +2,7 @@ import {
   useState,
   useEffect,
   useMemo,
+  useReducer,
   useRef,
   useCallback,
 } from 'react';
@@ -9,18 +10,13 @@ import * as Sentry from '@/lib/sentry';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { dataService } from '@/services/dataService';
-import type { Category } from '@/types/Category';
+import {
+  dataReducer,
+  EMPTY_DATA,
+  toSnapshot,
+  createSetters,
+} from '@/hooks/data/dataReducer';
 import type { Expense } from '@/types/Expense';
-import type { RecurringExpense } from '@/types/RecurringExpense';
-import type { Tag } from '@/types/Tag';
-import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
-import type { Goal } from '@/types/Goal';
-import type { Account } from '@/types/Account';
-import type { AccountBalance } from '@/types/AccountBalance';
-import type { Debt } from '@/types/Debt';
-import type { NoSpendDay } from '@/types/NoSpendDay';
-import type { CategoryBudget } from '@/types/CategoryBudget';
-import type { NotificationPreferences } from '@/types/Budget';
 import { useToast } from '@/hooks/useToast';
 import type {
   DataActions,
@@ -62,42 +58,47 @@ export const useDataLayer = () => {
   const { t } = useTranslation();
   const tRef = useRef(t);
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [incomes, setIncomes] = useState<Expense[]>([]);
-  const [recurringExpenses, setRecurringExpenses] = useState<
-    RecurringExpense[]
-  >([]);
-  const [recurringIncomes, setRecurringIncomes] = useState<RecurringExpense[]>(
-    [],
-  );
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [noSpendDays, setNoSpendDays] = useState<NoSpendDay[]>([]);
-  const [templates, setTemplates] = useState<ExpenseTemplate[]>([]);
-  const [goals, setGoals] = useState<Goal[]>([]);
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [accountBalances, setAccountBalances] = useState<AccountBalance[]>([]);
-  const [debts, setDebts] = useState<Debt[]>([]);
-  const [categoryBudgets, setCategoryBudgets] = useState<CategoryBudget[]>([]);
-  const [monthlyBudget, setMonthlyBudget] = useState<number | null>(null);
-  const [defaultCurrency, setDefaultCurrency] = useState<string>('EUR');
-  const [defaultSavingsPct, setDefaultSavingsPct] = useState<number | null>(
-    null,
-  );
-  const [dailyReminderHour, setDailyReminderHour] = useState<number | null>(
-    null,
-  );
-  const [notificationPreferences, setNotificationPreferences] =
-    useState<NotificationPreferences>({});
-  const [isInitialized, setIsInitialized] = useState(false);
-  // Sticky once true — flips false only on logout reset, never on background
-  // refetches, so /goals, /networth and /debts don't blank on foreground
-  // visibility refreshes.
-  const [isSecondaryLoaded, setIsSecondaryLoaded] = useState(false);
-  // Sticky in the same way: once the pre-cutoff tail is in state it stays
-  // there for the session, so a foreground refetch never re-opens the
-  // "loading older transactions" placeholder.
-  const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
+  // One reducer rather than twenty-one useState calls. See dataReducer.ts for
+  // why: the three things this layer does to its state are now three named
+  // transitions instead of twenty-odd setter calls spelled out longhand in
+  // three different places.
+  const [data, dispatch] = useReducer(dataReducer, EMPTY_DATA);
+  const {
+    categories,
+    expenses,
+    incomes,
+    recurringExpenses,
+    recurringIncomes,
+    tags,
+    noSpendDays,
+    templates,
+    goals,
+    accounts,
+    accountBalances,
+    debts,
+    categoryBudgets,
+    monthlyBudget,
+    defaultCurrency,
+    defaultSavingsPct,
+    dailyReminderHour,
+    notificationPreferences,
+    isInitialized,
+    isSecondaryLoaded,
+    isHistoryLoaded,
+  } = data;
+
+  // The setter surface the dataOps hooks already consume, kept exactly as it
+  // was and backed by the reducer. Rewriting fifteen call sites to dispatch
+  // actions would be churn: their code is fine, and the debt was never the
+  // shape of this API — it was the state handling behind it.
+  //
+  // Built once. A useState setter is stable, and so is dispatch, so nothing
+  // here can change identity and force a consumer to re-render.
+  // The setter surface the dataOps hooks already consume, kept exactly as it
+  // was and backed by the reducer. Rewriting fifteen call sites to dispatch
+  // actions would be churn: their code is fine, and the debt was never the
+  // shape of this API — it was the state handling behind it.
+  const setters = useMemo(() => createSetters(dispatch), []);
 
   // Expose latest data via refs so handlers can read it inside async callbacks
   // without subscribing to context updates (keeps the dataOps hooks stable).
@@ -208,34 +209,45 @@ export const useDataLayer = () => {
         const stage2AlreadyDone = stage2DoneForUserRef.current === userId;
 
         // React 18+ automatically batches these state updates
-        setCategories(categoriesData);
+        // One commit rather than twenty. React would batch these anyway, but
+        // batching is not the point — spelling the whole stage out as separate
+        // setter calls is what let the sign-out reset drift from the field
+        // list, and this is the same list.
+        dispatch({
+          type: 'applyPrimary',
+          values: {
+            categories: categoriesData,
+            recurringExpenses: recurringExpensesData,
+            recurringIncomes: recurringIncomesData,
+            tags: tagsData,
+            templates: templatesData,
+            categoryBudgets: categoryBudgetsData,
+            accounts: accountsData,
+            noSpendDays: noSpendDaysData,
+            monthlyBudget: budgetData?.monthly_amount ?? null,
+            defaultCurrency: budgetData?.default_currency ?? 'EUR',
+            defaultSavingsPct: budgetData?.default_savings_pct ?? null,
+            dailyReminderHour: budgetData?.daily_reminder_hour ?? null,
+            notificationPreferences: budgetData?.notification_preferences ?? {},
+            isInitialized: true,
+          },
+        });
+
         if (stage2AlreadyDone) {
           // The pre-cutoff tail already lives in state; a plain replace with
-          // the recent window would wipe it until the next boot.
-          setIsHistoryLoaded(true);
-          setExpenses((prev) =>
+          // the recent window would wipe it until the next boot. These stay as
+          // functional updates because they read what is already there.
+          setters.setIsHistoryLoaded(true);
+          setters.setExpenses((prev) =>
             replaceRecentWindow(prev, expensesData, recentCutoff),
           );
-          setIncomes((prev) =>
+          setters.setIncomes((prev) =>
             replaceRecentWindow(prev, incomesData, recentCutoff),
           );
         } else {
-          setExpenses(expensesData);
-          setIncomes(incomesData);
+          setters.setExpenses(expensesData);
+          setters.setIncomes(incomesData);
         }
-        setRecurringExpenses(recurringExpensesData);
-        setRecurringIncomes(recurringIncomesData);
-        setTags(tagsData);
-        setTemplates(templatesData);
-        setCategoryBudgets(categoryBudgetsData);
-        setAccounts(accountsData);
-        setNoSpendDays(noSpendDaysData);
-        setMonthlyBudget(budgetData?.monthly_amount ?? null);
-        setDefaultCurrency(budgetData?.default_currency ?? 'EUR');
-        setDefaultSavingsPct(budgetData?.default_savings_pct ?? null);
-        setDailyReminderHour(budgetData?.daily_reminder_hour ?? null);
-        setNotificationPreferences(budgetData?.notification_preferences ?? {});
-        setIsInitialized(true);
         // Fresh server data has now replaced anything hydrated from cache, so
         // stop suppressing the load-failure toast: a *later* fetch failure
         // (foreground refetch, manual refresh) should surface normally rather
@@ -255,10 +267,10 @@ export const useDataLayer = () => {
             if (controller.signal.aborted) {
               return;
             }
-            setGoals(goalsData);
-            setAccountBalances(balancesData);
-            setDebts(debtsData);
-            setIsSecondaryLoaded(true);
+            setters.setGoals(goalsData);
+            setters.setAccountBalances(balancesData);
+            setters.setDebts(debtsData);
+            setters.setIsSecondaryLoaded(true);
           })
           .catch((error) => {
             if (isAbortError(error) || isExpiredJwtError(error)) {
@@ -284,17 +296,17 @@ export const useDataLayer = () => {
                 return;
               }
               stage2DoneForUserRef.current = userId;
-              setIsHistoryLoaded(true);
+              setters.setIsHistoryLoaded(true);
               // Dedupe by id: if a refreshExpenses/refreshIncomes ran
               // concurrently (e.g. user deleted a recurring expense,
               // bulk-imported, or rolled back a category delete) it will have
               // replaced state with full history, so older* may already be
               // present.
               if (olderExpenses.length > 0) {
-                setExpenses((prev) => mergeUniqueById(prev, olderExpenses));
+                setters.setExpenses((prev) => mergeUniqueById(prev, olderExpenses));
               }
               if (olderIncomes.length > 0) {
-                setIncomes((prev) => mergeUniqueById(prev, olderIncomes));
+                setters.setIncomes((prev) => mergeUniqueById(prev, olderIncomes));
               }
             })
             .catch((error) => {
@@ -304,7 +316,7 @@ export const useDataLayer = () => {
               // Resolve the flag even on failure. The tail isn't here and won't
               // be until the next boot, so screens should fall back to their
               // normal empty state rather than promise data that isn't coming.
-              setIsHistoryLoaded(true);
+              setters.setIsHistoryLoaded(true);
               Sentry.captureException(error, {
                 tags: { context: 'fetchOlderTransactions' },
               });
@@ -349,7 +361,7 @@ export const useDataLayer = () => {
     };
 
     return run();
-  }, [userId]);
+  }, [userId, setters]);
 
   const refreshData = useCallback(async () => {
     await fetchData();
@@ -365,26 +377,7 @@ export const useDataLayer = () => {
       return;
     }
 
-    setCategories(snapshot.categories);
-    setExpenses(snapshot.expenses);
-    setIncomes(snapshot.incomes);
-    setRecurringExpenses(snapshot.recurringExpenses);
-    setRecurringIncomes(snapshot.recurringIncomes);
-    setTags(snapshot.tags);
-    setTemplates(snapshot.templates);
-    setCategoryBudgets(snapshot.categoryBudgets);
-    setAccounts(snapshot.accounts);
-    setGoals(snapshot.goals);
-    setAccountBalances(snapshot.accountBalances);
-    setDebts(snapshot.debts);
-    setNoSpendDays(snapshot.noSpendDays);
-    setMonthlyBudget(snapshot.monthlyBudget);
-    setDefaultCurrency(snapshot.defaultCurrency);
-    setDefaultSavingsPct(snapshot.defaultSavingsPct);
-    setDailyReminderHour(snapshot.dailyReminderHour);
-    setNotificationPreferences(snapshot.notificationPreferences);
-    setIsInitialized(true);
-    setIsSecondaryLoaded(snapshot.secondaryLoaded);
+    dispatch({ type: 'hydrate', snapshot });
   }, []);
 
   // The four per-domain refreshers differ only in what they fetch and what
@@ -420,15 +413,15 @@ export const useDataLayer = () => {
 
   const refreshExpenses = useCallback(async () => {
     await runRefresh('refresh expenses', async () => {
-      setExpenses(await dataService.getExpenses());
+      setters.setExpenses(await dataService.getExpenses());
     });
-  }, [runRefresh]);
+  }, [runRefresh, setters]);
 
   const refreshIncomes = useCallback(async () => {
     await runRefresh('refresh incomes', async () => {
-      setIncomes(await dataService.getIncomes());
+      setters.setIncomes(await dataService.getIncomes());
     });
-  }, [runRefresh]);
+  }, [runRefresh, setters]);
 
   const refreshAccounts = useCallback(async () => {
     await runRefresh('refresh accounts', async () => {
@@ -436,16 +429,16 @@ export const useDataLayer = () => {
         dataService.getAccounts(),
         dataService.getAllAccountBalances(),
       ]);
-      setAccounts(accountsData);
-      setAccountBalances(balancesData);
+      setters.setAccounts(accountsData);
+      setters.setAccountBalances(balancesData);
     });
-  }, [runRefresh]);
+  }, [runRefresh, setters]);
 
   const refreshDebts = useCallback(async () => {
     await runRefresh('refresh debts', async () => {
-      setDebts(await dataService.getDebts());
+      setters.setDebts(await dataService.getDebts());
     });
-  }, [runRefresh]);
+  }, [runRefresh, setters]);
 
   // ── Auth-transition boot/reset ─────────────────────────────────────────────
   // The state side of login/logout happens during render (the sanctioned
@@ -458,30 +451,12 @@ export const useDataLayer = () => {
     if (userId) {
       hydrateFromSnapshot(userId);
     } else {
-      setCategories([]);
-      setExpenses([]);
-      setIncomes([]);
-      setRecurringExpenses([]);
-      setRecurringIncomes([]);
-      setTags([]);
-      setTemplates([]);
-      setGoals([]);
-      setAccounts([]);
-      setAccountBalances([]);
-      setDebts([]);
-      setNoSpendDays([]);
-      setCategoryBudgets([]);
-      setMonthlyBudget(null);
-      setDefaultCurrency('EUR');
-      setDefaultSavingsPct(null);
-      // Reminder hour and notification prefs are per-user too — clearing them
-      // stops a second account on a shared device briefly seeing user A's
-      // settings before the new fetch resolves.
-      setDailyReminderHour(null);
-      setNotificationPreferences({});
-      setIsInitialized(false);
-      setIsSecondaryLoaded(false);
-      setIsHistoryLoaded(false);
+      // Reminder hour and notification preferences are per-user too, and
+      // clearing them is what stops a second account on a shared device
+      // briefly seeing the first one's settings. Spelling that out field by
+      // field is exactly what used to drift; EMPTY_DATA is now the single
+      // definition of both "empty" and "signed out".
+      dispatch({ type: 'reset' });
     }
   }
 
@@ -566,57 +541,22 @@ export const useDataLayer = () => {
       return;
     }
 
+    // The snapshot is every data field plus the deferred-stage flag, which is
+    // exactly the reducer's state minus the two booleans that describe the
+    // fetch rather than the data. Listing the fields by hand here — and again
+    // in the dependency array below — was the third place the field list was
+    // written out, and the third place it could fall behind.
     const persist = () => {
-      saveDataSnapshot(userId, {
-        categories,
-        expenses,
-        incomes,
-        recurringExpenses,
-        recurringIncomes,
-        tags,
-        templates,
-        categoryBudgets,
-        accounts,
-        goals,
-        accountBalances,
-        debts,
-        noSpendDays,
-        monthlyBudget,
-        defaultCurrency,
-        defaultSavingsPct,
-        dailyReminderHour,
-        notificationPreferences,
-        secondaryLoaded: isSecondaryLoaded,
-      });
+      saveDataSnapshot(userId, toSnapshot(data));
     };
     persistSnapshotRef.current = persist;
 
     const timer = setTimeout(persist, 2000);
 
     return () => clearTimeout(timer);
-  }, [
-    isInitialized,
-    userId,
-    categories,
-    expenses,
-    incomes,
-    recurringExpenses,
-    recurringIncomes,
-    tags,
-    templates,
-    categoryBudgets,
-    accounts,
-    goals,
-    accountBalances,
-    debts,
-    noSpendDays,
-    monthlyBudget,
-    defaultCurrency,
-    defaultSavingsPct,
-    dailyReminderHour,
-    notificationPreferences,
-    isSecondaryLoaded,
-  ]);
+    // `data` is one object now, so it stands in for the twenty fields this
+    // used to list. It changes identity on exactly the same commits they did.
+  }, [isInitialized, userId, data]);
 
   // Flush the pending snapshot synchronously when the app is backgrounded, so
   // data changed within the debounce window isn't lost if the OS freezes or
@@ -645,26 +585,19 @@ export const useDataLayer = () => {
       refreshDebts,
       expensesRef,
       incomesRef,
-      setCategories,
-      setExpenses,
-      setIncomes,
-      setRecurringExpenses,
-      setRecurringIncomes,
-      setTags,
-      setTemplates,
-      setGoals,
-      setAccounts,
-      setAccountBalances,
-      setDebts,
-      setNoSpendDays,
-      setCategoryBudgets,
-      setMonthlyBudget,
-      setDefaultCurrency,
-      setDefaultSavingsPct,
-      setDailyReminderHour,
-      setNotificationPreferences,
+      // Spread rather than listed: the bag is derived from the state shape, so
+      // a new field arrives here with its setter automatically instead of
+      // needing a line added in a fourth place.
+      ...setters,
     }),
-    [refreshData, refreshExpenses, refreshIncomes, refreshAccounts, refreshDebts],
+    [
+      refreshData,
+      refreshExpenses,
+      refreshIncomes,
+      refreshAccounts,
+      refreshDebts,
+      setters,
+    ],
   );
 
   const config = useMemo<DataConfig>(
