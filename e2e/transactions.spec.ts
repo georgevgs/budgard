@@ -91,8 +91,13 @@ test.describe('transactions', () => {
 
 // --- Helpers ---
 
+// The FAB now opens the keypad; the full form is one step past it behind
+// "More details". The keypad's own path is covered in quick-add.spec.
 const openAddExpense = async (page: import('@playwright/test').Page) => {
   await page.getByRole('button', { name: /open actions menu/i }).click();
   await page.getByRole('button', { name: /add expense/i }).click();
-  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByRole('button', { name: /more details/i }).click();
+  await expect(
+    page.getByLabel('Description', { exact: true }),
+  ).toBeVisible();
 };

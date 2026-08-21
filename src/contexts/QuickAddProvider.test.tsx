@@ -10,7 +10,11 @@ vi.mock('@/components/layout/FormsManager', () => ({ default: () => null }));
 vi.mock('@/components/income/IncomeFormDialog', () => ({ default: () => null }));
 
 vi.mock('@/contexts/DataContext', () => ({
-  useDataConfig: () => ({ isInitialized: true }),
+  useDataConfig: () => ({ isInitialized: true, defaultCurrency: 'EUR' }),
+  // The quick-add sheet ranks category chips by recent use, so the provider
+  // now pulls both of these through.
+  useCategoriesData: () => ({ expenseCategories: [] }),
+  useExpensesData: () => [],
 }));
 
 vi.mock('@/hooks/dataOps/useIncomeOps', () => ({

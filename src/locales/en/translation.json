@@ -274,7 +274,15 @@
       "entryDescription": "Refund — {{description}}",
       "confirm": "Record refund"
     },
-    "saveHint": "Add an amount and a description to save"
+    "saveHint": "Add an amount and a description to save",
+    "quickAdd": {
+      "untitled": "Expense",
+      "moreDetails": "More details"
+    },
+    "pad": {
+      "backspace": "Delete",
+      "label": "Amount keypad"
+    }
   },
   "income": {
     "title": "Income",

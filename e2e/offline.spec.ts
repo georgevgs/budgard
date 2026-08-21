@@ -15,6 +15,7 @@ test.describe('offline writes', () => {
 
     await app.getByRole('button', { name: /open actions menu/i }).click();
     await app.getByRole('button', { name: /add expense/i }).click();
+    await app.getByRole('button', { name: /more details/i }).click();
     await app.getByLabel('Amount', { exact: true }).fill('7,50');
     await app.getByLabel('Description', { exact: true }).fill('Offline coffee');
     await app.getByRole('button', { name: /save/i }).click();

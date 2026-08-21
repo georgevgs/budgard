@@ -36,6 +36,9 @@ import {
 
 type ExpensesFormProps = {
   expense?: Expense;
+  // What the quick-add pad captured before the user asked for more detail.
+  // Only read when creating; an edit always wins from the row itself.
+  draft?: ExpenseWritePayload;
   categories: Category[];
   onClose: () => void;
   onSubmit: (
@@ -47,6 +50,7 @@ type ExpensesFormProps = {
 
 const ExpensesForm = ({
   expense,
+  draft,
   categories,
   onClose,
   onSubmit,
@@ -60,9 +64,9 @@ const ExpensesForm = ({
     resolver: zodResolver(expenseSchema),
     mode: 'onTouched',
     defaultValues: {
-      amount: getInitialAmount(expense, defaultCurrency),
+      amount: getInitialAmount(expense, defaultCurrency, draft),
       description: expense?.description || '',
-      category_id: expense?.category_id || 'none',
+      category_id: expense?.category_id || draft?.category_id || 'none',
       tag_id: expense?.tag_id || undefined,
       extra_tag_ids: getInitialExtraTagIds(expense),
       date: getInitialDate(expense),

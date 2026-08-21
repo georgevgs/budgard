@@ -1,6 +1,7 @@
 import { useMemo, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import FormsManager from '@/components/layout/FormsManager';
+import QuickAddSheet from '@/components/expenses/QuickAddSheet';
 import SpeedDial from '@/components/layout/SpeedDial';
 import IncomeFormDialog from '@/components/income/IncomeFormDialog';
 import { QuickAddContext, type QuickAddValue } from '@/contexts/QuickAddContext';
@@ -11,6 +12,7 @@ import { useOpenFormFromUrl } from '@/hooks/expensesList/useOpenFormFromUrl';
 import { useOptimisticExpenseActions } from '@/hooks/expensesList/useOptimisticExpenseActions';
 import { useIncomeFormState } from '@/hooks/incomeList/useIncomeFormState';
 import { isTransactionEntryPath } from '@/lib/routes';
+import { FORM_TYPES } from '@/components/layout/formTypes';
 
 type Props = {
   children: ReactNode;
@@ -52,10 +54,17 @@ const QuickAddProvider = ({ children }: Props) => {
   return (
     <QuickAddContext.Provider value={value}>
       {children}
+      <QuickAddSheet
+        open={expenseForm.formType === FORM_TYPES.QUICK_ADD}
+        onClose={expenseForm.handleFormClose}
+        onSubmit={expenseActions.handleExpenseFormSubmit}
+        onOpenFullForm={expenseForm.openFullForm}
+      />
       <FormsManager
         formType={expenseForm.formType}
         onClose={expenseForm.handleFormClose}
         selectedExpense={expenseForm.selectedExpense}
+        draft={expenseForm.draft}
         onExpenseSubmit={expenseActions.handleExpenseFormSubmit}
       />
       <IncomeFormDialog

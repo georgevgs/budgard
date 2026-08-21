@@ -1,14 +1,17 @@
 import { useCallback, useState } from 'react';
 import { FORM_TYPES, type FormType } from '@/components/layout/formTypes';
 import type { Expense } from '@/types/Expense';
+import type { ExpenseWritePayload } from '@/services/dataService';
 
 export const useExpenseFormState = () => {
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
   const [formType, setFormType] = useState<FormType>(null);
+  const [draft, setDraft] = useState<ExpenseWritePayload | undefined>();
 
   const handleFormClose = useCallback(() => {
     setFormType(null);
     setSelectedExpense(undefined);
+    setDraft(undefined);
   }, []);
 
   const handleExpenseEdit = useCallback((expense: Expense) => {
@@ -17,7 +20,15 @@ export const useExpenseFormState = () => {
     setFormType(FORM_TYPES.EDIT_EXPENSE);
   }, []);
 
+  // The FAB opens the keypad; the full form is a step past it.
   const openNewExpenseForm = useCallback(() => {
+    setFormType(FORM_TYPES.QUICK_ADD);
+  }, []);
+
+  // Carries whatever the keypad captured into the full form, so asking for
+  // more detail never costs the user the amount they already typed.
+  const openFullForm = useCallback((captured: ExpenseWritePayload) => {
+    setDraft(captured);
     setFormType(FORM_TYPES.NEW_EXPENSE);
   }, []);
 
@@ -25,8 +36,10 @@ export const useExpenseFormState = () => {
     formType,
     setFormType,
     selectedExpense,
+    draft,
     handleFormClose,
     handleExpenseEdit,
     openNewExpenseForm,
+    openFullForm,
   };
 };

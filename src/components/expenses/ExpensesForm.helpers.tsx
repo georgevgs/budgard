@@ -16,8 +16,15 @@ export type TranslateFunction = (
 export const getInitialAmount = (
   expense: Expense | undefined,
   defaultCurrency: string,
+  draft?: { amount?: number },
 ): string => {
-  if (!expense) return '';
+  if (!expense) {
+    if (typeof draft?.amount === 'number' && draft.amount > 0) {
+      return formatCurrencyInput(draft.amount.toFixed(2).replace('.', ','));
+    }
+
+    return '';
+  }
 
   const sourceAmount = pickSourceAmount(expense, defaultCurrency);
 
