@@ -84,7 +84,13 @@ const renderCurve = (series: Series, context: Context) => {
   const values = valuesOf(data, series.key);
   const runs = runsOf(values, xAt, y);
   const smooth = series.smooth !== false;
-  const baseline = plot.top + plot.height;
+  // The fill meets zero, not the floor of the plot. On a chart that runs below
+  // zero — a deviation from a personal baseline, a net cash flow — filling to
+  // the bottom would shade the area under a negative month as though it were
+  // the same quantity as the area above a positive one, when the two point in
+  // opposite directions. On a chart that never goes negative this is the floor
+  // anyway, so nothing else changes.
+  const baseline = clampToPlot(y.to(0), plot);
   const color = stroke(series.color);
   const showFill = series.kind === 'area' && series.fill !== false;
 
@@ -127,6 +133,10 @@ const renderFills = (
       stroke="none"
     />
   ));
+};
+
+const clampToPlot = (value: number, plot: Plot): number => {
+  return Math.min(Math.max(value, plot.top), plot.top + plot.height);
 };
 
 const dashFor = (dashed: boolean | undefined): string | undefined => {

@@ -122,7 +122,9 @@
       "more": "{{amount}} more than by this day last month",
       "less": "{{amount}} less than by this day last month",
       "same": "About the same as by this day last month"
-    }
+    },
+    "recovery_one": "Your usual day is about {{amount}}, and there is {{count}} day left.",
+    "recovery_other": "Your usual day is about {{amount}}, and there are {{count}} days left."
   },
   "activity": {
     "title": "Activity",
@@ -1050,7 +1052,16 @@
     "trendSummary": "Spending over {{count}} months, {{first}} to {{last}}, ranging from {{low}} to {{high}}.",
     "monthlyTrend": "Monthly spending trend",
     "cashFlowSummary": "Money in and out over {{count}} months, {{first}} to {{last}}. Net {{net}}.",
-    "forecastSummary": "Projection for the next {{count}} months, ending {{last}} with a net of {{net}}."
+    "forecastSummary": "Projection for the next {{count}} months, ending {{last}} with a net of {{net}}.",
+    "rhythm": {
+      "title": "Your year in rhythm",
+      "subtitle": "Your usual month is about {{amount}}. The line is where you normally sit — not a target.",
+      "usual": "Usual",
+      "level": "About your usual month",
+      "heavier": "{{amount}} heavier than usual",
+      "lighter": "{{amount}} lighter than usual",
+      "summary": "Spending by month against a usual month of {{amount}}: {{heavier}} months heavier, {{lighter}} lighter."
+    }
   },
   "import": {
     "title": "Import Expenses",

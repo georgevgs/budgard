@@ -23,6 +23,8 @@ type Props = {
   moneyPath: MoneyPathPoint[];
   spentThisMonth: number;
   spentLastMonthToDate: number;
+  typicalDay: number | null;
+  daysRemaining: number;
 };
 
 const TodayHero = (props: Props) => {
@@ -140,7 +142,31 @@ const renderGuidance = (props: Props, t: TFunc) => {
         {renderSafeLabel(props.safeToSpend, props.upcomingThisMonth, t)}
       </p>
       {renderDailyAllowance(props.dailyAllowance, props.currency, t)}
+      {renderRecovery(props, t)}
     </div>
+  );
+};
+
+// Over plan there is no allowance left to quote. Rather than stopping at the
+// verdict, say what an ordinary day costs this person and how many are left —
+// information they can act on, with nothing to feel caught out by. A month
+// already past its plan cannot be undone; the days remaining are the part
+// still in their hands.
+const renderRecovery = (props: Props, t: TFunc) => {
+  if (props.safeToSpend === null || props.safeToSpend >= 0) {
+    return null;
+  }
+  if (props.typicalDay === null || props.daysRemaining <= 0) {
+    return null;
+  }
+
+  return (
+    <p className="mt-1 text-sm font-semibold opacity-85">
+      {t('today.recovery', {
+        amount: formatCurrency(props.typicalDay, props.currency),
+        count: props.daysRemaining,
+      })}
+    </p>
   );
 };
 

@@ -1,4 +1,5 @@
-import { format, startOfWeek, subDays } from 'date-fns';
+import { format, parseISO, startOfWeek, subDays } from 'date-fns';
+import { buildBaseline, compareToBaseline } from '@/lib/baseline';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import { countsAsSpending } from '@/lib/spending';
@@ -18,10 +19,6 @@ const BASELINE_WEEKS = BASELINE_DAYS / WEEK_DAYS;
 const MIN_BASELINE_TRANSACTIONS = 3;
 const MIN_BASELINE_WEEKLY_AVG = 5;
 
-// Ratio thresholds for flagging as an anomaly.
-const UP_RATIO_THRESHOLD = 1.5;
-const DOWN_RATIO_THRESHOLD = 0.5;
-
 const MAX_ANOMALIES = 3;
 
 export type WeeklyAnomaly = {
@@ -30,9 +27,12 @@ export type WeeklyAnomaly = {
   color: string | null;
   icon: string | null;
   thisWeekAmount: number;
+  // The typical week for this category, as a median — not a mean.
   baselineWeeklyAverage: number;
   ratio: number;
   direction: 'up' | 'down';
+  // How far from this category's own normal, in spreads. Drives the ordering.
+  deviations: number;
 };
 
 export type WeeklyRecap = {
@@ -89,7 +89,12 @@ export const buildWeeklyRecap = ({
     totalRatio = weekTotal / baselineWeeklyAverage;
   }
 
-  const anomalies = computeAnomalies(weekExpenses, baselineExpenses, categories);
+  const anomalies = computeAnomalies(
+    weekExpenses,
+    baselineExpenses,
+    categories,
+    baselineStartDate,
+  );
 
   return {
     windowStart,
@@ -135,13 +140,52 @@ const bucketByCategory = (rows: Expense[]): Map<string, CategoryBucket> => {
   return buckets;
 };
 
+// One number per week per category over the baseline window, which is what
+// the baseline model needs — a single 90-day total cannot say whether the
+// weeks behind it were steady or wildly uneven, and that difference is
+// exactly what decides whether this week is worth mentioning.
+const weeklyTotalsByCategory = (
+  rows: Expense[],
+  windowStart: Date,
+): Map<string, number[]> => {
+  const byCategory = new Map<string, number[]>();
+
+  for (const row of rows) {
+    if (!row.category_id) {
+      continue;
+    }
+    const weekIndex = Math.floor(
+      (parseISO(row.date).getTime() - windowStart.getTime()) /
+        (WEEK_DAYS * 86_400_000),
+    );
+    if (weekIndex < 0) {
+      continue;
+    }
+
+    const weeks = byCategory.get(row.category_id) ?? [];
+    weeks[weekIndex] = (weeks[weekIndex] ?? 0) + row.amount;
+    byCategory.set(row.category_id, weeks);
+  }
+
+  // A week the category was never touched is a real zero, not a gap: "you
+  // usually spend nothing here" is information the baseline needs.
+  for (const [categoryId, weeks] of byCategory) {
+    const filled = Array.from({ length: BASELINE_WEEKS }, (_, index) => weeks[index] ?? 0);
+    byCategory.set(categoryId, filled);
+  }
+
+  return byCategory;
+};
+
 const computeAnomalies = (
   weekRows: Expense[],
   baselineRows: Expense[],
   categories: Category[],
+  baselineStart: Date,
 ): WeeklyAnomaly[] => {
   const weekByCat = bucketByCategory(weekRows);
   const baselineByCat = bucketByCategory(baselineRows);
+  const weeklyByCat = weeklyTotalsByCategory(baselineRows, baselineStart);
   const catById = new Map(categories.map((c) => [c.id, c]));
 
   const anomalies: WeeklyAnomaly[] = [];
@@ -155,9 +199,14 @@ const computeAnomalies = (
     if (baseline.count < MIN_BASELINE_TRANSACTIONS) continue;
 
     const thisWeek = weekByCat.get(categoryId)?.total ?? 0;
-    const ratio = thisWeek / baselineWeeklyAvg;
+    const model = buildBaseline(weeklyByCat.get(categoryId) ?? []);
+    const comparison = compareToBaseline(thisWeek, model);
 
-    const direction = classifyDirection(ratio);
+    // The model decides whether this is worth saying at all. A category whose
+    // weeks swing wildly has to move a long way before it counts as unusual;
+    // a steady one is flagged by a much smaller change. A flat ratio
+    // threshold treated both the same and cried wolf on the lumpy ones.
+    const direction = directionFor(comparison.verdict);
     if (direction === null) continue;
 
     anomalies.push({
@@ -166,9 +215,12 @@ const computeAnomalies = (
       color: category.color,
       icon: category.icon,
       thisWeekAmount: thisWeek,
-      baselineWeeklyAverage: baselineWeeklyAvg,
-      ratio,
+      // Reported against the typical week rather than the mean, so the copy
+      // matches the reason the week was flagged.
+      baselineWeeklyAverage: model.median,
+      ratio: safeRatio(thisWeek, model.median),
       direction,
+      deviations: comparison.deviations,
     });
   }
 
@@ -177,15 +229,31 @@ const computeAnomalies = (
   return anomalies.slice(0, MAX_ANOMALIES);
 };
 
-const classifyDirection = (ratio: number): 'up' | 'down' | null => {
-  if (ratio >= UP_RATIO_THRESHOLD) return 'up';
-  if (ratio > 0 && ratio <= DOWN_RATIO_THRESHOLD) return 'down';
+const directionFor = (
+  verdict: ReturnType<typeof compareToBaseline>['verdict'],
+): 'up' | 'down' | null => {
+  if (verdict === 'higher') {
+    return 'up';
+  }
+  if (verdict === 'lower') {
+    return 'down';
+  }
 
   return null;
 };
 
-// Up-anomalies rank before down-anomalies (more actionable), then by how
-// far each ratio deviates from 1 (1.0 means "exactly normal").
+// A typical week of zero would divide by nothing; the ratio is only used for
+// wording, so 1 ("about usual") is the honest fallback.
+const safeRatio = (thisWeek: number, median: number): number => {
+  if (median <= 0) {
+    return 1;
+  }
+
+  return thisWeek / median;
+};
+
+// Up-anomalies rank before down-anomalies (more actionable), then by how far
+// each sits from that category's own normal.
 const compareAnomalies = (a: WeeklyAnomaly, b: WeeklyAnomaly): number => {
   if (a.direction !== b.direction) {
     if (a.direction === 'up') {
@@ -195,5 +263,5 @@ const compareAnomalies = (a: WeeklyAnomaly, b: WeeklyAnomaly): number => {
     return 1;
   }
 
-  return Math.abs(b.ratio - 1) - Math.abs(a.ratio - 1);
+  return Math.abs(b.deviations) - Math.abs(a.deviations);
 };

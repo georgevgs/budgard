@@ -210,4 +210,46 @@ describe('buildWeeklyRecap', () => {
 
     expect(recap!.anomalies[0].direction).toBe('up');
   });
+
+  // The reason the model moved off a flat ratio threshold. Both categories
+  // spent the same amount this week against the same 90-day total, but one
+  // has been lumpy all along and one has been steady. A single ratio treated
+  // them identically and cried wolf on the lumpy one every time it moved.
+  it('judges a category against its own steadiness, not a flat ratio', () => {
+    const steadyRuns = Array.from({ length: 12 }, (_, week) =>
+      expense({
+        id: `steady-${week}`,
+        amount: 30,
+        category_id: 'steady',
+        date: format(subDays(NOW, 8 + week * 7), 'yyyy-MM-dd'),
+      }),
+    );
+    // Same 360 total, but arriving in three big irregular hits.
+    const lumpyRuns = [0, 4, 9].map((week) =>
+      expense({
+        id: `lumpy-${week}`,
+        amount: 120,
+        category_id: 'lumpy',
+        date: format(subDays(NOW, 8 + week * 7), 'yyyy-MM-dd'),
+      }),
+    );
+
+    const recap = buildWeeklyRecap({
+      now: NOW,
+      expenses: [
+        ...steadyRuns,
+        ...lumpyRuns,
+        expense({ id: 'w1', amount: 90, category_id: 'steady' }),
+        expense({ id: 'w2', amount: 90, category_id: 'lumpy' }),
+      ],
+      categories: [category('steady', 'Steady'), category('lumpy', 'Lumpy')],
+    });
+
+    const flagged = recap?.anomalies.map((a) => a.categoryId) ?? [];
+
+    // The steady category tripled its usual week — clearly worth saying.
+    expect(flagged).toContain('steady');
+    // The lumpy one has weeks like this all the time, so it is not news.
+    expect(flagged).not.toContain('lumpy');
+  });
 });

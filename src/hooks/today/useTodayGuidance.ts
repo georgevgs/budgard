@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { format, getDaysInMonth } from 'date-fns';
+import { format, getDaysInMonth, subDays } from 'date-fns';
 import {
   useCategoriesData,
   useDataConfig,
@@ -15,6 +15,7 @@ import {
 import { buildUpcomingBills } from '@/lib/upcomingBills';
 import type { Expense } from '@/types/Expense';
 import { countsAsSpending, sumSpending } from '@/lib/spending';
+import { buildBaseline } from '@/lib/baseline';
 
 export type TodayStatus = 'comfortable' | 'watchful' | 'tight' | 'noBudget';
 
@@ -73,6 +74,11 @@ export const useTodayGuidance = (expenses: Expense[]) => {
     });
     const daysRemaining = getDaysInMonth(now) - now.getDate() + 1;
     const dailyAllowance = computeDailyAllowance(safeToSpend, daysRemaining);
+    // What an ordinary day actually costs this person, from their own recent
+    // history. Over plan there is no allowance left to quote, and a screen
+    // that only says "you are past your plan" delivers a verdict and no way
+    // forward — this is the way forward.
+    const typicalDay = computeTypicalDay(expenses, now);
     const timeProgress = (now.getDate() / getDaysInMonth(now)) * 100;
     // Pace is measured on everyday spending only. Recurring bills land as real
     // expenses on their due date, so rent hitting on the 1st used to read as
@@ -107,6 +113,7 @@ export const useTodayGuidance = (expenses: Expense[]) => {
       upcomingThisMonth,
       safeToSpend,
       dailyAllowance,
+      typicalDay,
       daysRemaining,
       timeProgress,
       everydayBudget,
@@ -166,6 +173,31 @@ const computeDailyAllowance = (
   }
 
   return safeToSpend / daysRemaining;
+};
+
+const TYPICAL_DAY_WINDOW = 60;
+
+// The median of the days money actually left the account. Days with no
+// spending are left out on purpose: including them would halve the figure and
+// describe an average day nobody has, rather than the shape of a normal one.
+const computeTypicalDay = (expenses: Expense[], now: Date): number | null => {
+  const cutoff = format(subDays(now, TYPICAL_DAY_WINDOW), 'yyyy-MM-dd');
+  const byDay = new Map<string, number>();
+
+  for (const expense of expenses) {
+    if (expense.date < cutoff || !countsAsSpending(expense)) {
+      continue;
+    }
+    byDay.set(expense.date, (byDay.get(expense.date) ?? 0) + expense.amount);
+  }
+
+  const days = [...byDay.values()].filter((total) => total > 0);
+  const baseline = buildBaseline(days);
+  if (baseline.count < 5) {
+    return null;
+  }
+
+  return baseline.median;
 };
 
 const computeBudgetProgress = (

@@ -14,6 +14,7 @@ import { CategoryDrillDown } from '@/components/analytics/CategoryDrillDown';
 import { MonthDrillDown } from '@/components/analytics/MonthDrillDown';
 import MonthSnapshotCard from '@/components/analytics/MonthSnapshotCard';
 import YearOverviewSection from '@/components/analytics/YearOverviewSection';
+import YearRhythm from '@/components/analytics/YearRhythm';
 import CashFlowSection from '@/components/analytics/CashFlowSection';
 import ForecastSection from '@/components/analytics/ForecastSection';
 import AnnualExportCard from '@/components/analytics/AnnualExportCard';
@@ -84,6 +85,14 @@ const AnalyticsView = () => {
         monthlyAverage={analytics.yearlyStats.monthlyAverage}
         monthsElapsed={analytics.yearlyStats.monthsElapsed}
         onMonthClick={drillDown.handleMonthClick}
+      />
+
+      {/* Placed right after the year overview: the bars above answer "how much
+          each month", and this answers "compared to what" — which is the
+          question the bars invite and cannot settle on their own. */}
+      <YearRhythm
+        months={analytics.monthlyData}
+        currency={defaultCurrency}
       />
 
       {renderProSections(isPro, analytics.selectedYear, t)}
