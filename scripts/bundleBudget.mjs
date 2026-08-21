@@ -18,10 +18,10 @@ const DIST = 'dist';
 const BUDGETS = {
   // Everything the browser must have before the first authenticated paint:
   // the entry chunk plus every modulepreload the entry declares.
-  criticalPathGzipKb: 200,
+  criticalPathGzipKb: 190,
   // What the service worker downloads on install. Every user pays this on
   // every update, so it is the number that decides how heavy an update feels.
-  precacheGzipKb: 560,
+  precacheGzipKb: 545,
   // No single precached chunk should dominate an install.
   largestPrecachedChunkGzipKb: 80,
 };

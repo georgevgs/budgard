@@ -389,6 +389,17 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),
+      // supabase-js builds a RealtimeClient in its own constructor, so the
+      // whole websocket stack ships in the entry bundle whether or not a
+      // channel is ever opened. This app opens none — every read is REST and
+      // every write goes through the offline queue — so it is aliased to a
+      // stub that throws loudly if anything ever asks for a channel.
+      //
+      // See src/lib/realtimeStub.ts. Deleting this line turns realtime back on.
+      "@supabase/realtime-js": path.resolve(
+        import.meta.dirname,
+        "./src/lib/realtimeStub.ts",
+      ),
     },
   },
   build: {
