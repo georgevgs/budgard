@@ -322,6 +322,13 @@
       animation-iteration-count: infinite !important;
     }
 
+    /* Same reasoning: the pull spinner reports that a refetch is in flight, so
+       it slows down rather than freezing mid-turn. */
+    .pull-ring {
+      animation-duration: 1.6s !important;
+      animation-iteration-count: infinite !important;
+    }
+
     /* The blanket rule collapses durations but leaves delays intact, and the
        rhythm dots fill both ways — a staggered delay would hold them invisible
        for a third of a second. Land the whole row at once instead. */
@@ -500,6 +507,93 @@
      percentage of neon into a near-black card reads as brown rather than as
      lit. A ring needs none of that — it is drawn ON the card rather than mixed
      INTO it — so the four overrides that used to live here are gone. */
+
+  /* ── Pull to refresh ──────────────────────────────────────────────────────
+     usePullToRefresh writes --pull-y, --pull-progress and a data-pull stage
+     onto the document element on every touchmove and never through React, so a
+     60fps drag costs one style recalc a frame instead of a re-render of the
+     whole authenticated shell — header, dock and every row of the active tab.
+
+     The shell's transform exists only while data-pull does. A transform is a
+     containing block for fixed-position descendants, so leaving one on
+     permanently would quietly change how anything fixed inside a route
+     positions itself. */
+  [data-pull] .pull-shell {
+    transform: translate3d(0, var(--pull-y, 0px), 0);
+  }
+
+  /* The puck's travel is tied to progress rather than to the page, so it slides
+     out from under the header and stops the instant the gesture arms — 0.75rem
+     clear of the bar, notch included. Releasing then moves the page up to meet
+     a puck that has already landed, instead of dragging the puck around with
+     it. Anchored below the header by the wrapper; -2.25rem is its own height,
+     which parks it fully behind the bar at rest. */
+  .pull-puck {
+    transform: translate3d(
+      0,
+      calc(-2.25rem + var(--pull-progress, 0) * 3rem),
+      0
+    );
+    /* Full strength by ~60% of the pull, so the last stretch reads as the ring
+       filling rather than as the puck still arriving. */
+    opacity: calc(var(--pull-progress, 0) * 1.6);
+  }
+
+  .pull-ring {
+    transform-origin: center;
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .pull-ring-track {
+    stroke: hsl(var(--border));
+  }
+
+  /* pathLength="100" on the circle makes the offset a plain percentage. Rotated
+     so the ring fills from twelve o'clock, the direction the finger is going. */
+  .pull-ring-arc {
+    stroke: hsl(var(--primary));
+    stroke-dasharray: 100;
+    stroke-dashoffset: calc(100 * (1 - var(--pull-progress, 0)));
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: rotate(-90deg);
+  }
+
+  /* The one moment the gesture has something to say: the ring has closed and
+     letting go now will refetch. It arrives with the haptic tick. */
+  [data-pull='armed'] .pull-ring {
+    transform: scale(1.12);
+  }
+
+  /* Released — the determinate ring becomes an ordinary spinner. */
+  [data-pull='refreshing'] .pull-ring {
+    animation: pull-spin 700ms linear infinite;
+  }
+
+  [data-pull='refreshing'] .pull-ring-arc {
+    stroke-dashoffset: 72;
+    /* Unwinds from the closed ring into the spinner's arc as it starts to
+       turn, rather than cutting between the two shapes. */
+    transition: stroke-dashoffset 200ms ease-out;
+  }
+
+  /* No easing under the finger — direct manipulation must not lag. The spring
+     is only for the release and the settle back. */
+  [data-pull='refreshing'] .pull-shell,
+  [data-pull='settling'] .pull-shell {
+    transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  [data-pull='refreshing'] .pull-puck,
+  [data-pull='settling'] .pull-puck {
+    transition:
+      transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 260ms ease-out;
+  }
+
+  [data-pull='settling'] .pull-ring-arc {
+    transition: stroke-dashoffset 260ms ease-out;
+  }
 }
 
 @layer utilities {
@@ -611,6 +705,14 @@
 
   .card-enter {
     animation: card-enter 220ms ease-out both;
+  }
+
+  /* The pull-to-refresh spinner. Its own keyframe rather than Tailwind's
+     `spin`, because the class is applied from CSS by stage, not from React. */
+  @keyframes pull-spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   /* Skeleton placeholder: a muted block with a highlight that sweeps across it,

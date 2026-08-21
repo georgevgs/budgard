@@ -1,17 +1,20 @@
 import { useTranslation } from 'react-i18next';
-import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
-import { cn } from '@/lib/utils';
 import type { PullToRefreshState } from '@/hooks/usePullToRefresh';
 
 type Props = {
   state: PullToRefreshState;
 };
 
-// Rides down from behind the header as the page is pulled. Fixed rather than
-// in flow so nothing below it reflows during the gesture — a list that shifts
-// while being dragged reads as the app struggling to keep up.
+// Rides out from behind the header as the page is pulled and lands clear of it
+// at the moment the gesture arms, so the puck and the bar are never overlapped.
+// Fixed rather than in flow so nothing below it reflows during the gesture — a
+// list that shifts while being dragged reads as the app struggling to keep up.
+//
+// Everything it does visually is driven by --pull-progress and the data-pull
+// stage that usePullToRefresh writes onto the document element (see the
+// pull-to-refresh block in index.css), so a drag never re-renders this tree.
 const PullToRefreshIndicator = ({ state }: Props) => {
-  if (state.distance <= 0) {
+  if (!state.isEnabled) {
     return null;
   }
 
@@ -19,17 +22,10 @@ const PullToRefreshIndicator = ({ state }: Props) => {
     <>
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed inset-x-0 top-(--header-height) z-40 flex justify-center"
-        style={{
-          transform: `translateY(${state.distance - 28}px)`,
-          opacity: Math.min(state.progress * 1.4, 1),
-        }}
+        className="pointer-events-none fixed inset-x-0 top-[calc(var(--header-height)+env(safe-area-inset-top))] z-40 flex justify-center"
       >
-        <div className="rounded-full bg-card p-2 shadow-md ring-1 ring-border/50">
-          <RefreshCw
-            className={cn('h-5 w-5 text-primary-ink', spinClass(state))}
-            style={{ transform: iconTransform(state) }}
-          />
+        <div className="pull-puck lift flex size-9 items-center justify-center rounded-full border border-border/70 bg-card">
+          <ProgressRing />
         </div>
       </div>
       {/* A sibling, not a child: anything inside the aria-hidden wrapper above
@@ -43,23 +39,34 @@ export default PullToRefreshIndicator;
 
 // --- Helpers ---
 
-// While pulling, the icon turns with the gesture so the user is winding it up
-// themselves. Once released it spins under its own power.
-const spinClass = (state: PullToRefreshState): string => {
-  if (state.isRefreshing) {
-    return 'animate-spin';
-  }
-
-  return '';
-};
-
-const iconTransform = (state: PullToRefreshState): string | undefined => {
-  if (state.isRefreshing) {
-    return undefined;
-  }
-
-  return `rotate(${state.progress * 270}deg)`;
-};
+// The ring fills as the pull approaches its trigger, then becomes an ordinary
+// indeterminate spinner once released — the same two-part read as iOS and
+// Material, and a far better answer to "how much further?" than an icon that
+// merely rotates.
+//
+// pathLength normalises the circle to 100 units so the dash offset in index.css
+// is a plain percentage of the ring rather than a magic number derived from the
+// radius, which would silently desync the moment the ring was resized.
+const ProgressRing = () => (
+  <svg className="pull-ring size-5" viewBox="0 0 24 24" fill="none">
+    <circle
+      className="pull-ring-track"
+      cx="12"
+      cy="12"
+      r="10"
+      strokeWidth="2.5"
+    />
+    <circle
+      className="pull-ring-arc"
+      cx="12"
+      cy="12"
+      r="10"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      pathLength="100"
+    />
+  </svg>
+);
 
 // The indicator itself is decorative; this is the part a screen reader gets.
 const RefreshAnnouncement = ({ isRefreshing }: { isRefreshing: boolean }) => {

@@ -1,10 +1,4 @@
-import {
-  Suspense,
-  useEffect,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from 'react';
+import { Suspense, useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   BrowserRouter,
@@ -33,9 +27,7 @@ import { shouldShowOnboarding } from '@/lib/onboarding';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { useRouteScrollRestoration } from '@/hooks/useRouteScrollRestoration';
 import { usePageRefresh } from '@/hooks/usePageRefresh';
-import type { PullToRefreshState } from '@/hooks/usePullToRefresh';
 import PullToRefreshIndicator from '@/components/common/PullToRefreshIndicator';
-import { prefersReducedMotion } from '@/lib/motion';
 import { useAppLock } from '@/hooks/useAppLock';
 import { signOut } from '@/lib/auth';
 import {
@@ -136,11 +128,15 @@ const AuthenticatedLayout = () => {
         <SkipToContentLink />
         <PullToRefreshIndicator state={refresh} />
         <Header />
+        {/* pull-shell: the page travels with the pull so the indicator emerges
+            into space rather than landing on top of the content. The travel
+            itself is CSS (index.css), driven by a custom property the gesture
+            writes straight to the document element — a drag has to move the
+            page without re-rendering everything inside it once a frame. */}
         <main
           id="main-content"
           tabIndex={-1}
-          className="route-transition-content flex-1 pt-2 pb-(--dock-inset) focus:outline-none"
-          style={pullStyle(refresh)}
+          className="pull-shell route-transition-content flex-1 pt-2 pb-(--dock-inset) focus:outline-none"
         >
           <Outlet />
         </main>
@@ -153,34 +149,6 @@ const AuthenticatedLayout = () => {
       {renderLockScreen(lock)}
     </QuickAddProvider>
   );
-};
-// The page travels with the pull so the indicator emerges into space rather
-// than landing on top of the content. Applied only while the gesture is live:
-// a transform creates a containing block for fixed-position descendants, and
-// leaving one in place permanently would change how anything fixed inside a
-// route positions itself.
-const pullStyle = (refresh: PullToRefreshState): CSSProperties | undefined => {
-  if (refresh.distance <= 0) {
-    return undefined;
-  }
-
-  return {
-    transform: `translateY(${refresh.distance}px)`,
-    transition: pullTransition(refresh.isDragging),
-  };
-};
-
-// No easing under the finger — direct manipulation must not lag. The ease is
-// only for the release, which is why reduced motion collapses just that.
-const pullTransition = (isDragging: boolean): string => {
-  if (isDragging) {
-    return 'none';
-  }
-  if (prefersReducedMotion()) {
-    return 'transform 0.01ms';
-  }
-
-  return 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)';
 };
 
 // The OS photographs the app for its multitasking switcher the moment it is
