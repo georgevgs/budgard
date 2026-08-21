@@ -29,7 +29,8 @@
     "loadingSection": "Φόρτωση — {{section}}…",
     "loadingApp": "Φόρτωση Budgard…",
     "loadingSettings": "Φόρτωση ρυθμίσεων…",
-    "loadingOlderTransactions": "Φόρτωση παλαιότερων κινήσεων…"
+    "loadingOlderTransactions": "Φόρτωση παλαιότερων κινήσεων…",
+    "refreshing": "Ανανέωση"
   },
   "auth": {
     "signIn": "Σύνδεση",

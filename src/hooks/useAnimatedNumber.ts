@@ -1,64 +1,114 @@
 import { useEffect, useRef, useState } from 'react';
 import { prefersReducedMotion } from '@/lib/motion';
 
-const ANIMATION_DURATION_MS = 400;
+// Tuned to settle in roughly a third of a second with no visible bounce. A
+// figure that overshoots reads as the app being unsure what the number is.
+const STIFFNESS = 210;
+const DAMPING = 26;
+const MASS = 1;
 
-const easeOutCubic = (t: number): number => 1 - Math.pow(1 - t, 3);
+// Below this the remaining distance is under a hundredth of a cent and the
+// velocity is spent, so continuing would burn frames on nothing.
+const REST_DISTANCE = 0.01;
+const REST_VELOCITY = 0.01;
 
+// Integration is capped so a backgrounded tab returning with a 4-second gap
+// steps the spring forward sanely instead of exploding.
+const MAX_FRAME_SECONDS = 1 / 30;
+
+/**
+ * Counts a figure up or down to its new value.
+ *
+ * A spring rather than a fixed-duration ease because it is interruptible: when
+ * a second change lands mid-flight — two expenses added in quick succession —
+ * the motion carries its current velocity into the new target instead of
+ * restarting from a standstill, which is what made the old easing stutter.
+ */
 export const useAnimatedNumber = (target: number): number => {
   const [display, setDisplay] = useState(target);
-  const animationRef = useRef<number | null>(null);
-  const startValueRef = useRef(target);
-  const startTimeRef = useRef<number | null>(null);
+  const frameRef = useRef<number | null>(null);
+  const valueRef = useRef(target);
+  const velocityRef = useRef(0);
+  const lastTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (animationRef.current !== null) {
-      cancelAnimationFrame(animationRef.current);
+    if (frameRef.current !== null) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
     }
 
+    // The value is information, not decoration — it still has to arrive, it
+    // just arrives at once. Scheduled rather than set inline: a synchronous
+    // setState in an effect body cascades an extra render pass.
     if (prefersReducedMotion()) {
-      animationRef.current = requestAnimationFrame(() => setDisplay(target));
+      valueRef.current = target;
+      velocityRef.current = 0;
+      frameRef.current = requestAnimationFrame(() => {
+        frameRef.current = null;
+        setDisplay(target);
+      });
 
       return () => {
-        if (animationRef.current !== null) {
-          cancelAnimationFrame(animationRef.current);
+        if (frameRef.current !== null) {
+          cancelAnimationFrame(frameRef.current);
+          frameRef.current = null;
         }
       };
     }
 
-    startValueRef.current = display;
-    startTimeRef.current = null;
+    lastTimeRef.current = null;
 
-    const animate = (timestamp: number): void => {
-      if (startTimeRef.current === null) {
-        startTimeRef.current = timestamp;
+    const step = (timestamp: number) => {
+      if (lastTimeRef.current === null) {
+        lastTimeRef.current = timestamp;
+      }
+      const seconds = Math.min(
+        (timestamp - lastTimeRef.current) / 1000,
+        MAX_FRAME_SECONDS,
+      );
+      lastTimeRef.current = timestamp;
+
+      const displacement = valueRef.current - target;
+      const acceleration =
+        (-STIFFNESS * displacement - DAMPING * velocityRef.current) / MASS;
+
+      velocityRef.current += acceleration * seconds;
+      valueRef.current += velocityRef.current * seconds;
+
+      if (isAtRest(valueRef.current, target, velocityRef.current)) {
+        valueRef.current = target;
+        velocityRef.current = 0;
+        frameRef.current = null;
+        setDisplay(target);
+
+        return;
       }
 
-      const elapsed = timestamp - startTimeRef.current;
-      const progress = Math.min(elapsed / ANIMATION_DURATION_MS, 1);
-      const easedProgress = easeOutCubic(progress);
-
-      const current =
-        startValueRef.current +
-        (target - startValueRef.current) * easedProgress;
-      setDisplay(current);
-
-      if (progress < 1) {
-        animationRef.current = requestAnimationFrame(animate);
-      } else {
-        animationRef.current = null;
-      }
+      setDisplay(valueRef.current);
+      frameRef.current = requestAnimationFrame(step);
     };
 
-    animationRef.current = requestAnimationFrame(animate);
+    frameRef.current = requestAnimationFrame(step);
 
     return () => {
-      if (animationRef.current !== null) {
-        cancelAnimationFrame(animationRef.current);
+      if (frameRef.current !== null) {
+        cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target]);
 
   return display;
+};
+
+// --- Helpers ---
+
+const isAtRest = (
+  value: number,
+  target: number,
+  velocity: number,
+): boolean => {
+  return (
+    Math.abs(value - target) < REST_DISTANCE && Math.abs(velocity) < REST_VELOCITY
+  );
 };

@@ -1,4 +1,10 @@
-import { Suspense, useEffect, useState, type ReactNode } from 'react';
+import {
+  Suspense,
+  useEffect,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   BrowserRouter,
@@ -26,6 +32,10 @@ import { useUpgradeIntent } from '@/hooks/pro/useUpgradeIntent';
 import { shouldShowOnboarding } from '@/lib/onboarding';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { useRouteScrollRestoration } from '@/hooks/useRouteScrollRestoration';
+import { usePageRefresh } from '@/hooks/usePageRefresh';
+import type { PullToRefreshState } from '@/hooks/usePullToRefresh';
+import PullToRefreshIndicator from '@/components/common/PullToRefreshIndicator';
+import { prefersReducedMotion } from '@/lib/motion';
 import {
   AppLoadingSkeleton,
   ExpenseLoadingState,
@@ -93,19 +103,27 @@ const renderRouteFallback = (skeleton: ReactNode) => (
 // ============================================================================
 
 const AuthenticatedLayout = () => {
+  const { pathname } = useLocation();
   useOfflineSync();
   useIdleTabPrefetch();
   useCheckoutReturn();
   useRouteScrollRestoration();
+  // One pull gesture for the whole shell. It cannot live inside the tab views:
+  // MainTabsLayout keeps every visited tab mounted and merely hides it, so a
+  // per-view hook would leave several document listeners attached at once and
+  // a single pull would fire a refetch for each of them.
+  const refresh = usePageRefresh(isMainTabPath(pathname));
 
   return (
     <QuickAddProvider>
       <SkipToContentLink />
+      <PullToRefreshIndicator state={refresh} />
       <Header />
       <main
         id="main-content"
         tabIndex={-1}
         className="route-transition-content flex-1 pt-2 pb-(--dock-inset) focus:outline-none"
+        style={pullStyle(refresh)}
       >
         <Outlet />
       </main>
@@ -116,6 +134,35 @@ const AuthenticatedLayout = () => {
     </QuickAddProvider>
   );
 };
+// The page travels with the pull so the indicator emerges into space rather
+// than landing on top of the content. Applied only while the gesture is live:
+// a transform creates a containing block for fixed-position descendants, and
+// leaving one in place permanently would change how anything fixed inside a
+// route positions itself.
+const pullStyle = (refresh: PullToRefreshState): CSSProperties | undefined => {
+  if (refresh.distance <= 0) {
+    return undefined;
+  }
+
+  return {
+    transform: `translateY(${refresh.distance}px)`,
+    transition: pullTransition(refresh.isDragging),
+  };
+};
+
+// No easing under the finger — direct manipulation must not lag. The ease is
+// only for the release, which is why reduced motion collapses just that.
+const pullTransition = (isDragging: boolean): string => {
+  if (isDragging) {
+    return 'none';
+  }
+  if (prefersReducedMotion()) {
+    return 'transform 0.01ms';
+  }
+
+  return 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)';
+};
+
 // Visually hidden until focused — the first Tab on the authenticated app jumps
 // keyboard/screen-reader users straight past the header into the main content.
 const SkipToContentLink = () => {

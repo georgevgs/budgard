@@ -29,7 +29,8 @@
     "loadingSection": "Loading {{section}}…",
     "loadingApp": "Loading Budgard…",
     "loadingSettings": "Loading settings…",
-    "loadingOlderTransactions": "Loading older transactions…"
+    "loadingOlderTransactions": "Loading older transactions…",
+    "refreshing": "Refreshing"
   },
   "auth": {
     "signIn": "Sign In",
