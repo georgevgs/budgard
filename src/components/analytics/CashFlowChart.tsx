@@ -1,27 +1,11 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Bar,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ReferenceLine,
-  Legend,
-} from 'recharts';
+import CartesianChart from '@/components/charts/CartesianChart';
+import type { ChartPoint as Point, Series } from '@/components/charts/chartTypes';
+import { ChartTooltipRow } from '@/components/common/ChartTooltip';
 import { cn, formatCurrency } from '@/lib/utils';
-import {
-  ChartTooltipShell,
-  ChartTooltipRow,
-} from '@/components/common/ChartTooltip';
 
-const INCOME_COLOR = 'hsl(var(--income))';
-const EXPENSE_COLOR = 'hsl(var(--primary))';
-const NET_COLOR = 'hsl(var(--foreground))';
-
-type ChartPoint = {
+type CashFlowPoint = {
   month: string;
   fullMonth: string;
   income: number;
@@ -30,7 +14,7 @@ type ChartPoint = {
 };
 
 type Props = {
-  data: ChartPoint[];
+  data: CashFlowPoint[];
   currencySymbol: string;
   currency: string;
 };
@@ -38,67 +22,36 @@ type Props = {
 const CashFlowChart = ({ data, currencySymbol, currency }: Props) => {
   const { t } = useTranslation();
 
+  // Income rises from zero and spending falls below it, with the net running
+  // through as a line — so a month that earned more than it spent reads at a
+  // glance from which side of the axis is taller.
+  const series = useMemo<Series[]>(
+    () => [
+      { kind: 'bar', key: 'income', label: t('income.title'), color: '--income' },
+      { kind: 'bar', key: 'expense', label: t('expenses.title'), color: '--primary' },
+      {
+        kind: 'line',
+        key: 'net',
+        label: t('income.netCashFlow'),
+        color: '--foreground',
+        smooth: false,
+      },
+    ],
+    [t],
+  );
+
   return (
-    <div className="w-full">
-      <ResponsiveContainer width="100%" height={288}>
-        <ComposedChart
-          data={data}
-          margin={{ top: 8, right: 12, bottom: 0, left: 0 }}
-        >
-          <XAxis
-            dataKey="month"
-            stroke="currentColor"
-            className="text-xs text-muted-foreground"
-            tick={{ fill: 'currentColor', fontSize: 11 }}
-            tickLine={false}
-            axisLine={false}
-          />
-          <YAxis
-            stroke="currentColor"
-            className="text-xs text-muted-foreground"
-            tick={{ fill: 'currentColor', fontSize: 11 }}
-            tickLine={false}
-            axisLine={false}
-            tickFormatter={(value) => `${Math.abs(value)}${currencySymbol}`}
-            width={60}
-          />
-          <ReferenceLine y={0} stroke="currentColor" strokeOpacity={0.3} />
-          <Tooltip
-            cursor={{ fill: 'rgba(0,0,0,0.04)' }}
-            content={({ active, payload }) =>
-              renderTooltipContent(active, payload, currency, t)
-            }
-          />
-          <Legend
-            wrapperStyle={{ fontSize: 11, paddingTop: 4 }}
-            iconType="circle"
-          />
-          <Bar
-            dataKey="income"
-            stackId="cashflow"
-            fill={INCOME_COLOR}
-            name={t('income.title')}
-            radius={[6, 6, 0, 0]}
-          />
-          <Bar
-            dataKey="expense"
-            stackId="cashflow"
-            fill={EXPENSE_COLOR}
-            name={t('expenses.title')}
-            radius={[0, 0, 6, 6]}
-          />
-          <Line
-            type="monotone"
-            dataKey="net"
-            stroke={NET_COLOR}
-            strokeWidth={2}
-            dot={{ r: 3, fill: NET_COLOR }}
-            activeDot={{ r: 4 }}
-            name={t('income.netCashFlow')}
-          />
-        </ComposedChart>
-      </ResponsiveContainer>
-    </div>
+    <CartesianChart
+      data={data as unknown as Point[]}
+      xKey="month"
+      series={series}
+      height={288}
+      allowNegative
+      showLegend
+      formatY={(value) => `${Math.abs(Math.round(value))}${currencySymbol}`}
+      renderTooltip={(point) => renderTooltip(point, currency, t)}
+      ariaLabel={buildAriaLabel(data, currency, t)}
+    />
   );
 };
 
@@ -106,43 +59,38 @@ export default memo(CashFlowChart);
 
 // --- Helpers ---
 
-type TooltipEntries = ReadonlyArray<{ payload?: unknown }> | undefined;
+type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-type TranslateFunction = (key: string) => string;
-
-const renderTooltipContent = (
-  active: boolean | undefined,
-  payload: TooltipEntries,
-  currency: string,
-  t: TranslateFunction,
-) => {
-  if (!active || !payload || payload.length === 0) return null;
-  const point = payload[0].payload as ChartPoint;
+const renderTooltip = (point: Point, currency: string, t: TFunc) => {
+  const income = Number(point.income ?? 0);
+  const expense = Number(point.expense ?? 0);
+  const net = Number(point.net ?? 0);
 
   return (
-    <ChartTooltipShell title={point.fullMonth}>
+    <div className="space-y-1.5">
+      <p className="font-medium text-foreground">{String(point.fullMonth)}</p>
       <ChartTooltipRow
         label={t('income.title')}
         labelClassName="text-income-ink"
-        value={`+${formatCurrency(point.income, currency)}`}
+        value={`+${formatCurrency(income, currency)}`}
       />
       <ChartTooltipRow
         label={t('expenses.title')}
         labelClassName="text-destructive-ink"
-        value={`-${formatCurrency(Math.abs(point.expense), currency)}`}
+        value={`-${formatCurrency(Math.abs(expense), currency)}`}
       />
       <ChartTooltipRow
         label={t('income.netCashFlow')}
         labelClassName="font-medium"
-        value={`${renderNetSign(point.net)}${formatCurrency(point.net, currency)}`}
-        valueClassName={cn('font-semibold', getNetClass(point.net))}
+        value={`${netSign(net)}${formatCurrency(net, currency)}`}
+        valueClassName={cn('font-semibold', netClass(net))}
         separated
       />
-    </ChartTooltipShell>
+    </div>
   );
 };
 
-const getNetClass = (net: number): string => {
+const netClass = (net: number): string => {
   if (net >= 0) {
     return 'text-income-ink';
   }
@@ -150,10 +98,29 @@ const getNetClass = (net: number): string => {
   return 'text-destructive-ink';
 };
 
-const renderNetSign = (net: number): string => {
+const netSign = (net: number): string => {
   if (net >= 0) {
     return '+';
   }
 
   return '';
+};
+
+const buildAriaLabel = (
+  data: CashFlowPoint[],
+  currency: string,
+  t: TFunc,
+): string => {
+  if (data.length === 0) {
+    return t('income.netCashFlow');
+  }
+
+  const totalNet = data.reduce((sum, point) => sum + point.net, 0);
+
+  return t('analytics.cashFlowSummary', {
+    count: data.length,
+    first: data[0].fullMonth,
+    last: data[data.length - 1].fullMonth,
+    net: formatCurrency(totalNet, currency),
+  });
 };

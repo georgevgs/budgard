@@ -1,0 +1,82 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useCategoriesData } from '@/contexts/DataContext';
+import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
+import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
+import { useIsPro } from '@/hooks/useIsPro';
+import { toast } from '@/hooks/useToast';
+import { canAddCategory, FREE_CATEGORY_LIMIT } from '@/lib/proLimits';
+import type { Category, CategoryType } from '@/types/Category';
+
+export type CategoryManagerView =
+  | { type: 'list' }
+  | { type: 'form'; category?: Category };
+
+export const useCategoryManager = (categoryType: CategoryType) => {
+  const { t } = useTranslation();
+  const { expenseCategories, incomeCategories } = useCategoriesData();
+  const { handleCategoryDelete } = useCategoryOps();
+  const isPro = useIsPro();
+  const { openUpgrade } = useUpgradeDialog();
+  const [view, setView] = useState<CategoryManagerView>({ type: 'list' });
+  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
+
+  const categories = pickCategories(
+    categoryType,
+    expenseCategories,
+    incomeCategories,
+  );
+
+  // The free cap counts each type separately (expense vs income sources).
+  const handleAddClick = () => {
+    if (!canAddCategory(isPro, categories.length)) {
+      toast({
+        title: t('pro.gate.categoryLimit', { limit: FREE_CATEGORY_LIMIT }),
+      });
+      openUpgrade();
+
+      return;
+    }
+
+    setView({ type: 'form' });
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) {
+      return;
+    }
+
+    try {
+      await handleCategoryDelete(deleteTarget.id);
+    } catch {
+      // The error toast is raised by useCategoryOps.
+    }
+    setDeleteTarget(null);
+  };
+
+  return {
+    categories,
+    view,
+    deleteTarget,
+    showList: () => setView({ type: 'list' }),
+    editCategory: (category: Category) => setView({ type: 'form', category }),
+    requestDelete: setDeleteTarget,
+    cancelDelete: () => setDeleteTarget(null),
+    handleAddClick,
+    handleDelete,
+  };
+};
+
+// --- Helpers ---
+
+const pickCategories = (
+  type: CategoryType,
+  expenseCategories: Category[],
+  incomeCategories: Category[],
+): Category[] => {
+  if (type === 'income') {
+    return incomeCategories;
+  }
+
+  return expenseCategories;
+};

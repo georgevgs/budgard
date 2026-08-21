@@ -1,0 +1,119 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  useAccountsData,
+  useCategoriesData,
+  useDataConfig,
+  useRecurringData,
+} from '@/contexts/DataContext';
+import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
+import { useIsPro } from '@/hooks/useIsPro';
+import {
+  useRecurringActions,
+  type RecurringMode,
+} from '@/hooks/recurring/useRecurringActions';
+import { useToast } from '@/hooks/useToast';
+import {
+  canAddRecurringExpense,
+  FREE_RECURRING_EXPENSE_LIMIT,
+} from '@/lib/proLimits';
+import { getMonthlyAmount } from '@/lib/recurring';
+import type { RecurringExpense } from '@/types/RecurringExpense';
+
+// The screen shows two lists behind one toggle — recurring expenses and
+// recurring incomes — and the mode decides which data, which categories and
+// which cap apply. Holding all of that here keeps the component to layout.
+export const useRecurringList = () => {
+  const { t } = useTranslation();
+  const [mode, setMode] = useState<RecurringMode>('expense');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<
+    RecurringExpense | undefined
+  >(undefined);
+
+  const { recurringExpenses, recurringIncomes } = useRecurringData();
+  const { expenseCategories, incomeCategories } = useCategoriesData();
+  const { accounts } = useAccountsData();
+  const { defaultCurrency, isInitialized } = useDataConfig();
+  const isPro = useIsPro();
+  const { openUpgrade } = useUpgradeDialog();
+  const { toast } = useToast();
+  const showSkeleton = useDelayedLoading(!isInitialized);
+
+  const closeForm = () => {
+    setIsFormOpen(false);
+    setSelectedExpense(undefined);
+  };
+
+  const actions = useRecurringActions({
+    mode,
+    selectedExpense,
+    onDone: closeForm,
+  });
+
+  const isIncome = mode === 'income';
+  const items = pick(isIncome, recurringIncomes, recurringExpenses);
+  const categories = pick(isIncome, incomeCategories, expenseCategories);
+  const activeItems = items.filter((item) => item.active);
+
+  // The free cap applies to recurring expenses only; recurring incomes stay
+  // uncapped on every plan.
+  const handleAddClick = () => {
+    const atFreeCap =
+      !isIncome && !canAddRecurringExpense(isPro, recurringExpenses.length);
+
+    if (atFreeCap) {
+      toast({
+        title: t('pro.gate.recurringLimit', {
+          limit: FREE_RECURRING_EXPENSE_LIMIT,
+        }),
+      });
+      openUpgrade();
+
+      return;
+    }
+
+    setIsFormOpen(true);
+  };
+
+  return {
+    mode,
+    setMode,
+    items,
+    categories,
+    activeCount: activeItems.length,
+    monthlyTotal: activeItems.reduce(
+      (sum, item) => sum + getMonthlyAmount(item),
+      0,
+    ),
+    investmentAccounts: accounts.filter(
+      (account) => account.kind === 'investment' && !account.is_archived,
+    ),
+    defaultCurrency,
+    isInitialized,
+    showSkeleton,
+    isFormOpen,
+    selectedExpense,
+    openForm: () => setIsFormOpen(true),
+    closeForm,
+    handleAddClick,
+    handleEdit: (expense: RecurringExpense) => {
+      setSelectedExpense(expense);
+      setIsFormOpen(true);
+    },
+    handleSubmit: actions.handleSubmit,
+    handleDelete: actions.handleDelete,
+    handleToggle: actions.handleToggle,
+  };
+};
+
+// --- Helpers ---
+
+const pick = <T,>(isIncome: boolean, income: T, expense: T): T => {
+  if (isIncome) {
+    return income;
+  }
+
+  return expense;
+};

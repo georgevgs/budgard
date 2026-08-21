@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +12,7 @@ import { Form } from '@/components/ui/form';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import { useCurrencyConversion } from '@/hooks/expenseForm/useCurrencyConversion';
+import { useExpenseAttachments } from '@/hooks/expenseForm/useExpenseAttachments';
 import { useDescriptionSuggestions } from '@/hooks/expenseForm/useDescriptionSuggestions';
 import { useTagPicker } from '@/hooks/expenseForm/useTagPicker';
 import { useExpenseSubmit } from '@/hooks/expenseForm/useExpenseSubmit';
@@ -54,11 +54,7 @@ const ExpensesForm = ({
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();
-  const [receiptFile, setReceiptFile] = useState<File | null>(null);
-  const [removeExistingReceipt, setRemoveExistingReceipt] = useState(false);
-  const [showDetails, setShowDetails] = useState(() =>
-    Boolean(expense?.tag_id || expense?.receipt_path),
-  );
+  const attachments = useExpenseAttachments(expense);
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
@@ -81,8 +77,8 @@ const ExpensesForm = ({
   const { isSubmitting, handleSubmit } = useExpenseSubmit({
     expense,
     conversion,
-    receiptFile,
-    removeExistingReceipt,
+    receiptFile: attachments.receiptFile,
+    removeExistingReceipt: attachments.removeExistingReceipt,
     onSubmit,
     onClose,
   });
@@ -120,31 +116,16 @@ const ExpensesForm = ({
             <ExpenseFormDetails
               form={form}
               tagPicker={tagPicker}
-              showDetails={showDetails}
-              onToggleDetails={() => setShowDetails((prev) => !prev)}
+              showDetails={attachments.showDetails}
+              onToggleDetails={attachments.toggleDetails}
               currentReceiptPath={expense?.receipt_path}
-              receiptFile={receiptFile}
-              isRemovingReceipt={removeExistingReceipt}
-              onReceiptSelect={setReceiptFile}
-              onRemoveExistingReceipt={() => setRemoveExistingReceipt(true)}
+              receiptFile={attachments.receiptFile}
+              isRemovingReceipt={attachments.removeExistingReceipt}
+              onReceiptSelect={attachments.setReceiptFile}
+              onRemoveExistingReceipt={attachments.removeReceipt}
             />
 
-            {/* A Save button that is disabled from the moment the form opens
-                is a dead end unless something says why — validation is
-                onTouched, so a pristine form has no field errors to read yet.
-                This line stands in until the fields can speak for themselves. */}
-            <div className="flex flex-wrap items-center justify-end gap-3 pt-2 pb-2">
-              {renderSaveHint(form.formState.isValid, t)}
-              <Button type="button" variant="outline" onClick={onClose}>
-                {t('common.cancel')}
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting || !form.formState.isValid}
-              >
-                {renderSaveButtonLabel(isSubmitting, t)}
-              </Button>
-            </div>
+            {renderActions(form.formState.isValid, isSubmitting, onClose, t)}
           </form>
         </Form>
       </div>
@@ -155,6 +136,27 @@ const ExpensesForm = ({
 export default ExpensesForm;
 
 // --- Helpers ---
+
+// A Save button that is disabled from the moment the form opens is a dead end
+// unless something says why — validation is onTouched, so a pristine form has
+// no field errors to read yet. The hint stands in until the fields can speak
+// for themselves.
+const renderActions = (
+  isValid: boolean,
+  isSubmitting: boolean,
+  onClose: () => void,
+  t: (key: string) => string,
+) => (
+  <div className="flex flex-wrap items-center justify-end gap-3 pt-2 pb-2">
+    {renderSaveHint(isValid, t)}
+    <Button type="button" variant="outline" onClick={onClose}>
+      {t('common.cancel')}
+    </Button>
+    <Button type="submit" disabled={isSubmitting || !isValid}>
+      {renderSaveButtonLabel(isSubmitting, t)}
+    </Button>
+  </div>
+);
 
 const renderSaveHint = (isValid: boolean, t: (key: string) => string) => {
   if (isValid) {

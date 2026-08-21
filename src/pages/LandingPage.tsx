@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { changeAppLanguage } from '@/lib/i18n';
 import LoginModal from '@/components/auth/LoginModal';
 import Header from '@/components/landing/Header';
 import Hero from '@/components/landing/Hero';
@@ -25,7 +26,7 @@ const LandingPage = () => {
   }
 
   const handleLanguageChange = (lang: string) => {
-    void i18n.changeLanguage(lang);
+    void changeAppLanguage(lang);
   };
 
   const handleGetStarted = () => {

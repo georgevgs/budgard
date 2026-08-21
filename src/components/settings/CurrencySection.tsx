@@ -51,7 +51,7 @@ const CurrencySection = () => {
             onValueChange={handleCurrencyChange}
             disabled={isCurrencyUpdating}
           >
-            <SelectTrigger>
+            <SelectTrigger aria-label={t('settings.currency.default')}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="max-h-60">

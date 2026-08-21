@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import X from 'lucide-react/dist/esm/icons/x';
@@ -19,17 +18,15 @@ import {
 } from '@/components/ui/select';
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { useCategoriesData, useDataConfig } from '@/contexts/DataContext';
-import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
-import { cn, formatCurrency, parseCurrencyInput } from '@/lib/utils';
+import {
+  isSettled,
+  useExpenseSplit,
+  MAX_SPLIT_PARTS,
+  type SplitPart,
+} from '@/hooks/expensesList/useExpenseSplit';
+import { cn, formatCurrency } from '@/lib/utils';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
-
-const MAX_PARTS = 6;
-
-type Part = {
-  amount: string;
-  category_id: string;
-};
 
 type Props = {
   expense: Expense;
@@ -41,48 +38,7 @@ const SplitExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const { expenseCategories } = useCategoriesData();
-  const { handleExpenseSplit } = useExpenseOps();
-  const [parts, setParts] = useState<Part[]>(() => buildInitialParts(expense));
-  const [isSaving, setIsSaving] = useState(false);
-
-  const [prevInputs, setPrevInputs] = useState({ open, expense });
-  const inputsChanged =
-    prevInputs.open !== open || prevInputs.expense !== expense;
-  if (inputsChanged) {
-    setPrevInputs({ open, expense });
-    if (open) setParts(buildInitialParts(expense));
-  }
-
-  const remaining = expense.amount - sumParts(parts);
-  const partsValid = parts.every((part) => parseCurrencyInput(part.amount) > 0);
-  const canConfirm = partsValid && Math.abs(remaining) < 0.005 && !isSaving;
-
-  const updatePart = (index: number, patch: Partial<Part>) => {
-    setParts((prev) =>
-      prev.map((part, i) => {
-        if (i !== index) return part;
-
-        return { ...part, ...patch };
-      }),
-    );
-  };
-
-  const handleConfirm = async () => {
-    setIsSaving(true);
-    try {
-      await handleExpenseSplit(
-        expense,
-        parts.map((part) => ({
-          amount: parseCurrencyInput(part.amount),
-          category_id: normalizeCategoryId(part.category_id),
-        })),
-      );
-      onOpenChange(false);
-    } catch {
-      // error toast handled by useExpenseOps
-    }
-    setIsSaving(false);
-  };
+  const split = useExpenseSplit(expense, open, () => onOpenChange(false));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -101,24 +57,22 @@ const SplitExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
         </DialogHeader>
 
         <div className="space-y-3 overflow-y-auto px-1">
-          {parts.map((part, index) =>
+          {split.parts.map((part, index) =>
             renderPartRow(
               part,
               index,
-              parts.length,
+              split.parts.length,
               expenseCategories,
               defaultCurrency,
               t,
-              updatePart,
-              (i) => setParts((prev) => prev.filter((_, j) => j !== i)),
+              split.updatePart,
+              split.removePart,
             ),
           )}
 
-          {renderAddPartButton(parts.length, t, () =>
-            setParts((prev) => [...prev, { amount: '', category_id: 'none' }]),
-          )}
+          {renderAddPartButton(split.parts.length, t, split.addPart)}
 
-          {renderRemaining(remaining, defaultCurrency, t)}
+          {renderRemaining(split.remaining, defaultCurrency, t)}
         </div>
 
         <div className="flex gap-3 justify-end pb-2">
@@ -126,11 +80,15 @@ const SplitExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
-            disabled={isSaving}
+            disabled={split.isSaving}
           >
             {t('common.cancel')}
           </Button>
-          <Button type="button" onClick={handleConfirm} disabled={!canConfirm}>
+          <Button
+            type="button"
+            onClick={split.confirm}
+            disabled={!split.canConfirm}
+          >
             {t('expenses.split.confirm')}
           </Button>
         </div>
@@ -145,33 +103,14 @@ export default SplitExpenseDialog;
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-const buildInitialParts = (expense: Expense): Part[] => {
-  return [
-    { amount: '', category_id: expense.category_id ?? 'none' },
-    { amount: '', category_id: 'none' },
-  ];
-};
-
-const sumParts = (parts: Part[]): number => {
-  return parts.reduce((sum, part) => sum + parseCurrencyInput(part.amount), 0);
-};
-
-const normalizeCategoryId = (value: string): string | null => {
-  if (value === 'none') {
-    return null;
-  }
-
-  return value;
-};
-
 const renderPartRow = (
-  part: Part,
+  part: SplitPart,
   index: number,
   partCount: number,
   categories: Category[],
   currency: string,
   t: TFunc,
-  onUpdate: (index: number, patch: Partial<Part>) => void,
+  onUpdate: (index: number, patch: Partial<SplitPart>) => void,
   onRemove: (index: number) => void,
 ) => {
   return (
@@ -213,7 +152,9 @@ const renderRemoveButton = (
   t: TFunc,
   onRemove: (index: number) => void,
 ) => {
-  if (partCount <= 2) return null;
+  if (partCount <= 2) {
+    return null;
+  }
 
   return (
     <Button
@@ -234,7 +175,9 @@ const renderAddPartButton = (
   t: TFunc,
   onAdd: () => void,
 ) => {
-  if (partCount >= MAX_PARTS) return null;
+  if (partCount >= MAX_SPLIT_PARTS) {
+    return null;
+  }
 
   return (
     <Button
@@ -251,7 +194,7 @@ const renderAddPartButton = (
 };
 
 const renderRemaining = (remaining: number, currency: string, t: TFunc) => {
-  const settled = Math.abs(remaining) < 0.005;
+  const settled = isSettled(remaining);
 
   return (
     <p

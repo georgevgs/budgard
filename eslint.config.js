@@ -37,5 +37,19 @@ export default tseslint.config(
     rules: {
       'react-refresh/only-export-components': 'off',
     },
+  },
+  {
+    // Playwright specs are Node, not browser React. Two of its conventions
+    // look like React violations and are not: a fixture declares unused
+    // dependencies as `async ({}, use)`, and the `use` callback is a fixture
+    // parameter rather than React's `use` hook.
+    files: ['e2e/**', 'playwright.config.ts', 'scripts/**'],
+    languageOptions: {
+      globals: globals.node,
+    },
+    rules: {
+      'no-empty-pattern': 'off',
+      'react-hooks/rules-of-hooks': 'off',
+    },
   }
 );

@@ -65,3 +65,9 @@ Thumbs.db
 .claude
 .codex
 skills-lock.json
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/.playwright/

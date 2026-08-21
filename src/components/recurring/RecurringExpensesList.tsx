@@ -1,155 +1,66 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { EmptyStateCard } from '@/components/ui/empty-state-card';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
-import {
-  useDataConfig,
-  useRecurringData,
-  useCategoriesData,
-  useAccountsData,
-} from '@/contexts/DataContext';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import RecurringExpenseForm from '@/components/recurring/RecurringExpenseForm';
 import RecurringExpenseCard from '@/components/recurring/RecurringExpenseCard';
-import {
-  useRecurringActions,
-  type RecurringMode,
-} from '@/hooks/recurring/useRecurringActions';
+import { useRecurringList } from '@/hooks/recurring/useRecurringList';
+import type { RecurringMode } from '@/hooks/recurring/useRecurringActions';
 import { formatCurrency } from '@/lib/utils';
-import { calculateNextOccurrence, getMonthlyAmount } from '@/lib/recurring';
+import { calculateNextOccurrence } from '@/lib/recurring';
 import PageHeader from '@/components/common/PageHeader';
 import RecurringLoadingState from '@/components/recurring/RecurringLoading';
-import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { useTranslation } from 'react-i18next';
-import { useIsPro } from '@/hooks/useIsPro';
-import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
-import { useToast } from '@/hooks/useToast';
-import {
-  canAddRecurringExpense,
-  FREE_RECURRING_EXPENSE_LIMIT,
-} from '@/lib/proLimits';
 
 const RecurringExpensesList = () => {
-  const [mode, setMode] = useState<RecurringMode>('expense');
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedExpense, setSelectedExpense] = useState<
-    RecurringExpense | undefined
-  >(undefined);
-  const { recurringExpenses, recurringIncomes } = useRecurringData();
-  const { expenseCategories, incomeCategories } = useCategoriesData();
-  const { accounts } = useAccountsData();
-  const { defaultCurrency, isInitialized } = useDataConfig();
   const { t } = useTranslation();
-  const isPro = useIsPro();
-  const { openUpgrade } = useUpgradeDialog();
-  const { toast } = useToast();
+  const list = useRecurringList();
 
-  const { handleSubmit, handleDelete, handleToggle } = useRecurringActions({
-    mode,
-    selectedExpense,
-    onDone: () => {
-      setIsFormOpen(false);
-      setSelectedExpense(undefined);
-    },
-  });
-
-  let items = recurringExpenses;
-  if (mode === 'income') {
-    items = recurringIncomes;
-  }
-
-  let categories = expenseCategories;
-  if (mode === 'income') {
-    categories = incomeCategories;
-  }
-
-  const investmentAccounts = accounts.filter(
-    (a) => a.kind === 'investment' && !a.is_archived,
-  );
-
-  const handleEditExpense = (expense: RecurringExpense) => {
-    setSelectedExpense(expense);
-    setIsFormOpen(true);
-  };
-
-  // The free cap applies to recurring expenses only; recurring incomes stay
-  // uncapped on every plan.
-  const handleAddClick = () => {
-    const atFreeCap =
-      mode === 'expense' &&
-      !canAddRecurringExpense(isPro, recurringExpenses.length);
-
-    if (atFreeCap) {
-      toast({
-        title: t('pro.gate.recurringLimit', {
-          limit: FREE_RECURRING_EXPENSE_LIMIT,
-        }),
-      });
-      openUpgrade();
-
-      return;
-    }
-
-    setIsFormOpen(true);
-  };
-
-  const handleFormClose = () => {
-    setIsFormOpen(false);
-    setSelectedExpense(undefined);
-  };
-
-  const activeItems = items.filter((e) => e.active);
-  const monthlyTotal = activeItems.reduce(
-    (sum, item) => sum + getMonthlyAmount(item),
-    0,
-  );
-  const showSkeleton = useDelayedLoading(!isInitialized);
-
-  if (!isInitialized) {
-    return renderLoading(showSkeleton);
+  if (!list.isInitialized) {
+    return renderLoading(list.showSkeleton);
   }
 
   return (
     <div className="page-shell space-y-4">
       <div className="flex flex-col gap-4">
         {renderHeader(
-          mode,
-          activeItems.length,
-          monthlyTotal,
-          defaultCurrency,
-          handleAddClick,
+          list.mode,
+          list.activeCount,
+          list.monthlyTotal,
+          list.defaultCurrency,
+          list.handleAddClick,
           t,
         )}
 
-        {renderModeToggle(mode, setMode, t)}
+        {renderModeToggle(list.mode, list.setMode, t)}
       </div>
 
       <div className="grid gap-4">
         {renderExpensesList(
-          items,
-          mode,
-          handleEditExpense,
-          handleDelete,
-          handleToggle,
-          setIsFormOpen,
+          list.items,
+          list.mode,
+          list.handleEdit,
+          list.handleDelete,
+          list.handleToggle,
+          list.openForm,
           t,
         )}
       </div>
 
-      <Dialog open={isFormOpen} onOpenChange={handleFormClose}>
+      <Dialog open={list.isFormOpen} onOpenChange={list.closeForm}>
         <DialogContent
           className="sm:max-w-[500px] p-0 gap-0"
-          onOpenChange={handleFormClose}
+          onOpenChange={list.closeForm}
         >
           <RecurringExpenseForm
-            expense={selectedExpense}
-            categories={categories}
-            investmentAccounts={investmentAccounts}
-            type={mode}
-            onSubmit={handleSubmit}
-            onClose={handleFormClose}
+            expense={list.selectedExpense}
+            categories={list.categories}
+            investmentAccounts={list.investmentAccounts}
+            type={list.mode}
+            onSubmit={list.handleSubmit}
+            onClose={list.closeForm}
           />
         </DialogContent>
       </Dialog>

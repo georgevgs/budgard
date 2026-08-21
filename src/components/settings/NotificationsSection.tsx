@@ -242,7 +242,10 @@ const renderReminderTimePicker = (
         value={localHour.toString()}
         onValueChange={(value) => onTimeChange(parseInt(value))}
       >
-        <SelectTrigger className="w-[120px]">
+        <SelectTrigger
+          className="w-[120px]"
+          aria-label={t('settings.notifications.dailyReminderTime')}
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent className="max-h-60">

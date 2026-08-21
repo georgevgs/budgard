@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { changeAppLanguage } from '@/lib/i18n';
 import SurfaceCard from '@/components/common/SurfaceCard';
 import {
   Select,
@@ -25,9 +26,11 @@ const LanguageSection = () => {
         <div className="p-4">
           <Select
             value={i18n.language}
-            onValueChange={(lang) => i18n.changeLanguage(lang)}
+            onValueChange={(lang) => void changeAppLanguage(lang)}
           >
-            <SelectTrigger>
+            {/* The visible value is the language name, which is not a label —
+                without this the control announces only "English, combobox". */}
+            <SelectTrigger aria-label={t('settings.language.select')}>
               <SelectValue placeholder={t('settings.language.select')} />
             </SelectTrigger>
             <SelectContent>

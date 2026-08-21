@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Pencil from 'lucide-react/dist/esm/icons/pencil';
@@ -11,17 +10,10 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import ConfirmDestructiveDialog from '@/components/common/ConfirmDestructiveDialog';
-import { useCategoriesData } from '@/contexts/DataContext';
-import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
-import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
-import { useIsPro } from '@/hooks/useIsPro';
-import { toast } from '@/hooks/useToast';
-import { canAddCategory, FREE_CATEGORY_LIMIT } from '@/lib/proLimits';
+import { useCategoryManager } from '@/hooks/categories/useCategoryManager';
 import type { Category, CategoryType } from '@/types/Category';
 import CategoryForm from '@/components/categories/CategoryForm';
 import { getColorTint } from '@/lib/categoryColor';
-
-type View = { type: 'list' } | { type: 'form'; category?: Category };
 
 type CategoryManagerProps = {
   categoryType?: CategoryType;
@@ -31,51 +23,15 @@ export const CategoryManager = ({
   categoryType = 'expense',
 }: CategoryManagerProps = {}) => {
   const { t } = useTranslation();
-  const { expenseCategories, incomeCategories } = useCategoriesData();
-  const { handleCategoryDelete } = useCategoryOps();
-  const isPro = useIsPro();
-  const { openUpgrade } = useUpgradeDialog();
-  const [view, setView] = useState<View>({ type: 'list' });
-  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
+  const manager = useCategoryManager(categoryType);
 
-  const categories = pickCategories(
-    categoryType,
-    expenseCategories,
-    incomeCategories,
-  );
-
-  // The free cap counts each type separately (expense vs income sources).
-  const handleAddClick = () => {
-    if (!canAddCategory(isPro, categories.length)) {
-      toast({
-        title: t('pro.gate.categoryLimit', { limit: FREE_CATEGORY_LIMIT }),
-      });
-      openUpgrade();
-
-      return;
-    }
-
-    setView({ type: 'form' });
-  };
-
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
-
-    try {
-      await handleCategoryDelete(deleteTarget.id);
-    } catch {
-      // error toast handled by useCategoryOps
-    }
-    setDeleteTarget(null);
-  };
-
-  if (view.type === 'form') {
+  if (manager.view.type === 'form') {
     return (
       <CategoryForm
-        category={view.category}
+        category={manager.view.category}
         categoryType={categoryType}
-        onBack={() => setView({ type: 'list' })}
-        onClose={() => setView({ type: 'list' })}
+        onBack={manager.showList}
+        onClose={manager.showList}
       />
     );
   }
@@ -105,11 +61,11 @@ export const CategoryManager = ({
         style={{ touchAction: 'pan-y' }}
       >
         {renderCategoryList(
-          categories,
+          manager.categories,
           categoryType,
           t,
-          setView,
-          setDeleteTarget,
+          manager.editCategory,
+          manager.requestDelete,
         )}
       </div>
 
@@ -118,25 +74,14 @@ export const CategoryManager = ({
           variant="outline"
           size="sm"
           className="w-full"
-          onClick={handleAddClick}
+          onClick={manager.handleAddClick}
         >
           <Plus className="h-4 w-4 mr-2" />
           {renderAddButtonLabel(categoryType, t)}
         </Button>
       </div>
 
-      <ConfirmDestructiveDialog
-        open={deleteTarget !== null}
-        title={t('categories.deleteCategory')}
-        description={t('categories.deleteConfirmation', {
-          name: deleteTarget?.name,
-        })}
-        confirmLabel={t('common.delete')}
-        onOpenChange={(open) => {
-          if (!open) setDeleteTarget(null);
-        }}
-        onConfirm={handleDelete}
-      />
+      {renderDeleteDialog(manager, t)}
     </>
   );
 };
@@ -145,30 +90,46 @@ export const CategoryManager = ({
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-const pickCategories = (
-  type: CategoryType,
-  expenseCategories: Category[],
-  incomeCategories: Category[],
-) => {
-  if (type === 'income') return incomeCategories;
-
-  return expenseCategories;
-};
+const renderDeleteDialog = (
+  manager: ReturnType<typeof useCategoryManager>,
+  t: TFunc,
+) => (
+  <ConfirmDestructiveDialog
+    open={manager.deleteTarget !== null}
+    title={t('categories.deleteCategory')}
+    description={t('categories.deleteConfirmation', {
+      name: manager.deleteTarget?.name,
+    })}
+    confirmLabel={t('common.delete')}
+    onOpenChange={(open) => {
+      if (!open) {
+        manager.cancelDelete();
+      }
+    }}
+    onConfirm={manager.handleDelete}
+  />
+);
 
 const renderManagerTitle = (type: CategoryType, t: TFunc) => {
-  if (type === 'income') return t('income.manageSources');
+  if (type === 'income') {
+    return t('income.manageSources');
+  }
 
   return t('categories.title');
 };
 
 const renderManagerDescription = (type: CategoryType, t: TFunc) => {
-  if (type === 'income') return t('income.manageDescription');
+  if (type === 'income') {
+    return t('income.manageDescription');
+  }
 
   return t('categories.manageDescription');
 };
 
 const renderAddButtonLabel = (type: CategoryType, t: TFunc) => {
-  if (type === 'income') return t('income.addSource');
+  if (type === 'income') {
+    return t('income.addSource');
+  }
 
   return t('categories.addCategory');
 };
@@ -177,8 +138,8 @@ const renderCategoryList = (
   categories: Category[],
   type: CategoryType,
   t: TFunc,
-  setView: (view: View) => void,
-  setDeleteTarget: (category: Category) => void,
+  onEdit: (category: Category) => void,
+  onDelete: (category: Category) => void,
 ) => {
   if (categories.length === 0) {
     return renderEmptyState(type, t);
@@ -199,7 +160,7 @@ const renderCategoryList = (
             variant="ghost"
             size="icon"
             className="h-10 w-10 -my-1.5 text-muted-foreground hover:text-foreground shrink-0"
-            onClick={() => setView({ type: 'form', category })}
+            onClick={() => onEdit(category)}
             aria-label={t('categories.editCategory')}
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -208,7 +169,7 @@ const renderCategoryList = (
             variant="ghost"
             size="icon"
             className="h-10 w-10 -my-1.5 text-muted-foreground hover:text-destructive-ink shrink-0"
-            onClick={() => setDeleteTarget(category)}
+            onClick={() => onDelete(category)}
             aria-label={t('categories.deleteCategory')}
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -235,13 +196,17 @@ const renderEmptyState = (type: CategoryType, t: TFunc) => {
 };
 
 const renderEmptyTitle = (type: CategoryType, t: TFunc) => {
-  if (type === 'income') return t('income.noSources');
+  if (type === 'income') {
+    return t('income.noSources');
+  }
 
   return t('categories.noCategories');
 };
 
 const renderEmptyHelp = (type: CategoryType, t: TFunc) => {
-  if (type === 'income') return t('income.emptySourcesHelp');
+  if (type === 'income') {
+    return t('income.emptySourcesHelp');
+  }
 
   return t('categories.emptyHelp');
 };

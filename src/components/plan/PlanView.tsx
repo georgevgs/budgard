@@ -43,6 +43,11 @@ const PlanView = () => {
     () => buildPlanModel(expenses, goals, recurringExpenses),
     [expenses, goals, recurringExpenses],
   );
+  const counts = {
+    goals: model.goalCount,
+    debts: debtSummary.activeCount,
+    accounts: accounts.length,
+  };
   const isLoading = !config.isInitialized || !config.isSecondaryLoaded;
   const showSkeleton = useDelayedLoading(isLoading);
 
@@ -93,44 +98,7 @@ const PlanView = () => {
       <div className="mt-8">
         <SavingsRhythm rhythm={rhythm} currency={config.defaultCurrency} />
       </div>
-      {/* Every screen that plans ahead is reachable from here — Plan is the
-          hub, so nothing lives only behind a header menu. */}
-      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <PlanOverviewCard
-          title={t('plan.recurring.title')}
-          value={formatCurrency(model.recurringMonthly, config.defaultCurrency)}
-          description={t('plan.recurring.description', {
-            count: model.recurringCount,
-          })}
-          path="/recurring"
-          icon={Repeat}
-          toneClass="bg-primary/12 text-primary-ink"
-        />
-        <PlanOverviewCard
-          title={t('plan.goals.title')}
-          value={t('plan.goals.value', { count: model.goalCount })}
-          description={t('plan.goals.description')}
-          path="/goals"
-          icon={Target}
-          toneClass="bg-income/12 text-income-ink"
-        />
-        <PlanOverviewCard
-          title={t('plan.debts.title')}
-          value={t('plan.debts.value', { count: debtSummary.activeCount })}
-          description={t('plan.debts.description')}
-          path="/debts"
-          icon={CreditCard}
-          toneClass="bg-warning/14 text-warning-ink"
-        />
-        <PlanOverviewCard
-          title={t('plan.networth.title')}
-          value={t('plan.networth.value', { count: accounts.length })}
-          description={t('plan.networth.description')}
-          path="/networth"
-          icon={Wallet}
-          toneClass="bg-info/12 text-info-ink"
-        />
-      </div>
+      {renderOverviewGrid(model, config.defaultCurrency, counts, t)}
     </div>
   );
 };
@@ -138,6 +106,60 @@ const PlanView = () => {
 export default PlanView;
 
 // --- Helpers ---
+
+type TFunc = (key: string, options?: Record<string, unknown>) => string;
+
+type OverviewCounts = {
+  goals: number;
+  debts: number;
+  accounts: number;
+};
+
+// Every screen that plans ahead is reachable from here — Plan is the hub, so
+// nothing lives only behind a header menu.
+const renderOverviewGrid = (
+  model: ReturnType<typeof buildPlanModel>,
+  currency: string,
+  counts: OverviewCounts,
+  t: TFunc,
+) => (
+  <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <PlanOverviewCard
+      title={t('plan.recurring.title')}
+      value={formatCurrency(model.recurringMonthly, currency)}
+      description={t('plan.recurring.description', {
+        count: model.recurringCount,
+      })}
+      path="/recurring"
+      icon={Repeat}
+      toneClass="bg-primary/12 text-primary-ink"
+    />
+    <PlanOverviewCard
+      title={t('plan.goals.title')}
+      value={t('plan.goals.value', { count: counts.goals })}
+      description={t('plan.goals.description')}
+      path="/goals"
+      icon={Target}
+      toneClass="bg-income/12 text-income-ink"
+    />
+    <PlanOverviewCard
+      title={t('plan.debts.title')}
+      value={t('plan.debts.value', { count: counts.debts })}
+      description={t('plan.debts.description')}
+      path="/debts"
+      icon={CreditCard}
+      toneClass="bg-warning/14 text-warning-ink"
+    />
+    <PlanOverviewCard
+      title={t('plan.networth.title')}
+      value={t('plan.networth.value', { count: counts.accounts })}
+      description={t('plan.networth.description')}
+      path="/networth"
+      icon={Wallet}
+      toneClass="bg-info/12 text-info-ink"
+    />
+  </div>
+);
 
 const buildPlanModel = (
   expenses: ReturnType<typeof useExpensesData>,

@@ -1,25 +1,19 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ResponsiveContainer, PieChart, Pie, Tooltip } from 'recharts';
 import SurfaceCard from '@/components/common/SurfaceCard';
+import DonutChart, { type DonutSlice } from '@/components/charts/DonutChart';
 import { formatCurrency, formatPercent } from '@/lib/utils';
-import { ChartTooltipShell } from '@/components/common/ChartTooltip';
 import type { Account } from '@/types/Account';
 
 type Props = {
   accounts: Account[];
 }
 
-type Slice = {
-  id: string;
+type Slice = DonutSlice & {
   name: string;
-  color: string;
-  // recharts Pie reads each slice's color from the data's `fill` key
-  fill: string;
   currency: string;
-  value: number;
   pct: number;
-}
+};
 
 const InvestmentAllocationCard = ({ accounts }: Props) => {
   const { t } = useTranslation();
@@ -34,9 +28,9 @@ const InvestmentAllocationCard = ({ accounts }: Props) => {
       .filter((a) => a.current_balance > 0)
       .map((a) => ({
         id: a.id,
+        label: a.name,
         name: a.name,
         color: a.color,
-        fill: a.color,
         currency: a.default_currency,
         value: a.current_balance,
         pct: (a.current_balance / total) * 100,
@@ -55,26 +49,18 @@ const InvestmentAllocationCard = ({ accounts }: Props) => {
           {t('networth.allocation.title')}
         </h3>
         <div className="flex items-center gap-4">
-          <div className="w-28 h-28 shrink-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={slices}
-                  dataKey="value"
-                  nameKey="name"
-                  innerRadius={28}
-                  outerRadius={50}
-                  paddingAngle={2}
-                  stroke="hsl(var(--background))"
-                  strokeWidth={2}
-                />
-                <Tooltip
-                  content={({ active, payload }) =>
-                    renderTooltip(Boolean(active), payload)
-                  }
-                />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="shrink-0">
+            <DonutChart
+              slices={slices}
+              size={112}
+              thickness={22}
+              renderTooltip={(slice) => renderSliceTooltip(slice, slices)}
+              ariaLabel={t('networth.allocation.summary', {
+                count: slices.length,
+                top: slices[0].name,
+                pct: formatPercent(slices[0].pct, 0),
+              })}
+            />
           </div>
           <ul className="flex-1 min-w-0 space-y-1.5">
             {slices.map((s) => (
@@ -104,24 +90,19 @@ export default InvestmentAllocationCard;
 
 // --- Helpers ---
 
-type TooltipPayloadEntry = {
-  payload?: Slice;
-}
-
-const renderTooltip = (
-  active: boolean,
-  payload: ReadonlyArray<TooltipPayloadEntry> | undefined,
-) => {
-  if (!active || !payload || payload.length === 0) return null;
-
-  const slice = payload[0].payload;
-  if (!slice) return null;
+const renderSliceTooltip = (slice: DonutSlice, slices: Slice[]) => {
+  const detail = slices.find((item) => item.id === slice.id);
+  if (!detail) {
+    return null;
+  }
 
   return (
-    <ChartTooltipShell title={slice.name}>
-      <p className="tabular-nums text-muted-foreground">
-        {formatCurrency(slice.value, slice.currency)} · {formatPercent(slice.pct, 1)}%
+    <>
+      <p className="font-medium text-foreground">{detail.name}</p>
+      <p className="mt-0.5 tabular-nums text-muted-foreground">
+        {formatCurrency(detail.value, detail.currency)} ·{' '}
+        {formatPercent(detail.pct, 1)}%
       </p>
-    </ChartTooltipShell>
+    </>
   );
-}
+};

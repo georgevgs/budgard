@@ -61,6 +61,12 @@ export type ThemeDefinition = {
  * their own stack the two into dead space at the end of the list.
  */
 export const BASE_TOKENS: TokenMap = {
+  // The two self-hosted variable faces (see src/design/fonts.css for why
+  // these two and not the obvious rounded ones). Declared as tokens so the
+  // family names live in one place: index.css reads them, and a swap is a
+  // one-line edit here rather than a grep across every component.
+  '--font-display': "'Commissioner', ui-rounded, 'SF Pro Rounded', system-ui, sans-serif",
+  '--font-sans': "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   // Anything that pins itself below the sticky header — the Activity feed's
   // day dividers, for one — offsets by this rather than restating the number.
   '--header-height': '4rem',

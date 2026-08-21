@@ -1,14 +1,8 @@
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useDialogDirty } from '@/hooks/useDialogDirty';
-import { budgetSchema, type BudgetFormData } from '@/lib/validations';
-import {
-  formatCurrencyInput,
-  parseCurrencyInput,
-  formatCurrency,
-} from '@/lib/utils';
+import type { UseFormRegister } from 'react-hook-form';
+import { useBudgetForm } from '@/hooks/budget/useBudgetForm';
+import type { BudgetFormData } from '@/lib/validations';
+import { formatCurrency } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import { Button } from '@/components/ui/button';
@@ -38,45 +32,16 @@ const BudgetForm = ({
   currencyCode = 'EUR',
 }: BudgetFormProps) => {
   const { t } = useTranslation();
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    reset,
-    formState: { errors, isSubmitting, isDirty, isValid },
-  } = useForm<BudgetFormData>({
-    resolver: zodResolver(budgetSchema),
-    mode: 'onTouched',
-    defaultValues: { amount: getInitialAmount(currentBudget) },
-  });
-
-  useDialogDirty(isDirty);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    reset({ amount: getInitialAmount(currentBudget) });
-  }, [isOpen, currentBudget, reset]);
-
-  const handleFormSubmit = async (data: BudgetFormData) => {
-    const amount = parseCurrencyInput(data.amount);
-    await onSubmit(amount);
-    onClose();
-  };
-
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatCurrencyInput(e.target.value);
-    setValue('amount', formatted, { shouldValidate: true });
-  };
+  const form = useBudgetForm({ isOpen, currentBudget, onSubmit, onClose });
+  const isEditing = currentBudget !== null;
 
   const handleOpenChange = (open: boolean) => {
-    if (open) return;
+    if (open) {
+      return;
+    }
 
     onClose();
   };
-
-  const isEditing = currentBudget !== null;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -99,32 +64,18 @@ const BudgetForm = ({
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="budget-amount">{t('budget.amountLabel')}</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  {getCurrencySymbol(currencyCode)}
-                </span>
-                <Input
-                  id="budget-amount"
-                  {...register('amount')}
-                  onChange={handleAmountChange}
-                  placeholder={t('budget.amountPlaceholder')}
-                  aria-label={t('budget.amountAriaLabel')}
-                  className="pl-8"
-                  autoComplete="off"
-                />
-              </div>
-              {renderAmountError(errors.amount?.message)}
-            </div>
+          <form onSubmit={form.submit} className="space-y-4">
+            {renderAmountField(form, currencyCode, t)}
 
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={onClose}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" disabled={isSubmitting || !isValid}>
-                {renderSubmitContent(isSubmitting, isEditing, t)}
+              <Button
+                type="submit"
+                disabled={form.isSubmitting || !form.isValid}
+              >
+                {renderSubmitContent(form.isSubmitting, isEditing, t)}
               </Button>
             </div>
           </form>
@@ -143,14 +94,41 @@ type TranslateFunction = (
   options?: Record<string, unknown>,
 ) => string;
 
-const getInitialAmount = (currentBudget: number | null): string => {
-  if (!currentBudget) return '';
-
-  return formatCurrencyInput(currentBudget.toString());
+type BudgetFormApi = {
+  register: UseFormRegister<BudgetFormData>;
+  handleAmountChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  errorMessage: string | undefined;
 };
 
+const renderAmountField = (
+  form: BudgetFormApi,
+  currencyCode: string,
+  t: TranslateFunction,
+) => (
+  <div className="space-y-2">
+    <Label htmlFor="budget-amount">{t('budget.amountLabel')}</Label>
+    <div className="relative">
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+        {getCurrencySymbol(currencyCode)}
+      </span>
+      <Input
+        id="budget-amount"
+        {...form.register('amount')}
+        onChange={form.handleAmountChange}
+        placeholder={t('budget.amountPlaceholder')}
+        aria-label={t('budget.amountAriaLabel')}
+        className="pl-8"
+        autoComplete="off"
+      />
+    </div>
+    {renderAmountError(form.errorMessage)}
+  </div>
+);
+
 const renderTitle = (isEditing: boolean, t: TranslateFunction) => {
-  if (isEditing) return t('budget.editBudget');
+  if (isEditing) {
+    return t('budget.editBudget');
+  }
 
   return t('budget.setBudget');
 };
@@ -171,7 +149,9 @@ const renderDescription = (
 };
 
 const renderAmountError = (message: string | undefined) => {
-  if (!message) return null;
+  if (!message) {
+    return null;
+  }
 
   return <p className="text-sm text-destructive-ink">{message}</p>;
 };
@@ -190,7 +170,9 @@ const renderSubmitContent = (
     );
   }
 
-  if (isEditing) return t('budget.updateButton');
+  if (isEditing) {
+    return t('budget.updateButton');
+  }
 
   return t('budget.setButton');
 };

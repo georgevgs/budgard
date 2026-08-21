@@ -15,7 +15,7 @@ import { designTokens } from "./plugins/designTokens.ts";
 // actual implementation, ~170 KB min) leaked into the app entry chunk and got
 // cache-busted on every deploy. Matching on the package directory captures
 // every module of the package. Anything unmatched returns undefined so
-// dynamic-import-only packages (recharts, browser-image-compression, ...)
+// dynamic-import-only packages (pdfmake, browser-image-compression, ...)
 // keep their natural lazy chunks.
 //
 // Only group a package here when it is EITHER genuinely needed at boot
@@ -251,6 +251,11 @@ export default defineConfig({
         // control transfers — and the app reloads — only when asked.
         cleanupOutdatedCaches: true,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,json}"],
+        // Fonts are deliberately NOT precached. Each face ships as four
+        // unicode-range subsets and the browser fetches only the ones a
+        // session actually needs — precaching them all would put ~290 KB of
+        // Greek and Latin-Extended on every install, most of it never read.
+        // The runtime cache below keeps whichever ones a user does load.
         // The OCR runtime (worker + ~4 MB wasm cores + traineddata) must NOT
         // be precached for every user at SW install — it's fetched on demand
         // and kept via the ocr-assets runtime cache below.
@@ -280,6 +285,23 @@ export default defineConfig({
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 2
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          // Self-hosted faces. Content-hashed into /assets/, so a file at a
+          // given URL never changes and CacheFirst is safe indefinitely.
+          {
+            urlPattern: ({ sameOrigin, url }) =>
+              sameOrigin && url.pathname.endsWith(".woff2"),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "font-assets",
+              expiration: {
+                maxEntries: 12,
+                maxAgeSeconds: 60 * 60 * 24 * 365
               },
               cacheableResponse: {
                 statuses: [0, 200]

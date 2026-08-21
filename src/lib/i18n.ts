@@ -66,9 +66,32 @@ const initI18n = async (): Promise<void> => {
       return;
     }
 
+    // Reaching here means something changed the language without going through
+    // changeAppLanguage below, so the bundle is arriving after the render that
+    // languageChanged already triggered. addResourceBundle alone does not
+    // notify react-i18next, which would leave the UI in the previous language
+    // until an unrelated re-render happened to come along. Re-announcing the
+    // same language once the bundle is in place is what repaints it — and it
+    // cannot loop, because hasResourceBundle short-circuits the second pass.
     const translation = await loadTranslation(lng);
     i18n.addResourceBundle(lng, 'translation', translation);
+    await i18n.changeLanguage(lng);
   });
 };
 
 export const i18nReady = initI18n();
+
+// Switching language has to load that language's strings before the switch is
+// announced, or every consumer renders one pass with the old bundle. Callers
+// use this rather than i18n.changeLanguage directly.
+export const changeAppLanguage = async (lng: string): Promise<void> => {
+  if (!isSupported(lng)) {
+    return;
+  }
+
+  if (!i18n.hasResourceBundle(lng, 'translation')) {
+    i18n.addResourceBundle(lng, 'translation', await loadTranslation(lng));
+  }
+
+  await i18n.changeLanguage(lng);
+};

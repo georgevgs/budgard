@@ -6,7 +6,7 @@ type ShellProps = {
   children?: ReactNode;
 };
 
-// Shared chrome for every recharts tooltip so all charts read as one system:
+// Shared chrome for every chart tooltip so all charts read as one system:
 // same radius, surface, border, shadow and padding. Content stays per-chart.
 const ChartTooltipShell = ({ title, children }: ShellProps) => (
   <div className="rounded-xl bg-popover border border-border/40 shadow-md p-3 text-xs space-y-1.5">

@@ -861,7 +861,8 @@
       "rangeAll": "All"
     },
     "allocation": {
-      "title": "Investment allocation"
+      "title": "Investment allocation",
+      "summary": "Allocation across {{count}} accounts, largest {{top}} at {{pct}}%."
     },
     "toasts": {
       "accountUpdated": "Account updated",
@@ -872,7 +873,8 @@
       "balanceUpdated": "Balance updated",
       "balanceUpdateFailed": "Failed to update balance",
       "snapshotDeleteFailed": "Failed to delete snapshot"
-    }
+    },
+    "chartSummary": "Net worth from {{first}} to {{last}}, moving from {{from}} to {{to}}."
   },
   "debts": {
     "addDebt": "Add debt",
@@ -1033,7 +1035,11 @@
       "uncategorized": "Uncategorized"
     },
     "emptyTitle": "No data to analyze yet",
-    "emptyDescription": "Add your first expenses and this screen fills with insights about your spending."
+    "emptyDescription": "Add your first expenses and this screen fills with insights about your spending.",
+    "trendSummary": "Spending over {{count}} months, {{first}} to {{last}}, ranging from {{low}} to {{high}}.",
+    "monthlyTrend": "Monthly spending trend",
+    "cashFlowSummary": "Money in and out over {{count}} months, {{first}} to {{last}}. Net {{net}}.",
+    "forecastSummary": "Projection for the next {{count}} months, ending {{last}} with a net of {{net}}."
   },
   "import": {
     "title": "Import Expenses",

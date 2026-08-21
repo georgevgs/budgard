@@ -1,27 +1,14 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO, subMonths, subYears, type Locale } from 'date-fns';
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Area,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from 'recharts';
+import CartesianChart from '@/components/charts/CartesianChart';
+import type { ChartPoint, Series } from '@/components/charts/chartTypes';
 import { cn, formatCurrency, formatCurrencyCompact } from '@/lib/utils';
-import {
-  ChartTooltipShell,
-  ChartTooltipRow,
-} from '@/components/common/ChartTooltip';
+import { ChartTooltipRow } from '@/components/common/ChartTooltip';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import { useIsPro } from '@/hooks/useIsPro';
-
-const VALUE_COLOR = 'hsl(var(--primary))';
-const BASIS_COLOR = 'hsl(var(--muted-foreground))';
 
 type RangeKey = '1m' | '3m' | '1y' | 'all';
 
@@ -62,59 +49,20 @@ const AccountHistoryChart = ({ account, snapshots }: Props) => {
   return (
     <div className="w-full">
       {renderRangeTabs(range, setRange, t)}
-      <ResponsiveContainer width="100%" height={180}>
-        <ComposedChart
-          data={visible}
-          margin={{ top: 8, right: 12, bottom: 0, left: 0 }}
-        >
-          <defs>
-            <linearGradient id="accountValueGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={VALUE_COLOR} stopOpacity={0.4} />
-              <stop offset="95%" stopColor={VALUE_COLOR} stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <XAxis
-            dataKey="label"
-            stroke="currentColor"
-            className="text-xs text-muted-foreground"
-            tick={{ fill: 'currentColor', fontSize: 11 }}
-            tickLine={false}
-            axisLine={false}
-            minTickGap={32}
-          />
-          <YAxis
-            stroke="currentColor"
-            className="text-xs text-muted-foreground"
-            tick={{ fill: 'currentColor', fontSize: 11 }}
-            tickLine={false}
-            axisLine={false}
-            tickFormatter={(value) =>
-              formatCurrencyCompact(Math.abs(value), account.default_currency)
-            }
-            width={60}
-          />
-          <Tooltip
-            cursor={{ stroke: 'currentColor', strokeOpacity: 0.2 }}
-            content={({ active, payload }) =>
-              renderTooltip({
-                active: Boolean(active),
-                payload,
-                isInvestment: showBasis,
-                currency: account.default_currency,
-                t,
-              })
-            }
-          />
-          <Area
-            type="monotone"
-            dataKey="balance"
-            stroke={VALUE_COLOR}
-            strokeWidth={2}
-            fill="url(#accountValueGradient)"
-          />
-          {renderCostBasisLine(showBasis)}
-        </ComposedChart>
-      </ResponsiveContainer>
+      <CartesianChart
+        data={visible as unknown as ChartPoint[]}
+        xKey="label"
+        series={buildSeries(showBasis, t)}
+        height={180}
+        allowNegative
+        formatY={(value) =>
+          formatCurrencyCompact(Math.abs(value), account.default_currency)
+        }
+        renderTooltip={(point) =>
+          renderTooltip(point, showBasis, account.default_currency, t)
+        }
+        ariaLabel={buildAriaLabel(visible, account.default_currency, t)}
+      />
     </div>
   );
 }
@@ -227,58 +175,68 @@ const filterByRange = (data: Point[], range: RangeKey): Point[] => {
   return [...anchor, ...inRange];
 };
 
-const renderCostBasisLine = (isInvestment: boolean) => {
-  if (!isInvestment) return null;
+// The balance area is the account; the cost-basis line is what was put in.
+// Dashed because it is a running total the user built, not a market value.
+const buildSeries = (showBasis: boolean, t: TranslateFunction): Series[] => {
+  const value: Series = {
+    kind: 'area',
+    key: 'balance',
+    label: t('networth.chart.value'),
+    color: '--primary',
+  };
 
-  return (
-    <Line
-      type="monotone"
-      dataKey="costBasis"
-      stroke={BASIS_COLOR}
-      strokeWidth={1.5}
-      strokeDasharray="4 4"
-      dot={false}
-      activeDot={false}
+  if (!showBasis) {
+    return [value];
+  }
+
+  return [
+    value,
+    {
+      kind: 'line',
+      key: 'costBasis',
+      label: t('networth.detail.costBasis'),
+      color: '--muted-foreground',
+      dashed: true,
+    },
+  ];
+};
+
+const renderTooltip = (
+  point: ChartPoint,
+  isInvestment: boolean,
+  currency: string,
+  t: TranslateFunction,
+) => (
+  <div className="space-y-1.5">
+    <p className="font-medium text-foreground">{String(point.fullDate)}</p>
+    <ChartTooltipRow
+      label={renderValueLabel(isInvestment, t)}
+      labelClassName="text-muted-foreground"
+      value={formatCurrency(Number(point.balance ?? 0), currency)}
+      valueClassName="font-semibold"
     />
-  );
-}
+    {renderCostBasisRow(isInvestment, point, currency, t)}
+  </div>
+);
 
-type TooltipPayloadEntry = {
-  payload?: Point;
-}
+const buildAriaLabel = (
+  data: Point[],
+  currency: string,
+  t: TranslateFunction,
+): string => {
+  if (data.length === 0) {
+    return t('networth.chart.title');
+  }
+  const first = data[0];
+  const last = data[data.length - 1];
 
-type TooltipArgs = {
-  active: boolean;
-  payload: ReadonlyArray<TooltipPayloadEntry> | undefined;
-  isInvestment: boolean;
-  currency: string;
-  t: TranslateFunction;
-}
-
-const renderTooltip = ({
-  active,
-  payload,
-  isInvestment,
-  currency,
-  t,
-}: TooltipArgs) => {
-  if (!active || !payload || payload.length === 0) return null;
-
-  const point = payload[0].payload;
-  if (!point) return null;
-
-  return (
-    <ChartTooltipShell title={point.fullDate}>
-      <ChartTooltipRow
-        label={renderValueLabel(isInvestment, t)}
-        labelClassName="text-muted-foreground"
-        value={formatCurrency(point.balance, currency)}
-        valueClassName="font-semibold"
-      />
-      {renderCostBasisRow(isInvestment, point, currency, t)}
-    </ChartTooltipShell>
-  );
-}
+  return t('networth.chartSummary', {
+    first: first.fullDate,
+    last: last.fullDate,
+    from: formatCurrency(first.balance, currency),
+    to: formatCurrency(last.balance, currency),
+  });
+};
 
 const renderValueLabel = (isInvestment: boolean, t: TranslateFunction) => {
   if (isInvestment) {
@@ -290,12 +248,16 @@ const renderValueLabel = (isInvestment: boolean, t: TranslateFunction) => {
 
 const renderCostBasisRow = (
   isInvestment: boolean,
-  point: Point,
+  point: ChartPoint,
   currency: string,
   t: TranslateFunction,
 ) => {
-  if (!isInvestment) return null;
-  if (point.costBasis == null) return null;
+  if (!isInvestment) {
+    return null;
+  }
+  if (typeof point.costBasis !== 'number') {
+    return null;
+  }
 
   return (
     <ChartTooltipRow
@@ -304,4 +266,4 @@ const renderCostBasisRow = (
       value={formatCurrency(point.costBasis, currency)}
     />
   );
-}
+};

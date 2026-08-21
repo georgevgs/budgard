@@ -240,8 +240,7 @@
 }
 
 @utility font-display {
-  font-family:
-    ui-rounded, 'SF Pro Rounded', 'Nunito Sans', system-ui, sans-serif;
+  font-family: var(--font-display);
 }
 
 /* In the components layer so a caller can still override the background with
@@ -283,7 +282,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--font-sans);
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

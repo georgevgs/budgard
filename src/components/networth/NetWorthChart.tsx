@@ -1,30 +1,22 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ReferenceLine,
-} from 'recharts';
 import SurfaceCard from '@/components/common/SurfaceCard';
+import CartesianChart from '@/components/charts/CartesianChart';
+import type { ChartPoint, Series } from '@/components/charts/chartTypes';
+import { ChartTooltipRow } from '@/components/common/ChartTooltip';
 import { cn, formatCurrency, formatCurrencyCompact } from '@/lib/utils';
-import {
-  ChartTooltipShell,
-  ChartTooltipRow,
-} from '@/components/common/ChartTooltip';
 import type { NetWorthPoint } from '@/hooks/useNetWorth';
 import { useDateLocale } from '@/hooks/useDateLocale';
-
-const NET_COLOR = 'hsl(var(--primary))';
 
 type Props = {
   series: NetWorthPoint[];
   defaultCurrency: string;
-}
+};
+
+const SERIES: Series[] = [
+  { kind: 'area', key: 'total', label: 'total', color: '--primary' },
+];
 
 const NetWorthChart = ({ series, defaultCurrency }: Props) => {
   const { t } = useTranslation();
@@ -32,14 +24,15 @@ const NetWorthChart = ({ series, defaultCurrency }: Props) => {
 
   const data = useMemo(
     () =>
-      series.map((p) => ({
-        ...p,
-        label: format(parseISO(p.date), 'MMM d', { locale: dateLocale }),
-        fullDate: format(parseISO(p.date), 'PPP', { locale: dateLocale }),
+      series.map((point) => ({
+        ...point,
+        label: format(parseISO(point.date), 'MMM d', { locale: dateLocale }),
+        fullDate: format(parseISO(point.date), 'PPP', { locale: dateLocale }),
       })),
     [series, dateLocale],
   );
 
+  // One snapshot is a number, not a trend — the KPI above already shows it.
   if (data.length < 2) {
     return null;
   }
@@ -48,96 +41,75 @@ const NetWorthChart = ({ series, defaultCurrency }: Props) => {
     <SurfaceCard>
       <div className="p-4 space-y-2">
         <p className="text-sm font-medium">{t('networth.chart.title')}</p>
-        <div className="w-full">
-          <ResponsiveContainer width="100%" height={220}>
-            <AreaChart
-              data={data}
-              margin={{ top: 8, right: 12, bottom: 0, left: 0 }}
-            >
-              <defs>
-                <linearGradient id="networthGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={NET_COLOR} stopOpacity={0.4} />
-                  <stop offset="95%" stopColor={NET_COLOR} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis
-                dataKey="label"
-                stroke="currentColor"
-                className="text-xs text-muted-foreground"
-                tick={{ fill: 'currentColor', fontSize: 11 }}
-                tickLine={false}
-                axisLine={false}
-                minTickGap={32}
-              />
-              <YAxis
-                stroke="currentColor"
-                className="text-xs text-muted-foreground"
-                tick={{ fill: 'currentColor', fontSize: 11 }}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) =>
-                  formatCurrencyCompact(Math.abs(value), defaultCurrency)
-                }
-                width={60}
-              />
-              <ReferenceLine y={0} stroke="currentColor" strokeOpacity={0.3} />
-              <Tooltip
-                cursor={{ stroke: 'currentColor', strokeOpacity: 0.2 }}
-                content={({ active, payload }) =>
-                  renderTooltipContent(active, payload, defaultCurrency, t)
-                }
-              />
-              <Area
-                type="monotone"
-                dataKey="total"
-                stroke={NET_COLOR}
-                strokeWidth={2}
-                fill="url(#networthGradient)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        <CartesianChart
+          data={data as unknown as ChartPoint[]}
+          xKey="label"
+          series={SERIES}
+          height={220}
+          allowNegative
+          formatY={(value) =>
+            formatCurrencyCompact(Math.abs(value), defaultCurrency)
+          }
+          reference={{ value: 0, color: '--muted-foreground' }}
+          renderTooltip={(point) => renderTooltip(point, defaultCurrency, t)}
+          ariaLabel={buildAriaLabel(data, defaultCurrency, t)}
+        />
       </div>
     </SurfaceCard>
   );
-}
+};
 
 export default NetWorthChart;
 
 // --- Helpers ---
 
-type ChartPoint = NetWorthPoint & { label: string; fullDate: string };
+type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-type TooltipEntries = ReadonlyArray<{ payload?: unknown }> | undefined;
-
-type TranslateFunction = (key: string) => string;
-
-const renderTooltipContent = (
-  active: boolean | undefined,
-  payload: TooltipEntries,
-  defaultCurrency: string,
-  t: TranslateFunction,
-) => {
-  if (!active || !payload || payload.length === 0) return null;
-  const point = payload[0].payload as ChartPoint;
+const renderTooltip = (point: ChartPoint, currency: string, t: TFunc) => {
+  const total = Number(point.total ?? 0);
 
   return (
-    <ChartTooltipShell title={point.fullDate}>
+    <div className="space-y-1.5">
+      <p className="font-medium text-foreground">{String(point.fullDate)}</p>
       <ChartTooltipRow
         label={t('networth.totalLabel')}
-        value={formatCurrency(point.total, defaultCurrency)}
-        valueClassName={cn('font-semibold', point.total < 0 && 'text-destructive-ink')}
+        value={formatCurrency(total, currency)}
+        valueClassName={cn('font-semibold', negativeClass(total))}
       />
       <ChartTooltipRow
         label={t('networth.assetsLabel')}
         labelClassName="text-muted-foreground"
-        value={formatCurrency(point.assets, defaultCurrency)}
+        value={formatCurrency(Number(point.assets ?? 0), currency)}
       />
       <ChartTooltipRow
         label={t('networth.liabilitiesLabel')}
         labelClassName="text-muted-foreground"
-        value={formatCurrency(point.liabilities, defaultCurrency)}
+        value={formatCurrency(Number(point.liabilities ?? 0), currency)}
       />
-    </ChartTooltipShell>
+    </div>
   );
+};
+
+const negativeClass = (total: number): string => {
+  if (total < 0) {
+    return 'text-destructive-ink';
+  }
+
+  return '';
+};
+
+const buildAriaLabel = (
+  data: { fullDate: string; total: number }[],
+  currency: string,
+  t: TFunc,
+): string => {
+  const first = data[0];
+  const last = data[data.length - 1];
+
+  return t('networth.chartSummary', {
+    first: first.fullDate,
+    last: last.fullDate,
+    from: formatCurrency(first.total, currency),
+    to: formatCurrency(last.total, currency),
+  });
 };

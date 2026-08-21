@@ -4,6 +4,10 @@ import { RootProvider } from '@/contexts/RootProvider';
 import App from '@/App';
 import { i18nReady } from '@/lib/i18n';
 import { captureException, loadSentry } from '@/lib/sentry';
+// Imported through the module graph rather than @import-ed from index.css:
+// Tailwind inlines its own @import chain and the relative url()s inside would
+// stop resolving, shipping dead font URLs. Vite rebases them correctly here.
+import '@/design/fonts.css';
 import './index.css';
 
 // The Sentry SDK loads lazily (see the idle scheduling below), so genuinely

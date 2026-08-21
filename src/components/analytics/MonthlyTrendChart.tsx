@@ -1,19 +1,8 @@
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ReferenceLine,
-} from 'recharts';
-import type { CategoricalChartFunc } from 'recharts/types/chart/types';
+import CartesianChart from '@/components/charts/CartesianChart';
+import type { ChartPoint, Series } from '@/components/charts/chartTypes';
 import { formatCurrency } from '@/lib/utils';
-import { ChartTooltipShell } from '@/components/common/ChartTooltip';
-
-const BUDGET_LINE_COLOR = 'hsl(var(--warning))';
 
 type MonthlyDataPoint = {
   month: string;
@@ -30,6 +19,10 @@ type Props = {
   onMonthClick: (monthIndex: number) => void;
 };
 
+const SERIES: Series[] = [
+  { kind: 'area', key: 'amount', label: 'amount', color: '--primary' },
+];
+
 const MonthlyTrendChart = ({
   data,
   monthlyBudget,
@@ -40,78 +33,19 @@ const MonthlyTrendChart = ({
 }: Props) => {
   const { t } = useTranslation();
 
-  const handleClick: CategoricalChartFunc = (nextState) => {
-    const index = nextState?.activeTooltipIndex;
-    if (typeof index !== 'number' || index < 0) return;
-
-    onMonthClick(index);
-  };
-
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <AreaChart
-        data={data}
-        onClick={handleClick}
-        margin={{ top: 4, right: 4, bottom: 0, left: -12 }}
-      >
-        <defs>
-          <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop
-              offset="0%"
-              stopColor="hsl(var(--primary))"
-              stopOpacity={0.7}
-            />
-            <stop
-              offset="100%"
-              stopColor="hsl(var(--primary))"
-              stopOpacity={0.1}
-            />
-          </linearGradient>
-        </defs>
-        <XAxis
-          dataKey="month"
-          tickLine={false}
-          axisLine={false}
-          tick={{
-            fill: 'hsl(var(--muted-foreground))',
-            fontSize: 12,
-          }}
-        />
-        <YAxis
-          tickLine={false}
-          axisLine={false}
-          tick={{
-            fill: 'hsl(var(--muted-foreground))',
-            fontSize: 12,
-          }}
-          tickFormatter={(val: number) =>
-            `${Math.round(val)}${currencySymbol}`
-          }
-          domain={[0, yAxisMax ?? 'auto']}
-        />
-        <Tooltip
-          content={<ChartTooltip currency={defaultCurrency} />}
-          cursor={{
-            stroke: 'hsl(var(--border))',
-            strokeDasharray: '4 4',
-          }}
-        />
-        {renderBudgetReferenceLine(monthlyBudget, t, defaultCurrency)}
-        <Area
-          type="monotone"
-          dataKey="amount"
-          stroke="hsl(var(--primary))"
-          strokeWidth={2}
-          fill="url(#areaGradient)"
-          dot={{ r: 4, fill: 'hsl(var(--primary))', strokeWidth: 0 }}
-          activeDot={{
-            r: 6,
-            fill: 'hsl(var(--primary))',
-            strokeWidth: 0,
-          }}
-        />
-      </AreaChart>
-    </ResponsiveContainer>
+    <CartesianChart
+      data={data as unknown as ChartPoint[]}
+      xKey="month"
+      series={SERIES}
+      height={280}
+      yMax={yAxisMax}
+      formatY={(value) => `${Math.round(value)}${currencySymbol}`}
+      reference={buildBudgetReference(monthlyBudget, defaultCurrency, t)}
+      renderTooltip={(point) => renderTooltip(point, defaultCurrency)}
+      onPointClick={onMonthClick}
+      ariaLabel={buildAriaLabel(data, defaultCurrency, t)}
+    />
   );
 };
 
@@ -119,57 +53,54 @@ export default memo(MonthlyTrendChart);
 
 // --- Helpers ---
 
-type TooltipPayloadEntry = {
-  value: number;
-  payload: { fullMonth: string };
-};
-
-type ChartTooltipProps = {
-  active?: boolean;
-  payload?: TooltipPayloadEntry[];
-  currency?: string;
-};
-
-const ChartTooltip = ({
-  active,
-  payload,
-  currency = 'EUR',
-}: ChartTooltipProps) => {
-  if (!active || !payload?.length) return null;
-
-  const { value, payload: data } = payload[0];
-
-  return (
-    <ChartTooltipShell title={data.fullMonth}>
-      <p className="text-sm font-semibold tabular-nums">
-        {formatCurrency(value, currency)}
-      </p>
-    </ChartTooltipShell>
-  );
-};
-
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-const renderBudgetReferenceLine = (
-  monthlyBudget: number | null,
-  t: TFunc,
-  currency: string,
-) => {
-  if (!monthlyBudget) return null;
+const renderTooltip = (point: ChartPoint, currency: string) => (
+  <>
+    <p className="font-medium text-foreground">{String(point.fullMonth)}</p>
+    <p className="mt-1 text-sm font-semibold tabular-nums">
+      {formatCurrency(Number(point.amount ?? 0), currency)}
+    </p>
+  </>
+);
 
-  return (
-    <ReferenceLine
-      y={monthlyBudget}
-      stroke={BUDGET_LINE_COLOR}
-      strokeDasharray="5 5"
-      label={{
-        value: t('analytics.budgetLabel', {
-          amount: formatCurrency(monthlyBudget, currency),
-        }),
-        position: 'right',
-        fill: BUDGET_LINE_COLOR,
-        fontSize: 11,
-      }}
-    />
-  );
+const buildBudgetReference = (
+  monthlyBudget: number | null,
+  currency: string,
+  t: TFunc,
+) => {
+  if (!monthlyBudget) {
+    return undefined;
+  }
+
+  return {
+    value: monthlyBudget,
+    color: '--warning',
+    label: t('analytics.budgetLabel', {
+      amount: formatCurrency(monthlyBudget, currency),
+    }),
+  };
+};
+
+// The chart is a picture to a sighted user and a sentence to everyone else.
+// Range plus span is what a summary needs — reading twelve values aloud is
+// noise, not information.
+const buildAriaLabel = (
+  data: MonthlyDataPoint[],
+  currency: string,
+  t: TFunc,
+): string => {
+  if (data.length === 0) {
+    return t('analytics.monthlyTrend');
+  }
+
+  const amounts = data.map((point) => point.amount);
+
+  return t('analytics.trendSummary', {
+    count: data.length,
+    first: data[0].fullMonth,
+    last: data[data.length - 1].fullMonth,
+    low: formatCurrency(Math.min(...amounts), currency),
+    high: formatCurrency(Math.max(...amounts), currency),
+  });
 };
