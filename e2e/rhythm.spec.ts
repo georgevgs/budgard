@@ -29,10 +29,38 @@ const PRO = {
 };
 
 test.describe('year in rhythm', () => {
-  // The rhythm reads the same year data as the overview above it, so it
-  // inherits the existing "last 3 months on the free plan" gate: three months
-  // cannot describe a rhythm anyway.
   test('appears once there is enough history to call it a rhythm', async ({
+    app,
+    data,
+  }) => {
+    data.expenses.push(...monthsOfSpending(8));
+
+    await app.goto('/trends');
+
+    await expect(
+      app.getByRole('heading', { name: /year in rhythm/i }),
+    ).toBeVisible();
+    // The baseline is stated as a fact about the user, not as a target.
+    await expect(app.getByText(/your usual month is about/i)).toBeVisible();
+  });
+
+  // The Pro gate protects the detailed history — the year picker, the
+  // breakdowns, the drill-downs. The rhythm shows a shape you cannot read a
+  // figure off or click into, so gating the one visual the app is
+  // recognisable by would hide it from exactly the people it might persuade.
+  test('is visible without a subscription', async ({ app, data }) => {
+    data.expenses.push(...monthsOfSpending(8));
+
+    await app.goto('/trends');
+
+    await expect(
+      app.getByRole('heading', { name: /year in rhythm/i }),
+    ).toBeVisible();
+    // The gated section is still gated, so the line has not simply moved.
+    await expect(app.getByText(/unlock full history with pro/i)).toBeVisible();
+  });
+
+  test('reads a rolling year, so it works for a subscriber too', async ({
     app,
     data,
   }) => {
@@ -44,8 +72,6 @@ test.describe('year in rhythm', () => {
     await expect(
       app.getByRole('heading', { name: /year in rhythm/i }),
     ).toBeVisible();
-    // The baseline is stated as a fact about the user, not as a target.
-    await expect(app.getByText(/your usual month is about/i)).toBeVisible();
   });
 
   // Three points is not a rhythm, and a wave drawn through them would imply a

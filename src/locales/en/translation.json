@@ -1107,7 +1107,8 @@
       "descriptionTooLong": "Description must be less than 100 characters",
       "descriptionInvalid": "Description contains invalid characters"
     },
-    "incomeRows": "{{count}} rows will be imported as income"
+    "incomeRows": "{{count}} rows will be imported as income",
+    "mapCategoryTo": "Map \"{{name}}\" to a category"
   },
   "receipt": {
     "receipt": "Receipt",

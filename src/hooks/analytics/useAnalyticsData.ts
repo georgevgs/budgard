@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, type Locale } from 'date-fns';
 import {
   useDataConfig,
   useExpensesData,
@@ -10,6 +10,7 @@ import { countsAsSpending } from '@/lib/spending';
 import { useIsPro } from '@/hooks/useIsPro';
 import { getFreeAnalyticsCutoff } from '@/lib/proLimits';
 import { monthsElapsedInYear } from '@/lib/utils';
+import type { Expense } from '@/types/Expense';
 
 export type CategoryRow = {
   id: string;
@@ -187,6 +188,23 @@ export const useAnalyticsData = () => {
     return undefined;
   }, [monthlyData, monthlyBudget]);
 
+  // Deliberately built from ALL expenses, not the free-tier window.
+  //
+  // The Pro gate protects the detailed history — the year picker, the
+  // breakdowns, the drill-downs. The rhythm shows a shape rather than a
+  // history: you cannot read a figure off it or click into a month. Gating the
+  // one visual the app is recognisable by, so that the people most likely to
+  // be persuaded by it are the only ones who never see it, is the wrong side
+  // of that line.
+  //
+  // Rolling twelve months rather than the selected calendar year, because a
+  // rhythm is about the recent shape of your spending and a year viewed in
+  // March is nine-twelfths empty.
+  const rhythmMonths = useMemo(
+    () => buildRollingMonths(allExpenses, dateLocale),
+    [allExpenses, dateLocale],
+  );
+
   return {
     selectedYear,
     setSelectedYear,
@@ -197,5 +215,38 @@ export const useAnalyticsData = () => {
     monthComparison,
     yearlyStats,
     yAxisMax,
+    rhythmMonths,
   };
+};
+
+// --- Helpers ---
+
+const ROLLING_MONTHS = 12;
+
+const buildRollingMonths = (expenses: Expense[], dateLocale: Locale) => {
+  const totals = new Map<string, number>();
+  for (const expense of expenses) {
+    if (!countsAsSpending(expense)) {
+      continue;
+    }
+    const key = expense.date.slice(0, 7);
+    totals.set(key, (totals.get(key) ?? 0) + expense.amount);
+  }
+
+  const now = new Date();
+
+  return Array.from({ length: ROLLING_MONTHS }, (_, offset) => {
+    const date = new Date(
+      now.getFullYear(),
+      now.getMonth() - (ROLLING_MONTHS - 1 - offset),
+      1,
+    );
+    const key = format(date, 'yyyy-MM');
+
+    return {
+      month: format(date, 'LLL', { locale: dateLocale }),
+      fullMonth: format(date, 'LLLL yyyy', { locale: dateLocale }),
+      amount: totals.get(key) ?? 0,
+    };
+  });
 };

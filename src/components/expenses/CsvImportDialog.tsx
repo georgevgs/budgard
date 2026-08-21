@@ -218,7 +218,9 @@ const renderMappingStep = (
             value={columnMapping.dateColumn.toString()}
             onValueChange={(v) => updateColumnMapping('dateColumn', parseInt(v))}
           >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label={t('import.dateColumn')}>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {csvPreview.headers.map((header, idx) => (
                 <SelectItem key={`date-${idx}`} value={idx.toString()}>
@@ -235,7 +237,9 @@ const renderMappingStep = (
             value={columnMapping.descriptionColumn.toString()}
             onValueChange={(v) => updateColumnMapping('descriptionColumn', parseInt(v))}
           >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label={t('import.descriptionColumn')}>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {csvPreview.headers.map((header, idx) => (
                 <SelectItem key={`desc-${idx}`} value={idx.toString()}>
@@ -252,7 +256,9 @@ const renderMappingStep = (
             value={columnMapping.amountColumn.toString()}
             onValueChange={(v) => updateColumnMapping('amountColumn', parseInt(v))}
           >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label={t('import.amountColumn')}>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {csvPreview.headers.map((header, idx) => (
                 <SelectItem key={`amount-${idx}`} value={idx.toString()}>
@@ -271,7 +277,9 @@ const renderMappingStep = (
               updateColumnMapping('categoryColumn', parseCategoryColumnValue(v))
             }
           >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label={t('import.categoryColumn')}>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="_none">{t('import.noCategory')}</SelectItem>
               {csvPreview.headers.map((header, idx) => (
@@ -393,7 +401,12 @@ const renderUnmatchedCategories = (
                 onCategoryMap(catName, parseCategoryMapValue(value))
               }
             >
-              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectTrigger
+                className="w-40"
+                aria-label={t('import.mapCategoryTo', { name: catName })}
+              >
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="_skip">{t('import.skipCategory')}</SelectItem>
                 {categories.map((cat) => (

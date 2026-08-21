@@ -2,9 +2,13 @@
 // Fails the build when a bundle grows past its budget.
 //
 // The numbers below are the measured size at the time each budget was set,
-// plus a small headroom — they are a ratchet, not an aspiration. When a change
-// legitimately needs more room, move the number in the same commit so the
-// growth is visible in review rather than discovered months later.
+// plus roughly 5-8% headroom — they are a ratchet, not an aspiration. When a
+// change legitimately needs more room, move the number in the same commit so
+// the growth is visible in review rather than discovered months later.
+//
+// The headroom is deliberate. A budget set flush against the current size
+// fails on every addition, and a budget that fails constantly just teaches
+// everyone to raise it — which is worse than not having one.
 import { readFileSync, statSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 import { join } from 'node:path';
@@ -17,7 +21,7 @@ const BUDGETS = {
   criticalPathGzipKb: 200,
   // What the service worker downloads on install. Every user pays this on
   // every update, so it is the number that decides how heavy an update feels.
-  precacheGzipKb: 580,
+  precacheGzipKb: 560,
   // No single precached chunk should dominate an install.
   largestPrecachedChunkGzipKb: 80,
 };

@@ -273,6 +273,13 @@ export default defineConfig({
           "**/assets/vfs_fonts-*.js",
           "**/assets/sentry-*.js",
           "**/assets/sentryHeavy-*.js",
+          // Same rule as the PDF and OCR runtimes above: optional and
+          // user-initiated. Image compression only runs when someone attaches
+          // a receipt photo, and the landing page is never reached by an
+          // installed, signed-in user — who is precisely whose service worker
+          // this is. Both are kept by the app-shell runtime cache on first use.
+          "**/assets/browser-image-compression-*.js",
+          "**/assets/LandingPage-*.js",
         ],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
@@ -285,6 +292,24 @@ export default defineConfig({
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 2
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          // Chunks deliberately left out of the precache above. Content-hashed,
+          // so a URL's contents never change and CacheFirst is safe forever;
+          // whoever actually uses the feature keeps it after the first load.
+          {
+            urlPattern: ({ sameOrigin, url }) =>
+              sameOrigin && /\/assets\/(browser-image-compression|LandingPage)-/.test(url.pathname),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "deferred-chunks",
+              expiration: {
+                maxEntries: 8,
+                maxAgeSeconds: 60 * 60 * 24 * 365
               },
               cacheableResponse: {
                 statuses: [0, 200]

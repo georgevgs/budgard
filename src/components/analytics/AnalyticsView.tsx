@@ -91,7 +91,7 @@ const AnalyticsView = () => {
           each month", and this answers "compared to what" — which is the
           question the bars invite and cannot settle on their own. */}
       <YearRhythm
-        months={analytics.monthlyData}
+        months={analytics.rhythmMonths}
         currency={defaultCurrency}
       />
 
