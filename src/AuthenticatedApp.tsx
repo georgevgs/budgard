@@ -36,6 +36,8 @@ import { usePageRefresh } from '@/hooks/usePageRefresh';
 import type { PullToRefreshState } from '@/hooks/usePullToRefresh';
 import PullToRefreshIndicator from '@/components/common/PullToRefreshIndicator';
 import { prefersReducedMotion } from '@/lib/motion';
+import { useAppLock } from '@/hooks/useAppLock';
+import { signOut } from '@/lib/auth';
 import {
   AppLoadingSkeleton,
   ExpenseLoadingState,
@@ -73,6 +75,12 @@ const NetWorthView = lazyWithRetry(
   () => import('@/components/networth/NetWorthView'),
 );
 const DebtsView = lazyWithRetry(() => import('@/components/debts/DebtsView'));
+// Not lazy: the lock has to be able to paint on the very first frame, and a
+// chunk fetch would leave the app readable while it loaded — which is the one
+// moment the lock exists to cover.
+const LockScreen = lazyWithRetry(
+  () => import('@/components/security/LockScreen'),
+);
 const TransactionDetailView = lazyWithRetry(
   () => import('@/components/transaction/TransactionDetailView'),
 );
@@ -107,6 +115,7 @@ const renderRouteFallback = (skeleton: ReactNode) => (
 
 const AuthenticatedLayout = () => {
   const { pathname } = useLocation();
+  const lock = useAppLock(true);
   useOfflineSync();
   useIdleTabPrefetch();
   useCheckoutReturn();
@@ -119,21 +128,29 @@ const AuthenticatedLayout = () => {
 
   return (
     <QuickAddProvider>
-      <SkipToContentLink />
-      <PullToRefreshIndicator state={refresh} />
-      <Header />
-      <main
-        id="main-content"
-        tabIndex={-1}
-        className="route-transition-content flex-1 pt-2 pb-(--dock-inset) focus:outline-none"
-        style={pullStyle(refresh)}
-      >
-        <Outlet />
-      </main>
-      <NavTabs />
-      <MilestoneWatcher />
-      <UpgradeDialog />
-      <OnboardingGate />
+      {/* inert while locked, not merely covered. A fixed overlay hides the app
+          from the eye but leaves it in the accessibility tree and in the tab
+          order — a keyboard user could Tab straight past the lock screen into
+          the account it is supposed to be guarding. */}
+      <div className="contents" inert={lock.isLocked}>
+        <SkipToContentLink />
+        <PullToRefreshIndicator state={refresh} />
+        <Header />
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="route-transition-content flex-1 pt-2 pb-(--dock-inset) focus:outline-none"
+          style={pullStyle(refresh)}
+        >
+          <Outlet />
+        </main>
+        <NavTabs />
+        <MilestoneWatcher />
+        <UpgradeDialog />
+        <OnboardingGate />
+      </div>
+      <PrivacyScreen isObscured={lock.isObscured} />
+      {renderLockScreen(lock)}
     </QuickAddProvider>
   );
 };
@@ -164,6 +181,35 @@ const pullTransition = (isDragging: boolean): string => {
   }
 
   return 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)';
+};
+
+// The OS photographs the app for its multitasking switcher the moment it is
+// backgrounded, and that screenshot is visible to anyone who double-taps home
+// — before any lock screen would have had a chance to appear. This covers the
+// app for the frame in which that photograph is taken.
+const PrivacyScreen = ({ isObscured }: { isObscured: boolean }) => {
+  if (!isObscured) {
+    return null;
+  }
+
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 z-150 bg-background"
+    />
+  );
+};
+
+const renderLockScreen = (lock: ReturnType<typeof useAppLock>) => {
+  if (!lock.isLocked) {
+    return null;
+  }
+
+  return (
+    <Suspense fallback={<div className="fixed inset-0 z-200 bg-background" />}>
+      <LockScreen onUnlock={lock.unlock} onSignOut={() => void signOut()} />
+    </Suspense>
+  );
 };
 
 // Visually hidden until focused — the first Tab on the authenticated app jumps

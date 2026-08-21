@@ -26,6 +26,16 @@ export const signOut = async () => {
   return supabase.auth.signOut();
 };
 
+// Revokes every refresh token for the account, not just this browser's.
+// Supabase does not expose a per-device session list to the client — that
+// needs a service-role call — so "sign out everywhere" is the honest thing
+// this can offer without an edge function standing behind it.
+export const signOutEverywhere = async () => {
+  markIntentionalSignOut();
+
+  return supabase.auth.signOut({ scope: 'global' });
+};
+
 export const getSession = () => {
   return supabase.auth.getSession();
 };

@@ -11,6 +11,7 @@ import ProfileSection from '@/components/settings/ProfileSection';
 import DataManagementSection from '@/components/settings/DataManagementSection';
 import LanguageSection from '@/components/settings/LanguageSection';
 import CurrencySection from '@/components/settings/CurrencySection';
+import SecuritySection from '@/components/settings/SecuritySection';
 import AboutSection from '@/components/settings/AboutSection';
 
 const SettingsView = () => {
@@ -68,6 +69,8 @@ const SettingsView = () => {
         isDeleting={handlers.isDeleting}
         t={t}
       />
+
+      <SecuritySection />
 
       <AboutSection />
     </div>

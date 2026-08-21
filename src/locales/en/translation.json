@@ -1702,5 +1702,45 @@
       "summary_other": "{{count}} times this month, {{amount}} in total"
     },
     "excludedBadge": "Not counted"
+  },
+  "security": {
+    "title": "Security",
+    "changePin": "Change PIN",
+    "disclosure": "The lock covers this app on this device. It does not encrypt your data — anyone who can unlock the phone itself can still reach it. Use your device passcode for that.",
+    "lockToggle": {
+      "label": "Lock Budgard with a PIN",
+      "description": "Ask for a four-digit PIN when you come back to the app.",
+      "saved": "App lock is on"
+    },
+    "device": {
+      "label": "Unlock with Face ID or your passcode",
+      "description": "Use the device you are holding instead of typing the PIN. The PIN still works if it fails.",
+      "notEnrolled": "Not set up — your PIN still works"
+    },
+    "sessions": {
+      "label": "Signed-in devices",
+      "description": "Budgard cannot list your devices individually, but it can sign out of all of them at once. Do this if you have lost a device.",
+      "signOutEverywhere": "Sign out everywhere",
+      "signOutConfirm": "You will be signed out on every device, including this one. Your data is untouched."
+    },
+    "lock": {
+      "title": "Budgard is locked",
+      "prompt": "Enter your PIN",
+      "padLabel": "PIN keypad",
+      "backspace": "Delete",
+      "useDevice": "Use Face ID or passcode",
+      "deviceFailed": "That did not work — enter your PIN",
+      "signOut": "Sign out instead",
+      "wrong_one": "Wrong PIN — {{count}} try left",
+      "wrong_other": "Wrong PIN — {{count}} tries left",
+      "cooldown_one": "Too many tries. Try again in {{minutes}} minute.",
+      "cooldown_other": "Too many tries. Try again in {{minutes}} minutes."
+    },
+    "setPin": {
+      "chooseTitle": "Choose a PIN",
+      "confirmTitle": "Enter it again",
+      "description": "Four digits. You will need it whenever you come back to the app.",
+      "mismatch": "Those did not match — start again"
+    }
   }
 }
