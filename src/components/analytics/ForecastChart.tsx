@@ -10,13 +10,23 @@ type Props = {
   data: ProjectionMonth[];
   currencySymbol: string;
   currency: string;
+  // Drawn solid against the dashed flow lines: the balance is the one series
+  // here anchored to something the user actually has, rather than modelled
+  // from an average.
+  hasBalance: boolean;
 };
 
-const ForecastChart = ({ data, currencySymbol, currency }: Props) => {
+const ForecastChart = ({
+  data,
+  currencySymbol,
+  currency,
+  hasBalance,
+}: Props) => {
   const { t } = useTranslation();
 
-  // Both lines are dashed: every value here is modelled, not measured, and a
-  // solid line would claim a certainty the forecast does not have.
+  // The flow lines are dashed: those values are modelled, not measured, and a
+  // solid line would claim a certainty the forecast does not have. The balance
+  // is drawn solid because it starts from a figure the user actually holds.
   const series = useMemo<Series[]>(
     () => [
       {
@@ -33,8 +43,9 @@ const ForecastChart = ({ data, currencySymbol, currency }: Props) => {
         color: '--primary',
         dashed: true,
       },
+      ...balanceSeries(hasBalance, t),
     ],
-    [t],
+    [t, hasBalance],
   );
 
   return (
@@ -44,6 +55,8 @@ const ForecastChart = ({ data, currencySymbol, currency }: Props) => {
       series={series}
       height={288}
       showLegend
+      allowNegative={hasBalance}
+      reference={buildZeroLine(hasBalance, t)}
       formatY={(value) => `${Math.round(value)}${currencySymbol}`}
       renderTooltip={(point) => renderTooltip(point, currency, t)}
       ariaLabel={buildAriaLabel(data, currency, t)}
@@ -56,6 +69,31 @@ export default memo(ForecastChart);
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
+
+const balanceSeries = (hasBalance: boolean, t: TFunc): Series[] => {
+  if (!hasBalance) {
+    return [];
+  }
+
+  return [
+    {
+      kind: 'line',
+      key: 'projectedBalance',
+      label: t('analytics.forecast.projectedBalance'),
+      color: '--foreground',
+    },
+  ];
+};
+
+// Only worth drawing when there is a balance that could cross it. Zero on a
+// chart of pure flows is just the bottom of the axis.
+const buildZeroLine = (hasBalance: boolean, t: TFunc) => {
+  if (!hasBalance) {
+    return undefined;
+  }
+
+  return { value: 0, color: '--muted-foreground', label: t('analytics.forecast.empty') };
+};
 
 const renderTooltip = (point: ChartPoint, currency: string, t: TFunc) => {
   const net = Number(point.projectedNet ?? 0);
@@ -73,6 +111,7 @@ const renderTooltip = (point: ChartPoint, currency: string, t: TFunc) => {
         labelClassName="text-destructive-ink"
         value={`-${formatCurrency(Number(point.projectedExpenses ?? 0), currency)}`}
       />
+      {renderBalanceRow(point, currency, t)}
       <ChartTooltipRow
         label={t('analytics.forecast.projectedNet')}
         labelClassName="font-medium"
@@ -81,6 +120,21 @@ const renderTooltip = (point: ChartPoint, currency: string, t: TFunc) => {
         separated
       />
     </div>
+  );
+};
+
+const renderBalanceRow = (point: ChartPoint, currency: string, t: TFunc) => {
+  if (typeof point.projectedBalance !== 'number') {
+    return null;
+  }
+
+  return (
+    <ChartTooltipRow
+      label={t('analytics.forecast.projectedBalance')}
+      labelClassName="font-medium"
+      value={formatCurrency(point.projectedBalance, currency)}
+      valueClassName={cn('font-semibold', netClass(point.projectedBalance))}
+    />
   );
 };
 

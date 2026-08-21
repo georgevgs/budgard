@@ -41,6 +41,9 @@ export type ProjectionMonth = {
   projectedExpenses: number;
   projectedIncome: number;
   projectedNet: number;
+  // Running balance at the end of this month, once an opening balance is
+  // known. Null when it is not — see openingBalance below.
+  projectedBalance: number | null;
 };
 
 export type ProjectionInput = {
@@ -52,6 +55,14 @@ export type ProjectionInput = {
   // Locale-aware labels are injected by the caller so this module stays free
   // of i18n dependencies. Defaults to e.g. "Aug 2026".
   formatMonthLabel?: (monthStart: Date) => string;
+  // What the spendable accounts hold today. Null when the user tracks no cash
+  // or bank account, in which case the projection reports flows only.
+  //
+  // A month's net is a rate; a balance is a position. "You will be 200 down in
+  // November" is only alarming if you know whether you started the year with
+  // 300 or 30,000, and the flows alone cannot say. This is what turns the
+  // forecast from a chart into an answer to "will I make it to payday".
+  openingBalance?: number | null;
 };
 
 // Budget minus what is already spent minus recurring bills still due before
@@ -118,24 +129,78 @@ export const computeTwelveMonthProjection = (
   const variableIncomeAvg = computeVariableMonthlyAverage(incomes, now);
   const months: ProjectionMonth[] = [];
 
+  const opening = input.openingBalance ?? null;
+  let running = opening;
+
   for (let offset = 1; offset <= 12; offset += 1) {
     const monthStart = addMonths(startOfMonth(now), offset);
     const projectedExpenses =
       sumRecurringForMonth(recurringExpenses, monthStart) + variableExpenseAvg;
     const projectedIncome =
       sumRecurringForMonth(recurringIncomes, monthStart) + variableIncomeAvg;
+    const projectedNet = projectedIncome - projectedExpenses;
+
+    if (running !== null) {
+      running += projectedNet;
+    }
 
     months.push({
       monthKey: format(monthStart, 'yyyy-MM'),
       label: formatMonthLabel(monthStart),
       projectedExpenses,
       projectedIncome,
-      projectedNet: projectedIncome - projectedExpenses,
+      projectedNet,
+      projectedBalance: running,
     });
   }
 
   return months;
 };
+
+// The first month the running balance is projected to go negative, or null if
+// it never does within the window.
+//
+// Deliberately the *first* one rather than the lowest point: a shortfall in
+// March is the thing to act on, and knowing that August is worse does not
+// change what you do about March.
+export const findFirstShortfall = (
+  months: ProjectionMonth[],
+): ProjectionMonth | null => {
+  return (
+    months.find(
+      (month) => month.projectedBalance !== null && month.projectedBalance < 0,
+    ) ?? null
+  );
+};
+
+// What the accounts a person can actually spend from hold right now.
+//
+// Investments are excluded because selling them is a decision, not a payment,
+// and counting them would quietly promise that a shortfall is covered by
+// something the user may have no intention of touching. Liabilities are
+// excluded for the mirror reason: a credit card balance is not cash you have.
+export const computeSpendableBalance = (
+  accounts: readonly SpendableAccount[],
+): number | null => {
+  const spendable = accounts.filter(
+    (account) =>
+      !account.is_archived && SPENDABLE_KINDS.includes(account.kind),
+  );
+
+  if (spendable.length === 0) {
+    return null;
+  }
+
+  return spendable.reduce((sum, account) => sum + account.current_balance, 0);
+};
+
+type SpendableAccount = {
+  kind: string;
+  current_balance: number;
+  is_archived: boolean;
+};
+
+const SPENDABLE_KINDS: readonly string[] = ['cash', 'bank'];
 
 // --- Helpers ---
 

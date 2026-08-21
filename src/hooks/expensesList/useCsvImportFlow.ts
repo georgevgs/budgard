@@ -16,6 +16,11 @@ import {
   type CsvPreviewData,
   type ColumnMapping,
 } from '@/lib/csvImport';
+import {
+  detectStatementFormat,
+  parseStatement,
+} from '@/lib/statementImport';
+import type { Category } from '@/types/Category';
 
 export type ImportStep = 'upload' | 'mapping' | 'preview' | 'importing';
 
@@ -78,7 +83,7 @@ export const useCsvImportFlow = (onClose: () => void) => {
 
   const handleFile = useCallback(
     async (file: File) => {
-      if (!file.name.endsWith('.csv')) {
+      if (!isImportableFile(file.name)) {
         toast({
           title: t('common.error'),
           description: t('import.invalidFileType'),
@@ -91,6 +96,36 @@ export const useCsvImportFlow = (onClose: () => void) => {
       try {
         const content = await readFileAsText(file);
         setCsvContent(content);
+
+        // OFX and QIF describe their own fields, so there is nothing for the
+        // user to map — those files skip straight to the preview. Everything
+        // past that point is the same pipeline as a CSV: the same category
+        // matching, the same duplicate handling, the same write. A second
+        // import path would be a second place for those to drift.
+        const statementFormat = detectStatementFormat(file.name, content);
+        if (statementFormat) {
+          const parsed = parseStatement(statementFormat, content);
+          const matched = matchStatementCategories(parsed.rows, categories);
+
+          setValidRows(matched.rows);
+          setErrors([]);
+          setUnmatchedCategories(matched.unmatched);
+          setSkippedIncomeCount(0);
+          setCategoryMappings(
+            new Map(matched.unmatched.map((name) => [name, null])),
+          );
+          setStep('preview');
+
+          // Reported, not swallowed: importing 340 of 341 transactions without
+          // saying so is worse than saying which one could not be read.
+          if (parsed.skipped > 0) {
+            toast({
+              title: t('import.someRowsSkipped', { count: parsed.skipped }),
+            });
+          }
+
+          return;
+        }
 
         const preview = getCsvPreviewData(content);
         setCsvPreview(preview);
@@ -108,7 +143,7 @@ export const useCsvImportFlow = (onClose: () => void) => {
         });
       }
     },
-    [toast, t],
+    [toast, t, categories],
   );
 
   const handleDrop = useCallback(
@@ -248,4 +283,39 @@ export const useCsvImportFlow = (onClose: () => void) => {
     handleBackToMapping,
     updateColumnMapping,
   };
+};
+
+// --- Helpers ---
+
+const IMPORTABLE_EXTENSIONS = ['.csv', '.ofx', '.qfx', '.qif'];
+
+export const isImportableFile = (fileName: string): boolean => {
+  const name = fileName.toLowerCase();
+
+  return IMPORTABLE_EXTENSIONS.some((extension) => name.endsWith(extension));
+};
+
+// Statement rows carry whatever category the exporting app used, which is its
+// taxonomy rather than the user's. A name that happens to match one of theirs
+// is taken; everything else is offered for mapping, exactly as a CSV's would
+// be — the user should not have to care which format the file was.
+const matchStatementCategories = (
+  rows: ParsedExpenseRow[],
+  categories: Category[],
+) => {
+  const byName = new Map(
+    categories.map((category) => [category.name.toLowerCase(), category]),
+  );
+  const unmatched = new Set<string>();
+
+  for (const row of rows) {
+    if (!row.categoryName) {
+      continue;
+    }
+    if (!byName.has(row.categoryName.toLowerCase())) {
+      unmatched.add(row.categoryName);
+    }
+  }
+
+  return { rows, unmatched: [...unmatched] };
 };

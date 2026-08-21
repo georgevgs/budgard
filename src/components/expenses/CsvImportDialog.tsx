@@ -185,7 +185,12 @@ const renderUploadStep = (
       <p className="text-sm text-muted-foreground mb-2">{t('import.dropzone')}</p>
       <p className="text-xs text-muted-foreground mb-4">{t('import.formatHint')}</p>
       <label>
-        <input type="file" accept=".csv" onChange={onFileInput} className="hidden" />
+        <input
+              type="file"
+              accept=".csv,.ofx,.qfx,.qif"
+              onChange={onFileInput}
+              className="hidden"
+            />
         <Button variant="outline" asChild>
           <span>{t('import.selectFile')}</span>
         </Button>

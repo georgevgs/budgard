@@ -14,7 +14,8 @@ const ForecastSection = () => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const currencySymbol = getCurrencySymbol(defaultCurrency);
-  const { safeToSpend, projection, noData } = useForecastData();
+  const forecast = useForecastData();
+  const { safeToSpend, projection, noData } = forecast;
 
   if (noData) return null;
 
@@ -27,6 +28,7 @@ const ForecastSection = () => {
       <div className="surface-card">
         <div className="p-5 space-y-4">
           {renderSafeToSpend(safeToSpend, defaultCurrency, t)}
+          {renderShortfall(forecast, defaultCurrency, t)}
 
           <div>
             <p className="text-sm font-medium mb-3">
@@ -37,6 +39,7 @@ const ForecastSection = () => {
                 data={projection}
                 currencySymbol={currencySymbol}
                 currency={defaultCurrency}
+                hasBalance={forecast.openingBalance !== null}
               />
             </Suspense>
           </div>
@@ -58,6 +61,47 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+// The whole reason the balance is projected at all. A chart of monthly nets
+// tells you the rate; this tells you the month it stops being survivable,
+// which is the question people actually bring to a forecast.
+//
+// Framed as a heads-up rather than an alarm: it is a projection built on an
+// average, months away, and entirely avoidable. Saying "you will run out"
+// would overstate what the model knows.
+const renderShortfall = (
+  forecast: ReturnType<typeof useForecastData>,
+  currency: string,
+  t: TranslateFunction,
+) => {
+  if (forecast.openingBalance === null) {
+    return renderNoBalanceHint(t);
+  }
+  if (!forecast.shortfall) {
+    return null;
+  }
+
+  return (
+    <p className="rounded-xl bg-warning/14 px-4 py-3 text-sm font-medium text-warning-ink">
+      {t('analytics.forecast.shortfall', {
+        month: forecast.shortfall.label,
+        amount: formatCurrency(
+          Math.abs(forecast.shortfall.projectedBalance ?? 0),
+          currency,
+        ),
+      })}
+    </p>
+  );
+};
+
+// Without a cash or bank account there is no balance to project from, and the
+// chart shows flows alone. Say why, and where to fix it — an unexplained
+// missing line reads as a bug.
+const renderNoBalanceHint = (t: TranslateFunction) => (
+  <p className="text-xs leading-relaxed text-muted-foreground">
+    {t('analytics.forecast.noBalance')}
+  </p>
+);
 
 // Only rendered when a monthly budget exists (computeSafeToSpend returns
 // null otherwise). Negative values stay visible in destructive red — an

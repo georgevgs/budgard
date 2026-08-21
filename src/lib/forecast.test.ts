@@ -3,6 +3,8 @@ import {
   computeSafeToSpend,
   computeUpcomingRecurringThisMonth,
   computeTwelveMonthProjection,
+  computeSpendableBalance,
+  findFirstShortfall,
 } from '@/lib/forecast';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
@@ -357,5 +359,112 @@ describe('computeTwelveMonthProjection', () => {
     expect(result[0].projectedIncome).toBe(2300);
     expect(result[0].projectedExpenses).toBe(500);
     expect(result[0].projectedNet).toBe(1800);
+  });
+});
+
+describe('computeSpendableBalance', () => {
+  const account = (over: Record<string, unknown>) =>
+    ({ kind: 'bank', current_balance: 100, is_archived: false, ...over }) as never;
+
+  it('adds up cash and bank accounts', () => {
+    expect(
+      computeSpendableBalance([
+        account({ kind: 'bank', current_balance: 1200 }),
+        account({ kind: 'cash', current_balance: 80 }),
+      ]),
+    ).toBe(1280);
+  });
+
+  // Selling an investment is a decision, not a payment. Counting it would
+  // quietly promise that a shortfall is covered by something the user may have
+  // no intention of touching.
+  it('leaves investments out', () => {
+    expect(
+      computeSpendableBalance([
+        account({ kind: 'bank', current_balance: 500 }),
+        account({ kind: 'investment', current_balance: 40000 }),
+      ]),
+    ).toBe(500);
+  });
+
+  // Mirror reason: a card balance is not cash you have.
+  it('leaves liabilities out', () => {
+    expect(
+      computeSpendableBalance([
+        account({ kind: 'bank', current_balance: 500 }),
+        account({ kind: 'credit_card', current_balance: -300 }),
+        account({ kind: 'loan', current_balance: -9000 }),
+      ]),
+    ).toBe(500);
+  });
+
+  it('ignores archived accounts', () => {
+    expect(
+      computeSpendableBalance([
+        account({ current_balance: 500 }),
+        account({ current_balance: 900, is_archived: true }),
+      ]),
+    ).toBe(500);
+  });
+
+  // Null, not zero. Zero is a balance; null means the app does not know one,
+  // and the projection must say so rather than draw a line from nowhere.
+  it('has no opinion when nothing spendable is tracked', () => {
+    expect(computeSpendableBalance([])).toBeNull();
+    expect(
+      computeSpendableBalance([account({ kind: 'investment' })]),
+    ).toBeNull();
+  });
+});
+
+describe('projected balance', () => {
+  const NOW = new Date('2026-08-15T12:00:00Z');
+
+  const project = (openingBalance: number | null) =>
+    computeTwelveMonthProjection({
+      expenses: [],
+      incomes: [],
+      recurringExpenses: [],
+      recurringIncomes: [],
+      now: NOW,
+      openingBalance,
+    });
+
+  it('reports flows only when no balance is known', () => {
+    const months = project(null);
+
+    expect(months).toHaveLength(12);
+    expect(months.every((month) => month.projectedBalance === null)).toBe(true);
+  });
+
+  it('carries the balance forward month by month', () => {
+    const months = computeTwelveMonthProjection({
+      expenses: [],
+      incomes: [],
+      recurringExpenses: [],
+      recurringIncomes: [],
+      now: NOW,
+      openingBalance: 1000,
+    });
+
+    // With no activity at all the balance simply holds.
+    expect(months[0].projectedBalance).toBe(1000);
+    expect(months[11].projectedBalance).toBe(1000);
+  });
+
+  it('finds nothing to warn about when the balance stays positive', () => {
+    expect(findFirstShortfall(project(5000))).toBeNull();
+  });
+
+  // The first shortfall, not the worst one: a gap in March is the thing to act
+  // on, and knowing August is worse does not change what you do about March.
+  it('reports the first month the balance goes under, not the lowest', () => {
+    const months = [
+      { monthKey: '2026-09', projectedBalance: 200 },
+      { monthKey: '2026-10', projectedBalance: -50 },
+      { monthKey: '2026-11', projectedBalance: -900 },
+    ] as never as Parameters<typeof findFirstShortfall>[0];
+
+    expect(findFirstShortfall(months)?.monthKey).toBe('2026-10');
   });
 });

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { format } from 'date-fns';
 import {
+  useAccountsData,
   useDataConfig,
   useExpensesData,
   useIncomesData,
@@ -9,9 +10,12 @@ import {
 import { useDateLocale } from '@/hooks/useDateLocale';
 import {
   computeSafeToSpend,
+  computeSpendableBalance,
   computeTwelveMonthProjection,
   computeUpcomingRecurringThisMonth,
+  findFirstShortfall,
 } from '@/lib/forecast';
+import { countsAsSpending } from '@/lib/spending';
 
 // Wires DataContext slices into the pure forecast math (lib/forecast.ts).
 // ForecastSection only renders for Pro users, so the full expense history is
@@ -21,6 +25,7 @@ export const useForecastData = () => {
   const incomes = useIncomesData();
   const { recurringExpenses, recurringIncomes } = useRecurringData();
   const { monthlyBudget } = useDataConfig();
+  const { accounts } = useAccountsData();
   const dateLocale = useDateLocale();
 
   return useMemo(() => {
@@ -31,6 +36,12 @@ export const useForecastData = () => {
     // than parseISO per row (same pattern as useAnalyticsData).
     let spentThisMonth = 0;
     for (const expense of expenses) {
+      // A transfer the user marked as not-spending must not eat into what is
+      // safe to spend. This was reading every row in the month; it is the one
+      // total the exclusion sweep missed.
+      if (!countsAsSpending(expense)) {
+        continue;
+      }
       if (expense.date.slice(0, 7) === thisMonthKey) {
         spentThisMonth += expense.amount;
       }
@@ -45,12 +56,17 @@ export const useForecastData = () => {
       ),
     });
 
+    // What the spendable accounts hold now. Null when the user tracks none,
+    // in which case the projection reports flows without a balance line.
+    const openingBalance = computeSpendableBalance(accounts);
+
     const projection = computeTwelveMonthProjection({
       expenses,
       incomes,
       recurringExpenses,
       recurringIncomes,
       now,
+      openingBalance,
       formatMonthLabel: (monthStart) =>
         format(monthStart, 'LLL yy', { locale: dateLocale }),
     });
@@ -61,13 +77,20 @@ export const useForecastData = () => {
       recurringExpenses.length === 0 &&
       recurringIncomes.length === 0;
 
-    return { safeToSpend, projection, noData };
+    return {
+      safeToSpend,
+      projection,
+      noData,
+      openingBalance,
+      shortfall: findFirstShortfall(projection),
+    };
   }, [
     expenses,
     incomes,
     recurringExpenses,
     recurringIncomes,
     monthlyBudget,
+    accounts,
     dateLocale,
   ]);
 };

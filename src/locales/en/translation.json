@@ -137,7 +137,7 @@
     "filterByTag": "Filter activity by tag",
     "allTags": "All tags",
     "exportCsv": "Export CSV",
-    "importCsv": "Import CSV",
+    "importCsv": "Import statement",
     "exportedTitle": "CSV ready",
     "exportedDescription_one": "Downloaded {{count}} matching transaction.",
     "exportedDescription_other": "Downloaded {{count}} matching transactions.",
@@ -1026,7 +1026,11 @@
       "projectedIncome": "Projected income",
       "projectedSpending": "Projected spending",
       "projectedNet": "Projected net",
-      "methodNote": "Based on your active recurring items plus your average non-recurring activity over the last six months."
+      "methodNote": "Based on your active recurring items plus your average non-recurring activity over the last six months.",
+      "projectedBalance": "Projected balance",
+      "empty": "Empty",
+      "shortfall": "On this pace your balance dips below zero around {{month}}, by about {{amount}}. Months away, and based on your average — but worth knowing now.",
+      "noBalance": "Add a cash or bank account under Net worth and this will project your balance forward, not just your monthly totals."
     },
     "insights": {
       "sectionTitle": "Spending insights",
@@ -1064,11 +1068,11 @@
     }
   },
   "import": {
-    "title": "Import Expenses",
-    "dropzone": "Drag and drop a CSV file here, or click to select",
-    "formatHint": "Supports any CSV format - you can map columns in the next step",
-    "selectFile": "Select CSV File",
-    "invalidFileType": "Please select a CSV file",
+    "title": "Import transactions",
+    "dropzone": "Drag and drop a statement here, or click to select",
+    "formatHint": "CSV, OFX, QFX or QIF. Most banks export at least one of these — OFX and QIF describe their own columns, so there is nothing to map.",
+    "selectFile": "Select file",
+    "invalidFileType": "Please select a CSV, OFX, QFX or QIF file",
     "parseError": "Failed to parse CSV file",
     "mappingDescription": "Select which columns contain the expense data:",
     "dateColumn": "Date",
@@ -1108,7 +1112,9 @@
       "descriptionInvalid": "Description contains invalid characters"
     },
     "incomeRows": "{{count}} rows will be imported as income",
-    "mapCategoryTo": "Map \"{{name}}\" to a category"
+    "mapCategoryTo": "Map \"{{name}}\" to a category",
+    "someRowsSkipped_one": "Skipped {{count}} transaction the file could not describe",
+    "someRowsSkipped_other": "Skipped {{count}} transactions the file could not describe"
   },
   "receipt": {
     "receipt": "Receipt",
