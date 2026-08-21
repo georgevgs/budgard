@@ -6,6 +6,7 @@ import PendingHistoryNotice from '@/components/common/PendingHistoryNotice';
 import { groupExpensesByDate } from '@/lib/dateGrouping';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import { formatCurrency } from '@/lib/utils';
+import { sumSpending } from '@/lib/spending';
 import type { Expense } from '@/types/Expense';
 
 type Props = {
@@ -150,13 +151,7 @@ const renderGroup = (group: DateGroup, props: Props) => (
 // Only money that left the account is summed here. A mixed net figure on a day
 // that holds both a salary and a coffee reads as nonsense.
 const renderDayTotal = (group: DateGroup, currency: string) => {
-  const spent = group.expenses.reduce((sum, transaction) => {
-    if (transaction.type === 'income') {
-      return sum;
-    }
-
-    return sum + transaction.amount;
-  }, 0);
+  const spent = sumSpending(group.expenses);
 
   if (spent <= 0) {
     return null;

@@ -73,6 +73,9 @@ const NetWorthView = lazyWithRetry(
   () => import('@/components/networth/NetWorthView'),
 );
 const DebtsView = lazyWithRetry(() => import('@/components/debts/DebtsView'));
+const TransactionDetailView = lazyWithRetry(
+  () => import('@/components/transaction/TransactionDetailView'),
+);
 const SettingsView = lazyWithRetry(
   () => import('@/components/settings/SettingsView'),
 );
@@ -472,6 +475,16 @@ const AuthenticatedApp = () => {
                   <Route
                     path="/analytics"
                     element={<LegacyRedirect to="/trends" />}
+                  />
+                  <Route
+                    path="/t/:id"
+                    element={
+                      <Suspense
+                        fallback={renderRouteFallback(<ExpenseLoadingState />)}
+                      >
+                        <TransactionDetailView />
+                      </Suspense>
+                    }
                   />
                   <Route
                     path="/recurring"

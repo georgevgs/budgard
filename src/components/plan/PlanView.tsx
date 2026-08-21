@@ -27,6 +27,7 @@ import { useSavingsRhythm } from '@/hooks/savings/useSavingsRhythm';
 import { getMonthlyAmount } from '@/lib/recurring';
 import { buildUpcomingBills } from '@/lib/upcomingBills';
 import { formatCurrency } from '@/lib/utils';
+import { sumSpending } from '@/lib/spending';
 
 const PlanView = () => {
   const { t } = useTranslation();
@@ -168,13 +169,9 @@ const buildPlanModel = (
 ) => {
   const now = new Date();
   const monthKey = format(now, 'yyyy-MM');
-  const monthlySpent = expenses.reduce((sum, expense) => {
-    if (expense.date.slice(0, 7) !== monthKey) {
-      return sum;
-    }
-
-    return sum + expense.amount;
-  }, 0);
+  const monthlySpent = sumSpending(
+    expenses.filter((expense) => expense.date.slice(0, 7) === monthKey),
+  );
   const activeRecurring = recurringExpenses.filter((item) => item.active);
 
   return {

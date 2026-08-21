@@ -173,7 +173,8 @@
     },
     "tools": {
       "label": "More actions"
-    }
+    },
+    "openTransaction": "Open {{description}}"
   },
   "plan": {
     "title": "Plan",
@@ -1658,5 +1659,28 @@
   },
   "upcomingBills": {
     "manage": "Manage"
+  },
+  "transaction": {
+    "title": "Transaction",
+    "notFound": "That transaction is no longer here",
+    "notFoundBody": "It may have been deleted, or the link is out of date.",
+    "backToActivity": "Back to activity",
+    "delete": "Delete transaction",
+    "deleteConfirmation": "This removes it permanently. Anything it was counted towards will be recalculated.",
+    "note": {
+      "label": "Note",
+      "placeholder": "What was this for?",
+      "unsaved": "Saves when you tap away"
+    },
+    "exclude": {
+      "label": "Don't count this as spending",
+      "description": "For transfers between your own accounts, or a cost someone paid you back. It stays in your activity but leaves every total."
+    },
+    "insight": {
+      "title": "This month",
+      "summary_one": "{{count}} time this month, {{amount}} in total",
+      "summary_other": "{{count}} times this month, {{amount}} in total"
+    },
+    "excludedBadge": "Not counted"
   }
 }

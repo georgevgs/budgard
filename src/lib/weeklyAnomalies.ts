@@ -1,6 +1,7 @@
 import { format, startOfWeek, subDays } from 'date-fns';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
+import { countsAsSpending } from '@/lib/spending';
 
 // "This week" is the last completed Mon–Sun window before `now`. The recap is
 // surfaced on Mondays, so on a Monday the window is the week that just ended
@@ -103,7 +104,9 @@ export const buildWeeklyRecap = ({
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const isSpendable = (e: Expense): boolean => e.type !== 'debt_payment';
+// Was `type !== 'debt_payment'` — now the same decision the rest of the app
+// makes in one place, including rows the user marked as not spending.
+const isSpendable = (e: Expense): boolean => countsAsSpending(e);
 
 const sumAmount = (rows: Expense[]): number =>
   rows.reduce((sum, e) => sum + e.amount, 0);

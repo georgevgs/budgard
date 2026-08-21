@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { format } from 'date-fns';
 import type { Expense } from '@/types/Expense';
+import { countsAsSpending } from '@/lib/spending';
 
 // Sums expenses for the current calendar month, grouped by category_id.
 // Returns a Map keyed by category_id; categories with no expenses are absent.
@@ -18,6 +19,7 @@ export const useCurrentMonthSpendingByCategory = (
     const totals = new Map<string, number>();
 
     for (const expense of expenses) {
+      if (!countsAsSpending(expense)) continue;
       if (!expense.category_id) continue;
       if (!expense.date.startsWith(monthKey)) continue;
       totals.set(

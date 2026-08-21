@@ -6,6 +6,7 @@ import {
   useCategoriesData,
 } from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
+import { countsAsSpending } from '@/lib/spending';
 import { useIsPro } from '@/hooks/useIsPro';
 import { getFreeAnalyticsCutoff } from '@/lib/proLimits';
 import { monthsElapsedInYear } from '@/lib/utils';
@@ -72,6 +73,9 @@ export const useAnalyticsData = () => {
     // 12 month keys to human-readable labels (date-fns only for labels).
     const totals = new Map<string, number>();
     for (const e of yearExpenses) {
+      if (!countsAsSpending(e)) {
+        continue;
+      }
       const key = e.date.slice(0, 7);
       totals.set(key, (totals.get(key) ?? 0) + e.amount);
     }

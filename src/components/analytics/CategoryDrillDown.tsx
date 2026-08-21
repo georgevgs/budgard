@@ -13,6 +13,7 @@ import { formatCurrency } from '@/lib/utils';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
+import { countsAsSpending } from '@/lib/spending';
 
 type Props = {
   isOpen: boolean;
@@ -47,6 +48,9 @@ export const CategoryDrillDown = ({
     const byMonth = new Map<string, number>();
     for (const expense of expenses) {
       const key = format(parseISO(expense.date), 'yyyy-MM');
+      if (!countsAsSpending(expense)) {
+        continue;
+      }
       byMonth.set(key, (byMonth.get(key) ?? 0) + expense.amount);
     }
 

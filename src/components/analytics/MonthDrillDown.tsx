@@ -13,6 +13,7 @@ import { formatCurrency } from '@/lib/utils';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
+import { countsAsSpending, sumSpending } from '@/lib/spending';
 import type { Category } from '@/types/Category';
 
 type Props = {
@@ -41,7 +42,7 @@ export const MonthDrillDown = ({
   );
 
   const totalAmount = useMemo(
-    () => monthExpenses.reduce((sum, e) => sum + e.amount, 0),
+    () => sumSpending(monthExpenses),
     [monthExpenses],
   );
 
@@ -49,6 +50,9 @@ export const MonthDrillDown = ({
     const byCategory = new Map<string | null, number>();
     for (const expense of monthExpenses) {
       const key = expense.category_id ?? null;
+      if (!countsAsSpending(expense)) {
+        continue;
+      }
       byCategory.set(key, (byCategory.get(key) ?? 0) + expense.amount);
     }
 

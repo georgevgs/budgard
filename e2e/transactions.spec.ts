@@ -39,44 +39,49 @@ test.describe('transactions', () => {
     await expect(save).toBeEnabled();
   });
 
-  test('edits an existing transaction from the activity row', async ({
+  // A row now opens the transaction rather than the editor, so editing runs
+  // through the detail screen — which is where Edit is the first action.
+  test('edits an existing transaction via the detail screen', async ({
     app,
     data,
   }) => {
     await app.goto('/activity');
 
-    await app.getByRole('button', { name: /edit weekly shop/i }).click();
+    await app.getByRole('link', { name: /open weekly shop/i }).click();
+    await expect(app).toHaveURL(/\/t\/exp-1$/);
+    await app.getByRole('button', { name: /^edit$/i }).click();
+
     const description = app.getByLabel('Description', { exact: true });
     await expect(description).toHaveValue('Weekly shop');
 
     await description.fill('Weekly shop (corrected)');
     await app.getByRole('button', { name: /save/i }).click();
 
-    await expect(
-      app.getByRole('button', { name: 'Edit Weekly shop (corrected)' }),
-    ).toHaveCount(1);
     await expect
       .poll(
         () =>
           data.expenses.find((row) => row.id === 'exp-1')?.description ?? '',
       )
       .toBe('Weekly shop (corrected)');
+    await expect(
+      app.getByRole('heading', { name: 'Weekly shop (corrected)' }),
+    ).toBeVisible();
   });
 
   test('a cancelled edit leaves the transaction untouched', async ({
     app,
     data,
   }) => {
-    await app.goto('/activity');
+    await app.goto('/t/exp-1');
 
-    await app.getByRole('button', { name: /edit weekly shop/i }).click();
+    await app.getByRole('button', { name: /^edit$/i }).click();
     await app
       .getByLabel('Description', { exact: true })
       .fill('Should not persist');
     await app.getByRole('button', { name: /cancel/i }).click();
 
     await expect(
-      app.getByRole('button', { name: 'Edit Weekly shop' }),
+      app.getByRole('heading', { name: 'Weekly shop' }),
     ).toBeVisible();
     expect(data.expenses.find((row) => row.id === 'exp-1')?.description).toBe(
       'Weekly shop',

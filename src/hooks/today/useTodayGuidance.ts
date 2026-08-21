@@ -14,6 +14,7 @@ import {
 } from '@/lib/forecast';
 import { buildUpcomingBills } from '@/lib/upcomingBills';
 import type { Expense } from '@/types/Expense';
+import { countsAsSpending, sumSpending } from '@/lib/spending';
 
 export type TodayStatus = 'comfortable' | 'watchful' | 'tight' | 'noBudget';
 
@@ -151,7 +152,7 @@ export const useTodayGuidance = (expenses: Expense[]) => {
 // --- Helpers ---
 
 const sumTransactions = (transactions: Expense[]): number =>
-  transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+  sumSpending(transactions);
 
 const computeDailyAllowance = (
   safeToSpend: number | null,
@@ -236,6 +237,9 @@ const buildMoneyPath = (
   const dailyTotals = new Map<number, number>();
   for (const expense of expenses) {
     if (expense.recurring_expense_id) {
+      continue;
+    }
+    if (!countsAsSpending(expense)) {
       continue;
     }
 

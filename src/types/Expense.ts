@@ -17,6 +17,13 @@ export type Expense = {
   user_id: string;
   receipt_path?: string | null;
   created_at: string;
+  // Free text, distinct from `description` — the description is the row's
+  // label and has to stay scannable in a list; a note is a sentence.
+  note?: string | null;
+  // Money that moved but is not spending: a transfer between your own
+  // accounts, a cost someone paid back. Still shown in Activity, because it
+  // happened, but skipped by every total.
+  is_excluded?: boolean;
   // Multi-currency: set when expense was logged in a foreign currency
   original_amount?: number | null;
   original_currency?: string | null;

@@ -34,7 +34,9 @@ const Header = () => {
     return null;
   }
 
-  const isSecondaryRoute = SECONDARY_ROUTES.includes(pathname);
+  // Transaction detail is a per-id route, so it cannot be listed literally.
+  const isSecondaryRoute =
+    SECONDARY_ROUTES.includes(pathname) || pathname.startsWith('/t/');
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/78 backdrop-blur-2xl pt-safe-t">

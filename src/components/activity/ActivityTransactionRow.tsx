@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import ExpensesCardActions from '@/components/expenses/ExpensesCardActions';
 import IncomeCardActions from '@/components/income/IncomeCardActions';
 import { cn, formatCurrency } from '@/lib/utils';
@@ -22,12 +23,15 @@ const ActivityTransactionRow = (props: Props) => {
 
   return (
     <div className="flex min-h-[4.5rem] items-center gap-1 pr-2">
-      {/* The row itself opens the editor — reaching for the overflow menu to
-          fix a typo is a step too many on a list people scan every day. */}
-      <button
-        type="button"
-        onClick={() => handleEdit(props, isIncome)}
-        aria-label={t('activity.editTransaction', {
+      {/* The row opens the transaction rather than the editor. Correcting a
+          typo is one more tap than it was, but "what was this and how often do
+          I do it" is the question people actually bring to a list they scan
+          every day — and the editor is the first action on the screen it
+          lands on. */}
+      <Link
+        to={`/t/${transaction.id}`}
+        viewTransition
+        aria-label={t('activity.openTransaction', {
           description: transaction.description,
         })}
         className="flex min-w-0 flex-1 items-center gap-3 rounded-2xl py-3 pl-4 pr-2 text-left transition-colors hover:bg-accent/40 active:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
@@ -46,11 +50,12 @@ const ActivityTransactionRow = (props: Props) => {
             'shrink-0 text-sm font-bold tabular-nums',
             getAmountTone(isIncome),
           )}
+          style={{ viewTransitionName: `tx-amount-${transaction.id}` }}
         >
           {getAmountPrefix(isIncome)}
           {formatCurrency(transaction.amount, props.currency)}
         </span>
-      </button>
+      </Link>
       {renderActions(props, isIncome)}
     </div>
   );
@@ -62,21 +67,14 @@ export default ActivityTransactionRow;
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-const handleEdit = (props: Props, isIncome: boolean) => {
-  if (isIncome) {
-    props.onIncomeEdit(props.transaction);
-
-    return;
-  }
-
-  props.onExpenseEdit(props.transaction);
-};
-
 const renderCategoryMark = (transaction: Expense) => {
   return (
     <span
       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm"
-      style={{ backgroundColor: getColorTint(transaction.category?.color) }}
+      style={{
+        backgroundColor: getColorTint(transaction.category?.color),
+        viewTransitionName: `tx-mark-${transaction.id}`,
+      }}
       aria-hidden="true"
     >
       {transaction.category?.icon ?? '•'}

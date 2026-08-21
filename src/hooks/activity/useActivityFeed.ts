@@ -261,9 +261,14 @@ const doesTagMatch = (row: Expense, search: string): boolean => {
   );
 };
 
+// The period summary is a total, so an excluded row is left out of it —
+// even though the row itself stays in the feed below, because it happened.
 const sumKind = (rows: Expense[], kind: 'expense' | 'income'): number =>
   rows.reduce((sum, row) => {
     if (row.type !== kind) {
+      return sum;
+    }
+    if (row.is_excluded) {
       return sum;
     }
 

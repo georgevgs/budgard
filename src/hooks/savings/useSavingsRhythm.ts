@@ -10,6 +10,7 @@ import {
 import { computeUpcomingRecurringThisMonth } from '@/lib/forecast';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
+import { countsAsSpending, sumSpending } from '@/lib/spending';
 import type { Goal } from '@/types/Goal';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
@@ -181,6 +182,9 @@ const buildSpendByDay = (expenses: Expense[]): Map<string, number> => {
     if (expense.recurring_expense_id) {
       continue;
     }
+    if (!countsAsSpending(expense)) {
+      continue;
+    }
 
     const current = byDay.get(expense.date) ?? 0;
     byDay.set(expense.date, current + expense.amount);
@@ -237,6 +241,10 @@ const computeSurplus = (
   return Math.min(allowance - (spendByDay.get(key) ?? 0), allowance);
 };
 
+// Deliberately NOT filtered by countsAsSpending. A transfer into savings is
+// exactly the kind of row someone marks as "not spending" — and it is also
+// exactly the set-aside this is measuring. Excluding it here would zero out
+// the rhythm for the users most diligently using the feature.
 const sumSetAside = (
   expenses: Expense[],
   savingsCategoryIds: Set<string>,
@@ -300,10 +308,11 @@ const computeAllowance = (
   isCurrentMonth: boolean,
 ): number => {
   const monthKey = format(reference, 'yyyy-MM');
-  const recurringSpent = expenses
-    .filter((expense) => expense.date.slice(0, 7) === monthKey)
-    .filter((expense) => expense.recurring_expense_id)
-    .reduce((sum, expense) => sum + expense.amount, 0);
+  const recurringSpent = sumSpending(
+    expenses
+      .filter((expense) => expense.date.slice(0, 7) === monthKey)
+      .filter((expense) => expense.recurring_expense_id),
+  );
 
   // Bills still to fall this month are already committed, so they come out of
   // the allowance now — otherwise every month would start generous and tighten.

@@ -128,6 +128,12 @@ const TAB_OWNED_ROUTES: Record<string, string> = {
 };
 
 const getActiveIndex = (pathname: string, tabs: Tab[]): number => {
+  // A transaction is something you reached from a list of transactions, so
+  // the dock keeps Activity lit while you are looking at one.
+  if (pathname.startsWith('/t/')) {
+    return tabs.findIndex((tab) => tab.path === '/activity');
+  }
+
   const owningPath = TAB_OWNED_ROUTES[pathname] ?? pathname;
 
   return tabs.findIndex((tab) => {

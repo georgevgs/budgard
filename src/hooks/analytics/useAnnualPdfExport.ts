@@ -15,6 +15,7 @@ import type {
 import { formatCurrency, monthsElapsedInYear } from '@/lib/utils';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
+import { countsAsSpending, sumSpending } from '@/lib/spending';
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
@@ -77,7 +78,7 @@ const buildReportInput = (
 ): AnnualPdfReportInput => {
   const yearExpenses = yearTransactions.filter(isExpenseTransaction);
   const yearIncomes = yearTransactions.filter(isIncomeTransaction);
-  const totalSpent = sumAmounts(yearExpenses);
+  const totalSpent = sumSpending(yearExpenses);
   const monthsElapsed = monthsElapsedInYear(year);
 
   let monthlyAverage = 0;
@@ -129,7 +130,7 @@ const buildIncomeTotal = (
     return null;
   }
 
-  return formatCurrency(sumAmounts(yearIncomes), currency);
+  return formatCurrency(sumAmounts(yearIncomes.filter(counts)), currency);
 };
 
 const buildMonthlyTotals = (
@@ -142,6 +143,9 @@ const buildMonthlyTotals = (
   // bucketing pattern in useAnalyticsData (parseISO only for labels).
   const totals = new Map<string, number>();
   for (const expense of yearExpenses) {
+    if (!countsAsSpending(expense)) {
+      continue;
+    }
     const key = expense.date.slice(0, 7);
     totals.set(key, (totals.get(key) ?? 0) + expense.amount);
   }
@@ -169,6 +173,9 @@ const buildCategoryRows = (
   const totalsByName = new Map<string, number>();
 
   for (const expense of yearExpenses) {
+    if (!countsAsSpending(expense)) {
+      continue;
+    }
     const name = resolveCategoryName(expense.category_id, nameById, uncategorizedLabel);
     totalsByName.set(name, (totalsByName.get(name) ?? 0) + expense.amount);
   }
@@ -215,3 +222,8 @@ const isIncomeTransaction = (transaction: Expense): boolean => {
 const sumAmounts = (transactions: Expense[]): number => {
   return transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
 };
+
+// Income has no `type` filter to apply, but it can still be excluded — an
+// incoming transfer from your own account is money arriving that was never
+// earned, and counting it would inflate the year.
+const counts = (transaction: Expense): boolean => !transaction.is_excluded;
