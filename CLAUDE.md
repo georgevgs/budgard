@@ -29,6 +29,10 @@ Rules for working in this repository. Follow them exactly.
   hash in `netlify.toml` and the manifest colours are all built from it by
   `plugins/designTokens.ts`. Components use `bg-primary` / `text-income` and never
   a raw hue.
+- `src/design/palette.ts`: the raw values behind those tokens, and the written
+  reasoning for each one. `--border` in particular is set darker than a hairline
+  needs because ~100 call sites draw inner rules at `border-border/40`–`/50`;
+  lightening it silently deletes them.
 
 ## Protected Files
 - Never hand-edit `src/design/tokens.generated.css`, the theme script in
@@ -40,6 +44,23 @@ Rules for working in this repository. Follow them exactly.
 ---
 
 ## 🧠 UI/UX Philosophy
+
+### Visual Direction: white, black, and accent only where it means something
+The app is a white page with white cards on it. Read `src/design/palette.ts`
+before changing anything visual — the reasoning is written there — but the four
+rules that constrain new work are:
+
+- **The rule is the separation.** Page and card are the same colour in both
+  themes; a panel exists because `--border` draws it. Use `.surface-card` (or a
+  `border`) — a `bg-card` with no rule is invisible.
+- **No ambient colour.** No washes behind a screen, no coloured glow, no tinted
+  section bands. Depth is `.lift` (grey shadow). If you want to add coloured
+  light somewhere, the answer is no.
+- **Never tint a large surface with an accent.** A hue mixed into a white
+  surface lands in the beige band the app was repainted to escape. Accent goes
+  on *small* things — a fill, a ring, an ink, a chip — never a card body.
+- **Greys stay achromatic.** Every value in the `neutral` and `ink` ramps is
+  `0 0%`. A hue in the ground is a cast over the whole app.
 
 ### Gestalt Principles (Visual Hierarchy)
 - **Proximity**: Related items (labels/inputs) must be physically close. Use `space-y-*` or `gap-*` consistently.

@@ -33,7 +33,7 @@ const ActivityFilters = ({
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder={t('activity.searchPlaceholder')}
             aria-label={t('activity.searchLabel')}
-            className="h-11 w-full rounded-xl border-border/35 bg-card/72 pl-9 shadow-none"
+            className="h-11 w-full rounded-xl border-input bg-card pl-9 shadow-none"
           />
         </div>
         {trailing}

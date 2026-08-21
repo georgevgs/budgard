@@ -152,7 +152,7 @@ const DialogContent = React.forwardRef<
             (e.currentTarget as HTMLElement).focus();
           }}
           className={cn(
-            'fixed z-50 grid w-full gap-4 border border-border/40 bg-card shadow-lg duration-200',
+            'fixed z-50 grid w-full gap-4 border border-border bg-card shadow-lg duration-200',
             // Mobile: drawer from bottom with rounded top corners.
             // Default padding keeps content clear of the rounded corners and
             // the iOS home indicator; consumers with bespoke layouts pass p-0.

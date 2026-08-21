@@ -24,7 +24,7 @@ export type Hsl = string;
  *   on         the label that rides on top of the fill.
  */
 export type Swatch = {
-  /** Filled surfaces, light theme. Capped by the cream canvas. */
+  /** Filled surfaces, light theme. Capped by the white canvas. */
   solid: Hsl;
   /** Filled surfaces, dark theme. Full neon — near-black gives it room. */
   solidDark: Hsl;
@@ -48,28 +48,69 @@ export type Swatch = {
   on: Hsl;
 };
 
-/** Warm greys — the light theme's canvas, surfaces and rules. */
+/**
+ * Greys, with the hue and the saturation taken out — the light theme's
+ * canvas, surfaces and rules.
+ *
+ * Dead neutral on purpose. These used to be warm greys sitting under a cream
+ * canvas, which made the whole app read as tinted before a single piece of
+ * content had loaded. The canvas is now plain white and a card is separated
+ * from it by `200` alone, so any hue left in this ramp would show up as a
+ * cast across every screen rather than as warmth. Colour in this app is a
+ * signal; the ground it sits on is not allowed to be one.
+ *
+ *   0    the canvas AND every card on it
+ *   50   filled-but-quiet: secondary buttons, skeleton blocks
+ *   100  the hover step above that
+ *   200  the hairline. The only thing drawing a panel, so it has to be seen.
+ *   500  muted text — held to 4.5:1 on white by `tokens.test.ts`
+ *   900  body text
+ *
+ * `200` is set darker than a hairline strictly needs, and that is on purpose:
+ * roughly a hundred call sites draw an INNER rule as `border-border/40` or
+ * `/50` to sit a step below the panel's own outline. Those alphas were chosen
+ * against a card that separated by its fill; now that the rule is the only
+ * separation there is, a faded rule has to still land somewhere visible. At
+ * 83% the whole ladder does — `/40` resolves to #ededed, `/50` to #e9e9e9,
+ * full strength to #d4d4d4 — so the hierarchy survives without touching every
+ * call site. Lightening this token quietly deletes a hundred dividers.
+ */
 export const neutral = {
   0: '0 0% 100%',
-  25: '32 100% 98%',
-  50: '30 60% 96%',
-  100: '30 45% 93%',
-  200: '28 35% 87%',
-  500: '25 12% 40%',
-  700: '24 14% 14%',
-  800: '24 16% 11%',
-  900: '24 18% 9%',
+  50: '0 0% 94%',
+  100: '0 0% 90%',
+  200: '0 0% 83%',
+  500: '0 0% 42%',
+  700: '0 0% 15%',
+  800: '0 0% 11%',
+  900: '0 0% 9%',
 } as const;
 
-/** Warm-tinted darks — the dark theme's canvas and surfaces. */
+/**
+ * Near-blacks, same treatment — the dark theme's canvas and surfaces.
+ *
+ * Mirrors the light ramp rather than inverting it loosely: `950` is both the
+ * page and the card, and `600` is the hairline that separates them, so the
+ * two themes are the same system seen from opposite ends instead of two
+ * different ideas about depth.
+ *
+ *   950  the canvas AND every card on it
+ *   900  the one surface allowed to sit above the page: the dock capsule
+ *   800  filled-but-quiet: secondary buttons, skeleton blocks
+ *   700  the hover step above that
+ *   600  the hairline — separate from 700 so a rule and a hover fill can be
+ *        tuned independently, which they cannot on a near-black page
+ *   300  muted text
+ *   50   body text
+ */
 export const ink = {
-  950: '26 32% 5%',
-  900: '25 24% 9%',
-  800: '24 18% 14%',
-  700: '24 16% 18%',
-  500: '25 14% 36%',
-  300: '28 22% 72%',
-  50: '30 45% 96%',
+  950: '0 0% 6%',
+  900: '0 0% 10%',
+  800: '0 0% 15%',
+  700: '0 0% 20%',
+  600: '0 0% 27%',
+  300: '0 0% 68%',
+  50: '0 0% 96%',
 } as const;
 
 /**
@@ -94,11 +135,11 @@ export const ink = {
  * still held to the full 4.5:1.
  *
  * WHY `solid` AND `solidDark` DIFFER. The canvas caps the fill, not the label.
- * Cream at 98% lightness leaves a bright hue nowhere to sit, so light mode
- * takes each colour to the brightest value that still reads as a shape on it;
- * near-black leaves all the room in the world, so dark mode runs the same hue
- * at full neon. Dark mode is where this palette is loudest, and that is the
- * correct place for neon to be loudest.
+ * White leaves a bright hue nowhere to sit, so light mode takes each colour to
+ * the brightest value that still reads as a shape on it; near-black leaves all
+ * the room in the world, so dark mode runs the same hue at full neon. Dark
+ * mode is where this palette is loudest, and that is the correct place for
+ * neon to be loudest.
  */
 export const accent = {
   /** Fanta US, `#ff8300`, to the hue. The brand, and the default accent. */
@@ -232,17 +273,19 @@ export const barbie = {
 } as const;
 
 /**
- * How hard the neon bleeds. Multiplied into the coloured drop shadow behind
- * the FAB, the nav indicator and the hero — the part that makes a bright hue
- * read as LIT rather than merely bright.
+ * How far a raised control reads off the page. Multiplied into the alpha of
+ * the plain black drop shadow behind the FAB and the pricing card.
  *
- * Dark carries the most because a glow needs somewhere dark to fall off into,
- * and dark is where the fills run hottest.
+ * There is no coloured bloom any more. A bloom is lighting, and lighting a
+ * white page in the accent hue is exactly the tint this palette exists to
+ * avoid — so depth is carried by grey and the hue is spent only on the shape
+ * throwing it. Dark carries more alpha because a black shadow on a near-black
+ * page has to work much harder to be seen at all.
  */
-export const glow = {
-  light: '0.5',
-  dark: '0.75',
-  barbie: '0.55',
+export const lift = {
+  light: '0.1',
+  dark: '0.6',
+  barbie: '0.14',
 } as const;
 
 /**

@@ -26,11 +26,13 @@ const SectionShell = ({
 export default SectionShell;
 
 const toneClass = (tone: 'default' | 'muted' | 'inverted') => {
-  // A wash of the brand rather than a grey. Alternating sections now warm and
-  // cool down the page as you scroll, and they turn with the accent — a grey
-  // band stayed grey no matter which colour the app was wearing.
+  // A grey band, not a wash of the brand. `bg-primary/6` gave the page a warm
+  // rhythm on a cream canvas; over white it resolves to a pale beige, which is
+  // the exact tint the app was repainted to get rid of. Alternating white and
+  // near-white still gives the scroll its rhythm, and the accent stays on the
+  // things you can click.
   if (tone === 'muted') {
-    return 'bg-primary/6';
+    return 'bg-muted/60';
   }
 
   if (tone === 'inverted') {

@@ -227,8 +227,8 @@ describe('contrast', () => {
 });
 
 describe('the three-role rule', () => {
-  // `bg-primary` is neon and `--background` is a pale cream, so a bare
-  // `text-primary` is orange-on-cream — somewhere around 2.5:1. There is no
+  // `bg-primary` is neon and `--background` is plain white, so a bare
+  // `text-primary` is orange-on-white — somewhere around 2.6:1. There is no
   // way to make that legible from the token side, so the rule is enforced from
   // the source side instead: the readable variant is `text-primary-ink`, and
   // the fill is only ever a background.

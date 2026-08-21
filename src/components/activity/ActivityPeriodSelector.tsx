@@ -36,7 +36,7 @@ const ActivityPeriodSelector = (props: Props) => {
         onValueChange={(value) => props.onPeriodChange(value as ActivityPeriod)}
       >
         <SelectTrigger
-          className="h-11 rounded-xl border-border/35 bg-card/72 shadow-none"
+          className="h-11 rounded-xl border-input bg-card shadow-none"
           aria-label={t('activity.period.label')}
         >
           <SelectValue />

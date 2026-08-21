@@ -196,12 +196,13 @@ const getActionsClass = (isOpen: boolean): string => {
 };
 
 const getToggleClass = (isOpen: boolean): string => {
-  // `glow` rather than a neutral drop shadow: the FAB is the largest area of
-  // accent on any screen, and a coloured bloom is what makes it read as lit
-  // rather than merely bright. It follows --primary, so it retints itself
-  // whenever the accent or theme changes.
+  // `lift` is a plain grey shadow. This used to be a coloured bloom drawn from
+  // --primary, on the reasoning that the FAB is the largest area of accent on
+  // any screen and should read as lit; on a white canvas that bloom spread the
+  // hue across the page around it, which is the one thing the palette will not
+  // do. The orange stops at the circle now and the depth is grey.
   const base =
-    'h-14 w-14 rounded-full glow transition-transform duration-200 pointer-events-auto';
+    'h-14 w-14 rounded-full lift transition-transform duration-200 pointer-events-auto';
   if (isOpen) {
     return cn(base, 'rotate-45');
   }

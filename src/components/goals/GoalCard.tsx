@@ -28,7 +28,7 @@ const GoalCard = ({ goal, onEdit, onDelete }: Props) => {
   const dateLocale = useDateLocale();
 
   return (
-    <SurfaceCard className="transition-colors hover:bg-card">
+    <SurfaceCard className="transition-colors hover:bg-muted/70">
       <div className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">

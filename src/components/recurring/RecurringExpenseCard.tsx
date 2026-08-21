@@ -36,7 +36,7 @@ const RecurringExpenseCard = ({
   return (
     <SurfaceCard
       className={cn(
-        'transition-[opacity,background-color] hover:bg-card',
+        'transition-[opacity,background-color] hover:bg-muted/70',
         !expense.active && 'opacity-60 bg-muted/30',
       )}
     >

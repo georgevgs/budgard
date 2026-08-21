@@ -40,7 +40,6 @@ const Hero = ({ onGetStarted }: Props) => {
 
   return (
     <div id="top" className="relative overflow-hidden bg-background">
-      {renderBackdrop()}
       <div className="relative max-w-6xl mx-auto px-5 sm:px-8 pt-20 sm:pt-28 pb-16 sm:pb-24">
         <div className="max-w-3xl mx-auto text-center">
           <Reveal>{renderHeading(t)}</Reveal>
@@ -61,18 +60,16 @@ const Hero = ({ onGetStarted }: Props) => {
 
 export default Hero;
 
-// The `aurora` utility carries the whole wash (see index.css) so the hero and
-// the app's lit surfaces cannot drift apart, and so the landing page turns
-// with the accent the way every other screen does.
-const renderBackdrop = () => (
-  <div aria-hidden className="aurora absolute inset-0 pointer-events-none" />
-);
-
+// The second line is the one accent on the page. It was a three-stop gradient
+// running orange to red to blue, which reads as a rainbow rather than as a
+// brand; a single ink says the same thing and is the same colour the CTA below
+// it is filled with. `--primary-ink` is held to 4.5:1 on white by the design
+// tests, so it stays a headline rather than a decoration.
 const renderHeading = (t: Tx) => (
   <h1 className="font-display text-[44px] sm:text-6xl md:text-7xl font-semibold tracking-[-0.035em] leading-[1.02] text-foreground">
     {t('landing.hero.headingLine1')}
     <br />
-    <span className="neon-ink">{t('landing.hero.headingLine2')}</span>
+    <span className="text-primary-ink">{t('landing.hero.headingLine2')}</span>
   </h1>
 );
 
@@ -92,7 +89,7 @@ const renderCtas = (
     <Button
       size="lg"
       onClick={onGetStarted}
-      className="group rounded-full px-7 h-12 text-[15px] glow w-full sm:w-auto"
+      className="group rounded-full px-7 h-12 text-[15px] lift w-full sm:w-auto"
     >
       {t('landing.hero.primaryCta')}
       <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -129,7 +126,7 @@ const renderTrustLine = (t: Tx) => (
 
 const renderHeroShot = (t: Tx) => (
   <div className="max-w-md mx-auto">
-    <DeviceFrame glow>
+    <DeviceFrame>
       <div className="p-3">
         {/* Built from the same tone classes the real hero uses, so the shot
             can never drift from the product — including in dark mode. */}
@@ -138,7 +135,7 @@ const renderHeroShot = (t: Tx) => (
             <p className="text-xs font-semibold opacity-65">
               {t('today.greeting.morning')}
             </p>
-            <span className="rounded-full bg-white/55 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ring-1 ring-black/5 dark:bg-white/10 dark:ring-white/10">
+            <span className="rounded-full bg-primary/12 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-primary-ink">
               {t('today.chip.comfortable')}
             </span>
           </div>

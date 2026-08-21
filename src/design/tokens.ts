@@ -33,8 +33,8 @@
 import {
   accent,
   barbie,
-  glow,
   ink,
+  lift,
   neutral,
   status,
   type Hsl,
@@ -85,15 +85,19 @@ export const BASE_TOKENS: TokenMap = {
 };
 
 /**
- * Light — a warm cream canvas with white cards floating on it.
+ * Light — white page, white cards, and a hairline doing the separating.
  *
- * The canvas is tinted rather than white so the app reads warm the moment it
- * opens, and so a card has something to lift off. That also lets
- * `--surface-ring` sit much lower than it used to: the panel is now separated
- * by its fill, not by a hairline doing all the work alone.
+ * The canvas used to be a warm cream so a card had something to lift off. It
+ * no longer is: page and card are the same plain white, and the ONLY thing
+ * drawing a panel is `--border` at full `--surface-ring`. That is what makes
+ * `--surface-ring: 1` load-bearing here rather than decorative — drop it back
+ * and every panel in the app dissolves into the page.
+ *
+ * The trade is deliberate. A tinted ground is a colour the user did not ask
+ * for on every screen; a rule is a colour only where there is an edge.
  */
 const light: TokenMap = {
-  '--background': neutral[25],
+  '--background': neutral[0],
   '--foreground': neutral[900],
   '--card': neutral[0],
   '--card-foreground': neutral[900],
@@ -126,14 +130,12 @@ const light: TokenMap = {
   '--info-foreground': status.info.on,
   '--info-ink': status.info.ink,
   '--radius': '1rem',
-  '--surface-ring': '0.5',
-  // How hard a neon fill bleeds into the page. See `.glow-*` in index.css.
-  '--glow-strength': glow.light,
-  // Alpha on the brand stop of the `.aurora` wash — the coloured light the
-  // landing page and the app's hero sections sit in. The other stops are
-  // secondary hues and are fixed; this is the one that carries the accent, so
-  // it is the one that has to answer to the canvas underneath it.
-  '--aurora': '0.38',
+  // Full strength: on a white page over white cards the rule is the only
+  // separation there is. This is not a decorative hairline.
+  '--surface-ring': '1',
+  // Alpha on the neutral drop shadow under a raised control. See `.lift` in
+  // index.css — grey, never the accent.
+  '--lift-strength': lift.light,
   // Highlight sweeping across skeleton placeholders — light catching the
   // surface. White in every theme, far more transparent on dark where the
   // muted block already sits close to black.
@@ -142,20 +144,26 @@ const light: TokenMap = {
   // backdrop-filter), so the read is built from translucency, a lit rim and
   // real elevation. Tuned per theme.
   '--glass-bg': neutral[0],
-  '--glass-alpha': '0.62',
-  '--glass-sheen': '0.35',
-  '--glass-rim': '0 0% 100% / 0.7',
-  '--glass-drop': '24 60% 12% / 0.16',
+  // Denser than it was, and with the lit rim and sheen switched off: both were
+  // white-on-white here, painting nothing while still costing a layer. The
+  // capsule's edge is the `--border` hairline in `.glass-capsule`, same as
+  // every other panel, and its shadow is plain black rather than warm brown.
+  '--glass-alpha': '0.8',
+  '--glass-sheen': '0',
+  '--glass-rim': '0 0% 100% / 0',
+  '--glass-drop': '0 0% 0% / 0.1',
 };
 
-/** Dark — warm-tinted blacks. The neon has somewhere to fall off into here,
- *  so every fill runs a step brighter than it can on the light canvas. */
+/** Dark — the light theme read from the other end. Page and card are again the
+ *  same tone with a rule between them, and the blacks carry no tint. The neon
+ *  has somewhere to fall off into here, so every fill runs a step brighter
+ *  than it can on the light canvas. */
 const dark: TokenMap = {
   '--background': ink[950],
   '--foreground': ink[50],
-  '--card': ink[900],
+  '--card': ink[950],
   '--card-foreground': ink[50],
-  '--popover': ink[900],
+  '--popover': ink[950],
   '--popover-foreground': ink[50],
   '--primary': accent.orange.solidDark,
   '--primary-foreground': accent.orange.on,
@@ -169,8 +177,8 @@ const dark: TokenMap = {
   '--destructive': status.danger.solidDark,
   '--destructive-foreground': status.danger.on,
   '--destructive-ink': status.danger.inkDark,
-  '--border': ink[700],
-  '--input': ink[700],
+  '--border': ink[600],
+  '--input': ink[600],
   '--ring': accent.orange.inkDark,
   '--income': status.income.solidDark,
   '--income-foreground': status.income.on,
@@ -181,16 +189,15 @@ const dark: TokenMap = {
   '--info': status.info.solidDark,
   '--info-foreground': status.info.on,
   '--info-ink': status.info.inkDark,
-  '--surface-ring': '0.4',
-  '--glow-strength': glow.dark,
-  // Near-black gives a wash somewhere to fall off into, so dark carries the
-  // most colour of the three themes. This is where the palette is loudest.
-  '--aurora': '0.5',
+  '--surface-ring': '1',
+  '--lift-strength': lift.dark,
   '--skeleton-sheen': '0 0% 100% / 0.07',
-  '--glass-bg': '26 24% 10%',
-  '--glass-alpha': '0.72',
-  '--glass-sheen': '0.08',
-  '--glass-rim': '0 0% 100% / 0.12',
+  // The one surface allowed to sit above the page tone: the dock capsule has
+  // content sliding under it, so it needs a ground of its own.
+  '--glass-bg': ink[900],
+  '--glass-alpha': '0.78',
+  '--glass-sheen': '0.06',
+  '--glass-rim': '0 0% 100% / 0.1',
   '--glass-drop': '0 0% 0% / 0.5',
 };
 
@@ -228,8 +235,7 @@ const barbieTheme: TokenMap = {
   '--info-ink': status.info.ink,
   '--radius': '1.25rem',
   '--surface-ring': '0.45',
-  '--glow-strength': glow.barbie,
-  '--aurora': '0.34',
+  '--lift-strength': lift.barbie,
   '--glass-bg': barbie.glass,
   '--glass-alpha': '0.7',
   '--glass-sheen': '0.46',

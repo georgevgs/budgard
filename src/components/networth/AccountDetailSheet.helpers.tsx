@@ -358,7 +358,7 @@ export const renderHistoryList = ({
       {snapshots.map((s) => (
         <li
           key={s.id}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border/40 bg-card/50"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border/40 bg-card"
         >
           {renderActivityIcon(s)}
           <div className="min-w-0 flex-1">

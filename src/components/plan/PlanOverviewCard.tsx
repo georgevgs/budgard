@@ -23,7 +23,7 @@ const PlanOverviewCard = ({
     <Link
       to={path}
       viewTransition
-      className="group flex min-h-36 flex-col surface-card p-4 transition-[background-color,scale] hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group flex min-h-36 flex-col surface-card p-4 transition-[background-color,scale] hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <div className="flex items-center justify-between">
         <span

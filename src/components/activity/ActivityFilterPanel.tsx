@@ -62,7 +62,7 @@ const ActivityFilterPanel = (props: Props) => {
         variant="outline"
         onClick={() => setIsOpen(true)}
         aria-label={getTriggerLabel(activeCount, t)}
-        className="h-11 shrink-0 gap-2 rounded-xl bg-card/72 px-3 shadow-none"
+        className="h-11 shrink-0 gap-2 rounded-xl bg-card px-3 shadow-none"
       >
         <SlidersHorizontal className="h-4 w-4" />
         <span className="hidden sm:inline">{t('activity.refine.trigger')}</span>
@@ -93,7 +93,7 @@ const ActivityFilterPanel = (props: Props) => {
               disabled={props.tags.length === 0}
             >
               <SelectTrigger
-                className="h-11 w-full rounded-xl border-border/35 bg-card/72 shadow-none [&>span]:flex-1 [&>span]:text-left"
+                className="h-11 w-full rounded-xl border-input bg-card shadow-none [&>span]:flex-1 [&>span]:text-left"
                 aria-label={t('activity.filterByTag')}
               >
                 <TagIcon className="mr-2 h-4 w-4 shrink-0 text-primary-ink" />

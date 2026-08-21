@@ -201,7 +201,7 @@ const renderLoadMore = (hasMore: boolean, onLoadMore: () => void, t: TFunc) => {
   return (
     <Button
       variant="outline"
-      className="w-full rounded-full bg-card/72 shadow-none"
+      className="w-full rounded-full bg-card shadow-none"
       onClick={onLoadMore}
     >
       {t('activity.loadMore')}
