@@ -13,6 +13,11 @@ type Props = {
 // A horizontal run of chips rather than a select: picking a category is the
 // second of the two taps this screen exists to make cheap, and a dropdown
 // turns it into three plus a scroll.
+//
+// `touch-action: pan-x` is what makes the swipe feel like a swipe. Without it
+// the browser waits to see whether a drag is horizontal or vertical, and the
+// vertical reading dismisses the sheet — so a slightly diagonal flick pulled
+// the whole sheet down instead of moving the strip.
 const QuickAddCategories = ({ categories, selectedId, onSelect }: Props) => {
   const { t } = useTranslation();
 
@@ -22,7 +27,11 @@ const QuickAddCategories = ({ categories, selectedId, onSelect }: Props) => {
 
   return (
     <div
-      className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1"
+      // -my-1/py-1 is headroom, not spacing: the selected chip draws its ring
+      // outside its own box, and a scroll container with no vertical padding
+      // clips the top of that ring against the amount above.
+      className="-mx-5 -my-1 flex snap-x snap-proximity gap-2 overflow-x-auto overscroll-x-contain scroll-px-5 px-5 py-1 scrollbar-none"
+      style={{ touchAction: 'pan-x' }}
       role="radiogroup"
       aria-label={t('expenses.category')}
     >
@@ -34,7 +43,7 @@ const QuickAddCategories = ({ categories, selectedId, onSelect }: Props) => {
           aria-checked={category.id === selectedId}
           onClick={() => select(category.id, selectedId, onSelect)}
           className={cn(
-            'flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            'flex min-h-11 shrink-0 snap-start items-center gap-1.5 rounded-full px-3.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
             chipTone(category.id === selectedId),
           )}
           style={chipStyle(category, category.id === selectedId)}

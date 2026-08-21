@@ -65,7 +65,7 @@ const ExpensesForm = ({
     mode: 'onTouched',
     defaultValues: {
       amount: getInitialAmount(expense, defaultCurrency, draft),
-      description: expense?.description || '',
+      description: expense?.description || draft?.description || '',
       category_id: expense?.category_id || draft?.category_id || 'none',
       tag_id: expense?.tag_id || undefined,
       extra_tag_ids: getInitialExtraTagIds(expense),

@@ -280,7 +280,9 @@
     "saveHint": "Συμπλήρωσε ποσό και περιγραφή για αποθήκευση",
     "quickAdd": {
       "untitled": "Έξοδο",
-      "moreDetails": "Περισσότερα"
+      "moreDetails": "Περισσότερα",
+      "namePlaceholder": "Για τι ήταν;",
+      "nameLabel": "Όνομα"
     },
     "pad": {
       "backspace": "Διαγραφή",

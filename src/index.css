@@ -503,6 +503,17 @@
 }
 
 @layer utilities {
+  /* A horizontal chip strip is read as swipeable; a scrollbar sitting under it
+     on desktop reads as a broken layout. The class was already in use on the
+     templates bar and had never actually been defined. */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   @keyframes nav-indicator-settle {
     0% {
       transform: scale(1, 1);

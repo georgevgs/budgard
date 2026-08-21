@@ -4,10 +4,13 @@ import { useCategoriesData, useDataConfig } from '@/contexts/DataContext';
 import { useExpensesData } from '@/contexts/DataContext';
 import { useAmountPad } from '@/hooks/expenseForm/useAmountPad';
 import type { Category } from '@/types/Category';
+import type { Expense } from '@/types/Expense';
 import type { ExpenseWritePayload } from '@/services/dataService';
 
 const RECENT_WINDOW = 60;
 const CHIP_LIMIT = 8;
+const NAME_LIMIT = 100;
+const SUGGESTION_LIMIT = 5;
 
 type Params = {
   isOpen: boolean;
@@ -22,6 +25,7 @@ export const useQuickAddDraft = ({ isOpen, onSubmit, onClose }: Params) => {
   const expenses = useExpensesData();
   const pad = useAmountPad();
   const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [name, setName] = useState('');
 
   // Reopening starts clean. Recorded during render rather than in an effect so
   // the first frame after opening never shows the previous amount.
@@ -31,12 +35,23 @@ export const useQuickAddDraft = ({ isOpen, onSubmit, onClose }: Params) => {
     if (isOpen) {
       pad.clear();
       setCategoryId(null);
+      setName('');
     }
   }
 
   const categories = useMemo(
     () => rankByRecentUse(expenseCategories, expenses),
     [expenseCategories, expenses],
+  );
+
+  const recentNames = useMemo(
+    () => distinctRecentNames(expenses),
+    [expenses],
+  );
+
+  const suggestions = useMemo(
+    () => matchNames(recentNames, name, categoryId),
+    [recentNames, name, categoryId],
   );
 
   const submit = () => {
@@ -46,25 +61,40 @@ export const useQuickAddDraft = ({ isOpen, onSubmit, onClose }: Params) => {
 
     onSubmit({
       amount: pad.amount,
-      description: describe(categoryId, categories, t),
+      description: describe(name, categoryId, categories, t),
       category_id: categoryId,
       date: new Date().toISOString().slice(0, 10),
     });
     onClose();
   };
 
+  // A suggestion carries the category it was last filed under, but only fills
+  // an empty slot — re-categorising a chip the user just tapped would be the
+  // screen arguing with them.
+  const applySuggestion = (suggestion: Expense) => {
+    setName(suggestion.description.slice(0, NAME_LIMIT));
+    if (!categoryId && suggestion.category_id) {
+      setCategoryId(suggestion.category_id);
+    }
+  };
+
   return {
     pad,
     categories: categories.slice(0, CHIP_LIMIT),
     categoryId,
+    name,
+    suggestions,
     currency: defaultCurrency,
     canSave: !pad.isEmpty,
     selectCategory: setCategoryId,
+    setName: (value: string) => setName(value.slice(0, NAME_LIMIT)),
+    applySuggestion,
     submit,
     // Everything the pad captured, handed to the full form so switching to it
     // never costs the user what they already typed.
     toFullForm: (): ExpenseWritePayload => ({
       amount: pad.amount,
+      description: name.trim(),
       category_id: categoryId,
       date: new Date().toISOString().slice(0, 10),
     }),
@@ -75,20 +105,79 @@ export const useQuickAddDraft = ({ isOpen, onSubmit, onClose }: Params) => {
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-// The description stays optional on this screen — asking for one is the step
-// that makes logging a coffee feel like paperwork. A row still needs a label
-// to be readable in a list, so the category supplies it.
+// A typed name always wins. It stays optional because asking for one is the
+// step that makes logging a coffee feel like paperwork — but a row needs a
+// label to be readable in a list, so the category stands in when it is blank.
 const describe = (
+  name: string,
   categoryId: string | null,
   categories: Category[],
   t: TFunc,
 ): string => {
+  const typed = name.trim();
+  if (typed) {
+    return typed;
+  }
+
   const category = categories.find((item) => item.id === categoryId);
   if (category) {
     return category.name;
   }
 
   return t('expenses.quickAdd.untitled');
+};
+
+// One entry per distinct name, newest first — the same shape the full form's
+// description field offers, so the two screens suggest the same things.
+const distinctRecentNames = (expenses: Expense[]): Expense[] => {
+  const seen = new Map<string, Expense>();
+  const newestFirst = [...expenses].sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
+
+  for (const expense of newestFirst) {
+    const key = expense.description.trim().toLowerCase();
+    if (key && !seen.has(key)) {
+      seen.set(key, expense);
+    }
+  }
+
+  return Array.from(seen.values());
+};
+
+// With nothing typed the list is a shortcut rather than an autocomplete: the
+// names last filed under the chosen category, which is the whole reason the
+// category is picked first. Typing narrows it the ordinary way.
+const matchNames = (
+  recent: Expense[],
+  query: string,
+  categoryId: string | null,
+): Expense[] => {
+  const typed = query.trim().toLowerCase();
+
+  if (!typed) {
+    return withinCategory(recent, categoryId).slice(0, SUGGESTION_LIMIT);
+  }
+
+  return recent
+    .filter((expense) => {
+      const description = expense.description.toLowerCase();
+
+      return description.includes(typed) && description !== typed;
+    })
+    .slice(0, SUGGESTION_LIMIT);
+};
+
+const withinCategory = (
+  recent: Expense[],
+  categoryId: string | null,
+): Expense[] => {
+  if (!categoryId) {
+    return recent;
+  }
+
+  return recent.filter((expense) => expense.category_id === categoryId);
 };
 
 // Most-used-recently first: the category you reached for yesterday is

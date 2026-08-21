@@ -280,7 +280,9 @@
     "saveHint": "Add an amount and a description to save",
     "quickAdd": {
       "untitled": "Expense",
-      "moreDetails": "More details"
+      "moreDetails": "More details",
+      "namePlaceholder": "What was it for?",
+      "nameLabel": "Name"
     },
     "pad": {
       "backspace": "Delete",
