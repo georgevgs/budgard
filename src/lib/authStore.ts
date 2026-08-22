@@ -118,6 +118,14 @@ supabase.auth.onAuthStateChange((event, session) => {
   notify({ session, isLoading: false });
 });
 
+// Synchronous read of who is signed in right now. Non-React code that must
+// attribute local writes to an owner — the offline queue — needs this without
+// a hook, and reading the live snapshot means it can never lag behind a
+// sign-out the way a captured value would.
+export const getCurrentUserId = (): string | null => {
+  return _snapshot.session?.user?.id ?? null;
+};
+
 export const authStore = {
   subscribe(listener: () => void) {
     listeners.add(listener);

@@ -151,6 +151,20 @@
   [headers.values]
     Cache-Control = "public, max-age=2592000"
 
+# Every other static path here declares its own policy, so these two do too
+# rather than inheriting a default from Netlify and Cloudflare in turn. One
+# hour: long enough that a crawler re-fetching them costs nothing, short
+# enough that adding a page to the sitemap is picked up the same day.
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
 [[headers]]
   for = "/favicon.ico"
   [headers.values]

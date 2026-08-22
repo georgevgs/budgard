@@ -10,6 +10,7 @@ import type { Debt } from '@/types/Debt';
 import type { NoSpendDay } from '@/types/NoSpendDay';
 import type { CategoryBudget } from '@/types/CategoryBudget';
 import type { NotificationPreferences } from '@/types/Budget';
+import { toIsoDate } from '@/lib/dates';
 
 // Snapshot of the DataContext bootstrap payload, persisted locally so the
 // next app open can paint with real data immediately while the network
@@ -78,7 +79,13 @@ export const getRecentCutoff = (): string => {
   const cutoff = new Date();
   cutoff.setMonth(cutoff.getMonth() - RECENT_MONTHS);
 
-  return cutoff.toISOString().split('T')[0];
+  // toIsoDate, not toISOString().split('T')[0]: transaction dates are calendar
+  // days in the user's timezone, so a cutoff derived from the UTC day compares
+  // against them off by one for part of every day. It is only a horizon, and
+  // the cache and the fetch both call this so they never disagree with each
+  // other — but lib/dates.ts is the single answer to "which day is it" and
+  // this was the one place still answering it separately.
+  return toIsoDate(cutoff);
 };
 
 // True when a YYYY-MM month's rows only arrive with the stage-2 history

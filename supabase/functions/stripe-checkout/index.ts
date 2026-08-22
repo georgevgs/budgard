@@ -98,6 +98,7 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${secretKey}`,
         'Stripe-Version': STRIPE_API_VERSION,
         'Content-Type': 'application/x-www-form-urlencoded',
+        'Idempotency-Key': buildIdempotencyKey(user.id, plan, trialEligible),
       },
       body: buildSessionParams(priceId, user.id, user.email, trialEligible),
     });
@@ -139,6 +140,46 @@ const readPlan = async (req: Request): Promise<Plan | null> => {
   } catch {
     return null;
   }
+};
+
+/**
+ * Collapses duplicate checkout requests onto one Stripe Checkout Session.
+ *
+ * Stripe stores an idempotency key's response and replays it for any request
+ * repeating that key, so two tabs — or a double-tap, or a client retry after a
+ * dropped response — land on the *same* Session instead of each creating their
+ * own. A Session can only be completed once, and that is what actually stops
+ * the double charge: the "Already subscribed" check above cannot, because it
+ * reads the subscriptions table, which only the webhook writes, and the
+ * webhook has not fired while both tabs are still sitting on the payment page.
+ *
+ * The key rotates every 30 minutes so someone who abandons checkout and wants
+ * to start over is not pinned to a spent Session for the full 24 hours Stripe
+ * retains a key. The race being closed lasts seconds, so a request landing
+ * either side of a bucket boundary is not a meaningful hole.
+ */
+const IDEMPOTENCY_WINDOW_MS = 30 * 60 * 1000;
+
+const buildIdempotencyKey = (
+  userId: string,
+  plan: Plan,
+  trialEligible: boolean,
+): string => {
+  const window = Math.floor(Date.now() / IDEMPOTENCY_WINDOW_MS);
+
+  // Every input that changes the request body is in the key. Stripe rejects a
+  // key replayed with different parameters, so omitting one would turn a
+  // harmless retry into a hard error — `trialEligible` in particular flips
+  // once a subscription row exists.
+  return `checkout:${userId}:${plan}:${trialSegment(trialEligible)}:${window}`;
+};
+
+const trialSegment = (trialEligible: boolean): string => {
+  if (trialEligible) {
+    return 'trial';
+  }
+
+  return 'notrial';
 };
 
 const getPriceId = (plan: Plan): string | undefined => {

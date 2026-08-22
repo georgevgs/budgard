@@ -41,7 +41,12 @@ const OnboardingBudgetStep = ({
       </DialogHeader>
 
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-lg">
+        {/* Decorative: the accessible name comes from aria-label, and reading
+            the symbol out separately would just announce "euro" on its own. */}
+        <span
+          aria-hidden="true"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-lg"
+        >
           {currencySymbol}
         </span>
         <Input
@@ -49,6 +54,10 @@ const OnboardingBudgetStep = ({
           inputMode="decimal"
           pattern="[0-9,.]*"
           placeholder={t('onboarding.budgetPlaceholder')}
+          // Without this the field announces as "edit text, 1.500" — the
+          // placeholder is a formatting hint, not a name, and it disappears
+          // the moment anything is typed.
+          aria-label={t('onboarding.budgetAmountLabel')}
           value={budgetInput}
           onChange={(e) => setBudgetInput(formatCurrencyInput(e.target.value))}
           className="pl-8 text-lg h-12"

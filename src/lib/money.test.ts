@@ -139,3 +139,41 @@ describe('isUsableRate', () => {
     expect(isUsableRate(1e9)).toBe(false);
   });
 });
+
+// -0 is equal to 0 by ===, so it survives every ordinary guard and only shows
+// itself at the very end, in Intl.NumberFormat, as "-€0.00".
+describe('negative zero', () => {
+  it('never returns -0 from roundMoney', () => {
+    expect(Object.is(roundMoney(-0.004), -0)).toBe(false);
+    expect(Object.is(roundMoney(-0.0000001), -0)).toBe(false);
+    expect(Object.is(roundMoney(-0), -0)).toBe(false);
+  });
+
+  it('never returns -0 from toMinorUnits', () => {
+    expect(Object.is(toMinorUnits(-0.004), -0)).toBe(false);
+    expect(Object.is(toMinorUnits(-0), -0)).toBe(false);
+  });
+
+  it('never returns -0 from convertMoney', () => {
+    // A small negative in a weak currency: the converted magnitude rounds
+    // away but the sign does not.
+    expect(Object.is(convertMoney(-0.01, 0.0025, 'EUR'), -0)).toBe(false);
+  });
+
+  it('formats a rounded-away negative as a plain zero', () => {
+    const format = (value: number) =>
+      new Intl.NumberFormat('en', {
+        style: 'currency',
+        currency: 'EUR',
+      }).format(value);
+
+    expect(format(roundMoney(-0.004))).toBe('€0.00');
+    expect(format(convertMoney(-0.01, 0.0025, 'EUR'))).toBe('€0.00');
+  });
+
+  it('still returns real negatives unchanged', () => {
+    expect(roundMoney(-0.01)).toBe(-0.01);
+    expect(roundMoney(-12.345)).toBe(-12.35);
+    expect(toMinorUnits(-1.5)).toBe(-150);
+  });
+});

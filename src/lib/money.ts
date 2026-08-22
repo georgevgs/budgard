@@ -43,7 +43,7 @@ export const roundToDecimals = (amount: number, decimals: number): number => {
   const scaled = shiftDecimalPoint(Math.abs(amount), decimals);
   const rounded = Math.round(scaled);
 
-  return sign * shiftDecimalPoint(rounded, -decimals);
+  return withoutNegativeZero(sign * shiftDecimalPoint(rounded, -decimals));
 };
 
 /** The amount as a whole number of minor units (cents, yen, …). */
@@ -55,7 +55,9 @@ export const toMinorUnits = (amount: number, currency?: string): number => {
 
   const sign = Math.sign(amount);
 
-  return sign * Math.round(shiftDecimalPoint(Math.abs(amount), decimals));
+  return withoutNegativeZero(
+    sign * Math.round(shiftDecimalPoint(Math.abs(amount), decimals)),
+  );
 };
 
 /** The inverse of `toMinorUnits`. */
@@ -114,6 +116,29 @@ export const isUsableRate = (rate: unknown): rate is number => {
 };
 
 // --- Helpers ---
+
+/**
+ * Collapses -0 to 0.
+ *
+ * `sign * magnitude` reproduces the sign even when the magnitude rounds away,
+ * so any amount smaller than half a minor unit but negative comes back as -0 —
+ * and `Intl.NumberFormat` renders that as "-€0.00", which reads as a
+ * bookkeeping error to anyone who sees it.
+ *
+ * No call site reaches this today: the only path that could is convertMoney,
+ * and the expense form's Zod schema requires `amount > 0`, while the flows
+ * that do produce negatives (refunds, split adjustments) work in the stored
+ * currency and never convert. It is guarded anyway because this module is
+ * meant to be the one place amounts are rounded, negative amounts are now
+ * legal in the data model, and the first caller to convert one would find it.
+ */
+const withoutNegativeZero = (value: number): number => {
+  if (value === 0) {
+    return 0;
+  }
+
+  return value;
+};
 
 // Rates beyond this are data errors, not exchange rates. The widest real pair
 // among supported currencies is roughly EUR→IDR territory; 1e6 leaves room

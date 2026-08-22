@@ -1,0 +1,27 @@
+# Budgard — https://budgard.com
+#
+# Only the landing page and the legal pages are reachable without a session.
+# Every other path is the app itself, and because the SPA rewrite returns the
+# same index.html for all of them, letting a crawler in would file a dozen
+# identical copies of the app shell under URLs a visitor can never usefully
+# land on. Disallowing them is about duplicate content, not secrecy — the data
+# behind those routes is protected by auth and RLS, never by this file.
+
+User-agent: *
+Allow: /
+Disallow: /today
+Disallow: /activity
+Disallow: /plan
+Disallow: /trends
+Disallow: /expenses
+Disallow: /income
+Disallow: /analytics
+Disallow: /recurring
+Disallow: /goals
+Disallow: /networth
+Disallow: /debts
+Disallow: /settings
+Disallow: /t/
+Disallow: /reset
+
+Sitemap: https://budgard.com/sitemap.xml

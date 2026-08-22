@@ -1139,6 +1139,7 @@
     "getStarted": "Let's go",
     "budgetTitle": "Set a monthly budget",
     "budgetDescription": "Pick a number you can actually live with. You can tweak it any time.",
+    "budgetAmountLabel": "Monthly budget amount",
     "budgetPlaceholder": "1.500",
     "categoriesTitle": "What do you usually spend on?",
     "categoriesDescription": "Pick the buckets that fit your life. Add more later — coffee deserves its own.",

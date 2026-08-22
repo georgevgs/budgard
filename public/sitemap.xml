@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The four routes a signed-out visitor can reach. Everything else is behind
+  auth and is disallowed in robots.txt.
+
+  No <lastmod>: it would have to be hand-edited on every copy change, and a
+  date that silently goes stale is worse than no date at all. <priority> and
+  <changefreq> are omitted for the same reason — Google ignores both.
+
+  src/test/invariants/crawlerFiles.test.ts fails the build if a route is added
+  without being classified here or in robots.txt.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://budgard.com/</loc>
+  </url>
+  <url>
+    <loc>https://budgard.com/privacy</loc>
+  </url>
+  <url>
+    <loc>https://budgard.com/terms</loc>
+  </url>
+  <url>
+    <loc>https://budgard.com/contact</loc>
+  </url>
+</urlset>
