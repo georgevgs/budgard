@@ -49,6 +49,25 @@
   to = "/workbox-:splat"
   status = 404
 
+# /splash/* and /icons/* are not fingerprinted and carry a 30-day max-age
+# rather than immutable, so a poisoned entry expires in a month instead of a
+# year and an image degrades rather than white-screening. Guarded anyway: the
+# rule for adding a cache header is that it comes with a 404 redirect, and an
+# unguarded path is how /workbox-* stayed poisonable for a day.
+# NOTE: public/icons/ is currently empty -- the PWA icons live at the web root
+# (/icon-192x192.png and friends), so the /icons/* header below has no files to
+# apply to. The guard is kept so the path cannot serve the app shell if
+# anything is ever put there.
+[[redirects]]
+  from = "/splash/*"
+  to = "/splash/:splat"
+  status = 404
+
+[[redirects]]
+  from = "/icons/*"
+  to = "/icons/:splat"
+  status = 404
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
