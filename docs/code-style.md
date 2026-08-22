@@ -1,5 +1,10 @@
 # Code Style
 
+> **`CLAUDE.md` / `AGENTS.md` in the repo root is the authority.** They are the
+> same generated rulebook and every agent loads one of them. This document is
+> the expanded form of one of its sections — if the two ever disagree, the
+> rulebook wins and this file is the one to fix.
+
 Guiding principle: **human-readable code**
 
 ---
@@ -114,6 +119,8 @@ Guiding principle: **human-readable code**
 
 ## Formatting
 
-- Prettier enforced
 - Blank line before `return`
+- Prettier config is in `.prettierrc`, but the repo is **not** Prettier-clean at
+  baseline. Never run the repo-wide `npm run format` — it rewrites ~190 files
+  that have nothing to do with your change. Format only what you touched.
 - No `console.log`

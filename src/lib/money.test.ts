@@ -1,9 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
-  allocateMoney,
   convertMoney,
   fromMinorUnits,
-  isSameMoney,
   isUsableRate,
   roundMoney,
   roundToDecimals,
@@ -139,50 +137,5 @@ describe('isUsableRate', () => {
 
   it('rejects absurd magnitudes', () => {
     expect(isUsableRate(1e9)).toBe(false);
-  });
-});
-
-describe('allocateMoney', () => {
-  it('splits evenly when it divides cleanly', () => {
-    expect(allocateMoney(30, 3)).toEqual([10, 10, 10]);
-  });
-
-  it('hands out the leftover cents rather than losing them', () => {
-    const parts = allocateMoney(10, 3);
-    expect(parts).toEqual([3.34, 3.33, 3.33]);
-    expect(sumAmounts(parts)).toBe(10);
-  });
-
-  it('keeps the total exact for an awkward amount', () => {
-    const parts = allocateMoney(0.05, 3);
-    expect(sumAmounts(parts)).toBe(0.05);
-  });
-
-  it('allocates negative amounts without inverting a part', () => {
-    const parts = allocateMoney(-10, 3);
-    expect(sumAmounts(parts)).toBe(-10);
-    expect(parts.every((part) => part <= 0)).toBe(true);
-  });
-
-  it('respects a zero-decimal currency', () => {
-    const parts = allocateMoney(1000, 3, 'JPY');
-    expect(parts).toEqual([334, 333, 333]);
-    expect(sumAmounts(parts, 'JPY')).toBe(1000);
-  });
-
-  it('returns nothing for a non-positive count', () => {
-    expect(allocateMoney(10, 0)).toEqual([]);
-  });
-});
-
-describe('isSameMoney', () => {
-  it('compares at the minor unit, ignoring float noise', () => {
-    expect(isSameMoney(0.1 + 0.2, 0.3)).toBe(true);
-    expect(isSameMoney(1.001, 1.004)).toBe(true);
-    expect(isSameMoney(1.001, 1.006)).toBe(false);
-  });
-
-  it('treats sub-yen differences as equal for JPY', () => {
-    expect(isSameMoney(100.4, 100, 'JPY')).toBe(true);
   });
 });

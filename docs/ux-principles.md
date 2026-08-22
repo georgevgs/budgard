@@ -1,5 +1,10 @@
 # UX Principles (Reference Only)
 
+> **`CLAUDE.md` / `AGENTS.md` in the repo root is the authority.** They are the
+> same generated rulebook and every agent loads one of them. This document is
+> the expanded form of one of its sections — if the two ever disagree, the
+> rulebook wins and this file is the one to fix.
+
 This document provides conceptual guidance.
 It is not a rulebook.
 

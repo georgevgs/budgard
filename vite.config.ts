@@ -55,9 +55,11 @@ const chunkForModule = (id: string): string | undefined => {
     return "react-vendor";
   }
 
-  // Supabase realtime client cannot be tree-shaken (statically imported
-  // by SupabaseClient), so isolate the whole scope into its own
-  // chunk. Entry shrinks; supabase parses in parallel.
+  // supabase-js is needed at boot but is large, so the whole scope gets its
+  // own chunk: the entry shrinks and supabase parses in parallel. The
+  // realtime stack is no longer part of that weight — the alias below swaps
+  // @supabase/realtime-js for src/lib/realtimeStub.ts — but the rest of the
+  // client still is.
   if (matchesPackage(id, ["@supabase"])) {
     return "supabase-vendor";
   }

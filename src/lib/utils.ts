@@ -6,23 +6,6 @@ export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
 };
 
-// Same de-DE separator convention as formatCurrency, so an original-currency
-// line stacked under the converted amount reads with identical number format.
-export const formatForeignAmount = (amount: number, currencyCode: string): string => {
-  const decimals = getCurrencyDecimals(currencyCode);
-
-  try {
-    return new Intl.NumberFormat('de-DE', {
-      style: 'currency',
-      currency: currencyCode,
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    }).format(amount);
-  } catch {
-    return `${amount.toFixed(decimals)} ${currencyCode}`;
-  }
-};
-
 // Decimals follow the currency's ISO 4217 minor unit, so a yen amount reads
 // "¥1.250" rather than the "¥1.250,00" that a two-decimal default would print
 // for a currency that has no cents.

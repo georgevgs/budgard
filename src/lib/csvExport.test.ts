@@ -3,7 +3,7 @@ import {
   buildCategorySummaryCsv,
   buildCsv,
   buildTransactionsCsv,
-  downloadExpensesAsCSV,
+  downloadCsv,
 } from '@/lib/csvExport';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
@@ -30,37 +30,7 @@ const categories: Category[] = [
   },
 ];
 
-const expenses: Expense[] = [
-  {
-    id: '1',
-    amount: 3.5,
-    description: 'Coffee',
-    date: '2026-01-15',
-    category_id: 'cat-1',
-    user_id: 'u1',
-    created_at: '2026-01-15T10:00:00Z',
-  },
-  {
-    id: '2',
-    amount: 25,
-    description: 'Bus pass',
-    date: '2026-01-16',
-    category_id: 'cat-2',
-    user_id: 'u1',
-    created_at: '2026-01-16T10:00:00Z',
-  },
-  {
-    id: '3',
-    amount: 100,
-    description: 'No category',
-    date: '2026-01-17',
-    category_id: null,
-    user_id: 'u1',
-    created_at: '2026-01-17T10:00:00Z',
-  },
-];
-
-describe('downloadExpensesAsCSV', () => {
+describe('downloadCsv', () => {
   let createObjectURLSpy: ReturnType<typeof vi.spyOn>;
   let revokeObjectURLSpy: ReturnType<typeof vi.spyOn>;
   let appendChildSpy: ReturnType<typeof vi.spyOn>;
@@ -105,36 +75,25 @@ describe('downloadExpensesAsCSV', () => {
     clickSpy.mockRestore();
   });
 
-  it('creates a CSV blob and triggers download with correct filename', () => {
-    downloadExpensesAsCSV({ expenses, categories, selectedMonth: '2026-01' });
+  it('creates a blob and triggers a download under the given filename', () => {
+    downloadCsv('transactions_2026.csv', 'A,B\r\n1,2');
 
     expect(createObjectURLSpy).toHaveBeenCalledOnce();
     expect(clickedLink?.getAttribute('download')).toBe(
-      'expenses_January_2026.csv',
+      'transactions_2026.csv',
     );
   });
 
-  it('does nothing when expenses array is empty', () => {
-    downloadExpensesAsCSV({
-      expenses: [],
-      categories,
-      selectedMonth: '2026-01',
-    });
-    expect(createObjectURLSpy).not.toHaveBeenCalled();
-  });
+  it('marks the blob as UTF-8 CSV', () => {
+    downloadCsv('transactions_2026.csv', 'A,B');
 
-  it('generates CSV with correct mime type', () => {
-    downloadExpensesAsCSV({
-      expenses: [expenses[0]],
-      categories,
-      selectedMonth: '2026-01',
-    });
     expect(capturedBlob).toBeDefined();
     expect(capturedBlob!.type).toBe('text/csv;charset=utf-8;');
   });
 
   it('revokes object URL after download', () => {
-    downloadExpensesAsCSV({ expenses, categories, selectedMonth: '2026-01' });
+    downloadCsv('transactions_2026.csv', 'A,B');
+
     expect(revokeObjectURLSpy).toHaveBeenCalledWith('blob:test');
   });
 });

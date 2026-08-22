@@ -5,7 +5,6 @@ import {
   formatCurrency,
   formatCurrencyCompact,
   formatPercent,
-  formatForeignAmount,
   formatCurrencyInput,
   parseCurrencyInput,
   extractEmoji,
@@ -194,41 +193,6 @@ describe('extractEmoji', () => {
 
   it('strips whitespace and keeps only emoji', () => {
     expect(extractEmoji('  🏠  ')).toBe('🏠');
-  });
-});
-
-describe('formatForeignAmount', () => {
-  it('formats USD with dollar sign', () => {
-    const result = formatForeignAmount(85, 'USD');
-    expect(result).toContain('85');
-    expect(result).toContain('$');
-  });
-
-  it('formats GBP with pound sign', () => {
-    const result = formatForeignAmount(50.5, 'GBP');
-    expect(result).toContain('50');
-    expect(result).toContain('£');
-  });
-
-  it('formats JPY without decimal places', () => {
-    const result = formatForeignAmount(1500, 'JPY');
-    expect(result).toContain('1.500');
-    expect(result).not.toMatch(/,\d{2}/);
-  });
-
-  it('formats amounts with two decimal places for standard currencies', () => {
-    const result = formatForeignAmount(78.2, 'USD');
-    expect(result).toMatch(/78,20/);
-  });
-
-  it('uses the same separator convention as formatCurrency', () => {
-    const result = formatForeignAmount(1234.56, 'USD');
-    expect(result).toContain('1.234,56');
-  });
-
-  it('falls back gracefully for unknown currency codes', () => {
-    const result = formatForeignAmount(100, 'XYZ');
-    expect(result).toContain('100');
   });
 });
 

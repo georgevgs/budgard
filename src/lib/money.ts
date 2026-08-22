@@ -113,49 +113,6 @@ export const isUsableRate = (rate: unknown): rate is number => {
   return rate > 0 && rate < MAX_PLAUSIBLE_RATE;
 };
 
-/**
- * Splits an amount into `count` parts that sum back to it exactly.
- *
- * The largest-remainder method: give every part the floor, then hand the
- * leftover minor units out one at a time. Three ways of 10,00 becomes
- * 3,34 / 3,33 / 3,33 rather than three 3,33s and a vanished cent.
- */
-export const allocateMoney = (
-  amount: number,
-  count: number,
-  currency?: string,
-): number[] => {
-  if (count <= 0) {
-    return [];
-  }
-
-  const totalMinor = toMinorUnits(amount, currency);
-  const base = Math.trunc(totalMinor / count);
-  let remainder = totalMinor - base * count;
-  const step = Math.sign(remainder);
-
-  const parts: number[] = [];
-  for (let index = 0; index < count; index += 1) {
-    let minor = base;
-    if (remainder !== 0) {
-      minor += step;
-      remainder -= step;
-    }
-    parts.push(fromMinorUnits(minor, currency));
-  }
-
-  return parts;
-};
-
-/** True when two amounts are the same to the currency's minor unit. */
-export const isSameMoney = (
-  a: number,
-  b: number,
-  currency?: string,
-): boolean => {
-  return toMinorUnits(a, currency) === toMinorUnits(b, currency);
-};
-
 // --- Helpers ---
 
 // Rates beyond this are data errors, not exchange rates. The widest real pair

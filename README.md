@@ -119,13 +119,13 @@ Payments run through Stripe as merchant of record; subscriptions are managed or 
 
 React 19 + TypeScript + Vite on the frontend. Supabase handles auth (email OTP), the Postgres database, file storage for receipts, and Edge Functions for recurring expense generation, push notifications, and Stripe billing (checkout, webhook, customer portal, live prices). Deployed on Netlify.
 
-UI components from shadcn/ui, charts from Recharts, forms from react-hook-form + Zod. State lives in React Context with optimistic updates (custom rollback pattern) so the UI never feels slow. Cloudflare Turnstile protects the auth flow. Errors are monitored with Sentry. Push notifications use the Web Push API with VAPID authentication.
+UI components from shadcn/ui, charts hand-rolled as inline SVG in `components/charts/` (no charting library), forms from react-hook-form + Zod. State lives in React Context with optimistic updates (custom rollback pattern) so the UI never feels slow. Cloudflare Turnstile protects the auth flow. Errors are monitored with Sentry. Push notifications use the Web Push API with VAPID authentication.
 
 ### Key architecture
 
 - **State**: Context API — `AuthContext` for sessions; `DataContext` is split into `useData` (full snapshot), `useDataConfig` (slow-changing scalars), and `useDataActions` (stable setters) so consumers don't re-render on unrelated mutations
 - **Data**: All Supabase calls go through `services/dataService.ts`; transactions load in two stages (last 12 months first, full history streams in)
-- **Mutations**: Optimistic updates with rollback composed from `hooks/dataOps/*` under `useDataOperations`
+- **Mutations**: Optimistic updates with rollback, one domain hook per table in `hooks/dataOps/*` (`useExpenseOps`, `useCategoryOps`, …) — called directly, there is no composed wrapper
 - **Validation**: Zod schemas in `lib/validations.ts`, react-hook-form for forms
 - **Routing**: Lazy-loaded routes with `PrivateRoute` / `PublicRoute` guards
 - **Path alias**: `@/*` maps to `./src/*`
@@ -134,17 +134,29 @@ UI components from shadcn/ui, charts from Recharts, forms from react-hook-form +
 
 ## Scripts
 
+The package manager is **bun** (`bun.lock`; `bunfig.toml` sets
+`frozenLockfile`, so `bun install` fails rather than silently resolving a
+different tree). The `npm run` scripts below work with either runner.
+
 ```bash
-npm run dev          # dev server
-npm run build        # TypeScript compile + Vite production build
-npm run lint         # ESLint
-npm run lint:fix     # ESLint with auto-fix
-npm run format       # Prettier format
-npm run typecheck    # TypeScript check without emit
-npm test             # run all tests (Vitest)
-npm run test:coverage # with coverage report
-npm run test:watch   # watch mode
+bun install           # install (respects the lockfile)
+
+bun run dev           # dev server
+bun run build         # TypeScript compile + Vite production build
+bun run typecheck     # TypeScript check without emit
+bun run lint          # ESLint
+bun run lint:fix      # ESLint with auto-fix
+bun run test          # unit tests (Vitest)
+bun run test:watch    # watch mode
+bun run test:coverage # with coverage report
+bun run test:e2e      # end-to-end tests (Playwright)
+bun run budget        # bundle-size budgets (reads dist/, run after build)
+bun run sync:agents   # regenerate AGENTS.md from CLAUDE.md
 ```
+
+`bun run format` reformats all of `src`, and the repo is not Prettier-clean at
+baseline — running it repo-wide produces a diff of unrelated files. Format only
+what you touched.
 
 ## License
 

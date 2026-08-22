@@ -1,5 +1,9 @@
 # AGENTS.md
 
+<!-- GENERATED from CLAUDE.md — do not edit. Change CLAUDE.md and run -->
+<!-- `npm run sync:agents`. src/test/invariants/agentDocsParity.test.ts -->
+<!-- fails if the two drift, so every agent reads the same rules. -->
+
 Rules for working in this repository. Follow them exactly.
 
 ## Stack
@@ -24,14 +28,64 @@ Rules for working in this repository. Follow them exactly.
 - `src/hooks`: Data fetching and state logic
 - `src/services`: Pure API/Supabase logic
 - `src/lib/validations.ts`: All Zod schemas
+- `src/design/tokens.ts`: **Every colour in the app.** The only file to edit for a
+  theme change — the generated CSS, the pre-paint script in `index.html`, the CSP
+  hash in `netlify.toml` and the manifest colours are all built from it by
+  `plugins/designTokens.ts`. Components use `bg-primary` / `text-income` and never
+  a raw hue.
+- `src/design/palette.ts`: the raw values behind those tokens, and the written
+  reasoning for each one. `--border` in particular is set darker than a hairline
+  needs because ~100 call sites draw inner rules at `border-border/40`–`/50`;
+  lightening it silently deletes them.
 
 ## Protected Files
+- Never hand-edit `src/design/tokens.generated.css`, the theme script in
+  `index.html`, or the CSP sha256 in `netlify.toml`. Change `src/design/tokens.ts`
+  and run `npm run build`; commit what it rewrites.
+- Never hand-edit `AGENTS.md`. It is this file, generated for Codex and other
+  agents that do not read `CLAUDE.md`. Change **this** file and run
+  `npm run sync:agents`; `src/test/invariants/agentDocsParity.test.ts` fails the
+  build if the two drift.
 - Do not edit `.env*` files unless the user explicitly requests an environment configuration change.
 - Do not edit dependency lockfiles unless the user explicitly requests a dependency change.
 
 ---
 
+## 📖 Reference Docs
+This file is the authority. `docs/` holds the expanded form of these sections —
+read the relevant one before a non-trivial change, and fix it if it disagrees
+with this file.
+
+- `docs/architecture.md` — routes, provider tree, `dataOps`, services, schema,
+  edge functions. Read before touching data flow.
+- `docs/code-style.md` — the long form of the Code Style rules below.
+- `docs/ui-rules.md` — the long form of the UI/UX rules, including colour.
+- `docs/ux-principles.md` — conceptual reference (Gestalt, heuristics).
+- `docs/household-sharing-design.md` — a design doc for an **unimplemented**
+  feature. Nothing in the codebase corresponds to it.
+- `design/brand/README.md` — the authority for icons, launch screens and the
+  brand mark.
+
+---
+
 ## 🧠 UI/UX Philosophy
+
+### Visual Direction: white, black, and accent only where it means something
+The app is a white page with white cards on it. Read `src/design/palette.ts`
+before changing anything visual — the reasoning is written there — but the four
+rules that constrain new work are:
+
+- **The rule is the separation.** Page and card are the same colour in both
+  themes; a panel exists because `--border` draws it. Use `.surface-card` (or a
+  `border`) — a `bg-card` with no rule is invisible.
+- **No ambient colour.** No washes behind a screen, no coloured glow, no tinted
+  section bands. Depth is `.lift` (grey shadow). If you want to add coloured
+  light somewhere, the answer is no.
+- **Never tint a large surface with an accent.** A hue mixed into a white
+  surface lands in the beige band the app was repainted to escape. Accent goes
+  on *small* things — a fill, a ring, an ink, a chip — never a card body.
+- **Greys stay achromatic.** Every value in the `neutral` and `ink` ramps is
+  `0 0%`. A hue in the ground is a cast over the whole app.
 
 ### Gestalt Principles (Visual Hierarchy)
 - **Proximity**: Related items (labels/inputs) must be physically close. Use `space-y-*` or `gap-*` consistently.

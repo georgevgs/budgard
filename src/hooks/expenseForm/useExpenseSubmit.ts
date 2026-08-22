@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { parseCurrencyInput } from '@/lib/utils';
+import { convertMoney } from '@/lib/money';
 import { useAuth } from '@/hooks/useAuth';
 import { collectExpenseTagIds } from '@/lib/expenseTags';
 import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
@@ -47,7 +48,7 @@ export const useExpenseSubmit = ({
 
       if (conversion.selectedCurrency !== conversion.defaultCurrency) {
         const rate = await conversion.ensureRate();
-        finalAmount = Math.round(rawAmount * rate * 100) / 100;
+        finalAmount = convertMoney(rawAmount, rate, conversion.defaultCurrency);
         originalAmount = rawAmount;
         originalCurrency = conversion.selectedCurrency;
         exchangeRateValue = rate;

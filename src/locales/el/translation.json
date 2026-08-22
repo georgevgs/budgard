@@ -314,16 +314,7 @@
     "manageSources": "Διαχείριση πηγών",
     "manageDescription": "Προσθέστε, επεξεργαστείτε ή αφαιρέστε τις πηγές εσόδων σας",
     "formDescription": "Καταγράψτε έσοδα για να βλέπετε την πλήρη ταμειακή ροή.",
-    "monthlyTotal": "Μηνιαία Έσοδα",
-    "noIncomeFor": "Δεν μπήκε τίποτα τον {{month}}",
-    "addFirstIncome": "Μισθός, μεροκάματο, μια έκπληξη που γύρισε πίσω — καταχώρισε ό,τι μπαίνει.",
-    "entryCount": "{{count}} καταχωρήσεις",
-    "searchPlaceholder": "Αναζήτηση εσόδων...",
-    "searchLabel": "Αναζήτηση εσόδων",
-    "noResultsFor": "Κανένα έσοδο δεν ταιριάζει με \"{{query}}\"",
     "netCashFlow": "Καθαρή Ταμειακή Ροή",
-    "savingsRate": "{{rate}}% αποταμίευση",
-    "savedBadge": "Αποταμίευση {{amount}}",
     "defaults": {
       "salary": "Μισθός",
       "freelance": "Freelance",
@@ -396,8 +387,7 @@
     "totalIncome": "Σύνολο εσόδων",
     "totalExpense": "Σύνολο εξόδων",
     "avgPerMonth": "{{amount}} μέσος όρος καθαρό ανά μήνα",
-    "monthly": "Μηνιαία ανάλυση",
-    "viewDetails": "Προβολή ανάλυσης ταμειακής ροής"
+    "monthly": "Μηνιαία ανάλυση"
   },
   "categories": {
     "title": "Κατηγορίες",
@@ -689,12 +679,6 @@
     "nextYear": "Επόμενο έτος",
     "selectMonth": "Επιλογή μήνα",
     "today": "Σήμερα"
-  },
-  "pagination": {
-    "previous": "Προηγούμενη",
-    "next": "Επόμενη",
-    "page": "Σελίδα {{page}}",
-    "more": "Περισσότερες σελίδες"
   },
   "dateGroup": {
     "today": "Σήμερα",
@@ -1005,12 +989,6 @@
     "open": "Άνοιγμα μενού ενεργειών",
     "close": "Κλείσιμο μενού ενεργειών"
   },
-  "dashboard": {
-    "zeroPercent": "0%",
-    "lessThanOnePercent": "<1%",
-    "percent": "{{value}}%",
-    "categoryBreakdown": "{{name}}: {{amount}}, {{percent}} των συνολικών εξόδων"
-  },
   "analytics": {
     "subtitle": "Δες τα μοτίβα πίσω από τα χρήματά σου χωρίς να χάνεις τη συνολική εικόνα.",
     "selectYear": "Επιλογή έτους",
@@ -1109,7 +1087,6 @@
     "importing": "Εισαγωγή {{count}} εξόδου(ων)...",
     "successMessage": "Επιτυχής εισαγωγή {{count}} εξόδου(ων)",
     "importError": "Αποτυχία εισαγωγής εξόδων",
-    "importCSV": "Εισαγωγή CSV",
     "rowErrors": {
       "tooFewColumns": "Η γραμμή πρέπει να έχει τουλάχιστον {{count}} στήλες",
       "invalidDate": "Μη έγκυρη μορφή ημερομηνίας. Αναμένεται yyyy-MM-dd ή dd/MM/yyyy",
@@ -1441,22 +1418,9 @@
       "primaryCta": "Δωρεάν εκκίνηση",
       "installCta": "Προσθήκη στην Αρχική",
       "trust": "Φτιαγμένο στην ΕΕ · Χωρίς διαφημίσεις · Χωρίς παρακολούθηση",
-      "previewMonthLabel": "Αυτόν τον μήνα",
       "previewSafeAmount": "742,00 €",
       "previewUpcoming": "88,40 € προγραμματισμένα αυτή την εβδομάδα",
-      "previewInsight": "Το φαγητό εκτός σπιτιού είναι χαμηλότερα από τον προηγούμενο μήνα",
-      "preview": {
-        "rent": "Ενοίκιο διαμερίσματος",
-        "groceries": "Ψώνια εβδομάδας",
-        "streaming": "Συνδρομή streaming",
-        "transit": "Κάρτα μετρό"
-      },
-      "cat": {
-        "housing": "Στέγαση",
-        "food": "Φαγητό",
-        "subs": "Συνδρομές",
-        "transport": "Μετακινήσεις"
-      }
+      "previewInsight": "Το φαγητό εκτός σπιτιού είναι χαμηλότερα από τον προηγούμενο μήνα"
     },
     "install": {
       "title": "Προσθήκη στην Αρχική Οθόνη",
@@ -1697,7 +1661,6 @@
     "manage": "Διαχείριση"
   },
   "transaction": {
-    "title": "Συναλλαγή",
     "notFound": "Η συναλλαγή δεν υπάρχει πια",
     "notFoundBody": "Μπορεί να διαγράφηκε ή ο σύνδεσμος να είναι παλιός.",
     "backToActivity": "Πίσω στη δραστηριότητα",

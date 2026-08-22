@@ -90,11 +90,16 @@
     # and plugins/designTokens.ts rewrites this line on every build. Commit the
     # change it makes — src/design/tokens.test.ts fails the build if the hash
     # here does not match the script that would be inlined.
+    # connect-src carries no wss:// origin on purpose. supabase-js builds a
+    # RealtimeClient in its constructor, but src/lib/realtimeStub.ts is aliased
+    # over @supabase/realtime-js in vite.config.ts and throws on channel(), so
+    # no socket is ever opened. Deleting that alias means adding
+    # wss://htamokfphaqudeivpowr.supabase.co back here.
     # 'wasm-unsafe-eval' permits WebAssembly compilation only (NOT eval) —
     # required by the self-hosted Tesseract OCR runtime; Chromium blocks
     # WebAssembly.compile without it while Safari/Firefox don't enforce, so
     # missing it would surface as a Chrome/Android-only scan failure.
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-2JvhQJmsh8CCLI5R5n9UWpamcYAeerR79MeJrJZq7hU=' https://static.cloudflareinsights.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://htamokfphaqudeivpowr.supabase.co wss://htamokfphaqudeivpowr.supabase.co https://cloudflareinsights.com https://challenges.cloudflare.com https://*.sentry.io https://api.frankfurter.dev; worker-src 'self' blob:; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self';"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-2JvhQJmsh8CCLI5R5n9UWpamcYAeerR79MeJrJZq7hU=' https://static.cloudflareinsights.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://htamokfphaqudeivpowr.supabase.co https://cloudflareinsights.com https://challenges.cloudflare.com https://*.sentry.io https://api.frankfurter.dev; worker-src 'self' blob:; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self';"
 
 # no-cache (not no-store): the browser must revalidate, but can reuse the
 # cached body on a 304 and keep the page eligible for back/forward cache.

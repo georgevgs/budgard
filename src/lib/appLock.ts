@@ -31,10 +31,6 @@ export type AppLockRecord = {
   lockedUntil: number | null;
 };
 
-export const isPinShaped = (pin: string): boolean => {
-  return new RegExp(`^\\d{${PIN_LENGTH}}$`).test(pin);
-};
-
 export const loadLock = (): AppLockRecord | null => {
   try {
     const raw = localStorage.getItem(PIN_KEY);
@@ -112,15 +108,6 @@ export const verifyPin = async (pin: string): Promise<VerifyResult> => {
     attemptsLeft: Math.max(MAX_ATTEMPTS - failedAttempts, 0),
     lockedUntil,
   };
-};
-
-export const clearFailures = (): void => {
-  const lock = loadLock();
-  if (!lock) {
-    return;
-  }
-
-  save({ ...lock, failedAttempts: 0, lockedUntil: null });
 };
 
 export { PIN_LENGTH, MAX_ATTEMPTS };

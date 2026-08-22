@@ -9,12 +9,6 @@ export type CsvRow = CsvCell[];
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-type ExportOptions = {
-  expenses: Expense[];
-  categories: Category[];
-  selectedMonth: string; // Format: "yyyy-MM"
-};
-
 export const buildCsv = (headers: string[], rows: CsvRow[]): string => {
   const lines = [headers.map(escapeCsvField).join(',')];
 
@@ -123,47 +117,7 @@ export const buildCategorySummaryCsv = (
   return buildCsv(headers, rows);
 };
 
-export const downloadExpensesAsCSV = ({
-  expenses,
-  categories,
-  selectedMonth,
-}: ExportOptions): void => {
-  if (expenses.length === 0) return;
-
-  const csv = generateMonthCsv(expenses, categories);
-  const [year, month] = selectedMonth.split('-');
-  const monthName = format(
-    new Date(parseInt(year), parseInt(month) - 1),
-    'MMMM',
-  );
-  const filename = `expenses_${monthName}_${year}.csv`;
-
-  downloadCsv(filename, csv);
-};
-
 // --- Helpers ---
-
-const generateMonthCsv = (
-  expenses: Expense[],
-  categories: Category[],
-): string => {
-  const categoryMap = new Map(categories.map((cat) => [cat.id, cat.name]));
-  const headers = ['Date', 'Description', 'Category', 'Amount'];
-
-  const rows: CsvRow[] = expenses.map((expense) => {
-    return [
-      // Already a yyyy-MM-dd calendar date. Round-tripping it through
-      // `new Date` parsed it as UTC and re-formatted it as local, moving
-      // every row back a day for anyone west of UTC.
-      expense.date,
-      expense.description,
-      resolveExpenseCategoryName(expense.category_id, categoryMap),
-      expense.amount.toFixed(2),
-    ];
-  });
-
-  return buildCsv(headers, rows);
-};
 
 // Defuse Excel/Numbers/LibreOffice formula evaluation when a cell starts with
 // =, +, -, @, tab, or CR. The leading apostrophe is the standard mitigation
@@ -252,15 +206,6 @@ const resolveCategoryName = (
   if (!found) return fallback;
 
   return found.name;
-};
-
-const resolveExpenseCategoryName = (
-  id: string | null | undefined,
-  byId: Map<string, string>,
-): string => {
-  if (!id) return 'Uncategorized';
-
-  return byId.get(id) ?? 'Uncategorized';
 };
 
 const compareBuckets = (

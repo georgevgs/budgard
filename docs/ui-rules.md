@@ -1,5 +1,10 @@
 # UI Rules (Strict)
 
+> **`CLAUDE.md` / `AGENTS.md` in the repo root is the authority.** They are the
+> same generated rulebook and every agent loads one of them. This document is
+> the expanded form of one of its sections — if the two ever disagree, the
+> rulebook wins and this file is the one to fix.
+
 These rules are mandatory when building UI.
 
 ---
@@ -54,6 +59,21 @@ Every user action must provide feedback:
 - Same action = same style everywhere
 - Same component = same behavior everywhere
 - Do not introduce new UI patterns without reason
+
+---
+
+## Colour
+
+- Every colour comes from `src/design/tokens.ts`. Use `bg-primary` /
+  `text-income`; never a raw hue.
+- Page and card are the same colour — a panel exists because `--border` draws
+  it. Use `.surface-card` or a `border`; a `bg-card` with no rule is invisible.
+- No ambient colour: no washes, no coloured glow, no tinted section bands.
+  Depth is `.lift` (grey shadow).
+- Accent goes on small things — a fill, a ring, an ink, a chip — never a card
+  body. Greys stay achromatic.
+
+See `src/design/palette.ts` for the written reasoning behind each value.
 
 ---
 

@@ -314,16 +314,7 @@
     "manageSources": "Manage sources",
     "manageDescription": "Add, edit, or remove your income sources",
     "formDescription": "Log income to track your full cash flow.",
-    "monthlyTotal": "Monthly Income",
-    "noIncomeFor": "Nothing came in for {{month}}",
-    "addFirstIncome": "Salary, side hustle, surprise refund — log anything coming in.",
-    "entryCount": "{{count}} entries",
-    "searchPlaceholder": "Search income...",
-    "searchLabel": "Search income",
-    "noResultsFor": "No income matches \"{{query}}\"",
     "netCashFlow": "Net Cash Flow",
-    "savingsRate": "{{rate}}% saved",
-    "savedBadge": "Saved {{amount}}",
     "defaults": {
       "salary": "Salary",
       "freelance": "Freelance",
@@ -396,8 +387,7 @@
     "totalIncome": "Total income",
     "totalExpense": "Total expenses",
     "avgPerMonth": "{{amount}} average net per month",
-    "monthly": "Monthly breakdown",
-    "viewDetails": "View cash flow breakdown"
+    "monthly": "Monthly breakdown"
   },
   "categories": {
     "title": "Categories",
@@ -689,12 +679,6 @@
     "nextYear": "Next year",
     "selectMonth": "Select month",
     "today": "Today"
-  },
-  "pagination": {
-    "previous": "Previous",
-    "next": "Next",
-    "more": "More",
-    "page": "Page {{page}}"
   },
   "dateGroup": {
     "today": "Today",
@@ -1005,12 +989,6 @@
     "open": "Open actions menu",
     "close": "Close actions menu"
   },
-  "dashboard": {
-    "zeroPercent": "0%",
-    "lessThanOnePercent": "<1%",
-    "percent": "{{value}}%",
-    "categoryBreakdown": "{{name}}: {{amount}}, {{percent}} of total expenses"
-  },
   "analytics": {
     "subtitle": "See the patterns behind your money without losing the bigger picture.",
     "selectYear": "Select year",
@@ -1109,7 +1087,6 @@
     "importing": "Importing {{count}} expense(s)...",
     "successMessage": "Successfully imported {{count}} expense(s)",
     "importError": "Failed to import expenses",
-    "importCSV": "Import CSV",
     "rowErrors": {
       "tooFewColumns": "Row must have at least {{count}} columns",
       "invalidDate": "Invalid date format. Expected yyyy-MM-dd or dd/MM/yyyy",
@@ -1441,22 +1418,9 @@
       "primaryCta": "Start free",
       "installCta": "Add to Home Screen",
       "trust": "Built in the EU · No ads · No tracking · Yours to keep",
-      "previewMonthLabel": "This month",
       "previewSafeAmount": "€742.00",
       "previewUpcoming": "€88.40 planned this week",
-      "previewInsight": "Dining out is gentler than last month",
-      "preview": {
-        "rent": "Apartment rent",
-        "groceries": "Weekly groceries",
-        "streaming": "Streaming plan",
-        "transit": "Metro pass"
-      },
-      "cat": {
-        "housing": "Housing",
-        "food": "Food",
-        "subs": "Subscriptions",
-        "transport": "Transport"
-      }
+      "previewInsight": "Dining out is gentler than last month"
     },
     "install": {
       "title": "Add to Home Screen",
@@ -1697,7 +1661,6 @@
     "manage": "Manage"
   },
   "transaction": {
-    "title": "Transaction",
     "notFound": "That transaction is no longer here",
     "notFoundBody": "It may have been deleted, or the link is out of date.",
     "backToActivity": "Back to activity",

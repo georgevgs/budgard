@@ -38,8 +38,29 @@ Rules for working in this repository. Follow them exactly.
 - Never hand-edit `src/design/tokens.generated.css`, the theme script in
   `index.html`, or the CSP sha256 in `netlify.toml`. Change `src/design/tokens.ts`
   and run `npm run build`; commit what it rewrites.
+- Never hand-edit `AGENTS.md`. It is this file, generated for Codex and other
+  agents that do not read `CLAUDE.md`. Change **this** file and run
+  `npm run sync:agents`; `src/test/invariants/agentDocsParity.test.ts` fails the
+  build if the two drift.
 - Do not edit `.env*` files unless the user explicitly requests an environment configuration change.
 - Do not edit dependency lockfiles unless the user explicitly requests a dependency change.
+
+---
+
+## 📖 Reference Docs
+This file is the authority. `docs/` holds the expanded form of these sections —
+read the relevant one before a non-trivial change, and fix it if it disagrees
+with this file.
+
+- `docs/architecture.md` — routes, provider tree, `dataOps`, services, schema,
+  edge functions. Read before touching data flow.
+- `docs/code-style.md` — the long form of the Code Style rules below.
+- `docs/ui-rules.md` — the long form of the UI/UX rules, including colour.
+- `docs/ux-principles.md` — conceptual reference (Gestalt, heuristics).
+- `docs/household-sharing-design.md` — a design doc for an **unimplemented**
+  feature. Nothing in the codebase corresponds to it.
+- `design/brand/README.md` — the authority for icons, launch screens and the
+  brand mark.
 
 ---
 

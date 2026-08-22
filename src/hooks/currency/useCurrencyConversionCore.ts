@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { parseCurrencyInput } from '@/lib/utils';
+import { convertMoney } from '@/lib/money';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 
@@ -30,7 +31,7 @@ export const useCurrencyConversionCore = (
     const raw = parseCurrencyInput(watchedAmount);
     if (!raw) return null;
 
-    return Math.round(raw * exchangeRate * 100) / 100;
+    return convertMoney(raw, exchangeRate, defaultCurrency);
   }, [exchangeRate, selectedCurrency, watchedAmount, defaultCurrency]);
 
   const handleCurrencyChange = (value: string) => {

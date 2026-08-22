@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
 import {
   clearLock,
   isLockEnabled,
-  isPinShaped,
   loadLock,
   setBiometrics,
   setPin,
@@ -18,14 +17,6 @@ describe('appLock', () => {
 
   afterEach(() => {
     vi.useRealTimers();
-  });
-
-  it('accepts only a four-digit pin', () => {
-    expect(isPinShaped('1234')).toBe(true);
-    expect(isPinShaped('123')).toBe(false);
-    expect(isPinShaped('12345')).toBe(false);
-    expect(isPinShaped('12a4')).toBe(false);
-    expect(isPinShaped('')).toBe(false);
   });
 
   it('is off until a pin is set', async () => {
