@@ -52,7 +52,7 @@ does not ship.
 | `public/icon-192x192.png`, `icon-512x512.png` | 192, 512 | Standard PWA icons. |
 | `public/icon-192x192-maskable.png`, `icon-512x512-maskable.png` | 192, 512 | Dedicated maskable PWA icons. |
 | `public/notification-badge.png` | 96×96 | Transparent monochrome push-notification badge. |
-| `public/favicon.ico` | 64×64 | Legacy browser fallback. NOT regenerable by `render-svg.swift`, which only writes PNG -- it still carries the old `#1B1613` field. Harmless at 16px in a tab strip, but it is the one asset the pipeline cannot keep in step. |
+| `public/favicon.ico` | 64×64 | Legacy browser fallback, converted from the rendered `favicon.svg` PNG with `sips`. |
 | `public/og-image.png` | 1200×630 | Raster social card. |
 | `public/splash/*.jpg` | 40 files | Black iOS launch screens with the white mark centred. |
 
@@ -62,6 +62,13 @@ field. Keep them in step: if the foreground token moves, re-run the icon
 renders and the launch-screen loop below, or Android's `background_color` and
 the iOS launch screens will disagree about what colour the app starts on.
 
+`plugins/brandAssets.ts` hashes all of these sources and generated files, then
+adds that revision to every launch image, install icon, favicon, social card,
+in-app mark, and notification asset URL. This is load-bearing: iOS and the CDN
+otherwise keep an older launch image at the unchanged path even after the
+bytes have been replaced. Do not hand-write a revision; changing the artwork
+changes the derived URL automatically on the next build.
+
 Compile the renderer once, then use `opaque` for assets that must never expose
 an alpha channel (especially `apple-touch-icon.png`):
 
@@ -69,6 +76,8 @@ an alpha channel (especially `apple-touch-icon.png`):
 swiftc design/brand/render-svg.swift -o /tmp/budgard-render-svg
 /tmp/budgard-render-svg public/brand/app-icon.svg public/apple-touch-icon.png 180 180 opaque
 /tmp/budgard-render-svg public/brand/budgard-mark.svg public/notification-badge.png 96 96
+/tmp/budgard-render-svg public/favicon.svg /tmp/budgard-favicon.png 64 64
+sips -s format ico /tmp/budgard-favicon.png --out public/favicon.ico
 ```
 
 ## Regenerating iOS launch screens

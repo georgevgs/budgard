@@ -8,6 +8,7 @@ import { defineConfig } from "vitest/config";
 import { VitePWA } from "vite-plugin-pwa";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import pkg from "./package.json" with { type: "json" };
+import { brandAssets, BRAND_ASSET_REVISION } from "./plugins/brandAssets.ts";
 import { designTokens } from "./plugins/designTokens.ts";
 
 // Function-form manualChunks: the previous array form only captured each
@@ -87,8 +88,10 @@ const resolveBuildId = (): string => {
 const buildId = resolveBuildId();
 
 const BUILD_ID_PLACEHOLDER = "__BUDGARD_BUILD_ID__";
+const BRAND_ASSET_REVISION_PLACEHOLDER = "__BUDGARD_BRAND_ASSET_REVISION__";
 
-// Replaces the placeholder in dist/push-sw.js with the real build id.
+// Replaces the placeholders in dist/push-sw.js with the real build id and the
+// content-derived brand revision.
 // Runs in closeBundle with normal enforce, so it executes BEFORE
 // vite-plugin-pwa:build (enforce "post") generates sw.js — the precache
 // manifest revision for push-sw.js is therefore computed from the final,
@@ -106,7 +109,18 @@ const stampPushSwBuildId = (): PluginOption => ({
       );
     }
 
-    await writeFile(file, source.replaceAll(BUILD_ID_PLACEHOLDER, buildId));
+    if (!source.includes(BRAND_ASSET_REVISION_PLACEHOLDER)) {
+      throw new Error(
+        "push-sw.js is missing the brand revision placeholder — notification artwork could stay stale"
+      );
+    }
+
+    await writeFile(
+      file,
+      source
+        .replaceAll(BUILD_ID_PLACEHOLDER, buildId)
+        .replaceAll(BRAND_ASSET_REVISION_PLACEHOLDER, BRAND_ASSET_REVISION),
+    );
   },
 });
 
@@ -225,10 +239,12 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
     __BUILD_ID__: JSON.stringify(buildId),
+    __BRAND_ASSET_REVISION__: JSON.stringify(BRAND_ASSET_REVISION),
     __OCR_ASSET_BASE__: JSON.stringify(ocrAssetBase),
   },
   plugins: [
     react(),
+    brandAssets(),
     designTokens(),
     stampPushSwBuildId(),
     vendorOcrAssets(),
@@ -250,6 +266,10 @@ export default defineConfig({
         // push-sw.js claims only when the user taps Update (SKIP_WAITING), so
         // control transfers — and the app reloads — only when asked.
         cleanupOutdatedCaches: true,
+        // Brand references carry a content-derived `v` so browser and iOS
+        // caches see new artwork. The active worker may still satisfy them
+        // from its revisioned precache, which preserves offline app chrome.
+        ignoreURLParametersMatching: [/^utm_/, /^fbclid$/, /^v$/],
         globPatterns: ["**/*.{js,css,html,ico,png,svg,json}"],
         // Fonts are deliberately NOT precached. Each face ships as four
         // unicode-range subsets and the browser fetches only the ones a

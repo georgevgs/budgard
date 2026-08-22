@@ -16,37 +16,37 @@
   "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "/brand/app-icon.svg",
+      "src": "/brand/app-icon.svg?v=c0c69249671b",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/icon-192x192.png",
+      "src": "/icon-192x192.png?v=c0c69249671b",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-192x192-maskable.png",
+      "src": "/icon-192x192-maskable.png?v=c0c69249671b",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/icon-512x512.png",
+      "src": "/icon-512x512.png?v=c0c69249671b",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-512x512-maskable.png",
+      "src": "/icon-512x512-maskable.png?v=c0c69249671b",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/apple-touch-icon.png",
+      "src": "/apple-touch-icon.png?v=c0c69249671b",
       "sizes": "180x180",
       "type": "image/png"
     }
@@ -59,7 +59,7 @@
       "url": "/today?action=add",
       "icons": [
         {
-          "src": "/icon-192x192.png",
+          "src": "/icon-192x192.png?v=c0c69249671b",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -72,7 +72,7 @@
       "url": "/trends",
       "icons": [
         {
-          "src": "/icon-192x192.png",
+          "src": "/icon-192x192.png?v=c0c69249671b",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -85,7 +85,7 @@
       "url": "/recurring",
       "icons": [
         {
-          "src": "/icon-192x192.png",
+          "src": "/icon-192x192.png?v=c0c69249671b",
           "sizes": "192x192",
           "type": "image/png"
         }

@@ -23,6 +23,7 @@ self.addEventListener('message', (event) => {
 // re-installed our own bytes (a known WebKit quirk after process kills), not
 // a new version, and the prompt is suppressed.
 const BUILD_ID = '__BUDGARD_BUILD_ID__';
+const BRAND_ASSET_REVISION = '__BUDGARD_BRAND_ASSET_REVISION__';
 
 self.addEventListener('message', (event) => {
   if (!event.data || event.data.type !== 'GET_BUILD_ID') return;
@@ -51,8 +52,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: payload.body || '',
-    icon: payload.icon || '/icon-192x192.png',
-    badge: '/notification-badge.png',
+    icon: payload.icon || `/icon-192x192.png?v=${BRAND_ASSET_REVISION}`,
+    badge: `/notification-badge.png?v=${BRAND_ASSET_REVISION}`,
     tag: payload.tag || 'budgard-notification',
     data: payload.data || { url: '/' },
     vibrate: [10, 40, 10],

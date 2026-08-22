@@ -61,9 +61,9 @@ NSGraphicsContext.current = context
 context.imageInterpolation = .high
 if isOpaque {
   NSColor(
-    calibratedRed: 27 / 255,
-    green: 22 / 255,
-    blue: 19 / 255,
+    calibratedRed: 23 / 255,
+    green: 23 / 255,
+    blue: 23 / 255,
     alpha: 1
   ).setFill()
 } else {

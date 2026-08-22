@@ -6,6 +6,7 @@ import type { PluginOption } from "vite";
 import { buildManifestColors, buildTokensCss } from "../src/design/generate.ts";
 import { buildThemeInitScript } from "../src/design/generate.ts";
 import { buildInlineHeadScript } from "../src/boot/inlineHeadScript.ts";
+import { versionBrandManifest } from "./brandAssets.ts";
 
 // Every colour in the app comes from src/design/tokens.ts. This plugin is what
 // carries it to the four places outside the module graph that cannot import it:
@@ -73,7 +74,10 @@ const syncCspHash = async (script: string): Promise<string[]> => {
 const syncManifest = async (): Promise<string[]> => {
   const file = path.join(ROOT, "public/manifest.json");
   const manifest = JSON.parse(await readFile(file, "utf8")) as Record<string, unknown>;
-  const updated = { ...manifest, ...buildManifestColors() };
+  const updated = versionBrandManifest({
+    ...manifest,
+    ...buildManifestColors(),
+  });
   const changed = await writeIfChanged(
     file,
     `${JSON.stringify(updated, null, 2)}\n`,
