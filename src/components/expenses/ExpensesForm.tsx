@@ -8,7 +8,6 @@ import {
   DialogDescription,
   DialogHeader,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
@@ -27,13 +26,13 @@ import ExpenseDescriptionField from '@/components/expenses/ExpenseDescriptionFie
 import ExpenseCategoryField from '@/components/expenses/ExpenseCategoryField';
 import ExpenseDateField from '@/components/expenses/ExpenseDateField';
 import ExpenseFormDetails from '@/components/expenses/ExpenseFormDetails';
+import ExpenseFormActions from '@/components/expenses/ExpenseFormActions';
 import { CategoryManager } from '@/components/categories/CategoryManager';
 import {
   getInitialAmount,
   getInitialDate,
   getInitialExtraTagIds,
   renderFormTitle,
-  renderSaveButtonLabel,
 } from '@/components/expenses/ExpensesForm.helpers';
 
 type ExpensesFormProps = {
@@ -77,6 +76,7 @@ const ExpensesForm = ({
   });
 
   useDialogDirty(form.formState.isDirty);
+  const isValid = form.formState.isValid;
 
   const conversion = useCurrencyConversion(form, expense);
   const suggestions = useDescriptionSuggestions(form);
@@ -96,10 +96,7 @@ const ExpensesForm = ({
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      {/* Mobile drag handle */}
-      <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
-        <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
-      </div>
+      {renderDragHandle()}
 
       <Form {...form}>
         <form
@@ -142,7 +139,11 @@ const ExpensesForm = ({
             </div>
           </div>
 
-          {renderActions(form.formState.isValid, isSubmitting, onClose, t)}
+          <ExpenseFormActions
+            isValid={isValid}
+            isSubmitting={isSubmitting}
+            onClose={onClose}
+          />
         </form>
       </Form>
     </div>
@@ -153,35 +154,8 @@ export default ExpensesForm;
 
 // --- Helpers ---
 
-// A Save button that is disabled from the moment the form opens is a dead end
-// unless something says why — validation is onTouched, so a pristine form has
-// no field errors to read yet. The hint stands in until the fields can speak
-// for themselves.
-const renderActions = (
-  isValid: boolean,
-  isSubmitting: boolean,
-  onClose: () => void,
-  t: (key: string) => string,
-) => (
-  <div className="flex shrink-0 flex-wrap items-center justify-end gap-3 border-t border-border/50 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-3">
-    {renderSaveHint(isValid, t)}
-    <Button type="button" variant="outline" onClick={onClose}>
-      {t('common.cancel')}
-    </Button>
-    <Button type="submit" disabled={isSubmitting || !isValid}>
-      {renderSaveButtonLabel(isSubmitting, t)}
-    </Button>
+const renderDragHandle = () => (
+  <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
+    <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
   </div>
 );
-
-const renderSaveHint = (isValid: boolean, t: (key: string) => string) => {
-  if (isValid) {
-    return null;
-  }
-
-  return (
-    <p className="mr-auto text-xs leading-relaxed text-muted-foreground">
-      {t('expenses.saveHint')}
-    </p>
-  );
-};
