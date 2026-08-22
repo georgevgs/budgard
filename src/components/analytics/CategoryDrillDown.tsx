@@ -65,7 +65,7 @@ export const CategoryDrillDown = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[480px]" onOpenChange={onClose}>
-        <DialogHeader data-draggable-area>
+        <DialogHeader className="pr-10" data-draggable-area>
           <div className="flex items-center gap-2.5">
             <div
               className="w-3 h-3 rounded-full shrink-0"

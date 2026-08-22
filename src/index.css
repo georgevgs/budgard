@@ -400,10 +400,24 @@
   }
 
   .surface-card-flush {
+    position: relative;
     border-radius: 1.6rem;
     overflow: hidden;
     background-color: hsl(var(--card));
+  }
+
+  /* Opaque rows inside a flush card can cover an inset shadow drawn by the
+     parent. Paint the rim above those rows so a white list never loses its
+     boundary against the white page. It is visual only and cannot intercept
+     row clicks, swipes, or focus. */
+  .surface-card-flush::after {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    border-radius: inherit;
     box-shadow: inset 0 0 0 1px hsl(var(--border) / var(--surface-ring));
+    content: '';
+    pointer-events: none;
   }
 
   /* Status ramp. The hero was a 20–26% mix of a semantic token into the card,

@@ -42,11 +42,8 @@ const SplitExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-[440px]"
-        onOpenChange={onOpenChange}
-      >
-        <DialogHeader data-draggable-area className="pt-2">
+      <DialogContent className="sm:max-w-[440px]" onOpenChange={onOpenChange}>
+        <DialogHeader data-draggable-area className="pr-10 pt-2">
           <DialogTitle>{t('expenses.split.title')}</DialogTitle>
           <DialogDescription>
             {t('expenses.split.description', {
@@ -56,7 +53,7 @@ const SplitExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3 overflow-y-auto px-1">
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-1">
           {split.parts.map((part, index) =>
             renderPartRow(
               part,
@@ -75,7 +72,7 @@ const SplitExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
           {renderRemaining(split.remaining, defaultCurrency, t)}
         </div>
 
-        <div className="flex gap-3 justify-end pb-2">
+        <div className="flex shrink-0 justify-end gap-3 border-t border-border/50 pt-4">
           <Button
             type="button"
             variant="outline"

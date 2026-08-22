@@ -96,8 +96,8 @@ const renderDialog = ({
           <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
         </div>
 
-        <div className="px-6 pt-2 sm:pt-6 pb-3 shrink-0">
-          <DialogHeader data-draggable-area>
+        <div className="shrink-0 px-4 pb-3 pt-2 sm:px-6 sm:pt-6">
+          <DialogHeader className="pr-10" data-draggable-area>
             <DialogTitle>{t('budget.categoryBudgets.title')}</DialogTitle>
             <DialogDescription>
               {t('budget.categoryBudgets.description')}
@@ -108,7 +108,7 @@ const renderDialog = ({
         {renderTotalsBar(totals, monthlyBudget, defaultCurrency, t)}
 
         <div
-          className="overflow-y-auto flex-1 min-h-0 px-6 py-2 overscroll-contain"
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-2 sm:px-6"
           style={{ touchAction: 'pan-y' }}
         >
           {renderCategoryRows(
@@ -124,7 +124,7 @@ const renderDialog = ({
 
         {renderError(error)}
 
-        <div className="flex justify-end gap-2 px-6 py-4 border-t border-border/50 shrink-0">
+        <div className="flex shrink-0 justify-end gap-2 border-t border-border/50 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-4">
           <Button
             type="button"
             variant="outline"
@@ -152,8 +152,7 @@ const renderTotalsBar = (
     return null;
   }
 
-  const overGlobal =
-    monthlyBudget !== null && totals.allocated > monthlyBudget;
+  const overGlobal = monthlyBudget !== null && totals.allocated > monthlyBudget;
 
   return (
     <div className="px-6 pb-2 shrink-0">

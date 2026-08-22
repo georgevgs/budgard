@@ -57,7 +57,7 @@ const ActivityFeed = (props: Props) => {
 
     return (
       <div
-        className="rounded-2xl border border-dashed border-border/50 px-5 py-12 text-center"
+        className="rounded-2xl border border-dashed border-border px-5 py-10 text-center sm:px-6 sm:py-12"
         role="status"
       >
         <p className="font-display text-lg font-semibold">
@@ -80,7 +80,11 @@ const ActivityFeed = (props: Props) => {
       {groups.map((group) => renderGroup(group, props, t))}
       {renderPendingHistory(props.isHistoryPending)}
       <div ref={sentinelRef} aria-hidden="true" className="h-px" />
-      {renderLoadMore(hasMore, () => setVisibleCount(visibleCount + PAGE_SIZE), t)}
+      {renderLoadMore(
+        hasMore,
+        () => setVisibleCount(visibleCount + PAGE_SIZE),
+        t,
+      )}
     </div>
   );
 };
@@ -140,7 +144,7 @@ const renderGroup = (group: DateGroup, props: Props, t: TFunc) => (
       </h2>
       {renderDayTotal(group, props.currency)}
     </div>
-    <div className="surface-card-flush divide-y divide-border/30">
+    <div className="surface-card-flush divide-y divide-border/50">
       {group.expenses.map((transaction) => (
         <SwipeableRow
           key={transaction.id}

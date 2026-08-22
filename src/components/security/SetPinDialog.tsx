@@ -26,7 +26,7 @@ const SetPinDialog = ({ open, onClose, onSaved }: Props) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[380px]" onOpenChange={onClose}>
-        <DialogHeader data-draggable-area>
+        <DialogHeader className="pr-10" data-draggable-area>
           <DialogTitle>{t(`security.setPin.${form.step}Title`)}</DialogTitle>
           <DialogDescription>
             {t('security.setPin.description')}

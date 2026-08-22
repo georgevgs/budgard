@@ -44,7 +44,7 @@ const FormsManager = ({
   return (
     <Dialog open={isExpenseForm} onOpenChange={onClose}>
       <DialogContent
-        className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
+        className="gap-0 p-0 sm:max-w-[500px]"
         onOpenChange={onClose}
         onFocusOutside={(e) => e.preventDefault()}
       >

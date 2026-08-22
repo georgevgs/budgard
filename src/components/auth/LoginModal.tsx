@@ -30,8 +30,8 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
           <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
         </div>
 
-        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-4 sm:pb-6 sm:pt-6">
-          <DialogHeader data-draggable-area>
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-6 sm:pt-6">
+          <DialogHeader className="pr-10" data-draggable-area>
             <DialogTitle>{t('auth.signIn')}</DialogTitle>
             <DialogDescription>{t('auth.emailVerification')}</DialogDescription>
           </DialogHeader>

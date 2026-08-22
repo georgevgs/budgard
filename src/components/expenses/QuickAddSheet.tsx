@@ -25,7 +25,7 @@ const QuickAddSheet = ({ open, onClose, onSubmit, onOpenFullForm }: Props) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
-        className="sm:max-w-[420px] p-0 gap-0 [&>button]:hidden"
+        className="gap-0 p-0 sm:max-w-[420px]"
         onOpenChange={onClose}
         onFocusOutside={(event) => event.preventDefault()}
       >
@@ -44,7 +44,7 @@ const QuickAddSheet = ({ open, onClose, onSubmit, onOpenFullForm }: Props) => {
           <p
             data-draggable-area
             className={cn(
-              'py-5 text-center font-display text-[2.75rem] font-semibold leading-none tabular-nums',
+              'px-10 py-5 text-center font-display text-[2.75rem] font-semibold leading-none tabular-nums',
               amountTone(draft.pad.isEmpty),
             )}
             aria-live="polite"

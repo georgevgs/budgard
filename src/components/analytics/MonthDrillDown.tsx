@@ -91,7 +91,7 @@ export const MonthDrillDown = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[480px]" onOpenChange={onClose}>
-        <DialogHeader data-draggable-area>
+        <DialogHeader className="pr-10" data-draggable-area>
           <DialogTitle className="capitalize">{monthLabel}</DialogTitle>
           <DialogDescription>
             {t('analytics.drillDown.monthTotal', {

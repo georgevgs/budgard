@@ -55,10 +55,10 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
 
         {/* Scrollable content */}
         <div
-          className="overflow-y-auto flex-1 px-4 sm:px-6 overscroll-contain"
+          className="flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-4"
           style={{ touchAction: 'pan-y' }}
         >
-          <DialogHeader className="pb-4 pt-2 sm:pt-0">
+          <DialogHeader className="pb-4 pr-10 pt-2 sm:pt-0">
             <DialogTitle className="text-xl">{t('import.title')}</DialogTitle>
           </DialogHeader>
 

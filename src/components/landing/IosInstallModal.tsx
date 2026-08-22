@@ -22,8 +22,8 @@ export const IosInstallModal = ({ open, onOpenChange }: Props) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 p-0 sm:max-w-sm">
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:pb-6">
-          <DialogHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 sm:pb-6">
+          <DialogHeader className="pr-10">
             <DialogTitle>{t('landing.install.title')}</DialogTitle>
             <DialogDescription>
               {t('landing.install.description')}

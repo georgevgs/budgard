@@ -86,7 +86,7 @@ const CategoryForm = ({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-5 pb-4"
+            className="space-y-5 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-4"
           >
             <CategoryFormFields
               form={form}
@@ -168,7 +168,7 @@ const renderHeader = (
   onBack: () => void,
   t: TranslateFunction,
 ) => (
-  <DialogHeader className="pb-4" data-draggable-area>
+  <DialogHeader className="pb-4 pr-10" data-draggable-area>
     <div className="flex items-center gap-2">
       <Button
         type="button"

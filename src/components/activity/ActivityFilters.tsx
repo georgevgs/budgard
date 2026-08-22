@@ -39,7 +39,7 @@ const ActivityFilters = ({
         {trailing}
       </div>
       <div
-        className="grid grid-cols-3 rounded-full bg-muted/72 p-1"
+        className="grid grid-cols-3 rounded-full border border-border bg-muted/72 p-1"
         role="group"
         aria-label={t('activity.filterLabel')}
       >

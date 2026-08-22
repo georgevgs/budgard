@@ -14,7 +14,7 @@ type ReceiptViewerProps = {
   receiptPath: string;
   open: boolean;
   onClose: () => void;
-}
+};
 
 const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
   const { t } = useTranslation();
@@ -36,8 +36,8 @@ const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
           <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
         </div>
 
-        <div className="px-6 pb-6 pt-2 sm:pt-6">
-          <DialogHeader data-draggable-area>
+        <div className="px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-2 sm:px-6 sm:pb-6 sm:pt-6">
+          <DialogHeader className="pr-10" data-draggable-area>
             <DialogTitle>{t('receipt.viewReceipt')}</DialogTitle>
             <DialogDescription className="sr-only">
               {t('receipt.receiptImage')}

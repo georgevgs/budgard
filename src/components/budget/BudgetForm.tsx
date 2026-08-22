@@ -56,8 +56,8 @@ const BudgetForm = ({
           <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-2 sm:pb-6 sm:pt-6">
-          <DialogHeader className="pb-4" data-draggable-area>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-2 sm:px-6 sm:pb-6 sm:pt-6">
+          <DialogHeader className="pb-4 pr-10" data-draggable-area>
             <DialogTitle>{renderTitle(isEditing, t)}</DialogTitle>
             <DialogDescription>
               {renderDescription(isEditing, currentBudget, currencyCode, t)}

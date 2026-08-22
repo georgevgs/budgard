@@ -62,7 +62,7 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
               />
 
               <div
-                className="flex-1 overflow-y-auto overscroll-contain px-4 pb-4"
+                className="flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-4"
                 style={{ touchAction: 'pan-y' }}
               >
                 <AccountHistoryChart account={account} snapshots={snapshots} />

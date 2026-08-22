@@ -78,7 +78,7 @@ const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
             className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 overscroll-contain"
             style={{ touchAction: 'pan-y' }}
           >
-            <DialogHeader className="pb-4" data-draggable-area>
+            <DialogHeader className="pb-4 pr-10" data-draggable-area>
               <DialogTitle className="text-xl">
                 {renderTitle(isEditing, t)}
               </DialogTitle>
@@ -90,7 +90,7 @@ const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
             <GoalFormFields form={form} sourceType={sourceType} />
           </div>
 
-          <div className="flex justify-end gap-2 px-4 sm:px-6 py-3 border-t border-border/50 shrink-0">
+          <div className="flex shrink-0 justify-end gap-2 border-t border-border/50 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-3">
             <Button type="button" variant="outline" onClick={onClose}>
               {t('common.cancel')}
             </Button>

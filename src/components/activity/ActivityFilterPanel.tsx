@@ -38,7 +38,10 @@ type Props = {
 const ActivityFilterPanel = (props: Props) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const activeCount = countActive(props.selectedCategoryId, props.selectedTagId);
+  const activeCount = countActive(
+    props.selectedCategoryId,
+    props.selectedTagId,
+  );
 
   const handleClear = () => {
     props.onCategoryChange(null);
@@ -70,11 +73,8 @@ const ActivityFilterPanel = (props: Props) => {
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent
-          className="sm:max-w-[440px]"
-          onOpenChange={setIsOpen}
-        >
-          <DialogHeader data-draggable-area>
+        <DialogContent className="sm:max-w-[440px]" onOpenChange={setIsOpen}>
+          <DialogHeader className="pr-10" data-draggable-area>
             <DialogTitle>{t('activity.refine.title')}</DialogTitle>
             <DialogDescription>
               {t('activity.refine.description')}

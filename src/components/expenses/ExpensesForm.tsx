@@ -110,7 +110,7 @@ const ExpensesForm = ({
             className="flex-1 overflow-y-auto overscroll-contain px-4 sm:px-6 sm:pt-6"
             style={{ touchAction: 'pan-y' }}
           >
-            <DialogHeader className="pb-4" data-draggable-area>
+            <DialogHeader className="pb-4 pr-10" data-draggable-area>
               <DialogTitle className="text-xl">
                 {renderFormTitle(Boolean(expense), t)}
               </DialogTitle>

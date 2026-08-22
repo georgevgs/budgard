@@ -39,8 +39,8 @@ const TagRenameForm = ({ tag, onClose }: Props) => {
   };
 
   return (
-    <div className="px-4 sm:px-6 pt-4 pb-4 space-y-4">
-      <DialogHeader data-draggable-area>
+    <div className="space-y-4 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-4">
+      <DialogHeader className="pr-10" data-draggable-area>
         <DialogTitle className="text-xl">{t('tags.renameTag')}</DialogTitle>
         <DialogDescription>{t('tags.renameDescription')}</DialogDescription>
       </DialogHeader>

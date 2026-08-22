@@ -75,7 +75,7 @@ export const CategoryManager = ({
         )}
       </div>
 
-      <div className="px-4 sm:px-6 py-3 shrink-0 border-t border-border/50">
+      <div className="shrink-0 border-t border-border/50 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-3">
         <Button
           variant="outline"
           size="sm"

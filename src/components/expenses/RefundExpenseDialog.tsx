@@ -35,7 +35,7 @@ const RefundExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[400px]" onOpenChange={onOpenChange}>
-        <DialogHeader data-draggable-area className="pt-2">
+        <DialogHeader data-draggable-area className="pr-10 pt-2">
           <DialogTitle>{t('expenses.refund.title')}</DialogTitle>
           <DialogDescription>
             {t('expenses.refund.description', {
@@ -76,7 +76,7 @@ const RefundExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
           </div>
         </div>
 
-        <div className="flex gap-3 justify-end pb-2">
+        <div className="flex shrink-0 justify-end gap-3 border-t border-border/50 pt-4">
           <Button
             type="button"
             variant="outline"

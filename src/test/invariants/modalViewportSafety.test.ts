@@ -18,6 +18,23 @@ const SCROLLABLE_DIALOGS = [
   'src/components/security/SetPinDialog.tsx',
 ] as const;
 
+const FORM_DIALOGS_WITH_VISIBLE_CLOSE = [
+  'src/components/debts/DebtsView.tsx',
+  'src/components/expenses/QuickAddSheet.tsx',
+  'src/components/income/IncomeFormDialog.tsx',
+  'src/components/layout/FormsManager.tsx',
+  'src/components/networth/NetWorthView.tsx',
+] as const;
+
+const ZERO_PADDING_ACTION_SHEETS = [
+  'src/components/categories/CategoryManager.tsx',
+  'src/components/debts/DebtForm.tsx',
+  'src/components/debts/DebtPaymentForm.tsx',
+  'src/components/goals/GoalForm.tsx',
+  'src/components/networth/AccountForm.tsx',
+  'src/components/networth/BalanceSnapshotForm.tsx',
+] as const;
+
 describe('modal viewport safety', () => {
   it('keeps routine scrims contextual instead of opaque', () => {
     expect(BASE_TOKENS['--modal-scrim-opacity']).toBe('0.48');
@@ -54,6 +71,24 @@ describe('modal viewport safety', () => {
     );
   });
 
+  it.each(FORM_DIALOGS_WITH_VISIBLE_CLOSE)(
+    '%s keeps its explicit close affordance visible',
+    (file) => {
+      const source = read(file);
+
+      expect(source).not.toContain('[&>button]:hidden');
+    },
+  );
+
+  it.each(ZERO_PADDING_ACTION_SHEETS)(
+    '%s keeps bottom actions above the device safe area',
+    (file) => {
+      const source = read(file);
+
+      expect(source).toContain('safe-area-inset-bottom');
+    },
+  );
+
   it('keeps secondary tasks inside their parent sheet', () => {
     const accountSheet = read('src/components/networth/AccountDetailSheet.tsx');
     const debtSheet = read('src/components/debts/DebtDetailSheet.tsx');
@@ -66,6 +101,16 @@ describe('modal viewport safety', () => {
     expect(countDialogRoots(debtSheet)).toBe(1);
     expect(countDialogRoots(incomeForm)).toBe(0);
     expect(countDialogRoots(expenseCategory)).toBe(0);
+  });
+
+  it('paints flush card rims above opaque child rows', () => {
+    const css = read('src/index.css');
+    const activityFeed = read('src/components/activity/ActivityFeed.tsx');
+
+    expect(css).toContain('.surface-card-flush::after');
+    expect(css).toContain('pointer-events: none');
+    expect(activityFeed).toContain('divide-y divide-border/50');
+    expect(activityFeed).toContain('border-dashed border-border');
   });
 });
 

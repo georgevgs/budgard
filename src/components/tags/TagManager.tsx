@@ -51,14 +51,14 @@ export const TagManager = () => {
       </div>
 
       <div className="px-4 sm:px-6 pt-2 sm:pt-4 pb-2 shrink-0">
-        <DialogHeader data-draggable-area>
+        <DialogHeader className="pr-10" data-draggable-area>
           <DialogTitle className="text-xl">{t('tags.title')}</DialogTitle>
           <DialogDescription>{t('tags.manageDescription')}</DialogDescription>
         </DialogHeader>
       </div>
 
       <div
-        className="overflow-y-auto flex-1 min-h-0 px-4 sm:px-6 pb-4 overscroll-contain"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-4"
         style={{ touchAction: 'pan-y' }}
       >
         {renderTagList(tags, t, setView, setDeleteTarget)}

@@ -78,7 +78,7 @@ const DebtsView = () => {
 
       <Dialog open={isFormOpen} onOpenChange={handleFormClose}>
         <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden"
+          className="gap-0 p-0 sm:max-w-[500px]"
           aria-describedby="debt-form-description"
           onOpenChange={handleFormClose}
           onFocusOutside={(e) => e.preventDefault()}
