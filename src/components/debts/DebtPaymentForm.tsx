@@ -15,7 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import {
-  formatCurrencyInput,
+  amountToInput,
   parseCurrencyInput,
 } from '@/lib/utils';
 import DebtPaymentFields from '@/components/debts/DebtPaymentFields';
@@ -39,9 +39,7 @@ const DebtPaymentForm = ({ debt, onClose }: Props) => {
 
   let suggested = '';
   if (debt.minimum_payment > 0) {
-    suggested = formatCurrencyInput(
-      debt.minimum_payment.toString().replace('.', ','),
-    );
+    suggested = amountToInput(debt.minimum_payment, debt.currency);
   }
 
   const form = useForm<DebtPaymentFormData>({

@@ -279,7 +279,13 @@ const TOP_STEP = 100;
 
 const buildMilestone = (setAside: number) => {
   const step = resolveStep(setAside);
-  const milestone = Math.floor(setAside / step) * step + step;
+  // Refunds are legal, so setAside can be negative — and floor(-10/25)*25+25
+  // is 0, which made milestoneProgress -Infinity. The first rung is always a
+  // real target.
+  const milestone = Math.max(
+    step,
+    Math.floor(setAside / step) * step + step,
+  );
 
   return {
     milestone,

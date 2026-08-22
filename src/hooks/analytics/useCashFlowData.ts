@@ -3,6 +3,8 @@ import { format } from 'date-fns';
 import { useExpensesData, useIncomesData } from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import { monthsElapsedInYear } from '@/lib/utils';
+import { countsInTotals } from '@/lib/spending';
+import { sumAmounts } from '@/lib/money';
 
 export const useCashFlowData = (selectedYear: number) => {
   const expenses = useExpensesData();
@@ -15,12 +17,19 @@ export const useCashFlowData = (selectedYear: number) => {
 
     // YYYY-MM-DD dates: slicing the year/month straight off the string is
     // ~10x faster than parseISO per row (see useExpensesFilter).
+    //
+    // A transfer between the user's own accounts is a row on both sides. Left
+    // in, it inflated the income bar and the expense bar by the same amount —
+    // net stayed right by luck while both bars, and avgNet's numerator, were
+    // wrong.
     for (const e of expenses) {
+      if (!countsInTotals(e)) continue;
       if (Number(e.date.slice(0, 4)) !== selectedYear) continue;
       expByMonth[Number(e.date.slice(5, 7)) - 1] += e.amount;
     }
 
     for (const i of incomes) {
+      if (!countsInTotals(i)) continue;
       if (Number(i.date.slice(0, 4)) !== selectedYear) continue;
       incByMonth[Number(i.date.slice(5, 7)) - 1] += i.amount;
     }
@@ -41,8 +50,8 @@ export const useCashFlowData = (selectedYear: number) => {
   }, [expenses, incomes, selectedYear, dateLocale]);
 
   const yearTotals = useMemo(() => {
-    const totalIncome = monthlyData.reduce((s, m) => s + m.income, 0);
-    const totalExpense = monthlyData.reduce((s, m) => s - m.expense, 0);
+    const totalIncome = sumAmounts(monthlyData.map((m) => m.income));
+    const totalExpense = sumAmounts(monthlyData.map((m) => -m.expense));
 
     const monthsElapsed = monthsElapsedInYear(selectedYear);
     let avgNet = 0;

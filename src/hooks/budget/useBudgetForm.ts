@@ -3,7 +3,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDialogDirty } from '@/hooks/useDialogDirty';
 import { budgetSchema, type BudgetFormData } from '@/lib/validations';
-import { formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
+import {
+  amountToInput,
+  formatCurrencyInput,
+  parseCurrencyInput,
+} from '@/lib/utils';
 
 type Params = {
   isOpen: boolean;
@@ -72,5 +76,5 @@ const getInitialAmount = (currentBudget: number | null): string => {
     return '';
   }
 
-  return formatCurrencyInput(currentBudget.toString());
+  return amountToInput(currentBudget);
 };

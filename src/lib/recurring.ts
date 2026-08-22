@@ -1,4 +1,10 @@
-import { addWeeks, addMonths, addYears } from 'date-fns';
+import { addWeeks } from 'date-fns';
+import {
+  addMonthsAnchored,
+  anchorDayOf,
+  parseIsoDate,
+  startOfToday,
+} from '@/lib/dates';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
 // Calendar-month approximations used to convert sub-monthly cadences into a
@@ -17,28 +23,33 @@ const MAX_CATCHUP_ITERATIONS = 1000;
 
 export const calculateNextOccurrence = (
   expense: RecurringExpense,
+  now: Date = new Date(),
 ): Date | null => {
   if (!expense.active) return null;
-  if (expense.end_date && new Date(expense.end_date) < new Date()) return null;
 
-  const startDate = new Date(expense.start_date);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = startOfToday(now);
+
+  // Both sides of this comparison are local midnight. Mixing a UTC-parsed
+  // date with a local one used to drop the final occurrence on its end date,
+  // and to skip a schedule's first occurrence when it started today.
+  if (expense.end_date && parseIsoDate(expense.end_date) < today) return null;
+
+  const startDate = parseIsoDate(expense.start_date);
 
   if (expense.last_generated_date) {
-    const fromDate = new Date(expense.last_generated_date);
+    const fromDate = parseIsoDate(expense.last_generated_date);
 
-    return advanceByFrequency(fromDate, expense.frequency);
+    return advanceOccurrence(expense, fromDate);
   }
 
   if (startDate >= today) {
     return startDate;
   }
 
-  let next = new Date(startDate);
+  let next = startDate;
   let iterations = 0;
   while (next < today) {
-    next = advanceByFrequency(next, expense.frequency);
+    next = advanceOccurrence(expense, next);
     iterations += 1;
     if (iterations >= MAX_CATCHUP_ITERATIONS) {
       return null;
@@ -46,6 +57,21 @@ export const calculateNextOccurrence = (
   }
 
   return next;
+}
+
+// The next occurrence of a schedule after `fromDate`, anchored on the
+// schedule's own start day. Mirrors calculate_next_occurrence in
+// 20260822000000_fix_recurring_anchor_and_exclusions.sql — the two must agree,
+// because the DB generates the rows and the client previews them.
+export const advanceOccurrence = (
+  expense: Pick<RecurringExpense, 'frequency' | 'start_date'>,
+  fromDate: Date,
+): Date => {
+  return advanceByFrequency(
+    fromDate,
+    expense.frequency,
+    anchorDayOf(expense.start_date),
+  );
 }
 
 export const getMonthlyAmount = (expense: RecurringExpense): number => {
@@ -70,19 +96,25 @@ export const getMonthlyAmount = (expense: RecurringExpense): number => {
 export const advanceByFrequency = (
   fromDate: Date,
   frequency: RecurringExpense['frequency'],
+  anchorDay?: number,
 ): Date => {
+  // Without an anchor the previous occurrence's own day is used, which is the
+  // behaviour that drifts. Callers that have the schedule should pass its
+  // start day — advanceOccurrence does that for them.
+  const anchor = anchorDay ?? fromDate.getDate();
+
   switch (frequency) {
     case 'weekly':
       return addWeeks(fromDate, 1);
     case 'biweekly':
       return addWeeks(fromDate, 2);
     case 'monthly':
-      return addMonths(fromDate, 1);
+      return addMonthsAnchored(fromDate, 1, anchor);
     case 'quarterly':
-      return addMonths(fromDate, 3);
+      return addMonthsAnchored(fromDate, 3, anchor);
     case 'yearly':
-      return addYears(fromDate, 1);
+      return addMonthsAnchored(fromDate, 12, anchor);
     default:
-      return addMonths(fromDate, 1);
+      return addMonthsAnchored(fromDate, 1, anchor);
   }
 }

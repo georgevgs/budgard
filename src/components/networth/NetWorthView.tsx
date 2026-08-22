@@ -160,7 +160,11 @@ const renderBody = (
   return (
     <>
       <NetWorthHeader summary={summary} defaultCurrency={defaultCurrency} />
-      <NetWorthChart series={series} defaultCurrency={defaultCurrency} />
+      <NetWorthChart
+        series={series}
+        defaultCurrency={defaultCurrency}
+        hasDebtConstant={summary.debts > 0}
+      />
       <AccountGroup
         title={t('networth.groups.assets')}
         accounts={grouped.assets}

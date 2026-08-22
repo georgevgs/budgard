@@ -8,6 +8,7 @@ import {
   useDataConfig,
 } from '@/contexts/DataContext';
 import { cn, formatCurrency } from '@/lib/utils';
+import { countsAsSpending, countsInTotals } from '@/lib/spending';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
@@ -52,9 +53,13 @@ const FiftyThirtyTwentyRing = ({ selectedMonth }: Props) => {
   const { categories } = useCategoriesData();
   const { defaultCurrency } = useDataConfig();
 
+  // Every arc here is a share of the total, so a single excluded transfer
+  // moves all three percentages — including the two it was never filed under.
   const monthExpenses = useMemo(() => {
     return expenses.filter(
-      (e: Expense) => format(parseISO(e.date), 'yyyy-MM') === selectedMonth,
+      (e: Expense) =>
+        countsAsSpending(e) &&
+        format(parseISO(e.date), 'yyyy-MM') === selectedMonth,
     );
   }, [expenses, selectedMonth]);
 
@@ -75,7 +80,9 @@ const FiftyThirtyTwentyRing = ({ selectedMonth }: Props) => {
 
     // Add explicit savings allocations from income rows for the same month
     const monthIncomes = incomes.filter(
-      (i: Expense) => format(parseISO(i.date), 'yyyy-MM') === selectedMonth,
+      (i: Expense) =>
+        countsInTotals(i) &&
+        format(parseISO(i.date), 'yyyy-MM') === selectedMonth,
     );
     for (const income of monthIncomes) {
       if (income.savings_allocation_amount && income.savings_allocation_amount > 0) {

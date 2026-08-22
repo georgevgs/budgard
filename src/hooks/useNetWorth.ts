@@ -36,6 +36,48 @@ export type NetWorthSummary = {
   staleCurrencies: string[];
 }
 
+/**
+ * The rate to convert `currency` into the default, recording any currency the
+ * app could not price.
+ *
+ * Falling back to 1 is only defensible when the UI says so, and it did for a
+ * FAILED fetch. It did not for a MISSING one: while a new requirement set is
+ * being fetched, `rates` and `failedKeys` are both the previous computation,
+ * so a newly added foreign account converted at 1.0 with staleCurrencies
+ * empty — a 2,000,000 yen account reading as 2,000,000 euro with no warning.
+ * A key that is absent is now treated exactly like one that failed.
+ */
+const resolveRate = ({
+  currency,
+  defaultCurrency,
+  date,
+  rates,
+  failedKeys,
+  staleCurrencies,
+}: {
+  currency: string;
+  defaultCurrency: string;
+  date: string;
+  rates: Map<string, number>;
+  failedKeys: Set<string>;
+  staleCurrencies: Set<string>;
+}): number => {
+  if (currency === defaultCurrency) {
+    return 1;
+  }
+
+  const key = RATE_KEY(currency, date);
+  const rate = rates.get(key);
+
+  if (rate === undefined || failedKeys.has(key)) {
+    staleCurrencies.add(currency);
+
+    return 1;
+  }
+
+  return rate;
+};
+
 const isLiveDebt = (d: Debt): boolean =>
   !d.is_archived && !d.is_completed && Number(d.current_balance) > 0;
 
@@ -160,14 +202,14 @@ export const useNetWorth = () => {
     const staleCurrencies = new Set<string>();
 
     accounts.forEach((a) => {
-      let rate = 1;
-      if (a.default_currency !== defaultCurrency) {
-        const key = RATE_KEY(a.default_currency, today);
-        if (failedKeys.has(key)) {
-          staleCurrencies.add(a.default_currency);
-        }
-        rate = rates.get(key) ?? 1;
-      }
+      const rate = resolveRate({
+        currency: a.default_currency,
+        defaultCurrency,
+        date: today,
+        rates,
+        failedKeys,
+        staleCurrencies,
+      });
       const balance = a.current_balance * rate;
 
       if (isLiability(a.kind)) {
@@ -187,14 +229,14 @@ export const useNetWorth = () => {
       if (!isLiveDebt(d)) {
         return;
       }
-      let rate = 1;
-      if (d.currency !== defaultCurrency) {
-        const key = RATE_KEY(d.currency, today);
-        if (failedKeys.has(key)) {
-          staleCurrencies.add(d.currency);
-        }
-        rate = rates.get(key) ?? 1;
-      }
+      const rate = resolveRate({
+        currency: d.currency,
+        defaultCurrency,
+        date: today,
+        rates,
+        failedKeys,
+        staleCurrencies,
+      });
       debtsTotal += Number(d.current_balance) * rate;
     });
 

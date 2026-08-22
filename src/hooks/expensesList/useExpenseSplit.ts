@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
 import { parseCurrencyInput } from '@/lib/utils';
+import { roundMoney, sumAmounts, toMinorUnits } from '@/lib/money';
 import type { Expense } from '@/types/Expense';
 
 export const MAX_SPLIT_PARTS = 6;
@@ -48,7 +49,7 @@ export const useExpenseSplit = (
     }
   }
 
-  const remaining = expense.amount - sumParts(parts);
+  const remaining = roundMoney(expense.amount - sumParts(parts));
   const partsValid = parts.every((part) => parseCurrencyInput(part.amount) > 0);
 
   const updatePart = (index: number, patch: Partial<SplitPart>) => {
@@ -74,13 +75,7 @@ export const useExpenseSplit = (
   const confirm = async () => {
     setIsSaving(true);
     try {
-      await handleExpenseSplit(
-        expense,
-        parts.map((part) => ({
-          amount: parseCurrencyInput(part.amount),
-          category_id: normalizeCategoryId(part.category_id),
-        })),
-      );
+      await handleExpenseSplit(expense, buildBalancedParts(expense, parts));
       onDone();
     } catch {
       // The error toast is raised by useExpenseOps; the dialog stays open so
@@ -103,8 +98,50 @@ export const useExpenseSplit = (
 
 // A split balances when the parts land within half a cent of the original —
 // exact equality would be unreachable after currency parsing rounds.
+// buildBalancedParts then absorbs whatever is left so the rows that get
+// written sum to the original exactly.
 export const isSettled = (remaining: number): boolean => {
   return Math.abs(remaining) < 0.005;
+};
+
+/**
+ * The parts as they will be written, adjusted so they sum to the original to
+ * the cent.
+ *
+ * isSettled tolerates half a cent, which is the right call for the button
+ * state — nobody should be blocked by a rounding artefact they cannot see.
+ * But writing that tolerance to the database creates or destroys money on
+ * every split, below the precision that would ever reveal it. The residual
+ * goes onto the largest part, where it is proportionally smallest.
+ */
+export const buildBalancedParts = (
+  expense: Expense,
+  parts: SplitPart[],
+): { amount: number; category_id: string | null }[] => {
+  const rows = parts.map((part) => ({
+    amount: roundMoney(parseCurrencyInput(part.amount)),
+    category_id: normalizeCategoryId(part.category_id),
+  }));
+
+  const residual = toMinorUnits(expense.amount) -
+    toMinorUnits(sumAmounts(rows.map((row) => row.amount)));
+  if (residual === 0) {
+    return rows;
+  }
+
+  let largestIndex = 0;
+  for (let index = 1; index < rows.length; index += 1) {
+    if (Math.abs(rows[index].amount) > Math.abs(rows[largestIndex].amount)) {
+      largestIndex = index;
+    }
+  }
+
+  rows[largestIndex] = {
+    ...rows[largestIndex],
+    amount: roundMoney(rows[largestIndex].amount + residual / 100),
+  };
+
+  return rows;
 };
 
 // --- Helpers ---
@@ -117,7 +154,7 @@ const buildInitialParts = (expense: Expense): SplitPart[] => {
 };
 
 const sumParts = (parts: SplitPart[]): number => {
-  return parts.reduce((sum, part) => sum + parseCurrencyInput(part.amount), 0);
+  return sumAmounts(parts.map((part) => parseCurrencyInput(part.amount)));
 };
 
 const normalizeCategoryId = (value: string): string | null => {

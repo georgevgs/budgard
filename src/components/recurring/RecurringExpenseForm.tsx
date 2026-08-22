@@ -14,7 +14,7 @@ import { Form } from '@/components/ui/form';
 import RecurringExpenseFields from '@/components/recurring/RecurringExpenseFields';
 import RecurringScheduleFields from '@/components/recurring/RecurringScheduleFields';
 import { useAuth } from '@/hooks/useAuth';
-import { formatCurrencyInput } from '@/lib/utils';
+import { amountToInput } from '@/lib/utils';
 import {
   recurringExpenseSchema,
   type RecurringExpenseFormData,
@@ -155,7 +155,7 @@ const resolveAmountDefault = (
   expense: RecurringExpense | undefined,
 ): string => {
   if (expense) {
-    return formatCurrencyInput(expense.amount.toString().replace('.', ','));
+    return amountToInput(expense.amount);
   }
 
   return '';

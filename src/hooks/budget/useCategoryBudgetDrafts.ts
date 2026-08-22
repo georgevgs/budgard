@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
+import {
+  amountToInput,
+  formatCurrencyInput,
+  parseCurrencyInput,
+} from '@/lib/utils';
 import {
   useCategoriesData,
   useCategoryBudgetsData,
@@ -47,7 +51,9 @@ export const useCategoryBudgetDrafts = (isOpen: boolean, onClose: () => void) =>
   if (inputsChanged) {
     setPrevInputs({ isOpen, expenseCategories, categoryBudgets });
     if (isOpen) {
-      setDrafts(buildInitialDrafts(expenseCategories, categoryBudgets));
+      setDrafts(
+        buildInitialDrafts(expenseCategories, categoryBudgets, defaultCurrency),
+      );
       setError(null);
     }
   }
@@ -139,6 +145,7 @@ type Diff = {
 const buildInitialDrafts = (
   categories: Category[],
   budgets: CategoryBudget[],
+  currency: string,
 ): Record<string, string> => {
   const map: Record<string, string> = {};
   const byCategoryId = new Map(budgets.map((b) => [b.category_id, b]));
@@ -146,7 +153,7 @@ const buildInitialDrafts = (
   for (const cat of categories) {
     const existing = byCategoryId.get(cat.id);
     if (existing) {
-      map[cat.id] = formatCurrencyInput(existing.monthly_amount.toString());
+      map[cat.id] = amountToInput(existing.monthly_amount, currency);
       continue;
     }
     map[cat.id] = '';

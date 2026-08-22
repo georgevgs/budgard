@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { currentMonthKey } from '@/lib/dates';
 import { useTranslation } from 'react-i18next';
 import {
   useGoalsData,
@@ -116,7 +117,7 @@ const buildCrossedMilestoneIds = (
     return [];
   }
 
-  const month = new Date().toISOString().slice(0, 7);
+  const month = currentMonthKey();
   const ids: string[] = [];
   for (const rung of [25, 50, 100, 150, 200, 250, 500, 1000]) {
     if (rhythm.setAside >= rung) {

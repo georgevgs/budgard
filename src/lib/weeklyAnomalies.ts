@@ -1,4 +1,10 @@
-import { format, parseISO, startOfWeek, subDays } from 'date-fns';
+import {
+  differenceInCalendarDays,
+  format,
+  parseISO,
+  startOfWeek,
+  subDays,
+} from 'date-fns';
 import { buildBaseline, compareToBaseline } from '@/lib/baseline';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
@@ -154,9 +160,12 @@ const weeklyTotalsByCategory = (
     if (!row.category_id) {
       continue;
     }
+    // Calendar days, not milliseconds: a week that spans a clock change is
+    // 167 or 169 hours long, and dividing raw milliseconds filed a boundary
+    // date into the neighbouring week — enough to move a category in or out
+    // of an anomaly callout.
     const weekIndex = Math.floor(
-      (parseISO(row.date).getTime() - windowStart.getTime()) /
-        (WEEK_DAYS * 86_400_000),
+      differenceInCalendarDays(parseISO(row.date), windowStart) / WEEK_DAYS,
     );
     if (weekIndex < 0) {
       continue;

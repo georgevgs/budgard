@@ -21,7 +21,10 @@ import AccountIdentityFields from '@/components/networth/AccountIdentityFields';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useAccountSubmit } from '@/hooks/networth/useAccountSubmit';
 import { getCurrencySymbol } from '@/lib/currencies';
-import { formatCurrencyInput } from '@/lib/utils';
+import {
+  amountToInput,
+  formatCurrencyInput,
+} from '@/lib/utils';
 import { accountSchema, type AccountFormData } from '@/lib/validations';
 import type { Account, AccountKind } from '@/types/Account';
 import { swatch } from '@/design/palette';
@@ -143,9 +146,7 @@ const resolveInitialBalance = (account: Account | undefined): string => {
     return '';
   }
 
-  return formatCurrencyInput(
-    account.current_balance.toString().replace('.', ','),
-  );
+  return amountToInput(account.current_balance, account.default_currency);
 };
 
 const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {

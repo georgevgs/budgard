@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -14,8 +12,8 @@ import { DatePickerField } from '@/components/ui/date-picker-field';
 import { Label } from '@/components/ui/label';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
-import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
-import { formatCurrencyInput, parseCurrencyInput } from '@/lib/utils';
+import { useRefundDialog } from '@/hooks/expensesList/useRefundDialog';
+import { formatCurrency } from '@/lib/utils';
 import type { Expense } from '@/types/Expense';
 
 type Props = {
@@ -25,48 +23,14 @@ type Props = {
 };
 
 // Records a refund as a negative expense in the same category, so spending
-// totals, budgets and analytics all net out without special cases.
+// totals, budgets and analytics all net out without special cases. The row
+// carries refunded_expense_id, which is both the audit trail back to the
+// charge and what makes "how much is still refundable" answerable.
 const RefundExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();
-  const { handleExpenseSubmit } = useExpenseOps();
-  const [amount, setAmount] = useState(() => toAmountInput(expense.amount));
-  const [date, setDate] = useState<Date>(new Date());
-  const [isSaving, setIsSaving] = useState(false);
-
-  const [prevInputs, setPrevInputs] = useState({ open, expense });
-  const inputsChanged =
-    prevInputs.open !== open || prevInputs.expense !== expense;
-  if (inputsChanged) {
-    setPrevInputs({ open, expense });
-    if (open) {
-      setAmount(toAmountInput(expense.amount));
-      setDate(new Date());
-    }
-  }
-
-  const parsed = parseCurrencyInput(amount);
-  const canConfirm = parsed > 0 && parsed <= expense.amount && !isSaving;
-
-  const handleConfirm = async () => {
-    setIsSaving(true);
-    try {
-      await handleExpenseSubmit({
-        amount: -parsed,
-        description: t('expenses.refund.entryDescription', {
-          description: expense.description,
-        }),
-        category_id: expense.category_id ?? null,
-        date: format(date, 'yyyy-MM-dd'),
-        type: 'expense',
-      });
-      onOpenChange(false);
-    } catch {
-      // error toast handled by useExpenseOps
-    }
-    setIsSaving(false);
-  };
+  const refund = useRefundDialog({ expense, open, onOpenChange });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -85,18 +49,24 @@ const RefundExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
             <Label className="text-sm">{t('expenses.refund.amountLabel')}</Label>
             <CurrencyInput
               currency={defaultCurrency}
-              value={amount}
-              onChange={setAmount}
+              value={refund.amount}
+              onChange={refund.setAmount}
               placeholder="0,00"
             />
+            {renderRefundableHint(
+              refund.alreadyRefunded,
+              refund.refundable,
+              defaultCurrency,
+              t,
+            )}
           </div>
 
           <div className="space-y-1.5">
             <Label className="text-sm">{t('expenses.refund.dateLabel')}</Label>
             <DatePickerField
-              value={date}
+              value={refund.date}
               onChange={(next) => {
-                if (next) setDate(next);
+                if (next) refund.setDate(next);
               }}
               placeholder={t('expenses.pickDate')}
               locale={dateLocale}
@@ -109,11 +79,15 @@ const RefundExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
-            disabled={isSaving}
+            disabled={refund.isSaving}
           >
             {t('common.cancel')}
           </Button>
-          <Button type="button" onClick={handleConfirm} disabled={!canConfirm}>
+          <Button
+            type="button"
+            onClick={refund.confirm}
+            disabled={!refund.canConfirm}
+          >
             {t('expenses.refund.confirm')}
           </Button>
         </div>
@@ -126,6 +100,27 @@ export default RefundExpenseDialog;
 
 // --- Helpers ---
 
-const toAmountInput = (amount: number): string => {
-  return formatCurrencyInput(amount.toFixed(2).replace('.', ','));
+type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
+// Only shown once part of the charge has already come back — otherwise the
+// refundable amount is just the charge, and saying so is noise.
+const renderRefundableHint = (
+  alreadyRefunded: number,
+  refundable: number,
+  currency: string,
+  t: TranslateFunction,
+) => {
+  if (alreadyRefunded <= 0) return null;
+
+  return (
+    <p className="text-xs text-muted-foreground">
+      {t('expenses.refund.remaining', {
+        refunded: formatCurrency(alreadyRefunded, currency),
+        remaining: formatCurrency(refundable, currency),
+      })}
+    </p>
+  );
 };

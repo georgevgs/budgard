@@ -128,8 +128,18 @@ export const xirr = (cashflows: Cashflow[], guess = 0.1): number | null => {
     return null;
   }
 
+  // With alternating cashflows — contributions plus withdrawals — NPV has
+  // more than one root, and Newton can converge on one far outside any
+  // meaningful range. Accepting it on `> MIN_RATE` alone let a 50,000%/yr
+  // "return" reach the UI. Out-of-band roots fall through to bisection, which
+  // is bracketed and cannot.
   const newton = newtonRaphson(sorted, guess);
-  if (newton !== null && Number.isFinite(newton) && newton > MIN_RATE) {
+  if (
+    newton !== null &&
+    Number.isFinite(newton) &&
+    newton > MIN_RATE &&
+    newton <= MAX_RATE
+  ) {
     return newton;
   }
 

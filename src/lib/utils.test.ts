@@ -1,5 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import {
+  amountToInput,
   cn,
   formatCurrency,
   formatCurrencyCompact,
@@ -228,5 +229,57 @@ describe('formatForeignAmount', () => {
   it('falls back gracefully for unknown currency codes', () => {
     const result = formatForeignAmount(100, 'XYZ');
     expect(result).toContain('100');
+  });
+});
+
+describe('formatCurrencyInput — separator conventions', () => {
+  it('reads a dotted decimal as a decimal, not as thousands', () => {
+    // The 100x bug: "250.5" used to mask to "2.505" and parse back as 2505.
+    expect(formatCurrencyInput('250.5')).toBe('250,5');
+    expect(formatCurrencyInput('1234.56')).toBe('1.234,56');
+    expect(formatCurrencyInput('0.99')).toBe('0,99');
+  });
+
+  it('still reads dots as thousands when they group', () => {
+    expect(formatCurrencyInput('1.234')).toBe('1.234');
+    expect(formatCurrencyInput('1.234.567')).toBe('1.234.567');
+  });
+
+  it('handles a pasted US-formatted amount', () => {
+    expect(formatCurrencyInput('1,234.56')).toBe('1.234,56');
+    expect(parseCurrencyInput(formatCurrencyInput('1,234.56'))).toBe(1234.56);
+  });
+
+  it('handles a pasted European-formatted amount', () => {
+    expect(formatCurrencyInput('1.234,56')).toBe('1.234,56');
+    expect(parseCurrencyInput(formatCurrencyInput('1.234,56'))).toBe(1234.56);
+  });
+});
+
+describe('amountToInput', () => {
+  it('round-trips a stored amount through the mask', () => {
+    const cases = [0.99, 12.5, 250.5, 1234.56, 1000, 99999.99];
+    for (const value of cases) {
+      expect(parseCurrencyInput(amountToInput(value))).toBe(value);
+    }
+  });
+
+  it('pads to the currency minor unit', () => {
+    expect(amountToInput(250.5)).toBe('250,50');
+    expect(amountToInput(1234.5, 'USD')).toBe('1.234,50');
+  });
+
+  it('omits decimals for a zero-decimal currency', () => {
+    expect(amountToInput(1250, 'JPY')).toBe('1.250');
+  });
+
+  it('returns the magnitude, since the mask has no sign', () => {
+    expect(amountToInput(-42.5)).toBe('42,50');
+  });
+
+  it('returns empty for absent or unusable values', () => {
+    expect(amountToInput(null)).toBe('');
+    expect(amountToInput(undefined)).toBe('');
+    expect(amountToInput(Number.NaN)).toBe('');
   });
 });

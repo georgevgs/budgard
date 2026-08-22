@@ -303,26 +303,47 @@ export const useExpenseOps = () => {
     [isInitialized, setExpenses],
   );
 
-  // Splits one expense into several: the original row keeps its receipt,
-  // tags and recurring link and takes the first part; the rest are new rows
-  // with the same date and description.
+  // Splits one expense into several: the original row keeps its receipt and
+  // recurring link and takes the first part; the rest are new rows with the
+  // same date, description, tag, note and exclusion state.
+  //
+  // The new rows are written FIRST and the original is shrunk last. The other
+  // order shrinks the original and then, if the insert fails, leaves the
+  // remainder existing nowhere — €120 split three ways became a single €40
+  // row with an error toast. Written this way the worst case is a duplicate
+  // set of parts alongside an intact original, which is visible and
+  // correctable, rather than money that is simply gone.
   const handleExpenseSplit = useCallback(
     async (expense: Expense, parts: SplitPart[]) => {
       if (!isInitialized || parts.length < 2) return;
 
       const [firstPart, ...restParts] = parts;
       try {
-        const updated = await dataService.updateExpense(
-          { amount: firstPart.amount, category_id: firstPart.category_id },
-          expense.id,
-        );
         const created = await dataService.createExpensesBulk(
           restParts.map((part) => ({
             date: expense.date,
             description: expense.description,
             amount: part.amount,
             category_id: part.category_id,
+            tag_id: expense.tag_id ?? null,
+            note: expense.note ?? null,
+            is_excluded: expense.is_excluded ?? false,
           })),
+        );
+        const updated = await dataService.updateExpense(
+          {
+            amount: firstPart.amount,
+            category_id: firstPart.category_id,
+            // The parts are amounts in the default currency. Leaving the
+            // original's foreign pairing on the row made the detail screen
+            // claim the full foreign figure, and re-opening the edit form
+            // pre-filled it and re-converted — restoring the whole original
+            // amount over the split part.
+            original_amount: null,
+            original_currency: null,
+            exchange_rate: null,
+          },
+          expense.id,
         );
         setExpenses((prev) =>
           mergeUniqueById(replaceById(prev, expense.id, updated), created),

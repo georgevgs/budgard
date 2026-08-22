@@ -1,30 +1,33 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { buildUpcomingBills } from '@/lib/upcomingBills';
+import { computeUpcomingRecurringThisMonth } from '@/lib/forecast';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
-vi.mock('@/lib/recurring', () => ({
-  calculateNextOccurrence: (item: { next_due?: string | null }) => {
-    if (!item.next_due) {
-      return null;
-    }
+// Deliberately NOT mocking @/lib/recurring. The point of this module is that
+// Today, Plan and safe-to-spend describe the same commitments, and a mocked
+// occurrence calendar cannot show that they do.
 
-    return new Date(item.next_due);
-  },
-}));
+const NOW = new Date(2026, 7, 7, 10, 0, 0); // 7 Aug 2026, local
 
-const NOW = new Date('2026-08-07T10:00:00Z');
-
-const bill = (id: string, amount: number, nextDue: string | null) =>
-  ({ id, amount, next_due: nextDue, description: id }) as unknown as
-    RecurringExpense;
+const bill = (overrides: Partial<RecurringExpense>): RecurringExpense =>
+  ({
+    id: 'r1',
+    user_id: 'u1',
+    amount: 10,
+    description: 'Bill',
+    frequency: 'monthly',
+    start_date: '2026-01-08',
+    active: true,
+    created_at: '2026-01-08T00:00:00Z',
+    ...overrides,
+  }) as RecurringExpense;
 
 describe('buildUpcomingBills', () => {
   it('keeps only occurrences inside the window', () => {
     const result = buildUpcomingBills(
       [
-        bill('tomorrow', 10, '2026-08-08T00:00:00Z'),
-        bill('in-20-days', 20, '2026-08-27T00:00:00Z'),
-        bill('yesterday', 30, '2026-08-06T00:00:00Z'),
+        bill({ id: 'tomorrow', amount: 10, start_date: '2026-08-08' }),
+        bill({ id: 'in-20-days', amount: 20, start_date: '2026-08-27' }),
       ],
       NOW,
       { withinDays: 7, limit: 10 },
@@ -38,9 +41,9 @@ describe('buildUpcomingBills', () => {
   it('includes today and the final day of the window', () => {
     const result = buildUpcomingBills(
       [
-        bill('today', 5, '2026-08-07T23:00:00Z'),
-        bill('last-day', 7, '2026-08-14T00:00:00Z'),
-        bill('just-past', 9, '2026-08-15T00:00:00Z'),
+        bill({ id: 'today', amount: 5, start_date: '2026-08-07' }),
+        bill({ id: 'last-day', amount: 7, start_date: '2026-08-14' }),
+        bill({ id: 'just-past', amount: 9, start_date: '2026-08-15' }),
       ],
       NOW,
       { withinDays: 7, limit: 10 },
@@ -55,8 +58,8 @@ describe('buildUpcomingBills', () => {
   it('orders by soonest first', () => {
     const result = buildUpcomingBills(
       [
-        bill('later', 1, '2026-08-12T00:00:00Z'),
-        bill('sooner', 1, '2026-08-09T00:00:00Z'),
+        bill({ id: 'later', amount: 1, start_date: '2026-08-12' }),
+        bill({ id: 'sooner', amount: 1, start_date: '2026-08-09' }),
       ],
       NOW,
       { withinDays: 30, limit: 10 },
@@ -68,11 +71,12 @@ describe('buildUpcomingBills', () => {
     ]);
   });
 
-  it('drops entries with no next occurrence', () => {
-    const result = buildUpcomingBills([bill('inactive', 50, null)], NOW, {
-      withinDays: 30,
-      limit: 10,
-    });
+  it('drops inactive items', () => {
+    const result = buildUpcomingBills(
+      [bill({ id: 'inactive', amount: 50, active: false })],
+      NOW,
+      { withinDays: 30, limit: 10 },
+    );
 
     expect(result.count).toBe(0);
     expect(result.total).toBe(0);
@@ -81,9 +85,9 @@ describe('buildUpcomingBills', () => {
   it('limits displayed items but still totals the whole window', () => {
     const result = buildUpcomingBills(
       [
-        bill('a', 10, '2026-08-08T00:00:00Z'),
-        bill('b', 20, '2026-08-09T00:00:00Z'),
-        bill('c', 30, '2026-08-10T00:00:00Z'),
+        bill({ id: 'a', amount: 10, start_date: '2026-08-08' }),
+        bill({ id: 'b', amount: 20, start_date: '2026-08-09' }),
+        bill({ id: 'c', amount: 30, start_date: '2026-08-10' }),
       ],
       NOW,
       { withinDays: 30, limit: 2 },
@@ -92,5 +96,77 @@ describe('buildUpcomingBills', () => {
     expect(result.items).toHaveLength(2);
     expect(result.count).toBe(3);
     expect(result.total).toBe(60);
+  });
+
+  it('counts every occurrence a weekly bill takes out of the window', () => {
+    // Weekly 25 from 8 Aug, 30-day window from 7 Aug: 8, 15, 22, 29 Aug and
+    // 5 Sep all land inside it. Counting the item once said 25 for something
+    // that removes 125.
+    const result = buildUpcomingBills(
+      [bill({ id: 'weekly', amount: 25, frequency: 'weekly', start_date: '2026-08-08' })],
+      NOW,
+      { withinDays: 30, limit: 10 },
+    );
+
+    expect(result.items[0].occurrences).toBe(5);
+    expect(result.total).toBe(125);
+    // Still one commitment in the list, five charges in the total.
+    expect(result.count).toBe(1);
+  });
+
+  it('stops counting at the end date', () => {
+    const result = buildUpcomingBills(
+      [
+        bill({
+          id: 'ending',
+          amount: 25,
+          frequency: 'weekly',
+          start_date: '2026-08-08',
+          end_date: '2026-08-20',
+        }),
+      ],
+      NOW,
+      { withinDays: 30, limit: 10 },
+    );
+
+    // 8 and 15 Aug only.
+    expect(result.items[0].occurrences).toBe(2);
+    expect(result.total).toBe(50);
+  });
+
+  it('keeps a month-end bill on its anchor day', () => {
+    const result = buildUpcomingBills(
+      [
+        bill({
+          id: 'rent',
+          amount: 900,
+          start_date: '2026-01-31',
+          last_generated_date: '2026-07-31',
+        }),
+      ],
+      NOW,
+      { withinDays: 30, limit: 10 },
+    );
+
+    expect(result.items[0].nextDate?.getDate()).toBe(31);
+    expect(result.total).toBe(900);
+  });
+
+  it('agrees with safe-to-spend about what is still due this month', () => {
+    // buildUpcomingBills counts from today inclusive; safe-to-spend excludes a
+    // charge due today because the cron already generated it. Given a bill due
+    // later this month and none due today, the two must land on the same
+    // number — that agreement is the reason both exist.
+    const items = [
+      bill({ id: 'later-this-month', amount: 40, start_date: '2026-08-20' }),
+    ];
+    const daysLeftInAugust = 24; // 7 Aug → 31 Aug
+
+    const upcoming = buildUpcomingBills(items, NOW, {
+      withinDays: daysLeftInAugust,
+      limit: 10,
+    });
+
+    expect(upcoming.total).toBe(computeUpcomingRecurringThisMonth(items, NOW));
   });
 });

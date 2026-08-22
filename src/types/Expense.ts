@@ -32,6 +32,10 @@ export type Expense = {
   // (outflow that reduces a liability — excluded from spending aggregations).
   // DB default is 'expense'.
   type?: TransactionType;
+  // For a refund row, the expense it reverses. Null on ordinary rows. Lets
+  // the refund dialog cap against what is still refundable rather than
+  // against the original amount every time.
+  refunded_expense_id?: string | null;
   // Savings nudge: portion of an income row earmarked as savings.
   savings_allocation_amount?: number | null;
   category?: EmbeddedCategory;

@@ -5,6 +5,8 @@ import {
   useGoalsData,
 } from '@/contexts/DataContext';
 import { expenseHasTag } from '@/lib/expenseTags';
+import { sumAmounts } from '@/lib/money';
+import { countsInTotals } from '@/lib/spending';
 import type { Expense } from '@/types/Expense';
 import type { Goal } from '@/types/Goal';
 
@@ -251,8 +253,14 @@ const sumForSource = (
   return incomeSum - expenseSum;
 }
 
+// Rows the user marked as not-spending are left out here for the same reason
+// they are everywhere else: a transfer between their own accounts is not
+// progress towards a goal, and for a net_delta goal it lands on both sides and
+// distorts the figure in whichever direction the pair happens to fall.
 const sumExpenses = (rows: Expense[]): number =>
-  rows.reduce((acc, row) => acc + Number(row.amount ?? 0), 0);
+  sumAmounts(
+    rows.filter(countsInTotals).map((row) => Number(row.amount ?? 0)),
+  );
 
 const computeDeadlineState = (deadline?: string | null) => {
   if (!deadline) {

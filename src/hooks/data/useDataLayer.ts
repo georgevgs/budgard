@@ -261,7 +261,13 @@ export const useDataLayer = () => {
         Promise.all([
           dataService.getGoals(controller.signal),
           dataService.getAllAccountBalances(controller.signal),
-          dataService.getDebts(controller.signal),
+          // Accrue interest up to today before reading the balances, so the
+          // debt figures are current rather than frozen at the last payment.
+          // Best-effort: a refresh failure must not stop debts from loading.
+          dataService
+            .refreshDebtBalances()
+            .catch(() => undefined)
+            .then(() => dataService.getDebts(controller.signal)),
         ])
           .then(([goalsData, balancesData, debtsData]) => {
             if (controller.signal.aborted) {

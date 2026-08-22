@@ -275,7 +275,8 @@
       "amountLabel": "Refund amount",
       "dateLabel": "Refund date",
       "entryDescription": "Refund — {{description}}",
-      "confirm": "Record refund"
+      "confirm": "Record refund",
+      "remaining": "{{refunded}} already refunded — {{remaining}} left"
     },
     "saveHint": "Add an amount and a description to save",
     "quickAdd": {
@@ -589,7 +590,11 @@
       "default": "Default Currency",
       "defaultDescription": "Used for new expenses and display formatting",
       "updated": "Currency updated",
-      "updateFailed": "Failed to update currency"
+      "updateFailed": "Failed to update currency",
+      "noConversionNote": "Changing this re-labels your existing amounts. It does not convert them.",
+      "confirmTitle": "Change currency without converting?",
+      "confirmDescription": "Every amount you have already recorded keeps its number and is shown in {{to}} instead of {{from}}. A 4,50 coffee becomes 4,50 {{to}}. Nothing is converted, and this is not undone by switching back.",
+      "confirmAction": "Switch to {{currency}}"
     },
     "notifications": {
       "title": "Notifications",
@@ -873,7 +878,8 @@
       "range1m": "1M",
       "range3m": "3M",
       "range1y": "1Y",
-      "rangeAll": "All"
+      "rangeAll": "All",
+      "debtConstantNote": "Debt history isn't tracked per day, so today's debt is subtracted from every point — the trend here is your assets."
     },
     "allocation": {
       "title": "Investment allocation",
@@ -1663,7 +1669,8 @@
     "noteInvalid": "Note contains invalid characters",
     "aprRequired": "APR is required",
     "aprRange": "APR must be between 0 and 100",
-    "minPaymentRequired": "Minimum payment is required"
+    "minPaymentRequired": "Minimum payment is required",
+    "dateInFuture": "That date is in the future"
   },
   "errorBoundary": {
     "updateTitle": "Update Available",

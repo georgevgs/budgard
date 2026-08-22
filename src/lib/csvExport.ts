@@ -152,7 +152,10 @@ const generateMonthCsv = (
 
   const rows: CsvRow[] = expenses.map((expense) => {
     return [
-      format(new Date(expense.date), 'yyyy-MM-dd'),
+      // Already a yyyy-MM-dd calendar date. Round-tripping it through
+      // `new Date` parsed it as UTC and re-formatted it as local, moving
+      // every row back a day for anyone west of UTC.
+      expense.date,
       expense.description,
       resolveExpenseCategoryName(expense.category_id, categoryMap),
       expense.amount.toFixed(2),

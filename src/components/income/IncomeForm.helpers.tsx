@@ -2,9 +2,10 @@ import { parseISO } from 'date-fns';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
 import {
+  amountToInput,
   formatCurrency,
-  formatCurrencyInput,
 } from '@/lib/utils';
+import { resolveSourceCurrency } from '@/components/expenses/ExpensesForm.helpers';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
@@ -21,7 +22,7 @@ export const getInitialAmount = (
 
   const sourceAmount = pickSourceAmount(income, defaultCurrency);
 
-  return formatCurrencyInput(sourceAmount.toString().replace('.', ','));
+  return amountToInput(sourceAmount, resolveSourceCurrency(income, defaultCurrency));
 };
 
 const pickSourceAmount = (

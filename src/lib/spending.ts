@@ -29,6 +29,23 @@ export const countsAsSpending = (expense: Expense): boolean => {
   return !expense.is_excluded;
 };
 
+/**
+ * Whether a row counts towards a total of its own kind.
+ *
+ * `countsAsSpending` answers "is this money spent", so it rejects every income
+ * row by design. Totals that have already picked a side — an income average, a
+ * cash-flow income bar — need the other half of the question: the row is the
+ * right kind, is it one the user excluded? Applying countsAsSpending there
+ * silently zeroes the whole series.
+ */
+export const countsInTotals = (expense: Expense): boolean => {
+  if (expense.type === 'debt_payment') {
+    return false;
+  }
+
+  return !expense.is_excluded;
+};
+
 /** Drops everything that is not spending. */
 export const onlySpending = (expenses: Expense[]): Expense[] => {
   return expenses.filter(countsAsSpending);

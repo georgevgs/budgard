@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { getCurrencySymbol } from '@/lib/currencies';
+import { getCurrencyDecimals, getCurrencySymbol } from '@/lib/currencies';
 
 export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
@@ -9,21 +9,28 @@ export const cn = (...inputs: ClassValue[]) => {
 // Same de-DE separator convention as formatCurrency, so an original-currency
 // line stacked under the converted amount reads with identical number format.
 export const formatForeignAmount = (amount: number, currencyCode: string): string => {
+  const decimals = getCurrencyDecimals(currencyCode);
+
   try {
     return new Intl.NumberFormat('de-DE', {
       style: 'currency',
       currency: currencyCode,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
     }).format(amount);
   } catch {
-    return `${amount.toFixed(2)} ${currencyCode}`;
+    return `${amount.toFixed(decimals)} ${currencyCode}`;
   }
 };
 
+// Decimals follow the currency's ISO 4217 minor unit, so a yen amount reads
+// "¥1.250" rather than the "¥1.250,00" that a two-decimal default would print
+// for a currency that has no cents.
 export const formatCurrency = (amount: number, currencyCode: string = 'EUR'): string => {
+  const decimals = getCurrencyDecimals(currencyCode);
   const formatted = amount.toLocaleString('de-DE', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   });
 
   return formatted + getCurrencySymbol(currencyCode);
@@ -59,8 +66,13 @@ const resolvePercentLocale = (): string => {
 };
 
 export const formatCurrencyInput = (value: string): string => {
+  // Resolve which separator the caller meant as the decimal point before
+  // stripping anything — see resolveDecimalSeparator. Without this a pasted
+  // "1,234.56" loses its dot as punctuation and reads as 1,23.
+  const normalized = normalizeAmountSeparators(value);
+
   // Remove everything except digits and comma
-  const cleaned = value.replace(/[^\d,]/g, '');
+  const cleaned = normalized.replace(/[^\d,]/g, '');
 
   // Split into whole and decimal parts
   const parts = cleaned.split(',');
@@ -87,11 +99,94 @@ export const formatCurrencyInput = (value: string): string => {
 
 export const parseCurrencyInput = (value: string): number => {
   // Convert from European format (1.234,56) to number
-  const cleaned = value
-    .replace(/\./g, '') // Remove thousand separators
+  const cleaned = normalizeAmountSeparators(value)
+    .replace(/[^\d,-]/g, '') // Drop thousand separators and stray characters
     .replace(',', '.'); // Convert decimal comma to dot
 
   return parseFloat(cleaned) || 0;
+};
+
+/**
+ * A stored amount rendered as the masked string the amount inputs expect.
+ *
+ * Every form that pre-fills an amount needs this, and calling
+ * `formatCurrencyInput(value.toString())` instead is the bug it exists to
+ * prevent: `toString()` emits a dot, which the mask reads as a thousands
+ * separator, so 250.5 pre-fills as "2.505" and saves back as 2505.
+ */
+export const amountToInput = (
+  value: number | null | undefined,
+  currencyCode: string = 'EUR',
+): string => {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  if (!Number.isFinite(value)) {
+    return '';
+  }
+
+  const decimals = getCurrencyDecimals(currencyCode);
+  const fixed = Math.abs(value).toFixed(decimals);
+
+  return formatCurrencyInput(fixed.replace('.', ','));
+};
+
+/**
+ * Rewrites an amount so its decimal separator is always a comma, whatever
+ * convention it arrived in.
+ *
+ * The app's inputs are de-DE: dot groups thousands, comma marks decimals. But
+ * amounts arrive from three other places — a pasted US figure, a bank export,
+ * and a number's own `toString()` — where the dot is the decimal point. Being
+ * wrong about which is which is a factor-of-100 error, so the rule is decided
+ * once, here:
+ *
+ *   both separators present  the rightmost one is the decimal point, because
+ *                            no convention puts the grouping separator last
+ *   only commas              already de-DE, leave it alone
+ *   only dots, one of them,
+ *   with 1–2 digits after    a decimal point ("12.50", "250.5")
+ *   only dots, otherwise     thousands grouping ("1.234", "1.234.567")
+ *
+ * A lone trailing separator ("50,") is kept as typed so the mask does not
+ * fight someone mid-keystroke.
+ */
+const normalizeAmountSeparators = (value: string): string => {
+  const lastDot = value.lastIndexOf('.');
+  const lastComma = value.lastIndexOf(',');
+
+  if (lastDot === -1) {
+    return value;
+  }
+
+  if (lastComma > lastDot) {
+    // "1.234,56" — dots are grouping, comma already marks the decimal.
+    return value.replace(/\./g, '');
+  }
+
+  if (lastComma !== -1) {
+    // "1,234.56" — commas are grouping, the dot marks the decimal.
+    return value.replace(/,/g, '').replace('.', ',');
+  }
+
+  if (isDotDecimal(value, lastDot)) {
+    return value.replace('.', ',');
+  }
+
+  return value.replace(/\./g, '');
+};
+
+const isDotDecimal = (value: string, lastDot: number): boolean => {
+  if (value.indexOf('.') !== lastDot) {
+    return false;
+  }
+
+  const fraction = value.slice(lastDot + 1);
+  if (!/^\d*$/.test(fraction)) {
+    return false;
+  }
+
+  return fraction.length > 0 && fraction.length <= 2;
 };
 
 // Strip non-emoji characters so the input only accepts emoji.

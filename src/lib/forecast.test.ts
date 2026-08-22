@@ -95,7 +95,14 @@ describe('computeUpcomingRecurringThisMonth', () => {
   });
 
   it('counts a monthly item still due later this month', () => {
-    const items = [buildRecurring({ last_generated_date: '2026-06-20' })];
+    // start_date carries the anchor day, so it has to agree with the day the
+    // item last generated on — real data always does.
+    const items = [
+      buildRecurring({
+        start_date: '2026-01-20',
+        last_generated_date: '2026-06-20',
+      }),
+    ];
     expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026)).toBe(10);
   });
 
@@ -116,6 +123,7 @@ describe('computeUpcomingRecurringThisMonth', () => {
       buildRecurring({
         amount: 30,
         frequency: 'quarterly',
+        start_date: '2026-01-20',
         last_generated_date: '2026-04-20',
       }),
     ];
@@ -156,10 +164,12 @@ describe('computeUpcomingRecurringThisMonth', () => {
 
   it('does not leak January charges into December (year boundary)', () => {
     const dueNextJanuary = buildRecurring({
+      start_date: '2026-01-05',
       last_generated_date: '2026-12-05',
     });
     const dueDec28 = buildRecurring({
       id: 'r2',
+      start_date: '2026-01-28',
       last_generated_date: '2026-11-28',
     });
     const items = [dueNextJanuary, dueDec28];

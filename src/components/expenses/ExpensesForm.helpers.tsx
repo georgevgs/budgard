@@ -1,10 +1,7 @@
 import type { TFunction } from 'i18next';
 import { parseISO } from 'date-fns';
 import Tag from 'lucide-react/dist/esm/icons/tag';
-import {
-  formatCurrency,
-  formatCurrencyInput,
-} from '@/lib/utils';
+import { amountToInput, formatCurrency } from '@/lib/utils';
 import type { Expense } from '@/types/Expense';
 import type { Category, EmbeddedCategory } from '@/types/Category';
 
@@ -20,15 +17,33 @@ export const getInitialAmount = (
 ): string => {
   if (!expense) {
     if (typeof draft?.amount === 'number' && draft.amount > 0) {
-      return formatCurrencyInput(draft.amount.toFixed(2).replace('.', ','));
+      return amountToInput(draft.amount, defaultCurrency);
     }
 
     return '';
   }
 
-  const sourceAmount = pickSourceAmount(expense, defaultCurrency);
+  const sourceCurrency = resolveSourceCurrency(expense, defaultCurrency);
 
-  return formatCurrencyInput(sourceAmount.toString().replace('.', ','));
+  return amountToInput(pickSourceAmount(expense, defaultCurrency), sourceCurrency);
+};
+
+// The currency the amount field is denominated in: the currency the row was
+// logged in when that differs from today's default, otherwise the default.
+// Editing a foreign row shows the foreign figure, so it has to be rounded and
+// masked in that currency's minor unit, not the default's.
+export const resolveSourceCurrency = (
+  transaction: Expense,
+  defaultCurrency: string,
+): string => {
+  if (
+    transaction.original_currency &&
+    transaction.original_currency !== defaultCurrency
+  ) {
+    return transaction.original_currency;
+  }
+
+  return defaultCurrency;
 };
 
 const pickSourceAmount = (

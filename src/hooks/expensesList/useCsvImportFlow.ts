@@ -10,6 +10,7 @@ import {
   mapRowsToIncomes,
   readFileAsText,
   getCsvPreviewData,
+  usesSignedAmountConvention,
   suggestColumnMapping,
   type ParsedExpenseRow,
   type CsvParseError,
@@ -170,13 +171,19 @@ export const useCsvImportFlow = (onClose: () => void) => {
   );
 
   const handleProceedToPreview = useCallback(() => {
-    const hasNegativeAmounts = csvPreview?.hasNegativeAmounts ?? false;
+    // The sign convention is read from the column the user actually mapped as
+    // the amount. Reading it from "any negative cell anywhere in the file"
+    // meant one minus sign in a balance or a description flipped every
+    // unsigned row in the import from expense to income.
+    const signedConvention = csvPreview
+      ? usesSignedAmountConvention(csvPreview, columnMapping.amountColumn)
+      : false;
     const result = parseExpensesCsv(
       csvContent,
       categories,
       columnMapping,
       skipIncome,
-      hasNegativeAmounts,
+      signedConvention,
     );
 
     setValidRows(result.validRows);

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   getCsvPreviewData,
+  usesSignedAmountConvention,
   suggestColumnMapping,
   parseExpensesCsv,
   mapRowsToExpenses,
@@ -69,14 +70,26 @@ describe('getCsvPreviewData', () => {
     expect(preview.totalRows).toBe(2);
   });
 
-  it('detects negative amounts in bank statements', () => {
+  it('detects negative amounts in the amount column', () => {
     const csv = 'Date,Description,Amount\n2026-01-01,Coffee,-3.50';
-    expect(getCsvPreviewData(csv).hasNegativeAmounts).toBe(true);
+    expect(usesSignedAmountConvention(getCsvPreviewData(csv), 2)).toBe(true);
   });
 
   it('reports no negative amounts for normal CSVs', () => {
     const csv = 'Date,Description,Amount\n2026-01-01,Coffee,3.50';
-    expect(getCsvPreviewData(csv).hasNegativeAmounts).toBe(false);
+    expect(usesSignedAmountConvention(getCsvPreviewData(csv), 2)).toBe(false);
+  });
+
+  it('ignores negatives that live in other columns', () => {
+    // A running-balance column, or a "-5%" in a description, used to flip the
+    // sign convention for the entire file.
+    const csv = [
+      'Date,Description,Amount,Balance',
+      '2026-01-01,Coffee -5% off,3.50,-120.00',
+      '2026-01-02,Lunch,12.00,-132.00',
+    ].join('\n');
+    expect(usesSignedAmountConvention(getCsvPreviewData(csv), 2)).toBe(false);
+    expect(usesSignedAmountConvention(getCsvPreviewData(csv), 3)).toBe(true);
   });
 });
 
@@ -396,5 +409,71 @@ describe('income row import', () => {
     const expenses = mapRowsToExpenses(rows, categories, new Map());
     expect(expenses).toHaveLength(1);
     expect(expenses[0].description).toBe('Coffee');
+  });
+});
+
+// --- amount parsing ---
+
+describe('amount parsing', () => {
+  const CATEGORIES: Category[] = [];
+  const MAPPING = {
+    dateColumn: 0,
+    descriptionColumn: 1,
+    amountColumn: 2,
+    categoryColumn: null,
+  };
+
+  // Quoted, so an amount containing a comma is one field rather than two.
+  const parseOne = (amount: string, signed = false) => {
+    const csv = `Date,Description,Amount\n2026-01-01,Thing,"${amount}"`;
+
+    return parseExpensesCsv(csv, CATEGORIES, MAPPING, false, signed);
+  };
+
+  it('reads thousands separators instead of truncating them', () => {
+    // "1,234" used to parseFloat to 1 and "1.234" to 1.23.
+    expect(parseOne('1,234').validRows[0].amount).toBe(1234);
+    expect(parseOne('1.234').validRows[0].amount).toBe(1234);
+    expect(parseOne('1,234.56').validRows[0].amount).toBe(1234.56);
+    expect(parseOne('1.234,56').validRows[0].amount).toBe(1234.56);
+  });
+
+  it('reads plain decimals in either convention', () => {
+    expect(parseOne('12.50').validRows[0].amount).toBe(12.5);
+    expect(parseOne('12,50').validRows[0].amount).toBe(12.5);
+  });
+
+  it('handles trailing-minus notation', () => {
+    // Some bank exports write "1234.56-" and it used to parse as positive.
+    const result = parseOne('1234.56-', true);
+    expect(result.validRows[0].amount).toBe(1234.56);
+    expect(result.skippedIncomeCount).toBe(0);
+  });
+
+  it('handles accounting parentheses', () => {
+    const result = parseOne('(1,234.56)', true);
+    expect(result.validRows[0].amount).toBe(1234.56);
+  });
+
+  it('keeps a refund negative when the file is not a bank statement', () => {
+    // Budgard's own export writes -3.50 for a refund. Read as a magnitude it
+    // came back as a +3.50 charge — a 7 euro swing per row.
+    const result = parseOne('-3.50', false);
+    expect(result.validRows[0].amount).toBe(-3.5);
+  });
+
+  it('treats a negative as an outgoing expense in a bank statement', () => {
+    const result = parseOne('-3.50', true);
+    expect(result.validRows[0].amount).toBe(3.5);
+  });
+
+  it('treats an unsigned amount as income only under the signed convention', () => {
+    expect(parseOne('3.50', true).skippedIncomeCount).toBe(0);
+    expect(parseOne('3.50', false).validRows[0].amount).toBe(3.5);
+  });
+
+  it('rejects a zero amount but not a negative one', () => {
+    expect(parseOne('0').validRows).toHaveLength(0);
+    expect(parseOne('-3.50').validRows).toHaveLength(1);
   });
 });

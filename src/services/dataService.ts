@@ -326,6 +326,11 @@ export const dataService = {
       description: string;
       amount: number;
       category_id: string | null;
+      // Carried by splits so the parts inherit what the original was: its
+      // primary tag, its note, and whether it counted towards totals.
+      tag_id?: string | null;
+      note?: string | null;
+      is_excluded?: boolean;
     }>,
   ) {
     const { data, error } = await supabase
@@ -928,6 +933,18 @@ export const dataService = {
     if (error) throw error;
 
     return data as Account;
+  },
+
+  // Interest accrues every day, but recompute_debt_balance only ran when a
+  // payment row moved — so a debt untouched for months carried a balance
+  // months out of date, and that figure feeds net worth and the payoff
+  // planner. Bringing the balances current immediately before reading them
+  // means the number is fresh exactly when someone is looking at it.
+  // Best-effort: a failure here must not stop the debts from loading.
+  async refreshDebtBalances() {
+    const { error } = await supabase.rpc('refresh_debt_balances');
+
+    if (error) throw error;
   },
 
   async getDebts(signal?: AbortSignal) {

@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { countsAsSpending, onlySpending, sumSpending } from '@/lib/spending';
+import {
+  countsAsSpending,
+  countsInTotals,
+  onlySpending,
+  sumSpending,
+} from '@/lib/spending';
 import type { Expense } from '@/types/Expense';
 
 const row = (overrides: Partial<Expense>): Expense =>
@@ -73,5 +78,32 @@ describe('onlySpending', () => {
     ];
 
     expect(onlySpending(rows).map((item) => item.id)).toEqual(['a', 'd']);
+  });
+});
+
+describe('countsInTotals', () => {
+  const row = (overrides: Partial<Expense>): Expense =>
+    ({ id: 'e1', amount: 10, date: '2026-08-01', ...overrides }) as Expense;
+
+  it('keeps an ordinary expense', () => {
+    expect(countsInTotals(row({ type: 'expense' }))).toBe(true);
+  });
+
+  it('keeps an income row, unlike countsAsSpending', () => {
+    // The distinction this predicate exists for: an income average filtered
+    // by countsAsSpending is always zero.
+    const income = row({ type: 'income' });
+
+    expect(countsAsSpending(income)).toBe(false);
+    expect(countsInTotals(income)).toBe(true);
+  });
+
+  it('drops an excluded row of either kind', () => {
+    expect(countsInTotals(row({ type: 'expense', is_excluded: true }))).toBe(false);
+    expect(countsInTotals(row({ type: 'income', is_excluded: true }))).toBe(false);
+  });
+
+  it('drops a debt payment, which is neither spending nor income', () => {
+    expect(countsInTotals(row({ type: 'debt_payment' }))).toBe(false);
   });
 });

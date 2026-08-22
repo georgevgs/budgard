@@ -22,7 +22,10 @@ import DebtNumbersFields from '@/components/debts/DebtNumbersFields';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useDebtSubmit } from '@/hooks/debts/useDebtSubmit';
 import { getCurrencySymbol } from '@/lib/currencies';
-import { formatCurrencyInput } from '@/lib/utils';
+import {
+  amountToInput,
+  formatCurrencyInput,
+} from '@/lib/utils';
 import { debtSchema, type DebtFormData } from '@/lib/validations';
 import { type Debt } from '@/types/Debt';
 import { swatch } from '@/design/palette';
@@ -130,7 +133,7 @@ const resolveCurrencyDefault = (value: number | undefined): string => {
     return '';
   }
 
-  return formatCurrencyInput(value.toString().replace('.', ','));
+  return amountToInput(value);
 };
 
 const resolveAprDefault = (debt: Debt | undefined): string => {

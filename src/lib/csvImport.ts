@@ -1,3 +1,4 @@
+import { roundMoney } from '@/lib/money';
 import type { Category } from '@/types/Category';
 import { SAFE_STRING } from '@/lib/validations';
 
@@ -24,7 +25,10 @@ export type CsvPreviewData = {
   sampleRows: string[][];
   delimiter: string;
   totalRows: number;
-  hasNegativeAmounts: boolean; // True if CSV contains negative values (bank statement format)
+  // Indices of columns that contain at least one negative number. The amount
+  // column's membership decides the sign convention; other columns are none
+  // of the amount's business.
+  negativeColumns: Set<number>;
 }
 
 type CsvParseResult = {
@@ -85,22 +89,48 @@ export const getCsvPreviewData = (csvContent: string): CsvPreviewData => {
     );
   const totalRows = dataRows.length;
 
-  // Check if any cell contains a negative number (indicates bank statement format)
-  const hasNegativeAmounts = dataRows.some((row) =>
-    row.some((cell) => {
-      const cleaned = cell.trim().replace(/[€$£¥\s"']/g, '');
-
-      return cleaned.startsWith('-') && /^-\d/.test(cleaned);
-    }),
-  );
+  // Which columns contain negative numbers. Previously this was a single flag
+  // set by ANY cell in ANY column — a running-balance column, a "-5%" in a
+  // description, one refund row — and that flag decided, for the whole file,
+  // whether an unsigned amount was an expense or an income. One stray minus
+  // sign turned five hundred expenses into five hundred incomes.
+  //
+  // Recording it per column lets the decision follow the column the user
+  // actually maps as the amount, and lets the UI show which way it resolved.
+  const negativeColumns = new Set<number>();
+  for (const row of dataRows) {
+    row.forEach((cell, index) => {
+      if (isNegativeCell(cell)) {
+        negativeColumns.add(index);
+      }
+    });
+  }
 
   return {
     headers,
     sampleRows,
     delimiter,
     totalRows,
-    hasNegativeAmounts,
+    negativeColumns,
   };
+};
+
+// A cell is a negative number, not merely a string that starts with a dash.
+const isNegativeCell = (cell: string): boolean => {
+  const cleaned = cell.trim().replace(/[€$£¥\s"']/g, '');
+
+  return /^-\d/.test(cleaned);
+};
+
+/**
+ * Whether the mapped amount column uses the bank-statement sign convention
+ * (negative = money out, positive = money in).
+ */
+export const usesSignedAmountConvention = (
+  preview: Pick<CsvPreviewData, 'negativeColumns'>,
+  amountColumn: number,
+): boolean => {
+  return preview.negativeColumns.has(amountColumn);
 };
 
 /**
@@ -212,15 +242,15 @@ export const suggestColumnMapping = (preview: CsvPreviewData): ColumnMapping => 
  * @param categories - User's categories for matching
  * @param columnMapping - Which columns contain which data
  * @param skipIncomeTransactions - Whether to skip income transactions
- * @param hasNegativeAmounts - If true, CSV uses bank statement convention
- *   where negative = expense, positive = income
+ * @param signedConvention - If true, the mapped amount column uses the bank
+ *   statement convention where negative = expense, positive = income
  */
 export const parseExpensesCsv = (
   csvContent: string,
   categories: Category[],
   columnMapping: ColumnMapping,
   skipIncomeTransactions: boolean = true,
-  hasNegativeAmounts: boolean = false,
+  signedConvention: boolean = false,
 ): CsvParseResult => {
   const lines = csvContent.trim().split(/\r?\n/);
   const validRows: ParsedExpenseRow[] = [];
@@ -259,7 +289,7 @@ export const parseExpensesCsv = (
       columnMapping,
       minColumns,
       categoryMap,
-      hasNegativeAmounts,
+      signedConvention,
       skipIncomeTransactions,
     );
 
@@ -374,7 +404,7 @@ const processRow = (
   columnMapping: ColumnMapping,
   minColumns: number,
   categoryMap: Map<string, Category>,
-  hasNegativeAmounts: boolean,
+  signedConvention: boolean,
   skipIncomeTransactions: boolean,
 ): RowOutcome => {
   const { dateColumn, descriptionColumn, amountColumn, categoryColumn } =
@@ -422,11 +452,12 @@ const processRow = (
   if (descriptionError) return { kind: 'error', error: descriptionError };
   const trimmedDescription = description.trim();
 
-  const { amount, isIncome } = parseAmount(amountStr.trim(), hasNegativeAmounts);
+  const { amount, isIncome } = parseAmount(amountStr.trim(), signedConvention);
 
   if (skipIncomeTransactions && isIncome) return { kind: 'income' };
 
-  if (amount === null || amount <= 0) {
+  // Zero is not a transaction; a negative expense is a refund and is legal.
+  if (amount === null || amount === 0) {
     return {
       kind: 'error',
       error: {
@@ -631,61 +662,134 @@ type AmountParseResult = {
 }
 
 /**
- * Parses an amount string, handling various formats
- * Returns both the amount and whether it's income
+ * Parses an amount from a CSV cell.
+ *
+ * Two things this has to get right that it previously did not:
+ *
+ * Thousands separators. Three regexes covered the common shapes and anything
+ * else fell through to a bare parseFloat, where "1,234" became 1 and "1.234"
+ * became 1.23 — both ordinary whole-euro bank exports, both silently wrong by
+ * three orders of magnitude. The separator is now resolved the same way the
+ * amount inputs resolve it: whichever of . or , appears last is the decimal
+ * point, and a lone separator is a decimal only when 1–2 digits follow it.
+ *
+ * Sign. Negative expenses are legal now (refunds, adjustments), so a minus no
+ * longer just means "expense, take the magnitude". In a bank statement the
+ * sign encodes direction, and a magnitude is what should be stored. In any
+ * other file the sign is part of the amount, so Budgard's own export
+ * round-trips: a -3,50 refund comes back as a -3,50 refund rather than as a
+ * +3,50 charge.
  *
  * @param amountStr - The amount string to parse
- * @param treatPositiveAsIncome - If true, positive amounts (no sign) are income.
- *   This should be true for bank statements that use -/+ convention.
- *   If false, only explicit + prefix is treated as income.
+ * @param signedConvention - True when the mapped amount column uses the
+ *   bank-statement convention (negative = money out, positive = money in).
  */
 const parseAmount = (
   amountStr: string,
-  treatPositiveAsIncome: boolean,
+  signedConvention: boolean,
 ): AmountParseResult => {
-  // Remove currency symbols and whitespace
-  let cleaned = amountStr.replace(/[€$£¥\s]/g, '');
+  // Currency symbols, spaces, quotes and thin/non-breaking spaces used as
+  // grouping separators in some locales.
+  let cleaned = amountStr
+    .replace(/[€$£¥\s"']/g, '')
+    .replace(/[\u00a0\u202f\u2009]/g, '');
 
-  // Check for +/- prefix
-  const hasMinusSign = cleaned.startsWith('-');
+  // Trailing-minus notation, used by several bank exports: "1234.56-".
+  let trailingMinus = false;
+  if (cleaned.endsWith('-')) {
+    trailingMinus = true;
+    cleaned = cleaned.slice(0, -1);
+  }
+
+  // Accounting parentheses: "(1,234.56)" is negative.
+  let parenthesised = false;
+  if (cleaned.startsWith('(') && cleaned.endsWith(')')) {
+    parenthesised = true;
+    cleaned = cleaned.slice(1, -1);
+  }
+
+  const hasMinusSign = cleaned.startsWith('-') || trailingMinus || parenthesised;
   const hasPlusSign = cleaned.startsWith('+');
 
-  // Remove +/- prefix for parsing
-  if (hasMinusSign || hasPlusSign) {
+  if (cleaned.startsWith('-') || hasPlusSign) {
     cleaned = cleaned.substring(1);
   }
 
-  // Handle European format (1.234,56) - thousands with dots, decimals with comma
-  if (/^\d{1,3}(?:\.\d{3})*,\d{1,2}$/.test(cleaned)) {
-    cleaned = cleaned.replace(/\./g, '').replace(',', '.');
-  }
-  // Handle format with just comma as decimal (123,45 or 123,5)
-  else if (/^\d+,\d{1,2}$/.test(cleaned)) {
-    cleaned = cleaned.replace(',', '.');
-  }
-  // Handle US format (1,234.56) - thousands with commas, decimals with dots
-  else if (/^\d{1,3}(?:,\d{3})*\.\d{1,2}$/.test(cleaned)) {
-    cleaned = cleaned.replace(/,/g, '');
-  }
+  const magnitude = parseFloat(normalizeSeparators(cleaned));
 
-  const amount = parseFloat(cleaned);
-
-  if (isNaN(amount)) {
+  if (!Number.isFinite(magnitude)) {
     return { amount: null, isIncome: false };
   }
 
-  // Determine if this is income:
-  // - If treatPositiveAsIncome is true (bank statement with negatives):
-  //   positive (no sign or +) = income, negative = expense
-  // - If treatPositiveAsIncome is false (e.g., Budgard export):
-  //   only explicit + is income, everything else is expense
-  let isIncome = hasPlusSign;
-  if (treatPositiveAsIncome) {
-    isIncome = !hasMinusSign;
+  const rounded = roundMoney(magnitude);
+
+  // Bank statement: the sign is the direction, so store the magnitude and
+  // record which side it fell on.
+  if (signedConvention) {
+    return { amount: rounded, isIncome: !hasMinusSign };
   }
 
-  return {
-    amount: Math.round(amount * 100) / 100,
-    isIncome,
-  };
+  // Everything else: an explicit + means income; otherwise the sign belongs to
+  // the amount, so a refund stays negative.
+  if (hasPlusSign) {
+    return { amount: rounded, isIncome: true };
+  }
+
+  if (hasMinusSign) {
+    return { amount: -rounded, isIncome: false };
+  }
+
+  return { amount: rounded, isIncome: false };
 };
+
+/**
+ * Rewrites an amount so the decimal point is a dot and grouping separators are
+ * gone, whichever convention the file used.
+ *
+ *   both separators   the rightmost is the decimal point — no convention puts
+ *                     the grouping separator last
+ *   one separator     a decimal point only when exactly one of it appears with
+ *                     1–2 digits after; "1,234" and "1.234" group thousands,
+ *                     "1,23" and "1.5" are decimals
+ *
+ * Deliberately stricter than lib/utils.ts, which leaves a lone comma alone
+ * because the amount inputs are de-DE and a typed comma is always a decimal
+ * point. A file has no such guarantee.
+ */
+const normalizeSeparators = (value: string): string => {
+  const lastDot = value.lastIndexOf('.');
+  const lastComma = value.lastIndexOf(',');
+
+  if (lastDot === -1 && lastComma === -1) {
+    return value;
+  }
+
+  if (lastDot !== -1 && lastComma !== -1) {
+    if (lastComma > lastDot) {
+      return value.replace(/\./g, '').replace(',', '.');
+    }
+
+    return value.replace(/,/g, '');
+  }
+
+  const separator = lastDot === -1 ? ',' : '.';
+  if (isDecimalSeparator(value, separator)) {
+    return value.replace(separator, '.');
+  }
+
+  return value.split(separator).join('');
+};
+
+// A lone separator marks decimals only when it appears once with one or two
+// digits after it. Anything else is thousands grouping.
+const isDecimalSeparator = (value: string, separator: string): boolean => {
+  const first = value.indexOf(separator);
+  if (first !== value.lastIndexOf(separator)) {
+    return false;
+  }
+
+  const fraction = value.slice(first + 1);
+
+  return /^\d{1,2}$/.test(fraction);
+};
+

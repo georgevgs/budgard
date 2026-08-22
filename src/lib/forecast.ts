@@ -21,7 +21,9 @@ import {
   startOfDay,
   startOfMonth,
 } from 'date-fns';
-import { advanceByFrequency, getMonthlyAmount } from '@/lib/recurring';
+import { advanceOccurrence, getMonthlyAmount } from '@/lib/recurring';
+import { sumAmounts } from '@/lib/money';
+import { countsInTotals } from '@/lib/spending';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
@@ -103,13 +105,15 @@ export const computeUpcomingRecurringThisMonth = (
 
     let cursor = findFirstOccurrenceAfter(item, today);
     let iterations = 0;
+    const due: number[] = [];
     while (cursor !== null && cursor <= monthEnd) {
       if (isBeyondEndDate(item, cursor)) break;
-      total += item.amount;
-      cursor = advanceByFrequency(cursor, item.frequency);
+      due.push(item.amount);
+      cursor = advanceOccurrence(item, cursor);
       iterations += 1;
       if (iterations >= MAX_OCCURRENCE_ITERATIONS) break;
     }
+    total = sumAmounts([total, ...due]);
   }
 
   return total;
@@ -191,7 +195,7 @@ export const computeSpendableBalance = (
     return null;
   }
 
-  return spendable.reduce((sum, account) => sum + account.current_balance, 0);
+  return sumAmounts(spendable.map((account) => account.current_balance));
 };
 
 type SpendableAccount = {
@@ -217,17 +221,14 @@ const findFirstOccurrenceAfter = (
 ): Date | null => {
   let cursor: Date;
   if (item.last_generated_date) {
-    cursor = advanceByFrequency(
-      parseISO(item.last_generated_date),
-      item.frequency,
-    );
+    cursor = advanceOccurrence(item, parseISO(item.last_generated_date));
   } else {
     cursor = parseISO(item.start_date);
   }
 
   let iterations = 0;
   while (cursor <= today) {
-    cursor = advanceByFrequency(cursor, item.frequency);
+    cursor = advanceOccurrence(item, cursor);
     iterations += 1;
     if (iterations >= MAX_OCCURRENCE_ITERATIONS) return null;
   }
@@ -242,6 +243,10 @@ const isBeyondEndDate = (item: RecurringExpense, date: Date): boolean => {
 };
 
 // Average of NON-recurring-generated rows over the last up-to-6 full months.
+// Rows the user marked as not-spending are left out, so the projection rests
+// on the same population as safe-to-spend rather than a wider one. This runs
+// over incomes as well as expenses, so the predicate is countsInTotals rather
+// than countsAsSpending — the latter rejects every income row.
 // The current (partial) month is excluded. Months before the user's first
 // transaction are excluded too, so a two-month-old account divides by 2, not
 // 6 — but a windowed month with zero variable activity still counts as a
@@ -268,14 +273,15 @@ const computeVariableMonthlyAverage = (rows: Expense[], now: Date): number => {
   }
   if (windowKeys.size === 0) return 0;
 
-  let total = 0;
+  const counted: number[] = [];
   for (const row of rows) {
     if (row.recurring_expense_id) continue;
+    if (!countsInTotals(row)) continue;
     if (!windowKeys.has(row.date.slice(0, 7))) continue;
-    total += row.amount;
+    counted.push(row.amount);
   }
 
-  return total / windowKeys.size;
+  return sumAmounts(counted) / windowKeys.size;
 };
 
 // Monthly-equivalent total of the recurring items live during the given
@@ -286,14 +292,14 @@ const sumRecurringForMonth = (
   monthStart: Date,
 ): number => {
   const monthEnd = endOfMonth(monthStart);
-  let total = 0;
+  const live: number[] = [];
 
   for (const item of items) {
     if (!item.active) continue;
     if (parseISO(item.start_date) > monthEnd) continue;
     if (item.end_date && parseISO(item.end_date) < monthStart) continue;
-    total += getMonthlyAmount(item);
+    live.push(getMonthlyAmount(item));
   }
 
-  return total;
+  return sumAmounts(live);
 };

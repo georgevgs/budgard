@@ -6,7 +6,8 @@ import {
   useCategoriesData,
 } from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
-import { countsAsSpending } from '@/lib/spending';
+import { onlySpending } from '@/lib/spending';
+import { sumAmounts } from '@/lib/money';
 import { useIsPro } from '@/hooks/useIsPro';
 import { getFreeAnalyticsCutoff } from '@/lib/proLimits';
 import { monthsElapsedInYear } from '@/lib/utils';
@@ -39,12 +40,22 @@ export const useAnalyticsData = () => {
 
   // Free tier sees the last 3 months only; everything downstream (year list,
   // charts, breakdowns, month comparison) derives from this window.
+  //
+  // The exclusion is applied HERE, once, rather than per-memo. It used to be
+  // applied in monthlyData only, so the bar chart, the headline sitting above
+  // it and the year totals were computed on different populations and
+  // contradicted each other on screen.
+  // Everything that counts as spending, over the full history. The rolling
+  // 12-month chart needs this rather than the free-tier window below, which
+  // would clip it to three months.
+  const countedExpenses = useMemo(() => onlySpending(allExpenses), [allExpenses]);
+
   const expenses = useMemo(() => {
-    if (isPro) return allExpenses;
+    if (isPro) return countedExpenses;
     const cutoff = getFreeAnalyticsCutoff();
 
-    return allExpenses.filter((e) => parseISO(e.date) >= cutoff);
-  }, [allExpenses, isPro]);
+    return countedExpenses.filter((e) => parseISO(e.date) >= cutoff);
+  }, [countedExpenses, isPro]);
 
   // YYYY-MM-DD dates: slicing the year/month straight off the string is ~10x
   // faster than parseISO per row (see useExpensesFilter for the same pattern).
@@ -74,9 +85,6 @@ export const useAnalyticsData = () => {
     // 12 month keys to human-readable labels (date-fns only for labels).
     const totals = new Map<string, number>();
     for (const e of yearExpenses) {
-      if (!countsAsSpending(e)) {
-        continue;
-      }
       const key = e.date.slice(0, 7);
       totals.set(key, (totals.get(key) ?? 0) + e.amount);
     }
@@ -101,16 +109,18 @@ export const useAnalyticsData = () => {
     const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthKey = format(lastMonthDate, 'yyyy-MM');
 
-    let thisMonthAmount = 0;
-    let lastMonthAmount = 0;
+    const thisMonthRows: number[] = [];
+    const lastMonthRows: number[] = [];
     for (const e of expenses) {
       const key = e.date.slice(0, 7);
       if (key === thisMonthKey) {
-        thisMonthAmount += e.amount;
+        thisMonthRows.push(e.amount);
       } else if (key === lastMonthKey) {
-        lastMonthAmount += e.amount;
+        lastMonthRows.push(e.amount);
       }
     }
+    const thisMonthAmount = sumAmounts(thisMonthRows);
+    const lastMonthAmount = sumAmounts(lastMonthRows);
 
     const delta = thisMonthAmount - lastMonthAmount;
     let percentChange: number | null = null;
@@ -201,8 +211,8 @@ export const useAnalyticsData = () => {
   // rhythm is about the recent shape of your spending and a year viewed in
   // March is nine-twelfths empty.
   const rhythmMonths = useMemo(
-    () => buildRollingMonths(allExpenses, dateLocale),
-    [allExpenses, dateLocale],
+    () => buildRollingMonths(countedExpenses, dateLocale),
+    [countedExpenses, dateLocale],
   );
 
   return {
@@ -223,12 +233,11 @@ export const useAnalyticsData = () => {
 
 const ROLLING_MONTHS = 12;
 
+// Callers pass the already-filtered `expenses` population, so this no longer
+// re-applies the exclusion.
 const buildRollingMonths = (expenses: Expense[], dateLocale: Locale) => {
   const totals = new Map<string, number>();
   for (const expense of expenses) {
-    if (!countsAsSpending(expense)) {
-      continue;
-    }
     const key = expense.date.slice(0, 7);
     totals.set(key, (totals.get(key) ?? 0) + expense.amount);
   }

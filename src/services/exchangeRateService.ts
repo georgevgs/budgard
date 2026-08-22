@@ -1,5 +1,8 @@
 // Frankfurter API — free, no key required, uses official ECB data
 // https://frankfurter.dev
+import { todayIso } from '@/lib/dates';
+import { isUsableRate } from '@/lib/money';
+
 const BASE_URL = 'https://api.frankfurter.dev/v2';
 
 // In-memory cache: key is "<from>-<to>-<date>" → cached entry. Mirrored to
@@ -37,7 +40,9 @@ export const fetchExchangeRate = async (
   hydrateFromStorage();
 
   const cacheKey = `${fromCurrency}-${toCurrency}-${date}`;
-  const today = new Date().toISOString().slice(0, 10);
+  // Local calendar day: the transaction's date is local, so the
+  // historic-vs-latest decision has to be made in the same frame.
+  const today = todayIso();
   const cached = rateCache.get(cacheKey);
   if (cached && isCacheEntryFresh(cached, today)) return cached.rate;
 
@@ -52,7 +57,29 @@ export const fetchExchangeRate = async (
   const entry = data.find((r) => r.quote === toCurrency);
   if (!entry) throw new Error(`${toCurrency} rate missing from response`);
 
+  // A null or absurd rate has to fail here. Taken on trust it becomes
+  // `amount * null` — an expense saved at zero that looks like a real row
+  // forever after, and a poisoned cache entry for every later conversion.
+  if (!isUsableRate(entry.rate)) {
+    throw new Error(
+      `Implausible ${fromCurrency}->${toCurrency} rate: ${String(entry.rate)}`,
+    );
+  }
+
   storeRate(cacheKey, buildCacheEntry(entry.rate, date, today));
+
+  // The ECB publishes on business days only, so a weekend or holiday request
+  // is answered with the preceding business day's rate. That is the right
+  // convention — it is the rate that was in force — but it means the value is
+  // not "the rate on `date`". Caching it under the date the API actually
+  // returned as well lets neighbouring non-business days reuse it instead of
+  // each making their own round trip for the same number.
+  if (entry.date && entry.date !== date) {
+    storeRate(
+      `${fromCurrency}-${toCurrency}-${entry.date}`,
+      buildCacheEntry(entry.rate, entry.date, today),
+    );
+  }
 
   return entry.rate;
 };
@@ -93,7 +120,7 @@ const hydrateFromStorage = (): void => {
     if (typeof stored.rates !== 'object' || stored.rates === null) return;
 
     for (const [key, entry] of Object.entries(stored.rates)) {
-      if (typeof entry?.rate !== 'number') continue;
+      if (!isUsableRate(entry?.rate)) continue;
       rateCache.set(key, entry);
     }
   } catch {

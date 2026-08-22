@@ -51,9 +51,65 @@ describe('calculateNextOccurrence', () => {
   it('advances from last_generated_date by one period', () => {
     const r = buildRecurring({
       frequency: 'monthly',
+      // Consistent with the anchor: a schedule that starts on the 15th is the
+      // only one that can have generated on the 15th.
+      start_date: '2026-01-15',
       last_generated_date: '2026-04-15',
     });
     expect(localDate(calculateNextOccurrence(r))).toBe('2026-05-15');
+  });
+
+  it('keeps a month-end schedule on its anchor day instead of drifting', () => {
+    // The drift bug: Jan 31 clamped to Feb 28, and every later occurrence was
+    // taken from the clamped date, so the bill stayed on the 28th forever.
+    const anchored = (lastGenerated: string) =>
+      localDate(
+        calculateNextOccurrence(
+          buildRecurring({
+            frequency: 'monthly',
+            start_date: '2026-01-31',
+            last_generated_date: lastGenerated,
+          }),
+        ),
+      );
+
+    expect(anchored('2026-01-31')).toBe('2026-02-28');
+    expect(anchored('2026-02-28')).toBe('2026-03-31');
+    expect(anchored('2026-03-31')).toBe('2026-04-30');
+    expect(anchored('2026-04-30')).toBe('2026-05-31');
+  });
+
+  it('keeps a leap-day yearly schedule anchored', () => {
+    const anchored = (lastGenerated: string) =>
+      localDate(
+        calculateNextOccurrence(
+          buildRecurring({
+            frequency: 'yearly',
+            start_date: '2024-02-29',
+            last_generated_date: lastGenerated,
+          }),
+        ),
+      );
+
+    expect(anchored('2024-02-29')).toBe('2025-02-28');
+    expect(anchored('2027-02-28')).toBe('2028-02-29');
+  });
+
+  it('still returns the final occurrence on the end date itself', () => {
+    // end_date parsed as UTC midnight used to compare as "already past" for
+    // most of the day in a positive-offset timezone.
+    const r = buildRecurring({
+      frequency: 'monthly',
+      start_date: '2026-01-07',
+      last_generated_date: '2026-04-07',
+      end_date: '2026-05-07',
+    });
+    expect(localDate(calculateNextOccurrence(r))).toBe('2026-05-07');
+  });
+
+  it('returns a schedule starting today rather than skipping to next period', () => {
+    const r = buildRecurring({ frequency: 'monthly', start_date: '2026-05-07' });
+    expect(localDate(calculateNextOccurrence(r))).toBe('2026-05-07');
   });
 
   it('catches up from an old start_date when last_generated_date is missing', () => {
@@ -120,5 +176,86 @@ describe('getMonthlyAmount', () => {
     expect(
       getMonthlyAmount(buildRecurring({ amount: 120, frequency: 'yearly' })),
     ).toBe(10);
+  });
+});
+
+describe('occurrence calendar parity with the database', () => {
+  // The DB generates the rows (process_all_recurring_expenses) and the client
+  // previews them (Today, Plan, forecast). If the two calendars disagree, the
+  // app shows a bill on a day it will not be charged. These dates were taken
+  // from calculate_next_occurrence running in Postgres against the same
+  // schedule, so a change to either side that breaks the agreement fails here.
+  const walk = (
+    frequency: RecurringExpense['frequency'],
+    startDate: string,
+    steps: number,
+  ): string[] => {
+    const dates: string[] = [];
+    let lastGenerated = startDate;
+
+    for (let index = 0; index < steps; index += 1) {
+      const next = calculateNextOccurrence(
+        buildRecurring({
+          frequency,
+          start_date: startDate,
+          last_generated_date: lastGenerated,
+          // Far enough ahead that nothing is filtered as past.
+          end_date: '2030-12-31',
+        }),
+        new Date(2026, 0, 1),
+      );
+      if (!next) break;
+      lastGenerated = localDate(next) as string;
+      dates.push(lastGenerated);
+    }
+
+    return dates;
+  };
+
+  it('matches the server for a monthly schedule anchored on the 31st', () => {
+    expect(walk('monthly', '2026-01-31', 11)).toEqual([
+      '2026-02-28',
+      '2026-03-31',
+      '2026-04-30',
+      '2026-05-31',
+      '2026-06-30',
+      '2026-07-31',
+      '2026-08-31',
+      '2026-09-30',
+      '2026-10-31',
+      '2026-11-30',
+      '2026-12-31',
+    ]);
+  });
+
+  it('matches the server for a quarterly schedule anchored on the 31st', () => {
+    expect(walk('quarterly', '2026-01-31', 4)).toEqual([
+      '2026-04-30',
+      '2026-07-31',
+      '2026-10-31',
+      '2027-01-31',
+    ]);
+  });
+
+  it('matches the server for a leap-day yearly schedule', () => {
+    expect(walk('yearly', '2024-02-29', 5)).toEqual([
+      '2025-02-28',
+      '2026-02-28',
+      '2027-02-28',
+      '2028-02-29',
+      '2029-02-28',
+    ]);
+  });
+
+  it('matches the server for weekly and biweekly cadences', () => {
+    expect(walk('weekly', '2026-01-31', 3)).toEqual([
+      '2026-02-07',
+      '2026-02-14',
+      '2026-02-21',
+    ]);
+    expect(walk('biweekly', '2026-01-31', 2)).toEqual([
+      '2026-02-14',
+      '2026-02-28',
+    ]);
   });
 });

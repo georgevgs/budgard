@@ -56,13 +56,24 @@ export const useExchangeRate = (
     Boolean(date),
   );
 
+  // `rate` is deliberately stale-while-refetching so the preview does not
+  // blank between keystrokes. That is right for a preview and wrong for a
+  // write: switching USD → JPY and submitting inside the fetch window used to
+  // stamp the row with original_currency JPY and the USD rate — an amount
+  // wrong by two orders of magnitude, carrying a rate that was never true for
+  // that pair, so the error could not be spotted afterwards from the row.
+  // Only a rate fetched for THIS key can be returned; anything else refetches.
   const ensureRate = useCallback(async (): Promise<number> => {
-    if (rate !== null) {
-      return rate;
+    if (fromCurrency === toCurrency) {
+      return 1;
+    }
+
+    if (fetched !== null && fetched.key === requestKey && fetched.rate !== null) {
+      return fetched.rate;
     }
 
     return fetchExchangeRate(fromCurrency, date ?? '', undefined, toCurrency);
-  }, [rate, fromCurrency, date, toCurrency]);
+  }, [fetched, requestKey, fromCurrency, date, toCurrency]);
 
   return { rate, isFetching, error, ensureRate };
 };

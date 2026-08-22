@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useCategoriesData, useDataConfig } from '@/contexts/DataContext';
 import { useExpensesData } from '@/contexts/DataContext';
 import { useAmountPad } from '@/hooks/expenseForm/useAmountPad';
+import { toIsoDate, todayIso } from '@/lib/dates';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { ExpenseWritePayload } from '@/services/dataService';
@@ -63,7 +64,7 @@ export const useQuickAddDraft = ({ isOpen, onSubmit, onClose }: Params) => {
       amount: pad.amount,
       description: describe(name, categoryId, categories, t),
       category_id: categoryId,
-      date: new Date().toISOString().slice(0, 10),
+      date: todayIso(),
     });
     onClose();
   };
@@ -96,7 +97,7 @@ export const useQuickAddDraft = ({ isOpen, onSubmit, onClose }: Params) => {
       amount: pad.amount,
       description: name.trim(),
       category_id: categoryId,
-      date: new Date().toISOString().slice(0, 10),
+      date: todayIso(),
     }),
   };
 };
@@ -186,9 +187,7 @@ const rankByRecentUse = (
   categories: Category[],
   expenses: { category_id?: string | null; date: string }[],
 ): Category[] => {
-  const cutoff = new Date(Date.now() - RECENT_WINDOW * 86_400_000)
-    .toISOString()
-    .slice(0, 10);
+  const cutoff = toIsoDate(new Date(Date.now() - RECENT_WINDOW * 86_400_000));
   const uses = new Map<string, number>();
 
   for (const expense of expenses) {

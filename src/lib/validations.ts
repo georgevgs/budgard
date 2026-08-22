@@ -16,6 +16,23 @@ export const SAFE_STRING = /^[\p{L}\p{N}\s.,!?'"\-/()@#&%+:;]*$/u; // Unicode le
 const AMOUNT_PATTERN = /^\d{1,3}(?:\.\d{3})*(?:,\d{0,2})?$|^\d+(?:,\d{0,2})?$/;
 const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
 
+/**
+ * A transaction records something that happened, so it cannot be dated into
+ * the future. One day of slack absorbs timezone differences between the
+ * device and anything it syncs with; beyond that a future date is a mistyped
+ * year, and it lands in a month whose totals and averages it then distorts.
+ *
+ * Evaluated per validation rather than at module load, so a session left open
+ * across midnight does not keep yesterday's ceiling.
+ */
+const isNotFutureDated = (date: Date): boolean => {
+  const limit = new Date();
+  limit.setDate(limit.getDate() + 1);
+  limit.setHours(23, 59, 59, 999);
+
+  return date <= limit;
+};
+
 // Disposable/temporary email providers blocked to prevent spam signups
 const BLOCKED_DOMAINS = [
   // Popular disposable email services
@@ -178,9 +195,11 @@ export const expenseSchema = z.object({
   // Additional tags beyond the primary (Pro). The form enforces the free
   // tier's single-tag limit; the expense_tags table enforces it server-side.
   extra_tag_ids: z.array(z.string()).optional(),
-  date: z.date({
-    error: 'validation.dateRequired',
-  }),
+  date: z
+    .date({
+      error: 'validation.dateRequired',
+    })
+    .refine(isNotFutureDated, 'validation.dateInFuture'),
 });
 
 // Category validation schema
@@ -269,9 +288,11 @@ export const incomeSchema = z.object({
     .transform((str) => str.trim())
     .refine((str) => str.length > 0, 'validation.descriptionEmpty'),
   category_id: z.string(),
-  date: z.date({
-    error: 'validation.dateRequired',
-  }),
+  date: z
+    .date({
+      error: 'validation.dateRequired',
+    })
+    .refine(isNotFutureDated, 'validation.dateInFuture'),
 });
 
 // Goal validation schema

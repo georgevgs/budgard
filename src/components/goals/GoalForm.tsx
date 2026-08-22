@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import GoalFormFields from '@/components/goals/GoalFormFields';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatCurrencyInput } from '@/lib/utils';
+import { amountToInput } from '@/lib/utils';
 import { goalSchema, type GoalFormData } from '@/lib/validations';
 import type { Goal } from '@/types/Goal';
 import { swatch } from '@/design/palette';
@@ -118,7 +118,7 @@ const resolveTargetAmount = (goal: Goal | undefined): string => {
     return '';
   }
 
-  return formatCurrencyInput(goal.target_amount.toString().replace('.', ','));
+  return amountToInput(goal.target_amount);
 };
 
 const resolveDeadline = (goal: Goal | undefined): Date | undefined => {

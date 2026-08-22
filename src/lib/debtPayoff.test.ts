@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { sumAmounts } from '@/lib/money';
 import {
   simulatePayoff,
   compareStrategies,
@@ -209,5 +210,102 @@ describe('minimumCoversInterest', () => {
         makeDebt({ apr: 99, current_balance: 0, minimum_payment: 0 }),
       ),
     ).toBe(true);
+  });
+});
+
+describe('schedule reconciliation', () => {
+  const NOW = new Date(2026, 0, 15);
+
+  const debt = (overrides: Partial<Debt>): Debt =>
+    ({
+      id: 'd1',
+      user_id: 'u1',
+      name: 'Card',
+      kind: 'credit_card',
+      original_principal: 1000,
+      current_balance: 1000,
+      apr: 20,
+      minimum_payment: 100,
+      currency: 'EUR',
+      start_date: '2026-01-01',
+      is_archived: false,
+      is_completed: false,
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-01T00:00:00Z',
+      ...overrides,
+    }) as Debt;
+
+  it("the schedule's interest column sums to the reported total", () => {
+    const result = simulatePayoff({
+      debts: [debt({})],
+      monthlyExtra: 0,
+      strategy: 'avalanche',
+      now: NOW,
+    });
+
+    const scheduled = sumAmounts(
+      result.schedule.flatMap((entry) =>
+        entry.payments.map((payment) => payment.interest),
+      ),
+    );
+
+    expect(scheduled).toBeCloseTo(result.totalInterestPaid, 2);
+  });
+
+  it('reconciles even when the minimum does not cover the interest', () => {
+    // The case the old code hid: displayed interest was capped at the payment
+    // while the total accrued the full amount, so the two never agreed.
+    const result = simulatePayoff({
+      debts: [debt({ apr: 30, minimum_payment: 5, current_balance: 5000 })],
+      monthlyExtra: 0,
+      strategy: 'avalanche',
+      now: NOW,
+    });
+
+    expect(result.unpayable).toBe(true);
+
+    const scheduled = sumAmounts(
+      result.schedule.flatMap((entry) =>
+        entry.payments.map((payment) => payment.interest),
+      ),
+    );
+
+    expect(scheduled).toBeCloseTo(result.totalInterestPaid, 2);
+  });
+
+  it('shows negative amortization rather than clamping principal at zero', () => {
+    const result = simulatePayoff({
+      debts: [debt({ apr: 30, minimum_payment: 5, current_balance: 5000 })],
+      monthlyExtra: 0,
+      strategy: 'avalanche',
+      now: NOW,
+    });
+
+    expect(result.schedule[0].payments[0].principal).toBeLessThan(0);
+  });
+
+  it('total paid equals principal repaid plus interest accrued', () => {
+    const result = simulatePayoff({
+      debts: [debt({})],
+      monthlyExtra: 50,
+      strategy: 'avalanche',
+      now: NOW,
+    });
+
+    // Everything that left the wallet covered the original balance and the
+    // interest that accrued on it — the closing entry of the ledger.
+    expect(result.totalPaid).toBeCloseTo(1000 + result.totalInterestPaid, 2);
+  });
+
+  it('does not overflow the payoff date past a short month', () => {
+    // setMonth overflowed 31 Jan + 1 month to 3 March.
+    const result = simulatePayoff({
+      debts: [debt({ current_balance: 100, minimum_payment: 100, apr: 0 })],
+      monthlyExtra: 0,
+      strategy: 'avalanche',
+      now: new Date(2026, 0, 31),
+    });
+
+    expect(result.payoffDate).toBe('2026-02-28');
   });
 });

@@ -1,18 +1,35 @@
+import { getDaysInMonth } from 'date-fns';
+import { roundMoney, sumAmounts } from '@/lib/money';
+import { toIsoDate } from '@/lib/dates';
 import type { Debt, PayoffStrategy } from '@/types/Debt';
 
 // Pure payoff simulation. Month-by-month:
-//   1. Accrue monthly interest on each active debt (apr/12).
+//   1. Accrue interest on each active debt for the days in that calendar
+//      month at the daily periodic rate (apr/365).
 //   2. Apply each debt's minimum payment.
 //   3. Sort remaining debts by strategy (snowball = lowest balance,
 //      avalanche = highest APR) and throw monthlyExtra + freed-up minimums
 //      from already-paid-off debts at the top of the list, cascading overflow.
 //   4. Stop when all balances reach zero, or after MAX_MONTHS as a safety cap.
+//
+// The accrual convention is daily simple interest at apr/365 across the days
+// of each calendar month, which is what recompute_debt_balance does in
+// 20260822000001_debt_balance_freshness.sql. It used to be apr/12 here and
+// apr/365 there, so the planner's projection could never be reconciled against
+// the balance the app actually tracks. Real month lengths are used rather than
+// a 30-day average for the same reason: the two have to agree exactly.
 
 type DebtMonth = {
   debtId: string;
   payment: number;
-  principal: number;
+  // Interest ACCRUED this month, not the interest portion of the payment.
+  // Capping it at the payment made the schedule's interest column sum to less
+  // than the reported total whenever a minimum failed to cover a month's
+  // interest — which is exactly the case the planner warns about.
   interest: number;
+  // payment - interest. Negative when the payment did not cover the interest,
+  // which is what negative amortization looks like and is worth showing.
+  principal: number;
   remaining: number;
 };
 
@@ -37,6 +54,8 @@ export type SimInput = {
   debts: Debt[];
   monthlyExtra: number;
   strategy: PayoffStrategy;
+  /** Injectable clock so month lengths and the payoff date are testable. */
+  now?: Date;
 };
 
 const MAX_MONTHS = 600;
@@ -49,11 +68,11 @@ const cloneState = (debt: Debt) => ({
   payoffMonth: null as number | null,
 });
 
-const emptyResult = (): SimResult => ({
+const emptyResult = (now: Date): SimResult => ({
   monthsToPayoff: 0,
   totalInterestPaid: 0,
   totalPaid: 0,
-  payoffDate: new Date().toISOString().slice(0, 10),
+  payoffDate: toIsoDate(now),
   perDebtPayoffMonth: {},
   perDebtTotalInterest: {},
   schedule: [],
@@ -61,12 +80,13 @@ const emptyResult = (): SimResult => ({
 });
 
 export const simulatePayoff = (input: SimInput): SimResult => {
+  const now = input.now ?? new Date();
   const states = input.debts
     .filter((d) => d.current_balance > 0 && !d.is_archived && !d.is_completed)
     .map(cloneState);
 
   if (states.length === 0) {
-    return emptyResult();
+    return emptyResult(now);
   }
 
   const schedule: ScheduleEntry[] = [];
@@ -78,11 +98,15 @@ export const simulatePayoff = (input: SimInput): SimResult => {
     const interestThisMonth = new Map<string, number>();
     const paymentThisMonth = new Map<string, number>();
 
+    const daysThisMonth = getDaysInMonth(monthDate(now, month - 1));
+
     for (const s of active) {
-      const interest = (s.remaining * s.debt.apr) / 100 / 12;
+      const interest = roundMoney(
+        (s.remaining * s.debt.apr * daysThisMonth) / 100 / 365,
+      );
       interestThisMonth.set(s.debt.id, interest);
-      s.remaining += interest;
-      s.totalInterest += interest;
+      s.remaining = roundMoney(s.remaining + interest);
+      s.totalInterest = roundMoney(s.totalInterest + interest);
       paymentThisMonth.set(s.debt.id, 0);
     }
 
@@ -133,20 +157,19 @@ export const simulatePayoff = (input: SimInput): SimResult => {
     }
 
     const payments: DebtMonth[] = active.map((s) => {
-      const payment = paymentThisMonth.get(s.debt.id) ?? 0;
-      const interest = Math.min(payment, interestThisMonth.get(s.debt.id) ?? 0);
-      const principal = Math.max(payment - interest, 0);
+      const payment = roundMoney(paymentThisMonth.get(s.debt.id) ?? 0);
+      const interest = interestThisMonth.get(s.debt.id) ?? 0;
 
       return {
         debtId: s.debt.id,
         payment,
-        principal,
         interest,
+        principal: roundMoney(payment - interest),
         remaining: s.remaining,
       };
     });
 
-    const totalRemaining = active.reduce((acc, s) => acc + s.remaining, 0);
+    const totalRemaining = sumAmounts(active.map((s) => s.remaining));
     schedule.push({ month, payments, totalRemaining });
   }
 
@@ -157,12 +180,10 @@ export const simulatePayoff = (input: SimInput): SimResult => {
     monthsToPayoff = Math.max(...states.map((s) => s.payoffMonth ?? 0));
   }
 
-  const totalInterestPaid = states.reduce((acc, s) => acc + s.totalInterest, 0);
-  const totalPaid = states.reduce((acc, s) => acc + s.totalPaid, 0);
+  const totalInterestPaid = sumAmounts(states.map((s) => s.totalInterest));
+  const totalPaid = sumAmounts(states.map((s) => s.totalPaid));
 
-  const payoffDate = addMonths(new Date(), monthsToPayoff)
-    .toISOString()
-    .slice(0, 10);
+  const payoffDate = toIsoDate(addMonthsClamped(now, monthsToPayoff));
 
   const perDebtPayoffMonth: Record<string, number> = {};
   const perDebtTotalInterest: Record<string, number> = {};
@@ -183,27 +204,51 @@ export const simulatePayoff = (input: SimInput): SimResult => {
   };
 };
 
-export const compareStrategies = (debts: Debt[], monthlyExtra: number) => ({
-  snowball: simulatePayoff({ debts, monthlyExtra, strategy: 'snowball' }),
-  avalanche: simulatePayoff({ debts, monthlyExtra, strategy: 'avalanche' }),
+export const compareStrategies = (
+  debts: Debt[],
+  monthlyExtra: number,
+  now?: Date,
+) => ({
+  snowball: simulatePayoff({ debts, monthlyExtra, strategy: 'snowball', now }),
+  avalanche: simulatePayoff({ debts, monthlyExtra, strategy: 'avalanche', now }),
 });
 
 // "Your minimum payment doesn't cover monthly interest, so this debt grows
 // each month if you pay only the minimum." Used in the per-debt UI as a
 // warning callout.
-export const minimumCoversInterest = (debt: Debt): boolean => {
+export const minimumCoversInterest = (
+  debt: Debt,
+  now: Date = new Date(),
+): boolean => {
   if (debt.current_balance <= 0) return true;
 
-  const monthlyInterest = (debt.current_balance * debt.apr) / 100 / 12;
+  // Same daily convention as the simulation and the database, measured over
+  // the current month so the warning matches what will actually be charged.
+  const days = getDaysInMonth(now);
+  const monthlyInterest = roundMoney(
+    (debt.current_balance * debt.apr * days) / 100 / 365,
+  );
 
   return debt.minimum_payment >= monthlyInterest;
 };
 
 // --- Helpers ---
 
-const addMonths = (date: Date, months: number): Date => {
-  const result = new Date(date.getTime());
-  result.setMonth(result.getMonth() + months);
+// The calendar month `offset` months after `now`, used for its length.
+const monthDate = (now: Date, offset: number): Date => {
+  return new Date(now.getFullYear(), now.getMonth() + offset, 1);
+};
 
-  return result;
+// setMonth OVERFLOWS rather than clamping: 31 Jan plus one month lands on
+// 3 March. Building the month first and clamping the day into it gives the
+// date a person would name.
+const addMonthsClamped = (date: Date, months: number): Date => {
+  const monthStart = new Date(date.getFullYear(), date.getMonth() + months, 1);
+  const lastDay = getDaysInMonth(monthStart);
+
+  return new Date(
+    monthStart.getFullYear(),
+    monthStart.getMonth(),
+    Math.min(date.getDate(), lastDay),
+  );
 };

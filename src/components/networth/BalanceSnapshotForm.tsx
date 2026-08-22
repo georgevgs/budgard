@@ -20,7 +20,7 @@ import {
 import { useDateLocale } from '@/hooks/useDateLocale';
 import { useSnapshotSubmit } from '@/hooks/networth/useSnapshotSubmit';
 import SnapshotMetaFields from '@/components/networth/SnapshotMetaFields';
-import { formatCurrencyInput } from '@/lib/utils';
+import { amountToInput } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
 import {
   accountBalanceSchema,
@@ -48,7 +48,7 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
   if (isCashflowMode) {
     // Hidden in deposit/withdrawal modes but the schema requires it; we replace
     // it with current_balance ± amount at submit.
-    balanceDefault = formatCurrencyInput(String(account.current_balance));
+    balanceDefault = amountToInput(account.current_balance, account.default_currency);
   }
 
   const form = useForm<AccountBalanceFormData>({
