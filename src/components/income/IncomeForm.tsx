@@ -3,8 +3,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDialogDirty } from '@/hooks/useDialogDirty';
 import {
-  Dialog,
-  DialogContent,
   DialogTitle,
   DialogDescription,
   DialogHeader,
@@ -61,6 +59,15 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
     onClose,
   });
 
+  if (picker.isManagerOpen) {
+    return (
+      <CategoryManager
+        categoryType="income"
+        onBack={() => picker.setIsManagerOpen(false)}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Mobile drag handle */}
@@ -68,57 +75,61 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
         <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
       </div>
 
-      <div
-        className="overflow-y-auto flex-1 px-4 sm:px-6 overscroll-contain"
-        style={{ touchAction: 'pan-y' }}
-      >
-        <DialogHeader className="pb-4" data-draggable-area>
-          <DialogTitle className="text-xl">
-            {renderFormTitle(Boolean(income), t)}
-          </DialogTitle>
-          <DialogDescription>{t('income.formDescription')}</DialogDescription>
-        </DialogHeader>
-
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit((v) => handleSubmit(v))}
-            className="space-y-4 pb-4"
-          >
-            <IncomeAmountField form={form} conversion={conversion} />
-            <IncomeDescriptionField form={form} />
-            <IncomeCategoryField form={form} picker={picker} />
-            <IncomeDateField form={form} dateLocale={dateLocale} />
-
-            <div className="flex gap-3 justify-end pt-2 pb-2">
-              <Button type="button" variant="outline" onClick={() => onClose()}>
-                {t('common.cancel')}
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting || !form.formState.isValid}
-                className="bg-income text-income-foreground hover:bg-income/90"
-              >
-                {renderSaveButtonLabel(isSubmitting, t)}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </div>
-
-      {/* Nested manager dialog — single entry point for add + edit + delete */}
-      <Dialog
-        open={picker.isManagerOpen}
-        onOpenChange={(open) => picker.setIsManagerOpen(open)}
-      >
-        <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0 flex flex-col max-h-[85dvh]"
-          onOpenChange={(open: boolean) => picker.setIsManagerOpen(open)}
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit((values) => handleSubmit(values))}
+          className="flex min-h-0 flex-1 flex-col"
         >
-          <CategoryManager categoryType="income" />
-        </DialogContent>
-      </Dialog>
+          <div
+            className="flex-1 overflow-y-auto overscroll-contain px-4 sm:px-6"
+            style={{ touchAction: 'pan-y' }}
+          >
+            <DialogHeader className="pb-4" data-draggable-area>
+              <DialogTitle className="text-xl">
+                {renderFormTitle(Boolean(income), t)}
+              </DialogTitle>
+              <DialogDescription>
+                {t('income.formDescription')}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 pb-4">
+              <IncomeAmountField form={form} conversion={conversion} />
+              <IncomeDescriptionField form={form} />
+              <IncomeCategoryField form={form} picker={picker} />
+              <IncomeDateField form={form} dateLocale={dateLocale} />
+            </div>
+          </div>
+
+          {renderActions(isSubmitting, form.formState.isValid, onClose, t)}
+        </form>
+      </Form>
     </div>
   );
 };
 
 export default IncomeForm;
+
+// --- Helpers ---
+
+type TFunc = (key: string, options?: Record<string, unknown>) => string;
+
+const renderActions = (
+  isSubmitting: boolean,
+  isValid: boolean,
+  onClose: () => void,
+  t: TFunc,
+) => (
+  <div className="flex shrink-0 justify-end gap-3 border-t border-border/50 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-3">
+    <Button type="button" variant="outline" onClick={onClose}>
+      {t('common.cancel')}
+    </Button>
+    <Button
+      type="submit"
+      disabled={isSubmitting || !isValid}
+      className="bg-income text-income-foreground hover:bg-income/90"
+    >
+      {renderSaveButtonLabel(isSubmitting, t)}
+    </Button>
+  </div>
+);

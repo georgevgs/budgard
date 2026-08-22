@@ -44,9 +44,11 @@ const RefundExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 px-1">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-1">
           <div className="space-y-1.5">
-            <Label className="text-sm">{t('expenses.refund.amountLabel')}</Label>
+            <Label className="text-sm">
+              {t('expenses.refund.amountLabel')}
+            </Label>
             <CurrencyInput
               currency={defaultCurrency}
               value={refund.amount}

@@ -8,12 +8,7 @@ type Props = {
   className?: string;
 };
 
-const SectionShell = ({
-  id,
-  tone = 'default',
-  children,
-  className,
-}: Props) => {
+const SectionShell = ({ id, tone = 'default', children, className }: Props) => {
   return (
     <section id={id} className={cn(toneClass(tone), className)}>
       <div className="max-w-6xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
@@ -26,13 +21,12 @@ const SectionShell = ({
 export default SectionShell;
 
 const toneClass = (tone: 'default' | 'muted' | 'inverted') => {
-  // A grey band, not a wash of the brand. `bg-primary/6` gave the page a warm
-  // rhythm on a cream canvas; over white it resolves to a pale beige, which is
-  // the exact tint the app was repainted to get rid of. Alternating white and
-  // near-white still gives the scroll its rhythm, and the accent stays on the
-  // things you can click.
+  // The app's rule is its separation. A full-width grey band made the landing
+  // page alternate surfaces even though the product deliberately keeps page
+  // and card the same colour. Paired rules preserve the reading rhythm without
+  // introducing an ambient fill.
   if (tone === 'muted') {
-    return 'bg-muted/60';
+    return 'border-y border-border/40 bg-background';
   }
 
   if (tone === 'inverted') {

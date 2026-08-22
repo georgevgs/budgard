@@ -65,8 +65,10 @@ export const BASE_TOKENS: TokenMap = {
   // these two and not the obvious rounded ones). Declared as tokens so the
   // family names live in one place: index.css reads them, and a swap is a
   // one-line edit here rather than a grep across every component.
-  '--font-display': "'Commissioner', ui-rounded, 'SF Pro Rounded', system-ui, sans-serif",
-  '--font-sans': "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  '--font-display':
+    "'Commissioner', ui-rounded, 'SF Pro Rounded', system-ui, sans-serif",
+  '--font-sans':
+    "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   // Anything that pins itself below the sticky header — the Activity feed's
   // day dividers, for one — offsets by this rather than restating the number.
   '--header-height': '4rem',
@@ -79,6 +81,10 @@ export const BASE_TOKENS: TokenMap = {
   '--dock-max-width': '30rem',
   '--dock-edge': 'max(1rem, calc((100% - var(--dock-max-width)) / 2))',
   '--dock-inset': 'calc(var(--dock-clearance) + 0.5rem)',
+  // Modal context should remain recognisable instead of being almost erased.
+  // The colour is themed below; this shared alpha keeps routine dialogs calm
+  // and prevents nested confirmations from compounding into a black screen.
+  '--modal-scrim-opacity': '0.48',
   // Barbie's pink, shown on the theme button while some OTHER theme is on —
   // the only spot in the app that needs a theme's colour outside that theme.
   '--barbie-swatch': accent.pink.solid,
@@ -103,6 +109,7 @@ const light: TokenMap = {
   '--card-foreground': neutral[900],
   '--popover': neutral[0],
   '--popover-foreground': neutral[900],
+  '--modal-scrim': neutral[900],
   '--primary': accent.orange.solid,
   '--primary-foreground': accent.orange.on,
   '--primary-ink': accent.orange.ink,
@@ -165,6 +172,7 @@ const dark: TokenMap = {
   '--card-foreground': ink[50],
   '--popover': ink[950],
   '--popover-foreground': ink[50],
+  '--modal-scrim': ink[950],
   '--primary': accent.orange.solidDark,
   '--primary-foreground': accent.orange.on,
   '--primary-ink': accent.orange.inkDark,
@@ -209,6 +217,7 @@ const barbieTheme: TokenMap = {
   '--card-foreground': barbie.ink,
   '--popover': neutral[0],
   '--popover-foreground': barbie.ink,
+  '--modal-scrim': barbie.ink,
   '--primary': accent.pink.solid,
   '--primary-foreground': accent.pink.on,
   '--primary-ink': accent.pink.ink,

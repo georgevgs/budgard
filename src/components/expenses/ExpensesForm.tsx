@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,6 +27,7 @@ import ExpenseDescriptionField from '@/components/expenses/ExpenseDescriptionFie
 import ExpenseCategoryField from '@/components/expenses/ExpenseCategoryField';
 import ExpenseDateField from '@/components/expenses/ExpenseDateField';
 import ExpenseFormDetails from '@/components/expenses/ExpenseFormDetails';
+import { CategoryManager } from '@/components/categories/CategoryManager';
 import {
   getInitialAmount,
   getInitialDate,
@@ -59,6 +61,7 @@ const ExpensesForm = ({
   const { defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();
   const attachments = useExpenseAttachments(expense);
+  const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
@@ -87,6 +90,10 @@ const ExpensesForm = ({
     onClose,
   });
 
+  if (isCategoryManagerOpen) {
+    return <CategoryManager onBack={() => setIsCategoryManagerOpen(false)} />;
+  }
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Mobile drag handle */}
@@ -94,45 +101,50 @@ const ExpensesForm = ({
         <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
       </div>
 
-      {/* Scrollable content */}
-      <div
-        className="overflow-y-auto flex-1 px-4 sm:px-6 sm:pt-6 overscroll-contain"
-        style={{ touchAction: 'pan-y' }}
-      >
-        <DialogHeader className="pb-4" data-draggable-area>
-          <DialogTitle className="text-xl">
-            {renderFormTitle(Boolean(expense), t)}
-          </DialogTitle>
-          <DialogDescription>
-            {t('expenses.formDescription')}
-          </DialogDescription>
-        </DialogHeader>
-
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4 pb-4"
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <div
+            className="flex-1 overflow-y-auto overscroll-contain px-4 sm:px-6 sm:pt-6"
+            style={{ touchAction: 'pan-y' }}
           >
-            <ExpenseAmountField form={form} conversion={conversion} />
-            <ExpenseDescriptionField form={form} suggestions={suggestions} />
-            <ExpenseCategoryField form={form} categories={categories} />
-            <ExpenseDateField form={form} dateLocale={dateLocale} />
-            <ExpenseFormDetails
-              form={form}
-              tagPicker={tagPicker}
-              showDetails={attachments.showDetails}
-              onToggleDetails={attachments.toggleDetails}
-              currentReceiptPath={expense?.receipt_path}
-              receiptFile={attachments.receiptFile}
-              isRemovingReceipt={attachments.removeExistingReceipt}
-              onReceiptSelect={attachments.setReceiptFile}
-              onRemoveExistingReceipt={attachments.removeReceipt}
-            />
+            <DialogHeader className="pb-4" data-draggable-area>
+              <DialogTitle className="text-xl">
+                {renderFormTitle(Boolean(expense), t)}
+              </DialogTitle>
+              <DialogDescription>
+                {t('expenses.formDescription')}
+              </DialogDescription>
+            </DialogHeader>
 
-            {renderActions(form.formState.isValid, isSubmitting, onClose, t)}
-          </form>
-        </Form>
-      </div>
+            <div className="space-y-4 pb-4">
+              <ExpenseAmountField form={form} conversion={conversion} />
+              <ExpenseDescriptionField form={form} suggestions={suggestions} />
+              <ExpenseCategoryField
+                form={form}
+                categories={categories}
+                onManageCategories={() => setIsCategoryManagerOpen(true)}
+              />
+              <ExpenseDateField form={form} dateLocale={dateLocale} />
+              <ExpenseFormDetails
+                form={form}
+                tagPicker={tagPicker}
+                showDetails={attachments.showDetails}
+                onToggleDetails={attachments.toggleDetails}
+                currentReceiptPath={expense?.receipt_path}
+                receiptFile={attachments.receiptFile}
+                isRemovingReceipt={attachments.removeExistingReceipt}
+                onReceiptSelect={attachments.setReceiptFile}
+                onRemoveExistingReceipt={attachments.removeReceipt}
+              />
+            </div>
+          </div>
+
+          {renderActions(form.formState.isValid, isSubmitting, onClose, t)}
+        </form>
+      </Form>
     </div>
   );
 };
@@ -151,7 +163,7 @@ const renderActions = (
   onClose: () => void,
   t: (key: string) => string,
 ) => (
-  <div className="flex flex-wrap items-center justify-end gap-3 pt-2 pb-2">
+  <div className="flex shrink-0 flex-wrap items-center justify-end gap-3 border-t border-border/50 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-3">
     {renderSaveHint(isValid, t)}
     <Button type="button" variant="outline" onClick={onClose}>
       {t('common.cancel')}

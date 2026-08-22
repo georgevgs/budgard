@@ -14,21 +14,15 @@ import { Form } from '@/components/ui/form';
 import { useAuth } from '@/contexts/AuthContext';
 import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
 import { useDateLocale } from '@/hooks/useDateLocale';
-import {
-  amountToInput,
-  parseCurrencyInput,
-} from '@/lib/utils';
+import { amountToInput, parseCurrencyInput } from '@/lib/utils';
 import DebtPaymentFields from '@/components/debts/DebtPaymentFields';
-import {
-  debtPaymentSchema,
-  type DebtPaymentFormData,
-} from '@/lib/validations';
+import { debtPaymentSchema, type DebtPaymentFormData } from '@/lib/validations';
 import type { Debt } from '@/types/Debt';
 
 type Props = {
   debt: Debt;
   onClose: () => void;
-}
+};
 
 const DebtPaymentForm = ({ debt, onClose }: Props) => {
   const { t } = useTranslation();
@@ -97,7 +91,7 @@ const DebtPaymentForm = ({ debt, onClose }: Props) => {
             className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 overscroll-contain"
             style={{ touchAction: 'pan-y' }}
           >
-            <DialogHeader className="pb-4" data-draggable-area>
+            <DialogHeader className="pb-4 pr-10" data-draggable-area>
               <DialogTitle className="text-xl">
                 {t('debts.payment.title', { name: debt.name })}
               </DialogTitle>
@@ -117,7 +111,10 @@ const DebtPaymentForm = ({ debt, onClose }: Props) => {
             <Button type="button" variant="outline" onClick={onClose}>
               {t('common.cancel')}
             </Button>
-            <Button type="submit" disabled={isSubmitting || !form.formState.isValid}>
+            <Button
+              type="submit"
+              disabled={isSubmitting || !form.formState.isValid}
+            >
               {renderSubmitLabel(isSubmitting, t)}
             </Button>
           </div>
@@ -125,7 +122,7 @@ const DebtPaymentForm = ({ debt, onClose }: Props) => {
       </Form>
     </>
   );
-}
+};
 
 // --- Helpers ---
 

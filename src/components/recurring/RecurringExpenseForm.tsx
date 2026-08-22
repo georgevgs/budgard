@@ -78,46 +78,43 @@ const RecurringExpenseForm = ({
         <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
       </div>
 
-      <div
-        className="overflow-y-auto flex-1 px-4 sm:px-6 overscroll-contain"
-        style={{ touchAction: 'pan-y' }}
-      >
-        <DialogHeader className="pb-4" data-draggable-area>
-          <DialogTitle className="text-xl">{formTitle}</DialogTitle>
-          <DialogDescription>
-            {t('recurring.formDescription')}
-          </DialogDescription>
-        </DialogHeader>
-
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4 pb-4"
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <div
+            className="flex-1 overflow-y-auto overscroll-contain px-4 sm:px-6"
+            style={{ touchAction: 'pan-y' }}
           >
-            <RecurringExpenseFields form={form} categories={categories} />
+            <DialogHeader className="pb-4" data-draggable-area>
+              <DialogTitle className="text-xl">{formTitle}</DialogTitle>
+              <DialogDescription>
+                {t('recurring.formDescription')}
+              </DialogDescription>
+            </DialogHeader>
 
-            <RecurringScheduleFields
-              form={form}
-              isEditing={Boolean(expense)}
-              showLinkedAccount={showLinkedAccount}
-              investmentAccounts={investmentAccounts}
-            />
+            <div className="space-y-4 pb-4">
+              <RecurringExpenseFields form={form} categories={categories} />
 
-            <div className="flex justify-end gap-2 pt-4 pb-2">
-              <Button type="button" variant="outline" onClick={onClose}>
-                {t('common.cancel')}
-              </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting || !form.formState.isValid}>
-                {renderSubmitLabel(
-                  form.formState.isSubmitting,
-                  Boolean(expense),
-                  t,
-                )}
-              </Button>
+              <RecurringScheduleFields
+                form={form}
+                isEditing={Boolean(expense)}
+                showLinkedAccount={showLinkedAccount}
+                investmentAccounts={investmentAccounts}
+              />
             </div>
-          </form>
-        </Form>
-      </div>
+          </div>
+
+          {renderActions(
+            form.formState.isSubmitting,
+            form.formState.isValid,
+            Boolean(expense),
+            onClose,
+            t,
+          )}
+        </form>
+      </Form>
     </div>
   );
 };
@@ -130,6 +127,23 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const renderActions = (
+  isSubmitting: boolean,
+  isValid: boolean,
+  isEditing: boolean,
+  onClose: () => void,
+  t: TranslateFunction,
+) => (
+  <div className="flex shrink-0 justify-end gap-2 border-t border-border/50 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-3">
+    <Button type="button" variant="outline" onClick={onClose}>
+      {t('common.cancel')}
+    </Button>
+    <Button type="submit" disabled={isSubmitting || !isValid}>
+      {renderSubmitLabel(isSubmitting, isEditing, t)}
+    </Button>
+  </div>
+);
 
 const getTitleSuffix = (isIncome: boolean, t: TranslateFunction): string => {
   if (isIncome) {

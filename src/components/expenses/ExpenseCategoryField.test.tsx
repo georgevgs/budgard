@@ -5,10 +5,6 @@ import { useForm, useWatch } from 'react-hook-form';
 import type { Category } from '@/types/Category';
 import type { ExpenseFormData } from '@/lib/validations';
 
-vi.mock('@/components/categories/CategoryManager', () => ({
-  CategoryManager: () => <div data-testid="category-manager" />,
-}));
-
 // The real Select is a Radix portal driven by pointer events that jsdom does
 // not implement. A plain listbox keeps the assertions about *behaviour* —
 // which option exists, and what selecting it does — rather than about Radix.
@@ -57,7 +53,11 @@ const categories: Category[] = [
 
 // The selected id is rendered into the DOM rather than captured out through a
 // ref, so the assertions read the same value a user's screen would show.
-const Harness = () => {
+type HarnessProps = {
+  onManageCategories: () => void;
+};
+
+const Harness = ({ onManageCategories }: HarnessProps) => {
   const form = useForm<ExpenseFormData>({
     defaultValues: { category_id: 'none' },
   });
@@ -65,7 +65,11 @@ const Harness = () => {
 
   return (
     <Form {...form}>
-      <ExpenseCategoryField form={form} categories={categories} />
+      <ExpenseCategoryField
+        form={form}
+        categories={categories}
+        onManageCategories={onManageCategories}
+      />
       <output data-testid="selected">{selected}</output>
     </Form>
   );
@@ -73,20 +77,22 @@ const Harness = () => {
 
 describe('expenses/ExpenseCategoryField', () => {
   it('selects a real category without opening the manager', () => {
-    render(<Harness />);
+    const onManageCategories = vi.fn();
+    render(<Harness onManageCategories={onManageCategories} />);
 
     fireEvent.click(screen.getByText('Groceries'));
 
     expect(screen.getByTestId('selected')).toHaveTextContent('c1');
-    expect(screen.queryByTestId('category-manager')).not.toBeInTheDocument();
+    expect(onManageCategories).not.toHaveBeenCalled();
   });
 
   it('opens the category manager instead of selecting the sentinel option', () => {
-    render(<Harness />);
+    const onManageCategories = vi.fn();
+    render(<Harness onManageCategories={onManageCategories} />);
 
     fireEvent.click(screen.getByText('categories.manageCategories'));
 
-    expect(screen.getByTestId('category-manager')).toBeInTheDocument();
+    expect(onManageCategories).toHaveBeenCalledOnce();
     expect(screen.getByTestId('selected')).toHaveTextContent('none');
   });
 });

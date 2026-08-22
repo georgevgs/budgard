@@ -21,48 +21,50 @@ export const IosInstallModal = ({ open, onOpenChange }: Props) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm p-6">
-        <DialogHeader>
-          <DialogTitle>{t('landing.install.title')}</DialogTitle>
-          <DialogDescription>
-            {t('landing.install.description')}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="gap-0 p-0 sm:max-w-sm">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:pb-6">
+          <DialogHeader>
+            <DialogTitle>{t('landing.install.title')}</DialogTitle>
+            <DialogDescription>
+              {t('landing.install.description')}
+            </DialogDescription>
+          </DialogHeader>
 
-        <ol className="space-y-4 mt-2 pb-2">
-          {renderStep(
-            1,
-            <ShareIcon />,
-            <Trans
-              i18nKey="landing.install.step1"
-              components={BOLD_COMPONENTS}
-            />,
-          )}
-          {renderStep(
-            2,
-            <ChevronDownIcon />,
-            <Trans
-              i18nKey="landing.install.step2"
-              components={BOLD_COMPONENTS}
-            />,
-          )}
-          {renderStep(
-            3,
-            <PlusSquareIcon />,
-            <Trans
-              i18nKey="landing.install.step3"
-              components={BOLD_COMPONENTS}
-            />,
-          )}
-          {renderStep(
-            4,
-            <CheckIcon />,
-            <Trans
-              i18nKey="landing.install.step4"
-              components={BOLD_COMPONENTS}
-            />,
-          )}
-        </ol>
+          <ol className="mt-6 space-y-4 pb-2">
+            {renderStep(
+              1,
+              <ShareIcon />,
+              <Trans
+                i18nKey="landing.install.step1"
+                components={BOLD_COMPONENTS}
+              />,
+            )}
+            {renderStep(
+              2,
+              <ChevronDownIcon />,
+              <Trans
+                i18nKey="landing.install.step2"
+                components={BOLD_COMPONENTS}
+              />,
+            )}
+            {renderStep(
+              3,
+              <PlusSquareIcon />,
+              <Trans
+                i18nKey="landing.install.step3"
+                components={BOLD_COMPONENTS}
+              />,
+            )}
+            {renderStep(
+              4,
+              <CheckIcon />,
+              <Trans
+                i18nKey="landing.install.step4"
+                components={BOLD_COMPONENTS}
+              />,
+            )}
+          </ol>
+        </div>
       </DialogContent>
     </Dialog>
   );

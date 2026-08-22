@@ -26,7 +26,7 @@ const Privacy = () => {
           </p>
         </Reveal>
       </div>
-      <div className="mt-12 grid sm:grid-cols-3 gap-4">
+      <div className="surface-card-flush mt-12 grid divide-y divide-border/60 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         {pillars().map((p, i) => (
           <Reveal key={p.titleKey} delay={i * 100}>
             {renderPillar(p, t)}
@@ -58,7 +58,7 @@ const pillars = (): Pillar[] => [
 ];
 
 const renderPillar = (p: Pillar, t: Tx) => (
-  <div className="rounded-2xl border border-border/60 bg-background p-6">
+  <div className="h-full p-6">
     <p.Icon className="h-5 w-5 text-foreground/70" />
     <h3 className="mt-4 text-base font-semibold tracking-tight">
       {t(p.titleKey)}

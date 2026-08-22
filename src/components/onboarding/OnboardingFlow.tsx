@@ -80,7 +80,7 @@ const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
           <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
         </div>
 
-        <div className="px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-2 sm:pb-6 sm:pt-6">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-2 sm:pb-6 sm:pt-6">
           {renderStepIndicator(step, t)}
           {renderCurrentStep()}
         </div>

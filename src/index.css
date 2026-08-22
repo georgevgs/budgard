@@ -597,6 +597,30 @@
 }
 
 @layer utilities {
+  /* Radix overlays are supplied by protected shadcn primitives. Restyle their
+     exact utility token here so the app owns the dimming through design tokens
+     without forking those primitives. */
+  [data-state][class~='bg-black/80'] {
+    background-color: hsl(
+      var(--modal-scrim) / var(--modal-scrim-opacity)
+    ) !important;
+  }
+
+  /* Alert dialogs are intentionally compact, but account deletion can grow
+     when verification or translated copy is present. The whole alert remains
+     reachable on short and landscape viewports. */
+  [role='alertdialog'] {
+    max-height: 85dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  @media (min-width: 640px) {
+    [role='alertdialog'] {
+      max-height: 90dvh;
+    }
+  }
+
   /* A horizontal chip strip is read as swipeable; a scrollbar sitting under it
      on desktop reads as a broken layout. The class was already in use on the
      templates bar and had never actually been defined. */
@@ -622,7 +646,7 @@
 
   /* Toast — safe-area offset for iOS notch / Dynamic Island */
   [data-sonner-toaster][data-y-position='top'] {
-    top: env(safe-area-inset-top, 0px) !important;
+    top: calc(env(safe-area-inset-top, 0px) + 1rem) !important;
   }
 
   /* Toast — frosted glass style matching app design */

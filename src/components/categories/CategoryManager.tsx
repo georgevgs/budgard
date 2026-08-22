@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import Plus from 'lucide-react/dist/esm/icons/plus';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import FolderOpen from 'lucide-react/dist/esm/icons/folder-open';
@@ -17,10 +18,12 @@ import { getColorTint } from '@/lib/categoryColor';
 
 type CategoryManagerProps = {
   categoryType?: CategoryType;
+  onBack?: () => void;
 };
 
 export const CategoryManager = ({
   categoryType = 'expense',
+  onBack,
 }: CategoryManagerProps = {}) => {
   const { t } = useTranslation();
   const manager = useCategoryManager(categoryType);
@@ -45,15 +48,18 @@ export const CategoryManager = ({
         <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
       </div>
 
-      <div className="px-4 sm:px-6 pt-2 sm:pt-4 pb-2 shrink-0">
-        <DialogHeader data-draggable-area>
-          <DialogTitle className="text-xl">
-            {renderManagerTitle(categoryType, t)}
-          </DialogTitle>
-          <DialogDescription>
-            {renderManagerDescription(categoryType, t)}
-          </DialogDescription>
-        </DialogHeader>
+      <div className="shrink-0 px-4 pb-2 pt-2 sm:px-6 sm:pt-4">
+        <div className="flex items-start gap-2" data-draggable-area>
+          {renderBackButton(onBack, t)}
+          <DialogHeader className="min-w-0 flex-1 pr-10">
+            <DialogTitle className="text-xl">
+              {renderManagerTitle(categoryType, t)}
+            </DialogTitle>
+            <DialogDescription>
+              {renderManagerDescription(categoryType, t)}
+            </DialogDescription>
+          </DialogHeader>
+        </div>
       </div>
 
       <div
@@ -89,6 +95,25 @@ export const CategoryManager = ({
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
+
+const renderBackButton = (onBack: (() => void) | undefined, t: TFunc) => {
+  if (!onBack) {
+    return null;
+  }
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      className="h-10 w-10 shrink-0"
+      onClick={onBack}
+      aria-label={t('common.back')}
+    >
+      <ArrowLeft className="h-4 w-4" />
+    </Button>
+  );
+};
 
 const renderDeleteDialog = (
   manager: ReturnType<typeof useCategoryManager>,
@@ -148,10 +173,7 @@ const renderCategoryList = (
   return (
     <div className="divide-y divide-border/30">
       {categories.map((category) => (
-        <div
-          key={category.id}
-          className="flex items-center gap-2.5 py-2 group"
-        >
+        <div key={category.id} className="flex items-center gap-2.5 py-2 group">
           {renderCategoryIndicator(category)}
           <span className="flex-1 text-sm font-medium truncate min-w-0">
             {category.name}

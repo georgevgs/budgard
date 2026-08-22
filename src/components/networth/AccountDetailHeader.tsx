@@ -56,7 +56,7 @@ const AccountDetailHeader = ({
 
   return (
     <DialogHeader className="p-4 pb-2" data-draggable-area>
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-3 pr-10">
         <div className="min-w-0 flex-1">
           <DialogTitle className="text-xl truncate">{account.name}</DialogTitle>
           <DialogDescription>
@@ -98,13 +98,7 @@ const AccountDetailHeader = ({
           {formatCurrency(account.current_balance, account.default_currency)}
         </p>
         {renderSinceLast(isInvestment, snapshots, account.default_currency, t)}
-        {renderInvestmentDetail(
-          account,
-          isInvestment,
-          snapshots,
-          t,
-          isPro,
-        )}
+        {renderInvestmentDetail(account, isInvestment, snapshots, t, isPro)}
       </div>
     </DialogHeader>
   );

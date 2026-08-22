@@ -34,7 +34,7 @@ type Props = {
   account: Account;
   onClose: () => void;
   mode?: SnapshotMode;
-}
+};
 
 const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
   const { t } = useTranslation();
@@ -48,7 +48,10 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
   if (isCashflowMode) {
     // Hidden in deposit/withdrawal modes but the schema requires it; we replace
     // it with current_balance ± amount at submit.
-    balanceDefault = amountToInput(account.current_balance, account.default_currency);
+    balanceDefault = amountToInput(
+      account.current_balance,
+      account.default_currency,
+    );
   }
 
   const form = useForm<AccountBalanceFormData>({
@@ -73,12 +76,7 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
 
   return (
     <>
-      <div
-        className="flex justify-center pt-3 pb-2 sm:hidden shrink-0"
-        data-drag-handle
-      >
-        <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
-      </div>
+      {renderDragHandle()}
 
       <Form {...form}>
         <form
@@ -89,7 +87,7 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
             className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 overscroll-contain"
             style={{ touchAction: 'pan-y' }}
           >
-            <DialogHeader className="pb-4" data-draggable-area>
+            <DialogHeader className="pb-4 pr-10" data-draggable-area>
               <DialogTitle className="text-xl">
                 {renderTitle(mode, account.name, t)}
               </DialogTitle>
@@ -99,19 +97,24 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
             </DialogHeader>
 
             <div className="space-y-4 pb-4">
-            {renderBalanceField(form, account, isInvestment, isCashflowMode, t)}
+              {renderBalanceField(
+                form,
+                account,
+                isInvestment,
+                isCashflowMode,
+                t,
+              )}
 
-            {renderContributionField(
-              form,
-              isInvestment,
-              isContributionMode,
-              isWithdrawalMode,
-              account.default_currency,
-              t,
-            )}
+              {renderContributionField(
+                form,
+                isInvestment,
+                isContributionMode,
+                isWithdrawalMode,
+                account.default_currency,
+                t,
+              )}
 
-            <SnapshotMetaFields form={form} dateLocale={dateLocale} />
-
+              <SnapshotMetaFields form={form} dateLocale={dateLocale} />
             </div>
           </div>
 
@@ -119,7 +122,10 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
             <Button type="button" variant="outline" onClick={onClose}>
               {t('common.cancel')}
             </Button>
-            <Button type="submit" disabled={isSubmitting || !form.formState.isValid}>
+            <Button
+              type="submit"
+              disabled={isSubmitting || !form.formState.isValid}
+            >
               {renderSubmitLabel(isSubmitting, t)}
             </Button>
           </div>
@@ -127,7 +133,7 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
       </Form>
     </>
   );
-}
+};
 
 export default BalanceSnapshotForm;
 
@@ -137,6 +143,15 @@ type TranslateFunction = (
   key: string,
   options?: Record<string, unknown>,
 ) => string;
+
+const renderDragHandle = () => (
+  <div
+    className="flex shrink-0 justify-center pb-2 pt-3 sm:hidden"
+    data-drag-handle
+  >
+    <div className="h-1.5 w-12 rounded-full bg-muted-foreground/20" />
+  </div>
+);
 
 import type { UseFormReturn } from 'react-hook-form';
 
@@ -213,7 +228,7 @@ const renderBalanceField = (
       )}
     />
   );
-}
+};
 
 const renderContributionField = (
   form: UseFormReturn<AccountBalanceFormData>,
@@ -271,4 +286,4 @@ const renderContributionField = (
       )}
     />
   );
-}
+};

@@ -33,25 +33,27 @@ const SetPinDialog = ({ open, onClose, onSaved }: Props) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col items-center gap-5 pb-2">
-          <div className="flex gap-3" aria-hidden="true">
-            {Array.from({ length: PIN_LENGTH }, (_, index) => (
-              <span
-                key={index}
-                className={cn(
-                  'h-3.5 w-3.5 rounded-full transition-colors',
-                  dotTone(index < form.entry.length, form.hasError),
-                )}
-              />
-            ))}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="flex flex-col items-center gap-5 pb-2">
+            <div className="flex gap-3" aria-hidden="true">
+              {Array.from({ length: PIN_LENGTH }, (_, index) => (
+                <span
+                  key={index}
+                  className={cn(
+                    'h-3.5 w-3.5 rounded-full transition-colors',
+                    dotTone(index < form.entry.length, form.hasError),
+                  )}
+                />
+              ))}
+            </div>
+            <p
+              className="min-h-5 text-center text-sm font-medium text-destructive-ink"
+              role="alert"
+            >
+              {form.message}
+            </p>
+            <PinPad onPress={form.press} onBackspace={form.backspace} />
           </div>
-          <p
-            className="min-h-5 text-center text-sm font-medium text-destructive-ink"
-            role="alert"
-          >
-            {form.message}
-          </p>
-          <PinPad onPress={form.press} onBackspace={form.backspace} />
         </div>
       </DialogContent>
     </Dialog>

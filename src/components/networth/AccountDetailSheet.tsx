@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useAccountBalances } from '@/hooks/useAccountBalances';
@@ -20,7 +20,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onEdit: (account: Account) => void;
-}
+};
 
 const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
   const { t } = useTranslation();
@@ -32,66 +32,66 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
 
   const isInvestment = account.kind === 'investment';
 
+  const handleOpenChange = createOpenChangeHandler(
+    () => setSnapshotMode(null),
+    onClose,
+  );
+
   return (
     <>
-      <Dialog open={open} onOpenChange={onClose}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden sm:[&>button]:inline-flex flex flex-col max-h-[85dvh]"
-          aria-describedby="account-detail-description"
-          onOpenChange={onClose}
+          className="flex max-h-[85dvh] flex-col gap-0 p-0 sm:max-w-[500px]"
+          onOpenChange={handleOpenChange}
         >
-          <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
-            <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
-          </div>
+          {renderDetailView(
+            snapshotMode,
+            <>
+              <div
+                className="flex justify-center pb-2 pt-3 sm:hidden"
+                data-drag-handle
+              >
+                <div className="h-1.5 w-12 rounded-full bg-muted-foreground/20" />
+              </div>
 
-          <AccountDetailHeader
-            account={account}
-            snapshots={snapshots}
-            onEdit={onEdit}
-            onArchiveRequest={() => actions.setShowArchiveDialog(true)}
-          />
+              <AccountDetailHeader
+                account={account}
+                snapshots={snapshots}
+                onEdit={onEdit}
+                onArchiveRequest={() => actions.setShowArchiveDialog(true)}
+              />
 
-          <div
-            className="overflow-y-auto flex-1 px-4 pb-4 overscroll-contain"
-            style={{ touchAction: 'pan-y' }}
-            id="account-detail-description"
-          >
-            <AccountHistoryChart account={account} snapshots={snapshots} />
+              <div
+                className="flex-1 overflow-y-auto overscroll-contain px-4 pb-4"
+                style={{ touchAction: 'pan-y' }}
+              >
+                <AccountHistoryChart account={account} snapshots={snapshots} />
 
-            {renderActionBar(isInvestment, setSnapshotMode, t)}
+                {renderActionBar(isInvestment, setSnapshotMode, t)}
 
-            <div className="flex items-center justify-between pt-4 pb-2 gap-2">
-              <h3 className="text-sm font-medium">
-                {t('networth.detail.history')}
-              </h3>
-            </div>
+                <div className="flex items-center justify-between gap-2 pb-2 pt-4">
+                  <h3 className="text-sm font-medium">
+                    {t('networth.detail.history')}
+                  </h3>
+                </div>
 
-            {renderHistoryList({
-              isLoading,
-              hasError,
-              isInvestment,
-              snapshots,
-              currency: account.default_currency,
-              accountName: account.name,
-              dateLocale,
-              onDelete: (id) => actions.setSnapshotToDelete(id),
-              onRetry: retry,
-              setMode: setSnapshotMode,
-              t,
-            })}
-          </div>
-        </DialogContent>
-      </Dialog>
+                {renderHistoryList({
+                  isLoading,
+                  hasError,
+                  isInvestment,
+                  snapshots,
+                  currency: account.default_currency,
+                  accountName: account.name,
+                  dateLocale,
+                  onDelete: (id) => actions.setSnapshotToDelete(id),
+                  onRetry: retry,
+                  setMode: setSnapshotMode,
+                  t,
+                })}
+              </div>
+            </>,
+          )}
 
-      <Dialog
-        open={snapshotMode !== null}
-        onOpenChange={() => setSnapshotMode(null)}
-      >
-        <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden sm:[&>button]:inline-flex"
-          onOpenChange={() => setSnapshotMode(null)}
-          onFocusOutside={(e) => e.preventDefault()}
-        >
           {renderSnapshotForm(account, snapshotMode, () =>
             setSnapshotMode(null),
           )}
@@ -119,6 +119,27 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
       />
     </>
   );
-}
+};
 
 export default AccountDetailSheet;
+
+// --- Helpers ---
+
+const createOpenChangeHandler = (reset: () => void, onClose: () => void) => {
+  return (nextOpen: boolean) => {
+    if (nextOpen) {
+      return;
+    }
+
+    reset();
+    onClose();
+  };
+};
+
+const renderDetailView = (mode: SnapshotMode | null, children: ReactNode) => {
+  if (mode !== null) {
+    return null;
+  }
+
+  return <div className="flex min-h-0 flex-1 flex-col">{children}</div>;
+};

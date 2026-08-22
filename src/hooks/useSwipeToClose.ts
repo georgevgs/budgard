@@ -50,6 +50,13 @@ export const useSwipeToClose = ({
       // Only the handle and the header start a drag; the body has to stay
       // scrollable, and a form field must not become a dismissal target.
       const target = event.target as HTMLElement;
+      const interactive = target.closest(
+        'button, a, input, textarea, select, [role="button"], [role="menuitem"]',
+      );
+      if (interactive) {
+        return;
+      }
+
       const onHandle = target.closest('[data-drag-handle]');
       const onHeader = target.closest('[data-draggable-area]');
       if (!onHandle && !onHeader) {

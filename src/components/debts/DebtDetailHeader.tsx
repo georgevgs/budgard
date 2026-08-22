@@ -26,7 +26,12 @@ type Props = {
   onArchiveRequest: () => void;
 };
 
-const DebtDetailHeader = ({ debt, progress, onEdit, onArchiveRequest }: Props) => {
+const DebtDetailHeader = ({
+  debt,
+  progress,
+  onEdit,
+  onArchiveRequest,
+}: Props) => {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -42,7 +47,7 @@ const DebtDetailHeader = ({ debt, progress, onEdit, onArchiveRequest }: Props) =
 
   return (
     <DialogHeader className="p-4 pb-2" data-draggable-area>
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-3 pr-10">
         <div className="min-w-0 flex-1">
           <DialogTitle className="text-xl truncate">{debt.name}</DialogTitle>
           <DialogDescription>
@@ -86,7 +91,9 @@ const DebtDetailHeader = ({ debt, progress, onEdit, onArchiveRequest }: Props) =
 
       <div className="grid grid-cols-3 gap-3 pt-3 text-xs">
         <div>
-          <p className="text-muted-foreground">{t('debts.detail.minPayment')}</p>
+          <p className="text-muted-foreground">
+            {t('debts.detail.minPayment')}
+          </p>
           <p className="font-medium tabular-nums mt-0.5">
             {formatCurrency(debt.minimum_payment, debt.currency)}
           </p>
@@ -129,10 +136,7 @@ const renderPayoffMonths = (progress: DebtProgress, t: TranslateFunction) => {
   return t('debts.monthsCount', { count: progress.monthsRemaining });
 };
 
-const renderUnpayableCallout = (
-  isUnpayable: boolean,
-  t: TranslateFunction,
-) => {
+const renderUnpayableCallout = (isUnpayable: boolean, t: TranslateFunction) => {
   if (!isUnpayable) return null;
 
   return (
@@ -148,4 +152,4 @@ const renderUnpayableCallout = (
       </div>
     </div>
   );
-}
+};

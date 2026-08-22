@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -14,7 +14,7 @@ import { useDebtPayments } from '@/hooks/useDebtPayments';
 import type { Debt } from '@/types/Debt';
 import type { Expense } from '@/types/Expense';
 import DebtDetailHeader from '@/components/debts/DebtDetailHeader';
-import DebtPaymentDialog from '@/components/debts/DebtPaymentDialog';
+import DebtPaymentForm from '@/components/debts/DebtPaymentForm';
 import ConfirmDestructiveDialog from '@/components/common/ConfirmDestructiveDialog';
 
 type Props = {
@@ -22,77 +22,83 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onEdit: (debt: Debt) => void;
-}
+};
 
 const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const progress = useDebtProgress(debt);
-  const { payments, isLoading, hasError, retry, removePayment } = useDebtPayments(
-    debt.id,
-    open,
-    debt.updated_at,
-  );
+  const { payments, isLoading, hasError, retry, removePayment } =
+    useDebtPayments(debt.id, open, debt.updated_at);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const actions = useDebtDetailActions({ debt, onClose, removePayment });
 
+  const handleOpenChange = createOpenChangeHandler(
+    () => setIsPaymentOpen(false),
+    onClose,
+  );
+
   return (
     <>
-      <Dialog open={open} onOpenChange={onClose}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
-          className="sm:max-w-[500px] p-0 gap-0 [&>button]:hidden sm:[&>button]:inline-flex flex flex-col max-h-[85dvh]"
-          aria-describedby="debt-detail-description"
-          onOpenChange={onClose}
+          className="flex max-h-[85dvh] flex-col gap-0 p-0 sm:max-w-[500px]"
+          onOpenChange={handleOpenChange}
         >
-          <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>
-            <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
-          </div>
-
-          <DebtDetailHeader
-            debt={debt}
-            progress={progress}
-            onEdit={onEdit}
-            onArchiveRequest={() => actions.setShowArchiveDialog(true)}
-          />
-
-          <div
-            className="overflow-y-auto flex-1 px-4 pb-4 overscroll-contain"
-            style={{ touchAction: 'pan-y' }}
-            id="debt-detail-description"
-          >
-            <div className="flex items-center justify-between pt-2 pb-2">
-              <h3 className="text-sm font-medium">
-                {t('debts.detail.history')}
-              </h3>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setIsPaymentOpen(true)}
+          {renderDetailView(
+            isPaymentOpen,
+            <>
+              <div
+                className="flex justify-center pb-2 pt-3 sm:hidden"
+                data-drag-handle
               >
-                <Plus className="h-3.5 w-3.5 mr-1" />
-                {t('debts.detail.logPayment')}
-              </Button>
-            </div>
+                <div className="h-1.5 w-12 rounded-full bg-muted-foreground/20" />
+              </div>
 
-            {renderHistoryList(
-              isLoading,
-              hasError,
-              payments,
-              debt.currency,
-              dateLocale,
-              (id) => actions.setPaymentToDelete(id),
-              retry,
-              t,
-            )}
-          </div>
+              <DebtDetailHeader
+                debt={debt}
+                progress={progress}
+                onEdit={onEdit}
+                onArchiveRequest={() => actions.setShowArchiveDialog(true)}
+              />
+
+              <div
+                className="flex-1 overflow-y-auto overscroll-contain px-4 pb-4"
+                style={{ touchAction: 'pan-y' }}
+              >
+                <div className="flex items-center justify-between pb-2 pt-2">
+                  <h3 className="text-sm font-medium">
+                    {t('debts.detail.history')}
+                  </h3>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setIsPaymentOpen(true)}
+                  >
+                    <Plus className="mr-1 h-3.5 w-3.5" />
+                    {t('debts.detail.logPayment')}
+                  </Button>
+                </div>
+
+                {renderHistoryList(
+                  isLoading,
+                  hasError,
+                  payments,
+                  debt.currency,
+                  dateLocale,
+                  (id) => actions.setPaymentToDelete(id),
+                  retry,
+                  t,
+                )}
+              </div>
+            </>,
+          )}
+
+          {renderPaymentForm(debt, isPaymentOpen, () =>
+            setIsPaymentOpen(false),
+          )}
         </DialogContent>
       </Dialog>
-
-      <DebtPaymentDialog
-        open={isPaymentOpen}
-        debt={debt}
-        onClose={() => setIsPaymentOpen(false)}
-      />
 
       <ConfirmDestructiveDialog
         open={actions.showArchiveDialog}
@@ -115,11 +121,42 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
       />
     </>
   );
-}
+};
 
 export default DebtDetailSheet;
 
 // --- Helpers ---
+
+const createOpenChangeHandler = (reset: () => void, onClose: () => void) => {
+  return (nextOpen: boolean) => {
+    if (nextOpen) {
+      return;
+    }
+
+    reset();
+    onClose();
+  };
+};
+
+const renderDetailView = (isPaymentOpen: boolean, children: ReactNode) => {
+  if (isPaymentOpen) {
+    return null;
+  }
+
+  return <div className="flex min-h-0 flex-1 flex-col">{children}</div>;
+};
+
+const renderPaymentForm = (
+  debt: Debt,
+  isPaymentOpen: boolean,
+  onClose: () => void,
+) => {
+  if (!isPaymentOpen) {
+    return null;
+  }
+
+  return <DebtPaymentForm debt={debt} onClose={onClose} />;
+};
 
 type TranslateFunction = (
   key: string,
@@ -194,10 +231,10 @@ const renderHistoryList = (
       ))}
     </ul>
   );
-}
+};
 
 const renderDescription = (description: string | null | undefined) => {
   if (!description) return null;
 
   return <span className="ml-1">· {description}</span>;
-}
+};

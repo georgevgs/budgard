@@ -10,11 +10,11 @@ const makeTouchEvent = (
   const el = {
     closest: vi.fn((selector: string) => {
       if (selector === '[data-drag-handle]')
-
         return target?.dataset?.dragHandle ? el : null;
       if (selector === '[data-draggable-area]')
-
         return target?.dataset?.draggableArea ? el : null;
+      if (selector.startsWith('button'))
+        return target?.dataset?.interactive ? el : null;
 
       return null;
     }),
@@ -56,6 +56,20 @@ describe('useSwipeToClose', () => {
 
     act(() => {
       result.current.handleTouchStart(makeTouchEvent(100));
+    });
+
+    expect(result.current.isDragging).toBe(false);
+  });
+
+  it('does not start dragging from a control inside a draggable header', () => {
+    const { result } = renderHook(() => useSwipeToClose({ onClose: vi.fn() }));
+
+    act(() => {
+      result.current.handleTouchStart(
+        makeTouchEvent(100, {
+          dataset: { draggableArea: 'true', interactive: 'true' },
+        } as unknown as Partial<HTMLElement>),
+      );
     });
 
     expect(result.current.isDragging).toBe(false);
@@ -129,7 +143,9 @@ describe('useSwipeToClose', () => {
       result.current.handleTouchStart(
         makeTouchEvent(
           100,
-          { dataset: { dragHandle: 'true' } } as unknown as Partial<HTMLElement>,
+          {
+            dataset: { dragHandle: 'true' },
+          } as unknown as Partial<HTMLElement>,
           0,
         ),
       );
@@ -154,7 +170,9 @@ describe('useSwipeToClose', () => {
       result.current.handleTouchStart(
         makeTouchEvent(
           100,
-          { dataset: { dragHandle: 'true' } } as unknown as Partial<HTMLElement>,
+          {
+            dataset: { dragHandle: 'true' },
+          } as unknown as Partial<HTMLElement>,
           0,
         ),
       );
