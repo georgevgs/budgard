@@ -11,7 +11,8 @@
 # .js URL forever, fails to parse it as a module, and the app white-screens
 # until storage is cleared — which is why the failure survives a reload.
 # Real files are matched before redirects are evaluated, so live assets are
-# unaffected. /ocr/* carries the same immutable header and needs the same guard.
+# unaffected. /ocr/* and /workbox-* carry the same immutable header and get
+# the same guard.
 #
 # RESIDUAL HAZARD, handled at the CDN rather than here. Netlify matches
 # [[headers]] rules against the REQUEST path, not the redirect destination
@@ -35,6 +36,17 @@
 [[redirects]]
   from = "/ocr/*"
   to = "/ocr/:splat"
+  status = 404
+
+# The workbox runtime is content-hashed and carries the same immutable header,
+# so it needs the same guard and did not have one. A stale service worker asks
+# for the hash it was built against; once that file is gone the catch-all below
+# answered with index.html at 200, and the browser then held HTML under
+# /workbox-<hash>.js for a year. importScripts fails on it, so the worker never
+# installs and the update path stays broken until storage is cleared.
+[[redirects]]
+  from = "/workbox-*"
+  to = "/workbox-:splat"
   status = 404
 
 [[redirects]]
