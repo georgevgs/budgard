@@ -12,6 +12,21 @@
 # until storage is cleared — which is why the failure survives a reload.
 # Real files are matched before redirects are evaluated, so live assets are
 # unaffected. /ocr/* carries the same immutable header and needs the same guard.
+#
+# RESIDUAL HAZARD, handled at the CDN rather than here. Netlify matches
+# [[headers]] rules against the REQUEST path, not the redirect destination
+# (verified: /index.html returns no-cache, but a path rewritten to it returns
+# the default). So the immutable header below lands on this 404 as well, and a
+# dead chunk URL is cached as immutable for a year at the edge. That is
+# harmless for a URL that is dead forever, but not for one that comes back:
+# roll a deploy back and forward again and any 404 served in between pins that
+# chunk as missing for a year for everyone behind that edge node -- the same
+# class of failure as the poisoning above, with a 404 in place of the HTML.
+# It cannot be fixed here, because a missing chunk and a live one are the same
+# shape and any rule narrow enough to catch one catches both. A Cloudflare
+# Cache Rule holds it instead: "Edge TTL -> by status code -> 404 -> no cache".
+# If Cloudflare is ever removed from in front of Netlify, that guard goes with
+# it and this becomes live again.
 [[redirects]]
   from = "/assets/*"
   to = "/assets/:splat"
