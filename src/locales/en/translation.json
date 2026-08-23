@@ -1079,6 +1079,8 @@
     "tile": {
       "averagePerMonth": "Avg / month",
       "biggestMonth": "Biggest month",
+      "acrossMonths_one": "Across {{count}} month",
+      "acrossMonths_other": "Across {{count}} months",
       "whereItWent": "Where it went"
     }
   },

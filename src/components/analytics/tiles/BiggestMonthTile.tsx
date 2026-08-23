@@ -31,7 +31,7 @@ const BiggestMonthTile = ({ monthlyData, onMonthClick }: Props) => {
     <BentoTile
       onClick={() => onMonthClick(peak.index)}
       ariaLabel={t('analytics.tile.biggestMonth')}
-      className="flex min-h-30 flex-col justify-between p-4"
+      className="flex min-h-26 flex-col justify-between p-4"
     >
       <TileLabel>{t('analytics.tile.biggestMonth')}</TileLabel>
       <div>

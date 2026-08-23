@@ -1079,6 +1079,8 @@
     "tile": {
       "averagePerMonth": "Μ.Ο. / μήνα",
       "biggestMonth": "Μεγαλύτερος μήνας",
+      "acrossMonths_one": "Σε {{count}} μήνα",
+      "acrossMonths_other": "Σε {{count}} μήνες",
       "whereItWent": "Πού πήγαν"
     }
   },

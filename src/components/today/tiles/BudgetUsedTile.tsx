@@ -15,6 +15,12 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 // How much of the plan is gone, as one ring. A bar would have to be read
 // against its own ends; a ring at this size is a shape you recognise before
 // you read the number in it.
+//
+// The percentage is HTML laid over the ring rather than an SVG `<text>`. A
+// `<text>` is positioned by its BASELINE, so centring it means guessing the
+// display face's cap height — the old `y="47"` guessed low and left the number
+// sitting a few pixels above the middle of the circle. Flex centring a span
+// over the square is exact and stays exact if the face or the size changes.
 const BudgetUsedTile = ({ spentThisMonth, monthlyBudget, currency }: Props) => {
   const { t } = useTranslation();
   const percent = resolvePercent(spentThisMonth, monthlyBudget);
@@ -26,8 +32,11 @@ const BudgetUsedTile = ({ spentThisMonth, monthlyBudget, currency }: Props) => {
       className="flex flex-col p-4"
     >
       <TileLabel>{t('today.tiles.budgetUsed')}</TileLabel>
-      <div className="mt-3 flex justify-center">
-        <svg viewBox="0 0 84 84" className="h-21 w-21" aria-hidden="true">
+      <div
+        className="relative mt-3 flex flex-1 items-center justify-center"
+        aria-hidden="true"
+      >
+        <svg viewBox="0 0 84 84" className="h-21 w-21">
           <circle
             cx="42"
             cy="42"
@@ -47,15 +56,10 @@ const BudgetUsedTile = ({ spentThisMonth, monthlyBudget, currency }: Props) => {
             strokeDasharray={`${(percent / 100) * CIRCUMFERENCE} ${CIRCUMFERENCE}`}
             transform="rotate(-90 42 42)"
           />
-          <text
-            x="42"
-            y="47"
-            textAnchor="middle"
-            className="fill-foreground type-figure-sm"
-          >
-            {percent}%
-          </text>
         </svg>
+        <span className="absolute inset-0 flex items-center justify-center type-figure-sm">
+          {percent}%
+        </span>
       </div>
       <p className="mt-3 text-[0.72rem] leading-snug text-muted-foreground">
         {renderCaption(spentThisMonth, monthlyBudget, currency, t)}
