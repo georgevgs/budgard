@@ -54,6 +54,16 @@ describe('normalizing a stored Today layout', () => {
     expect(layout.visible.filter((id) => id === 'safeToSpend')).toHaveLength(1);
   });
 
+  it('resolves a tile stored as both visible and hidden to visible', () => {
+    const layout = load({
+      visible: ['safeToSpend'],
+      hidden: ['safeToSpend'],
+    });
+
+    expect(layout.visible).toContain('safeToSpend');
+    expect(layout.hidden).not.toContain('safeToSpend');
+  });
+
   it('survives unreadable storage', () => {
     localStorage.setItem('today-layout', 'not json');
 

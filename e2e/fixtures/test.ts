@@ -23,10 +23,12 @@ export const test = base.extend<Fixtures>({
 
   app: async ({ page, data }, use) => {
     backend.reachable = true;
+    backend.nextFailure = null;
     await mockSupabase(page, data);
     await seedSession(page);
     await use(page);
     backend.reachable = true;
+    backend.nextFailure = null;
   },
 });
 
@@ -34,6 +36,17 @@ export const test = base.extend<Fixtures>({
 // path actually keys off (isOfflineError), not just navigator.onLine.
 export const setBackendReachable = (reachable: boolean): void => {
   backend.reachable = reachable;
+};
+
+export const failNextBackendRequest = (
+  status: number,
+  code: string,
+  message: string,
+): void => {
+  backend.nextFailure = {
+    status,
+    body: { code, message },
+  };
 };
 
 export { expect };

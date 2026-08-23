@@ -56,7 +56,10 @@ const isTileId = (value: unknown): value is TodayTileId =>
 const normalizeLayout = (stored: unknown): TodayLayout => {
   const source = stored as Partial<TodayLayout> | null;
   const visible = readList(source?.visible);
-  const hidden = readList(source?.hidden);
+  const visibleSet = new Set(visible);
+  const hidden = readList(source?.hidden).filter(
+    (tile) => !visibleSet.has(tile),
+  );
   const known = new Set([...visible, ...hidden]);
   const fresh = TODAY_TILES.filter((tile) => !known.has(tile));
 

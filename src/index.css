@@ -1134,6 +1134,12 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  /* Tile moves have their own named snapshots. Do not also animate the whole
+     route underneath them or a single arrow tap reads like navigation. */
+  .today-arrange-transition .route-transition-content {
+    view-transition-name: none;
+  }
+
   .route-transition-content {
     view-transition-name: app-content;
   }

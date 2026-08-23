@@ -55,6 +55,7 @@ const QuickAddSheet = ({ open, onClose, onSubmit, onOpenFullForm }: Props) => {
           <QuickAddName
             value={draft.name}
             suggestions={draft.suggestions}
+            errorKey={draft.nameErrorKey}
             onChange={draft.setName}
             onSelect={draft.applySuggestion}
           />

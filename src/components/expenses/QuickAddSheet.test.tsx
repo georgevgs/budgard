@@ -153,4 +153,16 @@ describe('components/expenses/QuickAddSheet', () => {
       expect.objectContaining({ description: 'Taxi home' }),
     );
   });
+
+  it('blocks a name the full expense form would reject', () => {
+    renderSheet();
+
+    typeAmount();
+    fireEvent.change(nameField(), { target: { value: 'A < B' } });
+
+    expect(screen.getByRole('button', { name: 'common.save' })).toBeDisabled();
+    expect(
+      screen.getByText('validation.descriptionInvalid'),
+    ).toBeInTheDocument();
+  });
 });

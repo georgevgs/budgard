@@ -36,7 +36,7 @@ export const useOptimisticExpenseActions = () => {
       if (id.startsWith('temp-')) return;
       startTransition(async () => {
         addOptimisticExpense({ type: 'delete', id });
-        await deleteExpense(id);
+        await settleReportedOperation(deleteExpense(id));
       });
     },
     [addOptimisticExpense, deleteExpense],
@@ -91,7 +91,9 @@ export const useOptimisticExpenseActions = () => {
           });
         }
 
-        await submitExpense(data, expenseId, receiptOptions);
+        await settleReportedOperation(
+          submitExpense(data, expenseId, receiptOptions),
+        );
       });
     },
     [addOptimisticExpense, categories, tags, optimisticExpenses, submitExpense],
@@ -136,14 +138,16 @@ export const useOptimisticExpenseActions = () => {
           },
         });
 
-        await submitExpense({
-          amount: template.amount,
-          description: template.description,
-          category_id: template.category_id,
-          tag_id: template.tag_id,
-          date: today,
-          user_id: userId,
-        });
+        await settleReportedOperation(
+          submitExpense({
+            amount: template.amount,
+            description: template.description,
+            category_id: template.category_id,
+            tag_id: template.tag_id,
+            date: today,
+            user_id: userId,
+          }),
+        );
       });
     },
     [userId, addOptimisticExpense, categories, tags, submitExpense],
@@ -159,6 +163,21 @@ export const useOptimisticExpenseActions = () => {
 };
 
 // --- Helpers ---
+
+// Operation hooks already report recoverable failures with a retry toast.
+// Letting that same error escape a transition replaces the authenticated app
+// with the route error boundary instead of simply rolling back the optimistic
+// row.
+const settleReportedOperation = async (
+  operation: Promise<void>,
+): Promise<void> => {
+  try {
+    await operation;
+  } catch {
+    // The operation hook owns reporting and retry. Completing the transition
+    // here lets useOptimistic restore the canonical data.
+  }
+};
 
 const resolveExtraTags = (
   extraTagIds: string[] | undefined,

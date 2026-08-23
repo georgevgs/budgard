@@ -23,14 +23,46 @@ test.describe('arranging the Today grid', () => {
     await app.goto('/today');
     await app.getByRole('button', { name: /arrange your grid/i }).click();
     await app.getByRole('button', { name: /hide month pace/i }).click();
+    const showButton = app.getByRole('button', { name: /show month pace/i });
+    await expect(showButton).toBeVisible();
+    await expect(showButton).toBeFocused();
     await expect(
-      app.getByRole('button', { name: /show month pace/i }),
-    ).toBeVisible();
+      app.getByRole('status').filter({ hasText: /month pace hidden/i }),
+    ).toHaveText(/month pace hidden/i);
 
-    await app.getByRole('button', { name: /show month pace/i }).click();
+    await showButton.click();
+    await expect(
+      app.getByRole('button', { name: /hide month pace/i }),
+    ).toBeFocused();
+    await expect(
+      app.getByRole('status').filter({ hasText: /month pace shown/i }),
+    ).toHaveText(/month pace shown/i);
     await app.getByRole('button', { name: /^done$/i }).click();
 
     await expect(app.getByText('Month pace')).toBeVisible();
+  });
+
+  test('reorders modules and keeps the order after reload', async ({ app }) => {
+    await app.goto('/today');
+    await app.getByRole('button', { name: /arrange your grid/i }).click();
+    await app
+      .getByRole('button', { name: /move budget used earlier/i })
+      .click();
+
+    await expect(
+      app
+        .getByRole('status')
+        .filter({ hasText: /budget used moved to position 1/i }),
+    ).toHaveText(/budget used moved to position 1/i);
+    await expect
+      .poll(async () => (await readVisibleOrder(app)).slice(0, 2))
+      .toEqual(['budgetUsed', 'safeToSpend']);
+
+    await app.reload();
+    expect((await readVisibleOrder(app)).slice(0, 2)).toEqual([
+      'budgetUsed',
+      'safeToSpend',
+    ]);
   });
 
   // Reachable: ten taps on − and the screen is blank. The way out has to be
@@ -62,3 +94,20 @@ test.describe('arranging the Today grid', () => {
     await expect(app.getByText('Safe to spend')).toBeVisible();
   });
 });
+
+// localStorage is the feature's persistence boundary. Reading it here pins
+// the exact order independently of which data-dependent tiles render today.
+const readVisibleOrder = async (
+  page: import('@playwright/test').Page,
+): Promise<string[]> =>
+  page.evaluate(() => {
+    const raw = localStorage.getItem('today-layout');
+    if (!raw) {
+
+      return [];
+    }
+
+    const stored = JSON.parse(raw) as { visible?: string[] };
+
+    return stored.visible ?? [];
+  });

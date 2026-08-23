@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   DEFAULT_VISIBLE,
   TODAY_TILES,
@@ -24,50 +24,80 @@ export type TodayLayoutControls = TodayLayout & {
  */
 export const useTodayLayout = (): TodayLayoutControls => {
   const [layout, setLayout] = useState<TodayLayout>(readStoredLayout);
+  const layoutRef = useRef(layout);
   const [isArranging, setArranging] = useState(false);
 
-  const commit = useCallback((next: TodayLayout) => {
+  const commit = useCallback((update: LayoutUpdate) => {
+    const current = layoutRef.current;
+    const next = update(current);
+    if (next === current) {
+
+      return;
+    }
+    layoutRef.current = next;
     setLayout(next);
     writeStoredLayout(next);
   }, []);
 
   const hide = useCallback(
     (id: TodayTileId) => {
-      commit({
-        visible: layout.visible.filter((tile) => tile !== id),
-        hidden: [...layout.hidden, id],
+      commit((current) => {
+        if (!current.visible.includes(id)) {
+
+          return current;
+        }
+
+        return {
+          visible: current.visible.filter((tile) => tile !== id),
+          hidden: [...current.hidden.filter((tile) => tile !== id), id],
+        };
       });
     },
-    [commit, layout],
+    [commit],
   );
 
   const show = useCallback(
     (id: TodayTileId) => {
-      commit({
-        visible: [...layout.visible, id],
-        hidden: layout.hidden.filter((tile) => tile !== id),
+      commit((current) => {
+        if (!current.hidden.includes(id)) {
+
+          return current;
+        }
+
+        return {
+          visible: [...current.visible.filter((tile) => tile !== id), id],
+          hidden: current.hidden.filter((tile) => tile !== id),
+        };
       });
     },
-    [commit, layout],
+    [commit],
   );
 
   const move = useCallback(
     (id: TodayTileId, offset: number) => {
-      const next = moveTile(layout.visible, id, offset);
-      if (next === layout.visible) {
-        return;
-      }
-      commit({ ...layout, visible: next });
+      commit((current) => {
+        const visible = moveTile(current.visible, id, offset);
+        if (visible === current.visible) {
+
+          return current;
+        }
+
+        return { ...current, visible };
+      });
     },
-    [commit, layout],
+    [commit],
   );
 
   const reset = useCallback(() => {
-    commit({
+    commit(() => ({
       visible: [...DEFAULT_VISIBLE],
       hidden: TODAY_TILES.filter((tile) => !DEFAULT_VISIBLE.includes(tile)),
-    });
+    }));
   }, [commit]);
 
   return { ...layout, isArranging, setArranging, hide, show, move, reset };
 };
+
+// --- Helpers ---
+
+type LayoutUpdate = (current: TodayLayout) => TodayLayout;

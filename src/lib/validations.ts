@@ -172,6 +172,14 @@ export const emailSchema = z
     },
   );
 
+export const expenseDescriptionSchema = z
+  .string()
+  .min(1, 'validation.descriptionRequired')
+  .max(100, 'validation.descriptionTooLong100')
+  .regex(SAFE_STRING, 'validation.descriptionInvalid')
+  .transform((str) => str.trim())
+  .refine((str) => str.length > 0, 'validation.descriptionEmpty');
+
 // Expense validation schema
 export const expenseSchema = z.object({
   amount: z
@@ -183,13 +191,7 @@ export const expenseSchema = z.object({
 
       return amount > 0 && amount <= 1000000;
     }, 'validation.amountMax1M'),
-  description: z
-    .string()
-    .min(1, 'validation.descriptionRequired')
-    .max(100, 'validation.descriptionTooLong100')
-    .regex(SAFE_STRING, 'validation.descriptionInvalid')
-    .transform((str) => str.trim())
-    .refine((str) => str.length > 0, 'validation.descriptionEmpty'),
+  description: expenseDescriptionSchema,
   category_id: z.string(),
   tag_id: z.string().optional(),
   // Additional tags beyond the primary (Pro). The form enforces the free

@@ -4,6 +4,7 @@ import { useCategoriesData, useDataConfig } from '@/contexts/DataContext';
 import { useExpensesData } from '@/contexts/DataContext';
 import { useAmountPad } from '@/hooks/expenseForm/useAmountPad';
 import { toIsoDate, todayIso } from '@/lib/dates';
+import { expenseDescriptionSchema } from '@/lib/validations';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { ExpenseWritePayload } from '@/services/dataService';
@@ -45,24 +46,31 @@ export const useQuickAddDraft = ({ isOpen, onSubmit, onClose }: Params) => {
     [expenseCategories, expenses],
   );
 
-  const recentNames = useMemo(
-    () => distinctRecentNames(expenses),
-    [expenses],
-  );
+  const recentNames = useMemo(() => distinctRecentNames(expenses), [expenses]);
 
   const suggestions = useMemo(
     () => matchNames(recentNames, name, categoryId),
     [recentNames, name, categoryId],
   );
+  const descriptionResult = expenseDescriptionSchema.safeParse(
+    describe(name, categoryId, categories, t),
+  );
+  let nameErrorKey: string | null = null;
+  if (!descriptionResult.success) {
+    nameErrorKey =
+      descriptionResult.error.issues[0]?.message ??
+      'validation.descriptionInvalid';
+  }
 
   const submit = () => {
-    if (pad.isEmpty) {
+    if (pad.isEmpty || !descriptionResult.success) {
+
       return;
     }
 
     onSubmit({
       amount: pad.amount,
-      description: describe(name, categoryId, categories, t),
+      description: descriptionResult.data,
       category_id: categoryId,
       date: todayIso(),
     });
@@ -86,7 +94,8 @@ export const useQuickAddDraft = ({ isOpen, onSubmit, onClose }: Params) => {
     name,
     suggestions,
     currency: defaultCurrency,
-    canSave: !pad.isEmpty,
+    canSave: !pad.isEmpty && descriptionResult.success,
+    nameErrorKey,
     selectCategory: setCategoryId,
     setName: (value: string) => setName(value.slice(0, NAME_LIMIT)),
     applySuggestion,

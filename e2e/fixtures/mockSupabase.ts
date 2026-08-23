@@ -10,10 +10,24 @@ const E2E_EMAIL = 'e2e@budgard.test';
 
 export type Dataset = Record<string, Record<string, unknown>[]>;
 
+type BackendFailure = {
+  status: number;
+  body: {
+    code: string;
+    message: string;
+  };
+};
+
 // Flipped by a test to make every REST call fail the way a dead network does,
 // so the offline queue can be exercised without touching browser-level
 // offline mode (which would also kill the intercepted routes).
-export const backend = { reachable: true };
+export const backend: {
+  reachable: boolean;
+  nextFailure: BackendFailure | null;
+} = {
+  reachable: true,
+  nextFailure: null,
+};
 
 export const buildDataset = (overrides: Partial<Dataset> = {}): Dataset => ({
   categories: [
@@ -170,6 +184,13 @@ const handleRest = async (route: Route, dataset: Dataset) => {
     return route.abort('internetdisconnected');
   }
 
+  const failure = backend.nextFailure;
+  if (failure) {
+    backend.nextFailure = null;
+
+    return json(route, failure.body, failure.status);
+  }
+
   const request = route.request();
   const url = new URL(request.url());
   const table = url.pathname.replace('/rest/v1/', '').split('/')[0];
@@ -197,6 +218,7 @@ const handleRest = async (route: Route, dataset: Dataset) => {
       id: `${table}-${nextId(table, index)}`,
       user_id: E2E_USER_ID,
       created_at: new Date().toISOString(),
+      ...tableDefaults(table),
       ...item,
     }));
     // An upsert re-sends a row that may already exist; replace in place so the
@@ -230,6 +252,21 @@ const nextId = (table: string, index: number): string => {
   idCounter += 1;
 
   return `${idCounter}-${index}`;
+};
+
+// Postgres applies these defaults before returning an inserted row. Mirroring
+// them matters after reload because the app's expense queries filter by type.
+const tableDefaults = (table: string): Record<string, unknown> => {
+  if (
+    table === 'categories' ||
+    table === 'expenses' ||
+    table === 'recurring_expenses'
+  ) {
+
+    return { type: 'expense' };
+  }
+
+  return {};
 };
 
 const upsertRow = (
