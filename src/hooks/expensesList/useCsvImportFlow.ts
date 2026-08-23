@@ -296,7 +296,7 @@ export const useCsvImportFlow = (onClose: () => void) => {
 
 const IMPORTABLE_EXTENSIONS = ['.csv', '.ofx', '.qfx', '.qif'];
 
-export const isImportableFile = (fileName: string): boolean => {
+const isImportableFile = (fileName: string): boolean => {
   const name = fileName.toLowerCase();
 
   return IMPORTABLE_EXTENSIONS.some((extension) => name.endsWith(extension));

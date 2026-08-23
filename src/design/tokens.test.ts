@@ -8,7 +8,13 @@ import { buildInlineHeadScript } from '../boot/inlineHeadScript';
 import { AA_LARGE, AA_TEXT, contrastRatio } from './contrast';
 import { buildManifestColors, buildTokensCss, hslToHex } from './generate';
 import { accent, dataColors, status, type Swatch } from './palette';
-import { ACCENTS, THEMES, accentValues, type ThemeName } from './tokens';
+import {
+  ACCENTS,
+  ACCENT_PROPERTIES,
+  THEMES,
+  accentValues,
+  type ThemeName,
+} from './tokens';
 
 const ROOT = path.resolve(__dirname, '../..');
 
@@ -302,7 +308,9 @@ describe('accents', () => {
       for (const isDark of [false, true]) {
         const values = accentValues(item.swatch, isDark);
 
-        expect(values, `${item.key} is missing a value`).toHaveLength(4);
+        expect(values, `${item.key} is missing a value`).toHaveLength(
+          ACCENT_PROPERTIES.length,
+        );
         expect(values.every(Boolean)).toBe(true);
       }
     }

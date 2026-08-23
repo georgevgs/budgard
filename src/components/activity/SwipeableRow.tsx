@@ -16,12 +16,17 @@ type Props = {
 // Wraps an activity row so it can be pulled aside to reveal Delete. The row
 // itself stays a link, so tapping it still opens the transaction — the swipe
 // only adds a second way in, it does not take the first one away.
+//
+// The wrapper is also the row's surface. Since the bento redesign a row is its
+// own rounded pill rather than a band inside a list card, and the pill has to
+// be the thing that clips the delete action — otherwise the reveal shows up
+// square behind a rounded row.
 const SwipeableRow = ({ children, onDelete, deleteLabel }: Props) => {
   const { t } = useTranslation();
   const swipe = useSwipeActions();
 
   return (
-    <div className="relative overflow-hidden">
+    <div className="tile-flush rounded-[1.375rem]">
       <div
         className="absolute inset-y-0 right-0 flex items-stretch"
         style={{ width: SWIPE_ACTION_WIDTH }}
@@ -47,7 +52,7 @@ const SwipeableRow = ({ children, onDelete, deleteLabel }: Props) => {
 
       <div
         {...swipe.handlers}
-        className="relative bg-card"
+        className="relative bg-tile"
         style={{
           transform: `translateX(${swipe.offset}px)`,
           transition: settleTransition(swipe.isDragging),

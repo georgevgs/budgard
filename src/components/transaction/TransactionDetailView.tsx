@@ -5,6 +5,7 @@ import { useQuickAdd } from '@/contexts/QuickAddContext';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { useTransactionDetail } from '@/hooks/transaction/useTransactionDetail';
 import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
+import BackButton from '@/components/common/BackButton';
 import TransactionHero from '@/components/transaction/TransactionHero';
 import TransactionMeta from '@/components/transaction/TransactionMeta';
 import TransactionNote from '@/components/transaction/TransactionNote';
@@ -30,38 +31,48 @@ const TransactionDetailView = () => {
   }
 
   return (
-    <div className="page-shell space-y-7 pb-10">
-      <TransactionHero
-        transaction={transaction}
-        currency={detail.currency}
-        isIncome={detail.isIncome}
-      />
-      <TransactionMeta
-        transaction={transaction}
-        isExcluded={detail.isExcluded}
-      />
-      <TransactionNote
-        value={detail.note}
-        isDirty={detail.isNoteDirty}
-        onChange={detail.setNote}
-        onSave={() => void detail.saveNote()}
-      />
-      <TransactionInsight
-        description={transaction.description}
-        monthTotal={detail.monthTotal}
-        monthCount={detail.monthCount}
-        similar={detail.similar}
-        currency={detail.currency}
-      />
-      <TransactionActions
-        isExcluded={detail.isExcluded}
-        onToggleExcluded={() => void detail.toggleExcluded()}
-        onEdit={() => openEditor(detail.isIncome, transaction, {
-          handleExpenseEdit,
-          handleIncomeEdit,
-        })}
-        onDelete={() => void detail.remove()}
-      />
+    <div className="page-shell pb-10">
+      {/* The screen's only chrome. Detail is a centred hero rather than a
+          titled page, so it takes the back button on its own instead of
+          through PageHeader — but it is the same control in the same place. */}
+      <div className="flex">
+        <BackButton />
+      </div>
+      <div className="mt-2 space-y-7">
+        <TransactionHero
+          transaction={transaction}
+          currency={detail.currency}
+          isIncome={detail.isIncome}
+        />
+        <TransactionMeta
+          transaction={transaction}
+          isExcluded={detail.isExcluded}
+        />
+        <TransactionNote
+          value={detail.note}
+          isDirty={detail.isNoteDirty}
+          onChange={detail.setNote}
+          onSave={() => void detail.saveNote()}
+        />
+        <TransactionInsight
+          description={transaction.description}
+          monthTotal={detail.monthTotal}
+          monthCount={detail.monthCount}
+          similar={detail.similar}
+          currency={detail.currency}
+        />
+        <TransactionActions
+          isExcluded={detail.isExcluded}
+          onToggleExcluded={() => void detail.toggleExcluded()}
+          onEdit={() =>
+            openEditor(detail.isIncome, transaction, {
+              handleExpenseEdit,
+              handleIncomeEdit,
+            })
+          }
+          onDelete={() => void detail.remove()}
+        />
+      </div>
     </div>
   );
 };
@@ -110,7 +121,7 @@ const renderNotFound = (t: TFunc) => (
       className="mt-10 rounded-2xl border border-dashed border-border/50 px-5 py-12 text-center"
       role="status"
     >
-      <p className="font-display text-lg font-semibold">
+      <p className="type-heading">
         {t('transaction.notFound')}
       </p>
       <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">

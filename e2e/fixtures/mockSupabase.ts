@@ -6,7 +6,7 @@ import type { Page, Route } from '@playwright/test';
 // the actual dataService code path instead of a hand-stubbed service layer.
 
 export const E2E_USER_ID = '11111111-1111-4111-8111-111111111111';
-export const E2E_EMAIL = 'e2e@budgard.test';
+const E2E_EMAIL = 'e2e@budgard.test';
 
 export type Dataset = Record<string, Record<string, unknown>[]>;
 
@@ -184,7 +184,11 @@ const handleRest = async (route: Route, dataset: Dataset) => {
   );
 
   if (method === 'GET') {
-    return respond(route, applyFilters(rows, url.searchParams), wantsObject);
+    return respond(
+      route,
+      embedRelations(applyFilters(rows, url.searchParams), url, dataset),
+      wantsObject,
+    );
   }
 
   if (method === 'POST') {
@@ -240,6 +244,32 @@ const upsertRow = (
   }
 
   rows.push(item);
+};
+
+// PostgREST resolves `category:categories(...)` in a select into a nested
+// object on each row; this mock returned the raw row and left it undefined, so
+// every transaction in every screenshot and every test rendered as
+// "Uncategorized" — which is exactly the state the row design is NOT built
+// around. Only the category embed is modelled, because it is the only one the
+// listing queries ask for.
+const EMBED_PATTERN = /\bcategory:categories\(/;
+
+const embedRelations = (
+  rows: Record<string, unknown>[],
+  url: URL,
+  dataset: Dataset,
+): Record<string, unknown>[] => {
+  const select = url.searchParams.get('select') ?? '';
+  if (!EMBED_PATTERN.test(select)) {
+    return rows;
+  }
+
+  const categories = dataset.categories ?? [];
+
+  return rows.map((row) => ({
+    ...row,
+    category: categories.find((item) => item.id === row.category_id) ?? null,
+  }));
 };
 
 // `.maybeSingle()` on an empty result is not an error — PostgREST answers 406

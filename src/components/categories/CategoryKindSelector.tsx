@@ -1,24 +1,35 @@
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import type { CategoryKind } from '@/types/Category';
 
-export type CategoryKind = 'need' | 'want' | 'savings';
+// The kinds a person picks. 'income' is the fourth member of the canonical
+// union and is deliberately not here: an income category is classified by
+// being income, not by a choice in this control.
+export type SelectableCategoryKind = Exclude<CategoryKind, 'income'>;
 
 type KindOption = {
-  value: CategoryKind;
+  value: SelectableCategoryKind;
   targetPct: number;
   activeClasses: string;
 };
 
+// These have to be the SAME three colours `FiftyThirtyTwentyRing` gives the
+// buckets, because this is the control that fills that chart: pick "Need"
+// here and the share it lands in over there has to be recognisably the same
+// thing. They were blue / gold / green — `--info` and `--warning` borrowed as
+// categorical hues — while the chart drew the same three buckets in
+// near-black / orange / green, so the picker and the chart disagreed about
+// what a need looks like.
 const KIND_OPTIONS: KindOption[] = [
   {
     value: 'need',
     targetPct: 50,
-    activeClasses: 'bg-info/15 text-info-ink',
+    activeClasses: 'bg-foreground/10 text-foreground',
   },
   {
     value: 'want',
     targetPct: 30,
-    activeClasses: 'bg-warning/15 text-warning-ink',
+    activeClasses: 'bg-primary/15 text-primary-ink',
   },
   {
     value: 'savings',
@@ -31,8 +42,8 @@ const INACTIVE_CLASSES =
   'border-border/60 text-muted-foreground hover:bg-accent/50';
 
 type CategoryKindSelectorProps = {
-  value: CategoryKind | undefined;
-  onChange: (kind: CategoryKind | undefined) => void;
+  value: SelectableCategoryKind | undefined;
+  onChange: (kind: SelectableCategoryKind | undefined) => void;
   disabled?: boolean;
 };
 
@@ -43,7 +54,7 @@ const CategoryKindSelector = ({
 }: CategoryKindSelectorProps) => {
   const { t } = useTranslation();
 
-  const handleClick = (option: CategoryKind) => {
+  const handleClick = (option: SelectableCategoryKind) => {
     onChange(toggleKind(value, option));
   };
 
@@ -81,9 +92,9 @@ export default CategoryKindSelector;
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const toggleKind = (
-  current: CategoryKind | undefined,
-  next: CategoryKind,
-): CategoryKind | undefined => {
+  current: SelectableCategoryKind | undefined,
+  next: SelectableCategoryKind,
+): SelectableCategoryKind | undefined => {
   if (current === next) return undefined;
 
   return next;

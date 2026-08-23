@@ -44,7 +44,7 @@ const QuickAddSheet = ({ open, onClose, onSubmit, onOpenFullForm }: Props) => {
           <p
             data-draggable-area
             className={cn(
-              'px-10 py-5 text-center font-display text-[2.75rem] font-semibold leading-none tabular-nums',
+              'px-10 py-5 text-center type-figure-xl',
               amountTone(draft.pad.isEmpty),
             )}
             aria-live="polite"

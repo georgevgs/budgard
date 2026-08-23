@@ -24,7 +24,7 @@ const SpeedDialAction = ({
       </div>
       <Button
         size="icon"
-        className="h-12 w-12 rounded-full shadow-lg"
+        className="lift h-12 w-12 rounded-full"
         onClick={onClick}
         aria-label={label}
         tabIndex={getTabIndex(isOpen)}
@@ -52,7 +52,7 @@ const getLabelClass = (
   labelDelayClass: string | undefined,
 ): string => {
   const base = cn(
-    'px-2 py-1 rounded-xl bg-card border border-border/40 shadow-sm',
+    'tile lift-soft rounded-xl px-2 py-1',
     'opacity-0 -translate-x-4 transition-[opacity,transform] duration-200',
   );
   if (isOpen) {

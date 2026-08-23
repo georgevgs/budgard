@@ -58,27 +58,31 @@ describe('SpendingInsights', () => {
     expect(screen.getByText('Third')).toBeInTheDocument();
   });
 
-  it('applies warning background when hero variant is warning', () => {
-    mockInsights = [insight('a', 'warning', 'Hero')];
+  // The variant used to tint the whole hero card — `bg-income/10` and a
+  // matching border — which is a mint-green wash across the widest card on the
+  // screen, and a hue mixed into a white surface is the one thing the palette
+  // rules out by name. It now rides the icon's ink instead.
+  it.each([
+    ['warning', 'text-warning-ink'],
+    ['positive', 'text-income-ink'],
+    ['default', 'text-primary-ink'],
+  ] as const)('carries the %s variant on the icon, in ink', (variant, ink) => {
+    mockInsights = [insight('a', variant, 'Hero')];
     const { container } = render(<SpendingInsights {...baseProps} />);
 
-    const hero = container.querySelector('[data-insight="hero"]');
-    expect(hero?.className).toContain('warning');
+    expect(container.querySelector(`.${ink}`)).not.toBeNull();
   });
 
-  it('applies income background when hero variant is positive', () => {
-    mockInsights = [insight('a', 'positive', 'Hero')];
-    const { container } = render(<SpendingInsights {...baseProps} />);
+  it.each(['warning', 'positive', 'default'] as const)(
+    'never washes the %s hero in a hue',
+    (variant) => {
+      mockInsights = [insight('a', variant, 'Hero')];
+      const { container } = render(<SpendingInsights {...baseProps} />);
 
-    const hero = container.querySelector('[data-insight="hero"]');
-    expect(hero?.className).toContain('income');
-  });
+      const hero = container.querySelector('[data-insight="hero"]');
 
-  it('applies primary background when hero variant is default', () => {
-    mockInsights = [insight('a', 'default', 'Hero')];
-    const { container } = render(<SpendingInsights {...baseProps} />);
-
-    const hero = container.querySelector('[data-insight="hero"]');
-    expect(hero?.className).toContain('primary');
-  });
+      expect(hero).toHaveClass('surface-card');
+      expect(hero?.className).not.toMatch(/bg-(primary|income|warning)/);
+    },
+  );
 });

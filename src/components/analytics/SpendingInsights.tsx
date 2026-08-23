@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
+import InsightIcon from '@/components/common/InsightIcon';
 import { useSpendingInsights, type Insight } from '@/hooks/useSpendingInsights';
 
 type SpendingInsightsProps = {
@@ -24,7 +25,7 @@ const SpendingInsights = (props: SpendingInsightsProps) => {
 
   return (
     <div className="space-y-3">
-      <h2 className="font-display text-xl font-semibold">
+      <h2 className="type-heading">
         {t('analytics.insights.sectionTitle')}
       </h2>
       {renderHeroCard(hero)}
@@ -37,30 +38,34 @@ export default SpendingInsights;
 
 // ─── Helper render functions ──────────────────────────────────────────────────
 
+// The lead insight is the same panel as the ones under it, told apart by the
+// size and weight of its copy rather than by its ground.
+//
+// It used to be tinted by variant — `bg-income/10` with an `income/20` border,
+// or the warning and primary equivalents — which put a mint-green or cream
+// wash across the widest card on the screen. That is a hue mixed into a white
+// surface, which is the one thing the palette rules out by name: it lands in
+// the beige band the app was repainted to get out of. See palette.ts.
 const renderHeroCard = (insight: Insight) => {
-  const Icon = insight.icon;
-  const bgClass = getHeroBgClass(insight.variant);
-  const iconClass = getIconClass(insight.variant);
-
   return (
     <div
       data-insight="hero"
-      className={`rounded-[1.6rem] p-4 flex items-start gap-3.5 ${bgClass}`}
+      className="surface-card flex items-start gap-3.5 p-4"
     >
-      <div
-        className={`mt-0.5 flex items-center justify-center h-8 w-8 rounded-full shrink-0 ${getIconBgClass(insight.variant)}`}
-      >
-        <Icon className={`h-4 w-4 ${iconClass}`} />
-      </div>
-      <p className="text-sm font-medium leading-relaxed pt-1">
-        {insight.text}
-      </p>
+      <InsightIcon
+        variant={insight.variant}
+        icon={insight.icon}
+        className="mt-0.5 h-5 w-5"
+      />
+      <p className="text-sm font-medium leading-relaxed">{insight.text}</p>
     </div>
   );
 };
 
 const renderSecondaryCards = (insights: Insight[]) => {
-  if (insights.length === 0) return null;
+  if (insights.length === 0) {
+    return null;
+  }
 
   return (
     <div className="grid gap-2">
@@ -82,27 +87,3 @@ const renderSecondaryCards = (insights: Insight[]) => {
   );
 };
 
-const getIconClass = (variant: Insight['variant']): string => {
-  if (variant === 'warning') return 'text-warning-ink';
-  if (variant === 'positive') return 'text-income-ink';
-
-  return 'text-primary-ink';
-};
-
-const getHeroBgClass = (variant: Insight['variant']): string => {
-  if (variant === 'warning')
-
-    return 'bg-warning/10 border border-warning/20';
-  if (variant === 'positive')
-
-    return 'bg-income/10 border border-income/20';
-
-  return 'bg-primary/10 border border-primary/20';
-};
-
-const getIconBgClass = (variant: Insight['variant']): string => {
-  if (variant === 'warning') return 'bg-warning/15';
-  if (variant === 'positive') return 'bg-income/15';
-
-  return 'bg-primary/15';
-};

@@ -57,10 +57,10 @@ const ActivityFeed = (props: Props) => {
 
     return (
       <div
-        className="rounded-2xl border border-dashed border-border px-5 py-10 text-center sm:px-6 sm:py-12"
+        className="rounded-[1.625rem] border border-dashed border-border px-5 py-10 text-center sm:px-6 sm:py-12"
         role="status"
       >
-        <p className="font-display text-lg font-semibold">
+        <p className="type-heading">
           {t('activity.emptyTitle')}
         </p>
         <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
@@ -135,16 +135,16 @@ const renderGroup = (group: DateGroup, props: Props, t: TFunc) => (
     aria-labelledby={`activity-${group.date}`}
     className="activity-day-group"
   >
-    <div className="activity-day-header mb-2 flex items-baseline justify-between gap-3 rounded-full px-1 py-1.5">
+    <div className="activity-day-header mb-2.5 flex items-baseline justify-between gap-3 rounded-full px-1 py-1.5">
       <h2
         id={`activity-${group.date}`}
-        className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground"
+        className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
       >
         {group.label}
       </h2>
       {renderDayTotal(group, props.currency)}
     </div>
-    <div className="surface-card-flush divide-y divide-border/50">
+    <div className="flex flex-col gap-2">
       {group.expenses.map((transaction) => (
         <SwipeableRow
           key={transaction.id}
@@ -205,7 +205,7 @@ const renderLoadMore = (hasMore: boolean, onLoadMore: () => void, t: TFunc) => {
   return (
     <Button
       variant="outline"
-      className="w-full rounded-full bg-card shadow-none"
+      className="w-full rounded-full border-0 bg-tile shadow-[inset_0_0_0_1px_hsl(var(--tile-ring))]"
       onClick={onLoadMore}
     >
       {t('activity.loadMore')}

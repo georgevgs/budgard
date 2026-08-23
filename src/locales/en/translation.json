@@ -71,23 +71,12 @@
     },
     "setBudget": "Set a monthly budget",
     "leftAfterBills": "left this month after planned bills",
-    "leftThisMonth": "left to spend this month",
-    "overPlan": "left this month — you're past your plan",
-    "perDay": "About {{amount}} a day from here",
-    "paceSummary": "{{percent}}% of your everyday budget used · day {{day}} of {{days}}",
-    "path": {
-      "ariaLabel": "Everyday spending through day {{day}} of {{days}}, with {{percent}} percent of your everyday budget used",
-      "monthStart": "Month start",
-      "today": "Today",
-      "monthEnd": "Month end"
-    },
+    "overPlan": "You're past your plan for this month.",
     "upcoming": {
-      "title": "Coming up",
-      "summary": "{{amount}} across {{count}} planned payments in the next 7 days"
+      "title": "Coming up"
     },
     "insights": {
-      "title": "Worth noticing",
-      "viewTrends": "View trends"
+      "title": "Worth noticing"
     },
     "recent": {
       "title": "Recent activity",
@@ -118,13 +107,49 @@
       }
     },
     "spentSoFar": "spent so far this month",
-    "comparedLastMonth": {
-      "more": "{{amount}} more than by this day last month",
-      "less": "{{amount}} less than by this day last month",
-      "same": "About the same as by this day last month"
-    },
     "recovery_one": "Your usual day is about {{amount}}, and there is {{count}} day left.",
-    "recovery_other": "Your usual day is about {{amount}}, and there are {{count}} days left."
+    "recovery_other": "Your usual day is about {{amount}}, and there are {{count}} days left.",
+    "tiles": {
+      "safeToSpend": "Safe to spend",
+      "overBudget": "Over budget",
+      "budgetUsed": "Budget used",
+      "monthPace": "Month pace",
+      "upcoming": "Next 7 days",
+      "topCategory": "Top category",
+      "insight": "Worth noticing",
+      "recentActivity": "Recent activity",
+      "weeklyRecap": "Weekly recap",
+      "netWorth": "Net worth",
+      "debts": "Debts"
+    },
+    "tile": {
+      "dailyPace_one": "{{amount}} a day for the {{count}} day left",
+      "dailyPace_other": "{{amount}} a day for the {{count}} days left",
+      "spentOfBudget": "{{spent}} of {{budget}}",
+      "noBudgetYet": "No budget set yet",
+      "budgetUsedAria": "Budget used: {{percent}} percent of your monthly plan",
+      "dayOfMonth": "Day {{day}} of {{days}}",
+      "monthPaceAria": "Spending over the last seven days, on day {{day}} of {{days}}",
+      "billsSummary_one": "{{amount}} · {{count}} bill",
+      "billsSummary_other": "{{amount}} · {{count}} bills",
+      "debtCount_one": "{{count}} debt",
+      "debtCount_other": "{{count}} debts"
+    },
+    "arrange": {
+      "open": "Arrange your grid",
+      "title": "Arrange",
+      "hint": "Reorder the modules and hide the ones you don't use. Saved on this device.",
+      "done": "Done",
+      "hidden": "Hidden tiles",
+      "hide": "Hide {{name}}",
+      "show": "Show {{name}}",
+      "moveUp": "Move {{name}} earlier",
+      "moveDown": "Move {{name}} later",
+      "reset": "Reset to default",
+      "allShown": "Every module is already on your grid.",
+      "emptyTitle": "Your grid is empty",
+      "emptyBody": "You've hidden every module. Bring the ones you want back from Arrange."
+    }
   },
   "activity": {
     "title": "Activity",
@@ -332,8 +357,8 @@
     }
   },
   "insights": {
-    "fiftyThirtyTwenty": "Spending split (50 / 30 / 20)",
-    "targetSplit": "Needs · Wants · Savings",
+    "fiftyThirtyTwenty": "Spending split",
+    "targetSplit": "50 / 30 / 20 target",
     "onTarget": "On target",
     "overTarget": "Over target",
     "unclassified": "{{amount}} from {{count}} unclassified categories — tag them as Need, Want, or Savings to include them."
@@ -670,7 +695,6 @@
     "settings": "Settings",
     "upgrade": "Upgrade to Pro",
     "openProfileMenu": "Open profile menu",
-    "goHome": "Go to home",
     "signedInAs": "Signed in as",
     "ariaLabel": "Main navigation",
     "previousMonth": "Previous month",
@@ -990,15 +1014,11 @@
     "close": "Close actions menu"
   },
   "analytics": {
-    "subtitle": "See the patterns behind your money without losing the bigger picture.",
     "selectYear": "Select year",
     "viewMonthDetails": "View month details",
     "chooseMonth": "Choose a month",
     "noCategorizedExpenses": "No categorized expenses for {{year}}",
     "yearOverview": "Year overview",
-    "vsLastMonthUp": "+{{percent}}% vs last month",
-    "vsLastMonthDown": "-{{percent}}% vs last month",
-    "vsLastMonthContext": "vs {{amount}} in {{month}}",
     "sameAsLastMonth": "Same as last month",
     "budgetLabel": "Budget: {{amount}}",
     "budgetUsed": "{{percent}}% of budget used",
@@ -1051,6 +1071,12 @@
       "heavier": "{{amount}} heavier than usual",
       "lighter": "{{amount}} lighter than usual",
       "summary": "Spending by month against a usual month of {{amount}}: {{heavier}} months heavier, {{lighter}} lighter."
+    },
+    "viewCategory": "View {{category}}",
+    "tile": {
+      "averagePerMonth": "Avg / month",
+      "biggestMonth": "Biggest month",
+      "whereItWent": "Where it went"
     }
   },
   "import": {

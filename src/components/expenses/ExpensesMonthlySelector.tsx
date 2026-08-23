@@ -14,15 +14,16 @@ import {
 import { useDateLocale } from '@/hooks/useDateLocale';
 import MonthYearPickerContent from '@/components/expenses/MonthYearPickerContent';
 
-type ExpensesMonthlySelectorProps = {
-  selectedMonth: string; // Format: "yyyy-MM"
+type Props = {
+  /** Format: "yyyy-MM". */
+  selectedMonth: string;
   onMonthChange: (month: string) => void;
-}
+};
 
 const ExpensesMonthlySelector = ({
   selectedMonth,
   onMonthChange,
-}: ExpensesMonthlySelectorProps) => {
+}: Props) => {
   const { t } = useTranslation();
   const selectedDate = parseISO(`${selectedMonth}-01`);
   const dateLocale = useDateLocale();
@@ -52,7 +53,7 @@ const ExpensesMonthlySelector = ({
   };
 
   return (
-    <div className="flex items-center justify-between gap-4 p-1 rounded-2xl bg-card border border-border/40 shadow-sm">
+    <div className="tile flex items-center justify-between gap-4 rounded-full p-1">
       <Button
         variant="ghost"
         size="sm"

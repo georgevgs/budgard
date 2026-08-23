@@ -35,7 +35,7 @@ const TransactionInsight = (props: Props) => {
       >
         {t('transaction.insight.title')}
       </h2>
-      <p className="mt-2 font-display text-lg font-semibold">
+      <p className="mt-2 type-heading">
         {t('transaction.insight.summary', {
           count: props.monthCount,
           amount: formatCurrency(props.monthTotal, props.currency),

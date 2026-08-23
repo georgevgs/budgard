@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
-import { Link } from 'react-router-dom';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import BentoTile from '@/components/bento/BentoTile';
+import TileLabel from '@/components/bento/TileLabel';
 
 type Props = {
   title: string;
@@ -8,41 +9,45 @@ type Props = {
   description: string;
   path: string;
   icon: ComponentType<{ className?: string }>;
-  toneClass: string;
 };
 
+// The icon chip is the same on all four, and it is the same chip the rest of
+// the app already uses (`UpcomingBillsCard`, `PaywallFeatures`, `TodayArrange`).
+// The four used to carry a hue each — orange, green, gold, blue — passed in as
+// a `toneClass` prop: a pastel per destination, which is four accents on one
+// screen in an app with one. Goals are not income and net worth is not
+// information, so the hues meant nothing; what they cost was the orange, which
+// stops reading as the app's accent the moment it is one of four.
+//
+// The icon and the label do the telling apart. Colour is not a labelling
+// device here — it is reserved for the figure that needs attention.
 const PlanOverviewCard = ({
   title,
   value,
   description,
   path,
   icon: Icon,
-  toneClass,
 }: Props) => {
   return (
-    <Link
+    <BentoTile
       to={path}
-      viewTransition
-      className="group flex min-h-36 flex-col surface-card p-4 transition-[background-color,scale] hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      ariaLabel={title}
+      className="group flex min-h-33 flex-col p-4"
     >
       <div className="flex items-center justify-between">
-        <span
-          className={`flex h-10 w-10 items-center justify-center rounded-full ${toneClass}`}
-        >
-          <Icon className="h-4.5 w-4.5" />
+        <span className="flex h-8.5 w-8.5 items-center justify-center rounded-full bg-primary/12 text-primary-ink">
+          <Icon className="h-4 w-4" />
         </span>
-        <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
       </div>
-      <p className="mt-5 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-        {title}
-      </p>
-      <p className="mt-1 font-display text-xl font-semibold tracking-[-0.02em]">
+      <TileLabel className="mt-4">{title}</TileLabel>
+      <p className="mt-1.5 type-figure-sm">
         {value}
       </p>
-      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+      <p className="mt-1 text-[0.7rem] leading-snug text-muted-foreground">
         {description}
       </p>
-    </Link>
+    </BentoTile>
   );
 };
 

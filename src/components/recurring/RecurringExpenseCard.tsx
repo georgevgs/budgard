@@ -102,9 +102,9 @@ const renderOverdueBadge = (
   if (!isOverdue || !expense.active) return null;
 
   return (
-    <Badge variant="destructive" className="text-xs">
+    <span className="inline-flex items-center rounded-full bg-destructive/12 px-2.5 py-0.5 text-xs font-semibold text-destructive-ink">
       {t('recurring.due')}
-    </Badge>
+    </span>
   );
 };
 

@@ -77,4 +77,3 @@ export const useAppLock = (isSignedIn: boolean): AppLockState => {
   };
 };
 
-export { AUTO_LOCK_MS };

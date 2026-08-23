@@ -210,9 +210,12 @@ src/
   ├── boot/              # pre-React guards + the inline head script
   ├── components/
   │     ├── ui/          # shadcn primitives (do not modify)
+  │     ├── bento/       # BentoGrid / BentoTile / TileLabel — the grid language
   │     ├── charts/      # hand-rolled SVG charts (no charting library)
   │     ├── common/
-  │     ├── today/  activity/  plan/  analytics/
+  │     ├── today/       # + today/tiles/    the Today bento modules
+  │     ├── activity/  plan/
+  │     ├── analytics/   # + analytics/tiles/  the Trends bento modules
   │     ├── expenses/  income/  categories/  tags/  budget/
   │     ├── recurring/  goals/  debts/  networth/
   │     ├── auth/  security/  onboarding/  pro/  settings/

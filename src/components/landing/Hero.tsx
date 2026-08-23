@@ -66,7 +66,7 @@ export default Hero;
 // it is filled with. `--primary-ink` is held to 4.5:1 on white by the design
 // tests, so it stays a headline rather than a decoration.
 const renderHeading = (t: Tx) => (
-  <h1 className="font-display text-[44px] sm:text-6xl md:text-7xl font-semibold tracking-[-0.035em] leading-[1.02] text-foreground">
+  <h1 className="type-slab text-[44px] leading-[1.02] sm:text-6xl md:text-7xl text-foreground">
     {t('landing.hero.headingLine1')}
     <br />
     <span className="text-primary-ink">{t('landing.hero.headingLine2')}</span>
@@ -139,10 +139,10 @@ const renderHeroShot = (t: Tx) => (
               {t('today.chip.comfortable')}
             </span>
           </div>
-          <p className="mt-2 max-w-[16rem] font-display text-xl font-semibold leading-tight tracking-[-0.025em]">
+          <p className="mt-2 max-w-[16rem] type-heading text-xl">
             {t('today.status.comfortable')}
           </p>
-          <p className="mt-5 font-display text-[2.35rem] font-bold leading-none tracking-[-0.045em] tabular-nums">
+          <p className="mt-5 type-figure-xl text-[2.35rem]">
             {t('landing.hero.previewSafeAmount')}
           </p>
           <p className="mt-1 text-xs opacity-65">{t('today.leftAfterBills')}</p>

@@ -32,7 +32,7 @@ const toLinear = (channel: number): number => {
 };
 
 /** Relative luminance, 0 (black) to 1 (white). */
-export const luminance = (hsl: string): number => {
+const luminance = (hsl: string): number => {
   const [red, green, blue] = toChannels(hsl).map(toLinear);
 
   return 0.2126 * red + 0.7152 * green + 0.0722 * blue;

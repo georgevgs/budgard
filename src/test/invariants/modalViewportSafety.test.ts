@@ -103,13 +103,19 @@ describe('modal viewport safety', () => {
     expect(countDialogRoots(expenseCategory)).toBe(0);
   });
 
-  it('paints flush card rims above opaque child rows', () => {
+  // Both flush surfaces put their rim on an ::after so an opaque child cannot
+  // paint over it: `.surface-card-flush` for the lists that are still one
+  // card, `.tile-flush` for an Activity row, which since the bento redesign is
+  // its own pill and has to clip its own swipe-to-delete reveal.
+  it('paints flush surface rims above opaque child rows', () => {
     const css = read('src/index.css');
+    const swipeableRow = read('src/components/activity/SwipeableRow.tsx');
     const activityFeed = read('src/components/activity/ActivityFeed.tsx');
 
     expect(css).toContain('.surface-card-flush::after');
+    expect(css).toContain('.tile-flush::after');
     expect(css).toContain('pointer-events: none');
-    expect(activityFeed).toContain('divide-y divide-border/50');
+    expect(swipeableRow).toContain('tile-flush');
     expect(activityFeed).toContain('border-dashed border-border');
   });
 });

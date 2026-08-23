@@ -87,7 +87,7 @@ const renderTotal = (rhythm: SavingsRhythm, currency: string, t: TFunc) => {
         <p className="text-xs font-semibold uppercase tracking-[0.08em] opacity-60">
           {t('today.rhythm.setAside.total')}
         </p>
-        <p className="font-display text-lg font-semibold tabular-nums">
+        <p className="type-figure-sm">
           {formatCurrency(rhythm.setAside, currency)}
         </p>
       </div>

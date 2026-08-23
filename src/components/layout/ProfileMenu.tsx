@@ -37,7 +37,7 @@ const ProfileMenu = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="h-11 w-11 rounded-full p-0 bg-primary/10 text-primary-ink hover:bg-primary/20"
+          className="h-10 w-10 rounded-full bg-tile p-0 text-primary-ink shadow-[inset_0_0_0_1px_hsl(var(--tile-ring))] hover:bg-accent"
           aria-label={t('navigation.openProfileMenu')}
         >
           <span className="text-sm font-semibold">{initial}</span>

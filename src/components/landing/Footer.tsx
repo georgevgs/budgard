@@ -34,7 +34,7 @@ const renderBrandColumn = (t: Tx) => (
   <div>
     <div className="flex items-center gap-2.5">
       <BrandMark className="h-7 w-7" />
-      <span className="font-display font-semibold tracking-[-0.025em] text-[15px]">
+      <span className="type-wordmark">
         Budgard
       </span>
     </div>

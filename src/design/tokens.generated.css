@@ -9,7 +9,7 @@
   :root {
     --font-display: 'Commissioner', ui-rounded, 'SF Pro Rounded', system-ui, sans-serif;
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --header-height: 4rem;
+    --header-height: 0rem;
     --dock-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
     --dock-height: 3.5rem;
     --dock-clearance: calc(var(--dock-bottom) + var(--dock-height));
@@ -38,6 +38,8 @@
     --destructive: 4 100% 58%;
     --destructive-foreground: 0 0% 100%;
     --destructive-ink: 356 85% 45%;
+    --tile: 0 0% 98%;
+    --tile-ring: 0 0% 7% / 0.07;
     --border: 0 0% 83%;
     --input: 0 0% 83%;
     --ring: 25 100% 33%;
@@ -81,6 +83,8 @@
     --destructive: 4 100% 62%;
     --destructive-foreground: 0 0% 100%;
     --destructive-ink: 4 100% 70%;
+    --tile: 0 0% 10%;
+    --tile-ring: 0 0% 100% / 0.08;
     --border: 0 0% 27%;
     --input: 0 0% 27%;
     --ring: 33 100% 62%;
@@ -123,6 +127,8 @@
     --destructive: 4 100% 58%;
     --destructive-foreground: 0 0% 100%;
     --destructive-ink: 356 85% 45%;
+    --tile: 0 0% 100%;
+    --tile-ring: 318 80% 86% / 0.5;
     --border: 318 80% 86%;
     --input: 318 80% 86%;
     --ring: 333 90% 43%;

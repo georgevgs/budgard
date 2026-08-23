@@ -119,7 +119,7 @@ const renderActiveTooltip = (
       aria-live="polite"
       className="pointer-events-none absolute left-1/2 top-full z-10 w-max max-w-[13rem] -translate-x-1/2 pt-2"
     >
-      <div className="rounded-xl border border-border/40 bg-popover p-2.5 text-xs shadow-md">
+      <div className="chart-tooltip">
         {render(slice)}
       </div>
     </div>

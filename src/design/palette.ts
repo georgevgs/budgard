@@ -15,13 +15,13 @@
 export type Hsl = string;
 
 /**
- * A hue in its four jobs. Splitting them is what lets the palette be neon at
+ * A hue in its three jobs. Splitting them is what lets the palette be neon at
  * all — see the note on `accent` below.
  *
  *   solid      the filled surface on the LIGHT canvas.
  *   solidDark  the same fill on the dark canvas, where it can run hotter.
  *   ink        the same hue at a depth that can be READ as text on the canvas.
- *   on         the label that rides on top of the fill.
+ *   on         the label that rides on top of the fill, at any size.
  */
 export type Swatch = {
   /** Filled surfaces, light theme. Capped by the white canvas. */
@@ -44,6 +44,15 @@ export type Swatch = {
    * 1.2:1 — that is not a relaxed standard, it is an invisible label — so
    * gold, lime and mint carry the app's own near-black instead, which is
    * also what makes those three able to go full neon.
+   *
+   * This is the label AT EVERY SIZE, the bento slab included. There used to be
+   * a fourth role, `deep`, holding a darkened hue at 4.5:1 for the slab alone,
+   * on the reasoning that a 3.5rem amount is read rather than glanced. It was
+   * dropped: on the app's own orange it produced a near-black caption stamped
+   * on a coloured box, which reads as a mistake rather than as a brand. White
+   * on the orange is what the brand looks like, so the slab carries white and
+   * earns its legibility with weight and size instead of with depth — see
+   * `.tile-slab` and `.type-slab` in index.css.
    */
   on: Hsl;
 };
@@ -59,7 +68,8 @@ export type Swatch = {
  * cast across every screen rather than as warmth. Colour in this app is a
  * signal; the ground it sits on is not allowed to be one.
  *
- *   0    the canvas AND every card on it
+ *   0    the canvas, and every card that separates by its rule alone
+ *   25   the bento tile — see the note under `25` below
  *   50   filled-but-quiet: secondary buttons, skeleton blocks
  *   100  the hover step above that
  *   200  the hairline. The only thing drawing a panel, so it has to be seen.
@@ -77,6 +87,22 @@ export type Swatch = {
  */
 export const neutral = {
   0: '0 0% 100%',
+  /**
+   * The bento tile, and the one place page and surface are allowed to differ.
+   *
+   * A card in this app separates by its rule: same white, one hairline. That
+   * works when there are three or four of them stacked down a column. The
+   * bento grid puts six or seven side by side at two different widths, and at
+   * that density a rule alone reads as a wireframe — the eye needs each module
+   * to be an object it can pick up, reorder and hide, not a region marked off
+   * on the page.
+   *
+   * So the tile gets a fill, and it is kept to 2% off the canvas: enough to
+   * make a shape, far too little to read as a tinted panel. Still dead
+   * achromatic, so it costs the app no colour. The plain `.surface-card` is
+   * unchanged and still correct everywhere a single panel stands alone.
+   */
+  25: '0 0% 98%',
   50: '0 0% 94%',
   100: '0 0% 90%',
   200: '0 0% 83%',

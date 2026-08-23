@@ -46,7 +46,7 @@ export const buildBrandAssetRevision = (): string => {
 
 export const BRAND_ASSET_REVISION = buildBrandAssetRevision();
 
-export const versionBrandAssetUrl = (value: string): string => {
+const versionBrandAssetUrl = (value: string): string => {
   const url = new URL(value, 'https://budgard.local');
 
   if (!BRAND_ASSET_PATHS.has(url.pathname)) {

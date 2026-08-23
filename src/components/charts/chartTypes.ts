@@ -3,11 +3,11 @@ import type { ReactNode } from 'react';
 // Every chart in the app is described by this shape. Colours are named by the
 // design token they come from — `'--primary'`, never a hue — so a repalette
 // moves the charts with the rest of the UI (see src/design/tokens.ts).
-export type TokenName = string;
+type TokenName = string;
 
 export type ChartPoint = Record<string, string | number | null | undefined>;
 
-export type SeriesKind = 'area' | 'line' | 'bar';
+type SeriesKind = 'area' | 'line' | 'bar';
 
 export type Series = {
   kind: SeriesKind;

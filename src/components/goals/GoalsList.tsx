@@ -65,6 +65,7 @@ const GoalsList = () => {
             onClick={() => setIsFormOpen(true)}
             size="sm"
             aria-label={t('goals.addGoal')}
+            className="h-10 rounded-full px-3.5"
           >
             <Plus className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">{t('goals.addGoal')}</span>

@@ -36,7 +36,7 @@ export default Header;
 const renderWordmark = () => (
   <a href="#top" className="flex items-center gap-2.5 group">
     <BrandMark className="h-7 w-7 transition-transform group-hover:scale-105" />
-    <span className="font-display font-semibold tracking-[-0.025em] text-[15px]">
+    <span className="type-wordmark">
       Budgard
     </span>
   </a>

@@ -16,7 +16,7 @@ import {
   useCategoriesData,
 } from '@/contexts/DataContext';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
-import Header from '@/components/layout/Header';
+import TopScrim from '@/components/layout/TopScrim';
 import NavTabs from '@/components/layout/NavTabs';
 import MilestoneWatcher from '@/components/common/MilestoneWatcher';
 import ProRoute from '@/components/pro/ProRoute';
@@ -29,6 +29,7 @@ import { useRouteScrollRestoration } from '@/hooks/useRouteScrollRestoration';
 import { usePageRefresh } from '@/hooks/usePageRefresh';
 import PullToRefreshIndicator from '@/components/common/PullToRefreshIndicator';
 import { useAppLock } from '@/hooks/useAppLock';
+import { useTheme } from '@/hooks/useTheme';
 import { signOut } from '@/lib/auth';
 import {
   AppLoadingSkeleton,
@@ -108,6 +109,10 @@ const renderRouteFallback = (skeleton: ReactNode) => (
 const AuthenticatedLayout = () => {
   const { pathname } = useLocation();
   const lock = useAppLock(true);
+  // Applies the stored theme to the document and the meta theme-colour. Lived
+  // in the app bar until that was removed; it is shell-wide work, not header
+  // work, so it belongs on the shell.
+  useTheme();
   useOfflineSync();
   useIdleTabPrefetch();
   useCheckoutReturn();
@@ -127,7 +132,7 @@ const AuthenticatedLayout = () => {
       <div className="contents" inert={lock.isLocked}>
         <SkipToContentLink />
         <PullToRefreshIndicator state={refresh} />
-        <Header />
+        <TopScrim />
         {/* pull-shell: the page travels with the pull so the indicator emerges
             into space rather than landing on top of the content. The travel
             itself is CSS (index.css), driven by a custom property the gesture
@@ -136,7 +141,7 @@ const AuthenticatedLayout = () => {
         <main
           id="main-content"
           tabIndex={-1}
-          className="pull-shell route-transition-content flex-1 pt-2 pb-(--dock-inset) focus:outline-none"
+          className="pull-shell route-transition-content flex-1 pb-(--dock-inset) focus:outline-none"
         >
           <Outlet />
         </main>
@@ -508,6 +513,7 @@ const AuthenticatedApp = () => {
                     path="/goals"
                     element={
                       <ProRoute
+                        screenTitleKey="navigation.goals"
                         titleKey="pro.gate.goalsTitle"
                         descriptionKey="pro.gate.goalsBody"
                       >

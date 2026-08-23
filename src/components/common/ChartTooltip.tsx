@@ -1,19 +1,8 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-type ShellProps = {
-  title: ReactNode;
-  children?: ReactNode;
-};
-
-// Shared chrome for every chart tooltip so all charts read as one system:
-// same radius, surface, border, shadow and padding. Content stays per-chart.
-const ChartTooltipShell = ({ title, children }: ShellProps) => (
-  <div className="rounded-xl bg-popover border border-border/40 shadow-md p-3 text-xs space-y-1.5">
-    <p className="font-medium text-foreground">{title}</p>
-    {children}
-  </div>
-);
+// The chrome around a chart tooltip is `.chart-tooltip` in index.css, with the
+// other surfaces. This file is only what goes inside one.
 
 type RowProps = {
   label: ReactNode;
@@ -43,4 +32,4 @@ const ChartTooltipRow = ({
   </div>
 );
 
-export { ChartTooltipShell, ChartTooltipRow };
+export { ChartTooltipRow };

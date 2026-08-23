@@ -59,7 +59,7 @@ const PadButton = ({ label, onPress, disabled, icon }: ButtonProps) => (
     onClick={onPress}
     disabled={disabled}
     aria-label={label}
-    className="flex h-16 items-center justify-center rounded-full bg-muted/60 font-display text-2xl font-semibold tabular-nums transition-colors active:bg-muted disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    className="flex h-16 items-center justify-center rounded-full bg-muted/60 type-figure transition-colors active:bg-muted disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
   >
     {renderFace(label, icon)}
   </button>

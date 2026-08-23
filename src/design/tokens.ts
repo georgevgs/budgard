@@ -28,6 +28,15 @@
  * `text-primary-ink` stands alone on the canvas. A bare `text-primary` is
  * always a bug — it paints neon on the page background — and `tokens.test.ts`
  * greps for it so it cannot reach main.
+ *
+ * There were four. `--x-deep` held a darkened hue for the bento slab alone,
+ * so a 3.5rem amount could clear 4.5:1 on its own fill; on the app's own
+ * orange that resolved to a near-black caption stamped on a coloured box,
+ * which reads as a mistake rather than as a brand. The slab now carries
+ * `--x-foreground` like every other filled thing — white on the orange, the
+ * drinks-can read the whole palette is built around — and buys back its
+ * legibility with weight and size rather than with depth. See `.tile-slab`
+ * and the `.type-*` scale in index.css.
  */
 
 import {
@@ -69,9 +78,12 @@ export const BASE_TOKENS: TokenMap = {
     "'Commissioner', ui-rounded, 'SF Pro Rounded', system-ui, sans-serif",
   '--font-sans':
     "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-  // Anything that pins itself below the sticky header — the Activity feed's
-  // day dividers, for one — offsets by this rather than restating the number.
-  '--header-height': '4rem',
+  // Chrome above the content, which the bento redesign took to nothing: every
+  // screen now draws its own header and it scrolls away with the page. Kept as
+  // a token rather than deleted because the things that pin below the chrome —
+  // the Activity feed's day dividers, the pull-to-refresh indicator — should
+  // go on reading the height from one place if a bar ever comes back.
+  '--header-height': '0rem',
   '--dock-bottom': 'calc(env(safe-area-inset-bottom) + 0.75rem)',
   '--dock-height': '3.5rem',
   '--dock-clearance': 'calc(var(--dock-bottom) + var(--dock-height))',
@@ -122,6 +134,8 @@ const light: TokenMap = {
   '--destructive': status.danger.solid,
   '--destructive-foreground': status.danger.on,
   '--destructive-ink': status.danger.ink,
+  '--tile': neutral[25],
+  '--tile-ring': '0 0% 7% / 0.07',
   '--border': neutral[200],
   '--input': neutral[200],
   // The focus ring is the ink, never the fill: a ring has to clear 3:1 against
@@ -185,6 +199,12 @@ const dark: TokenMap = {
   '--destructive': status.danger.solidDark,
   '--destructive-foreground': status.danger.on,
   '--destructive-ink': status.danger.inkDark,
+  // The tile steps UP off a near-black page where light mode steps down off a
+  // white one — same 2-4% separation, read from the other end. 900 is already
+  // the dock capsule's ground, so the two surfaces that sit above the page
+  // agree with each other.
+  '--tile': ink[900],
+  '--tile-ring': '0 0% 100% / 0.08',
   '--border': ink[600],
   '--input': ink[600],
   '--ring': accent.orange.inkDark,
@@ -230,6 +250,11 @@ const barbieTheme: TokenMap = {
   '--destructive': status.danger.solid,
   '--destructive-foreground': status.danger.on,
   '--destructive-ink': status.danger.ink,
+  // Barbie's page is already tinted, so a tile that stepped off it again would
+  // be a second wash. Here the tile is the plain white card the theme already
+  // uses, and the rim does the separating — the light theme's recipe inverted.
+  '--tile': neutral[0],
+  '--tile-ring': `${barbie.rule} / 0.5`,
   '--border': barbie.rule,
   '--input': barbie.rule,
   '--ring': accent.pink.ink,
@@ -310,6 +335,10 @@ export const ACCENT_PROPERTIES = [
  * The four values `applyAccentToDocument` and the pre-paint script write, in
  * the order `ACCENT_PROPERTIES` lists them. Kept here so the runtime hook and
  * the inlined script cannot disagree about what an accent means.
+ *
+ * `on` is the same value in both themes on purpose: it is pinned to the fill
+ * it rides on, and both fills are the same hue. The ink is not, because it is
+ * pinned to the canvas instead, and the two canvases are opposites.
  */
 export const accentValues = (
   swatch: Swatch,

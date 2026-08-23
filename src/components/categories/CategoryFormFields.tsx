@@ -11,7 +11,7 @@ import {
 import CategoryColorPicker from '@/components/categories/CategoryColorPicker';
 import CategoryIconPicker from '@/components/categories/CategoryIconPicker';
 import CategoryKindSelector, {
-  type CategoryKind,
+  type SelectableCategoryKind,
 } from '@/components/categories/CategoryKindSelector';
 import type { CategoryFormData } from '@/lib/validations';
 
@@ -122,7 +122,7 @@ const renderKindField = (
         <FormItem>
           <FormControl>
             <CategoryKindSelector
-              value={field.value as CategoryKind | undefined}
+              value={field.value as SelectableCategoryKind | undefined}
               onChange={field.onChange}
               disabled={isDisabled}
             />

@@ -18,23 +18,9 @@ export const AppLoadingSkeleton = () => {
       label={t('common.loadingApp')}
       className="min-h-dvh bg-background flex flex-col"
     >
-      {/* Header */}
-      <div className="sticky top-0 z-50 w-full border-b bg-background">
-        <div className="container flex h-14 items-center justify-between px-4">
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-7 w-7 rounded-md" />
-            <Skeleton className="h-5 w-20" />
-          </div>
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-8 w-8 rounded-md" />
-            <Skeleton className="h-8 w-8 rounded-md" />
-            <Skeleton className="h-8 w-8 rounded-md" />
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <main className="flex-1 pt-2 pb-(--dock-inset)">
+      {/* No app bar to stand in for any more: every screen draws its own
+          header, and the body below already opens with one. */}
+      <main className="flex-1 pb-(--dock-inset)">
         {renderTransactionsBody()}
       </main>
 
@@ -56,10 +42,10 @@ export const AppLoadingSkeleton = () => {
   );
 };
 
-// Mirrors the exact structure of the expenses page so the transition
-// from skeleton → real content feels seamless rather than jarring.
-// Income reuses it — the two lists share a layout — and only differs in
-// what gets announced to assistive tech.
+// Mirrors the structure of the screen it is about to become so the transition
+// from skeleton → real content feels seamless rather than jarring. Income and
+// Activity reuse it — they share a layout — and differ only in what gets
+// announced to assistive tech.
 export const ExpenseLoadingState = ({ section = 'expenses' }: Props) => {
   const { t } = useTranslation();
 
@@ -90,73 +76,41 @@ const resolveSectionName = (section: Section, t: TranslateFunction): string => {
   return t('navigation.expenses');
 };
 
+const PILL_ROWS = ['a', 'b', 'c'] as const;
+
 // Shared by both exports above. Kept announcement-free so AppLoadingSkeleton
 // can wrap it in a single live region instead of nesting two.
+//
+// Shaped like the bento grid it becomes: a header, the slab, the two-up
+// modules under it, then a stack of row pills. A skeleton mirroring a layout
+// the app no longer has costs more than no skeleton at all — the content
+// appears to jump the moment it arrives.
 const renderTransactionsBody = () => (
-  <div className="page-shell space-y-3">
-    {/* Monthly selector */}
-    <div className="flex items-center justify-between px-1">
-      <Skeleton className="h-8 w-8 rounded-full" />
-      <Skeleton className="h-4 w-32" />
-      <Skeleton className="h-8 w-8 rounded-full" />
-    </div>
-
-    {/* Monthly overview card */}
-    <div className="rounded-2xl border border-border/50 p-4 space-y-3">
-      <Skeleton className="h-3 w-24" />
-      <Skeleton className="h-8 w-36" />
-      <div className="grid grid-cols-2 gap-4 pt-2 border-t">
-        <div className="space-y-1.5">
-          <Skeleton className="h-3 w-20" />
-          <Skeleton className="h-5 w-10" />
-        </div>
-        <div className="space-y-1.5">
-          <Skeleton className="h-3 w-24" />
-          <Skeleton className="h-5 w-16" />
-        </div>
+  <div className="page-shell">
+    <div className="flex items-center justify-between gap-3">
+      <div className="space-y-2">
+        <Skeleton className="h-5 w-40" />
+        <Skeleton className="h-3 w-28" />
+      </div>
+      <div className="flex gap-2">
+        <Skeleton className="h-10 w-10 rounded-full" />
+        <Skeleton className="h-10 w-10 rounded-full" />
       </div>
     </div>
 
-    {/* Search bar */}
-    <Skeleton className="h-10 w-full rounded-lg" />
+    <div className="bento mt-4">
+      <Skeleton className="bento-wide h-38 rounded-[1.875rem]" />
+      <Skeleton className="h-44 rounded-[1.625rem]" />
+      <Skeleton className="h-44 rounded-[1.625rem]" />
+      <Skeleton className="bento-wide h-30 rounded-[1.625rem]" />
+      <Skeleton className="h-26 rounded-[1.625rem]" />
+      <Skeleton className="h-26 rounded-[1.625rem]" />
+    </div>
 
-    {/* Expense card skeletons — varying widths feel natural */}
-    {renderSkeletonCards()}
-  </div>
-);
-
-const SKELETON_ROWS = [
-  { desc: 'w-2/5', badge: 'w-20', amount: 'w-14' },
-  { desc: 'w-1/2', badge: 'w-16', amount: 'w-16' },
-  { desc: 'w-1/3', badge: 'w-24', amount: 'w-12' },
-  { desc: 'w-2/5', badge: 'w-18', amount: 'w-14' },
-  { desc: 'w-1/2', badge: 'w-20', amount: 'w-16' },
-] as const;
-
-const renderSkeletonCards = () => {
-  return (
-    <div className="space-y-2 pt-1">
-      {SKELETON_ROWS.map((row, i) => (
-        <div
-          key={`skeleton-${i}`}
-          className="rounded-2xl border border-border/50 overflow-hidden"
-        >
-          <div className="flex">
-            {/* Category accent strip */}
-            <Skeleton className="w-1 h-16 rounded-none shrink-0" />
-            <div className="p-4 flex-1 flex items-center justify-between gap-4">
-              <div className="flex-1 space-y-2 min-w-0">
-                <div className="flex items-center gap-2">
-                  <Skeleton className={`h-4 ${row.desc}`} />
-                  <Skeleton className="h-5 w-16 rounded-full" />
-                </div>
-                <Skeleton className="h-3 w-28" />
-              </div>
-              <Skeleton className={`h-5 ${row.amount} shrink-0`} />
-            </div>
-          </div>
-        </div>
+    <div className="mt-6 space-y-2">
+      {PILL_ROWS.map((row) => (
+        <Skeleton key={row} className="h-15 rounded-[1.375rem]" />
       ))}
     </div>
-  );
-};
+  </div>
+);

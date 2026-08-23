@@ -39,7 +39,7 @@ const ChartHoverCard = ({
       className="pointer-events-none absolute top-0 z-10 w-[168px]"
       style={{ left: clampToContainer(x, containerWidth) }}
     >
-      <div className="rounded-xl border border-border/40 bg-popover p-3 text-xs shadow-md">
+      <div className="chart-tooltip">
         {render(point, activeIndex)}
       </div>
     </div>

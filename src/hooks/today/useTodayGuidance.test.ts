@@ -105,10 +105,9 @@ describe('useTodayGuidance pace', () => {
 
     expect(result.current.everydayBudget).toBe(0);
     expect(result.current.status).toBe('comfortable');
-    expect(result.current.moneyPath).toEqual([]);
   });
 
-  it('reports noBudget and no path when no budget is set', () => {
+  it('reports noBudget when no budget is set', () => {
     monthlyBudget = null;
     atDay(10);
     const { result } = renderHook(() =>
@@ -117,7 +116,6 @@ describe('useTodayGuidance pace', () => {
 
     expect(result.current.status).toBe('noBudget');
     expect(result.current.safeToSpend).toBeNull();
-    expect(result.current.moneyPath).toEqual([]);
   });
 
   it('compares against the same day of last month, not the whole of it', () => {
@@ -134,7 +132,7 @@ describe('useTodayGuidance pace', () => {
     expect(result.current.spentLastMonthToDate).toBe(60);
   });
 
-  it('charts only everyday spend', () => {
+  it('paces on everyday spend only', () => {
     atDay(3);
     const { result } = renderHook(() =>
       useTodayGuidance([
@@ -143,9 +141,7 @@ describe('useTodayGuidance pace', () => {
       ]),
     );
 
-    const day3 = result.current.moneyPath.find((point) => point.day === 3);
-
-    // 40 of the 400 everyday budget — the 600 rent is absent from the curve.
-    expect(Math.round(day3?.budgetPercent ?? -1)).toBe(10);
+    // 40 of the 400 everyday budget — the 600 rent is absent from the pace.
+    expect(Math.round(result.current.everydayProgress)).toBe(10);
   });
 });

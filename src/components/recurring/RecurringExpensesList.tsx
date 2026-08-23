@@ -101,6 +101,7 @@ const renderHeader = (
         onClick={onAddClick}
         size="sm"
         aria-label={renderAddCtaLabel(mode, t)}
+        className="h-10 rounded-full px-3.5"
       >
         <Plus className="h-4 w-4 sm:mr-2" />
         <span className="hidden sm:inline">{renderAddCtaLabel(mode, t)}</span>
@@ -114,16 +115,14 @@ const renderModeToggle = (
   setMode: (mode: RecurringMode) => void,
   t: TranslateFunction,
 ) => (
-  <div
-    role="tablist"
-    className="inline-flex rounded-full bg-muted p-0.5 self-start"
-  >
+  <div role="tablist" className="segmented self-start">
     <button
       type="button"
       role="tab"
       aria-selected={mode === 'expense'}
+      data-active={mode === 'expense'}
       onClick={() => setMode('expense')}
-      className={`text-xs px-4 py-1.5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${getModeButtonClass(mode === 'expense')}`}
+      className={SEGMENT}
     >
       {t('expenses.title')}
     </button>
@@ -131,8 +130,9 @@ const renderModeToggle = (
       type="button"
       role="tab"
       aria-selected={mode === 'income'}
+      data-active={mode === 'income'}
       onClick={() => setMode('income')}
-      className={`text-xs px-4 py-1.5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${getModeButtonClass(mode === 'income')}`}
+      className={SEGMENT}
     >
       {t('income.title')}
     </button>
@@ -147,6 +147,9 @@ const renderModeTitle = (mode: RecurringMode, t: TranslateFunction): string => {
   return t('recurring.expensesTitle');
 };
 
+const SEGMENT =
+  'segmented-item cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+
 const renderAddCtaLabel = (
   mode: RecurringMode,
   t: TranslateFunction,
@@ -156,14 +159,6 @@ const renderAddCtaLabel = (
   }
 
   return t('recurring.addRecurring');
-};
-
-const getModeButtonClass = (active: boolean): string => {
-  if (active) {
-    return 'bg-background text-foreground shadow-sm';
-  }
-
-  return 'text-muted-foreground hover:text-foreground';
 };
 
 const renderMonthlySummary = (

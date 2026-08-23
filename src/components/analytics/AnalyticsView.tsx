@@ -8,22 +8,15 @@ import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import PageHeader from '@/components/common/PageHeader';
 import AnalyticsEmpty from '@/components/analytics/AnalyticsEmpty';
-import SpendingInsights from '@/components/analytics/SpendingInsights';
-import CategorySparkline from '@/components/analytics/CategorySparkline';
+import { useIsPro } from '@/hooks/useIsPro';
 import { CategoryDrillDown } from '@/components/analytics/CategoryDrillDown';
 import { MonthDrillDown } from '@/components/analytics/MonthDrillDown';
-import MonthSnapshotCard from '@/components/analytics/MonthSnapshotCard';
-import YearOverviewSection from '@/components/analytics/YearOverviewSection';
-import YearRhythm from '@/components/analytics/YearRhythm';
-import CashFlowSection from '@/components/analytics/CashFlowSection';
-import ForecastSection from '@/components/analytics/ForecastSection';
-import AnnualExportCard from '@/components/analytics/AnnualExportCard';
-import ProUpsellCard from '@/components/pro/ProUpsellCard';
+import TrendsBento from '@/components/analytics/TrendsBento';
+import TrendsSections from '@/components/analytics/TrendsSections';
+import YearPill from '@/components/analytics/YearPill';
 import { useAnalyticsData } from '@/hooks/analytics/useAnalyticsData';
 import { useAnalyticsDrillDown } from '@/hooks/analytics/useAnalyticsDrillDown';
-import { useIsPro } from '@/hooks/useIsPro';
 import type { CategoryRow } from '@/hooks/analytics/useAnalyticsData';
-import { formatCurrency } from '@/lib/utils';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
@@ -57,60 +50,39 @@ const AnalyticsView = () => {
   }
 
   return (
-    <div className="page-shell space-y-6">
+    <div className="page-shell">
       <PageHeader
         title={t('navigation.trends')}
-        subtitle={t('analytics.subtitle')}
+        action={
+          <YearPill
+            selectedYear={analytics.selectedYear}
+            availableYears={analytics.availableYears}
+            onYearChange={analytics.setSelectedYear}
+          />
+        }
       />
-      {/* Month snapshot */}
-      <MonthSnapshotCard monthComparison={analytics.monthComparison} />
 
-      {/* Spending insights */}
-      <SpendingInsights
-        expenses={analytics.expenses}
-        monthlyBudget={monthlyBudget}
+      {/* The five answers the screen is opened for, above any chart. */}
+      <TrendsBento
         monthComparison={analytics.monthComparison}
-        categories={categories}
-        defaultCurrency={defaultCurrency}
-      />
-
-      {/* Year overview */}
-      <YearOverviewSection
-        selectedYear={analytics.selectedYear}
-        availableYears={analytics.availableYears}
-        onYearChange={analytics.setSelectedYear}
+        rhythmMonths={analytics.rhythmMonths}
         monthlyData={analytics.monthlyData}
-        yAxisMax={analytics.yAxisMax}
-        totalSpent={analytics.yearlyStats.totalSpent}
         monthlyAverage={analytics.yearlyStats.monthlyAverage}
         monthsElapsed={analytics.yearlyStats.monthsElapsed}
+        totalSpent={analytics.yearlyStats.totalSpent}
+        breakdown={analytics.yearlyStats.categoryBreakdown}
         onMonthClick={drillDown.handleMonthClick}
+        onCategoryClick={drillDown.handleCategoryClick}
       />
 
-      {/* Placed right after the year overview: the bars above answer "how much
-          each month", and this answers "compared to what" — which is the
-          question the bars invite and cannot settle on their own. */}
-      <YearRhythm
-        months={analytics.rhythmMonths}
-        currency={defaultCurrency}
+      <TrendsSections
+        analytics={analytics}
+        drillDown={drillDown}
+        isPro={isPro}
+        categories={categories}
+        monthlyBudget={monthlyBudget}
+        defaultCurrency={defaultCurrency}
       />
-
-      {renderProSections(isPro, analytics.selectedYear, t)}
-
-      {/* Category breakdown */}
-      <div className="space-y-3">
-        <h2 className="font-display text-xl font-semibold">
-          {t('analytics.categoryTrends')}
-        </h2>
-        {renderCategoryBreakdown(
-          analytics.yearlyStats.categoryBreakdown,
-          analytics.yearlyStats.totalSpent,
-          analytics.selectedYear,
-          t,
-          drillDown.handleCategoryClick,
-          defaultCurrency,
-        )}
-      </div>
 
       {/* Drill-down dialogs */}
       {renderCategoryDrillDown(
@@ -138,103 +110,6 @@ const renderLoading = (showSkeleton: boolean) => {
   }
 
   return <AnalyticsLoadingState />;
-};
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
-// Cash flow and the annual CSV export cover more than the free 3-month
-// window, so free users get one upsell card in their place.
-const renderProSections = (isPro: boolean, selectedYear: number, t: TFunc) => {
-  if (!isPro) {
-    return (
-      <ProUpsellCard
-        title={t('pro.gate.analyticsTitle')}
-        description={t('pro.gate.analyticsBody')}
-      />
-    );
-  }
-
-  return (
-    <>
-      {/* Cash flow (income vs expense, year view) */}
-      <CashFlowSection selectedYear={selectedYear} />
-
-      {/* Forecast (12-month projection + safe-to-spend) */}
-      <ForecastSection />
-
-      {/* Annual export (CSV download for tax/records) */}
-      <AnnualExportCard selectedYear={selectedYear} />
-    </>
-  );
-};
-
-const renderCategoryBreakdown = (
-  breakdown: CategoryRow[],
-  totalSpent: number,
-  selectedYear: number,
-  t: TFunc,
-  onCategoryClick: (cat: CategoryRow) => void,
-  currency: string,
-) => {
-  if (breakdown.length === 0) {
-    return (
-      <p className="text-center text-sm text-muted-foreground py-8 px-4">
-        {t('analytics.noCategorizedExpenses', { year: selectedYear })}
-      </p>
-    );
-  }
-
-  return (
-    <div className="surface-card-flush">
-      <div className="p-0 divide-y divide-border/40">
-        {breakdown.map((cat) => {
-          let pct = 0;
-          if (totalSpent > 0) {
-            pct = (cat.amount / totalSpent) * 100;
-          }
-
-          return (
-            <button
-              key={cat.id}
-              type="button"
-              onClick={() => onCategoryClick(cat)}
-              className="flex min-h-11 w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-accent/50 active:bg-accent/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset cursor-pointer sm:gap-4 sm:px-5"
-            >
-              {renderCategoryIcon(cat)}
-              <span className="flex-1 text-sm font-medium truncate min-w-0">
-                {cat.name}
-              </span>
-              <div className="hidden w-16 shrink-0 sm:block">
-                <CategorySparkline
-                  values={cat.monthlyAmounts}
-                  color={cat.color}
-                />
-              </div>
-              <span className="text-sm font-semibold tabular-nums shrink-0">
-                {formatCurrency(cat.amount, currency)}
-              </span>
-              <span className="hidden w-8 shrink-0 text-right text-xs tabular-nums text-muted-foreground md:block">
-                {Math.round(pct)}%
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-const renderCategoryIcon = (cat: CategoryRow) => {
-  if (cat.icon) {
-    return <span className="text-base shrink-0">{cat.icon}</span>;
-  }
-
-  return (
-    <div
-      className="w-2.5 h-2.5 rounded-full shrink-0"
-      style={{ backgroundColor: cat.color }}
-    />
-  );
 };
 
 const renderCategoryDrillDown = (

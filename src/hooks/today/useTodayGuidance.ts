@@ -19,11 +19,6 @@ import { buildBaseline } from '@/lib/baseline';
 
 export type TodayStatus = 'comfortable' | 'watchful' | 'tight' | 'noBudget';
 
-export type MoneyPathPoint = {
-  day: number;
-  budgetPercent: number;
-};
-
 export type RecentActivityItem = {
   transaction: Expense;
   kind: 'expense' | 'income';
@@ -119,7 +114,6 @@ export const useTodayGuidance = (expenses: Expense[]) => {
       everydayBudget,
       everydayProgress,
       status,
-      moneyPath: buildMoneyPath(monthExpenses, everydayBudget, now),
       upcomingWeek: buildUpcomingBills(recurringExpenses, now, {
         withinDays: 7,
         limit: 3,
@@ -251,46 +245,6 @@ const resolveStatus = (input: StatusInput): TodayStatus => {
   }
 
   return 'comfortable';
-};
-
-// Plots the same series the status is judged on — everyday spend against the
-// everyday budget. If this charted gross spend while the chip judged
-// discretionary, the curve could sit above the guide line while the chip said
-// "on track", and the hero would be arguing with itself.
-const buildMoneyPath = (
-  expenses: Expense[],
-  everydayBudget: number | null,
-  now: Date,
-): MoneyPathPoint[] => {
-  if (!everydayBudget || everydayBudget <= 0) {
-    return [];
-  }
-
-  const dailyTotals = new Map<number, number>();
-  for (const expense of expenses) {
-    if (expense.recurring_expense_id) {
-      continue;
-    }
-    if (!countsAsSpending(expense)) {
-      continue;
-    }
-
-    const day = Number(expense.date.slice(8, 10));
-    const current = dailyTotals.get(day) ?? 0;
-    dailyTotals.set(day, current + expense.amount);
-  }
-
-  const points: MoneyPathPoint[] = [{ day: 0, budgetPercent: 0 }];
-  let cumulative = 0;
-  for (let day = 1; day <= now.getDate(); day += 1) {
-    cumulative += dailyTotals.get(day) ?? 0;
-    points.push({
-      day,
-      budgetPercent: (cumulative / everydayBudget) * 100,
-    });
-  }
-
-  return points;
 };
 
 const buildRecentActivity = (

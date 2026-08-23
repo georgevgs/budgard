@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import PageHeader from '@/components/common/PageHeader';
 import ActivityFeed from '@/components/activity/ActivityFeed';
 import ActivityFilters from '@/components/activity/ActivityFilters';
+import ActivityMonthStepper from '@/components/activity/ActivityMonthStepper';
 import ActivityPeriodSelector from '@/components/activity/ActivityPeriodSelector';
 import ActivitySummary from '@/components/activity/ActivitySummary';
 import ActivityTemplates from '@/components/activity/ActivityTemplates';
@@ -49,19 +50,23 @@ const ActivityView = () => {
         <PageHeader
           title={t('activity.title')}
           action={
-            <ActivityToolsMenu
-              isExportDisabled={csvExport.isExportDisabled}
-              onExport={csvExport.handleExport}
-            />
+            <div className="flex items-center gap-2">
+              <ActivityFilterPanel
+                categories={categories}
+                tags={tags}
+                selectedCategoryId={activity.selectedCategoryId}
+                selectedTagId={activity.selectedTagId}
+                onCategoryChange={activity.setSelectedCategoryId}
+                onTagChange={activity.setSelectedTagId}
+              />
+              <ActivityToolsMenu
+                isExportDisabled={csvExport.isExportDisabled}
+                onExport={csvExport.handleExport}
+              />
+            </div>
           }
         />
-        <div className="mt-5 space-y-4">
-          <ActivityPeriodSelector
-            period={activity.period}
-            selectedMonth={activity.selectedMonth}
-            onPeriodChange={activity.setPeriod}
-            onMonthChange={activity.setSelectedMonth}
-          />
+        <div className="mt-4 space-y-3">
           <ActivitySummary
             expenseTotal={activity.expenseTotal}
             incomeTotal={activity.incomeTotal}
@@ -73,15 +78,16 @@ const ActivityView = () => {
             onSearchChange={activity.setSearch}
             onKindChange={activity.setKind}
             trailing={
-              <ActivityFilterPanel
-                categories={categories}
-                tags={tags}
-                selectedCategoryId={activity.selectedCategoryId}
-                selectedTagId={activity.selectedTagId}
-                onCategoryChange={activity.setSelectedCategoryId}
-                onTagChange={activity.setSelectedTagId}
+              <ActivityPeriodSelector
+                period={activity.period}
+                onPeriodChange={activity.setPeriod}
               />
             }
+          />
+          <ActivityMonthStepper
+            period={activity.period}
+            selectedMonth={activity.selectedMonth}
+            onMonthChange={activity.setSelectedMonth}
           />
           <ActivityTemplates onUse={quickAdd.handleUseTemplate} />
         </div>
@@ -89,7 +95,7 @@ const ActivityView = () => {
           count={activity.filteredRows.length}
           active={activity.hasActiveFilters}
         />
-        <div className="mt-7">
+        <div className="mt-6">
           <ActivityFeed
             transactions={activity.filteredRows}
             currency={defaultCurrency}

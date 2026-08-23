@@ -5,6 +5,7 @@ import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
 import Target from 'lucide-react/dist/esm/icons/target';
 import Wallet from 'lucide-react/dist/esm/icons/wallet';
+import BentoGrid from '@/components/bento/BentoGrid';
 import PageHeader from '@/components/common/PageHeader';
 import BudgetProgress from '@/components/budget/BudgetProgress';
 import UpcomingBillsCard from '@/components/common/UpcomingBillsCard';
@@ -65,7 +66,7 @@ const PlanView = () => {
       >
         <h2
           id="monthly-plan-title"
-          className="mb-4 font-display text-xl font-semibold"
+          className="mb-4 type-heading"
         >
           {t('plan.monthlyPlan')}
         </h2>
@@ -124,7 +125,7 @@ const renderOverviewGrid = (
   counts: OverviewCounts,
   t: TFunc,
 ) => (
-  <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+  <BentoGrid className="mt-8 lg:grid-cols-4">
     <PlanOverviewCard
       title={t('plan.recurring.title')}
       value={formatCurrency(model.recurringMonthly, currency)}
@@ -133,7 +134,6 @@ const renderOverviewGrid = (
       })}
       path="/recurring"
       icon={Repeat}
-      toneClass="bg-primary/12 text-primary-ink"
     />
     <PlanOverviewCard
       title={t('plan.goals.title')}
@@ -141,7 +141,6 @@ const renderOverviewGrid = (
       description={t('plan.goals.description')}
       path="/goals"
       icon={Target}
-      toneClass="bg-income/12 text-income-ink"
     />
     <PlanOverviewCard
       title={t('plan.debts.title')}
@@ -149,7 +148,6 @@ const renderOverviewGrid = (
       description={t('plan.debts.description')}
       path="/debts"
       icon={CreditCard}
-      toneClass="bg-warning/14 text-warning-ink"
     />
     <PlanOverviewCard
       title={t('plan.networth.title')}
@@ -157,9 +155,8 @@ const renderOverviewGrid = (
       description={t('plan.networth.description')}
       path="/networth"
       icon={Wallet}
-      toneClass="bg-info/12 text-info-ink"
     />
-  </div>
+  </BentoGrid>
 );
 
 const buildPlanModel = (

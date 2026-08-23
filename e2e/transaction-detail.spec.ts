@@ -32,8 +32,10 @@ test.describe('transaction detail', () => {
     data,
   }) => {
     await app.goto('/today');
-    // 24.50 spent, 1500 budget -> 1475.50 left.
-    await expect(app.getByText('1.475,50€')).toBeVisible();
+    // 24.50 spent, 1500 budget -> 1475.50 left. Exact, because the budget
+    // figure also appears inside the Budget used tile's "x of y" caption —
+    // this assertion is about the slab, which is the whole answer.
+    await expect(app.getByText('1.475,50€', { exact: true })).toBeVisible();
 
     await app.goto('/t/exp-1');
     await app.getByRole('switch').click();
@@ -43,7 +45,7 @@ test.describe('transaction detail', () => {
       .toBe(true);
 
     await app.goto('/today');
-    await expect(app.getByText('1.500,00€')).toBeVisible();
+    await expect(app.getByText('1.500,00€', { exact: true })).toBeVisible();
   });
 
   test('a deleted transaction gets a real answer, not a blank screen', async ({

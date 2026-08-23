@@ -36,7 +36,7 @@ const SavingsRhythm = ({ rhythm, currency }: Props) => {
     <section aria-labelledby="savings-rhythm-title">
       <h2
         id="savings-rhythm-title"
-        className="mb-3 font-display text-xl font-semibold"
+        className="mb-3 type-heading"
       >
         {t(`today.rhythm.tone.${rhythm.tone}`)}
       </h2>

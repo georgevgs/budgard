@@ -7,7 +7,7 @@ import {
   useCategoriesData,
   useDataConfig,
 } from '@/contexts/DataContext';
-import { cn, formatCurrency } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 import { countsAsSpending, countsInTotals } from '@/lib/spending';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
@@ -22,27 +22,39 @@ type BucketConfig = {
   key: Bucket;
   target: number; // 0..1
   color: string;
-  textClass: string;
 };
 
+// The app's own three colours, doing the app's own three jobs. This used to be
+// blue / gold / green — `--info`, `--warning`, `--income` — which is a generic
+// chart palette wearing semantic tokens: a "want" is not a warning and a "need"
+// is not information, so the hues carried no meaning and the card read as the
+// one thing on a white page that had been coloured in from somewhere else.
+//
+// Each of these is honest about what it is:
+//   need     near-black, the unavoidable bulk — the app's ground truth colour
+//   want     the accent, because this is the one share you can actually move
+//   savings  the money-positive token, for money kept, which is exactly what
+//            `--income` means everywhere else in the app
+//
+// Which also frees `--warning` and `--info` to go back to meaning caution and
+// information. They were doubling as bucket colours here while the status
+// labels below used the same two hues for a different thing entirely, so a
+// gold bar and a gold "over target" sat in one card meaning nothing alike.
 const BUCKETS: BucketConfig[] = [
   {
     key: 'need',
     target: 0.5,
-    color: 'hsl(var(--info))',
-    textClass: 'text-info-ink',
+    color: 'hsl(var(--foreground))',
   },
   {
     key: 'want',
     target: 0.3,
-    color: 'hsl(var(--warning))',
-    textClass: 'text-warning-ink',
+    color: 'hsl(var(--primary))',
   },
   {
     key: 'savings',
     target: 0.2,
     color: 'hsl(var(--income))',
-    textClass: 'text-income-ink',
   },
 ];
 
@@ -105,10 +117,10 @@ const FiftyThirtyTwentyRing = ({ selectedMonth }: Props) => {
   const unclassifiedCount = countUnclassifiedCategories(categories);
 
   return (
-    <div className="bg-card border border-border/40 rounded-2xl p-5 shadow-sm space-y-4">
-      <div className="flex items-baseline justify-between">
-        <p className="text-sm font-medium">{t('insights.fiftyThirtyTwenty')}</p>
-        <p className="text-xs text-muted-foreground">
+    <div className="surface-card space-y-4 p-5">
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="type-heading">{t('insights.fiftyThirtyTwenty')}</p>
+        <p className="shrink-0 text-xs text-muted-foreground">
           {t('insights.targetSplit')}
         </p>
       </div>
@@ -166,14 +178,19 @@ const BucketRow = ({ bucket, actual, total, currency, t }: BucketRowProps) => {
   return (
     <div>
       <div className="flex items-baseline justify-between text-sm">
-        <span className={cn('font-medium', bucket.textClass)}>
+        <span className="flex items-center gap-2 font-medium">
+          <span
+            className="h-2 w-2 shrink-0 rounded-full"
+            style={{ backgroundColor: bucket.color }}
+            aria-hidden="true"
+          />
           {t(`categories.kind.${bucket.key}`)}
         </span>
         <span className="tabular-nums text-muted-foreground">
           {Math.round(actualPct * 100)}% / {Math.round(targetPct * 100)}%
         </span>
       </div>
-      <div className="mt-1 h-1.5 bg-muted/40 rounded-full overflow-hidden relative">
+      <div className="relative mt-1 h-2 overflow-hidden rounded-full bg-muted">
         <div
           className="h-full rounded-full transition-[width] duration-500"
           style={{
@@ -182,7 +199,7 @@ const BucketRow = ({ bucket, actual, total, currency, t }: BucketRowProps) => {
           }}
         />
         <div
-          className="absolute top-0 h-full w-px bg-foreground/40"
+          className="absolute top-0 h-full w-0.5 bg-background shadow-[0_0_0_0.5px_hsl(var(--foreground)/0.45)]"
           style={{ left: `${targetPct * 100}%` }}
           aria-hidden="true"
         />
@@ -219,10 +236,8 @@ const renderRing = (
           background: `conic-gradient(${stops.join(', ')})`,
         }}
       >
-        <div className="absolute inset-3 rounded-full bg-card flex flex-col items-center justify-center">
-          <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-            50 / 30 / 20
-          </span>
+        <div className="absolute inset-3 flex flex-col items-center justify-center rounded-full bg-tile">
+          <span className="tile-label">50 / 30 / 20</span>
         </div>
       </div>
     </div>
@@ -260,7 +275,7 @@ const getBucketStatus = (
 const renderStatusLabel = (status: BucketStatus, t: TranslateFunction) => {
   if (status === 'on-target') {
     return (
-      <span className="text-income-ink text-xs font-medium">
+      <span className="text-xs font-medium text-muted-foreground">
         {t('insights.onTarget')}
       </span>
     );
@@ -268,7 +283,7 @@ const renderStatusLabel = (status: BucketStatus, t: TranslateFunction) => {
 
   if (status === 'over') {
     return (
-      <span className="text-warning-ink text-xs font-medium">
+      <span className="text-xs font-semibold text-foreground">
         {t('insights.overTarget')}
       </span>
     );

@@ -2,63 +2,54 @@ import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import LoadingScreen from '@/components/ui/loading-screen';
 
+// Shaped like the screen it is about to become: a header with the year pill,
+// the five-tile bento grid, then the sections of charts under it.
+//
+// It used to draw the Trends that existed before the bento redesign — a month
+// snapshot card, a year selector, a category list — so the skeleton and the
+// content it resolved into had no layout in common and everything appeared to
+// jump on arrival. A skeleton mirroring a screen the app no longer has costs
+// more than no skeleton at all.
 const AnalyticsLoadingState = () => {
   const { t } = useTranslation();
 
   return (
     <LoadingScreen
       label={t('common.loadingSection', { section: t('navigation.analytics') })}
-      className="page-shell space-y-6"
+      className="page-shell"
     >
-      {/* Month snapshot */}
-      <div className="rounded-2xl border border-border/50 bg-card p-5 space-y-3">
-        <Skeleton className="h-3 w-28" />
-        <Skeleton className="h-9 w-36" />
-        <Skeleton className="h-3 w-44" />
-        <div className="pt-4 border-t border-border/50 space-y-1.5">
-          <div className="flex justify-between">
-            <Skeleton className="h-3 w-24" />
-            <Skeleton className="h-3 w-16" />
-          </div>
-          <Skeleton className="h-1.5 w-full rounded-full" />
-        </div>
+      <div className="flex items-center justify-between gap-3">
+        <Skeleton className="h-5 w-28" />
+        <Skeleton className="h-9 w-20 rounded-full" />
       </div>
 
-      {/* Year selector + chart */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-10 w-[130px] rounded-md" />
+      {/* TrendsBento: one wide tile, then two-up, then a wide legend. */}
+      <div className="bento mt-4">
+        <Skeleton className="bento-wide h-38 rounded-[1.625rem]" />
+        <Skeleton className="h-30 rounded-[1.625rem]" />
+        <Skeleton className="h-30 rounded-[1.625rem]" />
+        <Skeleton className="bento-wide h-44 rounded-[1.625rem]" />
+        <Skeleton className="bento-wide h-26 rounded-[1.625rem]" />
+      </div>
+
+      {/* TrendsSections: a heading over a panel, twice. */}
+      {SECTIONS.map((section) => (
+        <div key={section.key} className="mt-8 space-y-3">
           <Skeleton className="h-4 w-36" />
-        </div>
-        <div className="surface-card">
-          <div className="p-6">
-            <Skeleton className="h-[280px] w-full rounded-md" />
+          <div className="surface-card p-5">
+            <Skeleton className={section.body} />
           </div>
         </div>
-      </div>
-
-      {/* Category breakdown */}
-      <div className="space-y-3">
-        <Skeleton className="h-3 w-32" />
-        <div className="surface-card">
-          <div className="p-0 divide-y divide-border/50">
-            {[0, 1, 2, 3].map((i) => (
-              <div
-                key={`skeleton-${i}`}
-                className="flex items-center gap-4 px-5 py-3.5"
-              >
-                <Skeleton className="h-2.5 w-2.5 rounded-full shrink-0" />
-                <Skeleton className="h-4 flex-1" />
-                <Skeleton className="h-7 w-16 shrink-0" />
-                <Skeleton className="h-4 w-14 shrink-0" />
-                <Skeleton className="h-3 w-8 shrink-0" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      ))}
     </LoadingScreen>
   );
 };
 
 export default AnalyticsLoadingState;
+
+// --- Helpers ---
+
+const SECTIONS = [
+  { key: 'chart', body: 'h-56 w-full rounded-xl' },
+  { key: 'breakdown', body: 'h-40 w-full rounded-xl' },
+] as const;

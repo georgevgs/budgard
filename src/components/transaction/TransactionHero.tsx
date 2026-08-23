@@ -1,5 +1,6 @@
 import { format, parseISO } from 'date-fns';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { describeAmount } from '@/lib/transactionAmount';
 import { getColorTint } from '@/lib/categoryColor';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
@@ -15,6 +16,11 @@ type Props = {
 // mark and the amount travel between the two screens instead of cross-fading.
 const TransactionHero = ({ transaction, currency, isIncome }: Props) => {
   const dateLocale = useDateLocale();
+  const amount = describeAmount(
+    transaction.amount,
+    resolveKind(isIncome),
+    currency,
+  );
 
   return (
     <header className="flex flex-col items-center gap-3 pt-2 text-center">
@@ -28,18 +34,17 @@ const TransactionHero = ({ transaction, currency, isIncome }: Props) => {
       >
         {transaction.category?.icon ?? '•'}
       </span>
-      <h1 className="max-w-xs font-display text-xl font-semibold leading-tight">
+      <h1 className="max-w-xs type-heading text-xl">
         {transaction.description}
       </h1>
       <p
         className={cn(
-          'font-display text-[2.5rem] font-semibold leading-none tabular-nums',
-          amountTone(isIncome),
+          'type-figure-xl text-[2.5rem]',
+          amount.tone,
         )}
         style={{ viewTransitionName: `tx-amount-${transaction.id}` }}
       >
-        {amountPrefix(isIncome)}
-        {formatCurrency(transaction.amount, currency)}
+        {amount.text}
       </p>
       <p className="text-sm text-muted-foreground">
         {format(parseISO(transaction.date), 'PPPP', { locale: dateLocale })}
@@ -52,18 +57,10 @@ export default TransactionHero;
 
 // --- Helpers ---
 
-const amountTone = (isIncome: boolean): string => {
+const resolveKind = (isIncome: boolean): 'expense' | 'income' => {
   if (isIncome) {
-    return 'text-income-ink';
+    return 'income';
   }
 
-  return 'text-foreground';
-};
-
-const amountPrefix = (isIncome: boolean): string => {
-  if (isIncome) {
-    return '+';
-  }
-
-  return '−';
+  return 'expense';
 };

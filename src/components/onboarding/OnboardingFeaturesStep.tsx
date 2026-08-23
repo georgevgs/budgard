@@ -41,7 +41,7 @@ const OnboardingFeaturesStep = ({ onBack, onComplete }: Props) => {
         {FEATURES.map((feature) => (
           <div
             key={feature.titleKey}
-            className="flex items-start gap-3 rounded-xl border border-border/50 bg-card p-3"
+            className="tile flex items-start gap-3 rounded-xl p-3"
           >
             <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
               <feature.Icon className="h-5 w-5 text-primary-ink" />

@@ -36,7 +36,7 @@ const UpcomingBillsCard = ({
         <div>
           <h2
             id="upcoming-bills-title"
-            className="font-display text-xl font-semibold"
+            className="type-heading"
           >
             {title}
           </h2>

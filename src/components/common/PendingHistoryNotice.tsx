@@ -23,7 +23,7 @@ const PendingHistoryNotice = () => {
         {ROWS.map((width, i) => (
           <div
             key={`pending-history-${i}`}
-            className="rounded-2xl border border-border/50 overflow-hidden"
+            className="tile-flush rounded-2xl"
           >
             <div className="flex">
               <Skeleton className="w-1 h-16 rounded-none shrink-0" />

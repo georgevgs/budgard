@@ -16,7 +16,7 @@ import { useCategorySubmit } from '@/hooks/categories/useCategorySubmit';
 import { categorySchema, type CategoryFormData } from '@/lib/validations';
 import type { Category } from '@/types/Category';
 import CategoryFormFields from '@/components/categories/CategoryFormFields';
-import { type CategoryKind } from '@/components/categories/CategoryKindSelector';
+import { type SelectableCategoryKind } from '@/components/categories/CategoryKindSelector';
 import { swatch } from '@/design/palette';
 
 const DEFAULT_CATEGORY_COLOR = swatch.violet;
@@ -139,7 +139,7 @@ const getIsIncomeCategory = (
 
 const getEditableKind = (
   category: Category | undefined,
-): CategoryKind | undefined => {
+): SelectableCategoryKind | undefined => {
   if (category?.kind === 'need') return 'need';
   if (category?.kind === 'want') return 'want';
   if (category?.kind === 'savings') return 'savings';

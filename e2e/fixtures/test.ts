@@ -37,4 +37,4 @@ export const setBackendReachable = (reachable: boolean): void => {
 };
 
 export { expect };
-export { E2E_EMAIL, E2E_USER_ID } from './mockSupabase';
+export { E2E_USER_ID } from './mockSupabase';

@@ -19,3 +19,25 @@ const TRANSACTION_ENTRY_PATHS: readonly string[] = ['/today', '/activity'];
 
 export const isTransactionEntryPath = (path: string): boolean =>
   TRANSACTION_ENTRY_PATHS.includes(path);
+
+// A screen you arrived at FROM somewhere, rather than one the dock takes you
+// to. There is no persistent app bar any more — every screen draws its own
+// header — so the way back has to be part of that header, and this is what
+// decides whether it gets one. The dock still marks which tab owns the screen
+// (see NavTabs); this answers the different question of how you leave.
+const SECONDARY_PATHS: readonly string[] = [
+  '/recurring',
+  '/goals',
+  '/networth',
+  '/debts',
+  '/settings',
+];
+
+export const isSecondaryPath = (path: string): boolean => {
+  // Transaction detail is a per-id route, so it cannot be listed literally.
+  if (path.startsWith('/t/')) {
+    return true;
+  }
+
+  return SECONDARY_PATHS.includes(path);
+};

@@ -21,7 +21,7 @@ const ForecastSection = () => {
 
   return (
     <div className="space-y-3">
-      <h2 className="font-display text-xl font-semibold">
+      <h2 className="type-heading">
         {t('analytics.forecast.title')}
       </h2>
 

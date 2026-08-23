@@ -24,8 +24,8 @@
   --color-popover: hsl(var(--popover));
   --color-popover-foreground: hsl(var(--popover-foreground));
 
-  /* The three-role rule (see src/design/tokens.ts):
-       bg-primary + text-primary-foreground  a filled control
+  /* The role rule (see src/design/tokens.ts):
+       bg-primary + text-primary-foreground  anything ON the fill, at any size
        text-primary-ink                      the brand AS text, on the canvas
      A bare `text-primary` paints the neon fill onto the page background and is
      always a bug; the design tests grep for it. */
@@ -61,6 +61,10 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+
+  /* The bento tile's fill. Its rim is `--tile-ring`, which carries its own
+     alpha and so is applied by `.tile` rather than exposed as a colour. */
+  --color-tile: hsl(var(--tile));
 }
 
 /*
@@ -194,10 +198,6 @@
   /* Half the depth — for something already sitting on a surface, like the Pro
      card on the pricing table, where the full shadow would detach it. */
   box-shadow: 0 6px 16px -8px hsl(0 0% 0% / var(--lift-strength));
-}
-
-@utility font-display {
-  font-family: var(--font-display);
 }
 
 /* In the components layer so a caller can still override the background with
@@ -377,12 +377,138 @@
     max-width: 48rem;
     margin-inline: auto;
     padding-inline: 1rem;
-    padding-top: 1rem;
+    /* Clears the status bar itself now that no app bar does it. The 1rem is
+       the gap the design leaves above the screen's title. */
+    padding-top: calc(env(safe-area-inset-top) + 1rem);
     padding-bottom: 1.25rem;
 
     @media (width >= 40rem) {
       padding-inline: 1.5rem;
     }
+  }
+
+  /* ─── Type ────────────────────────────────────────────────────────────────
+     The display voice, as a scale rather than as thirty-nine separate
+     decisions.
+
+     It had become the second: every heading and every amount in the app was
+     written out longhand as `font-display text-… font-semibold tracking-[-N]`,
+     with the tracking guessed per call site at five different values and the
+     weight at 600 in all thirty-nine of them. A 3.5rem headline figure and a
+     1rem section heading were therefore set in exactly the same weight, which
+     is why the type had no hierarchy that size was not already providing.
+
+     Two rules run through what follows.
+
+     WEIGHT CARRIES RANK. The figure a screen exists to answer is 800. A figure
+     supporting it is 760. A number inside a module is 720. A heading naming a
+     section is 700 at a size that cannot be mistaken for a figure. 600 is left
+     to running text, where it is emphasis rather than rank.
+
+     TRACKING IS OPTICAL, NOT DECORATIVE. Letterforms need proportionally less
+     air between them the larger they are set, so tracking tightens as the
+     scale climbs — -0.055em at the top, -0.022em at the bottom — instead of
+     being picked by hand. The eyebrow runs the other way for the same reason:
+     at 10px, letterspacing is what keeps small caps from setting solid.
+
+     Each class carries its canonical size, so most call sites are one class.
+     Where a screen genuinely needs a different size — the landing hero, the
+     transaction hero — a `text-[…]` utility after the class still wins, and
+     the weight, tracking and numerals come along for free. */
+
+  .type-slab {
+    font-family: var(--font-display);
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 0.92;
+    letter-spacing: -0.055em;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  .type-figure-xl {
+    font-family: var(--font-display);
+    font-size: 2.75rem;
+    font-weight: 780;
+    line-height: 1;
+    letter-spacing: -0.048em;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  .type-figure-lg {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 760;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  .type-figure {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 720;
+    line-height: 1.05;
+    letter-spacing: -0.032em;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  .type-figure-sm {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.026em;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  /* The cents, on any figure that splits them off from the units.
+
+     They step back so the units carry the glance — the read every price tag
+     and every banking app trains people on — but they do it by SIZE rather
+     than by transparency. They used to be dimmed instead, which was nearly
+     free while the slab's label was a near-black ink. It is not free now that
+     the label is white on the orange: full white measures 2.47:1 there, and
+     dimming it to 72% takes it to 1.91:1 — under the palette's own 2.3 floor
+     for a label on a fill. Past that point dimmed cents stop reading as a
+     hierarchy and start reading as a rendering fault, which is exactly what
+     they looked like.
+
+     `em`, so this rides whatever step of the scale it is nested in. Tracking
+     opens back up because the same optical rule runs in reverse on the way
+     down: smaller type needs more air, not less. */
+  .type-fraction {
+    font-size: 0.56em;
+    letter-spacing: -0.02em;
+  }
+
+  /* The Budgard wordmark, in the landing header and footer. Display type, but
+     not on the size scale above — a logotype is one fixed object. */
+  .type-wordmark {
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  /* A screen's own name. There is no app bar, so this IS the chrome. */
+  .type-title {
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    font-weight: 720;
+    line-height: 1;
+    letter-spacing: -0.034em;
+  }
+
+  /* Names a section of a screen. A step above body rather than the same size
+     as it — at 1rem and weight 600 these headings were reading as bold
+     paragraphs, which is what let long screens flatten into one column of
+     text with no way in. */
+  .type-heading {
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.022em;
   }
 
   /* The one surface every panel in the app is built from. Kept here rather
@@ -392,18 +518,27 @@
 
      Opaque now. The card used to sit at 72% so the page's wash showed through
      and gave it some of its tone; there is no wash left to show through, and
-     a translucent white over white is just a white that costs a composite. */
+     a translucent white over white is just a white that costs a composite.
+
+     SAME SURFACE AS `.tile`. The bento redesign gave panels a fill of their
+     own — see the note on `neutral[25]` in palette.ts — and a card is a panel,
+     so it is that same object under an older name. They are kept as two
+     classes rather than one alias because they answer different questions:
+     `.tile` is a module of a grid and comes with a radius scale and tone
+     variants, `.surface-card` is the single panel a screen puts round a form
+     or a list. Whichever a screen reaches for, it gets the same surface, which
+     is the whole point of the sweep. */
   .surface-card {
     border-radius: 1.6rem;
-    background-color: hsl(var(--card));
-    box-shadow: inset 0 0 0 1px hsl(var(--border) / var(--surface-ring));
+    background-color: hsl(var(--tile));
+    box-shadow: inset 0 0 0 1px hsl(var(--tile-ring));
   }
 
   .surface-card-flush {
     position: relative;
     border-radius: 1.6rem;
     overflow: hidden;
-    background-color: hsl(var(--card));
+    background-color: hsl(var(--tile));
   }
 
   /* Opaque rows inside a flush card can cover an inset shadow drawn by the
@@ -415,9 +550,222 @@
     z-index: 1;
     inset: 0;
     border-radius: inherit;
-    box-shadow: inset 0 0 0 1px hsl(var(--border) / var(--surface-ring));
+    box-shadow: inset 0 0 0 1px hsl(var(--tile-ring));
     content: '';
     pointer-events: none;
+  }
+
+  /* The card a chart raises over itself on hover or touch. Every chart in the
+     app drew this by hand — same tokens, but one at `p-3` and one at `p-2.5`,
+     which is how a surface starts drifting. There was a `ChartTooltipShell`
+     component meant to stop that, but it took a `title` prop the charts had no
+     use for, so nothing ever imported it and it sat dead while the duplication
+     went on. The surface belongs here with the other surfaces; what goes
+     inside it stays each chart's business. */
+  .chart-tooltip {
+    border-radius: 0.75rem;
+    padding: 0.6875rem;
+    background-color: hsl(var(--popover));
+    border: 1px solid hsl(var(--border) / 0.4);
+    box-shadow:
+      0 4px 6px -1px hsl(0 0% 0% / var(--lift-strength)),
+      0 2px 4px -2px hsl(0 0% 0% / var(--lift-strength));
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  /* A segmented control: two or three exclusive options on one track.
+
+     There were two of these in the app and they did not agree. Activity's was
+     the redesigned one — a `.tile` track with the chosen segment in a soft
+     accent wash — and Recurring's was the pre-redesign default, a `bg-muted`
+     track with the chosen segment a white pill throwing a shadow. Same control,
+     same job, two visual languages, one screen apart.
+
+     The tone lives here rather than in a shared component because the two are
+     not the same control underneath: Activity's is a filter (a `group` of
+     `aria-pressed` buttons) and Recurring's is a `tablist` of `aria-selected`
+     tabs. Those semantics should stay different; only the surface should not.
+
+     `data-active` rather than a class so the markup states the selected
+     segment once, next to the aria attribute that has to agree with it. */
+  .segmented {
+    display: inline-flex;
+    border-radius: 9999px;
+    padding: 0.25rem;
+    background-color: hsl(var(--tile));
+    box-shadow: inset 0 0 0 1px hsl(var(--tile-ring));
+  }
+
+  .segmented-item {
+    min-height: 2.25rem;
+    border-radius: 9999px;
+    padding-inline: 0.875rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: hsl(var(--muted-foreground));
+    transition:
+      color 150ms,
+      background-color 150ms;
+  }
+
+  .segmented-item[data-active='true'] {
+    background-color: hsl(var(--primary) / 0.13);
+    color: hsl(var(--primary-ink));
+  }
+
+  /* ─── Bento ──────────────────────────────────────────────────────────────
+     The Today/Trends grid. Two columns of modules the user can reorder and
+     hide, sized by importance: one full-span slab, then half tiles.
+
+     A tile carries a fill (`--tile`) as well as a rim, which is the one place
+     in the app a surface differs from the page. The reasoning is in the note
+     on `neutral[25]` in palette.ts: at six or seven modules across two widths,
+     a hairline alone reads as a wireframe rather than as objects you can pick
+     up. Everywhere a single panel stands alone, `.surface-card` is still the
+     right thing and page and card are still the same white.
+
+     NOTE ON DEPTH. The source design puts a coloured bloom under the slab and
+     the FAB — `0 20px 38px -22px rgba(255,131,0,.95)`. That is the exact
+     shadow this app removed on purpose: a bloom is light thrown onto the page,
+     and on a white page the accent's light IS a tint. Depth here is `.lift`,
+     grey, same as every other raised thing. See the note on `.lift` above. */
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.625rem;
+    align-content: start;
+  }
+
+  /* A module that needs the full width — the slab, a bill list, a legend. */
+  .bento-wide {
+    grid-column: 1 / -1;
+  }
+
+  .tile {
+    position: relative;
+    border-radius: 1.625rem;
+    background-color: hsl(var(--tile));
+    box-shadow: inset 0 0 0 1px hsl(var(--tile-ring));
+  }
+
+  /* The one module carrying the number the whole screen exists to answer.
+
+     White on the orange, the same pairing every filled control in the app
+     uses. It briefly carried a darkened hue instead, on the reasoning that a
+     3.5rem amount is read rather than glanced and so owes 4.5:1 — but what
+     that produced was a near-black caption stamped on a coloured box, which
+     reads as a mistake rather than as a brand. White is what the orange is
+     FOR. It measures 2.46:1, the same deliberate drinks-can trade the whole
+     palette is built on (see palette.ts), and the slab pays it back the way
+     type does: `.type-slab` sets the amount at 800 and 3.5rem, where weight
+     and size carry the legibility that depth was carrying before. */
+  .tile-slab {
+    position: relative;
+    border-radius: 1.875rem;
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+
+  /* Inverted tile — near-black on the light page, and the page's own white on
+     the dark one. Used at most once per screen: it is the loudest thing in the
+     grid that costs no colour, so a second one flattens the first. */
+  .tile-ink {
+    position: relative;
+    border-radius: 1.625rem;
+    background-color: hsl(var(--foreground));
+    color: hsl(var(--background));
+  }
+
+  /* A tint, so its content is ink and never a fill label. */
+  .tile-accent {
+    position: relative;
+    border-radius: 1.625rem;
+    background-color: hsl(var(--primary) / 0.1);
+    box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.25);
+  }
+
+  /* Outline only — a slot rather than a thing. Hidden tiles in Arrange, and
+     the locked strip on Trends. */
+  .tile-ghost {
+    position: relative;
+    border-radius: 1.625rem;
+    box-shadow: inset 0 0 0 1.5px hsl(var(--foreground) / 0.1);
+  }
+
+  /* A tile whose content reaches its own edges — a row that slides sideways to
+     reveal a delete action, a list that scrolls inside it. The rim moves to an
+     ::after so an opaque child cannot paint over it, same trick and same
+     reason as `.surface-card-flush`. */
+  .tile-flush {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.625rem;
+    background-color: hsl(var(--tile));
+  }
+
+  .tile-flush::after {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px hsl(var(--tile-ring));
+    content: '';
+    pointer-events: none;
+  }
+
+  /* Every module names itself in the same voice. Letterspaced small caps,
+     never a heading size — the module's number is the heading. */
+  .tile-label {
+    font-family: var(--font-display);
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+  }
+
+  /* The eyebrow, promoted to a badge.
+
+     One state on the slab is not a caption. "Over budget" is the whole reading
+     of the tile, not a description of the figure under it, and a 10px small-cap
+     label at 78% opacity is the quietest element on the surface to say it with
+     — which left the over-budget slab looking very like the on-track one at a
+     glance, since both are the brand fill carrying a large number.
+
+     So in that one state the label stops being a caption and becomes a badge:
+     same voice, same size, same tracking, but inverted out of the fill. The
+     signal is contrast, not colour — the slab stays the brand hue in every
+     state, and nothing else on the screen changes.
+
+     `--foreground` on `--background`, so it flips with the theme and lands the
+     right way round in both: a near-black chip carrying white on the light
+     canvas, a near-white chip carrying near-black on the dark one. The extra
+     right padding pays back the trailing letterspace, which would otherwise
+     hang inside the pill as a gap. */
+  .tile-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.3125rem 0.6875rem 0.3125rem 0.5625rem;
+    background-color: hsl(var(--foreground));
+    color: hsl(var(--background));
+    font-family: var(--font-display);
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  /* On a slab or an ink tile the label rides the fill, so it inherits the
+     surface's own colour and steps back with alpha instead of switching to a
+     grey that would be a third colour on a coloured ground. */
+  .tile-slab .tile-label,
+  .tile-ink .tile-label {
+    color: inherit;
+    opacity: 0.78;
   }
 
   /* Status ramp. The hero was a 20–26% mix of a semantic token into the card,

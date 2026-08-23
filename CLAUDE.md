@@ -20,6 +20,9 @@ Rules for working in this repository. Follow them exactly.
 
 ## 📂 Directory Map
 - `src/components/ui`: shadcn primitives (do not modify)
+- `src/components/bento`: `BentoGrid` / `BentoTile` / `TileLabel` — the grid
+  language Today and Trends are built from. A new module goes in
+  `<feature>/tiles/`, never inline in the view.
 - `src/components/<feature>`: Business-specific components grouped by feature
 - `src/hooks`: Data fetching and state logic
 - `src/services`: Pure API/Supabase logic
@@ -67,21 +70,79 @@ with this file.
 ## 🧠 UI/UX Philosophy
 
 ### Visual Direction: white, black, and accent only where it means something
-The app is a white page with white cards on it. Read `src/design/palette.ts`
-before changing anything visual — the reasoning is written there — but the four
-rules that constrain new work are:
+The app is a white page carrying a grid of near-white modules. Read
+`src/design/palette.ts` before changing anything visual — the reasoning is
+written there — but the five rules that constrain new work are:
 
-- **The rule is the separation.** Page and card are the same colour in both
-  themes; a panel exists because `--border` draws it. Use `.surface-card` (or a
-  `border`) — a `bg-card` with no rule is invisible.
+- **A panel is a surface AND a rule.** It sits 2% off the page (`--tile`) and
+  carries a hairline (`--tile-ring`). Use `.surface-card` for the single panel
+  around a form or a list, `.tile` for a module of a bento grid; both resolve
+  to the same pair. A bare `bg-card` with no rule is invisible.
 - **No ambient colour.** No washes behind a screen, no coloured glow, no tinted
   section bands. Depth is `.lift` (grey shadow). If you want to add coloured
   light somewhere, the answer is no.
-- **Never tint a large surface with an accent.** A hue mixed into a white
-  surface lands in the beige band the app was repainted to escape. Accent goes
-  on *small* things — a fill, a ring, an ink, a chip — never a card body.
+- **One slab per screen.** A large accent FILL is allowed, and only as
+  `.tile-slab` — the single figure the screen exists to answer. Everything else
+  takes accent on *small* things: a fill, a ring, an ink, a chip. A hue MIXED
+  into a white surface is still banned; that lands in the beige band the app
+  was repainted to escape.
+- **White on the orange.** Everything riding an accent fill — a button label,
+  a chip, the slab's whole contents — is `text-primary-foreground`. It measures
+  2.46:1 on the brand orange and that is the deliberate drinks-can trade the
+  palette is built on; the slab pays it back with weight and size (`.type-slab`
+  is 800 at 3.5rem), not with a darker ink. The yellow-green accents flip the
+  label to near-black on their own, in the token. See the role rule in
+  `tokens.ts`.
+- **A fill carries the label the token gives it, never a hand-picked one.**
+  `bg-x` and `text-x-foreground` travel together. Seven hues resolve that to
+  white; the yellow-green band (gold, lime, mint, income, warning) resolves it
+  to the app's near-black, because white on those measures 1.2–2.3:1 against
+  near-black's 7.7–14.9:1. That is physics, not a style choice — `tokens.test.ts`
+  pins every pairing at 2.3:1 minimum, so a fill can never ship with a label
+  that cannot be read on it.
+- **Over budget is stated, not coloured.** The slab is the brand fill in every
+  state. When safe-to-spend goes negative the eyebrow is promoted to
+  `.tile-badge` — inverted out of the fill, `--foreground` carrying
+  `--background` — and the figure shows the SIZE of the overspend rather than a
+  signed balance. Contrast and words do the work; do not reach for a second hue.
+- **Never borrow a status token as a categorical colour.** `--info`,
+  `--warning`, `--income` and `--destructive` mean information, caution, money
+  in and danger. Reaching for them to tell three slices of a chart apart gives
+  a generic chart palette semantic names it does not honour, and the same hue
+  then means two things on one screen. A composition chart takes the app's own
+  colours — `--foreground` for the bulk, `--primary` for the part the user can
+  act on, a status token only where it genuinely means what it says. See
+  `FiftyThirtyTwentyRing`.
 - **Greys stay achromatic.** Every value in the `neutral` and `ink` ramps is
   `0 0%`. A hue in the ground is a cast over the whole app.
+
+### Layout: no app bar, and Today is the user's
+- There is no persistent header. Every screen draws its own via `PageHeader`,
+  which decides the back button **from the route** — a screen cannot ship
+  without a way out by forgetting to pass one. `TopScrim` keeps the status-bar
+  strip legible while content scrolls under it.
+- Today and Trends are bento grids: `BentoGrid` + `BentoTile`, two columns, one
+  full-span slab, half tiles below. Tones: `plain` / `slab` / `ink` / `accent` /
+  `ghost` / `bare`. At most one `slab` and one `ink` per screen — a second of
+  either flattens the first.
+- Today's order and visible set belong to the user (`useTodayLayout`,
+  localStorage, per device). A tile with nothing to say returns `null` and
+  gives its cell back rather than leaving a hole in the grid.
+
+### Type: weight carries rank
+- **Never write `font-display` in a component.** The display face is named in
+  exactly one place — the `.type-*` scale in `index.css` — and a test fails the
+  build if a `.tsx` names it. Use `.type-slab` / `.type-figure-xl` /
+  `.type-figure-lg` / `.type-figure` / `.type-figure-sm` for numbers,
+  `.type-title` for a screen's name, `.type-heading` for a section's, and
+  `TileLabel` (`.tile-label`) for an eyebrow.
+- **Do not override a scale class's weight.** Rank comes from weight — 800 for
+  the figure a screen exists to answer, down to 700 for a section heading — and
+  a `font-semibold` on top of it flattens the ladder. Size may be overridden
+  (`class="type-figure-xl text-[2.5rem]"`); weight and tracking may not.
+- **Tracking is optical and already set.** It tightens as the scale climbs and
+  opens up for the 10px eyebrow. Never add a `tracking-[…]` next to a
+  `.type-*` class.
 
 ### Gestalt Principles (Visual Hierarchy)
 - **Proximity**: Related items (labels/inputs) must be physically close. Use `space-y-*` or `gap-*` consistently.

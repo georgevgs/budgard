@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import CategoryGlyph from '@/components/common/CategoryGlyph';
 import ExpensesCardActions from '@/components/expenses/ExpensesCardActions';
 import IncomeCardActions from '@/components/income/IncomeCardActions';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { describeAmount } from '@/lib/transactionAmount';
 import type { Expense } from '@/types/Expense';
-import { getColorTint } from '@/lib/categoryColor';
 
 type Props = {
   transaction: Expense;
@@ -20,9 +21,14 @@ const ActivityTransactionRow = (props: Props) => {
   const { t } = useTranslation();
   const { transaction } = props;
   const isIncome = transaction.type === 'income';
+  const amount = describeAmount(
+    transaction.amount,
+    resolveKind(isIncome),
+    props.currency,
+  );
 
   return (
-    <div className="flex min-h-[4.5rem] items-center gap-1 pr-2">
+    <div className="flex min-h-15 items-center gap-1 pr-1.5">
       {/* The row opens the transaction rather than the editor. Correcting a
           typo is one more tap than it was, but "what was this and how often do
           I do it" is the question people actually bring to a list they scan
@@ -34,26 +40,25 @@ const ActivityTransactionRow = (props: Props) => {
         aria-label={t('activity.openTransaction', {
           description: transaction.description,
         })}
-        className="flex min-w-0 flex-1 items-center gap-3 rounded-2xl py-3 pl-4 pr-2 text-left transition-colors hover:bg-accent/40 active:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+        className="flex min-w-0 flex-1 items-center gap-3.5 rounded-[1.375rem] py-3 pl-4 pr-2 text-left transition-colors hover:bg-accent/40 active:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
       >
         {renderCategoryMark(transaction)}
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-semibold">
+          <span className="block truncate text-[0.9rem] font-medium leading-tight">
             {transaction.description}
           </span>
-          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+          <span className="mt-0.5 block truncate text-[0.72rem] leading-none text-muted-foreground">
             {renderCategoryName(transaction, t)}
           </span>
         </span>
         <span
           className={cn(
-            'shrink-0 text-sm font-bold tabular-nums',
-            getAmountTone(isIncome),
+            'shrink-0 text-[0.9rem] font-semibold tabular-nums',
+            amount.tone,
           )}
           style={{ viewTransitionName: `tx-amount-${transaction.id}` }}
         >
-          {getAmountPrefix(isIncome)}
-          {formatCurrency(transaction.amount, props.currency)}
+          {amount.text}
         </span>
       </Link>
       {renderActions(props, isIncome)}
@@ -67,18 +72,15 @@ export default ActivityTransactionRow;
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
+// The category's emoji, falling back to its colour as a dot. See CategoryGlyph
+// — the mark is shared with the pills Today draws, so the same transaction is
+// headed by the same thing wherever it is listed.
 const renderCategoryMark = (transaction: Expense) => {
   return (
-    <span
-      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm"
-      style={{
-        backgroundColor: getColorTint(transaction.category?.color),
-        viewTransitionName: `tx-mark-${transaction.id}`,
-      }}
-      aria-hidden="true"
-    >
-      {transaction.category?.icon ?? '•'}
-    </span>
+    <CategoryGlyph
+      transaction={transaction}
+      style={{ viewTransitionName: `tx-mark-${transaction.id}` }}
+    />
   );
 };
 
@@ -111,18 +113,10 @@ const renderActions = (props: Props, isIncome: boolean) => {
   );
 };
 
-const getAmountPrefix = (isIncome: boolean): string => {
+const resolveKind = (isIncome: boolean): 'expense' | 'income' => {
   if (isIncome) {
-    return '+';
+    return 'income';
   }
 
-  return '−';
-};
-
-const getAmountTone = (isIncome: boolean): string => {
-  if (isIncome) {
-    return 'text-income-ink';
-  }
-
-  return 'text-foreground';
+  return 'expense';
 };

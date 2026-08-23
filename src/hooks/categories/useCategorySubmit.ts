@@ -4,7 +4,7 @@ import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
 import { useDataConfig } from '@/contexts/DataContext';
 import type { CategoryFormData } from '@/lib/validations';
 import type { Category } from '@/types/Category';
-import type { CategoryKind } from '@/components/categories/CategoryKindSelector';
+import type { CategoryKind } from '@/types/Category';
 
 type UseCategorySubmitArgs = {
   category: Category | undefined;
@@ -53,7 +53,7 @@ type CategoryAddPayload = {
   icon: string | null;
   user_id: string;
   type: 'expense' | 'income';
-  kind: CategoryKind | 'income' | null;
+  kind: CategoryKind | null;
 };
 
 type CategoryUpdatePayload = {

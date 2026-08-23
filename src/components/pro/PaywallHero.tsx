@@ -11,7 +11,7 @@ const PaywallHero = () => {
 
   return (
     <div className="relative flex flex-col items-center gap-3 text-center">
-      <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-primary/75 text-primary-foreground shadow-lg shadow-black/10 dark:shadow-black/40">
+      <div className="lift relative flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
         <Crown className="h-7 w-7" />
       </div>
       <div className="relative space-y-1.5">

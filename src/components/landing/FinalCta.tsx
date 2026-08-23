@@ -15,7 +15,7 @@ const FinalCta = ({ onGetStarted }: Props) => {
       {renderSheen()}
       <div className="relative max-w-4xl mx-auto px-5 sm:px-8 py-24 sm:py-32 text-center">
         <Reveal>
-          <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight leading-[1.04]">
+          <h2 className="type-slab text-4xl leading-[1.04] sm:text-5xl md:text-6xl">
             {t('landing.finalCta.heading')}
           </h2>
         </Reveal>

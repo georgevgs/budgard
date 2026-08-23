@@ -24,7 +24,7 @@ const CashFlowSection = ({ selectedYear }: Props) => {
 
   return (
     <div className="space-y-3">
-      <h2 className="font-display text-xl font-semibold">
+      <h2 className="type-heading">
         {t('cashFlow.title')}
       </h2>
 
