@@ -138,7 +138,8 @@
     "arrange": {
       "open": "Arrange your grid",
       "title": "Arrange",
-      "hint": "Reorder the modules and hide the ones you don't use. Saved on this device.",
+      "hint": "Drag the grip to reorder, or use the arrow buttons. Hide modules you don't use. Saved on this device.",
+      "sessionHint": "Changes are temporary because this browser couldn't save them on this device.",
       "done": "Done",
       "hidden": "Hidden tiles",
       "hide": "Hide {{name}}",
@@ -146,9 +147,11 @@
       "moveUp": "Move {{name}} earlier",
       "moveDown": "Move {{name}} later",
       "movedAnnouncement": "{{name}} moved to position {{position}} of {{count}}.",
+      "droppedAnnouncement": "{{name}} placed at position {{position}} of {{count}}.",
       "hiddenAnnouncement": "{{name}} hidden.",
       "shownAnnouncement": "{{name}} shown at the end of the grid.",
       "reset": "Reset to default",
+      "resetAnnouncement": "Default layout restored.",
       "allShown": "Every module is already on your grid.",
       "emptyTitle": "Your grid is empty",
       "emptyBody": "You've hidden every module. Bring the ones you want back from Arrange."
@@ -1082,6 +1085,9 @@
       "biggestMonth": "Biggest month",
       "acrossMonths_one": "Across {{count}} month",
       "acrossMonths_other": "Across {{count}} months",
+      "comparedWithLastMonth": "Compared with last month",
+      "moreSpendingThanLastMonth": "{{percent}}% more spending than last month",
+      "lessSpendingThanLastMonth": "{{percent}}% less spending than last month",
       "whereItWent": "Where it went"
     }
   },

@@ -38,6 +38,27 @@ export const DEFAULT_VISIBLE: TodayTileId[] = [
   'recentActivity',
 ];
 
+const WIDE_TILES: readonly TodayTileId[] = [
+  'safeToSpend',
+  'upcoming',
+  'recentActivity',
+  'weeklyRecap',
+];
+
+export const isWideTodayTile = (id: TodayTileId): boolean =>
+  WIDE_TILES.includes(id);
+
+export const isDefaultLayout = (layout: TodayLayout): boolean => {
+  if (!hasSameOrder(layout.visible, DEFAULT_VISIBLE)) {
+    return false;
+  }
+  const defaultHidden = TODAY_TILES.filter(
+    (tile) => !DEFAULT_VISIBLE.includes(tile),
+  );
+
+  return hasSameOrder(layout.hidden, defaultHidden);
+};
+
 const STORAGE_KEY = 'today-layout';
 
 const isTileId = (value: unknown): value is TodayTileId =>
@@ -83,12 +104,15 @@ export const readStoredLayout = (): TodayLayout => {
   }
 };
 
-export const writeStoredLayout = (layout: TodayLayout): void => {
+export const writeStoredLayout = (layout: TodayLayout): boolean => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
+
+    return true;
   } catch {
     // Private mode and a full quota both land here. The grid still works for
-    // this session; it just will not be remembered.
+    // this session; tell the caller so the UI does not claim it was saved.
+    return false;
   }
 };
 
@@ -115,6 +139,14 @@ export const moveTile = (
 
 const isDefaultVisible = (tile: TodayTileId): boolean =>
   DEFAULT_VISIBLE.includes(tile);
+
+const hasSameOrder = (left: TodayTileId[], right: TodayTileId[]): boolean => {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  return left.every((tile, index) => tile === right[index]);
+};
 
 const readList = (value: unknown): TodayTileId[] => {
   if (!Array.isArray(value)) {

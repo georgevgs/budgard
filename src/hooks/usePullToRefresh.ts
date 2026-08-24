@@ -292,6 +292,11 @@ const canStartPull = (event: TouchEvent, isRefreshing: boolean): boolean => {
   if (isRefreshing) {
     return false;
   }
+  // Arrange owns vertical touch gestures while its drag handle is active. A
+  // pull-to-refresh underneath an edit mode reads as the page escaping.
+  if (document.body.hasAttribute('data-today-arranging')) {
+    return false;
+  }
   // A second finger means a pinch, not a pull.
   if (event.touches.length !== 1) {
     return false;

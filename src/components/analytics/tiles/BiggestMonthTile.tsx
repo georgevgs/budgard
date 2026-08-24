@@ -38,7 +38,7 @@ const BiggestMonthTile = ({ monthlyData, onMonthClick }: Props) => {
         <p className="type-figure">
           {formatCurrency(peak.amount, defaultCurrency)}
         </p>
-        <p className="mt-1.5 truncate text-[0.72rem] leading-tight text-muted-foreground">
+        <p className="mt-1.5 whitespace-normal break-normal text-[0.72rem] leading-snug text-muted-foreground">
           {peak.month}
         </p>
       </div>

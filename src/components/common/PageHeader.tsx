@@ -24,12 +24,10 @@ const PageHeader = ({ title, subtitle, action }: Props) => {
   const { pathname } = useLocation();
 
   return (
-    <div className="flex items-start gap-3">
+    <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
       {renderBack(pathname)}
-      <div className="min-w-0 flex-1">
-        <h1 className="type-title">
-          {title}
-        </h1>
+      <div className="min-w-min flex-1">
+        <h1 className="type-title leading-tight">{title}</h1>
         {renderSubtitle(subtitle)}
       </div>
       {renderAction(action)}
@@ -66,5 +64,5 @@ const renderAction = (action?: ReactNode) => {
     return null;
   }
 
-  return <div className="shrink-0">{action}</div>;
+  return <div className="ml-auto shrink-0">{action}</div>;
 };

@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import {
   DEFAULT_VISIBLE,
   TODAY_TILES,
+  isDefaultLayout,
   moveTile,
   readStoredLayout,
   writeStoredLayout,
@@ -11,6 +12,8 @@ import {
 
 export type TodayLayoutControls = TodayLayout & {
   isArranging: boolean;
+  isDefault: boolean;
+  isPersisted: boolean;
   setArranging: (value: boolean) => void;
   hide: (id: TodayTileId) => void;
   show: (id: TodayTileId) => void;
@@ -26,6 +29,7 @@ export const useTodayLayout = (): TodayLayoutControls => {
   const [layout, setLayout] = useState<TodayLayout>(readStoredLayout);
   const layoutRef = useRef(layout);
   const [isArranging, setArranging] = useState(false);
+  const [isPersisted, setIsPersisted] = useState(true);
 
   const commit = useCallback((update: LayoutUpdate) => {
     const current = layoutRef.current;
@@ -36,7 +40,7 @@ export const useTodayLayout = (): TodayLayoutControls => {
     }
     layoutRef.current = next;
     setLayout(next);
-    writeStoredLayout(next);
+    setIsPersisted(writeStoredLayout(next));
   }, []);
 
   const hide = useCallback(
@@ -89,13 +93,32 @@ export const useTodayLayout = (): TodayLayoutControls => {
   );
 
   const reset = useCallback(() => {
-    commit(() => ({
-      visible: [...DEFAULT_VISIBLE],
-      hidden: TODAY_TILES.filter((tile) => !DEFAULT_VISIBLE.includes(tile)),
-    }));
+    commit((current) => {
+      if (isDefaultLayout(current)) {
+
+        return current;
+      }
+
+      return {
+        visible: [...DEFAULT_VISIBLE],
+        hidden: TODAY_TILES.filter(
+          (tile) => !DEFAULT_VISIBLE.includes(tile),
+        ),
+      };
+    });
   }, [commit]);
 
-  return { ...layout, isArranging, setArranging, hide, show, move, reset };
+  return {
+    ...layout,
+    isArranging,
+    isDefault: isDefaultLayout(layout),
+    isPersisted,
+    setArranging,
+    hide,
+    show,
+    move,
+    reset,
+  };
 };
 
 // --- Helpers ---

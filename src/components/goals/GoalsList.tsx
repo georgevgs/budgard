@@ -160,10 +160,10 @@ const renderEmptyState = (
         onClick={() => onOpenForm(true)}
         variant="outline"
         size="sm"
-        className="mt-2 max-w-full"
+        className="mt-2 h-auto min-h-9 max-w-full whitespace-normal py-2.5 text-center leading-snug"
       >
         <Plus className="h-4 w-4 mr-2 shrink-0" />
-        <span className="truncate">{t('goals.empty.cta')}</span>
+        <span>{t('goals.empty.cta')}</span>
       </Button>
     </div>
   </SurfaceCard>

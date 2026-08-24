@@ -40,7 +40,9 @@ const PlanOverviewCard = ({
         </span>
         <ArrowRight className="h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
       </div>
-      <TileLabel className="mt-4">{title}</TileLabel>
+      <TileLabel className="mt-4 line-clamp-2 min-h-[2.7em] max-w-full whitespace-normal break-normal leading-[1.35]">
+        {title}
+      </TileLabel>
       <p className="mt-1.5 type-figure-sm">
         {value}
       </p>

@@ -1,7 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   DEFAULT_VISIBLE,
   TODAY_TILES,
+  isDefaultLayout,
+  isWideTodayTile,
   moveTile,
   readStoredLayout,
   writeStoredLayout,
@@ -72,9 +74,34 @@ describe('normalizing a stored Today layout', () => {
 
   it('round-trips through storage', () => {
     const layout: TodayLayout = { visible: ['insight'], hidden: [] };
-    writeStoredLayout(layout);
+    expect(writeStoredLayout(layout)).toBe(true);
 
     expect(readStoredLayout().visible[0]).toBe('insight');
+  });
+
+  it('reports when the browser refuses to persist a change', () => {
+    const setItem = vi
+      .spyOn(Storage.prototype, 'setItem')
+      .mockImplementation(() => {
+        throw new DOMException('Storage blocked', 'QuotaExceededError');
+      });
+    const layout: TodayLayout = { visible: ['insight'], hidden: [] };
+
+    expect(writeStoredLayout(layout)).toBe(false);
+    setItem.mockRestore();
+  });
+
+  it('recognizes only the complete default layout', () => {
+    const hidden = TODAY_TILES.filter(
+      (tile) => !DEFAULT_VISIBLE.includes(tile),
+    );
+
+    expect(isDefaultLayout({ visible: [...DEFAULT_VISIBLE], hidden })).toBe(
+      true,
+    );
+    expect(
+      isDefaultLayout({ visible: [...DEFAULT_VISIBLE].reverse(), hidden }),
+    ).toBe(false);
   });
 });
 
@@ -101,5 +128,15 @@ describe('moving a tile', () => {
     const start = [...order];
 
     expect(moveTile(start, 'debts', -1)).toBe(start);
+  });
+});
+
+describe('Today tile spans', () => {
+  it('keeps the Arrange preview aligned with the live grid', () => {
+    expect(isWideTodayTile('safeToSpend')).toBe(true);
+    expect(isWideTodayTile('upcoming')).toBe(true);
+    expect(isWideTodayTile('recentActivity')).toBe(true);
+    expect(isWideTodayTile('weeklyRecap')).toBe(true);
+    expect(isWideTodayTile('budgetUsed')).toBe(false);
   });
 });

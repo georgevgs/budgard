@@ -1,16 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import ChevronUp from 'lucide-react/dist/esm/icons/chevron-up';
+import GripVertical from 'lucide-react/dist/esm/icons/grip-vertical';
 import Minus from 'lucide-react/dist/esm/icons/minus';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import BentoGrid from '@/components/bento/BentoGrid';
 import TileLabel from '@/components/bento/TileLabel';
+import {
+  useTodayArrangeDrag,
+  type TodayArrangeDrag,
+} from '@/hooks/today/useTodayArrangeDrag';
+import { haptics } from '@/lib/haptics';
 import { prefersReducedMotion } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 import type { TodayLayoutControls } from '@/hooks/today/useTodayLayout';
-import type { TodayTileId } from '@/lib/bentoLayout';
+import { isWideTodayTile, type TodayTileId } from '@/lib/bentoLayout';
 
 type Props = {
   layout: TodayLayoutControls;
@@ -22,29 +29,36 @@ type Props = {
 // decision — as well as six re-renders per tap.
 const TodayArrange = ({ layout }: Props) => {
   const { t } = useTranslation();
+  const { pathname } = useLocation();
+  useArrangeMode(pathname, layout.setArranging);
   const actions = useArrangeActions(layout, t);
+  const drag = useTodayArrangeDrag({
+    visible: layout.visible,
+    onMove: layout.move,
+    onDrop: actions.drop,
+  });
 
   return (
     <div className="mt-4">
       <p role="status" aria-live="polite" className="sr-only">
         {actions.announcement}
       </p>
-      <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
-        {t('today.arrange.hint')}
-      </p>
-      <BentoGrid>
+      {renderPersistenceHint(layout.isPersisted, t)}
+      <BentoGrid className="today-arrange-grid">
         {layout.visible.map((id, index) =>
-          renderVisible(id, index, layout, actions, t),
+          renderVisible(id, index, layout, actions, drag, t),
         )}
       </BentoGrid>
+      {renderDragOverlay(drag.draggingId, t)}
       <TileLabel className="mt-7 mb-2.5 px-1">
         {t('today.arrange.hidden')}
       </TileLabel>
       {renderHidden(layout, actions, t)}
       <button
         type="button"
-        onClick={layout.reset}
-        className="mt-6 min-h-11 text-xs font-semibold text-primary-ink underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        onClick={actions.reset}
+        disabled={layout.isDefault}
+        className="mx-auto mt-6 flex min-h-11 items-center text-xs font-semibold text-primary-ink underline-offset-4 hover:underline disabled:cursor-default disabled:text-muted-foreground disabled:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {t('today.arrange.reset')}
       </button>
@@ -63,6 +77,8 @@ type ArrangeActions = {
   hide: (id: TodayTileId) => void;
   show: (id: TodayTileId) => void;
   move: (id: TodayTileId, offset: number) => void;
+  drop: (id: TodayTileId, position: number, count: number) => void;
+  reset: () => void;
 };
 
 const useArrangeActions = (
@@ -87,6 +103,7 @@ const useArrangeActions = (
     const name = t(`today.tiles.${id}`);
     pendingFocus.current = controlId('show', id);
     layout.hide(id);
+    haptics.light();
     setAnnouncement(t('today.arrange.hiddenAnnouncement', { name }));
   };
 
@@ -94,6 +111,7 @@ const useArrangeActions = (
     const name = t(`today.tiles.${id}`);
     pendingFocus.current = controlId('hide', id);
     layout.show(id);
+    haptics.light();
     setAnnouncement(t('today.arrange.shownAnnouncement', { name }));
   };
 
@@ -108,6 +126,7 @@ const useArrangeActions = (
       return;
     }
     commitWithMotion(() => layout.move(id, offset));
+    haptics.selection();
     setAnnouncement(
       t('today.arrange.movedAnnouncement', {
         name: t(`today.tiles.${id}`),
@@ -117,17 +136,63 @@ const useArrangeActions = (
     );
   };
 
-  return { announcement, hide, show, move };
+  const drop = (id: TodayTileId, position: number, count: number) => {
+    setAnnouncement(
+      t('today.arrange.droppedAnnouncement', {
+        name: t(`today.tiles.${id}`),
+        position,
+        count,
+      }),
+    );
+  };
+
+  const reset = () => {
+    if (layout.isDefault) {
+      return;
+    }
+    layout.reset();
+    haptics.success();
+    setAnnouncement(t('today.arrange.resetAnnouncement'));
+  };
+
+  return { announcement, hide, show, move, drop, reset };
 };
 
-// Alternating half-degree tilt. Static, not animated, so it reads as "these
-// are loose and can be moved" without costing anyone a motion preference.
-const getTilt = (index: number): string => {
-  if (index % 2 === 0) {
-    return '-rotate-[0.5deg]';
+const useArrangeMode = (
+  pathname: string,
+  setArranging: (value: boolean) => void,
+): void => {
+  useEffect(() => {
+    document.body.setAttribute('data-today-arranging', 'true');
+
+    return () => document.body.removeAttribute('data-today-arranging');
+  }, []);
+
+  useEffect(() => {
+    if (pathname === '/today') {
+      return;
+    }
+    setArranging(false);
+  }, [pathname, setArranging]);
+};
+
+const renderPersistenceHint = (isPersisted: boolean, t: TFunc) => {
+  if (!isPersisted) {
+    return (
+      <p
+        role="status"
+        className="mb-4 text-xs leading-relaxed text-muted-foreground"
+      >
+        {t('today.arrange.sessionHint')}
+      </p>
+    );
   }
 
-  return 'rotate-[0.5deg]';
+  return (
+    <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
+      {t('today.arrange.hint')}
+    </p>
+  );
 };
 
 const renderVisible = (
@@ -135,6 +200,7 @@ const renderVisible = (
   index: number,
   layout: TodayLayoutControls,
   actions: ArrangeActions,
+  drag: TodayArrangeDrag,
   t: TFunc,
 ) => {
   const name = t(`today.tiles.${id}`);
@@ -143,29 +209,136 @@ const renderVisible = (
     <div
       key={id}
       className={cn(
-        'tile flex min-h-24 flex-col justify-between p-4',
-        getTilt(index),
+        'tile flex min-h-28 flex-col p-2',
+        getSpanClass(id),
+        getDraggingClass(id, drag.draggingId),
       )}
+      data-arrange-tile={id}
       style={{ viewTransitionName: `today-arrange-${id}` }}
     >
-      <div className="flex items-start justify-between gap-2">
-        <TileLabel className="pt-0.5">{name}</TileLabel>
-        <button
-          type="button"
-          onClick={() => actions.hide(id)}
-          data-arrange-control={controlId('hide', id)}
-          aria-label={t('today.arrange.hide', { name })}
-          className="-mt-1.5 -mr-1.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-foreground text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <Minus className="h-3.5 w-3.5" />
-        </button>
+      <div className="flex min-h-11 items-start gap-1">
+        <div className="min-w-0 flex-1 px-1 pt-1.5" title={name}>
+          <TileLabel className="line-clamp-2 overflow-hidden text-ellipsis leading-[1.35]">
+            {name}
+          </TileLabel>
+        </div>
+        {renderHide(id, name, actions, t)}
       </div>
-      <div className="mt-3 flex gap-1.5">
+      <div className="relative left-1/2 mt-auto grid w-[8.25rem] max-w-[calc(100%+1rem)] -translate-x-1/2 grid-cols-3">
+        {renderDragHandle(id, drag)}
         {renderMove(id, -1, index === 0, actions, t)}
         {renderMove(id, 1, index === layout.visible.length - 1, actions, t)}
       </div>
     </div>
   );
+};
+
+const renderDragHandle = (id: TodayTileId, drag: TodayArrangeDrag) => {
+  const isDragging = drag.draggingId === id;
+
+  return (
+    <button
+      type="button"
+      tabIndex={-1}
+      aria-hidden="true"
+      data-arrange-drag-handle={id}
+      onPointerDown={(event) => drag.start(id, event)}
+      onPointerMove={(event) => drag.move(id, event)}
+      onPointerUp={(event) => drag.end(id, event)}
+      onPointerCancel={(event) => drag.cancel(id, event)}
+      onLostPointerCapture={(event) => drag.cancel(id, event)}
+      className={cn(
+        'flex h-11 w-11 touch-none cursor-grab items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:cursor-grabbing',
+        getDragHandleClass(isDragging),
+      )}
+    >
+      <GripVertical className="h-4.5 w-4.5" />
+    </button>
+  );
+};
+
+const renderDragOverlay = (id: TodayTileId | null, t: TFunc) => {
+  if (!id) {
+    return null;
+  }
+
+  return (
+    <div
+      aria-hidden="true"
+      data-arrange-drag-overlay
+      className="tile lift pointer-events-none fixed top-0 left-0 z-70 flex flex-col p-2 will-change-transform"
+      style={{
+        width: 'var(--arrange-drag-width)',
+        height: 'var(--arrange-drag-height)',
+        transform:
+          'translate3d(var(--arrange-drag-x), var(--arrange-drag-y), 0) scale(1.015)',
+      }}
+    >
+      <div className="flex min-h-11 items-start gap-1">
+        <TileLabel className="line-clamp-2 min-w-0 flex-1 overflow-hidden text-ellipsis px-1 pt-1.5 leading-[1.35]">
+          {t(`today.tiles.${id}`)}
+        </TileLabel>
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center text-muted-foreground">
+          <Minus className="h-4 w-4" />
+        </span>
+      </div>
+      <div className="relative left-1/2 mt-auto grid w-[8.25rem] max-w-[calc(100%+1rem)] -translate-x-1/2 grid-cols-3">
+        <span className="flex h-11 w-11 items-center justify-center text-foreground">
+          <GripVertical className="h-4.5 w-4.5" />
+        </span>
+        <span className="flex h-11 w-11 items-center justify-center text-muted-foreground">
+          <ChevronUp className="h-4 w-4" />
+        </span>
+        <span className="flex h-11 w-11 items-center justify-center text-muted-foreground">
+          <ChevronDown className="h-4 w-4" />
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const renderHide = (
+  id: TodayTileId,
+  name: string,
+  actions: ArrangeActions,
+  t: TFunc,
+) => (
+  <button
+    type="button"
+    onClick={() => actions.hide(id)}
+    data-arrange-control={controlId('hide', id)}
+    aria-label={t('today.arrange.hide', { name })}
+    className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  >
+    <Minus className="h-4 w-4" />
+  </button>
+);
+
+const getSpanClass = (id: TodayTileId): string => {
+  if (isWideTodayTile(id)) {
+    return 'bento-wide';
+  }
+
+  return '';
+};
+
+const getDraggingClass = (
+  id: TodayTileId,
+  draggingId: TodayTileId | null,
+): string => {
+  if (id === draggingId) {
+    return 'opacity-25 ring-2 ring-ring';
+  }
+
+  return 'transition-[opacity,box-shadow]';
+};
+
+const getDragHandleClass = (isDragging: boolean): string => {
+  if (isDragging) {
+    return 'bg-accent text-foreground';
+  }
+
+  return '';
 };
 
 const renderMove = (
@@ -189,7 +362,7 @@ const renderMove = (
       onClick={() => actions.move(id, offset)}
       disabled={isDisabled}
       aria-label={label}
-      className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-accent text-foreground transition-opacity disabled:cursor-default disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-default disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <Icon className="h-4 w-4" />
     </button>
@@ -210,7 +383,7 @@ const renderHidden = (
   }
 
   return (
-    <BentoGrid>
+    <BentoGrid className="today-arrange-grid">
       {layout.hidden.map((id) => {
         const name = t(`today.tiles.${id}`);
 
@@ -221,12 +394,13 @@ const renderHidden = (
             onClick={() => actions.show(id)}
             data-arrange-control={controlId('show', id)}
             aria-label={t('today.arrange.show', { name })}
-            className="tile-ghost flex min-h-19 cursor-pointer items-center gap-2.5 p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            title={name}
+            className="tile-ghost grid min-h-14 cursor-pointer grid-cols-[2.75rem_minmax(0,1fr)] items-center rounded-[1.125rem] p-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <span className="flex h-6.5 w-6.5 shrink-0 items-center justify-center rounded-full bg-primary/14 text-primary-ink">
-              <Plus className="h-3.5 w-3.5" />
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center text-primary-ink">
+              <Plus className="h-4 w-4" />
             </span>
-            <span className="min-w-0 truncate text-[0.8rem] font-medium text-muted-foreground">
+            <span className="line-clamp-2 min-w-0 overflow-hidden text-ellipsis px-2 text-[0.8rem] font-medium leading-snug text-muted-foreground">
               {name}
             </span>
           </button>

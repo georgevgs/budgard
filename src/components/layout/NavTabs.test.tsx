@@ -23,6 +23,14 @@ describe('NavTabs', () => {
     expect(screen.getByText('navigation.trends')).toBeInTheDocument();
   });
 
+  it('wraps translated labels instead of cutting them off', () => {
+    renderAt('/today');
+    const activity = screen.getByText('navigation.activity');
+
+    expect(activity).toHaveClass('whitespace-normal');
+    expect(activity).not.toHaveClass('truncate');
+  });
+
   it('points each tab to the right route', () => {
     renderAt('/today');
     const links = screen.getAllByRole('link');

@@ -4,7 +4,7 @@ import TileLabel from '@/components/bento/TileLabel';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import { buildSparkline } from '@/lib/sparkline';
-import { cn, formatCurrency, formatPercent } from '@/lib/utils';
+import { formatCurrency, formatPercent } from '@/lib/utils';
 import type { MonthComparison } from '@/hooks/analytics/useAnalyticsData';
 
 type RhythmMonth = {
@@ -36,14 +36,14 @@ const SpentThisMonthTile = ({ monthComparison, rhythmMonths }: Props) => {
 
   return (
     <BentoTile wide className="rounded-[1.875rem] px-4.5 pt-5 pb-3.5">
-      <div className="flex items-baseline justify-between gap-3">
-        <div className="min-w-0">
+      <div className="flex flex-wrap items-end justify-between gap-x-3 gap-y-2.5">
+        <div className="min-w-0 flex-1 basis-40">
           <TileLabel>{monthComparison.thisMonthLabel}</TileLabel>
-          <p className="mt-2.5 type-figure-lg">
+          <p className="mt-2.5 type-figure-lg text-[clamp(1.5rem,8vw,2rem)]">
             {formatCurrency(animated, defaultCurrency)}
           </p>
         </div>
-        {renderChangeChip(monthComparison, t)}
+        {renderMonthComparison(monthComparison, t)}
       </div>
       {renderChart(path)}
       {renderAxis(months)}
@@ -131,33 +131,61 @@ const getAxisToneClassName = (index: number, total: number): string => {
   return '';
 };
 
-const renderChangeChip = (comparison: MonthComparison, t: TFunc) => {
+const renderMonthComparison = (comparison: MonthComparison, t: TFunc) => {
   if (comparison.percentChange === null) {
     return null;
   }
 
-  const percent = formatPercent(Math.abs(comparison.percentChange), 1);
-
-  if (comparison.delta > 0) {
-    return renderChip(`+${percent}`, 'bg-destructive/10 text-destructive-ink');
+  let decimals = 1;
+  if (Number.isInteger(comparison.percentChange)) {
+    decimals = 0;
   }
-  if (comparison.delta < 0) {
-    return renderChip(`−${percent}`, 'bg-income/10 text-income-ink');
-  }
+  const percent = formatPercent(Math.abs(comparison.percentChange), decimals);
+  const visibleValue = getVisibleChangeValue(comparison.delta, percent);
+  const accessibleLabel = getAccessibleChangeLabel(
+    comparison.delta,
+    percent,
+    t,
+  );
 
-  return renderChip(
-    t('analytics.sameAsLastMonth'),
-    'bg-muted text-muted-foreground',
+  return (
+    <div className="ml-auto max-w-36 shrink-0 pt-0.5 text-right">
+      <span className="sr-only">{accessibleLabel}</span>
+      <p aria-hidden="true" className="type-figure-sm text-base tabular-nums">
+        {visibleValue}
+      </p>
+      <p
+        aria-hidden="true"
+        className="mt-1.5 whitespace-normal break-normal text-[0.6875rem] leading-snug text-muted-foreground"
+      >
+        {t('analytics.tile.comparedWithLastMonth')}
+      </p>
+    </div>
   );
 };
 
-const renderChip = (text: string, tone: string) => (
-  <span
-    className={cn(
-      'shrink-0 rounded-full px-2.5 py-1.5 text-[0.72rem] font-semibold leading-none tabular-nums',
-      tone,
-    )}
-  >
-    {text}
-  </span>
-);
+const getVisibleChangeValue = (delta: number, percent: string): string => {
+  if (delta > 0) {
+    return `+${percent}%`;
+  }
+  if (delta < 0) {
+    return `−${percent}%`;
+  }
+
+  return '0%';
+};
+
+const getAccessibleChangeLabel = (
+  delta: number,
+  percent: string,
+  t: TFunc,
+): string => {
+  if (delta > 0) {
+    return t('analytics.tile.moreSpendingThanLastMonth', { percent });
+  }
+  if (delta < 0) {
+    return t('analytics.tile.lessSpendingThanLastMonth', { percent });
+  }
+
+  return t('analytics.sameAsLastMonth');
+};

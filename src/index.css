@@ -419,6 +419,14 @@
     }
   }
 
+  /* Arrange is a focused edit mode. The sticky Done control is its way out;
+     the persistent dock and Quick Add would otherwise offer unrelated actions
+     and, because Today is kept mounted, could strand the mode behind a tab. */
+  body[data-today-arranging='true'] :is(.nav-dock, [data-dock-action]) {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   /* ─── Type ────────────────────────────────────────────────────────────────
      The display voice, as a scale rather than as thirty-nine separate
      decisions.
