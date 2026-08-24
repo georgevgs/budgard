@@ -233,6 +233,17 @@
     background-color: hsl(var(--background));
   }
 
+  /* On iOS, -apple-system-body carries the user's Dynamic Type scale into the
+     root rem. Body still supplies Budgard's chosen faces, while every rem-based
+     size grows with the system preference instead of being pinned to 16px. */
+  @supports (font: -apple-system-body) {
+    @media (hover: none) {
+      html {
+        font: -apple-system-body;
+      }
+    }
+  }
+
   * {
     @apply border-border;
   }
@@ -296,6 +307,7 @@
       -webkit-backdrop-filter: saturate(180%) blur(20px);
       backdrop-filter: saturate(180%) blur(20px);
       z-index: 9999;
+      pointer-events: none;
     }
   }
 
@@ -368,6 +380,24 @@
 }
 
 @layer components {
+  /* The marketing page fills the edge-to-edge viewport, but its controls stay
+     inside iOS's safe area. The header owns the top inset because it is sticky;
+     adding it to the hero as well would double the gap. The shared gutter also
+     protects every landing section from the sensor housing in landscape. */
+  .landing-header {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .landing-gutter {
+    padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+
+    @media (width >= 40rem) {
+      padding-left: max(2rem, env(safe-area-inset-left, 0px));
+      padding-right: max(2rem, env(safe-area-inset-right, 0px));
+    }
+  }
+
   /* The content column every screen sits in. Previously each screen picked its
      own — max-w-lg on Settings, max-w-3xl on the tabs, max-w-4xl on Net worth,
      Debts and Goals — so the column visibly jogged as you navigated between
@@ -376,14 +406,16 @@
     width: 100%;
     max-width: 48rem;
     margin-inline: auto;
-    padding-inline: 1rem;
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
     /* Clears the status bar itself now that no app bar does it. The 1rem is
        the gap the design leaves above the screen's title. */
     padding-top: calc(env(safe-area-inset-top) + 1rem);
     padding-bottom: 1.25rem;
 
     @media (width >= 40rem) {
-      padding-inline: 1.5rem;
+      padding-left: max(1.5rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1.5rem, env(safe-area-inset-right, 0px));
     }
   }
 
@@ -409,7 +441,7 @@
      air between them the larger they are set, so tracking tightens as the
      scale climbs — -0.055em at the top, -0.022em at the bottom — instead of
      being picked by hand. The eyebrow runs the other way for the same reason:
-     at 10px, letterspacing is what keeps small caps from setting solid.
+     at 11px, letterspacing is what keeps small caps from setting solid.
 
      Each class carries its canonical size, so most call sites are one class.
      Where a screen genuinely needs a different size — the landing hero, the
@@ -718,7 +750,7 @@
      never a heading size — the module's number is the heading. */
   .tile-label {
     font-family: var(--font-display);
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     line-height: 1;
     letter-spacing: 0.16em;
@@ -729,7 +761,7 @@
   /* The eyebrow, promoted to a badge.
 
      One state on the slab is not a caption. "Over budget" is the whole reading
-     of the tile, not a description of the figure under it, and a 10px small-cap
+     of the tile, not a description of the figure under it, and an 11px small-cap
      label at 78% opacity is the quietest element on the surface to say it with
      — which left the over-budget slab looking very like the on-track one at a
      glance, since both are the brand fill carrying a large number.
@@ -752,7 +784,7 @@
     background-color: hsl(var(--foreground));
     color: hsl(var(--background));
     font-family: var(--font-display);
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     line-height: 1;
     letter-spacing: 0.16em;
@@ -1074,10 +1106,11 @@
     }
   }
 
-  /* List entrance for the card lists — Goals, Debts, Income and the expense
-     pages stagger their rows in on a capped 40ms ramp. Deliberately NOT used by
-     the Activity feed: its rows remount on every search keystroke, so the
-     entrance would re-fire as you type. */
+  /* List entrance for card lists and the grouped insights panel. Goals, Debts,
+     Income and expense pages stagger rows on a capped 40ms ramp; insights move
+     as one common region. Deliberately NOT used by the Activity feed: its rows
+     remount on every search keystroke, so the entrance would re-fire as you
+     type. */
   @keyframes card-enter {
     from {
       opacity: 0;
@@ -1178,5 +1211,30 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+}
+
+/* Liquid materials become opaque when iOS Reduce Transparency is enabled.
+   The class is shared by the in-app status scrim and the landing header; the
+   dock and toasts already have stable semantic hooks of their own. */
+@media (prefers-reduced-transparency: reduce) {
+  body::before,
+  .adaptive-material,
+  .activity-day-header,
+  .glass-capsule,
+  .toast-custom {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  body::before,
+  .adaptive-material,
+  .activity-day-header {
+    background-color: hsl(var(--background)) !important;
+  }
+
+  .glass-capsule,
+  .toast-custom {
+    background-color: hsl(var(--card)) !important;
   }
 }

@@ -7,10 +7,11 @@ import { describe, expect, it } from 'vitest';
 import { buildInlineHeadScript } from '../boot/inlineHeadScript';
 import { AA_LARGE, AA_TEXT, contrastRatio } from './contrast';
 import { buildManifestColors, buildTokensCss, hslToHex } from './generate';
-import { accent, dataColors, status, type Swatch } from './palette';
+import { accent, dataColors, neutral, status, type Swatch } from './palette';
 import {
   ACCENTS,
   ACCENT_PROPERTIES,
+  HIGH_CONTRAST_THEMES,
   THEMES,
   accentValues,
   type ThemeName,
@@ -41,6 +42,19 @@ const resolve = (name: ThemeName, token: string): string => {
   }
 
   return value;
+};
+
+const resolveHighContrast = (name: ThemeName, token: string): string => {
+  const highContrastTheme = HIGH_CONTRAST_THEMES.find(
+    (entry) => entry.name === name,
+  );
+  const value = highContrastTheme?.tokens[token];
+
+  if (value) {
+    return value;
+  }
+
+  return resolve(name, token);
 };
 
 describe('generated artefacts', () => {
@@ -76,6 +90,15 @@ describe('generated artefacts', () => {
     expect(manifest.background_color).toBe(colors.background_color);
   });
 
+  it('the installed app can rotate with the device', () => {
+    const manifest = JSON.parse(read('public/manifest.json')) as Record<
+      string,
+      string
+    >;
+
+    expect(manifest.orientation).toBe('any');
+  });
+
   it('converts HSL to the hex the manifest needs', () => {
     expect(hslToHex('0 0% 100%')).toBe('#ffffff');
     expect(hslToHex('0 0% 0%')).toBe('#000000');
@@ -108,7 +131,10 @@ describe('contrast', () => {
 
   it.each(themes)('%s: filled controls carry legible labels', (theme) => {
     for (const [surface, foreground] of filled) {
-      const ratio = contrastRatio(resolve(theme, foreground), resolve(theme, surface));
+      const ratio = contrastRatio(
+        resolve(theme, foreground),
+        resolve(theme, surface),
+      );
 
       expect(
         ratio,
@@ -116,6 +142,27 @@ describe('contrast', () => {
       ).toBeGreaterThanOrEqual(LABEL_ON_FILL);
     }
   });
+
+  it.each(themes)(
+    '%s: Increase Contrast strengthens fill labels without replacing white',
+    (theme) => {
+      for (const [surface, foreground] of filled) {
+        const ratio = contrastRatio(
+          resolveHighContrast(theme, foreground),
+          resolveHighContrast(theme, surface),
+        );
+
+        expect(
+          ratio,
+          `${foreground} on ${surface} in high-contrast ${theme} is ${ratio.toFixed(2)}:1`,
+        ).toBeGreaterThanOrEqual(AA_TEXT);
+      }
+
+      expect(resolveHighContrast(theme, '--primary-foreground')).toBe(
+        neutral[0],
+      );
+    },
+  );
 
   // The other half of the three-role rule. Every `-ink` token is drawn AS text
   // straight onto the canvas — links, eyebrow labels, the amount on an income
@@ -172,7 +219,10 @@ describe('contrast', () => {
   // The focus ring is a UI boundary, and the only thing that makes a keyboard
   // user's position visible. It is wired to the ink for exactly this reason.
   it.each(themes)('%s: the focus ring is visible on the canvas', (theme) => {
-    const ratio = contrastRatio(resolve(theme, '--ring'), resolve(theme, '--background'));
+    const ratio = contrastRatio(
+      resolve(theme, '--ring'),
+      resolve(theme, '--background'),
+    );
 
     expect(ratio).toBeGreaterThanOrEqual(AA_LARGE);
   });
@@ -183,34 +233,61 @@ describe('contrast', () => {
   const swatches: [string, Swatch][] = [
     ...ACCENTS.map((item): [string, Swatch] => [item.key, item.swatch]),
     ['barbie pink', accent.pink],
-    ...Object.entries(status).map(([key, value]): [string, Swatch] => [key, value]),
+    ...Object.entries(status).map(([key, value]): [string, Swatch] => [
+      key,
+      value,
+    ]),
   ];
 
-  it.each(swatches)('%s carries its own label on its own fill', (key, swatch) => {
-    for (const fill of [swatch.solid, swatch.solidDark]) {
-      const ratio = contrastRatio(swatch.on, fill);
+  it.each(swatches)(
+    '%s carries its own label on its own fill',
+    (key, swatch) => {
+      for (const fill of [swatch.solid, swatch.solidDark]) {
+        const ratio = contrastRatio(swatch.on, fill);
 
-      expect(
-        ratio,
-        `${key}: its label on ${fill} is ${ratio.toFixed(2)}:1`,
-      ).toBeGreaterThanOrEqual(LABEL_ON_FILL);
-    }
-  });
+        expect(
+          ratio,
+          `${key}: its label on ${fill} is ${ratio.toFixed(2)}:1`,
+        ).toBeGreaterThanOrEqual(LABEL_ON_FILL);
+      }
+    },
+  );
 
   it.each(swatches)('%s reads as text on both canvases', (key, swatch) => {
     const onLight = contrastRatio(swatch.ink, resolve('light', '--background'));
-    const onDark = contrastRatio(swatch.inkDark, resolve('dark', '--background'));
+    const onDark = contrastRatio(
+      swatch.inkDark,
+      resolve('dark', '--background'),
+    );
 
-    expect(onLight, `${key} ink on light is ${onLight.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_TEXT);
-    expect(onDark, `${key} ink on dark is ${onDark.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_TEXT);
+    expect(
+      onLight,
+      `${key} ink on light is ${onLight.toFixed(2)}:1`,
+    ).toBeGreaterThanOrEqual(AA_TEXT);
+    expect(
+      onDark,
+      `${key} ink on dark is ${onDark.toFixed(2)}:1`,
+    ).toBeGreaterThanOrEqual(AA_TEXT);
   });
 
   it.each(swatches)('%s reads as a shape on both canvases', (key, swatch) => {
-    const onLight = contrastRatio(swatch.solid, resolve('light', '--background'));
-    const onDark = contrastRatio(swatch.solidDark, resolve('dark', '--background'));
+    const onLight = contrastRatio(
+      swatch.solid,
+      resolve('light', '--background'),
+    );
+    const onDark = contrastRatio(
+      swatch.solidDark,
+      resolve('dark', '--background'),
+    );
 
-    expect(onLight, `${key} fill on light is ${onLight.toFixed(2)}:1`).toBeGreaterThanOrEqual(SOLID_ON_LIGHT);
-    expect(onDark, `${key} fill on dark is ${onDark.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_LARGE);
+    expect(
+      onLight,
+      `${key} fill on light is ${onLight.toFixed(2)}:1`,
+    ).toBeGreaterThanOrEqual(SOLID_ON_LIGHT);
+    expect(
+      onDark,
+      `${key} fill on dark is ${onDark.toFixed(2)}:1`,
+    ).toBeGreaterThanOrEqual(AA_LARGE);
   });
 
   it.each(themes)('%s: body text clears AA against the canvas', (theme) => {
@@ -238,7 +315,8 @@ describe('the three-role rule', () => {
   // way to make that legible from the token side, so the rule is enforced from
   // the source side instead: the readable variant is `text-primary-ink`, and
   // the fill is only ever a background.
-  const BARE = /\b(text|border)-(primary|income|destructive|warning|info)(?![-a-zA-Z/])/;
+  const BARE =
+    /\b(text|border)-(primary|income|destructive|warning|info)(?![-a-zA-Z/])/;
 
   const sources = (dir: string): string[] =>
     readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -258,7 +336,8 @@ describe('the three-role rule', () => {
   // The mirror mistake: `-foreground` is the label for a SOLID fill, so on a
   // `bg-x/14` tint it paints white on a pale wash. Found in the wild the day
   // the ink went white, which is why it is a test now.
-  const ON_TINT = /bg-(primary|income|destructive|warning|info)\/\d+\D[^\n]*text-\1-foreground/;
+  const ON_TINT =
+    /bg-(primary|income|destructive|warning|info)\/\d+\D[^\n]*text-\1-foreground/;
 
   it('no component puts a fill label on a tint', () => {
     const offenders = sources(path.join(ROOT, 'src'))
@@ -271,7 +350,9 @@ describe('the three-role rule', () => {
           .map((entry) => `${path.relative(ROOT, entry.file)}:${entry.number}`),
       );
 
-    expect(offenders, 'a tint needs the -ink variant, not -foreground').toEqual([]);
+    expect(offenders, 'a tint needs the -ink variant, not -foreground').toEqual(
+      [],
+    );
   });
 
   it('no component paints a neon fill onto the page as text', () => {
@@ -298,7 +379,9 @@ describe('data colours', () => {
 
   it('offers a full grid of swatches', () => {
     expect(dataColors.length).toBeGreaterThanOrEqual(16);
-    expect(dataColors.every((color) => /^#[0-9a-f]{6}$/.test(color))).toBe(true);
+    expect(dataColors.every((color) => /^#[0-9a-f]{6}$/.test(color))).toBe(
+      true,
+    );
   });
 });
 
@@ -312,6 +395,24 @@ describe('accents', () => {
           ACCENT_PROPERTIES.length,
         );
         expect(values.every(Boolean)).toBe(true);
+      }
+    }
+  });
+
+  it('keeps white accent labels and deepens their fill for Increase Contrast', () => {
+    for (const item of ACCENTS) {
+      for (const isDark of [false, true]) {
+        const values = accentValues(item.swatch, isDark, true);
+        const ratio = contrastRatio(values[1], values[0]);
+
+        expect(
+          ratio,
+          `${item.key} high-contrast label is ${ratio.toFixed(2)}:1`,
+        ).toBeGreaterThanOrEqual(AA_TEXT);
+
+        if (item.swatch.on === neutral[0]) {
+          expect(values[1]).toBe(neutral[0]);
+        }
       }
     }
   });

@@ -60,9 +60,7 @@ const ActivityFeed = (props: Props) => {
         className="rounded-[1.625rem] border border-dashed border-border px-5 py-10 text-center sm:px-6 sm:py-12"
         role="status"
       >
-        <p className="type-heading">
-          {t('activity.emptyTitle')}
-        </p>
+        <p className="type-heading">{t('activity.emptyTitle')}</p>
         <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
           {t('activity.emptyBody')}
         </p>
@@ -138,7 +136,7 @@ const renderGroup = (group: DateGroup, props: Props, t: TFunc) => (
     <div className="activity-day-header mb-2.5 flex items-baseline justify-between gap-3 rounded-full px-1 py-1.5">
       <h2
         id={`activity-${group.date}`}
-        className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
+        className="text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
       >
         {group.label}
       </h2>

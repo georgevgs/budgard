@@ -1,6 +1,7 @@
 import type { TFunction } from 'i18next';
 import { parseISO } from 'date-fns';
 import Tag from 'lucide-react/dist/esm/icons/tag';
+import CategoryIcon from '@/components/common/CategoryIcon';
 import { amountToInput, formatCurrency } from '@/lib/utils';
 import type { Expense } from '@/types/Expense';
 import type { Category, EmbeddedCategory } from '@/types/Category';
@@ -25,7 +26,10 @@ export const getInitialAmount = (
 
   const sourceCurrency = resolveSourceCurrency(expense, defaultCurrency);
 
-  return amountToInput(pickSourceAmount(expense, defaultCurrency), sourceCurrency);
+  return amountToInput(
+    pickSourceAmount(expense, defaultCurrency),
+    sourceCurrency,
+  );
 };
 
 // The currency the amount field is denominated in: the currency the row was
@@ -180,7 +184,7 @@ export const renderSuggestionMeta = (suggestion: Expense) => {
 
 const renderSuggestionIcon = (category: EmbeddedCategory) => {
   if (category.icon) {
-    return <span className="text-xs">{category.icon}</span>;
+    return <CategoryIcon icon={category.icon} className="h-3.5 w-3.5" />;
   }
 
   return (
@@ -193,7 +197,7 @@ const renderSuggestionIcon = (category: EmbeddedCategory) => {
 
 export const renderCategoryIndicator = (category: Category) => {
   if (category.icon) {
-    return <span className="text-sm">{category.icon}</span>;
+    return <CategoryIcon icon={category.icon} />;
   }
 
   return (

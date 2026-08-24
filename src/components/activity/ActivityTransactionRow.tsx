@@ -47,7 +47,7 @@ const ActivityTransactionRow = (props: Props) => {
           <span className="block truncate text-[0.9rem] font-medium leading-tight">
             {transaction.description}
           </span>
-          <span className="mt-0.5 block truncate text-[0.72rem] leading-none text-muted-foreground">
+          <span className="mt-0.5 block truncate text-[0.72rem] leading-tight text-foreground">
             {renderCategoryName(transaction, t)}
           </span>
         </span>
@@ -72,9 +72,8 @@ export default ActivityTransactionRow;
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-// The category's emoji, falling back to its colour as a dot. See CategoryGlyph
-// — the mark is shared with the pills Today draws, so the same transaction is
-// headed by the same thing wherever it is listed.
+// The category mark is shared with the pills Today draws, so the same
+// transaction is headed by the same SVG wherever it is listed.
 const renderCategoryMark = (transaction: Expense) => {
   return (
     <CategoryGlyph

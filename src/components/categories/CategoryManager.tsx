@@ -4,6 +4,7 @@ import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import FolderOpen from 'lucide-react/dist/esm/icons/folder-open';
+import CategoryIcon from '@/components/common/CategoryIcon';
 import { Button } from '@/components/ui/button';
 import {
   DialogTitle,
@@ -106,7 +107,7 @@ const renderBackButton = (onBack: (() => void) | undefined, t: TFunc) => {
       type="button"
       variant="ghost"
       size="icon"
-      className="h-10 w-10 shrink-0"
+      className="h-11 w-11 shrink-0"
       onClick={onBack}
       aria-label={t('common.back')}
     >
@@ -181,7 +182,7 @@ const renderCategoryList = (
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10 -my-1.5 text-muted-foreground hover:text-foreground shrink-0"
+            className="-my-1.5 h-11 w-11 shrink-0 text-muted-foreground hover:text-foreground"
             onClick={() => onEdit(category)}
             aria-label={t('categories.editCategory')}
           >
@@ -190,7 +191,7 @@ const renderCategoryList = (
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10 -my-1.5 text-muted-foreground hover:text-destructive-ink shrink-0"
+            className="-my-1.5 h-11 w-11 shrink-0 text-muted-foreground hover:text-destructive-ink"
             onClick={() => onDelete(category)}
             aria-label={t('categories.deleteCategory')}
           >
@@ -237,10 +238,10 @@ const renderCategoryIndicator = (category: Category) => {
   if (category.icon) {
     return (
       <div
-        className="w-7 h-7 rounded-full flex items-center justify-center text-sm shrink-0"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
         style={{ backgroundColor: getColorTint(category.color) }}
       >
-        {category.icon}
+        <CategoryIcon icon={category.icon} className="text-foreground/75" />
       </div>
     );
   }

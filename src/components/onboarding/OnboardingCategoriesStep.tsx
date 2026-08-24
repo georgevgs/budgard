@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import Check from 'lucide-react/dist/esm/icons/check';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
+import CategoryIcon from '@/components/common/CategoryIcon';
 import { Button } from '@/components/ui/button';
 import {
   DialogDescription,
@@ -65,11 +66,13 @@ const OnboardingCategoriesStep = ({
               onClick={() => handleCategoryToggle(index)}
               className={cn(
                 'flex items-center gap-2.5 rounded-xl px-3 py-3 text-sm font-medium transition-all border',
-                isSelected && 'border-primary-ink bg-primary/10 text-foreground',
-                !isSelected && 'border-border/50 bg-card text-muted-foreground hover:border-border',
+                isSelected &&
+                  'border-primary-ink bg-primary/10 text-foreground',
+                !isSelected &&
+                  'border-border/50 bg-card text-muted-foreground hover:border-border',
               )}
             >
-              <span className="text-base shrink-0">{cat.icon}</span>
+              <CategoryIcon icon={cat.icon} />
               <span className="flex-1 text-left">
                 {t(`onboarding.presetCategories.${cat.nameKey}`)}
               </span>

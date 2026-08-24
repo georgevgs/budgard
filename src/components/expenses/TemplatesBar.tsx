@@ -1,6 +1,7 @@
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import CategoryIcon from '@/components/common/CategoryIcon';
 import TemplateDeleteDialog from '@/components/expenses/TemplateDeleteDialog';
 import X from 'lucide-react/dist/esm/icons/x';
 import { cn, formatCurrency } from '@/lib/utils';
@@ -140,7 +141,7 @@ const renderCategoryIndicator = (template: ExpenseTemplate) => {
   if (!template.category) return null;
 
   if (template.category.icon) {
-    return <span className="text-sm">{template.category.icon}</span>;
+    return <CategoryIcon icon={template.category.icon} />;
   }
 
   return (
@@ -166,7 +167,7 @@ const renderDeleteButton = (
     <button
       type="button"
       onClick={(e) => onClick(e, template)}
-      className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="absolute -top-3 -right-3 flex h-11 w-11 items-center justify-center rounded-full bg-destructive text-destructive-foreground transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       aria-label={t('expenses.deleteTemplate', { name: template.description })}
     >
       <X className="h-3 w-3" />

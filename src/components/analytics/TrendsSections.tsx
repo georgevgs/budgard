@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import SpendingInsights from '@/components/analytics/SpendingInsights';
 import CategorySparkline from '@/components/analytics/CategorySparkline';
+import CategoryIcon from '@/components/common/CategoryIcon';
 import YearOverviewSection from '@/components/analytics/YearOverviewSection';
 import YearRhythm from '@/components/analytics/YearRhythm';
 import CashFlowSection from '@/components/analytics/CashFlowSection';
@@ -8,6 +9,7 @@ import ForecastSection from '@/components/analytics/ForecastSection';
 import AnnualExportCard from '@/components/analytics/AnnualExportCard';
 import ProUpsellCard from '@/components/pro/ProUpsellCard';
 import { formatCurrency } from '@/lib/utils';
+import { getColorTint } from '@/lib/categoryColor';
 import type { useAnalyticsData } from '@/hooks/analytics/useAnalyticsData';
 import type { useAnalyticsDrillDown } from '@/hooks/analytics/useAnalyticsDrillDown';
 import type { CategoryRow } from '@/hooks/analytics/useAnalyticsData';
@@ -61,9 +63,7 @@ const TrendsSections = ({
       {renderProSections(isPro, analytics.selectedYear, t)}
 
       <div className="space-y-3">
-        <h2 className="type-heading">
-          {t('analytics.categoryTrends')}
-        </h2>
+        <h2 className="type-heading">{t('analytics.categoryTrends')}</h2>
         {renderCategoryBreakdown(
           analytics.yearlyStats.categoryBreakdown,
           analytics.yearlyStats.totalSpent,
@@ -167,14 +167,15 @@ const renderCategoryRow = (
 };
 
 const renderCategoryIcon = (cat: CategoryRow) => {
-  if (cat.icon) {
-    return <span className="shrink-0 text-base">{cat.icon}</span>;
-  }
-
   return (
-    <div
-      className="h-2.5 w-2.5 shrink-0 rounded-full"
-      style={{ backgroundColor: cat.color }}
-    />
+    <span
+      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
+      style={{ backgroundColor: getColorTint(cat.color) }}
+    >
+      <CategoryIcon
+        icon={cat.icon}
+        className="h-3.5 w-3.5 text-foreground/75"
+      />
+    </span>
   );
 };

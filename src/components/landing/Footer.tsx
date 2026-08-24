@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import BrandMark from '@/components/common/BrandMark';
-import { cn } from '@/lib/utils';
+import TileLabel from '@/components/bento/TileLabel';
 
 type Props = {
   currentLang: string;
@@ -15,7 +15,7 @@ const Footer = ({ currentLang, onChangeLanguage }: Props) => {
 
   return (
     <footer className="border-t border-border/60 bg-background">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-14">
+      <div className="landing-gutter mx-auto max-w-6xl py-14">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {renderBrandColumn(t)}
           {renderLinkColumn(t, 'product', ['features', 'pricing', 'faq'])}
@@ -34,9 +34,7 @@ const renderBrandColumn = (t: Tx) => (
   <div>
     <div className="flex items-center gap-2.5">
       <BrandMark className="h-7 w-7" />
-      <span className="type-wordmark">
-        Budgard
-      </span>
+      <span className="type-wordmark">Budgard</span>
     </div>
     <p className="mt-4 text-sm text-muted-foreground leading-relaxed max-w-[260px]">
       {t('landing.footer.tagline')}
@@ -46,10 +44,10 @@ const renderBrandColumn = (t: Tx) => (
 
 const renderLinkColumn = (t: Tx, group: string, items: string[]) => (
   <div>
-    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground/80">
+    <TileLabel className="text-foreground">
       {t(`landing.footer.${group}.title`)}
-    </p>
-    <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
+    </TileLabel>
+    <ul className="mt-4 space-y-3 text-sm text-foreground">
       {items.map((item) => (
         <li key={item}>{renderLink(group, item, t)}</li>
       ))}
@@ -64,14 +62,14 @@ const renderLink = (group: string, item: string, t: Tx) => {
 
   if (group === 'product') {
     return (
-      <a href={`#${item}`} className="hover:text-foreground transition-colors">
+      <a href={`#${item}`} className="transition-opacity hover:opacity-65">
         {label}
       </a>
     );
   }
 
   return (
-    <Link to={`/${item}`} className="hover:text-foreground transition-colors">
+    <Link to={`/${item}`} className="transition-opacity hover:opacity-65">
       {label}
     </Link>
   );
@@ -83,10 +81,10 @@ const renderLanguageColumn = (
   onChangeLanguage: (lang: string) => void,
 ) => (
   <div>
-    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground/80">
+    <TileLabel className="text-foreground">
       {t('landing.footer.language')}
-    </p>
-    <div className="mt-4 inline-flex items-center gap-1 p-1 rounded-full border border-border/60 bg-card">
+    </TileLabel>
+    <div className="segmented mt-4">
       {renderLangButton('en', 'English', currentLang, onChangeLanguage)}
       {renderLangButton('el', 'Ελληνικά', currentLang, onChangeLanguage)}
     </div>
@@ -105,11 +103,8 @@ const renderLangButton = (
     <button
       type="button"
       onClick={() => onChangeLanguage(code)}
-      className={cn(
-        'h-8 px-3 rounded-full text-xs font-medium transition-colors',
-        isActive && 'bg-foreground text-background',
-        !isActive && 'text-muted-foreground hover:text-foreground',
-      )}
+      data-active={isActive}
+      className="segmented-item min-h-8 px-3 hover:text-foreground"
     >
       {label}
     </button>

@@ -712,6 +712,7 @@
     "yesterday": "Yesterday"
   },
   "theme": {
+    "system": "Automatic",
     "light": "Light",
     "dark": "Dark",
     "barbie": "Neon pink"
@@ -1420,9 +1421,7 @@
         },
         {
           "heading": "Contact",
-          "paragraphs": [
-            "Questions about these terms: {{email}}."
-          ]
+          "paragraphs": ["Questions about these terms: {{email}}."]
         }
       ]
     },

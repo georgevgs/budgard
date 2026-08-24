@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import CategoryIcon from '@/components/common/CategoryIcon';
 import { cn } from '@/lib/utils';
 import { getColorTint } from '@/lib/categoryColor';
 import type { Expense } from '@/types/Expense';
@@ -9,8 +10,8 @@ type Props = {
   style?: CSSProperties;
 };
 
-// What identifies a transaction's category at the head of a row: the emoji, on
-// a disc tinted with the category's own colour.
+// What identifies a transaction's category at the head of a row: a consistent
+// SVG mark on a disc tinted with the category's own colour.
 //
 // The colour goes HERE and not on the description. A category's hue is one of
 // twenty-four the user picked and none of them is contrast-checked as text —
@@ -30,7 +31,7 @@ const CategoryGlyph = ({ transaction, className, style }: Props) => {
     <span
       aria-hidden="true"
       className={cn(
-        'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base leading-none',
+        'flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
         className,
       )}
       style={{
@@ -38,16 +39,12 @@ const CategoryGlyph = ({ transaction, className, style }: Props) => {
         ...style,
       }}
     >
-      {transaction.category?.icon ?? FALLBACK_GLYPH}
+      <CategoryIcon
+        icon={transaction.category?.icon}
+        className="text-foreground/75"
+      />
     </span>
   );
 };
 
 export default CategoryGlyph;
-
-// --- Helpers ---
-
-// Same mark the hero falls back to, so an uncategorised transaction looks like
-// itself on both screens. `getColorTint` answers `--muted` for a missing
-// colour, which makes that disc a neutral grey rather than a missing shape.
-const FALLBACK_GLYPH = '•';

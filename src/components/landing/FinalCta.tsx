@@ -13,7 +13,7 @@ const FinalCta = ({ onGetStarted }: Props) => {
   return (
     <section className="relative bg-primary text-primary-foreground overflow-hidden">
       {renderSheen()}
-      <div className="relative max-w-4xl mx-auto px-5 sm:px-8 py-24 sm:py-32 text-center">
+      <div className="landing-gutter relative mx-auto max-w-4xl py-24 text-center sm:py-32">
         <Reveal>
           <h2 className="type-slab text-4xl leading-[1.04] sm:text-5xl md:text-6xl">
             {t('landing.finalCta.heading')}

@@ -5,7 +5,6 @@ import SectionShell from '@/components/landing/SectionShell';
 import EyebrowLabel from '@/components/landing/EyebrowLabel';
 import Reveal from '@/components/landing/Reveal';
 import Check from 'lucide-react/dist/esm/icons/check';
-import { cn } from '@/lib/utils';
 import { useProPlans, type ProPlansDisplay } from '@/hooks/pro/useProPlans';
 import { yearlySavingsPercent, type ProPlanId } from '@/lib/proPlans';
 
@@ -39,7 +38,7 @@ export default Pricing;
 const renderHeader = (t: Tx) => (
   <div className="text-center max-w-2xl mx-auto">
     <EyebrowLabel>{t('landing.pricing.eyebrow')}</EyebrowLabel>
-    <h2 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
+    <h2 className="type-heading mt-3 text-3xl leading-[1.08] sm:text-4xl md:text-5xl">
       {t('landing.pricing.heading')}
     </h2>
     <p className="mt-4 text-base text-muted-foreground">
@@ -55,7 +54,7 @@ const renderToggle = (
   plans: ProPlansDisplay,
 ) => (
   <div className="mt-8 flex justify-center">
-    <div className="inline-flex p-1 rounded-full bg-muted border border-border/60">
+    <div className="segmented">
       {renderToggleButton(t, 'monthly', cycle, setCycle, plans)}
       {renderToggleButton(t, 'yearly', cycle, setCycle, plans)}
     </div>
@@ -76,11 +75,8 @@ const renderToggleButton = (
     <button
       type="button"
       onClick={() => setCycle(value)}
-      className={cn(
-        'px-4 h-9 rounded-full text-sm font-medium transition-colors',
-        isActive && 'bg-background text-foreground shadow-sm',
-        !isActive && 'text-muted-foreground hover:text-foreground',
-      )}
+      data-active={isActive}
+      className="segmented-item text-sm"
     >
       {t(labelKey)}
       {renderSaveBadge(t, value, plans)}
@@ -105,24 +101,20 @@ const renderSaveBadge = (t: Tx, value: Cycle, plans: ProPlansDisplay) => {
   if (percent <= 0) return null;
 
   return (
-    <span className="ml-2 text-[10px] font-semibold uppercase tracking-wider text-primary-ink">
+    <span className="ml-2 text-[11px] font-semibold uppercase tracking-wider text-primary-ink">
       {t('landing.pricing.savePercent', { percent })}
     </span>
   );
 };
 
 const renderFreeCard = (t: Tx, onGetStarted: () => void) => (
-  <div className="rounded-3xl border border-border/60 bg-card p-8 flex flex-col">
-    <h3 className="text-lg font-semibold tracking-tight">
-      {t('landing.pricing.free.title')}
-    </h3>
+  <div className="surface-card flex flex-col p-8">
+    <h3 className="type-heading text-lg">{t('landing.pricing.free.title')}</h3>
     <p className="mt-1 text-sm text-muted-foreground">
       {t('landing.pricing.free.subtitle')}
     </p>
     <div className="mt-6 flex items-baseline gap-1.5">
-      <span className="text-5xl font-semibold tabular-nums tracking-tight">
-        €0
-      </span>
+      <span className="type-figure-xl text-5xl">€0</span>
       <span className="text-sm text-muted-foreground">
         {t('landing.pricing.forever')}
       </span>
@@ -148,13 +140,11 @@ const renderProCard = (
   plans: ProPlansDisplay,
   onGetPro: (plan: Cycle) => void,
 ) => (
-  <div className="relative rounded-3xl border-2 border-primary/60 bg-card p-8 flex flex-col lift-soft">
+  <div className="surface-card relative flex flex-col border-2 border-primary/60 p-8 lift-soft">
     <div className="absolute -top-3 left-8 px-2.5 h-6 inline-flex items-center rounded-full bg-primary text-primary-foreground text-[11px] font-semibold tracking-wide">
       {t('landing.pricing.recommended')}
     </div>
-    <h3 className="text-lg font-semibold tracking-tight">
-      {t('landing.pricing.pro.title')}
-    </h3>
+    <h3 className="type-heading text-lg">{t('landing.pricing.pro.title')}</h3>
     <p className="mt-1 text-sm text-muted-foreground">
       {t('landing.pricing.pro.subtitle')}
     </p>
@@ -177,9 +167,7 @@ const renderProPrice = (t: Tx, cycle: Cycle, plans: ProPlansDisplay) => {
   if (cycle === 'monthly') {
     return (
       <div className="mt-6 flex items-baseline gap-1.5">
-        <span className="text-5xl font-semibold tabular-nums tracking-tight">
-          {plans.monthlyLabel}
-        </span>
+        <span className="type-figure-xl text-5xl">{plans.monthlyLabel}</span>
         <span className="text-sm text-muted-foreground">
           {t('landing.pricing.perMonth')}
         </span>
@@ -190,7 +178,7 @@ const renderProPrice = (t: Tx, cycle: Cycle, plans: ProPlansDisplay) => {
   return (
     <div className="mt-6">
       <div className="flex items-baseline gap-1.5">
-        <span className="text-5xl font-semibold tabular-nums tracking-tight">
+        <span className="type-figure-xl text-5xl">
           {plans.yearlyPerMonthLabel}
         </span>
         <span className="text-sm text-muted-foreground">

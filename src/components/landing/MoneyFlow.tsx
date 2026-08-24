@@ -3,6 +3,7 @@ import SectionShell from '@/components/landing/SectionShell';
 import EyebrowLabel from '@/components/landing/EyebrowLabel';
 import DeviceFrame from '@/components/landing/DeviceFrame';
 import Reveal from '@/components/landing/Reveal';
+import TileLabel from '@/components/bento/TileLabel';
 
 type Tx = (key: string) => string;
 type Row = { key: string; amount: string; isIncome: boolean };
@@ -29,7 +30,7 @@ export default MoneyFlow;
 const renderCopy = (t: Tx) => (
   <div>
     <EyebrowLabel>{t('landing.flow.eyebrow')}</EyebrowLabel>
-    <h2 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
+    <h2 className="type-heading mt-3 text-3xl leading-[1.08] sm:text-4xl md:text-5xl">
       {t('landing.flow.heading')}
     </h2>
     <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-md">
@@ -51,13 +52,11 @@ const renderPoint = (text: string) => (
 const renderCard = (t: Tx) => (
   <DeviceFrame>
     <div className="p-6">
-      <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-        {t('landing.flow.cardLabel')}
+      <TileLabel>{t('landing.flow.cardLabel')}</TileLabel>
+      <p className="type-figure-lg mt-1">€18,420</p>
+      <p className="text-[11px] text-income-ink">
+        {t('landing.flow.cardDelta')}
       </p>
-      <p className="mt-1 text-[32px] font-semibold tabular-nums tracking-tight">
-        €18,420
-      </p>
-      <p className="text-[11px] text-income-ink">{t('landing.flow.cardDelta')}</p>
       <div className="mt-6 space-y-3">
         {rows().map((row) => renderRow(row, t))}
       </div>

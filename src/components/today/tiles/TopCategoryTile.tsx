@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import BentoTile from '@/components/bento/BentoTile';
 import TileLabel from '@/components/bento/TileLabel';
+import CategoryIcon from '@/components/common/CategoryIcon';
 import { formatCurrency } from '@/lib/utils';
 import type { TopCategory } from '@/hooks/today/useTopCategory';
 
@@ -28,7 +29,7 @@ const TopCategoryTile = ({ category, currency }: Props) => {
     >
       <div className="flex items-center justify-between gap-2">
         <TileLabel>{t('today.tiles.topCategory')}</TileLabel>
-        {renderIcon(category.icon)}
+        <CategoryIcon icon={category.icon} className="opacity-80" />
       </div>
       <div>
         <p className="truncate text-sm font-medium">{category.name}</p>
@@ -41,17 +42,3 @@ const TopCategoryTile = ({ category, currency }: Props) => {
 };
 
 export default TopCategoryTile;
-
-// --- Helpers ---
-
-const renderIcon = (icon: string | null) => {
-  if (!icon) {
-    return null;
-  }
-
-  return (
-    <span aria-hidden="true" className="text-sm leading-none">
-      {icon}
-    </span>
-  );
-};

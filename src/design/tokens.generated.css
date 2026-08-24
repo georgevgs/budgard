@@ -15,7 +15,7 @@
     --dock-clearance: calc(var(--dock-bottom) + var(--dock-height));
     --dock-action-slot: 4.25rem;
     --dock-max-width: 30rem;
-    --dock-edge: max(1rem, calc((100% - var(--dock-max-width)) / 2));
+    --dock-edge: max(1rem, env(safe-area-inset-left), env(safe-area-inset-right), calc((100% - var(--dock-max-width)) / 2));
     --dock-inset: calc(var(--dock-clearance) + 0.5rem);
     --modal-scrim-opacity: 0.48;
     --barbie-swatch: 330 100% 62%;
@@ -149,5 +149,49 @@
     --glass-sheen: 0.46;
     --glass-rim: 0 0% 100% / 0.8;
     --glass-drop: 328 85% 45% / 0.25;
+  }
+
+  @media (prefers-contrast: more) {
+    :root {
+      --primary: 25 100% 33%;
+      --primary-foreground: 0 0% 100%;
+      --destructive: 356 85% 45%;
+      --destructive-foreground: 0 0% 100%;
+      --info: 207 100% 34%;
+      --info-foreground: 0 0% 100%;
+      --muted-foreground: 0 0% 15%;
+      --tile-ring: 0 0% 7% / 0.22;
+      --border: 0 0% 42%;
+      --input: 0 0% 42%;
+      --glass-alpha: 0.98;
+    }
+
+    .dark {
+      --primary: 25 100% 33%;
+      --primary-foreground: 0 0% 100%;
+      --destructive: 356 85% 45%;
+      --destructive-foreground: 0 0% 100%;
+      --info: 207 100% 34%;
+      --info-foreground: 0 0% 100%;
+      --muted-foreground: 0 0% 96%;
+      --tile-ring: 0 0% 100% / 0.22;
+      --border: 0 0% 68%;
+      --input: 0 0% 68%;
+      --glass-alpha: 0.98;
+    }
+
+    [data-theme='barbie'] {
+      --primary: 333 90% 43%;
+      --primary-foreground: 0 0% 100%;
+      --destructive: 356 85% 45%;
+      --destructive-foreground: 0 0% 100%;
+      --info: 207 100% 34%;
+      --info-foreground: 0 0% 100%;
+      --muted-foreground: 288 60% 12%;
+      --tile-ring: 318 80% 86% / 0.9;
+      --border: 308 32% 40%;
+      --input: 308 32% 40%;
+      --glass-alpha: 0.98;
+    }
   }
 }

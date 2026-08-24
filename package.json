@@ -17,6 +17,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "budget": "node scripts/bundleBudget.mjs",
+    "brand:generate": "zsh design/brand/generate-assets.zsh",
     "sync:agents": "node scripts/syncAgentDocs.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"

@@ -1,12 +1,34 @@
 import { useTranslation } from 'react-i18next';
+import CategoryIcon from '@/components/common/CategoryIcon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn, extractEmoji } from '@/lib/utils';
 
 const CATEGORY_ICONS = [
-  '🍔', '🛒', '🏠', '🚗', '🎬', '💊', '👕', '💡',
-  '🎮', '✈️', '📱', '🎓', '💇', '🐾', '🎁', '☕',
-  '🍕', '🍺', '🏋️', '💼', '🎵', '📚', '🧹', '👶',
+  '🍔',
+  '🛒',
+  '🏠',
+  '🚗',
+  '🎬',
+  '💊',
+  '👕',
+  '💡',
+  '🎮',
+  '✈️',
+  '📱',
+  '🎓',
+  '💇',
+  '🐾',
+  '🎁',
+  '☕',
+  '🍕',
+  '🍺',
+  '🏋️',
+  '💼',
+  '🎵',
+  '📚',
+  '🧹',
+  '👶',
 ] as const;
 
 type CategoryIconPickerProps = {
@@ -46,11 +68,11 @@ const CategoryIconPicker = ({
             disabled={disabled}
             aria-label={t('categories.selectIconAria', { icon: emoji })}
             className={cn(
-              'w-9 h-9 rounded-full transition-all duration-150 flex items-center justify-center text-lg',
+              'flex h-11 w-11 items-center justify-center rounded-full transition-all duration-150',
               renderIconButtonState(value === emoji),
             )}
           >
-            {emoji}
+            <CategoryIcon icon={emoji} />
           </button>
         ))}
       </div>
@@ -61,7 +83,7 @@ const CategoryIconPicker = ({
           onChange={(e) => handleCustomChange(e.target.value)}
           disabled={disabled}
           placeholder={t('categories.customIcon')}
-          className="h-7 w-32 text-sm px-2"
+          className="h-11 w-32 px-2 text-sm"
           maxLength={4}
           aria-label={t('categories.customIcon')}
         />
@@ -107,7 +129,7 @@ const renderClearButton = (
       type="button"
       variant="ghost"
       size="sm"
-      className="px-2 text-xs text-muted-foreground"
+      className="min-h-11 px-2 text-xs text-muted-foreground"
       onClick={onClear}
       disabled={disabled}
     >

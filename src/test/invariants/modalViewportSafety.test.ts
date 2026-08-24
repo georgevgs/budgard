@@ -71,6 +71,26 @@ describe('modal viewport safety', () => {
     );
   });
 
+  it('keeps the landing header visible in an iOS Home Screen web app', () => {
+    const css = read('src/index.css');
+    const header = read('src/components/landing/Header.tsx');
+    const loading = read('src/components/landing/LandingLoading.tsx');
+    const document = read('index.html');
+    const manifest = read('public/manifest.json');
+
+    expect(document).toContain('viewport-fit=cover');
+    expect(document).toContain(
+      'apple-mobile-web-app-status-bar-style" content="black-translucent',
+    );
+    expect(manifest).toContain('"display": "standalone"');
+    expect(css).toContain('.landing-header');
+    expect(css).toContain('padding-top: env(safe-area-inset-top, 0px);');
+    expect(css).toContain('env(safe-area-inset-left, 0px)');
+    expect(css).toContain('env(safe-area-inset-right, 0px)');
+    expect(header).toContain('landing-header sticky top-0');
+    expect(loading).toContain('className="landing-header"');
+  });
+
   it.each(FORM_DIALOGS_WITH_VISIBLE_CLOSE)(
     '%s keeps its explicit close affordance visible',
     (file) => {

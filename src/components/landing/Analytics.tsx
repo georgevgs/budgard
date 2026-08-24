@@ -3,6 +3,7 @@ import SectionShell from '@/components/landing/SectionShell';
 import EyebrowLabel from '@/components/landing/EyebrowLabel';
 import DeviceFrame from '@/components/landing/DeviceFrame';
 import Reveal from '@/components/landing/Reveal';
+import TileLabel from '@/components/bento/TileLabel';
 
 type Tx = (key: string) => string;
 
@@ -26,7 +27,7 @@ export default Analytics;
 const renderCopy = (t: Tx) => (
   <div>
     <EyebrowLabel>{t('landing.analytics.eyebrow')}</EyebrowLabel>
-    <h2 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
+    <h2 className="type-heading mt-3 text-3xl leading-[1.08] sm:text-4xl md:text-5xl">
       {t('landing.analytics.heading')}
     </h2>
     <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-md">
@@ -38,12 +39,8 @@ const renderCopy = (t: Tx) => (
 const renderChart = (t: Tx) => (
   <DeviceFrame>
     <div className="p-6">
-      <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-        {t('landing.analytics.cardLabel')}
-      </p>
-      <p className="text-[32px] font-semibold tabular-nums tracking-tight mt-1">
-        €8,868
-      </p>
+      <TileLabel>{t('landing.analytics.cardLabel')}</TileLabel>
+      <p className="type-figure-lg mt-1">€8,868</p>
       <p className="text-xs text-muted-foreground mt-0.5">
         {t('landing.analytics.cardSub')}
       </p>
@@ -61,10 +58,18 @@ const renderSvgChart = () => {
     .join(' ');
 
   return (
-    <svg viewBox="0 0 320 110" className="w-full mt-5" preserveAspectRatio="none">
+    <svg
+      viewBox="0 0 320 110"
+      className="w-full mt-5"
+      preserveAspectRatio="none"
+    >
       <defs>
         <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.35" />
+          <stop
+            offset="0%"
+            stopColor="hsl(var(--primary))"
+            stopOpacity="0.35"
+          />
           <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
         </linearGradient>
       </defs>

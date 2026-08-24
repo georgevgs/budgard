@@ -1,10 +1,8 @@
 import { parseISO } from 'date-fns';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
-import {
-  amountToInput,
-  formatCurrency,
-} from '@/lib/utils';
+import CategoryIcon from '@/components/common/CategoryIcon';
+import { amountToInput, formatCurrency } from '@/lib/utils';
 import { resolveSourceCurrency } from '@/components/expenses/ExpensesForm.helpers';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
@@ -22,13 +20,13 @@ export const getInitialAmount = (
 
   const sourceAmount = pickSourceAmount(income, defaultCurrency);
 
-  return amountToInput(sourceAmount, resolveSourceCurrency(income, defaultCurrency));
+  return amountToInput(
+    sourceAmount,
+    resolveSourceCurrency(income, defaultCurrency),
+  );
 };
 
-const pickSourceAmount = (
-  income: Expense,
-  defaultCurrency: string,
-): number => {
+const pickSourceAmount = (income: Expense, defaultCurrency: string): number => {
   const isForeign =
     income.original_currency && income.original_currency !== defaultCurrency;
   if (isForeign) return income.original_amount ?? income.amount;
@@ -122,7 +120,7 @@ export const renderCategoryButtonContent = (
 
 export const renderCategoryDot = (category: Category) => {
   if (category.icon) {
-    return <span className="text-sm">{category.icon}</span>;
+    return <CategoryIcon icon={category.icon} />;
   }
 
   return (

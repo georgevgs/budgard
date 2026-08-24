@@ -26,7 +26,7 @@ const TodayHeader = (props: Props) => {
         <h1 className="truncate type-title">
           {t(`today.greeting.${props.greeting}`)}
         </h1>
-        <p className="mt-1 truncate text-xs leading-none text-muted-foreground">
+        <p className="mt-1 truncate text-xs leading-tight text-muted-foreground">
           {props.dateLabel}
         </p>
       </div>
@@ -54,13 +54,11 @@ type TFunc = (key: string) => string;
 const renderArrangingHeader = (onDone: () => void, t: TFunc) => {
   return (
     <div className="flex items-center justify-between gap-3">
-      <h1 className="type-title">
-        {t('today.arrange.title')}
-      </h1>
+      <h1 className="type-title">{t('today.arrange.title')}</h1>
       <button
         type="button"
         onClick={onDone}
-        className="flex h-9 shrink-0 cursor-pointer items-center rounded-full bg-foreground px-4 text-xs font-semibold text-background transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="flex min-h-11 shrink-0 cursor-pointer items-center rounded-full bg-foreground px-4 text-xs font-semibold text-background transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         {t('today.arrange.done')}
       </button>

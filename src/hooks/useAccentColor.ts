@@ -59,7 +59,15 @@ const applyAccentToDocument = (key: AccentColorKey): void => {
   }
 
   const isDark = root.classList.contains('dark');
-  const values = accentValues(findAccent(key).swatch, isDark);
+  let increasedContrast = false;
+  if (window.matchMedia) {
+    increasedContrast = window.matchMedia('(prefers-contrast: more)').matches;
+  }
+  const values = accentValues(
+    findAccent(key).swatch,
+    isDark,
+    increasedContrast,
+  );
 
   ACCENT_PROPERTIES.forEach((property, index) => {
     root.style.setProperty(property, values[index]);
@@ -97,6 +105,18 @@ export const useAccentColor = (): {
     });
 
     return () => observer.disconnect();
+  }, [accent]);
+
+  useEffect(() => {
+    if (!window.matchMedia) {
+      return;
+    }
+
+    const contrast = window.matchMedia('(prefers-contrast: more)');
+    const reapplyAccent = () => applyAccentToDocument(accent);
+    contrast.addEventListener('change', reapplyAccent);
+
+    return () => contrast.removeEventListener('change', reapplyAccent);
   }, [accent]);
 
   return { accent, setAccent };

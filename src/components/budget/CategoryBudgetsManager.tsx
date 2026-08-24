@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import FolderOpen from 'lucide-react/dist/esm/icons/folder-open';
 import X from 'lucide-react/dist/esm/icons/x';
+import CategoryIcon from '@/components/common/CategoryIcon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -314,10 +315,10 @@ const renderCategoryIndicator = (category: Category) => {
   if (category.icon) {
     return (
       <div
-        className="w-7 h-7 rounded-full flex items-center justify-center text-sm shrink-0"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
         style={{ backgroundColor: getColorTint(category.color) }}
       >
-        {category.icon}
+        <CategoryIcon icon={category.icon} className="text-foreground/75" />
       </div>
     );
   }

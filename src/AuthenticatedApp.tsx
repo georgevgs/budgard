@@ -29,7 +29,6 @@ import { useRouteScrollRestoration } from '@/hooks/useRouteScrollRestoration';
 import { usePageRefresh } from '@/hooks/usePageRefresh';
 import PullToRefreshIndicator from '@/components/common/PullToRefreshIndicator';
 import { useAppLock } from '@/hooks/useAppLock';
-import { useTheme } from '@/hooks/useTheme';
 import { signOut } from '@/lib/auth';
 import {
   AppLoadingSkeleton,
@@ -109,10 +108,6 @@ const renderRouteFallback = (skeleton: ReactNode) => (
 const AuthenticatedLayout = () => {
   const { pathname } = useLocation();
   const lock = useAppLock(true);
-  // Applies the stored theme to the document and the meta theme-colour. Lived
-  // in the app bar until that was removed; it is shell-wide work, not header
-  // work, so it belongs on the shell.
-  useTheme();
   useOfflineSync();
   useIdleTabPrefetch();
   useCheckoutReturn();

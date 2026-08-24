@@ -82,7 +82,7 @@ const renderTab = (tab: Tab) => {
           />
           <span
             className={cn(
-              'w-full truncate px-1 text-center text-[10px] font-semibold leading-none transition-colors',
+              'w-full truncate px-1 text-center text-[11px] font-semibold leading-tight transition-colors',
               getTabToneClassName(isActive),
             )}
           >

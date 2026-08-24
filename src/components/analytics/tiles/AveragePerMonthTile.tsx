@@ -26,13 +26,16 @@ const AveragePerMonthTile = ({ monthlyAverage, monthsElapsed }: Props) => {
   }
 
   return (
-    <BentoTile tone="ink" className="flex min-h-26 flex-col justify-between p-4">
+    <BentoTile
+      tone="ink"
+      className="flex min-h-26 flex-col justify-between p-4"
+    >
       <TileLabel>{t('analytics.tile.averagePerMonth')}</TileLabel>
       <div>
         <p className="type-figure">
           {formatCurrency(monthlyAverage, defaultCurrency)}
         </p>
-        <p className="mt-1.5 truncate text-[0.72rem] leading-none opacity-70">
+        <p className="mt-1.5 truncate text-[0.72rem] leading-tight opacity-70">
           {t('analytics.tile.acrossMonths', { count: monthsElapsed })}
         </p>
       </div>

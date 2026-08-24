@@ -41,7 +41,7 @@ const TransactionPill = ({
         <span className="block truncate text-[0.9rem] font-medium leading-tight">
           {transaction.description}
         </span>
-        <span className="mt-0.5 block truncate text-[0.72rem] leading-none text-muted-foreground">
+        <span className="mt-0.5 block truncate text-[0.72rem] leading-tight text-foreground">
           {meta}
         </span>
       </span>

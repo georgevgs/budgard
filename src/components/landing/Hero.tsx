@@ -7,6 +7,7 @@ import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { IosInstallModal } from '@/components/landing/IosInstallModal';
 import DeviceFrame from '@/components/landing/DeviceFrame';
 import Reveal from '@/components/landing/Reveal';
+import TileLabel from '@/components/bento/TileLabel';
 
 type Props = {
   onGetStarted: () => void;
@@ -40,7 +41,7 @@ const Hero = ({ onGetStarted }: Props) => {
 
   return (
     <div id="top" className="relative overflow-hidden bg-background">
-      <div className="relative max-w-6xl mx-auto px-5 sm:px-8 pt-20 sm:pt-28 pb-16 sm:pb-24">
+      <div className="landing-gutter relative mx-auto max-w-6xl pb-16 pt-20 sm:pb-24 sm:pt-28">
         <div className="max-w-3xl mx-auto text-center">
           <Reveal>{renderHeading(t)}</Reveal>
           <Reveal delay={80}>{renderSubtitle(t)}</Reveal>
@@ -135,7 +136,7 @@ const renderHeroShot = (t: Tx) => (
             <p className="text-xs font-semibold opacity-65">
               {t('today.greeting.morning')}
             </p>
-            <span className="rounded-full bg-primary/12 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-primary-ink">
+            <span className="rounded-full bg-primary/12 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-primary-ink">
               {t('today.chip.comfortable')}
             </span>
           </div>
@@ -188,9 +189,7 @@ const renderPreviewPath = () => (
 const renderPreviewSummary = (label: string, value: string) => (
   <div className="flex items-center justify-between gap-4 rounded-xl px-3 py-2.5">
     <div className="min-w-0">
-      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-        {label}
-      </p>
+      <TileLabel>{label}</TileLabel>
       <p className="mt-0.5 truncate text-xs font-medium">{value}</p>
     </div>
     <span

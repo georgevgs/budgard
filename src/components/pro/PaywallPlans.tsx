@@ -137,7 +137,7 @@ const renderBadge = (badge: string | null) => {
   if (!badge) return null;
 
   return (
-    <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">
+    <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-primary-foreground">
       {badge}
     </span>
   );

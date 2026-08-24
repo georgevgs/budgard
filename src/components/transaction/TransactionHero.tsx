@@ -1,4 +1,5 @@
 import { format, parseISO } from 'date-fns';
+import CategoryIcon from '@/components/common/CategoryIcon';
 import { cn } from '@/lib/utils';
 import { describeAmount } from '@/lib/transactionAmount';
 import { getColorTint } from '@/lib/categoryColor';
@@ -32,16 +33,16 @@ const TransactionHero = ({ transaction, currency, isIncome }: Props) => {
         }}
         aria-hidden="true"
       >
-        {transaction.category?.icon ?? '•'}
+        <CategoryIcon
+          icon={transaction.category?.icon}
+          className="h-6 w-6 text-foreground/75"
+        />
       </span>
       <h1 className="max-w-xs type-heading text-xl">
         {transaction.description}
       </h1>
       <p
-        className={cn(
-          'type-figure-xl text-[2.5rem]',
-          amount.tone,
-        )}
+        className={cn('type-figure-xl text-[2.5rem]', amount.tone)}
         style={{ viewTransitionName: `tx-amount-${transaction.id}` }}
       >
         {amount.text}

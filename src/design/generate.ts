@@ -9,6 +9,7 @@ import {
   ACCENTS,
   ACCENT_PROPERTIES,
   BASE_TOKENS,
+  HIGH_CONTRAST_THEMES,
   THEMES,
   accentValues,
   type TokenMap,
@@ -27,12 +28,16 @@ const GENERATED_HEADER = [
 const quote = (values: readonly string[]): string =>
   `[${values.map((value) => `'${value}'`).join(', ')}]`;
 
-const formatBlock = (selector: string, tokens: TokenMap): string => {
+const formatBlock = (
+  selector: string,
+  tokens: TokenMap,
+  indent = '  ',
+): string => {
   const declarations = Object.entries(tokens)
-    .map(([name, value]) => `    ${name}: ${value};`)
+    .map(([name, value]) => `${indent}  ${name}: ${value};`)
     .join('\n');
 
-  return `  ${selector} {\n${declarations}\n  }`;
+  return `${indent}${selector} {\n${declarations}\n${indent}}`;
 };
 
 /** The `@layer base` block of custom properties, one selector per theme. */
@@ -44,8 +49,11 @@ export const buildTokensCss = (): string => {
 
     return formatBlock(theme.selector, theme.tokens);
   });
+  const highContrastBlocks = HIGH_CONTRAST_THEMES.map((theme) =>
+    formatBlock(theme.selector, theme.tokens, '    '),
+  );
 
-  return `${GENERATED_HEADER}\n\n@layer base {\n${blocks.join('\n\n')}\n}\n`;
+  return `${GENERATED_HEADER}\n\n@layer base {\n${blocks.join('\n\n')}\n\n  @media (prefers-contrast: more) {\n${highContrastBlocks.join('\n\n')}\n  }\n}\n`;
 };
 
 /**
@@ -64,32 +72,47 @@ export const buildThemeInitScript = (): string => {
   const accents = ACCENTS.map((item) => {
     const light = accentValues(item.swatch, false);
     const dark = accentValues(item.swatch, true);
+    const highContrastLight = accentValues(item.swatch, false, true);
+    const highContrastDark = accentValues(item.swatch, true, true);
 
-    return `    ${item.key}: [${quote(light)}, ${quote(dark)}]`;
+    return `    ${item.key}: [${quote(light)}, ${quote(dark)}, ${quote(highContrastLight)}, ${quote(highContrastDark)}]`;
   }).join(',\n');
 
   const properties = ACCENT_PROPERTIES.map((name) => `'${name}'`).join(', ');
 
   return `(function () {
   var root = document.documentElement;
-  var savedTheme = 'light';
+  var savedTheme = 'system';
   var savedAccent = null;
 
   try {
-    savedTheme = localStorage.getItem('theme') || 'light';
+    savedTheme = localStorage.getItem('theme') || 'system';
     savedAccent = localStorage.getItem('accent-color');
   } catch (error) {
     // Storage can be unavailable (private mode) — fall back to the defaults.
   }
 
-  root.setAttribute('data-theme', savedTheme);
+  if (savedTheme !== 'system' && savedTheme !== 'light' && savedTheme !== 'dark' && savedTheme !== 'barbie') {
+    savedTheme = 'system';
+  }
 
-  if (savedTheme === 'dark') {
+  var resolvedTheme = savedTheme;
+  if (savedTheme === 'system') {
+    resolvedTheme = 'light';
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      resolvedTheme = 'dark';
+    }
+  }
+
+  root.setAttribute('data-theme', resolvedTheme);
+  root.setAttribute('data-theme-preference', savedTheme);
+
+  if (resolvedTheme === 'dark') {
     root.classList.add('dark');
   }
 
   // Barbie has its own fixed palette — never override its primary.
-  if (savedTheme === 'barbie') return;
+  if (resolvedTheme === 'barbie') return;
 
   var properties = [${properties}];
   var accents = {
@@ -99,7 +122,14 @@ ${accents}
   var accent = savedAccent && accents[savedAccent];
   if (!accent) return;
 
-  var values = savedTheme === 'dark' ? accent[1] : accent[0];
+  var valueIndex = 0;
+  if (resolvedTheme === 'dark') {
+    valueIndex = 1;
+  }
+  if (window.matchMedia && window.matchMedia('(prefers-contrast: more)').matches) {
+    valueIndex += 2;
+  }
+  var values = accent[valueIndex];
 
   for (var i = 0; i < properties.length; i++) {
     root.style.setProperty(properties[i], values[i]);
@@ -113,12 +143,14 @@ export const hslToHex = (value: string): string => {
     .split(' ')
     .map((part) => Number.parseFloat(part));
 
-  const chroma = (saturation / 100) * Math.min(lightness / 100, 1 - lightness / 100);
+  const chroma =
+    (saturation / 100) * Math.min(lightness / 100, 1 - lightness / 100);
 
   const channel = (offset: number): string => {
     const position = (offset + hue / 30) % 12;
     const amount =
-      lightness / 100 - chroma * Math.max(-1, Math.min(position - 3, 9 - position, 1));
+      lightness / 100 -
+      chroma * Math.max(-1, Math.min(position - 3, 9 - position, 1));
 
     return Math.round(amount * 255)
       .toString(16)
@@ -138,11 +170,11 @@ const lightTokens = (): TokenMap => {
   return light.tokens;
 };
 
-/** Browser chrome and PWA launch colours, both derived from the light theme. */
+/** Browser chrome and the first PWA frame, derived from the light surface. */
 export const buildManifestColors = (): {
   theme_color: string;
   background_color: string;
 } => ({
   theme_color: hslToHex(lightTokens()['--background']),
-  background_color: hslToHex(lightTokens()['--foreground']),
+  background_color: hslToHex(lightTokens()['--background']),
 });

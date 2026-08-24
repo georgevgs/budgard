@@ -21,10 +21,7 @@ type Props = {
 // app. Everything else in the grid is a supporting fact about this figure.
 const SafeToSpendTile = (props: Props) => {
   const { t } = useTranslation();
-  const { whole, fraction } = splitAmount(
-    resolveAmount(props),
-    props.currency,
-  );
+  const { whole, fraction } = splitAmount(resolveAmount(props), props.currency);
 
   return (
     <BentoTile
@@ -102,7 +99,7 @@ const renderChip = (props: Props, t: TFunc) => {
   }
 
   return (
-    <span className="inline-flex items-center rounded-full bg-current/14 px-2.5 py-1.5 text-[0.65rem] font-semibold uppercase leading-none tracking-[0.1em]">
+    <span className="inline-flex items-center rounded-full bg-current/14 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase leading-none tracking-[0.1em]">
       {t(`today.chip.${props.status}`)}
     </span>
   );

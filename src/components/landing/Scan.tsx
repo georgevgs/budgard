@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next';
 import SectionShell from '@/components/landing/SectionShell';
 import EyebrowLabel from '@/components/landing/EyebrowLabel';
 import Reveal from '@/components/landing/Reveal';
+import TileLabel from '@/components/bento/TileLabel';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 
 type Tx = (key: string) => string;
 
@@ -27,7 +29,7 @@ export default Scan;
 const renderCopy = (t: Tx) => (
   <div>
     <EyebrowLabel>{t('landing.scan.eyebrow')}</EyebrowLabel>
-    <h2 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
+    <h2 className="type-heading mt-3 text-3xl leading-[1.08] sm:text-4xl md:text-5xl">
       {t('landing.scan.heading')}
     </h2>
     <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-md">
@@ -52,18 +54,14 @@ const renderPoint = (text: string) => (
 const renderDemo = (t: Tx) => (
   <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-4">
     {renderReceipt(t)}
-    <span aria-hidden="true" className="text-2xl text-muted-foreground">
-      →
-    </span>
+    <ArrowRight aria-hidden="true" className="h-5 w-5 text-foreground/60" />
     {renderResult(t)}
   </div>
 );
 
 const renderReceipt = (t: Tx) => (
-  <div className="rounded-2xl border border-border/70 bg-card p-4 shadow-lg">
-    <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-      {t('landing.scan.receiptLabel')}
-    </p>
+  <div className="surface-card p-4 lift">
+    <TileLabel>{t('landing.scan.receiptLabel')}</TileLabel>
     <div className="mt-3 space-y-1.5">
       <div className="h-1.5 w-3/4 rounded-full bg-muted" />
       <div className="h-1.5 w-1/2 rounded-full bg-muted" />
@@ -73,24 +71,20 @@ const renderReceipt = (t: Tx) => (
       <span className="text-[11px] font-medium">
         {t('landing.scan.receiptTotal')}
       </span>
-      <span className="text-sm font-semibold tabular-nums">€24.80</span>
+      <span className="type-figure-sm text-sm">€24.80</span>
     </div>
   </div>
 );
 
 const renderResult = (t: Tx) => (
-  <div className="rounded-2xl border border-border/70 bg-card p-4 shadow-lg">
-    <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-      {t('landing.scan.resultLabel')}
-    </p>
-    <p className="mt-2 text-sm font-semibold">{t('landing.scan.merchant')}</p>
+  <div className="surface-card p-4 lift">
+    <TileLabel>{t('landing.scan.resultLabel')}</TileLabel>
+    <p className="type-heading mt-2 text-sm">{t('landing.scan.merchant')}</p>
     <p className="text-[11px] text-muted-foreground">
       {t('landing.scan.resultDate')}
     </p>
-    <p className="mt-3 text-[22px] font-semibold tabular-nums tracking-tight">
-      €24.80
-    </p>
-    <span className="mt-3 inline-flex items-center rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary-ink">
+    <p className="type-figure mt-3 text-[22px]">€24.80</p>
+    <span className="mt-3 inline-flex items-center rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary-ink">
       {t('landing.scan.category')}
     </span>
   </div>

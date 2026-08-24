@@ -22,7 +22,7 @@ const Header = ({ onSignIn }: Props) => {
 
   return (
     <header className={getHeaderClassName(scrolled)}>
-      <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+      <div className="landing-gutter mx-auto flex h-16 max-w-6xl items-center justify-between">
         {renderWordmark()}
         {renderNav(t)}
         {renderActions(t, onSignIn)}
@@ -36,35 +36,33 @@ export default Header;
 const renderWordmark = () => (
   <a href="#top" className="flex items-center gap-2.5 group">
     <BrandMark className="h-7 w-7 transition-transform group-hover:scale-105" />
-    <span className="type-wordmark">
-      Budgard
-    </span>
+    <span className="type-wordmark">Budgard</span>
   </a>
 );
 
 const getHeaderClassName = (scrolled: boolean) => {
   if (scrolled) {
     return cn(
-      'sticky top-0 z-50 transition-colors duration-200',
-      'border-b border-border/50 bg-background/85 backdrop-blur-xl',
+      'landing-header sticky top-0 z-50 transition-colors duration-200',
+      'adaptive-material border-b border-border/50 bg-background/85 backdrop-blur-xl',
     );
   }
 
   return cn(
-    'sticky top-0 z-50 transition-colors duration-200',
-    'border-b border-transparent bg-background/0',
+    'landing-header sticky top-0 z-50 transition-colors duration-200',
+    'adaptive-material border-b border-transparent bg-background/0',
   );
 };
 
 const renderNav = (t: (k: string) => string) => (
-  <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-    <a href="#features" className="hover:text-foreground transition-colors">
+  <nav className="hidden items-center gap-8 text-sm text-foreground md:flex">
+    <a href="#features" className="transition-opacity hover:opacity-65">
       {t('landing.nav.features')}
     </a>
-    <a href="#pricing" className="hover:text-foreground transition-colors">
+    <a href="#pricing" className="transition-opacity hover:opacity-65">
       {t('landing.nav.pricing')}
     </a>
-    <a href="#faq" className="hover:text-foreground transition-colors">
+    <a href="#faq" className="transition-opacity hover:opacity-65">
       {t('landing.nav.faq')}
     </a>
   </nav>
@@ -76,7 +74,7 @@ const renderActions = (t: (k: string) => string, onSignIn: () => void) => (
       variant="ghost"
       size="sm"
       onClick={onSignIn}
-      className="text-sm text-muted-foreground hover:text-foreground"
+      className="text-sm text-foreground"
     >
       {t('landing.nav.signIn')}
     </Button>

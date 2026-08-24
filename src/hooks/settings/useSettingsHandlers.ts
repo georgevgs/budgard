@@ -1,15 +1,13 @@
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSettingsOps } from '@/hooks/dataOps/useSettingsOps';
-import { useTheme } from '@/hooks/useTheme';
+import { useTheme, type Theme } from '@/hooks/useTheme';
 import { useAccentColor, type AccentColorKey } from '@/hooks/useAccentColor';
 import { signOut } from '@/lib/auth';
 import { useToast } from '@/hooks/useToast';
 import { haptics, hapticsSettings } from '@/lib/haptics';
 import type { NotificationPreferenceKey } from '@/types/Budget';
 import { localToUtcHour } from '@/lib/reminderTime';
-
-type Theme = 'light' | 'dark' | 'barbie';
 
 export const useSettingsHandlers = () => {
   const { t } = useTranslation();

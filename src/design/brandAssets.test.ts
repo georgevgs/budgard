@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest';
 
 import {
   BRAND_ASSET_REVISION,
+  buildBrandAssetReferences,
   buildBrandAssetRevision,
-  versionBrandAssetReferences,
   versionBrandManifest,
 } from '../../plugins/brandAssets.ts';
 
@@ -41,7 +41,7 @@ describe('brand asset revisions', () => {
   });
 
   it('versions every iOS launch image in the rendered document', () => {
-    const rendered = versionBrandAssetReferences(read('index.html'));
+    const rendered = buildBrandAssetReferences(read('index.html'));
     const splashFiles = readdirSync(path.join(ROOT, 'public/splash')).sort();
 
     for (const file of splashFiles) {
@@ -51,6 +51,16 @@ describe('brand asset revisions', () => {
     expect(rendered.match(/rel="apple-touch-startup-image"/g)).toHaveLength(
       splashFiles.length,
     );
+    expect(
+      rendered.match(
+        /apple-touch-startup-image[^>]+prefers-color-scheme: light/g,
+      ),
+    ).toHaveLength(40);
+    expect(
+      rendered.match(
+        /apple-touch-startup-image[^>]+prefers-color-scheme: dark/g,
+      ),
+    ).toHaveLength(40);
   });
 
   it('keeps every manifest icon on the current artwork revision', () => {

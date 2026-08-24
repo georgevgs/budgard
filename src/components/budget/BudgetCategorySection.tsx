@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
+import CategoryIcon from '@/components/common/CategoryIcon';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, cn } from '@/lib/utils';
 import { getColorTint } from '@/lib/categoryColor';
@@ -150,11 +151,11 @@ const renderIndicator = (row: BudgetCategoryRow) => {
   if (row.icon) {
     return (
       <span
-        className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] shrink-0"
+        className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
         style={{ backgroundColor: getColorTint(row.color) }}
         aria-hidden="true"
       >
-        {row.icon}
+        <CategoryIcon icon={row.icon} className="h-3 w-3 text-foreground/75" />
       </span>
     );
   }

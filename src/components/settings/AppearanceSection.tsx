@@ -2,6 +2,7 @@ import SurfaceCard from '@/components/common/SurfaceCard';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import Moon from 'lucide-react/dist/esm/icons/moon';
+import Monitor from 'lucide-react/dist/esm/icons/monitor';
 import Sun from 'lucide-react/dist/esm/icons/sun';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import Check from 'lucide-react/dist/esm/icons/check';
@@ -10,8 +11,7 @@ import {
   accentSwatch,
   type AccentColorKey,
 } from '@/hooks/useAccentColor';
-
-type Theme = 'light' | 'dark' | 'barbie';
+import type { Theme } from '@/hooks/useTheme';
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
@@ -46,6 +46,7 @@ const AppearanceSection = ({
           <div>
             <p className="text-sm mb-2">{t('settings.appearance.theme')}</p>
             <div className="flex flex-wrap gap-2">
+              {renderThemeButton('system', theme, onThemeSelect, t)}
               {renderThemeButton('light', theme, onThemeSelect, t)}
               {renderThemeButton('dark', theme, onThemeSelect, t)}
               {renderThemeButton('barbie', theme, onThemeSelect, t)}
@@ -69,6 +70,7 @@ export default AppearanceSection;
 // --- Helpers ---
 
 const THEME_ICONS: Record<Theme, typeof Sun> = {
+  system: Monitor,
   light: Sun,
   dark: Moon,
   barbie: Sparkles,
@@ -155,8 +157,8 @@ const renderAccentCheck = (isSelected: boolean) => {
   if (!isSelected) return null;
 
   return (
-    <span className="absolute inset-0 m-auto flex h-6 w-6 items-center justify-center rounded-full bg-black/20 backdrop-blur-sm">
-      <Check className="h-3.5 w-3.5 text-white drop-shadow-sm" />
+    <span className="absolute inset-0 m-auto flex h-6 w-6 items-center justify-center rounded-full bg-foreground">
+      <Check className="h-3.5 w-3.5 text-background" />
     </span>
   );
 };

@@ -7,7 +7,7 @@ const TopScrim = () => {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-x-0 top-0 z-40 h-[env(safe-area-inset-top)] bg-background/80 backdrop-blur-xl"
+      className="adaptive-material pointer-events-none fixed inset-x-0 top-0 z-40 h-[env(safe-area-inset-top)] bg-background/80 backdrop-blur-xl"
     />
   );
 };

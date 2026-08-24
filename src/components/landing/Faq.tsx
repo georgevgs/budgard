@@ -19,12 +19,12 @@ const Faq = () => {
       <Reveal>
         <div className="text-center max-w-2xl mx-auto">
           <EyebrowLabel>{t('landing.faq.eyebrow')}</EyebrowLabel>
-          <h2 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
+          <h2 className="type-heading mt-3 text-3xl leading-[1.08] sm:text-4xl md:text-5xl">
             {t('landing.faq.heading')}
           </h2>
         </div>
       </Reveal>
-      <div className="mt-12 max-w-2xl mx-auto divide-y divide-border/60 rounded-2xl border border-border/60 bg-background overflow-hidden">
+      <div className="surface-card-flush mx-auto mt-12 max-w-2xl divide-y divide-border/60">
         {QUESTION_KEYS.map((n, i) =>
           renderItem(n, i, openIndex, setOpenIndex, t),
         )}

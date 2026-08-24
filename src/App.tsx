@@ -2,6 +2,7 @@ import { Suspense, type ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePwaUpdate } from '@/hooks/usePwaUpdate';
+import { useTheme } from '@/hooks/useTheme';
 import { lazyWithRetry } from '@/lib/lazyWithRetry';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -19,6 +20,7 @@ const ContactPage = lazyWithRetry(() => import('@/pages/legal/ContactPage'));
 
 const App = () => {
   usePwaUpdate();
+  useTheme();
   const { session, isLoading } = useAuth();
 
   if (isLoading) {

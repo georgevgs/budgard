@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { UseFormReturn } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
+import CategoryIcon from '@/components/common/CategoryIcon';
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { Label } from '@/components/ui/label';
 import {
@@ -108,7 +109,7 @@ const renderCategoryIcon = (category: {
   color: string;
 }) => {
   if (category.icon) {
-    return <span className="text-sm">{category.icon}</span>;
+    return <CategoryIcon icon={category.icon} />;
   }
 
   return (

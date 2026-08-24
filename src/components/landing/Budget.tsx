@@ -3,11 +3,11 @@ import SectionShell from '@/components/landing/SectionShell';
 import EyebrowLabel from '@/components/landing/EyebrowLabel';
 import DeviceFrame from '@/components/landing/DeviceFrame';
 import Reveal from '@/components/landing/Reveal';
-import { swatch } from '@/design/palette';
+import TileLabel from '@/components/bento/TileLabel';
 
 type Tx = (key: string) => string;
 
-type CategoryRow = { name: string; percent: number; amount: string; color: string };
+type CategoryRow = { name: string; percent: number; amount: string };
 
 const Budget = () => {
   const { t } = useTranslation();
@@ -29,7 +29,7 @@ export default Budget;
 const renderCopy = (t: Tx) => (
   <div>
     <EyebrowLabel>{t('landing.budget.eyebrow')}</EyebrowLabel>
-    <h2 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
+    <h2 className="type-heading mt-3 text-3xl leading-[1.08] sm:text-4xl md:text-5xl">
       {t('landing.budget.heading')}
     </h2>
     <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-md">
@@ -41,17 +41,16 @@ const renderCopy = (t: Tx) => (
 const renderCard = (t: Tx) => (
   <DeviceFrame>
     <div className="p-6">
-      <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-        {t('landing.budget.cardLabel')}
-      </p>
+      <TileLabel>{t('landing.budget.cardLabel')}</TileLabel>
       <div className="flex items-baseline gap-2 mt-1">
-        <p className="text-[32px] font-semibold tabular-nums tracking-tight">
-          €1,058
-        </p>
+        <p className="type-figure-lg">€1,058</p>
         <p className="text-sm text-muted-foreground tabular-nums">/ €2,000</p>
       </div>
       <div className="mt-4 h-1.5 rounded-full bg-muted overflow-hidden">
-        <div className="h-full rounded-full bg-primary" style={{ width: '53%' }} />
+        <div
+          className="h-full rounded-full bg-primary"
+          style={{ width: '53%' }}
+        />
       </div>
       <div className="mt-1.5 flex justify-between text-[11px] text-muted-foreground">
         <span>{t('landing.budget.spent')}</span>
@@ -63,10 +62,10 @@ const renderCard = (t: Tx) => (
 );
 
 const rows = (t: Tx): CategoryRow[] => [
-  { name: t('landing.budget.cats.housing'), percent: 80, amount: '€800', color: swatch.violet },
-  { name: t('landing.budget.cats.food'), percent: 39, amount: '€156', color: swatch.mint },
-  { name: t('landing.budget.cats.transport'), percent: 50, amount: '€100', color: swatch.sky },
-  { name: t('landing.budget.cats.subs'), percent: 13, amount: '€26', color: swatch.pink },
+  { name: t('landing.budget.cats.housing'), percent: 80, amount: '€800' },
+  { name: t('landing.budget.cats.food'), percent: 39, amount: '€156' },
+  { name: t('landing.budget.cats.transport'), percent: 50, amount: '€100' },
+  { name: t('landing.budget.cats.subs'), percent: 13, amount: '€26' },
 ];
 
 const renderRow = (row: CategoryRow) => (
@@ -77,8 +76,8 @@ const renderRow = (row: CategoryRow) => (
     </div>
     <div className="mt-1.5 h-1 rounded-full bg-muted overflow-hidden">
       <div
-        className="h-full rounded-full"
-        style={{ width: `${row.percent}%`, backgroundColor: row.color }}
+        className="h-full rounded-full bg-primary"
+        style={{ width: `${row.percent}%` }}
       />
     </div>
   </div>

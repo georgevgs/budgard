@@ -91,7 +91,8 @@ export const BASE_TOKENS: TokenMap = {
   // Phone-first: 1rem from each edge. Past ~30rem the dock stops stretching
   // and centres instead, so it never spans a tablet window.
   '--dock-max-width': '30rem',
-  '--dock-edge': 'max(1rem, calc((100% - var(--dock-max-width)) / 2))',
+  '--dock-edge':
+    'max(1rem, env(safe-area-inset-left), env(safe-area-inset-right), calc((100% - var(--dock-max-width)) / 2))',
   '--dock-inset': 'calc(var(--dock-clearance) + 0.5rem)',
   // Modal context should remain recognisable instead of being almost erased.
   // The colour is themed below; this shared alpha keeps routine dialogs calm
@@ -288,6 +289,66 @@ export const THEMES: ThemeDefinition[] = [
   { name: 'barbie', selector: "[data-theme='barbie']", tokens: barbieTheme },
 ];
 
+/**
+ * Increase Contrast keeps the product's white-on-orange identity, but gives
+ * that pairing a deeper orange fill. The foreground never flips to black.
+ * Supporting greys and material edges also strengthen so the whole interface
+ * responds to the system setting rather than only the primary button.
+ */
+export const HIGH_CONTRAST_THEMES: ThemeDefinition[] = [
+  {
+    name: 'light',
+    selector: ':root',
+    tokens: {
+      '--primary': accent.orange.ink,
+      '--primary-foreground': accent.orange.on,
+      '--destructive': status.danger.ink,
+      '--destructive-foreground': status.danger.on,
+      '--info': status.info.ink,
+      '--info-foreground': status.info.on,
+      '--muted-foreground': neutral[700],
+      '--tile-ring': '0 0% 7% / 0.22',
+      '--border': neutral[500],
+      '--input': neutral[500],
+      '--glass-alpha': '0.98',
+    },
+  },
+  {
+    name: 'dark',
+    selector: '.dark',
+    tokens: {
+      '--primary': accent.orange.ink,
+      '--primary-foreground': accent.orange.on,
+      '--destructive': status.danger.ink,
+      '--destructive-foreground': status.danger.on,
+      '--info': status.info.ink,
+      '--info-foreground': status.info.on,
+      '--muted-foreground': ink[50],
+      '--tile-ring': '0 0% 100% / 0.22',
+      '--border': ink[300],
+      '--input': ink[300],
+      '--glass-alpha': '0.98',
+    },
+  },
+  {
+    name: 'barbie',
+    selector: "[data-theme='barbie']",
+    tokens: {
+      '--primary': accent.pink.ink,
+      '--primary-foreground': accent.pink.on,
+      '--destructive': status.danger.ink,
+      '--destructive-foreground': status.danger.on,
+      '--info': status.info.ink,
+      '--info-foreground': status.info.on,
+      '--muted-foreground': barbie.ink,
+      '--tile-ring': `${barbie.rule} / 0.9`,
+      '--border': barbie.mutedInk,
+      '--input': barbie.mutedInk,
+      '--glass-alpha': '0.98',
+    },
+  },
+];
+
 export type AccentColorKey =
   | 'sunset'
   | 'coral'
@@ -343,7 +404,16 @@ export const ACCENT_PROPERTIES = [
 export const accentValues = (
   swatch: Swatch,
   isDark: boolean,
+  increasedContrast = false,
 ): [Hsl, Hsl, Hsl, Hsl] => {
+  if (increasedContrast && swatch.on === neutral[0]) {
+    if (isDark) {
+      return [swatch.ink, swatch.on, swatch.inkDark, swatch.inkDark];
+    }
+
+    return [swatch.ink, swatch.on, swatch.ink, swatch.ink];
+  }
+
   if (isDark) {
     return [swatch.solidDark, swatch.on, swatch.inkDark, swatch.inkDark];
   }

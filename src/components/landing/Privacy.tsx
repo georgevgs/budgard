@@ -18,7 +18,7 @@ const Privacy = () => {
       <div className="max-w-3xl">
         <Reveal>
           <EyebrowLabel>{t('landing.privacy.eyebrow')}</EyebrowLabel>
-          <h2 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
+          <h2 className="type-heading mt-3 text-3xl leading-[1.08] sm:text-4xl md:text-5xl">
             {t('landing.privacy.heading')}
           </h2>
           <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-xl">
@@ -60,9 +60,7 @@ const pillars = (): Pillar[] => [
 const renderPillar = (p: Pillar, t: Tx) => (
   <div className="h-full p-6">
     <p.Icon className="h-5 w-5 text-foreground/70" />
-    <h3 className="mt-4 text-base font-semibold tracking-tight">
-      {t(p.titleKey)}
-    </h3>
+    <h3 className="type-heading mt-4">{t(p.titleKey)}</h3>
     <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
       {t(p.bodyKey)}
     </p>

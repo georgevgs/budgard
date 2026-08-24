@@ -22,7 +22,11 @@ const baseProps = {
   defaultCurrency: 'EUR',
 };
 
-const insight = (id: string, variant: Insight['variant'], text = id): Insight => ({
+const insight = (
+  id: string,
+  variant: Insight['variant'],
+  text = id,
+): Insight => ({
   id,
   variant,
   text,
@@ -37,52 +41,57 @@ describe('SpendingInsights', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders only the hero when there is a single insight', () => {
-    mockInsights = [insight('a', 'default', 'Hero text')];
+  it('renders one grouped row when there is a single insight', () => {
+    mockInsights = [insight('a', 'default', 'First insight')];
     const { container } = render(<SpendingInsights {...baseProps} />);
 
-    expect(screen.getByText('Hero text')).toBeInTheDocument();
+    expect(screen.getByText('First insight')).toBeInTheDocument();
     expect(container.querySelectorAll('[data-insight]')).toHaveLength(1);
+    expect(container.querySelector('[data-insight-list]')).toHaveClass(
+      'surface-card',
+    );
   });
 
-  it('renders hero plus secondary cards for multiple insights', () => {
+  it('renders multiple insights as rows in one surface', () => {
     mockInsights = [
-      insight('a', 'warning', 'Hero'),
+      insight('a', 'warning', 'First'),
       insight('b', 'positive', 'Second'),
       insight('c', 'default', 'Third'),
     ];
     render(<SpendingInsights {...baseProps} />);
 
-    expect(screen.getByText('Hero')).toBeInTheDocument();
+    expect(screen.getByText('First')).toBeInTheDocument();
     expect(screen.getByText('Second')).toBeInTheDocument();
     expect(screen.getByText('Third')).toBeInTheDocument();
+    expect(document.querySelectorAll('[data-insight-list]')).toHaveLength(1);
+    expect(document.querySelectorAll('[data-insight]')).toHaveLength(3);
   });
 
-  // The variant used to tint the whole hero card — `bg-income/10` and a
-  // matching border — which is a mint-green wash across the widest card on the
-  // screen, and a hue mixed into a white surface is the one thing the palette
-  // rules out by name. It now rides the icon's ink instead.
-  it.each([
-    ['warning', 'text-warning-ink'],
-    ['positive', 'text-income-ink'],
-    ['default', 'text-primary-ink'],
-  ] as const)('carries the %s variant on the icon, in ink', (variant, ink) => {
-    mockInsights = [insight('a', variant, 'Hero')];
-    const { container } = render(<SpendingInsights {...baseProps} />);
+  it('uses the same foreground ink and weight for every insight', () => {
+    mockInsights = [
+      insight('a', 'warning', 'First'),
+      insight('b', 'positive', 'Second'),
+    ];
+    render(<SpendingInsights {...baseProps} />);
 
-    expect(container.querySelector(`.${ink}`)).not.toBeNull();
+    expect(screen.getByText('First')).toHaveClass('text-foreground');
+    expect(screen.getByText('First')).not.toHaveClass('font-medium');
+    expect(screen.getByText('Second')).toHaveClass('text-foreground');
+    for (const icon of screen.getAllByTestId('insight-icon')) {
+      expect(icon).toHaveClass('text-foreground');
+    }
   });
 
   it.each(['warning', 'positive', 'default'] as const)(
-    'never washes the %s hero in a hue',
+    'never washes the %s insight list in a hue',
     (variant) => {
-      mockInsights = [insight('a', variant, 'Hero')];
+      mockInsights = [insight('a', variant, 'First')];
       const { container } = render(<SpendingInsights {...baseProps} />);
 
-      const hero = container.querySelector('[data-insight="hero"]');
+      const list = container.querySelector('[data-insight-list]');
 
-      expect(hero).toHaveClass('surface-card');
-      expect(hero?.className).not.toMatch(/bg-(primary|income|warning)/);
+      expect(list).toHaveClass('surface-card');
+      expect(list?.className).not.toMatch(/bg-(primary|income|warning)/);
     },
   );
 });

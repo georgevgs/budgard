@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import Shapes from 'lucide-react/dist/esm/icons/shapes';
+import CategoryIcon from '@/components/common/CategoryIcon';
 import {
   Select,
   SelectContent,
@@ -8,6 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { UNCATEGORIZED_VALUE } from '@/lib/expenseFilters';
+import { getColorTint } from '@/lib/categoryColor';
 import type { Category } from '@/types/Category';
 
 type Props = {
@@ -74,15 +76,16 @@ const renderCategoryOption = (category: Category) => (
 );
 
 const renderCategoryMark = (category: Category) => {
-  if (category.icon) {
-    return <span className="text-sm">{category.icon}</span>;
-  }
-
   return (
     <span
-      className="h-2.5 w-2.5 rounded-full"
-      style={{ backgroundColor: category.color }}
+      className="flex h-6 w-6 items-center justify-center rounded-full"
+      style={{ backgroundColor: getColorTint(category.color) }}
       aria-hidden="true"
-    />
+    >
+      <CategoryIcon
+        icon={category.icon}
+        className="h-3 w-3 text-foreground/75"
+      />
+    </span>
   );
 };

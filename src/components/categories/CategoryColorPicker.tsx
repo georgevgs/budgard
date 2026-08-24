@@ -79,8 +79,8 @@ const renderSwatchCheck = (isSelected: boolean) => {
   if (!isSelected) return null;
 
   return (
-    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black/20 backdrop-blur-sm">
-      <Check className="h-3.5 w-3.5 text-white drop-shadow" />
+    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-foreground">
+      <Check className="h-3.5 w-3.5 text-background" />
     </span>
   );
 };

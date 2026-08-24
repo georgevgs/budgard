@@ -75,7 +75,6 @@ const useArrangeActions = (
   useEffect(() => {
     const targetId = pendingFocus.current;
     if (!targetId) {
-
       return;
     }
     pendingFocus.current = null;
@@ -106,7 +105,6 @@ const useArrangeActions = (
       nextIndex < 0 ||
       nextIndex >= layout.visible.length
     ) {
-
       return;
     }
     commitWithMotion(() => layout.move(id, offset));
@@ -157,7 +155,7 @@ const renderVisible = (
           onClick={() => actions.hide(id)}
           data-arrange-control={controlId('hide', id)}
           aria-label={t('today.arrange.hide', { name })}
-          className="-mt-1.5 -mr-1.5 flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full bg-foreground text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="-mt-1.5 -mr-1.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-foreground text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Minus className="h-3.5 w-3.5" />
         </button>
@@ -191,7 +189,7 @@ const renderMove = (
       onClick={() => actions.move(id, offset)}
       disabled={isDisabled}
       aria-label={label}
-      className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-accent text-foreground transition-opacity disabled:cursor-default disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-accent text-foreground transition-opacity disabled:cursor-default disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <Icon className="h-4 w-4" />
     </button>

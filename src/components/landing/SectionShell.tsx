@@ -11,7 +11,7 @@ type Props = {
 const SectionShell = ({ id, tone = 'default', children, className }: Props) => {
   return (
     <section id={id} className={cn(toneClass(tone), className)}>
-      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
+      <div className="landing-gutter mx-auto max-w-6xl py-20 sm:py-28">
         {children}
       </div>
     </section>
