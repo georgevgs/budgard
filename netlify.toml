@@ -1,4 +1,6 @@
-# Serve reset.html directly — must come before the SPA catch-all
+# Serve reset.html directly — must come before the SPA catch-all. The service
+# worker denylist mirrors this route, while recovery code uses /reset.html
+# directly so workers deployed before that denylist still reach the real file.
 [[redirects]]
   from = "/reset"
   to = "/reset.html"
@@ -99,7 +101,7 @@
     # required by the self-hosted Tesseract OCR runtime; Chromium blocks
     # WebAssembly.compile without it while Safari/Firefox don't enforce, so
     # missing it would surface as a Chrome/Android-only scan failure.
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-9iy68r/WpImNA2GADs1zVev80qaZU6Ld7SR9u73EfZs=' https://static.cloudflareinsights.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://htamokfphaqudeivpowr.supabase.co https://cloudflareinsights.com https://challenges.cloudflare.com https://*.sentry.io https://api.frankfurter.dev; worker-src 'self' blob:; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self';"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-rQ1IPWSEQVhsG568ZPy/q0J2vTYsN8WvQ9/2XqDAOLs=' https://static.cloudflareinsights.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://htamokfphaqudeivpowr.supabase.co https://cloudflareinsights.com https://challenges.cloudflare.com https://*.sentry.io https://api.frankfurter.dev; worker-src 'self' blob:; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self';"
 
 # no-cache (not no-store): the browser must revalidate, but can reuse the
 # cached body on a 304 and keep the page eligible for back/forward cache.

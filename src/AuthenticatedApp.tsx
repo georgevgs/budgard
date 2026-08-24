@@ -248,7 +248,7 @@ const useIdleTabPrefetch = () => {
       // reuses the same chunks rather than emitting new ones.
       // Prefetch is a background optimization — swallow failures (a transient
       // network blip on mobile throws "Importing a module script failed.").
-      // The real navigation is still protected by lazyWithRetry → /reset.
+      // The real navigation is still protected by lazyWithRetry → reset.html.
       const swallow = () => {};
       import('@/components/today/TodayView').catch(swallow);
       import('@/components/activity/ActivityView').catch(swallow);

@@ -16,12 +16,12 @@ describe('boot guard', () => {
     vi.useRealTimers();
   });
 
-  it('sends a never-mounting app to /reset, preserving where it was', () => {
+  it('sends a never-mounting app to reset.html, preserving where it was', () => {
     const guard = runGuard({ path: '/activity?tab=all' });
     vi.advanceTimersByTime(BACKSTOP_MS);
 
     expect(guard.replace).toHaveBeenCalledWith(
-      `/reset?from=${encodeURIComponent('/activity?tab=all')}`,
+      `/reset.html?from=${encodeURIComponent('/activity?tab=all')}`,
     );
   });
 
@@ -82,8 +82,17 @@ describe('boot guard', () => {
     expect(guard.replace).not.toHaveBeenCalled();
   });
 
-  it('never guards /reset itself', () => {
-    const guard = runGuard({ path: '/reset' });
+  it('escapes when an older worker serves the app shell at /reset', () => {
+    const guard = runGuard({ path: '/reset?from=%2Factivity' });
+    vi.advanceTimersByTime(BACKSTOP_MS);
+
+    expect(guard.replace).toHaveBeenCalledWith(
+      `/reset.html?from=${encodeURIComponent('/')}`,
+    );
+  });
+
+  it('does not guard the physical reset page', () => {
+    const guard = runGuard({ path: '/reset.html' });
     vi.advanceTimersByTime(BACKSTOP_MS);
 
     expect(guard.replace).not.toHaveBeenCalled();

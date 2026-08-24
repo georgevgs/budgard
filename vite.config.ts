@@ -10,6 +10,7 @@ import { sentryVitePlugin } from "@sentry/vite-plugin";
 import pkg from "./package.json" with { type: "json" };
 import { brandAssets, BRAND_ASSET_REVISION } from "./plugins/brandAssets.ts";
 import { designTokens } from "./plugins/designTokens.ts";
+import { PWA_NAVIGATION_DENYLIST } from "./src/boot/pwaNavigation.ts";
 
 // Function-form manualChunks: the previous array form only captured each
 // package's entry module, so secondary entry points (e.g. react-dom/client's
@@ -304,7 +305,7 @@ export default defineConfig({
           "**/assets/LandingPage-*.js",
         ],
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
+        navigateFallbackDenylist: PWA_NAVIGATION_DENYLIST,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,

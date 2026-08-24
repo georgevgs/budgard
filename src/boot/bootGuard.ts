@@ -14,14 +14,16 @@
  * the whole point when the network is what betrayed us.
  *
  * Emitted only for production builds — a 20-second watchdog that redirects to
- * /reset would be a hostile surprise while developing.
+ * /reset.html would be a hostile surprise while developing.
  */
 export const buildBootGuardScript = (): string => `(function () {
   var BREAKER_KEY = 'budgard-boot-recovered';
   var BACKSTOP_MS = 20000;
 
-  // /reset is the recovery page itself; guarding it would loop.
-  if (window.location.pathname === '/reset') return;
+  // reset.html is the recovery page itself and does not include this script.
+  // If this guard is running at /reset, an older service worker mistakenly
+  // served index.html for that route; recover through the real file instead.
+  if (window.location.pathname === '/reset.html') return;
 
   var recovered = false;
   try {
@@ -48,7 +50,15 @@ export const buildBootGuardScript = (): string => `(function () {
     }
 
     var from = window.location.pathname + window.location.search;
-    window.location.replace('/reset?from=' + encodeURIComponent(from));
+    if (window.location.pathname === '/reset') {
+      from = '/';
+    }
+
+    // Use the physical .html URL. Even an older service worker's generic
+    // file-extension denylist lets this navigation reach the reset page;
+    // /reset itself used to be mistaken for an app route and served the same
+    // broken cached shell again.
+    window.location.replace('/reset.html?from=' + encodeURIComponent(from));
   };
 
   // Precise signal: one of our own module scripts failed to load or parse.
