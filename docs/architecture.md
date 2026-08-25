@@ -166,6 +166,17 @@ call the domain hook you need directly.
 When offline (or the server is down), writes are queued in IndexedDB and
 reconciled on reconnect — see `lib/offlineQueue.ts`.
 
+### PWA Cache Boundary
+
+The service worker caches the app shell and immutable, content-versioned
+assets. Supabase requests are always network-only: REST, Auth, Storage and Edge
+Function responses can contain private, mutable data and Cache Storage is not
+the source of truth for offline reads.
+
+Offline data comes from the app-owned snapshot in `lib/dataCache.ts`, which is
+scoped to the authenticated user. Never add a service-worker fallback for an
+authorized API response; extend the user-scoped data cache instead.
+
 ---
 
 ## Service Layer

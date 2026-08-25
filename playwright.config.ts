@@ -20,14 +20,27 @@ export default defineConfig({
     baseURL: 'http://localhost:4173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    // The service worker would serve one test's cached shell to the next.
-    // Update behaviour is covered by the unit tests around usePwaUpdate.
+    // The default suite blocks the worker so cached shells cannot affect an
+    // unrelated journey. The isolated pwa-cache project below overrides this
+    // and exercises the generated production worker deliberately.
     serviceWorkers: 'block',
     // The app is mobile-first and the bottom dock only exists at this size.
     ...devices['Pixel 7'],
   },
 
-  projects: [{ name: 'chromium' }],
+  projects: [
+    {
+      name: 'chromium',
+      testIgnore: '**/service-worker-cache.spec.ts',
+    },
+    {
+      name: 'pwa-cache',
+      testMatch: '**/service-worker-cache.spec.ts',
+      use: {
+        serviceWorkers: 'allow',
+      },
+    },
+  ],
 
   webServer: {
     command:

@@ -24,6 +24,10 @@ self.addEventListener('message', (event) => {
 // a new version, and the prompt is suppressed.
 const BUILD_ID = '__BUDGARD_BUILD_ID__';
 const BRAND_ASSET_REVISION = '__BUDGARD_BRAND_ASSET_REVISION__';
+// Workers released before the private-cache fix stored authorized Supabase
+// GETs here. Keep deleting the known name so a user can upgrade from any old
+// installed version without retaining another account's financial data.
+const LEGACY_PRIVATE_CACHE_NAMES = ['supabase-cache'];
 
 self.addEventListener('message', (event) => {
   if (!event.data || event.data.type !== 'GET_BUILD_ID') return;
@@ -35,9 +39,15 @@ self.addEventListener('message', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  if (!claimOnActivate) return;
+  const activationTasks = LEGACY_PRIVATE_CACHE_NAMES.map((cacheName) =>
+    caches.delete(cacheName)
+  );
 
-  event.waitUntil(self.clients.claim());
+  if (claimOnActivate) {
+    activationTasks.push(self.clients.claim());
+  }
+
+  event.waitUntil(Promise.all(activationTasks));
 });
 
 self.addEventListener('push', (event) => {

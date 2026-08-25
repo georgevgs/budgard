@@ -307,19 +307,14 @@ export default defineConfig({
         navigateFallback: '/index.html',
         navigateFallbackDenylist: PWA_NAVIGATION_DENYLIST,
         runtimeCaching: [
+          // Supabase responses are private, mutable and authorized by request
+          // headers. A shared Cache Storage entry is not safely user-scoped,
+          // so an API response must never fall back to another session's
+          // cached body. Offline reads come from the app-owned, user-scoped
+          // snapshot instead; supabase-js handles transient GET retries.
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "supabase-cache",
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 2
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
+            handler: "NetworkOnly",
           },
           // Chunks deliberately left out of the precache above. Content-hashed,
           // so a URL's contents never change and CacheFirst is safe forever;
