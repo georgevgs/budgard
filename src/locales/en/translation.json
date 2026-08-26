@@ -138,8 +138,8 @@
     "arrange": {
       "open": "Arrange your grid",
       "title": "Arrange",
-      "hint": "Drag the grip to reorder, or use the arrow buttons. Hide modules you don't use. Saved on this device.",
-      "sessionHint": "Changes are temporary because this browser couldn't save them on this device.",
+      "hint": "Drag the grip to reorder, or use the arrow buttons. Hide modules you don't use. Changes sync with your account.",
+      "sessionHint": "This change couldn't sync. It is still saved on this device.",
       "done": "Done",
       "hidden": "Hidden tiles",
       "hide": "Hide {{name}}",
@@ -164,6 +164,7 @@
     "received": "Received",
     "searchPlaceholder": "Search activity…",
     "searchLabel": "Search activity",
+    "searchScope": "All time",
     "filterLabel": "Filter activity",
     "filterByTag": "Filter activity by tag",
     "allTags": "All tags",
@@ -706,7 +707,7 @@
       "deleteAccountVerifyButton": "Verify & Delete",
       "deleteAccountSuccess": "Account deleted successfully",
       "deleteAccountFailed": "Failed to delete account",
-      "exportDescription": "Download a copy of everything you have saved in Budgard as a JSON file. Receipt images are not included.",
+      "exportDescription": "Download your financial setup and records as a JSON file. Receipt images are not included.",
       "exportButton": "Download my data",
       "exporting": "Preparing export...",
       "exportReady": "Your data export has been downloaded.",
@@ -731,6 +732,22 @@
       "manageHint": "Cancel, switch plan, update payment details or download invoices — handled securely by Stripe.",
       "noBillingHint": "This Pro access has no recurring payment or Stripe subscription to manage.",
       "portalError": "Couldn't open subscription management. Please try again."
+    },
+    "feedback": {
+      "title": "Help shape Budgard",
+      "description": "Share an idea or tell us what got in your way. Your current screen and app version are included with the message.",
+      "sendFeedback": "Send feedback",
+      "reportProblem": "Report a problem",
+      "feedbackTitle": "Send feedback",
+      "feedbackDescription": "What would make Budgard work better for you?",
+      "bugTitle": "Report a problem",
+      "bugDescription": "Tell us what happened and what you expected instead.",
+      "messageLabel": "Message",
+      "placeholder": "Add the details that would help us understand…",
+      "submit": "Send",
+      "sending": "Sending…",
+      "success": "Thanks — your message was sent.",
+      "failed": "Couldn't send your message. Try again."
     },
     "about": {
       "title": "About",
@@ -1082,6 +1099,20 @@
     "budgetUsed": "{{percent}}% of budget used",
     "avgPerMonth": "avg {{amount}}/mo",
     "categoryTrends": "Where your money went",
+    "review": {
+      "title": "This month in brief",
+      "noSpending": "Nothing has been logged this month yet.",
+      "firstMonth": "{{amount}} logged so far — this is your first month to compare.",
+      "moreThanLast": "You have spent {{amount}} more than last month so far.",
+      "lessThanLast": "You have spent {{amount}} less than last month so far.",
+      "sameAsLast": "Spending is level with last month so far.",
+      "topCategory": "{{name}} leads this month at {{amount}}.",
+      "budgetLeft": "{{amount}} remains in your monthly plan.",
+      "budgetOver": "Your monthly plan is over by {{amount}}.",
+      "transactionCount_one": "{{count}} expense logged this month.",
+      "transactionCount_other": "{{count}} expenses logged this month.",
+      "openActivity": "Review this month's activity"
+    },
     "forecast": {
       "title": "Forecast",
       "safeToSpend": "Safe to spend this month",
@@ -1200,6 +1231,7 @@
     "invalidType": "Invalid file type. Please use JPEG, PNG, WebP, or HEIC",
     "fileTooLarge": "File is too large. Maximum size is 10MB",
     "changeReceipt": "Change receipt",
+    "attached": "Attached",
     "scanReceipt": "Scan receipt",
     "scanning": "Scanning receipt…",
     "cancelScan": "Cancel scan",
@@ -1227,15 +1259,15 @@
     "welcomeDescription": "A calm way to know where your money goes. Under a minute to set up — no spreadsheets, no judgement.",
     "getStarted": "Let's go",
     "budgetTitle": "Set a monthly budget",
-    "budgetDescription": "Pick a number you can actually live with. You can tweak it any time.",
+    "budgetDescription": "Optional: add a monthly guardrail now, or tune it later in Settings.",
     "budgetAmountLabel": "Monthly budget amount",
     "budgetPlaceholder": "1.500",
     "categoriesTitle": "What do you usually spend on?",
-    "categoriesDescription": "Pick the buckets that fit your life. Add more later — coffee deserves its own.",
+    "categoriesDescription": "Now shape Budgard around your real spending. You can add more later.",
     "firstExpenseTitle": "Log your first expense",
-    "firstExpenseDescription": "Use something from today. It will appear on Today as soon as you save it.",
+    "firstExpenseDescription": "Start with something from today. We’ll shape the rest around a real entry.",
     "exploreFirst": "Not now",
-    "saveFirstExpense": "Save & see Today",
+    "saveFirstExpense": "Save & continue",
     "skip": "Skip",
     "next": "Continue",
     "budgetSaveFailed": "Could not save budget. You can set it later in settings.",
@@ -1317,14 +1349,15 @@
           "heading": "The data we store",
           "paragraphs": [
             "Your account is your email address — we use it to sign you in with one-time codes and to send account emails. No password is stored.",
-            "Everything you enter in the app is stored so we can show it back to you and sync it across your devices: expenses, income, categories, tags, budgets, savings goals, recurring expenses, debts, accounts and net-worth snapshots, plus your preferences such as language, currency, theme and notification choices.",
+            "Everything you enter in the app is stored so we can show it back to you and sync it across your devices: expenses, income, categories, tags, budgets, savings goals, recurring expenses, debts, accounts and net-worth snapshots, plus your preferences such as language, currency, theme, Today layout and notification choices.",
+            "If you send feedback or report a problem, we store the message with your account, the screen you sent it from and the app version so we can understand the request or fix the issue. Financial records are not attached automatically.",
             "If you turn on push notifications, we also store the push token your browser issues for your device."
           ]
         },
         {
           "heading": "What we use it for",
           "paragraphs": [
-            "We use your data solely to run Budgard: showing your finances, syncing your devices, sending the notifications you asked for, managing your Pro subscription and fixing errors.",
+            "We use your data solely to run and improve Budgard: showing your finances, syncing your devices, sending the notifications you asked for, managing your Pro subscription, reviewing feedback and fixing errors.",
             "We do not sell personal data, we show no ads, and we do not use your data for advertising or profiling."
           ]
         },
@@ -1715,7 +1748,9 @@
     "aprRequired": "APR is required",
     "aprRange": "APR must be between 0 and 100",
     "minPaymentRequired": "Minimum payment is required",
-    "dateInFuture": "That date is in the future"
+    "dateInFuture": "That date is in the future",
+    "feedbackTooShort": "Add at least 10 characters",
+    "feedbackTooLong": "Keep the message under 2,000 characters"
   },
   "errorBoundary": {
     "updateTitle": "Update Available",

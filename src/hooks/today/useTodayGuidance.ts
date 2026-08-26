@@ -24,13 +24,15 @@ export type RecentActivityItem = {
   kind: 'expense' | 'income';
 };
 
-export const useTodayGuidance = (expenses: Expense[]) => {
+export const useTodayGuidance = (
+  expenses: Expense[],
+  now: Date = new Date(),
+) => {
   const incomes = useIncomesData();
   const { expenseCategories } = useCategoriesData();
   const { recurringExpenses } = useRecurringData();
   const { monthlyBudget, defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();
-  const now = useMemo(() => new Date(), []);
   const monthKey = format(now, 'yyyy-MM');
   const previousMonthKey = format(
     new Date(now.getFullYear(), now.getMonth() - 1, 1),

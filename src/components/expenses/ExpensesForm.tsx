@@ -40,6 +40,7 @@ type ExpensesFormProps = {
   // What the quick-add pad captured before the user asked for more detail.
   // Only read when creating; an edit always wins from the row itself.
   draft?: ExpenseWritePayload;
+  draftReceiptFile?: File;
   categories: Category[];
   onClose: () => void;
   onSubmit: (
@@ -52,6 +53,7 @@ type ExpensesFormProps = {
 const ExpensesForm = ({
   expense,
   draft,
+  draftReceiptFile,
   categories,
   onClose,
   onSubmit,
@@ -59,7 +61,7 @@ const ExpensesForm = ({
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();
-  const attachments = useExpenseAttachments(expense);
+  const attachments = useExpenseAttachments(expense, draftReceiptFile);
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
 
   const form = useForm<ExpenseFormData>({
@@ -71,12 +73,11 @@ const ExpensesForm = ({
       category_id: expense?.category_id || draft?.category_id || 'none',
       tag_id: expense?.tag_id || undefined,
       extra_tag_ids: getInitialExtraTagIds(expense),
-      date: getInitialDate(expense),
+      date: getInitialDate(expense, draft),
     },
   });
 
   useDialogDirty(form.formState.isDirty);
-  const isValid = form.formState.isValid;
 
   const conversion = useCurrencyConversion(form, expense);
   const suggestions = useDescriptionSuggestions(form);
@@ -140,7 +141,7 @@ const ExpensesForm = ({
           </div>
 
           <ExpenseFormActions
-            isValid={isValid}
+            isValid={form.formState.isValid}
             isSubmitting={isSubmitting}
             onClose={onClose}
           />

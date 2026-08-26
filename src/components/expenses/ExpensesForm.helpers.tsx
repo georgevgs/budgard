@@ -61,8 +61,12 @@ const pickSourceAmount = (
   return expense.amount;
 };
 
-export const getInitialDate = (expense: Expense | undefined): Date => {
+export const getInitialDate = (
+  expense: Expense | undefined,
+  draft?: { date?: string },
+): Date => {
   if (expense) return parseISO(expense.date);
+  if (draft?.date) return parseISO(draft.date);
 
   return new Date();
 };

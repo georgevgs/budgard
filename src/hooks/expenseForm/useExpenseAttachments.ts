@@ -15,13 +15,16 @@ export type ExpenseAttachmentsApi = {
 // validation; it is pure UI state that rides along to the submit handler.
 export const useExpenseAttachments = (
   expense?: Expense,
+  draftReceiptFile?: File,
 ): ExpenseAttachmentsApi => {
-  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | null>(
+    draftReceiptFile ?? null,
+  );
   const [removeExistingReceipt, setRemoveExistingReceipt] = useState(false);
   // An expense that already carries a tag or a receipt opens with the drawer
   // down, so the thing the user came back to edit is on screen.
   const [showDetails, setShowDetails] = useState(() =>
-    Boolean(expense?.tag_id || expense?.receipt_path),
+    Boolean(expense?.tag_id || expense?.receipt_path || draftReceiptFile),
   );
 
   return {

@@ -466,6 +466,14 @@ export const debtPaymentSchema = z.object({
     .optional(),
 });
 
+export const feedbackFormSchema = z.object({
+  message: z
+    .string()
+    .trim()
+    .min(10, 'validation.feedbackTooShort')
+    .max(2000, 'validation.feedbackTooLong'),
+});
+
 // Types
 export type ExpenseFormData = z.infer<typeof expenseSchema>;
 export type IncomeFormData = z.infer<typeof incomeSchema>;
@@ -477,3 +485,4 @@ export type AccountFormData = z.infer<typeof accountSchema>;
 export type AccountBalanceFormData = z.infer<typeof accountBalanceSchema>;
 export type DebtFormData = z.infer<typeof debtSchema>;
 export type DebtPaymentFormData = z.infer<typeof debtPaymentSchema>;
+export type FeedbackFormData = z.infer<typeof feedbackFormSchema>;

@@ -7,7 +7,10 @@ vi.mock('@/components/layout/SpeedDial', () => ({
 }));
 
 vi.mock('@/components/layout/FormsManager', () => ({ default: () => null }));
-vi.mock('@/components/income/IncomeFormDialog', () => ({ default: () => null }));
+vi.mock('@/components/expenses/QuickAddSheet', () => ({ default: () => null }));
+vi.mock('@/components/income/IncomeFormDialog', () => ({
+  default: () => null,
+}));
 
 vi.mock('@/contexts/DataContext', () => ({
   useDataConfig: () => ({ isInitialized: true, defaultCurrency: 'EUR' }),

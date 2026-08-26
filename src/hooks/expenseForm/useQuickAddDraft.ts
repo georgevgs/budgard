@@ -8,6 +8,7 @@ import { expenseDescriptionSchema } from '@/lib/validations';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { ExpenseWritePayload } from '@/services/dataService';
+import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 
 const RECENT_WINDOW = 60;
 const CHIP_LIMIT = 8;
@@ -16,7 +17,11 @@ const SUGGESTION_LIMIT = 5;
 
 type Params = {
   isOpen: boolean;
-  onSubmit: (data: ExpenseWritePayload) => void;
+  onSubmit: (
+    data: ExpenseWritePayload,
+    expenseId?: string,
+    receiptOptions?: ReceiptOptions,
+  ) => void;
   onClose: () => void;
 };
 
@@ -28,6 +33,7 @@ export const useQuickAddDraft = ({ isOpen, onSubmit, onClose }: Params) => {
   const pad = useAmountPad();
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [name, setName] = useState('');
+  const [date, setDate] = useState(todayIso);
 
   // Reopening starts clean. Recorded during render rather than in an effect so
   // the first frame after opening never shows the previous amount.
@@ -38,6 +44,7 @@ export const useQuickAddDraft = ({ isOpen, onSubmit, onClose }: Params) => {
       pad.clear();
       setCategoryId(null);
       setName('');
+      setDate(todayIso());
     }
   }
 
@@ -62,18 +69,22 @@ export const useQuickAddDraft = ({ isOpen, onSubmit, onClose }: Params) => {
       'validation.descriptionInvalid';
   }
 
-  const submit = () => {
+  const submit = (receiptOptions?: ReceiptOptions) => {
     if (pad.isEmpty || !descriptionResult.success) {
-
       return;
     }
 
-    onSubmit({
+    const payload = {
       amount: pad.amount,
       description: descriptionResult.data,
       category_id: categoryId,
-      date: todayIso(),
-    });
+      date,
+    };
+    if (receiptOptions) {
+      onSubmit(payload, undefined, receiptOptions);
+    } else {
+      onSubmit(payload);
+    }
     onClose();
   };
 
@@ -92,12 +103,14 @@ export const useQuickAddDraft = ({ isOpen, onSubmit, onClose }: Params) => {
     categories: categories.slice(0, CHIP_LIMIT),
     categoryId,
     name,
+    date,
     suggestions,
     currency: defaultCurrency,
     canSave: !pad.isEmpty && descriptionResult.success,
     nameErrorKey,
     selectCategory: setCategoryId,
     setName: (value: string) => setName(value.slice(0, NAME_LIMIT)),
+    setDate,
     applySuggestion,
     submit,
     // Everything the pad captured, handed to the full form so switching to it
@@ -106,7 +119,7 @@ export const useQuickAddDraft = ({ isOpen, onSubmit, onClose }: Params) => {
       amount: pad.amount,
       description: name.trim(),
       category_id: categoryId,
-      date: todayIso(),
+      date,
     }),
   };
 };

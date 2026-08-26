@@ -9,6 +9,7 @@ export type AmountPad = {
   cents: number;
   amount: number;
   isEmpty: boolean;
+  setAmount: (amount: number) => void;
   press: (digit: number) => void;
   backspace: () => void;
   clear: () => void;
@@ -30,6 +31,14 @@ export const useAmountPad = (initialCents = 0): AmountPad => {
     cents,
     amount: cents / 100,
     isEmpty: cents === 0,
+    setAmount: (amount: number) => {
+      const nextCents = Math.round(amount * 100);
+      if (nextCents < 0 || nextCents > MAX_CENTS) {
+        return;
+      }
+
+      setCents(nextCents);
+    },
     press: (digit: number) => {
       setCents((current) => {
         const next = current * 10 + digit;

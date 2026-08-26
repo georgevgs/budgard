@@ -69,6 +69,7 @@ const QuickAddProvider = ({ children }: Props) => {
         onClose={expenseForm.handleFormClose}
         selectedExpense={expenseForm.selectedExpense}
         draft={expenseForm.draft}
+        draftReceiptFile={expenseForm.draftReceiptFile}
         onExpenseSubmit={expenseActions.handleExpenseFormSubmit}
       />
       <IncomeFormDialog

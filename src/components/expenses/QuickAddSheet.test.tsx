@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
@@ -38,6 +38,17 @@ const data = vi.hoisted(() => {
   };
 });
 
+const receiptScan = vi.hoisted(() => ({
+  file: null as File | null,
+  options: undefined as
+    | {
+        receiptFile: File;
+        removeExistingReceipt: boolean;
+        existingReceiptPath: null;
+      }
+    | undefined,
+}));
+
 vi.mock('@/contexts/DataContext', () => ({
   useCategoriesData: () => ({ expenseCategories: data.categories }),
   useDataConfig: () => ({ defaultCurrency: 'EUR' }),
@@ -47,6 +58,19 @@ vi.mock('@/contexts/DataContext', () => ({
 
 vi.mock('@/hooks/dataOps/useTemplateOps', () => ({
   useTemplateOps: () => ({ handleTemplateDelete: vi.fn() }),
+}));
+
+vi.mock('@/hooks/expenseForm/useQuickReceiptScan', () => ({
+  useQuickReceiptScan: () => ({
+    inputRef: { current: null },
+    receiptFile: receiptScan.file,
+    isScanning: false,
+    progress: 0,
+    receiptOptions: receiptScan.options,
+    openPicker: vi.fn(),
+    handleChange: vi.fn(),
+    cancel: vi.fn(),
+  }),
 }));
 
 // Radix portals need pointer APIs jsdom does not implement. Both stand-ins
@@ -96,6 +120,11 @@ const typeAmount = () => {
 
 const nameField = () =>
   screen.getByRole('textbox', { name: 'expenses.quickAdd.nameLabel' });
+
+beforeEach(() => {
+  receiptScan.file = null;
+  receiptScan.options = undefined;
+});
 
 describe('components/expenses/QuickAddSheet', () => {
   it('saves the typed name as the description', () => {
@@ -165,6 +194,18 @@ describe('components/expenses/QuickAddSheet', () => {
     expect(onOpenFullForm).toHaveBeenCalledWith(
       expect.objectContaining({ description: 'Taxi home' }),
     );
+  });
+
+  it('keeps a scanned receipt attached when opening the full form', () => {
+    const file = new File(['receipt'], 'receipt.jpg', { type: 'image/jpeg' });
+    receiptScan.file = file;
+    const { onOpenFullForm } = renderSheet();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'expenses.quickAdd.moreDetails' }),
+    );
+
+    expect(onOpenFullForm).toHaveBeenCalledWith(expect.any(Object), file);
   });
 
   it('blocks a name the full expense form would reject', () => {

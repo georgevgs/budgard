@@ -21,6 +21,7 @@ import {
 } from '@/hooks/activity/useActivityFeed';
 import { useActivityCsvExport } from '@/hooks/activity/useActivityCsvExport';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
+import { useCurrentDate } from '@/hooks/useCurrentDate';
 import { useSeedIncomeCategories } from '@/hooks/incomeList/useSeedIncomeCategories';
 import { isMonthPendingHistory } from '@/lib/dataCache';
 
@@ -30,7 +31,8 @@ const ActivityView = () => {
   const { categories } = useCategoriesData();
   const tags = useTagsData();
   const quickAdd = useQuickAdd();
-  const activity = useActivityFeed(quickAdd.optimisticExpenses);
+  const now = useCurrentDate();
+  const activity = useActivityFeed(quickAdd.optimisticExpenses, now);
   const csvExport = useActivityCsvExport(
     activity.filteredRows,
     activity.exportScope,
@@ -71,15 +73,10 @@ const ActivityView = () => {
             kind={activity.kind}
             onSearchChange={activity.setSearch}
             onKindChange={activity.setKind}
-            trailing={
-              <ActivityPeriodSelector
-                period={activity.period}
-                onPeriodChange={activity.setPeriod}
-              />
-            }
+            trailing={renderPeriodControl(activity, t)}
           />
           <ActivityMonthStepper
-            period={activity.period}
+            period={activity.effectivePeriod}
             selectedMonth={activity.selectedMonth}
             onMonthChange={activity.setSelectedMonth}
           />
@@ -97,13 +94,11 @@ const ActivityView = () => {
           <ActivityFeed
             transactions={activity.filteredRows}
             currency={defaultCurrency}
-            matchesOutsidePeriod={activity.matchesOutsidePeriod}
             isHistoryPending={isPendingHistory(
               isHistoryLoaded,
-              activity.period,
+              activity.effectivePeriod,
               activity.selectedMonth,
             )}
-            onSearchEverywhere={() => activity.setPeriod('all')}
             onExpenseEdit={quickAdd.handleExpenseEdit}
             onExpenseDelete={quickAdd.handleExpenseDelete}
             onSaveAsTemplate={quickAdd.handleSaveAsTemplate}
@@ -119,6 +114,26 @@ const ActivityView = () => {
 export default ActivityView;
 
 // --- Helpers ---
+
+type Activity = ReturnType<typeof useActivityFeed>;
+type TFunc = (key: string) => string;
+
+const renderPeriodControl = (activity: Activity, t: TFunc) => {
+  if (activity.isSearchingAllTime) {
+    return (
+      <span className="tile flex h-10 min-w-20 items-center justify-center rounded-full px-3 text-xs font-semibold text-primary-ink">
+        {t('activity.searchScope')}
+      </span>
+    );
+  }
+
+  return (
+    <ActivityPeriodSelector
+      period={activity.period}
+      onPeriodChange={activity.setPeriod}
+    />
+  );
+};
 
 // Stage 1 fetches the last 12 months; everything older streams in afterwards.
 // Only the periods that can actually reach past that horizon care.

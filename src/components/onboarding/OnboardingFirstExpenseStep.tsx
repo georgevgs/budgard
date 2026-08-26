@@ -75,7 +75,7 @@ const OnboardingFirstExpenseStep = ({ draft, onBack, onSkip }: Props) => {
         <Button
           className="min-w-0 flex-1"
           disabled={!draft.canSave}
-          onClick={draft.submit}
+          onClick={() => draft.submit()}
         >
           {t('onboarding.saveFirstExpense')}
         </Button>

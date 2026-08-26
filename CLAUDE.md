@@ -126,8 +126,9 @@ written there — but the five rules that constrain new work are:
   `ghost` / `bare`. At most one `slab` and one `ink` per screen — a second of
   either flattens the first.
 - Today's order and visible set belong to the user (`useTodayLayout`,
-  localStorage, per device). A tile with nothing to say returns `null` and
-  gives its cell back rather than leaving a hole in the grid.
+  localStorage for instant/offline reads plus the owner-scoped
+  `user_ui_preferences` row for cross-device sync). A tile with nothing to say
+  returns `null` and gives its cell back rather than leaving a hole in the grid.
 
 ### Type: weight carries rank
 - **Never write `font-display` in a component.** The display face is named in

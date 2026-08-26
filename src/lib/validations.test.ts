@@ -5,9 +5,28 @@ import {
   categorySchema,
   recurringExpenseSchema,
   budgetSchema,
+  feedbackFormSchema,
   RECEIPT_ALLOWED_TYPES,
   RECEIPT_MAX_FILE_SIZE,
 } from '@/lib/validations';
+
+describe('feedbackFormSchema', () => {
+  it('accepts a useful free-form message', () => {
+    expect(
+      feedbackFormSchema.safeParse({ message: 'The month chart was helpful.' })
+        .success,
+    ).toBe(true);
+  });
+
+  it('rejects empty and oversized reports', () => {
+    expect(feedbackFormSchema.safeParse({ message: 'short' }).success).toBe(
+      false,
+    );
+    expect(
+      feedbackFormSchema.safeParse({ message: 'a'.repeat(2001) }).success,
+    ).toBe(false);
+  });
+});
 
 describe('emailSchema', () => {
   it('accepts a valid email', () => {

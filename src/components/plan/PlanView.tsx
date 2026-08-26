@@ -24,6 +24,7 @@ import { useQuickAdd } from '@/contexts/QuickAddContext';
 import { useBudgetOps } from '@/hooks/dataOps/useBudgetOps';
 import { useDebts } from '@/hooks/useDebts';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
+import { useCurrentDate } from '@/hooks/useCurrentDate';
 import { useSavingsRhythm } from '@/hooks/savings/useSavingsRhythm';
 import { getMonthlyAmount } from '@/lib/recurring';
 import { computeUpcomingRecurringThisMonth } from '@/lib/forecast';
@@ -42,10 +43,11 @@ const PlanView = () => {
   const { summary: debtSummary } = useDebts();
   const { handleBudgetUpdate } = useBudgetOps();
   const { optimisticExpenses } = useQuickAdd();
+  const now = useCurrentDate();
   const rhythm = useSavingsRhythm(optimisticExpenses);
   const model = useMemo(
-    () => buildPlanModel(optimisticExpenses, goals, recurringExpenses),
-    [optimisticExpenses, goals, recurringExpenses],
+    () => buildPlanModel(optimisticExpenses, goals, recurringExpenses, now),
+    [optimisticExpenses, goals, recurringExpenses, now],
   );
   const decision = useMemo(
     () =>
@@ -237,8 +239,8 @@ const buildPlanModel = (
   expenses: Expense[],
   goals: ReturnType<typeof useGoalsData>,
   recurringExpenses: ReturnType<typeof useRecurringData>['recurringExpenses'],
+  now: Date,
 ) => {
-  const now = new Date();
   const monthKey = format(now, 'yyyy-MM');
   const monthlySpent = sumSpending(
     expenses.filter((expense) => expense.date.slice(0, 7) === monthKey),

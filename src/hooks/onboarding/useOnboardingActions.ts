@@ -61,9 +61,9 @@ export const useOnboardingActions = ({
         }
         setIsSubmitting(false);
       }
-      setStep(2);
+      handleComplete();
     },
-    [handleBudgetUpdate, toast, t, setStep],
+    [handleBudgetUpdate, toast, t, handleComplete],
   );
 
   const handleCategoriesNext = useCallback(

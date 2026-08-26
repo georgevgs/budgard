@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { format } from 'date-fns';
 import TodayArrange from '@/components/today/TodayArrange';
 import TodayGrid from '@/components/today/TodayGrid';
@@ -7,6 +6,7 @@ import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useQuickAdd } from '@/contexts/QuickAddContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
+import { useCurrentDate } from '@/hooks/useCurrentDate';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { useExpenseAlerts } from '@/hooks/expensesList/useExpenseAlerts';
 import { useDailyPace } from '@/hooks/today/useDailyPace';
@@ -22,8 +22,8 @@ const TodayView = () => {
   const { isInitialized, monthlyBudget } = useDataConfig();
   const { optimisticExpenses } = useQuickAdd();
   const dateLocale = useDateLocale();
-  const now = useMemo(() => new Date(), []);
-  const guidance = useTodayGuidance(optimisticExpenses);
+  const now = useCurrentDate();
+  const guidance = useTodayGuidance(optimisticExpenses, now);
   const pace = useDailyPace(optimisticExpenses, guidance.dailyAllowance, now);
   const topCategory = useTopCategory(optimisticExpenses);
   const layout = useTodayLayout();

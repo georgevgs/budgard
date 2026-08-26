@@ -60,6 +60,7 @@ export const isDefaultLayout = (layout: TodayLayout): boolean => {
 };
 
 const STORAGE_KEY = 'today-layout';
+const SYNC_PENDING_KEY = 'today-layout-sync-pending';
 
 const isTileId = (value: unknown): value is TodayTileId =>
   typeof value === 'string' &&
@@ -74,7 +75,7 @@ const isTileId = (value: unknown): value is TodayTileId =>
  * only `visible` and a tile added in a later release is indistinguishable from
  * one the user deliberately hid.
  */
-const normalizeLayout = (stored: unknown): TodayLayout => {
+export const normalizeLayout = (stored: unknown): TodayLayout => {
   const source = stored as Partial<TodayLayout> | null;
   const visible = readList(source?.visible);
   const visibleSet = new Set(visible);
@@ -112,6 +113,33 @@ export const writeStoredLayout = (layout: TodayLayout): boolean => {
   } catch {
     // Private mode and a full quota both land here. The grid still works for
     // this session; tell the caller so the UI does not claim it was saved.
+    return false;
+  }
+};
+
+export const markTodayLayoutSyncPending = (): boolean => {
+  try {
+    localStorage.setItem(SYNC_PENDING_KEY, 'true');
+
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const clearTodayLayoutSyncPending = (): void => {
+  try {
+    localStorage.removeItem(SYNC_PENDING_KEY);
+  } catch {
+    // The server copy is already current. A blocked local store cannot make
+    // that write unsafe, and the next successful save will try again.
+  }
+};
+
+export const hasTodayLayoutSyncPending = (): boolean => {
+  try {
+    return localStorage.getItem(SYNC_PENDING_KEY) === 'true';
+  } catch {
     return false;
   }
 };

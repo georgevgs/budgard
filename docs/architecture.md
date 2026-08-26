@@ -148,8 +148,8 @@ hooks/dataOps/
 One hook per domain — `useExpenseOps`, `useIncomeOps`, `useCategoryOps`,
 `useTagOps`, `useBudgetOps`, `useGoalOps`, `useDebtOps`, `useAccountOps`,
 `useRecurringExpenseOps`, `useRecurringIncomeOps`, `useTemplateOps`,
-`useNoSpendOps`, `useSettingsOps`. There is no composed `useDataOperations`;
-call the domain hook you need directly.
+`useNoSpendOps`, `useSettingsOps`, `useFeedbackOps`. Call the domain hook you
+need directly; there is no composed `useDataOperations`.
 
 ### Responsibilities
 
@@ -185,9 +185,11 @@ All external communication is centralized.
 
 ### Files
 
-- `services/dataService.ts` — every table read and write
+- `services/dataService.ts` — core finance-table reads and writes
 - `services/receiptService.ts` — receipt upload/removal in Supabase Storage
 - `services/ocrService.ts` — Tesseract receipt scanning (Pro)
+- `services/uiPreferencesService.ts` — owner-scoped Today layout sync
+- `services/feedbackService.ts` — append-only feedback/problem reports
 - `services/subscriptionService.ts` — Stripe checkout/portal via edge functions
 - `services/proPlansService.ts` — live Pro prices
 - `services/exchangeRateService.ts` — Frankfurter FX rates
@@ -337,7 +339,8 @@ Supabase PostgreSQL. Every table is RLS-protected and owner-scoped.
 - Planning: `user_budgets`, `category_budgets`, `recurring_expenses`, `goals`,
   `no_spend_days`
 - Net worth: `accounts`, `account_balances`, `debts`
-- Platform: `subscriptions`, `checkout_attempts`, `push_subscriptions`
+- Platform: `subscriptions`, `checkout_attempts`, `push_subscriptions`,
+  `user_ui_preferences`, `feedback_reports`
 
 Migrations are in `supabase/migrations/` and are append-only history — never
 edit an applied one. Run `supabase migration list --linked` to see what is
@@ -370,8 +373,9 @@ Handled via `receiptService.ts`
 2. Upload to the Supabase Storage bucket below, under the owner's user id
 3. Read back through short-lived signed URLs (`useReceiptUrl`)
 
-Pro users can also run the receipt through `services/ocrService.ts` (Tesseract,
-self-hosted under `/ocr/`) to prefill the amount, date and merchant.
+Pro users can also capture and scan a receipt from Quick Add or the full form
+through `services/ocrService.ts` (Tesseract, self-hosted under `/ocr/`) to
+prefill the amount, date and merchant.
 
 ### Storage Bucket
 

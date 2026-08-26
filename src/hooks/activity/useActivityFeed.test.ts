@@ -54,7 +54,10 @@ describe('useActivityFeed', () => {
 
     act(() => result.current.setPeriod('all'));
 
-    expect(result.current.filteredRows.map((r) => r.id)).toEqual(['aug', 'jan']);
+    expect(result.current.filteredRows.map((r) => r.id)).toEqual([
+      'aug',
+      'jan',
+    ]);
   });
 
   it('honours rolling-day windows', () => {
@@ -70,7 +73,7 @@ describe('useActivityFeed', () => {
     expect(result.current.filteredRows.map((r) => r.id)).toEqual(['recent']);
   });
 
-  it('reports matches hiding outside a narrowed period', () => {
+  it('searches all history without losing the chosen period', () => {
     const { result } = renderHook(() =>
       useActivityFeed([
         row({ id: 'aug', description: 'Coffee', date: '2026-08-05' }),
@@ -80,19 +83,14 @@ describe('useActivityFeed', () => {
 
     act(() => result.current.setSearch('dentist'));
 
-    expect(result.current.filteredRows).toHaveLength(0);
-    expect(result.current.matchesOutsidePeriod).toBe(1);
-  });
+    expect(result.current.filteredRows.map((item) => item.id)).toEqual(['jun']);
+    expect(result.current.effectivePeriod).toBe('all');
+    expect(result.current.period).toBe('month');
 
-  it('reports no outside matches once the period is already everything', () => {
-    const { result } = renderHook(() =>
-      useActivityFeed([row({ id: 'jun', date: '2026-06-05' })]),
-    );
+    act(() => result.current.setSearch(''));
 
-    act(() => result.current.setPeriod('all'));
-    act(() => result.current.setSearch('nothing-matches-this'));
-
-    expect(result.current.matchesOutsidePeriod).toBe(0);
+    expect(result.current.filteredRows.map((item) => item.id)).toEqual(['aug']);
+    expect(result.current.effectivePeriod).toBe('month');
   });
 
   it('filters by category, including uncategorized', () => {
@@ -138,6 +136,10 @@ describe('useActivityFeed', () => {
     act(() => result.current.setPeriod('thisYear'));
 
     expect(result.current.exportScope).toBe('thisYear');
+
+    act(() => result.current.setSearch('something'));
+
+    expect(result.current.exportScope).toBe('all');
   });
 
   // Search reaches a note now that transactions carry one.

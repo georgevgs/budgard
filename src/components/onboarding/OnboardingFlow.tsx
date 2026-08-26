@@ -27,6 +27,10 @@ const OnboardingFlow = ({ isOpen, onComplete, onDismiss }: Props) => {
   const { defaultCurrency } = useDataConfig();
   const quickAdd = useQuickAdd();
   const currencySymbol = getCurrencySymbol(defaultCurrency || 'EUR');
+  const finishFlow = useCallback(() => {
+    onComplete();
+    navigate('/today', { replace: true, viewTransition: true });
+  }, [onComplete, navigate]);
 
   const {
     step,
@@ -35,18 +39,17 @@ const OnboardingFlow = ({ isOpen, onComplete, onDismiss }: Props) => {
     handleComplete,
     handleBudgetNext,
     handleCategoriesNext,
-  } = useOnboardingActions({ onComplete });
+  } = useOnboardingActions({ onComplete: finishFlow });
   const handleFirstExpense = useCallback(
     (data: Parameters<typeof quickAdd.handleExpenseFormSubmit>[0]) => {
       quickAdd.handleExpenseFormSubmit(data);
-      handleComplete();
-      navigate('/today', { replace: true, viewTransition: true });
+      setStep(2);
     },
-    [quickAdd, handleComplete, navigate],
+    [quickAdd, setStep],
   );
   const keepFlowOpen = useCallback(() => {}, []);
   const firstExpense = useQuickAddDraft({
-    isOpen: isOpen && step === 3,
+    isOpen: isOpen && step === 1,
     onSubmit: handleFirstExpense,
     onClose: keepFlowOpen,
   });
@@ -58,12 +61,10 @@ const OnboardingFlow = ({ isOpen, onComplete, onDismiss }: Props) => {
     }
     if (step === 1) {
       return (
-        <OnboardingBudgetStep
-          isSubmitting={isSubmitting}
-          currencySymbol={currencySymbol}
+        <OnboardingFirstExpenseStep
+          draft={firstExpense}
           onBack={() => setStep(0)}
           onSkip={() => setStep(2)}
-          onNext={handleBudgetNext}
         />
       );
     }
@@ -79,10 +80,12 @@ const OnboardingFlow = ({ isOpen, onComplete, onDismiss }: Props) => {
     }
 
     return (
-      <OnboardingFirstExpenseStep
-        draft={firstExpense}
+      <OnboardingBudgetStep
+        isSubmitting={isSubmitting}
+        currencySymbol={currencySymbol}
         onBack={() => setStep(2)}
         onSkip={handleComplete}
+        onNext={handleBudgetNext}
       />
     );
   };

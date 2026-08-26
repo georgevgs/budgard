@@ -75,8 +75,9 @@ Deno.serve(async (req) => {
     // Delete the auth user. All public.* tables that reference auth.users.id
     // are configured with ON DELETE CASCADE, so the user's rows in expenses,
     // categories, tags, recurring_expenses, expense_templates, user_budgets,
-    // accounts, account_balances, debts, goals, category_budgets, and
-    // push_subscriptions all delete automatically.
+    // accounts, account_balances, debts, goals, category_budgets,
+    // push_subscriptions, user_ui_preferences, and feedback_reports all
+    // delete automatically.
     const { error: deleteError } = await adminClient.auth.admin.deleteUser(user.id);
     if (deleteError) {
       return new Response(

@@ -63,7 +63,7 @@ export const useExpenseOps = () => {
           let receiptFailed = false;
           let oldPathToDelete: string | null = null;
 
-          if (receiptOptions && expenseData.user_id) {
+          if (receiptOptions) {
             let uploadedNewPath: string | null = null;
             ({
               receiptPath,
@@ -73,7 +73,7 @@ export const useExpenseOps = () => {
             } = await processReceipt(
               savedExpense,
               receiptOptions,
-              expenseData.user_id,
+              savedExpense.user_id,
             ));
 
             if (

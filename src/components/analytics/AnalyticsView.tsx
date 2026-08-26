@@ -13,9 +13,12 @@ import { CategoryDrillDown } from '@/components/analytics/CategoryDrillDown';
 import { MonthDrillDown } from '@/components/analytics/MonthDrillDown';
 import TrendsBento from '@/components/analytics/TrendsBento';
 import TrendsSections from '@/components/analytics/TrendsSections';
+import MonthlyReview from '@/components/analytics/MonthlyReview';
 import YearPill from '@/components/analytics/YearPill';
 import { useAnalyticsData } from '@/hooks/analytics/useAnalyticsData';
 import { useAnalyticsDrillDown } from '@/hooks/analytics/useAnalyticsDrillDown';
+import { useMonthlyReview } from '@/hooks/analytics/useMonthlyReview';
+import { useCurrentDate } from '@/hooks/useCurrentDate';
 import type { CategoryRow } from '@/hooks/analytics/useAnalyticsData';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
@@ -26,8 +29,17 @@ const AnalyticsView = () => {
   const { expenseCategories: categories } = useCategoriesData();
   const { monthlyBudget, defaultCurrency, isInitialized } = useDataConfig();
   const allExpenses = useExpensesData();
+  const now = useCurrentDate();
 
-  const analytics = useAnalyticsData();
+  const analytics = useAnalyticsData(now);
+  const review = useMonthlyReview({
+    expenses: analytics.expenses,
+    categories,
+    comparison: analytics.monthComparison,
+    monthlyBudget,
+    currency: defaultCurrency,
+    now,
+  });
   const drillDown = useAnalyticsDrillDown(
     analytics.yearExpenses,
     analytics.selectedYear,
@@ -74,6 +86,8 @@ const AnalyticsView = () => {
         onMonthClick={drillDown.handleMonthClick}
         onCategoryClick={drillDown.handleCategoryClick}
       />
+
+      <MonthlyReview label={review.label} items={review.items} />
 
       <TrendsSections
         analytics={analytics}

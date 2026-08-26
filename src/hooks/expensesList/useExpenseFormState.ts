@@ -7,11 +7,13 @@ export const useExpenseFormState = () => {
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
   const [formType, setFormType] = useState<FormType>(null);
   const [draft, setDraft] = useState<ExpenseWritePayload | undefined>();
+  const [draftReceiptFile, setDraftReceiptFile] = useState<File | undefined>();
 
   const handleFormClose = useCallback(() => {
     setFormType(null);
     setSelectedExpense(undefined);
     setDraft(undefined);
+    setDraftReceiptFile(undefined);
   }, []);
 
   const handleExpenseEdit = useCallback((expense: Expense) => {
@@ -27,16 +29,21 @@ export const useExpenseFormState = () => {
 
   // Carries whatever the keypad captured into the full form, so asking for
   // more detail never costs the user the amount they already typed.
-  const openFullForm = useCallback((captured: ExpenseWritePayload) => {
-    setDraft(captured);
-    setFormType(FORM_TYPES.NEW_EXPENSE);
-  }, []);
+  const openFullForm = useCallback(
+    (captured: ExpenseWritePayload, receiptFile?: File) => {
+      setDraft(captured);
+      setDraftReceiptFile(receiptFile);
+      setFormType(FORM_TYPES.NEW_EXPENSE);
+    },
+    [],
+  );
 
   return {
     formType,
     setFormType,
     selectedExpense,
     draft,
+    draftReceiptFile,
     handleFormClose,
     handleExpenseEdit,
     openNewExpenseForm,

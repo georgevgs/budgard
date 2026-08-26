@@ -67,4 +67,21 @@ describe('useAmountPad', () => {
 
     expect(result.current.cents).toBe(0);
   });
+
+  it('accepts a parsed amount without replaying keypad digits', () => {
+    const { result } = renderHook(() => useAmountPad());
+
+    act(() => result.current.setAmount(12.8));
+
+    expect(result.current.cents).toBe(1280);
+    expect(result.current.amount).toBe(12.8);
+  });
+
+  it('rejects parsed amounts above the form limit', () => {
+    const { result } = renderHook(() => useAmountPad());
+
+    act(() => result.current.setAmount(1_000_000.01));
+
+    expect(result.current.cents).toBe(0);
+  });
 });

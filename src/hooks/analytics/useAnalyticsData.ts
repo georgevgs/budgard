@@ -31,7 +31,7 @@ export type MonthComparison = {
   percentChange: number | null;
 };
 
-export const useAnalyticsData = () => {
+export const useAnalyticsData = (now: Date = new Date()) => {
   const allExpenses = useExpensesData();
   const { expenseCategories: categories } = useCategoriesData();
   const { monthlyBudget } = useDataConfig();
@@ -48,26 +48,29 @@ export const useAnalyticsData = () => {
   // Everything that counts as spending, over the full history. The rolling
   // 12-month chart needs this rather than the free-tier window below, which
   // would clip it to three months.
-  const countedExpenses = useMemo(() => onlySpending(allExpenses), [allExpenses]);
+  const countedExpenses = useMemo(
+    () => onlySpending(allExpenses),
+    [allExpenses],
+  );
 
   const expenses = useMemo(() => {
     if (isPro) return countedExpenses;
-    const cutoff = getFreeAnalyticsCutoff();
+    const cutoff = getFreeAnalyticsCutoff(now);
 
     return countedExpenses.filter((e) => parseISO(e.date) >= cutoff);
-  }, [countedExpenses, isPro]);
+  }, [countedExpenses, isPro, now]);
 
   // YYYY-MM-DD dates: slicing the year/month straight off the string is ~10x
   // faster than parseISO per row (see useExpensesFilter for the same pattern).
   const availableYears = useMemo(() => {
     const years = new Set(expenses.map((e) => Number(e.date.slice(0, 4))));
-    years.add(new Date().getFullYear());
+    years.add(now.getFullYear());
 
     return Array.from(years).sort().reverse();
-  }, [expenses]);
+  }, [expenses, now]);
 
   const [selectedYear, setSelectedYear] = useState(
-    () => availableYears[0] || new Date().getFullYear(),
+    () => availableYears[0] || now.getFullYear(),
   );
 
   // Clamp during render (guarded): if the selected year disappears (e.g. the
@@ -104,7 +107,6 @@ export const useAnalyticsData = () => {
   }, [yearExpenses, selectedYear, dateLocale]);
 
   const monthComparison = useMemo<MonthComparison>(() => {
-    const now = new Date();
     const thisMonthKey = format(now, 'yyyy-MM');
     const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthKey = format(lastMonthDate, 'yyyy-MM');
@@ -138,7 +140,7 @@ export const useAnalyticsData = () => {
       delta,
       percentChange,
     };
-  }, [expenses, dateLocale]);
+  }, [expenses, dateLocale, now]);
 
   const yearlyStats = useMemo(() => {
     // Single pass: bucket each expense by category and by month index.
@@ -159,7 +161,7 @@ export const useAnalyticsData = () => {
       slot.monthly[monthIdx] += e.amount;
     }
 
-    const monthsElapsed = monthsElapsedInYear(selectedYear);
+    const monthsElapsed = monthsElapsedInYear(selectedYear, now);
     let monthlyAverage = 0;
     if (monthsElapsed > 0) {
       monthlyAverage = totalSpent / monthsElapsed;
@@ -187,7 +189,7 @@ export const useAnalyticsData = () => {
       categoryBreakdown,
       monthsElapsed,
     };
-  }, [yearExpenses, categories, selectedYear]);
+  }, [yearExpenses, categories, selectedYear, now]);
 
   const yAxisMax = useMemo(() => {
     const maxAmount = Math.max(...monthlyData.map((d) => d.amount), 0);
@@ -211,8 +213,8 @@ export const useAnalyticsData = () => {
   // rhythm is about the recent shape of your spending and a year viewed in
   // March is nine-twelfths empty.
   const rhythmMonths = useMemo(
-    () => buildRollingMonths(countedExpenses, dateLocale),
-    [countedExpenses, dateLocale],
+    () => buildRollingMonths(countedExpenses, dateLocale, now),
+    [countedExpenses, dateLocale, now],
   );
 
   return {
@@ -235,14 +237,16 @@ const ROLLING_MONTHS = 12;
 
 // Callers pass the already-filtered `expenses` population, so this no longer
 // re-applies the exclusion.
-const buildRollingMonths = (expenses: Expense[], dateLocale: Locale) => {
+const buildRollingMonths = (
+  expenses: Expense[],
+  dateLocale: Locale,
+  now: Date,
+) => {
   const totals = new Map<string, number>();
   for (const expense of expenses) {
     const key = expense.date.slice(0, 7);
     totals.set(key, (totals.get(key) ?? 0) + expense.amount);
   }
-
-  const now = new Date();
 
   return Array.from({ length: ROLLING_MONTHS }, (_, offset) => {
     const date = new Date(

@@ -5,16 +5,23 @@ import AmountKeypad from '@/components/expenses/AmountKeypad';
 import QuickAddCategories from '@/components/expenses/QuickAddCategories';
 import QuickAddName from '@/components/expenses/QuickAddName';
 import QuickAddTemplates from '@/components/expenses/QuickAddTemplates';
+import QuickReceiptScanAction from '@/components/expenses/QuickReceiptScanAction';
 import { useQuickAddDraft } from '@/hooks/expenseForm/useQuickAddDraft';
+import { useQuickReceiptScan } from '@/hooks/expenseForm/useQuickReceiptScan';
 import { cn, formatCurrency } from '@/lib/utils';
+import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 import type { ExpenseWritePayload } from '@/services/dataService';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: ExpenseWritePayload) => void;
-  onOpenFullForm: (draft: ExpenseWritePayload) => void;
+  onSubmit: (
+    data: ExpenseWritePayload,
+    expenseId?: string,
+    receiptOptions?: ReceiptOptions,
+  ) => void;
+  onOpenFullForm: (draft: ExpenseWritePayload, receiptFile?: File) => void;
   onUseTemplate: (template: ExpenseTemplate) => void;
 };
 
@@ -30,6 +37,15 @@ const QuickAddSheet = ({
 }: Props) => {
   const { t } = useTranslation();
   const draft = useQuickAddDraft({ isOpen: open, onSubmit, onClose });
+  const receiptScan = useQuickReceiptScan({
+    isOpen: open,
+    amountIsEmpty: draft.pad.isEmpty,
+    date: draft.date,
+    name: draft.name,
+    setAmount: draft.pad.setAmount,
+    setDate: draft.setDate,
+    setName: draft.setName,
+  });
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -63,6 +79,8 @@ const QuickAddSheet = ({
 
           {renderTemplates(open, onUseTemplate, onClose)}
 
+          <QuickReceiptScanAction scan={receiptScan} />
+
           <QuickAddName
             value={draft.name}
             suggestions={draft.suggestions}
@@ -83,7 +101,17 @@ const QuickAddSheet = ({
             <AmountKeypad pad={draft.pad} />
           </div>
 
-          {renderActions(draft, () => onOpenFullForm(draft.toFullForm()), t)}
+          {renderActions(
+            draft,
+            () =>
+              openFullForm(
+                draft.toFullForm(),
+                receiptScan.receiptFile,
+                onOpenFullForm,
+              ),
+            receiptScan.receiptOptions,
+            t,
+          )}
         </div>
       </DialogContent>
     </Dialog>
@@ -111,6 +139,7 @@ const renderTemplates = (
 const renderActions = (
   draft: Draft,
   onMoreDetails: () => void,
+  receiptOptions: ReceiptOptions | undefined,
   t: (key: string) => string,
 ) => (
   <div className="mt-4 flex items-center gap-3">
@@ -126,12 +155,26 @@ const renderActions = (
       type="button"
       className="flex-1 rounded-full"
       disabled={!draft.canSave}
-      onClick={draft.submit}
+      onClick={() => draft.submit(receiptOptions)}
     >
       {t('common.save')}
     </Button>
   </div>
 );
+
+const openFullForm = (
+  draft: ExpenseWritePayload,
+  receiptFile: File | null,
+  onOpen: (draft: ExpenseWritePayload, receiptFile?: File) => void,
+) => {
+  if (receiptFile) {
+    onOpen(draft, receiptFile);
+
+    return;
+  }
+
+  onOpen(draft);
+};
 
 // A zero sits back until there is a real number to show, so the sheet opens
 // looking like an empty field rather than a €0.00 expense.

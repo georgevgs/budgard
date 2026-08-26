@@ -12,15 +12,12 @@ export type ActivityKind = 'all' | 'expense' | 'income';
 // so the presets live in the same select as the month and win outright —
 // the stepper is only offered while the period is 'month'.
 export type ActivityPeriod =
-  | 'month'
-  | 'last7'
-  | 'last30'
-  | 'last90'
-  | 'thisQuarter'
-  | 'thisYear'
-  | 'all';
+  'month' | 'last7' | 'last30' | 'last90' | 'thisQuarter' | 'thisYear' | 'all';
 
-export const useActivityFeed = (expenses: Expense[]) => {
+export const useActivityFeed = (
+  expenses: Expense[],
+  now: Date = new Date(),
+) => {
   const incomes = useIncomesData();
   const [selectedMonth, setSelectedMonth] = useState(
     format(new Date(), 'yyyy-MM'),
@@ -38,10 +35,12 @@ export const useActivityFeed = (expenses: Expense[]) => {
       ...expenses.map((row) => normalizeType(row, 'expense')),
       ...incomes.map((row) => normalizeType(row, 'income')),
     ].sort(compareNewestFirst);
-    const periodRows = allRows.filter((row) =>
-      isInPeriod(row, period, selectedMonth),
-    );
     const normalizedSearch = search.trim().toLocaleLowerCase();
+    const isSearchingAllTime = normalizedSearch.length > 0;
+    const effectivePeriod = resolveEffectivePeriod(period, isSearchingAllTime);
+    const periodRows = allRows.filter((row) =>
+      isInPeriod(row, effectivePeriod, selectedMonth, now),
+    );
     const matches = (row: Expense) =>
       matchesKind(row, kind) &&
       matchesTag(row, selectedTagId) &&
@@ -52,16 +51,8 @@ export const useActivityFeed = (expenses: Expense[]) => {
     return {
       periodRows,
       filteredRows,
-      // Drives the "nothing here — look everywhere?" escape hatch. Only worth
-      // computing while the period is narrowed and the narrow view came back
-      // empty, so the extra pass over full history stays off the hot path.
-      matchesOutsidePeriod: countOutsidePeriod({
-        allRows,
-        periodRows,
-        filteredRows,
-        period,
-        matches,
-      }),
+      effectivePeriod,
+      isSearchingAllTime,
       expenseTotal: sumKind(filteredRows, 'expense'),
       incomeTotal: sumKind(filteredRows, 'income'),
     };
@@ -69,6 +60,7 @@ export const useActivityFeed = (expenses: Expense[]) => {
     expenses,
     incomes,
     kind,
+    now,
     period,
     search,
     selectedCategoryId,
@@ -91,7 +83,7 @@ export const useActivityFeed = (expenses: Expense[]) => {
     setPeriod,
     // Names the CSV after what it actually contains, so two exports taken
     // under different periods don't collide in the downloads folder.
-    exportScope: resolveExportScope(period, selectedMonth),
+    exportScope: resolveExportScope(activity.effectivePeriod, selectedMonth),
     search,
     setSearch,
     kind,
@@ -142,6 +134,7 @@ const isInPeriod = (
   row: Expense,
   period: ActivityPeriod,
   selectedMonth: string,
+  now: Date,
 ): boolean => {
   if (period === 'all') {
     return true;
@@ -150,7 +143,7 @@ const isInPeriod = (
     return row.date.slice(0, 7) === selectedMonth;
   }
 
-  const start = getPeriodStart(period, new Date());
+  const start = getPeriodStart(period, now);
   if (!start) {
     return true;
   }
@@ -159,35 +152,15 @@ const isInPeriod = (
   return row.date >= start;
 };
 
-// True when the visible window covers less than everything the user has.
-const isNarrowed = (period: ActivityPeriod): boolean => period !== 'all';
-
-type OutsideArgs = {
-  allRows: Expense[];
-  periodRows: Expense[];
-  filteredRows: Expense[];
-  period: ActivityPeriod;
-  matches: (row: Expense) => boolean;
-};
-
-const countOutsidePeriod = ({
-  allRows,
-  periodRows,
-  filteredRows,
-  period,
-  matches,
-}: OutsideArgs): number => {
-  if (filteredRows.length > 0) {
-    return 0;
-  }
-  if (!isNarrowed(period)) {
-    return 0;
-  }
-  if (allRows.length === periodRows.length) {
-    return 0;
+const resolveEffectivePeriod = (
+  period: ActivityPeriod,
+  isSearchingAllTime: boolean,
+): ActivityPeriod => {
+  if (isSearchingAllTime) {
+    return 'all';
   }
 
-  return allRows.filter(matches).length;
+  return period;
 };
 
 const matchesKind = (row: Expense, kind: ActivityKind): boolean => {

@@ -12,6 +12,7 @@ type FormsManagerProps = {
   onClose: () => void;
   selectedExpense?: Expense;
   draft?: ExpenseWritePayload;
+  draftReceiptFile?: File;
   onExpenseSubmit: (
     data: ExpenseWritePayload,
     expenseId?: string,
@@ -24,6 +25,7 @@ const FormsManager = ({
   onClose,
   selectedExpense,
   draft,
+  draftReceiptFile,
   onExpenseSubmit,
 }: FormsManagerProps) => {
   const { expenseCategories: categories } = useCategoriesData();
@@ -55,6 +57,7 @@ const FormsManager = ({
           onClose,
           onExpenseSubmit,
           draft,
+          draftReceiptFile,
         )}
       </DialogContent>
     </Dialog>
@@ -76,6 +79,7 @@ const renderExpenseForm = (
     receiptOptions?: ReceiptOptions,
   ) => void,
   draft?: ExpenseWritePayload,
+  draftReceiptFile?: File,
 ) => {
   if (!isOpen) {
     return null;
@@ -85,6 +89,7 @@ const renderExpenseForm = (
     <ExpensesForm
       expense={expense}
       draft={draft}
+      draftReceiptFile={draftReceiptFile}
       categories={categories}
       onClose={onClose}
       onSubmit={onSubmit}

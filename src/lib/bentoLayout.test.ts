@@ -8,6 +8,9 @@ import {
   readStoredLayout,
   writeStoredLayout,
   type TodayLayout,
+  clearTodayLayoutSyncPending,
+  hasTodayLayoutSyncPending,
+  markTodayLayoutSyncPending,
 } from '@/lib/bentoLayout';
 
 describe('normalizing a stored Today layout', () => {
@@ -102,6 +105,18 @@ describe('normalizing a stored Today layout', () => {
     expect(
       isDefaultLayout({ visible: [...DEFAULT_VISIBLE].reverse(), hidden }),
     ).toBe(false);
+  });
+});
+
+describe('Today layout sync marker', () => {
+  it('tracks and clears a layout waiting to sync', () => {
+    expect(hasTodayLayoutSyncPending()).toBe(false);
+
+    expect(markTodayLayoutSyncPending()).toBe(true);
+    expect(hasTodayLayoutSyncPending()).toBe(true);
+
+    clearTodayLayoutSyncPending();
+    expect(hasTodayLayoutSyncPending()).toBe(false);
   });
 });
 

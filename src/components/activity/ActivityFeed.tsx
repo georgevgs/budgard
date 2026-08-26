@@ -14,9 +14,7 @@ import type { Expense } from '@/types/Expense';
 type Props = {
   transactions: Expense[];
   currency: string;
-  matchesOutsidePeriod: number;
   isHistoryPending: boolean;
-  onSearchEverywhere: () => void;
   onExpenseEdit: (expense: Expense) => void;
   onExpenseDelete: (id: string) => void;
   onSaveAsTemplate: (expense: Expense) => void;
@@ -64,11 +62,6 @@ const ActivityFeed = (props: Props) => {
         <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
           {t('activity.emptyBody')}
         </p>
-        {renderSearchEverywhere(
-          props.matchesOutsidePeriod,
-          props.onSearchEverywhere,
-          t,
-        )}
       </div>
     );
   }
@@ -102,30 +95,6 @@ const renderPendingHistory = (isHistoryPending: boolean) => {
 
 type DateGroup = ReturnType<typeof groupExpensesByDate>[number];
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
-// The month you happen to be looking at is the single most common reason a
-// search "finds nothing". Rather than making the user step back through months
-// to discover that, offer the wider search where the dead end appears.
-const renderSearchEverywhere = (
-  matchesOutsidePeriod: number,
-  onSearchEverywhere: () => void,
-  t: TFunc,
-) => {
-  if (matchesOutsidePeriod === 0) {
-    return null;
-  }
-
-  return (
-    <Button
-      type="button"
-      variant="outline"
-      className="mt-5 rounded-full"
-      onClick={onSearchEverywhere}
-    >
-      {t('activity.searchEverywhere', { count: matchesOutsidePeriod })}
-    </Button>
-  );
-};
 
 const renderGroup = (group: DateGroup, props: Props, t: TFunc) => (
   <section

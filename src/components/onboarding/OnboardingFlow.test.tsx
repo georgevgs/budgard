@@ -111,26 +111,26 @@ describe('OnboardingFlow', () => {
     expect(screen.getByText('onboarding.welcomeTitle')).toBeInTheDocument();
   });
 
-  it('navigates to budget step from welcome', () => {
+  it('starts with a real expense instead of setup questions', () => {
     renderFlow();
     fireEvent.click(screen.getByText('onboarding.getStarted'));
-    expect(screen.getByText('onboarding.budgetTitle')).toBeInTheDocument();
+    expect(
+      screen.getByText('onboarding.firstExpenseTitle'),
+    ).toBeInTheDocument();
   });
 
-  it('navigates to categories step when skipping budget', () => {
+  it('moves to categories when the first expense is deferred', () => {
     renderFlow();
-    // Welcome -> Budget
     fireEvent.click(screen.getByText('onboarding.getStarted'));
-    // Budget -> Categories (skip)
-    fireEvent.click(screen.getByText('onboarding.skip'));
+    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
+
     expect(screen.getByText('onboarding.categoriesTitle')).toBeInTheDocument();
   });
 
   it('renders category buttons with translation keys', () => {
     renderFlow();
-    // Welcome -> Budget -> Categories
     fireEvent.click(screen.getByText('onboarding.getStarted'));
-    fireEvent.click(screen.getByText('onboarding.skip'));
+    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
 
     expect(
       screen.getByText('onboarding.presetCategories.food'),
@@ -145,19 +145,16 @@ describe('OnboardingFlow', () => {
 
   it('toggles category selection on click', () => {
     renderFlow();
-    // Welcome -> Budget -> Categories
     fireEvent.click(screen.getByText('onboarding.getStarted'));
-    fireEvent.click(screen.getByText('onboarding.skip'));
+    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
 
     const foodButton = screen
       .getByText('onboarding.presetCategories.food')
       .closest('button')!;
 
-    // Food is selected by default (index 0) — deselect it
     fireEvent.click(foodButton);
     expect(foodButton.className).toContain('border-border/50');
 
-    // Select it again
     fireEvent.click(foodButton);
     expect(foodButton.className).toContain('border-primary-ink');
   });
@@ -166,9 +163,8 @@ describe('OnboardingFlow', () => {
     mockHandleCategoriesAddBulk.mockResolvedValue(undefined);
 
     renderFlow();
-    // Welcome -> Budget -> Categories
     fireEvent.click(screen.getByText('onboarding.getStarted'));
-    fireEvent.click(screen.getByText('onboarding.skip'));
+    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
     fireEvent.click(screen.getByText('onboarding.next'));
 
     await waitFor(() => {
@@ -187,15 +183,14 @@ describe('OnboardingFlow', () => {
     expect(foodCategory?.color).toBe(swatch.mint);
     expect(foodCategory?.icon).toBe('🍔');
     expect(foodCategory?.user_id).toBe('user-123');
+    expect(screen.getByText('onboarding.budgetTitle')).toBeInTheDocument();
   });
 
   it('skips category creation when none selected', async () => {
     renderFlow();
-    // Welcome -> Budget -> Categories
     fireEvent.click(screen.getByText('onboarding.getStarted'));
-    fireEvent.click(screen.getByText('onboarding.skip'));
+    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
 
-    // Deselect the 4 default-selected categories (indices 0-3)
     const categoryNames = ['food', 'housing', 'transport', 'entertainment'];
     for (const name of categoryNames) {
       const button = screen
@@ -207,50 +202,27 @@ describe('OnboardingFlow', () => {
     fireEvent.click(screen.getByText('onboarding.next'));
 
     await waitFor(() => {
-      expect(
-        screen.getByText('onboarding.firstExpenseTitle'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('onboarding.budgetTitle')).toBeInTheDocument();
     });
 
     expect(mockHandleCategoriesAddBulk).not.toHaveBeenCalled();
   });
 
-  it('asks for a real expense on the final step', () => {
-    renderFlow();
-    // Welcome -> Budget -> Categories -> First expense
-    fireEvent.click(screen.getByText('onboarding.getStarted'));
-    fireEvent.click(screen.getByText('onboarding.skip'));
-    fireEvent.click(screen.getByText('onboarding.skip'));
-
-    expect(
-      screen.getByText('onboarding.firstExpenseTitle'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'onboarding.saveFirstExpense' }),
-    ).toBeDisabled();
-  });
-
-  it('sets onboarded flag when the first expense is deferred', () => {
+  it('does not complete onboarding when the first expense is deferred', () => {
     const onComplete = vi.fn();
     renderFlow(onComplete);
 
-    // Welcome -> Budget -> Categories -> First expense
     fireEvent.click(screen.getByText('onboarding.getStarted'));
-    fireEvent.click(screen.getByText('onboarding.skip'));
-    fireEvent.click(screen.getByText('onboarding.skip'));
-
     fireEvent.click(screen.getByText('onboarding.exploreFirst'));
 
-    expect(localStorage.getItem('budgard_onboarded')).toBe('true');
-    expect(onComplete).toHaveBeenCalled();
+    expect(onComplete).not.toHaveBeenCalled();
+    expect(localStorage.getItem('budgard_onboarded')).toBeNull();
   });
 
-  it('saves the first expense before revealing Today', () => {
+  it('saves the first expense before asking setup questions', () => {
     const onComplete = vi.fn();
     renderFlow(onComplete);
     fireEvent.click(screen.getByText('onboarding.getStarted'));
-    fireEvent.click(screen.getByText('onboarding.skip'));
-    fireEvent.click(screen.getByText('onboarding.skip'));
 
     fireEvent.click(screen.getByRole('button', { name: '4' }));
     fireEvent.click(screen.getByRole('button', { name: '0' }));
@@ -262,8 +234,41 @@ describe('OnboardingFlow', () => {
     expect(mockHandleExpenseFormSubmit).toHaveBeenCalledWith(
       expect.objectContaining({ amount: 4, date: expect.any(String) }),
     );
+    expect(screen.getByText('onboarding.categoriesTitle')).toBeInTheDocument();
+    expect(onComplete).not.toHaveBeenCalled();
+  });
+
+  it('completes after the optional budget step is skipped', () => {
+    const onComplete = vi.fn();
+    renderFlow(onComplete);
+
+    fireEvent.click(screen.getByText('onboarding.getStarted'));
+    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
+    fireEvent.click(screen.getByText('onboarding.skip'));
+    fireEvent.click(screen.getByText('onboarding.skip'));
+
     expect(localStorage.getItem('budgard_onboarded')).toBe('true');
     expect(onComplete).toHaveBeenCalled();
+  });
+
+  it('saves a budget and then completes onboarding', async () => {
+    const onComplete = vi.fn();
+    renderFlow(onComplete);
+    fireEvent.click(screen.getByText('onboarding.getStarted'));
+    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
+    fireEvent.click(screen.getByText('onboarding.skip'));
+    fireEvent.change(
+      screen.getByRole('textbox', {
+        name: 'onboarding.budgetAmountLabel',
+      }),
+      { target: { value: '500' } },
+    );
+    fireEvent.click(screen.getByText('onboarding.next'));
+
+    await waitFor(() => {
+      expect(mockHandleBudgetUpdate).toHaveBeenCalledWith(500);
+      expect(onComplete).toHaveBeenCalled();
+    });
   });
 
   it('returns to the saved step when setup resumes', () => {
@@ -271,8 +276,6 @@ describe('OnboardingFlow', () => {
 
     renderFlow();
 
-    expect(
-      screen.getByText('onboarding.firstExpenseTitle'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('onboarding.budgetTitle')).toBeInTheDocument();
   });
 });
