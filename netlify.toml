@@ -79,6 +79,9 @@
   command = "npm run test && npm run build"
   publish = "dist"
 
+[[context.production.plugins]]
+  package = "netlify-purge-cloudflare-on-deploy"
+
 [[headers]]
   for = "/*"
   [headers.values]

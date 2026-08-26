@@ -232,16 +232,25 @@ export const usePullToRefresh = ({
         });
     };
 
+    const handleCancel = () => {
+      const wasPulling = phase === 'pulling';
+      phase = 'idle';
+      armed = false;
+      if (wasPulling) {
+        settleBack();
+      }
+    };
+
     document.addEventListener('touchstart', handleStart, { passive: true });
     document.addEventListener('touchmove', handleMove, { passive: false });
     document.addEventListener('touchend', handleEnd, { passive: true });
-    document.addEventListener('touchcancel', handleEnd, { passive: true });
+    document.addEventListener('touchcancel', handleCancel, { passive: true });
 
     return () => {
       document.removeEventListener('touchstart', handleStart);
       document.removeEventListener('touchmove', handleMove);
       document.removeEventListener('touchend', handleEnd);
-      document.removeEventListener('touchcancel', handleEnd);
+      document.removeEventListener('touchcancel', handleCancel);
       disposed = true;
       clearTimeout(settleTimer);
       clearTimeout(holdTimer);

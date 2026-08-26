@@ -83,7 +83,7 @@ const CategoryIconPicker = ({
           onChange={(e) => handleCustomChange(e.target.value)}
           disabled={disabled}
           placeholder={t('categories.customIcon')}
-          className="h-11 w-32 px-2 text-sm"
+          className="h-11 w-32 px-2 text-base sm:text-sm"
           maxLength={4}
           aria-label={t('categories.customIcon')}
         />

@@ -1,10 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
-import {
-  useSwipeActions,
-  SWIPE_ACTION_WIDTH,
-} from '@/hooks/useSwipeActions';
+import { useSwipeActions, SWIPE_ACTION_WIDTH } from '@/hooks/useSwipeActions';
 import { prefersReducedMotion } from '@/lib/motion';
 
 type Props = {
@@ -46,7 +43,9 @@ const SwipeableRow = ({ children, onDelete, deleteLabel }: Props) => {
           className="flex w-full flex-col items-center justify-center gap-1 bg-destructive text-destructive-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
         >
           <Trash2 className="h-5 w-5" aria-hidden="true" />
-          <span className="text-[11px] font-semibold">{t('common.delete')}</span>
+          <span className="text-[11px] font-semibold">
+            {t('common.delete')}
+          </span>
         </button>
       </div>
 
@@ -54,6 +53,9 @@ const SwipeableRow = ({ children, onDelete, deleteLabel }: Props) => {
         {...swipe.handlers}
         className="relative bg-tile"
         style={{
+          // Vertical travel belongs to page scrolling; horizontal travel is
+          // reserved for this row's reveal instead of browser navigation.
+          touchAction: 'pan-y pinch-zoom',
           transform: `translateX(${swipe.offset}px)`,
           transition: settleTransition(swipe.isDragging),
         }}

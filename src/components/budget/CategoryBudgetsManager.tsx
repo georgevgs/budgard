@@ -256,7 +256,7 @@ const renderCategoryRow = (
           disabled={isSaving}
           inputMode="decimal"
           autoComplete="off"
-          className="h-9 pl-6 pr-7 text-sm tabular-nums text-right"
+          className="h-9 pl-6 pr-7 text-right text-base tabular-nums sm:text-sm"
         />
         {renderClearButton(hasDraft, isSaving, category, clearDraft, t)}
       </div>

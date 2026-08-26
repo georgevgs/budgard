@@ -256,6 +256,27 @@ describe('useSwipeToClose', () => {
     expect(result.current.isDragging).toBe(false);
   });
 
+  it('restores the sheet when the browser cancels the gesture', () => {
+    const onClose = vi.fn();
+    const { result } = renderHook(() => useSwipeToClose({ onClose }));
+
+    act(() => {
+      result.current.handleTouchStart(
+        makeTouchEvent(100, {
+          dataset: { dragHandle: 'true' },
+        } as unknown as Partial<HTMLElement>),
+      );
+    });
+    act(() => result.current.handleTouchMove(makeTouchEvent(160)));
+    expect(result.current.translateY).toBe(60);
+
+    act(() => document.dispatchEvent(new TouchEvent('touchcancel')));
+
+    expect(result.current.translateY).toBe(0);
+    expect(result.current.isDragging).toBe(false);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it('does nothing when disabled', () => {
     const { result } = renderHook(() =>
       useSwipeToClose({ onClose: vi.fn(), enabled: false }),

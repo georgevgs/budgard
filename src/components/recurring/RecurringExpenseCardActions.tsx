@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import ScrollSafeDropdownMenuTrigger from '@/components/common/ScrollSafeDropdownMenuTrigger';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import ConfirmDestructiveDialog from '@/components/common/ConfirmDestructiveDialog';
@@ -42,7 +42,11 @@ const RecurringExpenseCardActions = ({ expense, onEdit, onDelete }: Props) => {
   return (
     <>
       <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-        <DropdownMenuTrigger asChild>
+        <ScrollSafeDropdownMenuTrigger
+          asChild
+          isOpen={dropdownOpen}
+          onOpenChange={setDropdownOpen}
+        >
           <Button
             variant="ghost"
             size="icon"
@@ -51,7 +55,7 @@ const RecurringExpenseCardActions = ({ expense, onEdit, onDelete }: Props) => {
             <MoreVertical className="h-4 w-4" />
             <span className="sr-only">{t('common.openMenu')}</span>
           </Button>
-        </DropdownMenuTrigger>
+        </ScrollSafeDropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
           <DropdownMenuItem onClick={handleEditClick}>
             {t('common.edit')}

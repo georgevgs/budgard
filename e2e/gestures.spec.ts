@@ -33,7 +33,10 @@ test.describe('pull to refresh', () => {
   test('pulls once even after every tab has been visited', async ({ app }) => {
     const refetches: string[] = [];
     app.on('request', (request) => {
-      if (request.url().includes('/rest/v1/expenses') && request.method() === 'GET') {
+      if (
+        request.url().includes('/rest/v1/expenses') &&
+        request.method() === 'GET'
+      ) {
         refetches.push(request.url());
       }
     });
@@ -78,6 +81,27 @@ test.describe('pull to refresh', () => {
 
     await expect(app.getByText('Should stay hidden')).toBeHidden();
   });
+
+  test('a cancelled pull does not refetch', async ({ app, data }) => {
+    await app.goto('/today');
+    await expect(app.getByText('Weekly shop')).toBeVisible();
+
+    data.expenses.push({
+      id: 'exp-cancelled-pull',
+      amount: 7,
+      description: 'Cancelled pull stays hidden',
+      date: new Date().toISOString().slice(0, 10),
+      category_id: 'cat-groceries',
+      type: 'expense',
+      user_id: '11111111-1111-4111-8111-111111111111',
+      created_at: new Date().toISOString(),
+    });
+
+    await cancelPull(app, 140);
+    await app.waitForTimeout(700);
+
+    await expect(app.getByText('Cancelled pull stays hidden')).toBeHidden();
+  });
 });
 
 // --- Helpers ---
@@ -93,7 +117,12 @@ const pullDown = async (
         bubbles: true,
         cancelable: true,
         touches: [
-          new Touch({ identifier: 1, target: document.body, clientY: y, clientX: 100 }),
+          new Touch({
+            identifier: 1,
+            target: document.body,
+            clientY: y,
+            clientX: 100,
+          }),
         ],
       });
     const move = (y: number) =>
@@ -101,7 +130,12 @@ const pullDown = async (
         bubbles: true,
         cancelable: true,
         touches: [
-          new Touch({ identifier: 1, target: document.body, clientY: y, clientX: 100 }),
+          new Touch({
+            identifier: 1,
+            target: document.body,
+            clientY: y,
+            clientX: 100,
+          }),
         ],
       });
 
@@ -114,5 +148,32 @@ const pullDown = async (
       await new Promise((resolve) => requestAnimationFrame(resolve));
     }
     document.dispatchEvent(new TouchEvent('touchend', { bubbles: true }));
+  }, distance);
+};
+
+const cancelPull = async (
+  page: import('@playwright/test').Page,
+  distance: number,
+) => {
+  await page.evaluate(async (total) => {
+    const touch = (type: 'touchstart' | 'touchmove', y: number) =>
+      new TouchEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        touches: [
+          new Touch({
+            identifier: 2,
+            target: document.body,
+            clientY: y,
+            clientX: 100,
+          }),
+        ],
+      });
+
+    window.scrollTo(0, 0);
+    document.dispatchEvent(touch('touchstart', 80));
+    document.dispatchEvent(touch('touchmove', 80 + total));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    document.dispatchEvent(new TouchEvent('touchcancel', { bubbles: true }));
   }, distance);
 };

@@ -32,9 +32,9 @@ test.describe('activity list', () => {
 
     await app.mouse.wheel(0, 6000);
 
-    await expect(
-      app.getByRole('link', { name: /open item 30/i }),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(app.getByRole('link', { name: /open item 30/i })).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   // Off-screen groups must stay in the DOM: content-visibility skips their
@@ -44,13 +44,15 @@ test.describe('activity list', () => {
     await expect(app.getByRole('link', { name: /open item 0/i })).toBeVisible();
 
     await app.mouse.wheel(0, 6000);
-    await expect(
-      app.getByRole('link', { name: /open item 30/i }),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(app.getByRole('link', { name: /open item 30/i })).toBeVisible({
+      timeout: 10_000,
+    });
 
     await app.mouse.wheel(0, -6000);
 
-    await expect(app.getByRole('link', { name: /open item 30/i })).toHaveCount(1);
+    await expect(app.getByRole('link', { name: /open item 30/i })).toHaveCount(
+      1,
+    );
   });
 
   test('the delete action behind a row is not a keyboard tab stop', async ({
@@ -69,4 +71,83 @@ test.describe('activity list', () => {
       app.getByRole('button', { name: 'Delete Item 0' }),
     ).toHaveCount(0);
   });
+
+  test('scrolling from a row menu button does not open it', async ({ app }) => {
+    await app.goto('/activity');
+    const rowLink = app.getByRole('link', { name: /open item 0/i });
+    await expect(rowLink).toBeVisible();
+    const menuTrigger = rowLink
+      .locator('..')
+      .getByRole('button', { name: /open menu/i });
+    const swipeSurface = rowLink.locator('../..');
+
+    await expect(swipeSurface).toHaveCSS('touch-action', 'pan-y pinch-zoom');
+
+    await menuTrigger.dispatchEvent(
+      'pointerdown',
+      touchPointer({ clientX: 350, clientY: 300 }),
+    );
+    await expect(menuTrigger).toHaveAttribute('aria-expanded', 'false');
+    await menuTrigger.dispatchEvent(
+      'pointermove',
+      touchPointer({ clientX: 350, clientY: 350 }),
+    );
+    await menuTrigger.dispatchEvent(
+      'pointerup',
+      touchPointer({ clientX: 350, clientY: 350 }),
+    );
+
+    await expect(menuTrigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('tapping a row menu button still opens it', async ({ app }) => {
+    await app.goto('/activity');
+    const rowLink = app.getByRole('link', { name: /open item 0/i });
+    await expect(rowLink).toBeVisible();
+    const menuTrigger = rowLink
+      .locator('..')
+      .getByRole('button', { name: /open menu/i });
+
+    await menuTrigger.dispatchEvent(
+      'pointerdown',
+      touchPointer({ clientX: 350, clientY: 300 }),
+    );
+    await menuTrigger.dispatchEvent(
+      'pointerup',
+      touchPointer({ clientX: 350, clientY: 300 }),
+    );
+
+    await expect(app.getByRole('menuitem', { name: /edit/i })).toBeVisible();
+  });
+
+  test('keeps the search field at an iOS-safe focus size', async ({ app }) => {
+    await app.goto('/activity');
+    const search = app.getByRole('textbox', { name: /search activity/i });
+
+    await expect(search).toBeVisible();
+    await expect(search).toHaveCSS('font-size', '16px');
+    await search.focus();
+
+    await expect
+      .poll(() => app.evaluate(() => window.visualViewport?.scale ?? 1))
+      .toBe(1);
+  });
+});
+
+// --- Helpers ---
+
+type PointerCoordinates = {
+  clientX: number;
+  clientY: number;
+};
+
+const touchPointer = ({ clientX, clientY }: PointerCoordinates) => ({
+  bubbles: true,
+  button: 0,
+  cancelable: true,
+  clientX,
+  clientY,
+  ctrlKey: false,
+  pointerId: 9,
+  pointerType: 'touch',
 });

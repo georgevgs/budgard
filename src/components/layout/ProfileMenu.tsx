@@ -1,12 +1,13 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import ScrollSafeDropdownMenuTrigger from '@/components/common/ScrollSafeDropdownMenuTrigger';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import Settings from 'lucide-react/dist/esm/icons/settings';
@@ -26,14 +27,19 @@ const ProfileMenu = () => {
   const navigate = useNavigate();
   const isPro = useIsPro();
   const { openUpgrade } = useUpgradeDialog();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   if (!session?.user) return null;
 
   const initial = getInitial(session.user.email);
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+      <ScrollSafeDropdownMenuTrigger
+        asChild
+        isOpen={isMenuOpen}
+        onOpenChange={setIsMenuOpen}
+      >
         <Button
           variant="ghost"
           size="icon"
@@ -42,7 +48,7 @@ const ProfileMenu = () => {
         >
           <span className="text-sm font-semibold">{initial}</span>
         </Button>
-      </DropdownMenuTrigger>
+      </ScrollSafeDropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         {renderEmail(session.user.email, t)}
         <DropdownMenuSeparator />

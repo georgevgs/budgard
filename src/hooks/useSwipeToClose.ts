@@ -109,6 +109,27 @@ export const useSwipeToClose = ({
     }
   }, [isDragging, enabled, translateY, threshold, onClose]);
 
+  // React's content handlers only receive the normal touch end. If the browser
+  // or OS cancels the gesture, recover at the document boundary so a sheet
+  // cannot remain halfway down the screen with its transition disabled.
+  useEffect(() => {
+    if (!isDragging) {
+      return;
+    }
+
+    const handleTouchCancel = () => {
+      velocity.current = 0;
+      setIsDragging(false);
+      setTranslateY(0);
+    };
+
+    document.addEventListener('touchcancel', handleTouchCancel, {
+      passive: true,
+    });
+
+    return () => document.removeEventListener('touchcancel', handleTouchCancel);
+  }, [isDragging]);
+
   // Reset on unmount so a reopened sheet never starts mid-drag.
   useEffect(() => {
     return () => {

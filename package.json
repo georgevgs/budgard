@@ -80,6 +80,7 @@
     "fake-indexeddb": "^6.2.5",
     "globals": "^17.9.0",
     "jsdom": "^30.0.1",
+    "netlify-purge-cloudflare-on-deploy": "1.2.0",
     "postcss": "^8.5.26",
     "prettier": "^3.9.6",
     "supabase": "2.111.0",

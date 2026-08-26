@@ -57,6 +57,7 @@
         "fake-indexeddb": "^6.2.5",
         "globals": "^17.9.0",
         "jsdom": "^30.0.1",
+        "netlify-purge-cloudflare-on-deploy": "1.2.0",
         "postcss": "^8.5.26",
         "prettier": "^3.9.6",
         "supabase": "2.111.0",
@@ -1164,6 +1165,8 @@
     "nanoid": ["nanoid@3.3.18", "", { "bin": { "nanoid": "bin/nanoid.cjs" } }, "sha512-DTg4MJbGMWkfi6VZFdNt2/caMbQy4Ou+Op/hJQvGEWcnVfoA1QA+xzRKAzw9jD6+GVOOeYr/mIcuDSdug6F6+w=="],
 
     "natural-compare": ["natural-compare@1.4.0", "", {}, "sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw=="],
+
+    "netlify-purge-cloudflare-on-deploy": ["netlify-purge-cloudflare-on-deploy@1.2.0", "", { "dependencies": { "node-fetch": "^2.6.0" } }, "sha512-MHAC9cQHIcoloxdVj0yV0n6qg3h96BCJjJkyBfmOqhTmWNMwRlaIZK86yc3c1KLWNW4S+eNn4H2ULqXrapkf8A=="],
 
     "node-fetch": ["node-fetch@2.7.0", "", { "dependencies": { "whatwg-url": "^5.0.0" }, "peerDependencies": { "encoding": "^0.1.0" }, "optionalPeers": ["encoding"] }, "sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A=="],
 

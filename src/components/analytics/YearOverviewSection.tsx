@@ -134,7 +134,7 @@ const renderMonthDetailSelect = (
         id="analytics-month-details"
         value=""
         onChange={handleChange}
-        className="h-11 w-full rounded-xl border border-border/60 bg-card px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-56"
+        className="h-11 w-full rounded-xl border border-border/60 bg-card px-3 text-base text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-56 sm:text-sm"
       >
         <option value="" disabled>
           {t('analytics.chooseMonth')}

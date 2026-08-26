@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import ScrollSafeDropdownMenuTrigger from '@/components/common/ScrollSafeDropdownMenuTrigger';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import Bookmark from 'lucide-react/dist/esm/icons/bookmark';
 import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
@@ -81,7 +81,11 @@ const ExpensesCardActions = ({
   return (
     <>
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-        <DropdownMenuTrigger asChild>
+        <ScrollSafeDropdownMenuTrigger
+          asChild
+          isOpen={menuOpen}
+          onOpenChange={setMenuOpen}
+        >
           <Button
             variant="ghost"
             size="icon"
@@ -90,7 +94,7 @@ const ExpensesCardActions = ({
             <MoreVertical className="h-4 w-4" />
             <span className="sr-only">{t('common.openMenu')}</span>
           </Button>
-        </DropdownMenuTrigger>
+        </ScrollSafeDropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {renderEditMenuItem(expense, t, handleEditClick)}
           {renderTemplateMenuItem(onSaveAsTemplate, t, handleSaveAsTemplate)}
@@ -220,7 +224,11 @@ const renderSplitDialog = (
   if (!isOpen) return null;
 
   return (
-    <SplitExpenseDialog expense={expense} open={isOpen} onOpenChange={setOpen} />
+    <SplitExpenseDialog
+      expense={expense}
+      open={isOpen}
+      onOpenChange={setOpen}
+    />
   );
 };
 

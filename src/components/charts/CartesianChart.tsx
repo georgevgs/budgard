@@ -87,7 +87,9 @@ const renderChart = (
     return <div style={{ height }} />;
   }
 
-  const barCount = props.series.filter((series) => series.kind === 'bar').length;
+  const barCount = props.series.filter(
+    (series) => series.kind === 'bar',
+  ).length;
   const context = {
     data: props.data,
     plot: layout.plot,
@@ -120,11 +122,12 @@ const renderChart = (
         format={props.formatX}
       />
       {renderCursor(interaction.activeIndex, props, layout, hasBars)}
-      {props.series.map((series, index) =>
-        renderSeries(series, barIndexOf(props, series.key), {
-          ...context,
-          barCount,
-        }) ?? index,
+      {props.series.map(
+        (series, index) =>
+          renderSeries(series, barIndexOf(props, series.key), {
+            ...context,
+            barCount,
+          }) ?? index,
       )}
       {renderReference(props, layout)}
       <rect
@@ -139,7 +142,9 @@ const renderChart = (
         className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         onPointerMove={interaction.handlePointerMove}
         onPointerLeave={interaction.handlePointerLeave}
-        onPointerDown={interaction.handleClick}
+        // Click is emitted after a tap, but cancelled when the same touch turns
+        // into a page scroll. Pointer-down opened drill-down before that choice.
+        onClick={interaction.handleClick}
         onKeyDown={interaction.handleKeyDown}
       />
     </svg>
@@ -154,7 +159,11 @@ const barIndexOf = (props: CartesianChartProps, key: string): number => {
     .findIndex((series) => series.key === key);
 };
 
-const renderFillGradient = (series: { key: string; color: string; kind: string }) => {
+const renderFillGradient = (series: {
+  key: string;
+  color: string;
+  kind: string;
+}) => {
   if (series.kind !== 'area') {
     return null;
   }
@@ -168,8 +177,16 @@ const renderFillGradient = (series: { key: string; color: string; kind: string }
       x2="0"
       y2="1"
     >
-      <stop offset="0%" stopColor={`hsl(var(${series.color}))`} stopOpacity={0.34} />
-      <stop offset="100%" stopColor={`hsl(var(${series.color}))`} stopOpacity={0.02} />
+      <stop
+        offset="0%"
+        stopColor={`hsl(var(${series.color}))`}
+        stopOpacity={0.34}
+      />
+      <stop
+        offset="100%"
+        stopColor={`hsl(var(${series.color}))`}
+        stopOpacity={0.02}
+      />
     </linearGradient>
   );
 };

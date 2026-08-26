@@ -5,12 +5,12 @@ import MoreHorizontal from 'lucide-react/dist/esm/icons/more-horizontal';
 import TagIcon from 'lucide-react/dist/esm/icons/tag';
 import Upload from 'lucide-react/dist/esm/icons/upload';
 import { Button } from '@/components/ui/button';
+import ScrollSafeDropdownMenuTrigger from '@/components/common/ScrollSafeDropdownMenuTrigger';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { TagManager } from '@/components/tags/TagManager';
 import { lazyWithRetry } from '@/lib/lazyWithRetry';
@@ -33,11 +33,16 @@ const ActivityToolsMenu = ({ isExportDisabled, onExport }: Props) => {
   const { t } = useTranslation();
   const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+        <ScrollSafeDropdownMenuTrigger
+          asChild
+          isOpen={isMenuOpen}
+          onOpenChange={setIsMenuOpen}
+        >
           <Button
             variant="ghost"
             size="icon"
@@ -46,7 +51,7 @@ const ActivityToolsMenu = ({ isExportDisabled, onExport }: Props) => {
           >
             <MoreHorizontal className="h-5 w-5" />
           </Button>
-        </DropdownMenuTrigger>
+        </ScrollSafeDropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-52">
           <DropdownMenuItem onClick={() => setIsTagManagerOpen(true)}>
             <TagIcon className="h-4 w-4" />

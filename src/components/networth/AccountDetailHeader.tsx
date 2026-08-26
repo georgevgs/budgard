@@ -6,11 +6,11 @@ import {
   DialogHeader,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import ScrollSafeDropdownMenuTrigger from '@/components/common/ScrollSafeDropdownMenuTrigger';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import { cn, formatCurrency } from '@/lib/utils';
@@ -64,12 +64,16 @@ const AccountDetailHeader = ({
           </DialogDescription>
         </div>
         <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-          <DropdownMenuTrigger asChild>
+          <ScrollSafeDropdownMenuTrigger
+            asChild
+            isOpen={menuOpen}
+            onOpenChange={setMenuOpen}
+          >
             <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0">
               <MoreVertical className="h-4 w-4" />
               <span className="sr-only">{t('common.openMenu')}</span>
             </Button>
-          </DropdownMenuTrigger>
+          </ScrollSafeDropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuItem onClick={handleEditClick}>
               {t('common.edit')}

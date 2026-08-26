@@ -24,6 +24,7 @@ export type SwipeActions = {
     onTouchStart: (event: React.TouchEvent) => void;
     onTouchMove: (event: React.TouchEvent) => void;
     onTouchEnd: () => void;
+    onTouchCancel: () => void;
   };
 };
 
@@ -33,7 +34,9 @@ export type SwipeActions = {
  * that deletes the moment your thumb leaves the glass will eventually delete
  * something you meant to scroll past.
  */
-export const useSwipeActions = ({ enabled = true }: Params = {}): SwipeActions => {
+export const useSwipeActions = ({
+  enabled = true,
+}: Params = {}): SwipeActions => {
   const [offset, setOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const start = useRef({ x: 0, y: 0 });
@@ -83,11 +86,22 @@ export const useSwipeActions = ({ enabled = true }: Params = {}): SwipeActions =
 
     onTouchEnd: () => {
       if (axis.current !== 'horizontal') {
+        axis.current = 'none';
+
         return;
       }
       axis.current = 'none';
       setIsDragging(false);
       setOffset((current) => settle(current));
+    },
+
+    // A browser can cancel a touch when the OS takes over the gesture. Return
+    // to where the row started instead of leaving a half-revealed surface with
+    // transitions disabled.
+    onTouchCancel: () => {
+      axis.current = 'none';
+      setIsDragging(false);
+      setOffset(openedAt.current);
     },
   };
 

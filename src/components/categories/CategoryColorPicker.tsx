@@ -56,7 +56,7 @@ const CategoryColorPicker = ({
           value={value}
           onChange={(e) => handleHexChange(e.target.value)}
           disabled={disabled}
-          className="h-7 w-24 text-xs font-mono tabular-nums px-2"
+          className="h-7 w-24 px-2 font-mono text-base tabular-nums sm:text-xs"
           maxLength={7}
           aria-label={t('categories.customColor')}
         />

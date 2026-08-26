@@ -1,6 +1,14 @@
 import { useState } from 'react';
-import type { PointerEvent as ReactPointerEvent, KeyboardEvent } from 'react';
-import { bandScale, pointScale, type Plot } from '@/components/charts/chartScales';
+import type {
+  PointerEvent as ReactPointerEvent,
+  MouseEvent as ReactMouseEvent,
+  KeyboardEvent,
+} from 'react';
+import {
+  bandScale,
+  pointScale,
+  type Plot,
+} from '@/components/charts/chartScales';
 
 type Params = {
   count: number;
@@ -35,7 +43,7 @@ export const useChartInteraction = ({
     setActiveIndex(null);
   };
 
-  const handleClick = (event: ReactPointerEvent<SVGRectElement>) => {
+  const handleClick = (event: ReactMouseEvent<SVGRectElement>) => {
     if (!onPointClick) {
       return;
     }

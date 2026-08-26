@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import ScrollSafeDropdownMenuTrigger from '@/components/common/ScrollSafeDropdownMenuTrigger';
 import ConfirmDestructiveDialog from '@/components/common/ConfirmDestructiveDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import Pencil from 'lucide-react/dist/esm/icons/pencil';
@@ -45,7 +45,11 @@ const IncomeCardActions = ({ income, onEdit, onDelete }: Props) => {
   return (
     <>
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-        <DropdownMenuTrigger asChild>
+        <ScrollSafeDropdownMenuTrigger
+          asChild
+          isOpen={menuOpen}
+          onOpenChange={setMenuOpen}
+        >
           <Button
             variant="ghost"
             size="icon"
@@ -54,7 +58,7 @@ const IncomeCardActions = ({ income, onEdit, onDelete }: Props) => {
             <MoreVertical className="h-4 w-4" />
             <span className="sr-only">{t('common.openMenu')}</span>
           </Button>
-        </DropdownMenuTrigger>
+        </ScrollSafeDropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {renderEditMenuItem(income, t, handleEditClick)}
           <DropdownMenuSeparator />

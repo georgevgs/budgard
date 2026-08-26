@@ -50,7 +50,9 @@ test.describe('charts', () => {
     // No path may contain NaN — the signature of a broken scale.
     const paths = await app
       .locator('svg[role="img"] path')
-      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('d') ?? ''));
+      .evaluateAll((nodes) =>
+        nodes.map((node) => node.getAttribute('d') ?? ''),
+      );
     expect(paths.length).toBeGreaterThan(0);
     expect(paths.filter((d) => d.includes('NaN'))).toEqual([]);
 
@@ -59,7 +61,9 @@ test.describe('charts', () => {
 
   test('a chart can be read with the keyboard alone', async ({ app }) => {
     await app.goto('/trends');
-    const plot = app.locator('svg[role="img"] rect[role="application"]').first();
+    const plot = app
+      .locator('svg[role="img"] rect[role="application"]')
+      .first();
     await plot.waitFor();
 
     await plot.focus();
@@ -69,4 +73,45 @@ test.describe('charts', () => {
     // only drawn.
     await expect(app.locator('[role="status"]').first()).toBeVisible();
   });
+
+  test('scrolling over an interactive chart does not open drill-down', async ({
+    app,
+  }) => {
+    await app.goto('/trends');
+    const chart = app.getByRole('img', { name: /spending over/i });
+    const plot = chart.locator('rect[role="application"]');
+    await expect(plot).toBeVisible();
+
+    await plot.dispatchEvent('pointerdown', chartPointer(80, 80));
+    await plot.dispatchEvent('pointermove', chartPointer(82, 140));
+    await plot.dispatchEvent('pointerup', chartPointer(82, 140));
+
+    await expect(app.getByRole('dialog')).toHaveCount(0);
+  });
+
+  test('tapping an interactive chart still opens drill-down', async ({
+    app,
+  }) => {
+    await app.goto('/trends');
+    const chart = app.getByRole('img', { name: /spending over/i });
+    const plot = chart.locator('rect[role="application"]');
+    await expect(plot).toBeVisible();
+
+    await plot.tap({ position: { x: 80, y: 80 } });
+
+    await expect(app.getByRole('dialog')).toBeVisible();
+  });
+});
+
+// --- Helpers ---
+
+const chartPointer = (clientX: number, clientY: number) => ({
+  bubbles: true,
+  button: 0,
+  cancelable: true,
+  clientX,
+  clientY,
+  ctrlKey: false,
+  pointerId: 11,
+  pointerType: 'touch',
 });
