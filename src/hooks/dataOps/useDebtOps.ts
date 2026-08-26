@@ -1,114 +1,71 @@
-import { useCallback, useMemo } from 'react';
-import * as Sentry from '@/lib/sentry';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
 import type { Debt } from '@/types/Debt';
-import { pickByEdit, replaceById } from '@/hooks/dataOps/helpers';
-import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
+import {
+  pickByEdit,
+  removeOptimistic,
+  replaceById,
+} from '@/hooks/dataOps/helpers';
+import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
 
 export const useDebtOps = () => {
   const { isInitialized } = useDataConfig();
   const { setDebts } = useDataActions();
-  const { toast } = useToast();
   const { t } = useTranslation();
-  const showErrorToast = useShowErrorToast();
+  const runMutation = useMutationRunner();
 
-  const handleDebtSubmit = useCallback(
-    async (
+  return useMemo(() => {
+    const skip = !isInitialized;
+
+    // Server-first: a debt carries a balance the DB maintains, so there is
+    // nothing safe to show optimistically. New debts append rather than
+    // prepend — the list reads oldest-first.
+    const handleDebtSubmit = async (
       debtData: Partial<Debt>,
       debtId?: string,
     ): Promise<Debt | null> => {
-      const run = async (): Promise<Debt | null> => {
-        if (!isInitialized) return null;
+      const saved = await runMutation<Debt>({
+        operation: pickByEdit(debtId, 'updateDebt', 'createDebt'),
+        skip,
+        errorMessage: pickByEdit(
+          debtId,
+          t('debts.toasts.updateFailed'),
+          t('debts.toasts.addFailed'),
+        ),
+        successMessage: pickByEdit(
+          debtId,
+          t('debts.toasts.updated'),
+          t('debts.toasts.added'),
+        ),
+        perform: () => {
+          if (debtId) return dataService.updateDebt(debtId, debtData);
 
-        try {
-          let saved: Debt;
-          if (debtId) {
-            saved = await dataService.updateDebt(debtId, debtData);
-          } else {
-            saved = await dataService.createDebt(debtData);
-          }
-
-          haptics.success();
+          return dataService.createDebt(debtData);
+        },
+        commit: (row) =>
           setDebts((prev) => {
-            if (debtId) return replaceById(prev, debtId, saved);
+            if (debtId) return replaceById(prev, debtId, row);
 
-            return [...prev, saved];
-          });
+            return [...prev, row];
+          }),
+      });
 
-          toast({
-            variant: 'success',
-            title: pickByEdit(
-              debtId,
-              t('debts.toasts.updated'),
-              t('debts.toasts.added'),
-            ),
-          });
+      return saved ?? null;
+    };
 
-          return saved;
-        } catch (error) {
-          haptics.error();
-          Sentry.captureException(error, {
-            tags: { operation: pickByEdit(debtId, 'updateDebt', 'createDebt') },
-          });
-          showErrorToast(
-            pickByEdit(
-              debtId,
-              t('debts.toasts.updateFailed'),
-              t('debts.toasts.addFailed'),
-            ),
-            () => {
-              void run().catch(() => undefined);
-            },
-          );
-          throw error;
-        }
-      };
+    const handleDebtArchive = (debtId: string) =>
+      runMutation({
+        operation: 'archiveDebt',
+        skip,
+        errorMessage: t('debts.toasts.archiveFailed'),
+        onStart: () => haptics.warning(),
+        optimistic: () => removeOptimistic(setDebts, debtId),
+        perform: () => dataService.archiveDebt(debtId),
+      });
 
-      return run();
-    },
-    [isInitialized, setDebts, showErrorToast, toast, t],
-  );
-
-  const handleDebtArchive = useCallback(
-    async (debtId: string) => {
-      const run = async () => {
-        if (!isInitialized) return;
-
-        haptics.warning();
-        let previousDebts: Debt[] = [];
-        setDebts((prev) => {
-          previousDebts = prev;
-
-          return prev.filter((d) => d.id !== debtId);
-        });
-
-        try {
-          await dataService.archiveDebt(debtId);
-          haptics.success();
-        } catch (error) {
-          haptics.error();
-          setDebts(previousDebts);
-          Sentry.captureException(error, {
-            tags: { operation: 'archiveDebt' },
-          });
-          showErrorToast(t('debts.toasts.archiveFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
-
-      return run();
-    },
-    [isInitialized, setDebts, showErrorToast, t],
-  );
-
-  return useMemo(
-    () => ({ handleDebtSubmit, handleDebtArchive }),
-    [handleDebtSubmit, handleDebtArchive],
-  );
+    return { handleDebtSubmit, handleDebtArchive };
+  }, [isInitialized, setDebts, runMutation, t]);
 };

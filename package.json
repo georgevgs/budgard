@@ -19,6 +19,7 @@
     "budget": "node scripts/bundleBudget.mjs",
     "brand:generate": "zsh design/brand/generate-assets.zsh",
     "sync:agents": "node scripts/syncAgentDocs.ts",
+    "docs:schema": "node scripts/generateSchemaMap.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },

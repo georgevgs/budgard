@@ -1,45 +1,61 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import * as Sentry from '@/lib/sentry';
 import { useTranslation } from 'react-i18next';
-import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
-import { pickByEdit, replaceById } from '@/hooks/dataOps/helpers';
-import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
+import {
+  pickByEdit,
+  removeOptimistic,
+  replaceById,
+} from '@/hooks/dataOps/helpers';
+import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
 
 export const useAccountOps = () => {
   const { isInitialized } = useDataConfig();
   const { setAccounts, setAccountBalances, refreshAccounts } = useDataActions();
-  const { toast } = useToast();
   const { t } = useTranslation();
-  const showErrorToast = useShowErrorToast();
+  const runMutation = useMutationRunner();
 
-  const handleAccountSubmit = useCallback(
-    async (
+  return useMemo(() => {
+    const skip = !isInitialized;
+
+    // Server-first: an account's balance is derived, so there is nothing safe
+    // to show before the write lands. New accounts append — the list reads
+    // in creation order.
+    const handleAccountSubmit = async (
       accountData: Partial<Account> & { initial_balance?: number },
       accountId?: string,
     ): Promise<Account | null> => {
-      const run = async (): Promise<Account | null> => {
-        if (!isInitialized) return null;
+      const saved = await runMutation<Account>({
+        operation: pickByEdit(accountId, 'updateAccount', 'createAccount'),
+        skip,
+        errorMessage: pickByEdit(
+          accountId,
+          t('networth.toasts.accountUpdateFailed'),
+          t('networth.toasts.accountAddFailed'),
+        ),
+        successMessage: pickByEdit(
+          accountId,
+          t('networth.toasts.accountUpdated'),
+          t('networth.toasts.accountAdded'),
+        ),
+        perform: () => {
+          if (accountId) return dataService.updateAccount(accountId, accountData);
 
-        try {
-          let saved: Account;
-          if (accountId) {
-            saved = await dataService.updateAccount(accountId, accountData);
-          } else {
-            saved = await dataService.createAccount(accountData);
-          }
-
-          haptics.success();
+          return dataService.createAccount(accountData);
+        },
+        commit: (row) => {
           setAccounts((prev) => {
-            if (accountId) return replaceById(prev, accountId, saved);
+            if (accountId) return replaceById(prev, accountId, row);
 
-            return [...prev, saved];
+            return [...prev, row];
           });
 
+          // A new account may arrive with an opening balance the server
+          // derived; refetch so the list shows it.
           if (!accountId) {
             refreshAccounts().catch((err) => {
               Sentry.captureException(err, {
@@ -47,169 +63,78 @@ export const useAccountOps = () => {
               });
             });
           }
+        },
+      });
 
-          toast({
-            variant: 'success',
-            title: pickByEdit(
-              accountId,
-              t('networth.toasts.accountUpdated'),
-              t('networth.toasts.accountAdded'),
-            ),
-          });
+      return saved ?? null;
+    };
 
-          return saved;
-        } catch (error) {
-          haptics.error();
-          Sentry.captureException(error, {
-            tags: {
-              operation: pickByEdit(accountId, 'updateAccount', 'createAccount'),
-            },
-          });
-          showErrorToast(
-            pickByEdit(
-              accountId,
-              t('networth.toasts.accountUpdateFailed'),
-              t('networth.toasts.accountAddFailed'),
-            ),
-            () => {
-              void run().catch(() => undefined);
-            },
+    const handleAccountArchive = (accountId: string) =>
+      runMutation({
+        operation: 'archiveAccount',
+        skip,
+        errorMessage: t('networth.toasts.archiveFailed'),
+        onStart: () => haptics.warning(),
+        optimistic: () => removeOptimistic(setAccounts, accountId),
+        perform: () => dataService.archiveAccount(accountId),
+      });
+
+    // A snapshot rewrites the account's balance, so the account row is
+    // refetched rather than patched — the server owns that number.
+    const handleSnapshotCreate = (snapshot: Partial<AccountBalance>) =>
+      runMutation({
+        operation: 'createAccountBalance',
+        skip,
+        errorMessage: t('networth.toasts.balanceUpdateFailed'),
+        successMessage: t('networth.toasts.balanceUpdated'),
+        perform: () => dataService.upsertAccountBalance(snapshot),
+        commit: async (saved) => {
+          const account = await dataService.getAccountById(saved.account_id);
+
+          setAccountBalances((prev) =>
+            [
+              ...prev.filter(
+                (b) =>
+                  !(
+                    b.account_id === saved.account_id &&
+                    b.recorded_at === saved.recorded_at
+                  ),
+              ),
+              saved,
+            ].sort((a, b) => a.recorded_at.localeCompare(b.recorded_at)),
           );
-          throw error;
-        }
-      };
+          setAccounts((prev) => replaceById(prev, saved.account_id, account));
+        },
+      });
 
-      return run();
-    },
-    [isInitialized, setAccounts, refreshAccounts, showErrorToast, toast, t],
-  );
-
-  const handleAccountArchive = useCallback(
-    async (accountId: string) => {
-      const run = async () => {
-        if (!isInitialized) return;
-
-        haptics.warning();
-        let previousAccounts: Account[] = [];
-        setAccounts((prev) => {
-          previousAccounts = prev;
-
-          return prev.filter((a) => a.id !== accountId);
-        });
-
-        try {
-          await dataService.archiveAccount(accountId);
-          haptics.success();
-        } catch (error) {
-          haptics.error();
-          setAccounts(previousAccounts);
-          Sentry.captureException(error, {
-            tags: { operation: 'archiveAccount' },
-          });
-          showErrorToast(t('networth.toasts.archiveFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
-
-      return run();
-    },
-    [isInitialized, setAccounts, showErrorToast, t],
-  );
-
-  const handleSnapshotCreate = useCallback(
-    async (snapshot: Partial<AccountBalance>) => {
-      const run = async () => {
-        if (!isInitialized) return null;
-
-        try {
-          const saved = await dataService.upsertAccountBalance(snapshot);
-          haptics.success();
-
-          const accountId = saved.account_id;
-          const updatedAccount = await dataService.getAccountById(accountId);
-
-          setAccountBalances((prev) => {
-            const filtered = prev.filter(
-              (b) =>
-                !(b.account_id === accountId && b.recorded_at === saved.recorded_at),
-            );
-
-            return [...filtered, saved].sort((a, b) =>
-              a.recorded_at.localeCompare(b.recorded_at),
-            );
-          });
-          setAccounts((prev) => replaceById(prev, accountId, updatedAccount));
-
-          toast({ variant: 'success', title: t('networth.toasts.balanceUpdated') });
-
-          return saved;
-        } catch (error) {
-          haptics.error();
-          Sentry.captureException(error, {
-            tags: { operation: 'createAccountBalance' },
-          });
-          showErrorToast(t('networth.toasts.balanceUpdateFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
-
-      return run();
-    },
-    [isInitialized, setAccounts, setAccountBalances, showErrorToast, toast, t],
-  );
-
-  const handleSnapshotDelete = useCallback(
-    async (snapshotId: string, accountId: string) => {
-      const run = async () => {
-        if (!isInitialized) return;
-
-        haptics.warning();
-        let previousBalances: AccountBalance[] = [];
-        setAccountBalances((prev) => {
-          previousBalances = prev;
-
-          return prev.filter((b) => b.id !== snapshotId);
-        });
-
-        try {
+    const handleSnapshotDelete = (snapshotId: string, accountId: string) =>
+      runMutation({
+        operation: 'deleteAccountBalance',
+        skip,
+        errorMessage: t('networth.toasts.snapshotDeleteFailed'),
+        onStart: () => haptics.warning(),
+        optimistic: () => removeOptimistic(setAccountBalances, snapshotId),
+        perform: async () => {
           await dataService.deleteAccountBalance(snapshotId);
-          const updatedAccount = await dataService.getAccountById(accountId);
-          setAccounts((prev) => replaceById(prev, accountId, updatedAccount));
-          haptics.success();
-        } catch (error) {
-          haptics.error();
-          setAccountBalances(previousBalances);
-          Sentry.captureException(error, {
-            tags: { operation: 'deleteAccountBalance' },
-          });
-          showErrorToast(t('networth.toasts.snapshotDeleteFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
 
-      return run();
-    },
-    [isInitialized, setAccounts, setAccountBalances, showErrorToast, t],
-  );
+          return dataService.getAccountById(accountId);
+        },
+        commit: (account) =>
+          setAccounts((prev) => replaceById(prev, accountId, account)),
+      });
 
-  return useMemo(
-    () => ({
+    return {
       handleAccountSubmit,
       handleAccountArchive,
       handleSnapshotCreate,
       handleSnapshotDelete,
-    }),
-    [
-      handleAccountSubmit,
-      handleAccountArchive,
-      handleSnapshotCreate,
-      handleSnapshotDelete,
-    ],
-  );
+    };
+  }, [
+    isInitialized,
+    setAccounts,
+    setAccountBalances,
+    refreshAccounts,
+    runMutation,
+    t,
+  ]);
 };

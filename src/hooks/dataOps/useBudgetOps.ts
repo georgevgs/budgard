@@ -1,144 +1,106 @@
-import { useCallback, useMemo } from 'react';
-import * as Sentry from '@/lib/sentry';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
-import { haptics } from '@/lib/haptics';
 import type { CategoryBudget } from '@/types/CategoryBudget';
-import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
+import { setScalarOptimistic } from '@/hooks/dataOps/helpers';
+import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
 
 export const useBudgetOps = () => {
   const { isInitialized, monthlyBudget } = useDataConfig();
   const { setMonthlyBudget, setCategoryBudgets } = useDataActions();
   const { t } = useTranslation();
-  const showErrorToast = useShowErrorToast();
+  const runMutation = useMutationRunner();
 
-  const handleBudgetUpdate = useCallback(
-    async (amount: number) => {
-      const run = async () => {
-        const previousBudget = monthlyBudget;
-        setMonthlyBudget(amount);
+  return useMemo(() => {
+    const skip = !isInitialized;
 
-        try {
-          await dataService.upsertBudget(amount);
-        } catch (error) {
-          haptics.error();
-          setMonthlyBudget(previousBudget);
-          Sentry.captureException(error, { tags: { operation: 'upsertBudget' } });
-          showErrorToast(t('budget.toasts.updateFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
+    // The headline budget is a scalar and does not buzz — the figure changing
+    // on screen is the confirmation.
+    const handleBudgetUpdate = async (amount: number): Promise<void> => {
+      await runMutation({
+        operation: 'upsertBudget',
+        errorMessage: t('budget.toasts.updateFailed'),
+        successHaptic: 'none',
+        optimistic: () =>
+          setScalarOptimistic(setMonthlyBudget, monthlyBudget, amount),
+        perform: () => dataService.upsertBudget(amount),
+      });
+    };
+
+    // Upsert, so the optimistic pass either bumps the existing cap or adds a
+    // placeholder row — and the commit collapses both onto the saved row.
+    const handleCategoryBudgetUpsert = (categoryId: string, amount: number) => {
+      const optimisticBudget: CategoryBudget = {
+        id: `temp-${Date.now()}`,
+        user_id: '',
+        category_id: categoryId,
+        monthly_amount: amount,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
 
-      return run();
-    },
-    [monthlyBudget, setMonthlyBudget, showErrorToast, t],
-  );
-
-  const handleCategoryBudgetUpsert = useCallback(
-    async (categoryId: string, amount: number) => {
-      const run = async () => {
-        if (!isInitialized) return;
-
-        let previousBudgets: CategoryBudget[] = [];
-        const optimisticBudget: CategoryBudget = {
-          id: `temp-${Date.now()}`,
-          user_id: '',
-          category_id: categoryId,
-          monthly_amount: amount,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-
-        setCategoryBudgets((prev) => {
-          previousBudgets = prev;
-          const existing = prev.find((b) => b.category_id === categoryId);
-          if (existing) {
-            return prev.map((b) => bumpBudgetAmount(b, categoryId, amount));
-          }
-
-          return [...prev, optimisticBudget];
-        });
-
-        try {
-          const saved = await dataService.upsertCategoryBudget(
-            categoryId,
-            amount,
-          );
-          haptics.success();
+      return runMutation({
+        operation: 'upsertCategoryBudget',
+        skip,
+        errorMessage: t('budget.toasts.categoryUpdateFailed'),
+        optimistic: () => {
+          let previousBudgets: CategoryBudget[] = [];
           setCategoryBudgets((prev) => {
-            const filtered = prev.filter(
+            previousBudgets = prev;
+            const existing = prev.find((b) => b.category_id === categoryId);
+            if (existing) {
+              return prev.map((b) => bumpBudgetAmount(b, categoryId, amount));
+            }
+
+            return [...prev, optimisticBudget];
+          });
+
+          return () => setCategoryBudgets(previousBudgets);
+        },
+        perform: () => dataService.upsertCategoryBudget(categoryId, amount),
+        commit: (saved) =>
+          setCategoryBudgets((prev) => [
+            ...prev.filter(
               (b) =>
                 b.category_id !== categoryId && b.id !== optimisticBudget.id,
-            );
+            ),
+            saved,
+          ]),
+      });
+    };
 
-            return [...filtered, saved];
+    const handleCategoryBudgetDelete = (categoryId: string) =>
+      runMutation({
+        operation: 'deleteCategoryBudget',
+        skip,
+        errorMessage: t('budget.toasts.categoryRemoveFailed'),
+        optimistic: () => {
+          let previousBudgets: CategoryBudget[] = [];
+          setCategoryBudgets((prev) => {
+            previousBudgets = prev;
+
+            return prev.filter((b) => b.category_id !== categoryId);
           });
-        } catch (error) {
-          haptics.error();
-          setCategoryBudgets(previousBudgets);
-          Sentry.captureException(error, {
-            tags: { operation: 'upsertCategoryBudget' },
-          });
-          showErrorToast(t('budget.toasts.categoryUpdateFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
 
-      return run();
-    },
-    [isInitialized, setCategoryBudgets, showErrorToast, t],
-  );
+          return () => setCategoryBudgets(previousBudgets);
+        },
+        perform: () => dataService.deleteCategoryBudget(categoryId),
+      });
 
-  const handleCategoryBudgetDelete = useCallback(
-    async (categoryId: string) => {
-      const run = async () => {
-        if (!isInitialized) return;
-
-        let previousBudgets: CategoryBudget[] = [];
-        setCategoryBudgets((prev) => {
-          previousBudgets = prev;
-
-          return prev.filter((b) => b.category_id !== categoryId);
-        });
-
-        try {
-          await dataService.deleteCategoryBudget(categoryId);
-          haptics.success();
-        } catch (error) {
-          haptics.error();
-          setCategoryBudgets(previousBudgets);
-          Sentry.captureException(error, {
-            tags: { operation: 'deleteCategoryBudget' },
-          });
-          showErrorToast(t('budget.toasts.categoryRemoveFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
-
-      return run();
-    },
-    [isInitialized, setCategoryBudgets, showErrorToast, t],
-  );
-
-  return useMemo(
-    () => ({
+    return {
       handleBudgetUpdate,
       handleCategoryBudgetUpsert,
       handleCategoryBudgetDelete,
-    }),
-    [
-      handleBudgetUpdate,
-      handleCategoryBudgetUpsert,
-      handleCategoryBudgetDelete,
-    ],
-  );
+    };
+  }, [
+    isInitialized,
+    monthlyBudget,
+    setMonthlyBudget,
+    setCategoryBudgets,
+    runMutation,
+    t,
+  ]);
 };
 
 // --- Helpers ---

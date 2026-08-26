@@ -4,8 +4,7 @@ import {
   useCategoriesData,
   useTagsData,
 } from '@/contexts/DataContext';
-import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
-import { useIsPro } from '@/hooks/useIsPro';
+import { useProGate } from '@/hooks/pro/useProGate';
 import { useToast } from '@/hooks/useToast';
 import { buildTransactionsCsv, downloadCsv } from '@/lib/csvExport';
 import type { Expense } from '@/types/Expense';
@@ -17,14 +16,11 @@ export const useActivityCsvExport = (
   const { t } = useTranslation();
   const { categories } = useCategoriesData();
   const tags = useTagsData();
-  const isPro = useIsPro();
-  const { openUpgrade } = useUpgradeDialog();
+  const { isPro, allow } = useProGate();
   const { toast } = useToast();
 
   const handleExport = useCallback(() => {
-    if (!isPro) {
-      openUpgrade();
-
+    if (!allow('csvExport')) {
       return;
     }
     if (transactions.length === 0) {
@@ -42,8 +38,7 @@ export const useActivityCsvExport = (
     });
   }, [
     categories,
-    isPro,
-    openUpgrade,
+    allow,
     exportScope,
     t,
     tags,

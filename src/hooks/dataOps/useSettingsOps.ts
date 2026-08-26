@@ -1,13 +1,15 @@
-import { useCallback, useMemo } from 'react';
-import * as Sentry from '@/lib/sentry';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
-import { haptics } from '@/lib/haptics';
 import { signOut } from '@/lib/auth';
 import type { NotificationPreferenceKey } from '@/types/Budget';
-import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
+import { setScalarOptimistic } from '@/hooks/dataOps/helpers';
+import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
 
+// Every setting here is the same write: show the new value, save it, put the
+// old one back if that fails. None of them buzz on success — the control
+// moving under the user's finger is the confirmation.
 export const useSettingsOps = () => {
   const {
     defaultCurrency,
@@ -22,139 +24,89 @@ export const useSettingsOps = () => {
     setNotificationPreferences,
   } = useDataActions();
   const { t } = useTranslation();
-  const showErrorToast = useShowErrorToast();
+  const runMutation = useMutationRunner();
 
-  const handleCurrencyUpdate = useCallback(
-    async (currency: string) => {
-      const run = async () => {
-        const previousCurrency = defaultCurrency;
-        setDefaultCurrency(currency);
+  return useMemo(() => {
+    const handleCurrencyUpdate = (currency: string) =>
+      runMutation({
+        operation: 'updateDefaultCurrency',
+        errorMessage: t('settings.currency.updateFailed'),
+        successHaptic: 'none',
+        optimistic: () =>
+          setScalarOptimistic(setDefaultCurrency, defaultCurrency, currency),
+        perform: () => dataService.updateDefaultCurrency(currency),
+      });
 
-        try {
-          await dataService.updateDefaultCurrency(currency);
-        } catch (error) {
-          haptics.error();
-          setDefaultCurrency(previousCurrency);
-          Sentry.captureException(error, {
-            tags: { operation: 'updateDefaultCurrency' },
-          });
-          showErrorToast(t('settings.currency.updateFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
+    const handleDailyReminderHourUpdate = (hour: number | null) =>
+      runMutation({
+        operation: 'updateDailyReminderHour',
+        errorMessage: t('settings.notifications.dailyReminderFailed'),
+        successHaptic: 'none',
+        optimistic: () =>
+          setScalarOptimistic(setDailyReminderHour, dailyReminderHour, hour),
+        perform: () => dataService.updateDailyReminderHour(hour),
+      });
 
-      return run();
-    },
-    [defaultCurrency, setDefaultCurrency, showErrorToast, t],
-  );
+    const handleNotificationPreferenceUpdate = (
+      key: NotificationPreferenceKey,
+      enabled: boolean,
+    ) => {
+      const next = { ...notificationPreferences, [key]: enabled };
 
-  const handleDailyReminderHourUpdate = useCallback(
-    async (hour: number | null) => {
-      const run = async () => {
-        const previous = dailyReminderHour;
-        setDailyReminderHour(hour);
+      return runMutation({
+        operation: 'updateNotificationPreferences',
+        errorMessage: t('settings.notifications.preferencesUpdateFailed'),
+        successHaptic: 'none',
+        optimistic: () =>
+          setScalarOptimistic(
+            setNotificationPreferences,
+            notificationPreferences,
+            next,
+          ),
+        perform: () => dataService.updateNotificationPreferences(next),
+      });
+    };
 
-        try {
-          await dataService.updateDailyReminderHour(hour);
-        } catch (error) {
-          haptics.error();
-          setDailyReminderHour(previous);
-          Sentry.captureException(error, {
-            tags: { operation: 'updateDailyReminderHour' },
-          });
-          showErrorToast(t('settings.notifications.dailyReminderFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
+    const handleSavingsPctUpdate = (pct: number | null) =>
+      runMutation({
+        operation: 'updateDefaultSavingsPct',
+        errorMessage: t('income.toasts.savingsRateUpdateFailed'),
+        successHaptic: 'none',
+        optimistic: () =>
+          setScalarOptimistic(setDefaultSavingsPct, defaultSavingsPct, pct),
+        perform: () => dataService.updateDefaultSavingsPct(pct),
+      });
 
-      return run();
-    },
-    [dailyReminderHour, setDailyReminderHour, showErrorToast, t],
-  );
+    // No retry: re-running an account deletion on a tap is not a kindness.
+    const handleDeleteAccount = () =>
+      runMutation({
+        operation: 'deleteAccount',
+        errorMessage: t('settings.data.deleteAccountFailed'),
+        successHaptic: 'none',
+        retryable: false,
+        perform: async () => {
+          await dataService.deleteAccount();
+          await signOut();
+        },
+      });
 
-  const handleNotificationPreferenceUpdate = useCallback(
-    async (key: NotificationPreferenceKey, enabled: boolean) => {
-      const run = async () => {
-        const previous = notificationPreferences;
-        const next = { ...previous, [key]: enabled };
-        setNotificationPreferences(next);
-
-        try {
-          await dataService.updateNotificationPreferences(next);
-        } catch (error) {
-          haptics.error();
-          setNotificationPreferences(previous);
-          Sentry.captureException(error, {
-            tags: { operation: 'updateNotificationPreferences' },
-          });
-          showErrorToast(t('settings.notifications.preferencesUpdateFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
-
-      return run();
-    },
-    [notificationPreferences, setNotificationPreferences, showErrorToast, t],
-  );
-
-  const handleSavingsPctUpdate = useCallback(
-    async (pct: number | null) => {
-      const run = async () => {
-        const previous = defaultSavingsPct;
-        setDefaultSavingsPct(pct);
-
-        try {
-          await dataService.updateDefaultSavingsPct(pct);
-        } catch (error) {
-          haptics.error();
-          setDefaultSavingsPct(previous);
-          Sentry.captureException(error, {
-            tags: { operation: 'updateDefaultSavingsPct' },
-          });
-          showErrorToast(t('income.toasts.savingsRateUpdateFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
-
-      return run();
-    },
-    [defaultSavingsPct, setDefaultSavingsPct, showErrorToast, t],
-  );
-
-  const handleDeleteAccount = useCallback(async () => {
-    try {
-      await dataService.deleteAccount();
-      await signOut();
-    } catch (error) {
-      haptics.error();
-      Sentry.captureException(error, { tags: { operation: 'deleteAccount' } });
-      showErrorToast(t('settings.data.deleteAccountFailed'));
-      throw error;
-    }
-  }, [showErrorToast, t]);
-
-  return useMemo(
-    () => ({
+    return {
       handleCurrencyUpdate,
       handleDailyReminderHourUpdate,
       handleNotificationPreferenceUpdate,
       handleSavingsPctUpdate,
       handleDeleteAccount,
-    }),
-    [
-      handleCurrencyUpdate,
-      handleDailyReminderHourUpdate,
-      handleNotificationPreferenceUpdate,
-      handleSavingsPctUpdate,
-      handleDeleteAccount,
-    ],
-  );
+    };
+  }, [
+    defaultCurrency,
+    defaultSavingsPct,
+    dailyReminderHour,
+    notificationPreferences,
+    setDefaultCurrency,
+    setDefaultSavingsPct,
+    setDailyReminderHour,
+    setNotificationPreferences,
+    runMutation,
+    t,
+  ]);
 };

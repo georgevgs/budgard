@@ -1,11 +1,7 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useCategoriesData } from '@/contexts/DataContext';
-import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
 import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
-import { useIsPro } from '@/hooks/useIsPro';
-import { toast } from '@/hooks/useToast';
-import { canAddCategory, FREE_CATEGORY_LIMIT } from '@/lib/proLimits';
+import { useProGate } from '@/hooks/pro/useProGate';
 import type { Category, CategoryType } from '@/types/Category';
 
 export type CategoryManagerView =
@@ -13,11 +9,9 @@ export type CategoryManagerView =
   | { type: 'form'; category?: Category };
 
 export const useCategoryManager = (categoryType: CategoryType) => {
-  const { t } = useTranslation();
   const { expenseCategories, incomeCategories } = useCategoriesData();
   const { handleCategoryDelete } = useCategoryOps();
-  const isPro = useIsPro();
-  const { openUpgrade } = useUpgradeDialog();
+  const { allow } = useProGate();
   const [view, setView] = useState<CategoryManagerView>({ type: 'list' });
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
 
@@ -29,12 +23,7 @@ export const useCategoryManager = (categoryType: CategoryType) => {
 
   // The free cap counts each type separately (expense vs income sources).
   const handleAddClick = () => {
-    if (!canAddCategory(isPro, categories.length)) {
-      toast({
-        title: t('pro.gate.categoryLimit', { limit: FREE_CATEGORY_LIMIT }),
-      });
-      openUpgrade();
-
+    if (!allow('categories', categories.length)) {
       return;
     }
 

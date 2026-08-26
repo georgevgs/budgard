@@ -1,5 +1,4 @@
-import { useCallback, useMemo } from 'react';
-import * as Sentry from '@/lib/sentry';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
@@ -10,7 +9,7 @@ import { isOfflineError } from '@/lib/offlineError';
 import type { Expense } from '@/types/Expense';
 import { replaceById, patchById, pickByEdit } from '@/hooks/dataOps/helpers';
 import { mergeUniqueById } from '@/contexts/DataContext.helpers';
-import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
+import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
 
 type BulkIncomeRow = {
   date: string;
@@ -24,163 +23,130 @@ export const useIncomeOps = () => {
   const { setIncomes } = useDataActions();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const showErrorToast = useShowErrorToast();
+  const runMutation = useMutationRunner();
 
-  const handleIncomeSubmit = useCallback(
-    async (
+  return useMemo(() => {
+    const skip = !isInitialized;
+
+    // Queues the write and applies it locally, so the row looks saved while
+    // the device is offline. Returns true to tell the runner it is handled.
+    const queueOffline = async (
+      incomeData: Partial<Expense>,
+      incomeId: string | undefined,
+      error: unknown,
+    ): Promise<boolean> => {
+      if (!isOfflineError(error)) {
+        return false;
+      }
+
+      const tempId = pickByEdit<string | null>(incomeId, null, createTempId());
+      await offlineQueue.enqueueWithReconcile(
+        pickByEdit(incomeId, 'updateIncome', 'createIncome'),
+        {
+          ...incomeData,
+          ...pickByEdit<Record<string, unknown>>(
+            incomeId,
+            { id: incomeId },
+            { __tempId: tempId },
+          ),
+        } as Record<string, unknown>,
+      );
+
+      setIncomes((prev) => {
+        if (incomeId) return patchById(prev, incomeId, incomeData);
+
+        const optimistic = {
+          ...incomeData,
+          id: tempId as string,
+          created_at: new Date().toISOString(),
+        } as Expense;
+
+        return [optimistic, ...prev];
+      });
+      haptics.success();
+      toast({
+        variant: 'success',
+        title: t('offline.savedOffline'),
+        description: t('offline.willSync'),
+      });
+
+      return true;
+    };
+
+    // Server-first: an income row carries server-derived columns, so it is
+    // shown only once the write lands (or once it is safely queued).
+    const handleIncomeSubmit = async (
       incomeData: Partial<Expense>,
       incomeId?: string,
     ): Promise<Expense | null> => {
-      const run = async (): Promise<Expense | null> => {
-        if (!isInitialized) {
-          return null;
-        }
+      const saved = await runMutation<Expense>({
+        operation: pickByEdit(incomeId, 'updateIncome', 'createIncome'),
+        skip,
+        errorMessage: pickByEdit(
+          incomeId,
+          t('income.toasts.updateFailed'),
+          t('income.toasts.addFailed'),
+        ),
+        successMessage: pickByEdit(
+          incomeId,
+          t('income.toasts.updated'),
+          t('income.toasts.added'),
+        ),
+        offlineFallback: (error) => queueOffline(incomeData, incomeId, error),
+        perform: () => {
+          if (incomeId) return dataService.updateIncome(incomeData, incomeId);
 
-        try {
-          let savedIncome: Expense;
-          if (incomeId) {
-            savedIncome = await dataService.updateIncome(incomeData, incomeId);
-          } else {
-            savedIncome = await dataService.createIncome(incomeData);
-          }
-
-          haptics.success();
+          return dataService.createIncome(incomeData);
+        },
+        commit: (row) =>
           setIncomes((prev) => {
-            if (incomeId) return replaceById(prev, incomeId, savedIncome);
+            if (incomeId) return replaceById(prev, incomeId, row);
 
-            return [savedIncome, ...prev];
+            return [row, ...prev];
+          }),
+      });
+
+      return saved ?? null;
+    };
+
+    // The row is removed once the delete lands, not before — a failed delete
+    // that already emptied the row would read as data loss.
+    const handleIncomeDelete = (incomeId: string) =>
+      runMutation({
+        operation: 'deleteIncome',
+        skip,
+        errorMessage: t('income.toasts.deleteFailed'),
+        onStart: () => haptics.warning(),
+        successHaptic: 'none',
+        offlineFallback: async (error) => {
+          if (!isOfflineError(error)) return false;
+
+          await offlineQueue.enqueueWithReconcile('deleteIncome', {
+            id: incomeId,
           });
+          setIncomes((prev) => prev.filter((e) => e.id !== incomeId));
+          haptics.success();
           toast({
             variant: 'success',
-            title: pickByEdit(
-              incomeId,
-              t('income.toasts.updated'),
-              t('income.toasts.added'),
-            ),
+            title: t('offline.deleteSavedOffline'),
+            description: t('offline.willSync'),
           });
 
-          return savedIncome;
-        } catch (error) {
-          if (isOfflineError(error)) {
-            const mutationType = pickByEdit(
-              incomeId,
-              'updateIncome',
-              'createIncome',
-            );
-            const tempId = pickByEdit<string | null>(
-              incomeId,
-              null,
-              createTempId(),
-            );
-            const idPayload = pickByEdit<Record<string, unknown>>(
-              incomeId,
-              { id: incomeId },
-              { __tempId: tempId },
-            );
-            await offlineQueue.enqueueWithReconcile(mutationType, {
-              ...incomeData,
-              ...idPayload,
-            } as Record<string, unknown>);
-            setIncomes((prev) => {
-              if (incomeId) {
-                return patchById(prev, incomeId, incomeData);
-              }
-              const optimistic = {
-                ...incomeData,
-                id: tempId as string,
-                created_at: new Date().toISOString(),
-              } as Expense;
+          return true;
+        },
+        perform: () => dataService.deleteIncome(incomeId),
+        commit: () => setIncomes((prev) => prev.filter((e) => e.id !== incomeId)),
+      });
 
-              return [optimistic, ...prev];
-            });
-            haptics.success();
-            toast({
-              variant: 'success',
-              title: t('offline.savedOffline'),
-              description: t('offline.willSync'),
-            });
+    // The insert returns the created rows with their embeds, so merging them
+    // into state replaces a full-history re-download.
+    const handleBulkIncomeImport = async (incomesData: BulkIncomeRow[]) => {
+      if (skip) return;
 
-            return null;
-          }
-          haptics.error();
-          Sentry.captureException(error, {
-            tags: {
-              operation: pickByEdit(incomeId, 'updateIncome', 'createIncome'),
-            },
-          });
-          showErrorToast(
-            pickByEdit(
-              incomeId,
-              t('income.toasts.updateFailed'),
-              t('income.toasts.addFailed'),
-            ),
-            () => {
-              void run().catch(() => undefined);
-            },
-          );
-          throw error;
-        }
-      };
-
-      return run();
-    },
-    [isInitialized, setIncomes, showErrorToast, toast, t],
-  );
-
-  const handleIncomeDelete = useCallback(
-    async (incomeId: string) => {
-      const run = async () => {
-        if (!isInitialized) {
-          return;
-        }
-
-        haptics.warning();
-        try {
-          await dataService.deleteIncome(incomeId);
-          setIncomes((prev) => prev.filter((e) => e.id !== incomeId));
-        } catch (error) {
-          if (isOfflineError(error)) {
-            await offlineQueue.enqueueWithReconcile('deleteIncome', {
-              id: incomeId,
-            });
-            setIncomes((prev) => prev.filter((e) => e.id !== incomeId));
-            haptics.success();
-            toast({
-              variant: 'success',
-              title: t('offline.deleteSavedOffline'),
-              description: t('offline.willSync'),
-            });
-
-            return;
-          }
-          haptics.error();
-          Sentry.captureException(error, { tags: { operation: 'deleteIncome' } });
-          showErrorToast(t('income.toasts.deleteFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
-
-      return run();
-    },
-    [isInitialized, setIncomes, showErrorToast, toast, t],
-  );
-
-  const handleBulkIncomeImport = useCallback(
-    async (incomesData: BulkIncomeRow[]) => {
-      if (!isInitialized) return;
-
-      // Mirrors handleBulkExpenseImport: the insert returns the created rows
-      // with their embeds, so merging replaces a full re-download.
       const created = await dataService.createIncomesBulk(incomesData);
       setIncomes((prev) => mergeUniqueById(prev, created));
-    },
-    [isInitialized, setIncomes],
-  );
+    };
 
-  return useMemo(
-    () => ({ handleIncomeSubmit, handleIncomeDelete, handleBulkIncomeImport }),
-    [handleIncomeSubmit, handleIncomeDelete, handleBulkIncomeImport],
-  );
+    return { handleIncomeSubmit, handleIncomeDelete, handleBulkIncomeImport };
+  }, [isInitialized, setIncomes, runMutation, toast, t]);
 };

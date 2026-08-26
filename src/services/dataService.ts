@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { rows, row, maybeRow, done } from '@/services/supabaseCrud';
 import type { Budget, NotificationPreferences } from '@/types/Budget';
 import type { CategoryBudget } from '@/types/CategoryBudget';
 import type { Category } from '@/types/Category';
@@ -24,7 +25,8 @@ const CATEGORY_EMBED = 'category:categories(id, name, color, icon, type, kind)';
 // with a computed relationship. Naming the FK keeps today's bundles immune
 // if a second relationship path to tags ever appears on these tables.
 const EXPENSE_TAG_EMBED = 'tag:tags!expenses_tag_id_fkey(id, name, color)';
-const TEMPLATE_TAG_EMBED = 'tag:tags!expense_templates_tag_id_fkey(id, name, color)';
+const TEMPLATE_TAG_EMBED =
+  'tag:tags!expense_templates_tag_id_fkey(id, name, color)';
 const EXTRA_TAGS_EMBED = 'extra_tags:expense_tags(tag:tags(id, name, color))';
 const SELECT_WITH_CATEGORY_AND_TAG = `*, ${CATEGORY_EMBED}, ${EXPENSE_TAG_EMBED}, ${EXTRA_TAGS_EMBED}`;
 const SELECT_WITH_CATEGORY = `*, ${CATEGORY_EMBED}`;
@@ -53,54 +55,31 @@ export const dataService = {
   async getCategories(signal?: AbortSignal) {
     let query = supabase.from('categories').select('*').order('name');
     if (signal) query = query.abortSignal(signal);
-    const { data, error } = await query;
 
-    if (error) throw error;
-
-    return data as Category[];
+    return rows<Category>(query);
   },
 
   async getTags(signal?: AbortSignal) {
     let query = supabase.from('tags').select('*').order('name');
     if (signal) query = query.abortSignal(signal);
-    const { data, error } = await query;
 
-    if (error) throw error;
-
-    return data as Tag[];
+    return rows<Tag>(query);
   },
 
   async createTag(tagData: { name: string; color: string }) {
-    const { data, error } = await supabase
-      .from('tags')
-      .insert(tagData)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return data as Tag;
+    return row<Tag>(supabase.from('tags').insert(tagData).select().single());
   },
 
   async updateTag(tagId: string, tagData: { name: string }) {
-    const { data, error } = await supabase
-      .from('tags')
-      .update(tagData)
-      .eq('id', tagId)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return data as Tag;
+    return row<Tag>(
+      supabase.from('tags').update(tagData).eq('id', tagId).select().single(),
+    );
   },
 
   // expenses.tag_id is ON DELETE SET NULL and expense_tags cascades,
   // so deleting a tag never touches the expenses themselves.
   async deleteTag(tagId: string) {
-    const { error } = await supabase.from('tags').delete().eq('id', tagId);
-
-    if (error) throw error;
+    await done(supabase.from('tags').delete().eq('id', tagId));
   },
 
   async getNoSpendDays(signal?: AbortSignal) {
@@ -109,35 +88,25 @@ export const dataService = {
       .select('*')
       .order('day', { ascending: false });
     if (signal) query = query.abortSignal(signal);
-    const { data, error } = await query;
 
-    if (error) throw error;
-
-    return data as NoSpendDay[];
+    return rows<NoSpendDay>(query);
   },
 
   // Idempotent by primary key — a double tap or a replayed write banks the day
   // once. onConflict/ignoreDuplicates keeps that from surfacing as an error the
   // caller would have to special-case.
   async createNoSpendDay(day: string) {
-    const { data, error } = await supabase
-      .from('no_spend_days')
-      .upsert({ day }, { onConflict: 'user_id,day', ignoreDuplicates: true })
-      .select()
-      .maybeSingle();
-
-    if (error) throw error;
-
-    return data as NoSpendDay | null;
+    return maybeRow<NoSpendDay>(
+      supabase
+        .from('no_spend_days')
+        .upsert({ day }, { onConflict: 'user_id,day', ignoreDuplicates: true })
+        .select()
+        .maybeSingle(),
+    );
   },
 
   async deleteNoSpendDay(day: string) {
-    const { error } = await supabase
-      .from('no_spend_days')
-      .delete()
-      .eq('day', day);
-
-    if (error) throw error;
+    await done(supabase.from('no_spend_days').delete().eq('day', day));
   },
 
   async getExpenses(
@@ -194,49 +163,39 @@ export const dataService = {
       category_id: string | null;
     }>,
   ) {
-    const { data, error } = await supabase
-      .from('expenses')
-      .insert(incomesData.map((row) => ({ ...row, type: 'income' })))
-      .select(SELECT_WITH_CATEGORY);
-
-    if (error) throw error;
-
-    return data as Expense[];
+    return rows<Expense>(
+      supabase
+        .from('expenses')
+        .insert(incomesData.map((row) => ({ ...row, type: 'income' })))
+        .select(SELECT_WITH_CATEGORY),
+    );
   },
 
   async createIncome(incomeData: Partial<Expense>) {
-    const { data, error } = await supabase
-      .from('expenses')
-      .insert({ ...incomeData, type: 'income' })
-      .select(SELECT_WITH_CATEGORY)
-      .single();
-
-    if (error) throw error;
-
-    return data as Expense;
+    return row<Expense>(
+      supabase
+        .from('expenses')
+        .insert({ ...incomeData, type: 'income' })
+        .select(SELECT_WITH_CATEGORY)
+        .single(),
+    );
   },
 
   async updateIncome(incomeData: Partial<Expense>, incomeId: string) {
     const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = incomeData;
-    const { data, error } = await supabase
-      .from('expenses')
-      .update(safeUpdate)
-      .eq('id', incomeId)
-      .select(SELECT_WITH_CATEGORY)
-      .single();
 
-    if (error) throw error;
-
-    return data as Expense;
+    return row<Expense>(
+      supabase
+        .from('expenses')
+        .update(safeUpdate)
+        .eq('id', incomeId)
+        .select(SELECT_WITH_CATEGORY)
+        .single(),
+    );
   },
 
   async deleteIncome(incomeId: string) {
-    const { error } = await supabase
-      .from('expenses')
-      .delete()
-      .eq('id', incomeId);
-
-    if (error) throw error;
+    await done(supabase.from('expenses').delete().eq('id', incomeId));
   },
 
   async updateExpense(expenseData: ExpenseWritePayload, expenseId: string) {
@@ -303,7 +262,9 @@ export const dataService = {
 
     const { error: insertError } = await supabase
       .from('expense_tags')
-      .insert(tagIds.map((tagId) => ({ expense_id: expenseId, tag_id: tagId })));
+      .insert(
+        tagIds.map((tagId) => ({ expense_id: expenseId, tag_id: tagId })),
+      );
 
     if (insertError) throw insertError;
   },
@@ -344,47 +305,30 @@ export const dataService = {
   },
 
   async deleteExpense(expenseId: string) {
-    const { error } = await supabase
-      .from('expenses')
-      .delete()
-      .eq('id', expenseId);
-
-    if (error) throw error;
+    await done(supabase.from('expenses').delete().eq('id', expenseId));
   },
 
   async createCategory(categoryData: Partial<Category>) {
-    const { data, error } = await supabase
-      .from('categories')
-      .insert(categoryData)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return data as Category;
+    return row<Category>(
+      supabase.from('categories').insert(categoryData).select().single(),
+    );
   },
 
   async updateCategory(categoryId: string, categoryData: Partial<Category>) {
     const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = categoryData;
-    const { data, error } = await supabase
-      .from('categories')
-      .update(safeUpdate)
-      .eq('id', categoryId)
-      .select()
-      .single();
 
-    if (error) throw error;
-
-    return data as Category;
+    return row<Category>(
+      supabase
+        .from('categories')
+        .update(safeUpdate)
+        .eq('id', categoryId)
+        .select()
+        .single(),
+    );
   },
 
   async deleteCategory(categoryId: string) {
-    const { error } = await supabase
-      .from('categories')
-      .delete()
-      .eq('id', categoryId);
-
-    if (error) throw error;
+    await done(supabase.from('categories').delete().eq('id', categoryId));
   },
 
   async getRecurringExpenses(signal?: AbortSignal) {
@@ -394,11 +338,8 @@ export const dataService = {
       .eq('type', 'expense')
       .order('created_at', { ascending: false });
     if (signal) query = query.abortSignal(signal);
-    const { data, error } = await query;
 
-    if (error) throw error;
-
-    return data as RecurringExpense[];
+    return rows<RecurringExpense>(query);
   },
 
   async getRecurringIncomes(signal?: AbortSignal) {
@@ -408,23 +349,18 @@ export const dataService = {
       .eq('type', 'income')
       .order('created_at', { ascending: false });
     if (signal) query = query.abortSignal(signal);
-    const { data, error } = await query;
 
-    if (error) throw error;
-
-    return data as RecurringExpense[];
+    return rows<RecurringExpense>(query);
   },
 
   async createRecurringIncome(incomeData: Partial<RecurringExpense>) {
-    const { data, error } = await supabase
-      .from('recurring_expenses')
-      .insert({ ...incomeData, type: 'income' })
-      .select(SELECT_WITH_CATEGORY)
-      .single();
-
-    if (error) throw error;
-
-    return data as RecurringExpense;
+    return row<RecurringExpense>(
+      supabase
+        .from('recurring_expenses')
+        .insert({ ...incomeData, type: 'income' })
+        .select(SELECT_WITH_CATEGORY)
+        .single(),
+    );
   },
 
   async updateRecurringIncome(
@@ -432,50 +368,40 @@ export const dataService = {
     incomeId: string,
   ) {
     const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = incomeData;
-    const { data, error } = await supabase
-      .from('recurring_expenses')
-      .update(safeUpdate)
-      .eq('id', incomeId)
-      .select(SELECT_WITH_CATEGORY)
-      .single();
 
-    if (error) throw error;
-
-    return data as RecurringExpense;
+    return row<RecurringExpense>(
+      supabase
+        .from('recurring_expenses')
+        .update(safeUpdate)
+        .eq('id', incomeId)
+        .select(SELECT_WITH_CATEGORY)
+        .single(),
+    );
   },
 
   async deleteRecurringIncome(incomeId: string) {
-    const { error } = await supabase
-      .from('recurring_expenses')
-      .delete()
-      .eq('id', incomeId);
-
-    if (error) throw error;
+    await done(supabase.from('recurring_expenses').delete().eq('id', incomeId));
   },
 
   async toggleRecurringIncome(incomeId: string, active: boolean) {
-    const { data, error } = await supabase
-      .from('recurring_expenses')
-      .update({ active })
-      .eq('id', incomeId)
-      .select(SELECT_WITH_CATEGORY)
-      .single();
-
-    if (error) throw error;
-
-    return data as RecurringExpense;
+    return row<RecurringExpense>(
+      supabase
+        .from('recurring_expenses')
+        .update({ active })
+        .eq('id', incomeId)
+        .select(SELECT_WITH_CATEGORY)
+        .single(),
+    );
   },
 
   async createRecurringExpense(expenseData: Partial<RecurringExpense>) {
-    const { data, error } = await supabase
-      .from('recurring_expenses')
-      .insert(expenseData)
-      .select(SELECT_WITH_CATEGORY)
-      .single();
-
-    if (error) throw error;
-
-    return data as RecurringExpense;
+    return row<RecurringExpense>(
+      supabase
+        .from('recurring_expenses')
+        .insert(expenseData)
+        .select(SELECT_WITH_CATEGORY)
+        .single(),
+    );
   },
 
   async updateRecurringExpense(
@@ -483,48 +409,39 @@ export const dataService = {
     expenseId: string,
   ) {
     const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = expenseData;
-    const { data, error } = await supabase
-      .from('recurring_expenses')
-      .update(safeUpdate)
-      .eq('id', expenseId)
-      .select(SELECT_WITH_CATEGORY)
-      .single();
 
-    if (error) throw error;
-
-    return data as RecurringExpense;
+    return row<RecurringExpense>(
+      supabase
+        .from('recurring_expenses')
+        .update(safeUpdate)
+        .eq('id', expenseId)
+        .select(SELECT_WITH_CATEGORY)
+        .single(),
+    );
   },
 
   async deleteRecurringExpense(expenseId: string) {
-    const { error } = await supabase
-      .from('recurring_expenses')
-      .delete()
-      .eq('id', expenseId);
-
-    if (error) throw error;
+    await done(
+      supabase.from('recurring_expenses').delete().eq('id', expenseId),
+    );
   },
 
   async toggleRecurringExpense(expenseId: string, active: boolean) {
-    const { data, error } = await supabase
-      .from('recurring_expenses')
-      .update({ active })
-      .eq('id', expenseId)
-      .select(SELECT_WITH_CATEGORY)
-      .single();
-
-    if (error) throw error;
-
-    return data as RecurringExpense;
+    return row<RecurringExpense>(
+      supabase
+        .from('recurring_expenses')
+        .update({ active })
+        .eq('id', expenseId)
+        .select(SELECT_WITH_CATEGORY)
+        .single(),
+    );
   },
 
   async getBudget(signal?: AbortSignal) {
     let query = supabase.from('user_budgets').select('*');
     if (signal) query = query.abortSignal(signal);
-    const { data, error } = await query.maybeSingle();
 
-    if (error) throw error;
-
-    return data as Budget | null;
+    return maybeRow<Budget>(query.maybeSingle());
   },
 
   async upsertBudget(monthlyAmount: number) {
@@ -534,18 +451,16 @@ export const dataService = {
     } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase
-      .from('user_budgets')
-      .upsert(
-        { user_id: session.user.id, monthly_amount: monthlyAmount },
-        { onConflict: 'user_id' },
-      )
-      .select()
-      .maybeSingle();
-
-    if (error) throw error;
-
-    return data as Budget;
+    return row<Budget>(
+      supabase
+        .from('user_budgets')
+        .upsert(
+          { user_id: session.user.id, monthly_amount: monthlyAmount },
+          { onConflict: 'user_id' },
+        )
+        .select()
+        .maybeSingle(),
+    );
   },
 
   async updateDefaultCurrency(currency: string) {
@@ -555,18 +470,16 @@ export const dataService = {
     } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase
-      .from('user_budgets')
-      .upsert(
-        { user_id: session.user.id, default_currency: currency },
-        { onConflict: 'user_id' },
-      )
-      .select()
-      .maybeSingle();
-
-    if (error) throw error;
-
-    return data as Budget;
+    return row<Budget>(
+      supabase
+        .from('user_budgets')
+        .upsert(
+          { user_id: session.user.id, default_currency: currency },
+          { onConflict: 'user_id' },
+        )
+        .select()
+        .maybeSingle(),
+    );
   },
 
   async updateDefaultSavingsPct(pct: number | null) {
@@ -576,28 +489,23 @@ export const dataService = {
     } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase
-      .from('user_budgets')
-      .upsert(
-        { user_id: session.user.id, default_savings_pct: pct },
-        { onConflict: 'user_id' },
-      )
-      .select()
-      .maybeSingle();
-
-    if (error) throw error;
-
-    return data as Budget;
+    return row<Budget>(
+      supabase
+        .from('user_budgets')
+        .upsert(
+          { user_id: session.user.id, default_savings_pct: pct },
+          { onConflict: 'user_id' },
+        )
+        .select()
+        .maybeSingle(),
+    );
   },
 
   async getCategoryBudgets(signal?: AbortSignal) {
     let query = supabase.from('category_budgets').select('*');
     if (signal) query = query.abortSignal(signal);
-    const { data, error } = await query;
 
-    if (error) throw error;
-
-    return data as CategoryBudget[];
+    return rows<CategoryBudget>(query);
   },
 
   async upsertCategoryBudget(categoryId: string, monthlyAmount: number) {
@@ -607,22 +515,20 @@ export const dataService = {
     } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase
-      .from('category_budgets')
-      .upsert(
-        {
-          user_id: session.user.id,
-          category_id: categoryId,
-          monthly_amount: monthlyAmount,
-        },
-        { onConflict: 'user_id,category_id' },
-      )
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return data as CategoryBudget;
+    return row<CategoryBudget>(
+      supabase
+        .from('category_budgets')
+        .upsert(
+          {
+            user_id: session.user.id,
+            category_id: categoryId,
+            monthly_amount: monthlyAmount,
+          },
+          { onConflict: 'user_id,category_id' },
+        )
+        .select()
+        .single(),
+    );
   },
 
   async deleteCategoryBudget(categoryId: string) {
@@ -632,13 +538,13 @@ export const dataService = {
     } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const { error } = await supabase
-      .from('category_budgets')
-      .delete()
-      .eq('user_id', session.user.id)
-      .eq('category_id', categoryId);
-
-    if (error) throw error;
+    await done(
+      supabase
+        .from('category_budgets')
+        .delete()
+        .eq('user_id', session.user.id)
+        .eq('category_id', categoryId),
+    );
   },
 
   async updateDailyReminderHour(hour: number | null) {
@@ -650,18 +556,16 @@ export const dataService = {
 
     // Use upsert: users without a `user_budgets` row (no monthly budget set)
     // would silently no-op with `.update()`.
-    const { data, error } = await supabase
-      .from('user_budgets')
-      .upsert(
-        { user_id: session.user.id, daily_reminder_hour: hour },
-        { onConflict: 'user_id' },
-      )
-      .select()
-      .maybeSingle();
-
-    if (error) throw error;
-
-    return data as Budget;
+    return row<Budget>(
+      supabase
+        .from('user_budgets')
+        .upsert(
+          { user_id: session.user.id, daily_reminder_hour: hour },
+          { onConflict: 'user_id' },
+        )
+        .select()
+        .maybeSingle(),
+    );
   },
 
   async updateNotificationPreferences(prefs: NotificationPreferences) {
@@ -671,18 +575,16 @@ export const dataService = {
     } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
 
-    const { data, error } = await supabase
-      .from('user_budgets')
-      .upsert(
-        { user_id: session.user.id, notification_preferences: prefs },
-        { onConflict: 'user_id' },
-      )
-      .select()
-      .maybeSingle();
-
-    if (error) throw error;
-
-    return data as Budget;
+    return row<Budget>(
+      supabase
+        .from('user_budgets')
+        .upsert(
+          { user_id: session.user.id, notification_preferences: prefs },
+          { onConflict: 'user_id' },
+        )
+        .select()
+        .maybeSingle(),
+    );
   },
 
   async getTemplates(signal?: AbortSignal) {
@@ -691,32 +593,24 @@ export const dataService = {
       .select(SELECT_TEMPLATE)
       .order('created_at', { ascending: false });
     if (signal) query = query.abortSignal(signal);
-    const { data, error } = await query;
 
-    if (error) throw error;
-
-    return data as ExpenseTemplate[];
+    return rows<ExpenseTemplate>(query);
   },
 
   async createTemplate(templateData: Partial<ExpenseTemplate>) {
-    const { data, error } = await supabase
-      .from('expense_templates')
-      .insert(templateData)
-      .select(SELECT_TEMPLATE)
-      .single();
-
-    if (error) throw error;
-
-    return data as ExpenseTemplate;
+    return row<ExpenseTemplate>(
+      supabase
+        .from('expense_templates')
+        .insert(templateData)
+        .select(SELECT_TEMPLATE)
+        .single(),
+    );
   },
 
   async deleteTemplate(templateId: string) {
-    const { error } = await supabase
-      .from('expense_templates')
-      .delete()
-      .eq('id', templateId);
-
-    if (error) throw error;
+    await done(
+      supabase.from('expense_templates').delete().eq('id', templateId),
+    );
   },
 
   async getGoals(signal?: AbortSignal) {
@@ -725,43 +619,29 @@ export const dataService = {
       .select('*')
       .order('created_at', { ascending: false });
     if (signal) query = query.abortSignal(signal);
-    const { data, error } = await query;
 
-    if (error) throw error;
-
-    return data as Goal[];
+    return rows<Goal>(query);
   },
 
   async createGoal(goalData: Partial<Goal>) {
-    const { data, error } = await supabase
-      .from('goals')
-      .insert(goalData)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return data as Goal;
+    return row<Goal>(supabase.from('goals').insert(goalData).select().single());
   },
 
   async updateGoal(goalId: string, goalData: Partial<Goal>) {
     const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = goalData;
-    const { data, error } = await supabase
-      .from('goals')
-      .update(safeUpdate)
-      .eq('id', goalId)
-      .select()
-      .single();
 
-    if (error) throw error;
-
-    return data as Goal;
+    return row<Goal>(
+      supabase
+        .from('goals')
+        .update(safeUpdate)
+        .eq('id', goalId)
+        .select()
+        .single(),
+    );
   },
 
   async deleteGoal(goalId: string) {
-    const { error } = await supabase.from('goals').delete().eq('id', goalId);
-
-    if (error) throw error;
+    await done(supabase.from('goals').delete().eq('id', goalId));
   },
 
   async getAccounts(signal?: AbortSignal) {
@@ -771,11 +651,8 @@ export const dataService = {
       .eq('is_archived', false)
       .order('created_at', { ascending: true });
     if (signal) query = query.abortSignal(signal);
-    const { data, error } = await query;
 
-    if (error) throw error;
-
-    return data as Account[];
+    return rows<Account>(query);
   },
 
   async createAccount(
@@ -821,29 +698,26 @@ export const dataService = {
 
   async updateAccount(accountId: string, accountData: Partial<Account>) {
     const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = accountData;
-    const { data, error } = await supabase
-      .from('accounts')
-      .update(safeUpdate)
-      .eq('id', accountId)
-      .select()
-      .single();
 
-    if (error) throw error;
-
-    return data as Account;
+    return row<Account>(
+      supabase
+        .from('accounts')
+        .update(safeUpdate)
+        .eq('id', accountId)
+        .select()
+        .single(),
+    );
   },
 
   async archiveAccount(accountId: string) {
-    const { data, error } = await supabase
-      .from('accounts')
-      .update({ is_archived: true })
-      .eq('id', accountId)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return data as Account;
+    return row<Account>(
+      supabase
+        .from('accounts')
+        .update({ is_archived: true })
+        .eq('id', accountId)
+        .select()
+        .single(),
+    );
   },
 
   async getAccountBalances(accountId: string, signal?: AbortSignal) {
@@ -877,15 +751,9 @@ export const dataService = {
   },
 
   async createAccountBalance(snapshot: Partial<AccountBalance>) {
-    const { data, error } = await supabase
-      .from('account_balances')
-      .insert(snapshot)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return data as AccountBalance;
+    return row<AccountBalance>(
+      supabase.from('account_balances').insert(snapshot).select().single(),
+    );
   },
 
   async upsertAccountBalance(snapshot: Partial<AccountBalance>) {
@@ -897,42 +765,29 @@ export const dataService = {
       throw new Error('account_id and balance are required');
     }
 
-    const { data, error } = await supabase.rpc('upsert_account_balance', {
-      p_account_id: snapshot.account_id,
-      p_balance: snapshot.balance,
-      p_contribution_delta: snapshot.contribution_delta ?? null,
-      p_recorded_at: snapshot.recorded_at ?? null,
-      p_note: snapshot.note ?? null,
-      p_original_amount: snapshot.original_amount ?? null,
-      p_original_currency: snapshot.original_currency ?? null,
-      p_exchange_rate: snapshot.exchange_rate ?? null,
-    });
-
-    if (error) throw error;
-
-    return data as AccountBalance;
+    return row<AccountBalance>(
+      supabase.rpc('upsert_account_balance', {
+        p_account_id: snapshot.account_id,
+        p_balance: snapshot.balance,
+        p_contribution_delta: snapshot.contribution_delta ?? null,
+        p_recorded_at: snapshot.recorded_at ?? null,
+        p_note: snapshot.note ?? null,
+        p_original_amount: snapshot.original_amount ?? null,
+        p_original_currency: snapshot.original_currency ?? null,
+        p_exchange_rate: snapshot.exchange_rate ?? null,
+      }),
+    );
   },
 
   async deleteAccountBalance(snapshotId: string) {
-    const { error } = await supabase
-      .from('account_balances')
-      .delete()
-      .eq('id', snapshotId);
-
-    if (error) throw error;
+    await done(supabase.from('account_balances').delete().eq('id', snapshotId));
   },
 
   async getAccountById(accountId: string, signal?: AbortSignal) {
-    let query = supabase
-      .from('accounts')
-      .select('*')
-      .eq('id', accountId);
+    let query = supabase.from('accounts').select('*').eq('id', accountId);
     if (signal) query = query.abortSignal(signal);
-    const { data, error } = await query.single();
 
-    if (error) throw error;
-
-    return data as Account;
+    return row<Account>(query.single());
   },
 
   // Interest accrues every day, but recompute_debt_balance only ran when a
@@ -942,9 +797,7 @@ export const dataService = {
   // means the number is fresh exactly when someone is looking at it.
   // Best-effort: a failure here must not stop the debts from loading.
   async refreshDebtBalances() {
-    const { error } = await supabase.rpc('refresh_debt_balances');
-
-    if (error) throw error;
+    await done(supabase.rpc('refresh_debt_balances'));
   },
 
   async getDebts(signal?: AbortSignal) {
@@ -954,21 +807,15 @@ export const dataService = {
       .eq('is_archived', false)
       .order('created_at', { ascending: true });
     if (signal) query = query.abortSignal(signal);
-    const { data, error } = await query;
 
-    if (error) throw error;
-
-    return data as Debt[];
+    return rows<Debt>(query);
   },
 
   async getDebtById(debtId: string, signal?: AbortSignal) {
     let query = supabase.from('debts').select('*').eq('id', debtId);
     if (signal) query = query.abortSignal(signal);
-    const { data, error } = await query.single();
 
-    if (error) throw error;
-
-    return data as Debt;
+    return row<Debt>(query.single());
   },
 
   async createDebt(debtData: Partial<Debt>) {
@@ -976,45 +823,40 @@ export const dataService = {
     // amount. We treat the entered current_balance as both original_principal
     // and current_balance — the recompute trigger will keep current_balance
     // correct from there as payments are logged.
-    const { data, error } = await supabase
-      .from('debts')
-      .insert({
-        ...debtData,
-        original_principal: debtData.current_balance,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return data as Debt;
+    return row<Debt>(
+      supabase
+        .from('debts')
+        .insert({
+          ...debtData,
+          original_principal: debtData.current_balance,
+        })
+        .select()
+        .single(),
+    );
   },
 
   async updateDebt(debtId: string, debtData: Partial<Debt>) {
     const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = debtData;
-    const { data, error } = await supabase
-      .from('debts')
-      .update(safeUpdate)
-      .eq('id', debtId)
-      .select()
-      .single();
 
-    if (error) throw error;
-
-    return data as Debt;
+    return row<Debt>(
+      supabase
+        .from('debts')
+        .update(safeUpdate)
+        .eq('id', debtId)
+        .select()
+        .single(),
+    );
   },
 
   async archiveDebt(debtId: string) {
-    const { data, error } = await supabase
-      .from('debts')
-      .update({ is_archived: true })
-      .eq('id', debtId)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return data as Debt;
+    return row<Debt>(
+      supabase
+        .from('debts')
+        .update({ is_archived: true })
+        .eq('id', debtId)
+        .select()
+        .single(),
+    );
   },
 
   async getDebtPayments(debtId: string, signal?: AbortSignal) {

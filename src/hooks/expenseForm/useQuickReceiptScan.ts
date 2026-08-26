@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
-import { useIsPro } from '@/hooks/useIsPro';
+import { useProGate } from '@/hooks/pro/useProGate';
 import { useToast } from '@/hooks/useToast';
 import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 import { toIsoDate, todayIso } from '@/lib/dates';
@@ -37,8 +36,7 @@ export const useQuickReceiptScan = ({
 }: Params) => {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
-  const isPro = useIsPro();
-  const { openUpgrade } = useUpgradeDialog();
+  const { allow } = useProGate();
   const handleRef = useRef<OcrRunHandle | null>(null);
   const targetRef = useRef<PrefillTarget>({
     amountIsEmpty,
@@ -86,8 +84,7 @@ export const useQuickReceiptScan = ({
   }, []);
 
   const openPicker = (input?: HTMLInputElement | null) => {
-    if (!isPro) {
-      openUpgrade();
+    if (!allow('receiptScan')) {
 
       return;
     }

@@ -1,123 +1,72 @@
-import { useCallback, useMemo } from 'react';
-import * as Sentry from '@/lib/sentry';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
 import type { Goal } from '@/types/Goal';
-import { patchById, replaceById } from '@/hooks/dataOps/helpers';
-import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
+import {
+  patchOptimistic,
+  prependOptimistic,
+  removeOptimistic,
+  replaceById,
+} from '@/hooks/dataOps/helpers';
+import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
 
 export const useGoalOps = () => {
   const { isInitialized } = useDataConfig();
   const { setGoals } = useDataActions();
-  const { toast } = useToast();
   const { t } = useTranslation();
-  const showErrorToast = useShowErrorToast();
+  const runMutation = useMutationRunner();
 
-  const handleGoalCreate = useCallback(
-    async (goalData: Partial<Goal>) => {
-      const run = async () => {
-        if (!isInitialized) return;
+  return useMemo(() => {
+    const skip = !isInitialized;
 
-        const optimisticGoal = {
-          ...goalData,
-          id: `temp-${Date.now()}`,
-          is_completed: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        } as Goal;
+    const handleGoalCreate = (goalData: Partial<Goal>) => {
+      const optimistic = buildOptimisticGoal(goalData);
 
-        setGoals((prev) => [optimisticGoal, ...prev]);
+      return runMutation({
+        operation: 'createGoal',
+        skip,
+        errorMessage: t('goals.toasts.createFailed'),
+        successMessage: t('goals.toasts.created'),
+        optimistic: () => prependOptimistic(setGoals, optimistic),
+        perform: () => dataService.createGoal(goalData),
+        commit: (saved) =>
+          setGoals((prev) => replaceById(prev, optimistic.id, saved)),
+      });
+    };
 
-        try {
-          const saved = await dataService.createGoal(goalData);
-          haptics.success();
-          setGoals((prev) => replaceById(prev, optimisticGoal.id, saved));
-          toast({ variant: 'success', title: t('goals.toasts.created') });
-        } catch (error) {
-          haptics.error();
-          setGoals((prev) => prev.filter((g) => g.id !== optimisticGoal.id));
-          Sentry.captureException(error, { tags: { operation: 'createGoal' } });
-          showErrorToast(t('goals.toasts.createFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
+    const handleGoalUpdate = (goalId: string, goalData: Partial<Goal>) =>
+      runMutation({
+        operation: 'updateGoal',
+        skip,
+        errorMessage: t('goals.toasts.updateFailed'),
+        optimistic: () => patchOptimistic(setGoals, goalId, goalData),
+        perform: () => dataService.updateGoal(goalId, goalData),
+        commit: (saved) => setGoals((prev) => replaceById(prev, goalId, saved)),
+      });
 
-      return run();
-    },
-    [isInitialized, setGoals, showErrorToast, toast, t],
-  );
+    const handleGoalDelete = (goalId: string) =>
+      runMutation({
+        operation: 'deleteGoal',
+        skip,
+        errorMessage: t('goals.toasts.deleteFailed'),
+        onStart: () => haptics.warning(),
+        optimistic: () => removeOptimistic(setGoals, goalId),
+        perform: () => dataService.deleteGoal(goalId),
+      });
 
-  const handleGoalUpdate = useCallback(
-    async (goalId: string, goalData: Partial<Goal>) => {
-      const run = async () => {
-        if (!isInitialized) return;
-
-        let previousGoals: Goal[] = [];
-        setGoals((prev) => {
-          previousGoals = prev;
-
-          return patchById(prev, goalId, goalData);
-        });
-
-        try {
-          const saved = await dataService.updateGoal(goalId, goalData);
-          haptics.success();
-          setGoals((prev) => replaceById(prev, goalId, saved));
-        } catch (error) {
-          haptics.error();
-          setGoals(previousGoals);
-          Sentry.captureException(error, { tags: { operation: 'updateGoal' } });
-          showErrorToast(t('goals.toasts.updateFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
-
-      return run();
-    },
-    [isInitialized, setGoals, showErrorToast, t],
-  );
-
-  const handleGoalDelete = useCallback(
-    async (goalId: string) => {
-      const run = async () => {
-        if (!isInitialized) return;
-
-        haptics.warning();
-        let previousGoals: Goal[] = [];
-        setGoals((prev) => {
-          previousGoals = prev;
-
-          return prev.filter((g) => g.id !== goalId);
-        });
-
-        try {
-          await dataService.deleteGoal(goalId);
-          haptics.success();
-        } catch (error) {
-          haptics.error();
-          setGoals(previousGoals);
-          Sentry.captureException(error, { tags: { operation: 'deleteGoal' } });
-          showErrorToast(t('goals.toasts.deleteFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
-
-      return run();
-    },
-    [isInitialized, setGoals, showErrorToast, t],
-  );
-
-  return useMemo(
-    () => ({ handleGoalCreate, handleGoalUpdate, handleGoalDelete }),
-    [handleGoalCreate, handleGoalUpdate, handleGoalDelete],
-  );
+    return { handleGoalCreate, handleGoalUpdate, handleGoalDelete };
+  }, [isInitialized, setGoals, runMutation, t]);
 };
+
+// --- Helpers ---
+
+const buildOptimisticGoal = (goalData: Partial<Goal>): Goal =>
+  ({
+    ...goalData,
+    id: `temp-${Date.now()}`,
+    is_completed: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }) as Goal;

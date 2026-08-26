@@ -1,102 +1,73 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import * as Sentry from '@/lib/sentry';
 import { useTranslation } from 'react-i18next';
-import { useToast } from '@/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/contexts/DataContext';
 import { dataService } from '@/services/dataService';
 import { haptics } from '@/lib/haptics';
 import type { RecurringExpense } from '@/types/RecurringExpense';
-import { patchById, pickByEdit, replaceById } from '@/hooks/dataOps/helpers';
-import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
+import {
+  patchById,
+  pickByEdit,
+  removeOptimistic,
+  replaceById,
+} from '@/hooks/dataOps/helpers';
+import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
 
 export const useRecurringExpenseOps = () => {
   const { isInitialized } = useDataConfig();
   const { setRecurringExpenses, refreshExpenses } = useDataActions();
-  const { toast } = useToast();
   const { t } = useTranslation();
-  const showErrorToast = useShowErrorToast();
+  const runMutation = useMutationRunner();
 
-  const handleRecurringExpenseSubmit = useCallback(
-    async (expenseData: Partial<RecurringExpense>, expenseId?: string) => {
-      const run = async () => {
-        if (!isInitialized) {
-          return;
-        }
+  return useMemo(() => {
+    const skip = !isInitialized;
 
-        try {
-          let savedExpense: RecurringExpense;
+    const handleRecurringExpenseSubmit = (
+      expenseData: Partial<RecurringExpense>,
+      expenseId?: string,
+    ) =>
+      runMutation({
+        operation: pickByEdit(
+          expenseId,
+          'updateRecurringExpense',
+          'createRecurringExpense',
+        ),
+        skip,
+        errorMessage: pickByEdit(
+          expenseId,
+          t('recurring.toasts.expenseUpdateFailed'),
+          t('recurring.toasts.expenseAddFailed'),
+        ),
+        successMessage: pickByEdit(
+          expenseId,
+          t('recurring.toasts.expenseUpdated'),
+          t('recurring.toasts.expenseAdded'),
+        ),
+        perform: () => {
           if (expenseId) {
-            savedExpense = await dataService.updateRecurringExpense(
-              expenseData,
-              expenseId,
-            );
-          } else {
-            savedExpense = await dataService.createRecurringExpense(expenseData);
+            return dataService.updateRecurringExpense(expenseData, expenseId);
           }
 
-          haptics.success();
-          toast({
-            variant: 'success',
-            title: pickByEdit(
-              expenseId,
-              t('recurring.toasts.expenseUpdated'),
-              t('recurring.toasts.expenseAdded'),
-            ),
-          });
+          return dataService.createRecurringExpense(expenseData);
+        },
+        commit: (saved) =>
           setRecurringExpenses((prev) => {
-            if (expenseId) return replaceById(prev, expenseId, savedExpense);
+            if (expenseId) return replaceById(prev, expenseId, saved);
 
-            return [savedExpense, ...prev];
-          });
-        } catch (error) {
-          haptics.error();
-          Sentry.captureException(error, {
-            tags: {
-              operation: pickByEdit(
-                expenseId,
-                'updateRecurringExpense',
-                'createRecurringExpense',
-              ),
-            },
-          });
-          showErrorToast(
-            pickByEdit(
-              expenseId,
-              t('recurring.toasts.expenseUpdateFailed'),
-              t('recurring.toasts.expenseAddFailed'),
-            ),
-            () => {
-              void run().catch(() => undefined);
-            },
-          );
-          throw error;
-        }
-      };
+            return [saved, ...prev];
+          }),
+      });
 
-      return run();
-    },
-    [isInitialized, setRecurringExpenses, showErrorToast, toast, t],
-  );
-
-  const handleRecurringExpenseDelete = useCallback(
-    async (expenseId: string) => {
-      const run = async () => {
-        if (!isInitialized) {
-          return;
-        }
-
-        haptics.warning();
-
-        let previousRecurring: RecurringExpense[] = [];
-        setRecurringExpenses((prev) => {
-          previousRecurring = prev;
-
-          return prev.filter((e) => e.id !== expenseId);
-        });
-
-        try {
-          await dataService.deleteRecurringExpense(expenseId);
-          haptics.success();
+    const handleRecurringExpenseDelete = (expenseId: string) =>
+      runMutation({
+        operation: 'deleteRecurringExpense',
+        skip,
+        errorMessage: t('recurring.toasts.expenseDeleteFailed'),
+        onStart: () => haptics.warning(),
+        optimistic: () => removeOptimistic(setRecurringExpenses, expenseId),
+        perform: () => dataService.deleteRecurringExpense(expenseId),
+        // Deleting the rule can strip generated rows, so the ledger is resynced.
+        commit: () => {
           refreshExpenses().catch((err) => {
             Sentry.captureException(err, {
               tags: {
@@ -105,70 +76,33 @@ export const useRecurringExpenseOps = () => {
               },
             });
           });
-        } catch (error) {
-          haptics.error();
-          setRecurringExpenses(previousRecurring);
-          Sentry.captureException(error, {
-            tags: { operation: 'deleteRecurringExpense' },
-          });
-          showErrorToast(t('recurring.toasts.expenseDeleteFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
+        },
+      });
 
-      return run();
-    },
-    [isInitialized, setRecurringExpenses, refreshExpenses, showErrorToast, t],
-  );
+    const handleRecurringExpenseToggle = (expenseId: string, active: boolean) =>
+      runMutation({
+        operation: 'toggleRecurringExpense',
+        skip,
+        errorMessage: t('recurring.toasts.expenseToggleFailed'),
+        optimistic: () => {
+          setRecurringExpenses((prev) => patchById(prev, expenseId, { active }));
 
-  const handleRecurringExpenseToggle = useCallback(
-    async (expenseId: string, active: boolean) => {
-      const run = async () => {
-        if (!isInitialized) {
-          return;
-        }
+          // Flip it back rather than restoring the whole list: the switch is
+          // the only thing that moved.
+          return () =>
+            setRecurringExpenses((prev) =>
+              patchById(prev, expenseId, { active: !active }),
+            );
+        },
+        perform: () => dataService.toggleRecurringExpense(expenseId, active),
+        commit: (saved) =>
+          setRecurringExpenses((prev) => replaceById(prev, expenseId, saved)),
+      });
 
-        setRecurringExpenses((prev) => patchById(prev, expenseId, { active }));
-
-        try {
-          const savedExpense = await dataService.toggleRecurringExpense(
-            expenseId,
-            active,
-          );
-          haptics.success();
-          setRecurringExpenses((prev) => replaceById(prev, expenseId, savedExpense));
-        } catch (error) {
-          haptics.error();
-          setRecurringExpenses((prev) =>
-            patchById(prev, expenseId, { active: !active }),
-          );
-          Sentry.captureException(error, {
-            tags: { operation: 'toggleRecurringExpense' },
-          });
-          showErrorToast(t('recurring.toasts.expenseToggleFailed'), () => {
-            void run().catch(() => undefined);
-          });
-          throw error;
-        }
-      };
-
-      return run();
-    },
-    [isInitialized, setRecurringExpenses, showErrorToast, t],
-  );
-
-  return useMemo(
-    () => ({
+    return {
       handleRecurringExpenseSubmit,
       handleRecurringExpenseDelete,
       handleRecurringExpenseToggle,
-    }),
-    [
-      handleRecurringExpenseSubmit,
-      handleRecurringExpenseDelete,
-      handleRecurringExpenseToggle,
-    ],
-  );
+    };
+  }, [isInitialized, setRecurringExpenses, refreshExpenses, runMutation, t]);
 };

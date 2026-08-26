@@ -7,6 +7,7 @@ import {
   isMonthPendingHistory,
   type DataSnapshot,
 } from '@/lib/dataCache';
+import { toIsoDate } from '@/lib/dates';
 import type { Expense } from '@/types/Expense';
 
 const CACHE_KEY = 'budgard-data-snapshot';
@@ -193,7 +194,10 @@ describe('dataCache', () => {
     expect(cutoff).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     const expected = new Date();
     expected.setMonth(expected.getMonth() - 12);
-    expect(cutoff).toBe(expected.toISOString().split('T')[0]);
+    // toIsoDate, not toISOString(): the cutoff is a calendar day in the
+    // user's timezone, so a UTC-derived expectation disagrees with it for
+    // part of every day and fails outright around midnight.
+    expect(cutoff).toBe(toIsoDate(expected));
   });
 
   it('isMonthPendingHistory flags months at or before the cutoff month', () => {

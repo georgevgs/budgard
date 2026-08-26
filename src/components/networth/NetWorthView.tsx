@@ -4,10 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import { useDataConfig } from '@/contexts/DataContext';
-import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
-import { useIsPro } from '@/hooks/useIsPro';
-import { toast } from '@/hooks/useToast';
-import { canAddAccount, FREE_ACCOUNT_LIMIT } from '@/lib/proLimits';
+import { useProGate } from '@/hooks/pro/useProGate';
 import { useNetWorth } from '@/hooks/useNetWorth';
 import {
   useGroupedAccounts,
@@ -33,8 +30,7 @@ const NetWorthView = () => {
   const { accounts, grouped, latestSnapshotByAccount } = useGroupedAccounts();
   const { defaultCurrency, isInitialized, isSecondaryLoaded } = useDataConfig();
   const { summary, series } = useNetWorth();
-  const isPro = useIsPro();
-  const { openUpgrade } = useUpgradeDialog();
+  const { isPro, allow } = useProGate();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | undefined>();
   const [detailAccount, setDetailAccount] = useState<Account | undefined>();
@@ -42,18 +38,13 @@ const NetWorthView = () => {
   // The free tier tracks up to 3 active accounts; `accounts` is active-only
   // (getAccounts filters archived), so its length is the count that matters.
   const handleAddClick = useCallback(() => {
-    if (!canAddAccount(isPro, accounts.length)) {
-      toast({
-        title: t('pro.gate.accountLimit', { limit: FREE_ACCOUNT_LIMIT }),
-      });
-      openUpgrade();
-
+    if (!allow('accounts', accounts.length)) {
       return;
     }
 
     setSelectedAccount(undefined);
     setIsFormOpen(true);
-  }, [isPro, accounts.length, openUpgrade, t]);
+  }, [allow, accounts.length]);
 
   const handleAccountClick = useCallback((account: Account) => {
     setDetailAccount(account);

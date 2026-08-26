@@ -1,23 +1,16 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import {
   useAccountsData,
   useCategoriesData,
   useDataConfig,
   useRecurringData,
 } from '@/contexts/DataContext';
-import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
-import { useIsPro } from '@/hooks/useIsPro';
+import { useProGate } from '@/hooks/pro/useProGate';
 import {
   useRecurringActions,
   type RecurringMode,
 } from '@/hooks/recurring/useRecurringActions';
-import { useToast } from '@/hooks/useToast';
-import {
-  canAddRecurringExpense,
-  FREE_RECURRING_EXPENSE_LIMIT,
-} from '@/lib/proLimits';
 import { getMonthlyAmount } from '@/lib/recurring';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
@@ -25,7 +18,6 @@ import type { RecurringExpense } from '@/types/RecurringExpense';
 // recurring incomes — and the mode decides which data, which categories and
 // which cap apply. Holding all of that here keeps the component to layout.
 export const useRecurringList = () => {
-  const { t } = useTranslation();
   const [mode, setMode] = useState<RecurringMode>('expense');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<
@@ -36,9 +28,7 @@ export const useRecurringList = () => {
   const { expenseCategories, incomeCategories } = useCategoriesData();
   const { accounts } = useAccountsData();
   const { defaultCurrency, isInitialized } = useDataConfig();
-  const isPro = useIsPro();
-  const { openUpgrade } = useUpgradeDialog();
-  const { toast } = useToast();
+  const { allow } = useProGate();
   const showSkeleton = useDelayedLoading(!isInitialized);
 
   const closeForm = () => {
@@ -60,17 +50,9 @@ export const useRecurringList = () => {
   // The free cap applies to recurring expenses only; recurring incomes stay
   // uncapped on every plan.
   const handleAddClick = () => {
-    const atFreeCap =
-      !isIncome && !canAddRecurringExpense(isPro, recurringExpenses.length);
-
-    if (atFreeCap) {
-      toast({
-        title: t('pro.gate.recurringLimit', {
-          limit: FREE_RECURRING_EXPENSE_LIMIT,
-        }),
-      });
-      openUpgrade();
-
+    // Recurring incomes stay uncapped on every plan, so only expenses are
+    // counted against the free limit.
+    if (!isIncome && !allow('recurringExpenses', recurringExpenses.length)) {
       return;
     }
 

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { todayIso } from '@/lib/dates';
 
 // Use vi.resetModules() in beforeEach to get a fresh module (and fresh cache Map)
 // for each test, preventing cache state from leaking between tests.
@@ -53,7 +54,10 @@ describe('fetchExchangeRate', () => {
 
   it('omits date param for today (uses latest rates)', async () => {
     vi.stubGlobal('fetch', vi.fn().mockReturnValue(makeOkResponse(0.92)));
-    const today = new Date().toISOString().slice(0, 10);
+    // todayIso(), not toISOString(): the service compares against the local
+    // calendar day, so a UTC "today" reads as a past date either side of
+    // midnight and the request gains a date= param.
+    const today = todayIso();
     await fetchExchangeRate('USD', today);
     const url = vi.mocked(fetch).mock.calls[0][0] as string;
     expect(url).not.toContain('date=');

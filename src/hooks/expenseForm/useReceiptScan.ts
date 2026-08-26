@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isSameDay } from 'date-fns';
 import type { UseFormReturn } from 'react-hook-form';
-import { useIsPro } from '@/hooks/useIsPro';
-import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
+import { useProGate } from '@/hooks/pro/useProGate';
 import { useToast } from '@/hooks/useToast';
 import { parseReceiptText } from '@/lib/receiptParse';
 import { formatCurrencyInput } from '@/lib/utils';
@@ -22,8 +21,7 @@ type UseReceiptScanArgs = {
 export const useReceiptScan = ({ form, receiptFile }: UseReceiptScanArgs) => {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
-  const isPro = useIsPro();
-  const { openUpgrade } = useUpgradeDialog();
+  const { allow } = useProGate();
   const [isScanning, setIsScanning] = useState(false);
   const [progress, setProgress] = useState(0);
   const handleRef = useRef<OcrRunHandle | null>(null);
@@ -41,8 +39,7 @@ export const useReceiptScan = ({ form, receiptFile }: UseReceiptScanArgs) => {
   }, [receiptFile]);
 
   const handleScan = async () => {
-    if (!isPro) {
-      openUpgrade();
+    if (!allow('receiptScan')) {
 
       return;
     }
