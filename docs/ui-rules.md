@@ -184,6 +184,11 @@ Two rules hold it together:
   which decides the back button from the route — a screen cannot ship without
   a way out by forgetting to pass one. `TopScrim` keeps the status-bar strip
   legible while content scrolls under it.
+- Mobile dialogs are bottom sheets and use their handle or draggable header to
+  swipe closed. The shared top-right close button is hidden below `sm` and
+  remains visible on desktop, where drag dismissal is disabled. A committed
+  swipe continues from the finger's release position; the sheet stays opaque
+  while it exits and the backdrop owns the fade.
 - Today and Trends are bento grids: `BentoGrid` + `BentoTile`, two columns,
   one full-span slab, half tiles under it. Tones are `plain` / `slab` / `ink` /
   `accent` / `ghost` / `bare` — at most one `ink` and one `slab` per screen.

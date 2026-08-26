@@ -2,6 +2,7 @@ import { useRef, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import Check from 'lucide-react/dist/esm/icons/check';
 import ScanText from 'lucide-react/dist/esm/icons/scan-text';
+import X from 'lucide-react/dist/esm/icons/x';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import type { QuickReceiptScanApi } from '@/hooks/expenseForm/useQuickReceiptScan';
@@ -16,7 +17,7 @@ const QuickReceiptScanAction = ({ scan }: Props) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="mt-3">
+    <>
       <input
         ref={inputRef}
         type="file"
@@ -26,7 +27,7 @@ const QuickReceiptScanAction = ({ scan }: Props) => {
         onChange={scan.handleChange}
       />
       {renderControl(scan, inputRef, t)}
-    </div>
+    </>
   );
 };
 
@@ -44,33 +45,50 @@ const renderControl = (
 ) => {
   if (scan.isScanning) {
     return (
-      <div className="flex items-center gap-3" aria-live="polite">
-        <Progress
-          value={scan.progress}
-          className="h-1.5 flex-1"
-          aria-label={t('receipt.scanning')}
-        />
-        <Button type="button" variant="ghost" size="sm" onClick={scan.cancel}>
-          {t('receipt.cancelScan')}
+      <>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="tile rounded-full text-muted-foreground hover:text-foreground"
+          onClick={scan.cancel}
+          aria-label={t('receipt.cancelScan')}
+          title={t('receipt.cancelScan')}
+        >
+          <X className="h-4.5 w-4.5" aria-hidden="true" />
         </Button>
-      </div>
+        <div
+          className="col-span-3 mt-1 flex items-center gap-3"
+          aria-live="polite"
+        >
+          <Progress
+            value={scan.progress}
+            className="h-1.5 flex-1"
+            aria-label={t('receipt.scanning')}
+          />
+          <span className="w-8 text-right text-xs tabular-nums text-muted-foreground">
+            {scan.progress}%
+          </span>
+        </div>
+      </>
     );
   }
 
+  const label = getButtonLabel(scan.receiptFile, t);
+
   return (
-    <div className="flex items-center gap-2">
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="rounded-full"
-        onClick={() => scan.openPicker(inputRef.current)}
-      >
-        <ScanText className="mr-2 h-4 w-4" />
-        {getButtonLabel(scan.receiptFile, t)}
-      </Button>
-      {renderAttached(scan.receiptFile, t)}
-    </div>
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      className="tile relative rounded-full text-muted-foreground hover:text-foreground"
+      onClick={() => scan.openPicker(inputRef.current)}
+      aria-label={label}
+      title={label}
+    >
+      <ScanText className="h-4.5 w-4.5" aria-hidden="true" />
+      {renderAttached(scan.receiptFile)}
+    </Button>
   );
 };
 
@@ -82,15 +100,17 @@ const getButtonLabel = (file: File | null, t: TFunc): string => {
   return t('receipt.scanReceipt');
 };
 
-const renderAttached = (file: File | null, t: TFunc) => {
+const renderAttached = (file: File | null) => {
   if (!file) {
     return null;
   }
 
   return (
-    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-      <Check className="h-3.5 w-3.5" aria-hidden="true" />
-      {t('receipt.attached')}
+    <span
+      className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-foreground text-background ring-2 ring-background"
+      aria-hidden="true"
+    >
+      <Check className="h-2.5 w-2.5" />
     </span>
   );
 };

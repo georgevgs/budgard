@@ -18,14 +18,6 @@ const SCROLLABLE_DIALOGS = [
   'src/components/security/SetPinDialog.tsx',
 ] as const;
 
-const FORM_DIALOGS_WITH_VISIBLE_CLOSE = [
-  'src/components/debts/DebtsView.tsx',
-  'src/components/expenses/QuickAddSheet.tsx',
-  'src/components/income/IncomeFormDialog.tsx',
-  'src/components/layout/FormsManager.tsx',
-  'src/components/networth/NetWorthView.tsx',
-] as const;
-
 const ZERO_PADDING_ACTION_SHEETS = [
   'src/components/categories/CategoryManager.tsx',
   'src/components/debts/DebtForm.tsx',
@@ -93,14 +85,16 @@ describe('modal viewport safety', () => {
     expect(loading).toContain('className="landing-header"');
   });
 
-  it.each(FORM_DIALOGS_WITH_VISIBLE_CLOSE)(
-    '%s keeps its explicit close affordance visible',
-    (file) => {
-      const source = read(file);
+  it('uses swipe as the only mobile dialog chrome and keeps desktop close', () => {
+    const css = read('src/index.css');
+    const dialog = read('src/components/ui/dialog.tsx');
 
-      expect(source).not.toContain('[&>button]:hidden');
-    },
-  );
+    expect(css).toMatch(
+      /@media \(max-width: 639px\) \{\s+\[role='dialog'\]\[data-state\] > button:last-child \{\s+display: none;\s+\}\s+\}/,
+    );
+    expect(dialog).toContain('enabled: isMobile');
+    expect(dialog).toContain('inline-flex h-10 w-10');
+  });
 
   it.each(ZERO_PADDING_ACTION_SHEETS)(
     '%s keeps bottom actions above the device safe area',

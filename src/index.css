@@ -1023,6 +1023,17 @@
     }
   }
 
+  /* Dialogs are bottom sheets on mobile, where the handle and draggable
+     header already teach swipe-to-dismiss. Keep that as the only visible
+     dismissal chrome there; the shared close button returns on desktop,
+     where drag dismissal is disabled. Radix appends that Close as the final
+     direct child of its stateful dialog content. */
+  @media (max-width: 639px) {
+    [role='dialog'][data-state] > button:last-child {
+      display: none;
+    }
+  }
+
   /* A horizontal chip strip is read as swipeable; a scrollbar sitting under it
      on desktop reads as a broken layout. The class was already in use on the
      templates bar and had never actually been defined. */

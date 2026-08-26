@@ -66,20 +66,22 @@ const QuickAddSheet = ({
           {/* Only the amount drags the sheet. The strip and the keypad below
               are controls, and arming a dismissal on them is what made the
               category swipe feel like it was fighting back. */}
-          <p
-            data-draggable-area
-            className={cn(
-              'px-10 py-5 text-center type-figure-xl',
-              amountTone(draft.pad.isEmpty),
-            )}
-            aria-live="polite"
-          >
-            {formatCurrency(draft.pad.amount, draft.currency)}
-          </p>
+          <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-x-2 py-5">
+            <span aria-hidden="true" />
+            <p
+              data-draggable-area
+              className={cn(
+                'min-w-0 text-center type-figure-xl',
+                amountTone(draft.pad.isEmpty),
+              )}
+              aria-live="polite"
+            >
+              {formatCurrency(draft.pad.amount, draft.currency)}
+            </p>
+            <QuickReceiptScanAction scan={receiptScan} />
+          </div>
 
           {renderTemplates(open, onUseTemplate, onClose)}
-
-          <QuickReceiptScanAction scan={receiptScan} />
 
           <QuickAddName
             value={draft.name}

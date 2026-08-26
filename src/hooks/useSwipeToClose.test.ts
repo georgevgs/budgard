@@ -1,11 +1,19 @@
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useSwipeToClose } from '@/hooks/useSwipeToClose';
+
+const makeSheet = (height = 600) =>
+  ({
+    dataset: { state: 'open' },
+    isConnected: true,
+    getBoundingClientRect: () => ({ height }),
+  }) as unknown as HTMLElement;
 
 const makeTouchEvent = (
   clientY: number,
   target?: Partial<HTMLElement>,
   timeStamp = 0,
+  currentTarget = makeSheet(),
 ) => {
   const el = {
     closest: vi.fn((selector: string) => {
@@ -25,15 +33,21 @@ const makeTouchEvent = (
   return {
     touches: [{ clientY }],
     target: el as unknown as EventTarget,
+    currentTarget,
     timeStamp,
-  } as unknown as React.TouchEvent;
+  } as unknown as React.TouchEvent<HTMLElement>;
 };
 
 describe('useSwipeToClose', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('returns initial state with no dragging', () => {
     const { result } = renderHook(() => useSwipeToClose({ onClose: vi.fn() }));
 
     expect(result.current.isDragging).toBe(false);
+    expect(result.current.isDismissing).toBe(false);
     expect(result.current.translateY).toBe(0);
   });
 
@@ -154,7 +168,7 @@ describe('useSwipeToClose', () => {
       result.current.handleTouchMove(makeTouchEvent(160, undefined, 40));
     });
     act(() => {
-      result.current.handleTouchEnd();
+      result.current.handleTouchEnd(makeTouchEvent(160, undefined, 40));
     });
 
     expect(onClose).toHaveBeenCalledOnce();
@@ -181,7 +195,7 @@ describe('useSwipeToClose', () => {
       result.current.handleTouchMove(makeTouchEvent(160, undefined, 900));
     });
     act(() => {
-      result.current.handleTouchEnd();
+      result.current.handleTouchEnd(makeTouchEvent(160, undefined, 900));
     });
 
     expect(onClose).not.toHaveBeenCalled();
@@ -204,7 +218,7 @@ describe('useSwipeToClose', () => {
       result.current.handleTouchMove(makeTouchEvent(200));
     });
     act(() => {
-      result.current.handleTouchEnd();
+      result.current.handleTouchEnd(makeTouchEvent(200));
     });
 
     expect(onClose).toHaveBeenCalledOnce();
@@ -227,7 +241,7 @@ describe('useSwipeToClose', () => {
       result.current.handleTouchMove(makeTouchEvent(150));
     });
     act(() => {
-      result.current.handleTouchEnd();
+      result.current.handleTouchEnd(makeTouchEvent(150));
     });
 
     expect(onClose).not.toHaveBeenCalled();
@@ -249,11 +263,79 @@ describe('useSwipeToClose', () => {
       result.current.handleTouchMove(makeTouchEvent(150));
     });
     act(() => {
-      result.current.handleTouchEnd();
+      result.current.handleTouchEnd(makeTouchEvent(150));
     });
 
     expect(result.current.translateY).toBe(0);
     expect(result.current.isDragging).toBe(false);
+  });
+
+  it('continues a committed dismissal from the exact release position', () => {
+    const sheet = makeSheet();
+    const onClose = vi.fn(() => {
+      sheet.dataset.state = 'closed';
+    });
+    const { result } = renderHook(() =>
+      useSwipeToClose({ onClose, threshold: 50 }),
+    );
+
+    act(() => {
+      result.current.handleTouchStart(
+        makeTouchEvent(100, {
+          dataset: { dragHandle: 'true' },
+        } as unknown as Partial<HTMLElement>),
+      );
+    });
+    act(() => {
+      result.current.handleTouchMove(makeTouchEvent(200));
+    });
+    act(() => {
+      result.current.handleTouchEnd(makeTouchEvent(200, undefined, 0, sheet));
+    });
+
+    expect(result.current.translateY).toBe(100);
+    expect(result.current.isDragging).toBe(false);
+    expect(result.current.isDismissing).toBe(true);
+    expect(result.current.dragStyle.transform).toBe('translateY(100px)');
+    expect(result.current.dragStyle.animationDuration).toBe('320ms');
+    expect(result.current.dragStyle.animationTimingFunction).toBe(
+      'cubic-bezier(0.32, 0.72, 0, 1)',
+    );
+    expect(result.current.dragStyle['--tw-exit-opacity']).toBe('1');
+    expect(result.current.overlayStyle.animationDuration).toBe('320ms');
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it('settles back when a close guard rejects the dismissal', () => {
+    vi.useFakeTimers();
+    const sheet = makeSheet();
+    const { result } = renderHook(() =>
+      useSwipeToClose({ onClose: vi.fn(), threshold: 50 }),
+    );
+
+    act(() => {
+      result.current.handleTouchStart(
+        makeTouchEvent(100, {
+          dataset: { dragHandle: 'true' },
+        } as unknown as Partial<HTMLElement>),
+      );
+    });
+    act(() => {
+      result.current.handleTouchMove(makeTouchEvent(200));
+    });
+    act(() => {
+      result.current.handleTouchEnd(makeTouchEvent(200, undefined, 0, sheet));
+    });
+
+    expect(result.current.translateY).toBe(100);
+    expect(result.current.isDismissing).toBe(true);
+
+    act(() => {
+      vi.runOnlyPendingTimers();
+    });
+
+    expect(result.current.translateY).toBe(0);
+    expect(result.current.isDismissing).toBe(false);
   });
 
   it('restores the sheet when the browser cancels the gesture', () => {
