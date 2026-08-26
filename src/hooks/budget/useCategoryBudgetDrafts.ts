@@ -24,7 +24,10 @@ export type CategoryBudgetTotals = {
 // Per-category caps are edited as a sheet of drafts and saved in one go, so
 // the whole screen is one unit of work: nothing is written until Save, and a
 // single invalid amount blocks the batch rather than half-applying it.
-export const useCategoryBudgetDrafts = (isOpen: boolean, onClose: () => void) => {
+export const useCategoryBudgetDrafts = (
+  isOpen: boolean,
+  onClose: () => void,
+) => {
   const { t } = useTranslation();
   const { expenseCategories } = useCategoriesData();
   const categoryBudgets = useCategoryBudgetsData();
@@ -39,12 +42,20 @@ export const useCategoryBudgetDrafts = (isOpen: boolean, onClose: () => void) =>
 
   // Reset drafts whenever the dialog opens or the underlying caps change
   // (e.g. another tab updated them).
-  const [prevInputs, setPrevInputs] = useState({
-    isOpen,
-    expenseCategories,
-    categoryBudgets,
-  });
+  //
+  // Starts as null rather than as the current inputs, so a hook that mounts
+  // ALREADY open still seeds. Today the manager is always mounted and starts
+  // closed, so the false→true transition does the seeding — but a later switch
+  // to `{isOpen && <Manager/>}` would otherwise leave every draft empty, and an
+  // empty draft against an existing cap reads as "cleared" and deletes it.
+  type Inputs = {
+    isOpen: boolean;
+    expenseCategories: Category[];
+    categoryBudgets: CategoryBudget[];
+  };
+  const [prevInputs, setPrevInputs] = useState<Inputs | null>(null);
   const inputsChanged =
+    prevInputs === null ||
     prevInputs.isOpen !== isOpen ||
     prevInputs.expenseCategories !== expenseCategories ||
     prevInputs.categoryBudgets !== categoryBudgets;

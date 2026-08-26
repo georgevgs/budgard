@@ -20,6 +20,20 @@ Rules for working in this repository. Follow them exactly.
 - **Services**: All external communication (`src/services/*`).
 - **Context**: Global state (e.g., `AuthProvider`). Max 2 levels of prop drilling.
 - **Mutations**: Must use the operation hooks in `src/hooks/dataOps/*` for optimistic updates + rollback logic.
+  A new write declares itself through `useMutationRunner` — it owns the guard,
+  haptics, rollback, Sentry tag and retryable error toast that every mutation
+  shares. Never hand-roll that shell again; the optimistic shapes
+  (`prependOptimistic` / `patchOptimistic` / `removeOptimistic` /
+  `setScalarOptimistic`) live in `dataOps/helpers.ts`.
+  Offline queueing covers **expenses and incomes only** — `MutationType` and
+  `useOfflineSync`'s cases must stay in lock-step, so widening one without the
+  other silently drops writes.
+- **Pro gating**: Every free-tier limit is declared in `src/lib/proGates.ts` and
+  asked through `useProGate().allow(...)`. Do not read `isPro` and hand-roll a
+  toast + `openUpgrade()` at a new call site.
+- **Supabase tails**: Service methods end with `rows` / `row` / `maybeRow` /
+  `done` from `src/services/supabaseCrud.ts`. Keep the query chain itself
+  spelled out — every embed names its FK explicitly, and that is load-bearing.
 - **Routing**: Lazy-load all routes in `src/App.tsx`.
 
 ## 📂 Directory Map

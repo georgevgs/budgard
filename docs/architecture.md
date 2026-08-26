@@ -163,8 +163,57 @@ need directly; there is no composed `useDataOperations`.
 2. Call service layer
 3. If error → rollback previous state
 
+### The shared shell: `useMutationRunner`
+
+Every one of those writes is the same sequence, so it lives in one place —
+`hooks/dataOps/useMutationRunner.ts` — and the domain hooks describe only what
+differs. A mutation is declared, not spelled out:
+
+```ts
+runMutation({
+  operation: 'createGoal',        // Sentry tag
+  skip,                           // the isInitialized guard
+  errorMessage: t('...'),         // shown with a "Try again" action
+  successMessage: t('...'),       // omit for writes that shouldn't announce
+  optimistic: () => prependOptimistic(setGoals, optimisticGoal), // returns its undo
+  perform: () => dataService.createGoal(goalData),
+  commit: (saved) => setGoals((prev) => replaceById(prev, temp.id, saved)),
+});
+```
+
+The runner handles the rest: haptics, the Sentry tag, the rollback, the
+retryable error toast, and rethrowing. The retry deliberately re-runs the
+optimistic pass — by the time the user taps it, the rollback has already
+happened.
+
+Options that exist because real call sites need them:
+
+- `successHaptic: 'none'` — settings scalars don't buzz; the control moving is
+  the confirmation
+- `retryable: false` — deleting an account or splitting an expense must not
+  offer a one-tap re-run
+- `offlineFallback` — return `true` to say the failure was handled (queued),
+  so the runner resolves quietly instead of rolling back
+- `commit` may be async when reconciling needs a follow-up read
+
+The three optimistic shapes — `prependOptimistic`, `patchOptimistic`,
+`removeOptimistic` — plus `setScalarOptimistic` live in `dataOps/helpers.ts`.
+They read the previous list from **inside** the updater, which is what keeps a
+rollback correct when two writes overlap.
+
+`useFeedbackOps` deliberately sits outside the runner: it reports with a plain
+destructive toast, offers no retry, and carries an extra Sentry tag.
+
+### Offline writes
+
 When offline (or the server is down), writes are queued in IndexedDB and
 reconciled on reconnect — see `lib/offlineQueue.ts`.
+
+**Only expenses and incomes are queued.** `MutationType` in `offlineQueue.ts`
+and the cases in `useOfflineSync` must stay in lock-step — a type queued with
+no matching sync case is silently dropped — and `mutationEntity()` is written
+for those two tables. Extending offline to another entity means adding its sync
+case and its temp-id reconciliation, not just widening a union.
 
 ### PWA Cache Boundary
 
@@ -193,12 +242,20 @@ All external communication is centralized.
 - `services/subscriptionService.ts` — Stripe checkout/portal via edge functions
 - `services/proPlansService.ts` — live Pro prices
 - `services/exchangeRateService.ts` — Frankfurter FX rates
+- `services/supabaseCrud.ts` — `rows` / `row` / `maybeRow` / `done`
 
 ### Rules
 
 - No direct Supabase calls outside services
 - Services return typed data
 - Errors must be propagated (not swallowed)
+
+`supabaseCrud` owns only the tail every query shares: unwrap `{ data, error }`,
+throw the error, cast the rows. It is deliberately **not** a query builder —
+the Supabase chain stays spelled out at each call site, because the `select`
+strings there name their foreign keys explicitly. A helper that assembled one
+is exactly the bug that made the bare `tags` embed ambiguous and broke
+months-stale PWA bundles with PGRST201.
 
 ---
 
@@ -327,6 +384,40 @@ other.
 ### Behavior
 
 - Auto-detect browser language
+
+---
+
+## Pro Gating
+
+Everything the free plan limits is declared in one place: `lib/proGates.ts`.
+Before it existed, the only way to answer "what exactly is gated?" was to grep
+for `openUpgrade()`.
+
+Two kinds of gate:
+
+- a **cap** — allowed up to `limit`, then a toast naming it (`categories`,
+  `recurringExpenses`, `accounts`, `tagsPerExpense`)
+- **pro-only** — not on the free plan at all (`receiptScan`, `csvExport`,
+  `categoryBudgets`)
+
+Ask through `useProGate`, never by reading `isPro` and hand-rolling the upsell:
+
+```ts
+const { allow } = useProGate();
+
+if (!allow('accounts', accounts.length)) return;   // toasts + opens upgrade
+```
+
+`allow` returns true when the action may proceed. When it may not, it explains
+the limit (where the gate has a message) and opens the upgrade flow. Pass
+`{ onBlock }` to close a popover that would otherwise sit on top of the dialog.
+
+Note the asymmetry: cap gates explain themselves, pro-only gates open the
+dialog with nothing said first. That is a deliberate current state, not an
+oversight — giving a pro-only gate a `messageKey` is all it takes to change it.
+
+`ProRoute` guards whole routes; `useIsPro` remains for read-only branching
+(showing an upsell card rather than blocking an action).
 
 ---
 

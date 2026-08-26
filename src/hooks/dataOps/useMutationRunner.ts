@@ -16,7 +16,7 @@ import { useShowErrorToast } from '@/hooks/dataOps/useShowErrorToast';
 
 // Undoes an optimistic change. Returned by `optimistic` so the runner can put
 // state back exactly as it was when the write fails.
-export type Rollback = () => void;
+type Rollback = () => void;
 
 export type MutationSpec<TSaved> = {
   // Names the write for Sentry, e.g. 'createGoal'.
