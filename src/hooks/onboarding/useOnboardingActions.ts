@@ -1,21 +1,24 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { parseCurrencyInput } from '@/lib/utils';
 import { useBudgetOps } from '@/hooks/dataOps/useBudgetOps';
 import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
-import { ONBOARDED_KEY } from '@/lib/onboarding';
+import {
+  completeOnboarding,
+  readOnboardingStep,
+  saveOnboardingStep,
+  startOnboarding,
+} from '@/lib/onboarding';
 import { PRESET_CATEGORIES } from '@/components/onboarding/presetCategories';
 
 type UseOnboardingActionsArgs = {
   onComplete: () => void;
-  setStep: (step: number) => void;
 };
 
 export const useOnboardingActions = ({
   onComplete,
-  setStep,
 }: UseOnboardingActionsArgs) => {
   const { t } = useTranslation();
   const { session } = useAuth();
@@ -23,9 +26,19 @@ export const useOnboardingActions = ({
   const { handleCategoriesAddBulk } = useCategoryOps();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [step, setCurrentStep] = useState(readOnboardingStep);
+
+  useEffect(() => {
+    startOnboarding();
+  }, []);
+
+  const setStep = useCallback((nextStep: number) => {
+    saveOnboardingStep(nextStep);
+    setCurrentStep(nextStep);
+  }, []);
 
   const handleComplete = useCallback(() => {
-    localStorage.setItem(ONBOARDED_KEY, 'true');
+    completeOnboarding();
     onComplete();
   }, [onComplete]);
 
@@ -41,6 +54,10 @@ export const useOnboardingActions = ({
             variant: 'destructive',
             description: t('onboarding.budgetSaveFailed'),
           });
+
+          setIsSubmitting(false);
+
+          return;
         }
         setIsSubmitting(false);
       }
@@ -60,7 +77,9 @@ export const useOnboardingActions = ({
       setIsSubmitting(true);
       try {
         const toCreate = selectedIndices.map((i) => ({
-          name: t(`onboarding.presetCategories.${PRESET_CATEGORIES[i].nameKey}`),
+          name: t(
+            `onboarding.presetCategories.${PRESET_CATEGORIES[i].nameKey}`,
+          ),
           color: PRESET_CATEGORIES[i].color,
           icon: PRESET_CATEGORIES[i].icon,
           user_id: session?.user?.id,
@@ -71,6 +90,10 @@ export const useOnboardingActions = ({
           variant: 'destructive',
           description: t('onboarding.categoriesSaveFailed'),
         });
+
+        setIsSubmitting(false);
+
+        return;
       }
       setIsSubmitting(false);
       setStep(3);
@@ -78,5 +101,12 @@ export const useOnboardingActions = ({
     [session?.user?.id, handleCategoriesAddBulk, t, toast, setStep],
   );
 
-  return { isSubmitting, handleComplete, handleBudgetNext, handleCategoriesNext };
+  return {
+    step,
+    setStep,
+    isSubmitting,
+    handleComplete,
+    handleBudgetNext,
+    handleCategoriesNext,
+  };
 };

@@ -162,7 +162,7 @@
     "netChange": "Net change",
     "spent": "Spent",
     "received": "Received",
-    "searchPlaceholder": "Search description, note, amount…",
+    "searchPlaceholder": "Search activity…",
     "searchLabel": "Search activity",
     "filterLabel": "Filter activity",
     "filterByTag": "Filter activity by tag",
@@ -214,6 +214,30 @@
     "title": "Plan",
     "subtitle": "Give the month a shape, then let Budgard keep the moving parts together.",
     "monthlyPlan": "This month's boundary",
+    "decision": {
+      "label": {
+        "noBudget": "Next move",
+        "shortfall": "Gap to close",
+        "save": "Flexible now",
+        "ready": "Flexible now"
+      },
+      "start": "Start here",
+      "body": {
+        "noBudget": "Set a monthly boundary to see what is free after bills and savings.",
+        "shortfall": "This month needs an adjustment after spending, upcoming bills and savings.",
+        "save": "Set aside {{savings}} to stay on target. The figure above is flexible after that.",
+        "ready": "Your upcoming bills are covered. This is still free to use."
+      },
+      "spent": "Spent",
+      "committed": "Due",
+      "savings": "Save",
+      "action": {
+        "setBudget": "Set the boundary",
+        "review": "Review spending",
+        "save": "Set money aside",
+        "steady": "No change needed"
+      }
+    },
     "recurring": {
       "title": "Planned payments",
       "description": "{{count}} active recurring items"
@@ -1181,17 +1205,10 @@
     "budgetPlaceholder": "1.500",
     "categoriesTitle": "What do you usually spend on?",
     "categoriesDescription": "Pick the buckets that fit your life. Add more later — coffee deserves its own.",
-    "featuresTitle": "You're all set.",
-    "featuresDescription": "Here's what you can do with Budgard.",
-    "featureExpenses": "Track expenses",
-    "featureExpensesDesc": "Log spending in seconds. Tag it, color it, find it later.",
-    "featureRecurring": "Recurring bills",
-    "featureRecurringDesc": "Rent, subscriptions, the gym you swear you'll use.",
-    "featureAnalytics": "Analytics",
-    "featureAnalyticsDesc": "See where your money actually goes — usually within a week.",
-    "featureReceipts": "Receipts",
-    "featureReceiptsDesc": "Snap a photo, attach it, never dig through a wallet again.",
-    "startTracking": "Start tracking",
+    "firstExpenseTitle": "Log your first expense",
+    "firstExpenseDescription": "Use something from today. It will appear on Today as soon as you save it.",
+    "exploreFirst": "Not now",
+    "saveFirstExpense": "Save & see Today",
     "skip": "Skip",
     "next": "Continue",
     "budgetSaveFailed": "Could not save budget. You can set it later in settings.",

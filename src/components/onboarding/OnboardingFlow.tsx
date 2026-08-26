@@ -1,34 +1,56 @@
-import { useState } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currencies';
 import { useDataConfig } from '@/contexts/DataContext';
+import { useQuickAdd } from '@/contexts/QuickAddContext';
+import { useQuickAddDraft } from '@/hooks/expenseForm/useQuickAddDraft';
 import { useOnboardingActions } from '@/hooks/onboarding/useOnboardingActions';
 import OnboardingWelcomeStep from '@/components/onboarding/OnboardingWelcomeStep';
 import OnboardingBudgetStep from '@/components/onboarding/OnboardingBudgetStep';
 import OnboardingCategoriesStep from '@/components/onboarding/OnboardingCategoriesStep';
-import OnboardingFeaturesStep from '@/components/onboarding/OnboardingFeaturesStep';
+import OnboardingFirstExpenseStep from '@/components/onboarding/OnboardingFirstExpenseStep';
 
 const STEP_COUNT = 4;
 
 type Props = {
   isOpen: boolean;
   onComplete: () => void;
+  onDismiss?: () => void;
 };
 
-const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
+const OnboardingFlow = ({ isOpen, onComplete, onDismiss }: Props) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { defaultCurrency } = useDataConfig();
-  const [step, setStep] = useState(0);
+  const quickAdd = useQuickAdd();
   const currencySymbol = getCurrencySymbol(defaultCurrency || 'EUR');
 
   const {
+    step,
+    setStep,
     isSubmitting,
     handleComplete,
     handleBudgetNext,
     handleCategoriesNext,
-  } = useOnboardingActions({ onComplete, setStep });
+  } = useOnboardingActions({ onComplete });
+  const handleFirstExpense = useCallback(
+    (data: Parameters<typeof quickAdd.handleExpenseFormSubmit>[0]) => {
+      quickAdd.handleExpenseFormSubmit(data);
+      handleComplete();
+      navigate('/today', { replace: true, viewTransition: true });
+    },
+    [quickAdd, handleComplete, navigate],
+  );
+  const keepFlowOpen = useCallback(() => {}, []);
+  const firstExpense = useQuickAddDraft({
+    isOpen: isOpen && step === 3,
+    onSubmit: handleFirstExpense,
+    onClose: keepFlowOpen,
+  });
+  const handleDismiss = onDismiss ?? onComplete;
 
   const renderCurrentStep = () => {
     if (step === 0) {
@@ -57,20 +79,19 @@ const OnboardingFlow = ({ isOpen, onComplete }: Props) => {
     }
 
     return (
-      <OnboardingFeaturesStep
+      <OnboardingFirstExpenseStep
+        draft={firstExpense}
         onBack={() => setStep(2)}
-        onComplete={handleComplete}
+        onSkip={handleComplete}
       />
     );
   };
 
-  // Dismissing the flow (swipe/Esc/X) also marks onboarding as done —
-  // otherwise it re-opens on every app boot until the last step is reached.
   return (
-    <Dialog open={isOpen} onOpenChange={() => handleComplete()}>
+    <Dialog open={isOpen} onOpenChange={(open) => dismiss(open, handleDismiss)}>
       <DialogContent
         className="sm:max-w-[420px] p-0 gap-0"
-        onOpenChange={() => handleComplete()}
+        onOpenChange={(open) => dismiss(open, handleDismiss)}
       >
         {/* Mobile drag handle */}
         <div
@@ -128,4 +149,12 @@ const getStepClass = (index: number, currentStep: number): string => {
   }
 
   return cn(base, 'w-1.5 bg-muted-foreground/30');
+};
+
+const dismiss = (isOpen: boolean, onDismiss: () => void): void => {
+  if (isOpen) {
+    return;
+  }
+
+  onDismiss();
 };

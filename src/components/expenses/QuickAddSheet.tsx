@@ -4,21 +4,30 @@ import { Button } from '@/components/ui/button';
 import AmountKeypad from '@/components/expenses/AmountKeypad';
 import QuickAddCategories from '@/components/expenses/QuickAddCategories';
 import QuickAddName from '@/components/expenses/QuickAddName';
+import QuickAddTemplates from '@/components/expenses/QuickAddTemplates';
 import { useQuickAddDraft } from '@/hooks/expenseForm/useQuickAddDraft';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { ExpenseWritePayload } from '@/services/dataService';
+import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 
 type Props = {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: ExpenseWritePayload) => void;
   onOpenFullForm: (draft: ExpenseWritePayload) => void;
+  onUseTemplate: (template: ExpenseTemplate) => void;
 };
 
 // An amount, a name and a category. The full form is still there behind "More
 // details" for the expense that needs a date, a tag or a receipt — but it is
 // no longer the toll every coffee has to pay.
-const QuickAddSheet = ({ open, onClose, onSubmit, onOpenFullForm }: Props) => {
+const QuickAddSheet = ({
+  open,
+  onClose,
+  onSubmit,
+  onOpenFullForm,
+  onUseTemplate,
+}: Props) => {
   const { t } = useTranslation();
   const draft = useQuickAddDraft({ isOpen: open, onSubmit, onClose });
 
@@ -52,6 +61,8 @@ const QuickAddSheet = ({ open, onClose, onSubmit, onOpenFullForm }: Props) => {
             {formatCurrency(draft.pad.amount, draft.currency)}
           </p>
 
+          {renderTemplates(open, onUseTemplate, onClose)}
+
           <QuickAddName
             value={draft.name}
             suggestions={draft.suggestions}
@@ -84,6 +95,18 @@ export default QuickAddSheet;
 // --- Helpers ---
 
 type Draft = ReturnType<typeof useQuickAddDraft>;
+
+const renderTemplates = (
+  isOpen: boolean,
+  onUse: (template: ExpenseTemplate) => void,
+  onClose: () => void,
+) => {
+  if (!isOpen) {
+    return null;
+  }
+
+  return <QuickAddTemplates onUse={onUse} onClose={onClose} />;
+};
 
 const renderActions = (
   draft: Draft,

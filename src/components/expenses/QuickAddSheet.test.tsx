@@ -42,6 +42,11 @@ vi.mock('@/contexts/DataContext', () => ({
   useCategoriesData: () => ({ expenseCategories: data.categories }),
   useDataConfig: () => ({ defaultCurrency: 'EUR' }),
   useExpensesData: () => data.expenses,
+  useTemplatesData: () => [],
+}));
+
+vi.mock('@/hooks/dataOps/useTemplateOps', () => ({
+  useTemplateOps: () => ({ handleTemplateDelete: vi.fn() }),
 }));
 
 // Radix portals need pointer APIs jsdom does not implement. Both stand-ins
@@ -49,7 +54,9 @@ vi.mock('@/contexts/DataContext', () => ({
 // the popover still reports whether it would be open.
 vi.mock('@/components/ui/dialog', () => ({
   Dialog: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  DialogContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DialogContent: ({ children }: { children: ReactNode }) => (
+    <div>{children}</div>
+  ),
   DialogTitle: ({ children }: { children: ReactNode }) => <h2>{children}</h2>,
 }));
 
@@ -74,6 +81,7 @@ const renderSheet = () => {
       onClose={vi.fn()}
       onSubmit={onSubmit}
       onOpenFullForm={onOpenFullForm}
+      onUseTemplate={vi.fn()}
     />,
   );
 
@@ -126,7 +134,10 @@ describe('components/expenses/QuickAddSheet', () => {
 
     expect(nameField()).toHaveValue('Cinema');
     expect(onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({ description: 'Cinema', category_id: 'cat-fun' }),
+      expect.objectContaining({
+        description: 'Cinema',
+        category_id: 'cat-fun',
+      }),
     );
   });
 
@@ -136,7 +147,9 @@ describe('components/expenses/QuickAddSheet', () => {
     fireEvent.click(screen.getByRole('radio', { name: 'Food' }));
     const list = screen.getByTestId('suggestions');
 
-    expect(within(list).getByRole('button', { name: 'Flat white' })).toBeInTheDocument();
+    expect(
+      within(list).getByRole('button', { name: 'Flat white' }),
+    ).toBeInTheDocument();
     expect(within(list).queryByRole('button', { name: 'Cinema' })).toBeNull();
   });
 

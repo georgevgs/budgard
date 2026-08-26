@@ -4,7 +4,10 @@ import FormsManager from '@/components/layout/FormsManager';
 import QuickAddSheet from '@/components/expenses/QuickAddSheet';
 import SpeedDial from '@/components/layout/SpeedDial';
 import IncomeFormDialog from '@/components/income/IncomeFormDialog';
-import { QuickAddContext, type QuickAddValue } from '@/contexts/QuickAddContext';
+import {
+  QuickAddContext,
+  type QuickAddValue,
+} from '@/contexts/QuickAddContext';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useIncomeOps } from '@/hooks/dataOps/useIncomeOps';
 import { useExpenseFormState } from '@/hooks/expensesList/useExpenseFormState';
@@ -59,6 +62,7 @@ const QuickAddProvider = ({ children }: Props) => {
         onClose={expenseForm.handleFormClose}
         onSubmit={expenseActions.handleExpenseFormSubmit}
         onOpenFullForm={expenseForm.openFullForm}
+        onUseTemplate={expenseActions.handleUseTemplate}
       />
       <FormsManager
         formType={expenseForm.formType}

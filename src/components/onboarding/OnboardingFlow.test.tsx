@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { swatch } from '@/design/palette';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import OnboardingFlow from '@/components/onboarding/OnboardingFlow';
 import { shouldShowOnboarding } from '@/lib/onboarding';
 
@@ -15,11 +16,20 @@ vi.mock('@/hooks/useAuth', () => ({
 // Mock useData
 vi.mock('@/contexts/DataContext', () => ({
   useData: () => ({ defaultCurrency: 'EUR' }),
+  useCategoriesData: () => ({ expenseCategories: [] }),
+  useExpensesData: () => [],
   useDataConfig: () => ({
     isInitialized: true,
     monthlyBudget: null,
     defaultCurrency: 'EUR',
     defaultSavingsPct: null,
+  }),
+}));
+
+const mockHandleExpenseFormSubmit = vi.fn();
+vi.mock('@/contexts/QuickAddContext', () => ({
+  useQuickAdd: () => ({
+    handleExpenseFormSubmit: mockHandleExpenseFormSubmit,
   }),
 }));
 
@@ -45,7 +55,18 @@ beforeEach(() => {
   localStorage.clear();
   mockHandleBudgetUpdate.mockReset();
   mockHandleCategoriesAddBulk.mockReset();
+  mockHandleExpenseFormSubmit.mockReset();
 });
+
+const renderFlow = (onComplete = vi.fn()) => {
+  render(
+    <MemoryRouter>
+      <OnboardingFlow isOpen onComplete={onComplete} />
+    </MemoryRouter>,
+  );
+
+  return onComplete;
+};
 
 // ─── shouldShowOnboarding ────────────────────────────────────────────────────
 
@@ -74,24 +95,30 @@ describe('shouldShowOnboarding', () => {
   it('returns true for fresh user with no data', () => {
     expect(shouldShowOnboarding(true, 0, 0, null)).toBe(true);
   });
+
+  it('resumes a started flow after setup data has been saved', () => {
+    localStorage.setItem('budgard_onboarding_started', 'true');
+
+    expect(shouldShowOnboarding(true, 0, 3, 1500)).toBe(true);
+  });
 });
 
 // ─── OnboardingFlow ──────────────────────────────────────────────────────────
 
 describe('OnboardingFlow', () => {
   it('renders the welcome step first', () => {
-    render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
+    renderFlow();
     expect(screen.getByText('onboarding.welcomeTitle')).toBeInTheDocument();
   });
 
   it('navigates to budget step from welcome', () => {
-    render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
+    renderFlow();
     fireEvent.click(screen.getByText('onboarding.getStarted'));
     expect(screen.getByText('onboarding.budgetTitle')).toBeInTheDocument();
   });
 
   it('navigates to categories step when skipping budget', () => {
-    render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
+    renderFlow();
     // Welcome -> Budget
     fireEvent.click(screen.getByText('onboarding.getStarted'));
     // Budget -> Categories (skip)
@@ -100,7 +127,7 @@ describe('OnboardingFlow', () => {
   });
 
   it('renders category buttons with translation keys', () => {
-    render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
+    renderFlow();
     // Welcome -> Budget -> Categories
     fireEvent.click(screen.getByText('onboarding.getStarted'));
     fireEvent.click(screen.getByText('onboarding.skip'));
@@ -117,7 +144,7 @@ describe('OnboardingFlow', () => {
   });
 
   it('toggles category selection on click', () => {
-    render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
+    renderFlow();
     // Welcome -> Budget -> Categories
     fireEvent.click(screen.getByText('onboarding.getStarted'));
     fireEvent.click(screen.getByText('onboarding.skip'));
@@ -138,7 +165,7 @@ describe('OnboardingFlow', () => {
   it('creates categories with translated names on continue', async () => {
     mockHandleCategoriesAddBulk.mockResolvedValue(undefined);
 
-    render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
+    renderFlow();
     // Welcome -> Budget -> Categories
     fireEvent.click(screen.getByText('onboarding.getStarted'));
     fireEvent.click(screen.getByText('onboarding.skip'));
@@ -148,8 +175,12 @@ describe('OnboardingFlow', () => {
       expect(mockHandleCategoriesAddBulk).toHaveBeenCalled();
     });
 
-    const categories: { name: string; color: string; icon: string; user_id: string }[] =
-      mockHandleCategoriesAddBulk.mock.calls[0][0];
+    const categories: {
+      name: string;
+      color: string;
+      icon: string;
+      user_id: string;
+    }[] = mockHandleCategoriesAddBulk.mock.calls[0][0];
     const foodCategory = categories.find((c) => c.name.includes('food'));
 
     expect(foodCategory?.name).toBe('onboarding.presetCategories.food');
@@ -159,7 +190,7 @@ describe('OnboardingFlow', () => {
   });
 
   it('skips category creation when none selected', async () => {
-    render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
+    renderFlow();
     // Welcome -> Budget -> Categories
     fireEvent.click(screen.getByText('onboarding.getStarted'));
     fireEvent.click(screen.getByText('onboarding.skip'));
@@ -176,39 +207,72 @@ describe('OnboardingFlow', () => {
     fireEvent.click(screen.getByText('onboarding.next'));
 
     await waitFor(() => {
-      expect(screen.getByText('onboarding.featuresTitle')).toBeInTheDocument();
+      expect(
+        screen.getByText('onboarding.firstExpenseTitle'),
+      ).toBeInTheDocument();
     });
 
     expect(mockHandleCategoriesAddBulk).not.toHaveBeenCalled();
   });
 
-  it('shows feature highlights on the final step', () => {
-    render(<OnboardingFlow isOpen onComplete={vi.fn()} />);
-    // Welcome -> Budget -> Categories -> Features
+  it('asks for a real expense on the final step', () => {
+    renderFlow();
+    // Welcome -> Budget -> Categories -> First expense
     fireEvent.click(screen.getByText('onboarding.getStarted'));
     fireEvent.click(screen.getByText('onboarding.skip'));
     fireEvent.click(screen.getByText('onboarding.skip'));
 
-    expect(screen.getByText('onboarding.featuresTitle')).toBeInTheDocument();
-    expect(screen.getByText('onboarding.featureExpenses')).toBeInTheDocument();
-    expect(screen.getByText('onboarding.featureRecurring')).toBeInTheDocument();
-    expect(screen.getByText('onboarding.featureAnalytics')).toBeInTheDocument();
-    expect(screen.getByText('onboarding.featureReceipts')).toBeInTheDocument();
+    expect(
+      screen.getByText('onboarding.firstExpenseTitle'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'onboarding.saveFirstExpense' }),
+    ).toBeDisabled();
   });
 
-  it('sets onboarded flag and calls onComplete on final step', () => {
+  it('sets onboarded flag when the first expense is deferred', () => {
     const onComplete = vi.fn();
-    render(<OnboardingFlow isOpen onComplete={onComplete} />);
+    renderFlow(onComplete);
 
-    // Welcome -> Budget -> Categories -> Features
+    // Welcome -> Budget -> Categories -> First expense
     fireEvent.click(screen.getByText('onboarding.getStarted'));
     fireEvent.click(screen.getByText('onboarding.skip'));
     fireEvent.click(screen.getByText('onboarding.skip'));
 
-    // Click start tracking
-    fireEvent.click(screen.getByText('onboarding.startTracking'));
+    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
 
     expect(localStorage.getItem('budgard_onboarded')).toBe('true');
     expect(onComplete).toHaveBeenCalled();
+  });
+
+  it('saves the first expense before revealing Today', () => {
+    const onComplete = vi.fn();
+    renderFlow(onComplete);
+    fireEvent.click(screen.getByText('onboarding.getStarted'));
+    fireEvent.click(screen.getByText('onboarding.skip'));
+    fireEvent.click(screen.getByText('onboarding.skip'));
+
+    fireEvent.click(screen.getByRole('button', { name: '4' }));
+    fireEvent.click(screen.getByRole('button', { name: '0' }));
+    fireEvent.click(screen.getByRole('button', { name: '0' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'onboarding.saveFirstExpense' }),
+    );
+
+    expect(mockHandleExpenseFormSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 4, date: expect.any(String) }),
+    );
+    expect(localStorage.getItem('budgard_onboarded')).toBe('true');
+    expect(onComplete).toHaveBeenCalled();
+  });
+
+  it('returns to the saved step when setup resumes', () => {
+    localStorage.setItem('budgard_onboarding_step', '3');
+
+    renderFlow();
+
+    expect(
+      screen.getByText('onboarding.firstExpenseTitle'),
+    ).toBeInTheDocument();
   });
 });

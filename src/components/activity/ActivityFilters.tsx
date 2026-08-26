@@ -35,13 +35,13 @@ const ActivityFilters = ({
             /* Not `.tile`: the Input primitive carries its own `bg-card`
                utility, which outranks a component-layer class, so the surface
                has to be stated as utilities here to land at all. */
-            className="h-10.5 w-full rounded-full border-0 bg-tile pl-9.5 text-sm shadow-[inset_0_0_0_1px_hsl(var(--tile-ring))]"
+            className="h-10.5 w-full rounded-full border-0 bg-tile pl-9.5 text-sm shadow-[inset_0_0_0_1px_hsl(var(--tile-ring))] placeholder:text-[0.6875rem]"
           />
         </div>
         {trailing}
       </div>
       <div
-        className="segmented grid grid-cols-3"
+        className="segmented grid w-full grid-cols-3"
         role="group"
         aria-label={t('activity.filterLabel')}
       >

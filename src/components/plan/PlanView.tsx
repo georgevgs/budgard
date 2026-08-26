@@ -12,11 +12,11 @@ import UpcomingBillsCard from '@/components/common/UpcomingBillsCard';
 import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
 import FiftyThirtyTwentyRing from '@/components/income/FiftyThirtyTwentyRing';
 import PlanOverviewCard from '@/components/plan/PlanOverviewCard';
+import MonthlyDecisionCard from '@/components/plan/MonthlyDecisionCard';
 import SavingsRhythm from '@/components/plan/SavingsRhythm';
 import {
   useAccountsData,
   useDataConfig,
-  useExpensesData,
   useGoalsData,
   useRecurringData,
 } from '@/contexts/DataContext';
@@ -26,14 +26,16 @@ import { useDebts } from '@/hooks/useDebts';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { useSavingsRhythm } from '@/hooks/savings/useSavingsRhythm';
 import { getMonthlyAmount } from '@/lib/recurring';
+import { computeUpcomingRecurringThisMonth } from '@/lib/forecast';
+import { buildMonthlyDecision } from '@/lib/monthlyDecision';
 import { buildUpcomingBills } from '@/lib/upcomingBills';
 import { formatCurrency } from '@/lib/utils';
 import { sumSpending } from '@/lib/spending';
+import type { Expense } from '@/types/Expense';
 
 const PlanView = () => {
   const { t } = useTranslation();
   const config = useDataConfig();
-  const expenses = useExpensesData();
   const goals = useGoalsData();
   const { recurringExpenses } = useRecurringData();
   const { accounts } = useAccountsData();
@@ -42,8 +44,25 @@ const PlanView = () => {
   const { optimisticExpenses } = useQuickAdd();
   const rhythm = useSavingsRhythm(optimisticExpenses);
   const model = useMemo(
-    () => buildPlanModel(expenses, goals, recurringExpenses),
-    [expenses, goals, recurringExpenses],
+    () => buildPlanModel(optimisticExpenses, goals, recurringExpenses),
+    [optimisticExpenses, goals, recurringExpenses],
+  );
+  const decision = useMemo(
+    () =>
+      buildMonthlyDecision({
+        monthlyBudget: config.monthlyBudget,
+        spent: model.monthlySpent,
+        committed: model.upcomingThisMonth,
+        savingsTargetPct: config.defaultSavingsPct,
+        saved: rhythm?.setAside ?? 0,
+      }),
+    [
+      config.monthlyBudget,
+      config.defaultSavingsPct,
+      model.monthlySpent,
+      model.upcomingThisMonth,
+      rhythm?.setAside,
+    ],
   );
   const counts = {
     goals: model.goalCount,
@@ -60,14 +79,16 @@ const PlanView = () => {
   return (
     <div className="page-shell">
       <PageHeader title={t('plan.title')} subtitle={t('plan.subtitle')} />
+      <MonthlyDecisionCard
+        decision={decision}
+        currency={config.defaultCurrency}
+      />
       <section
-        className="surface-card mt-6 p-5"
+        id="monthly-plan"
+        className="surface-card mt-6 scroll-mt-6 p-5"
         aria-labelledby="monthly-plan-title"
       >
-        <h2
-          id="monthly-plan-title"
-          className="mb-4 type-heading"
-        >
+        <h2 id="monthly-plan-title" className="mb-4 type-heading">
           {t('plan.monthlyPlan')}
         </h2>
         <BudgetProgress
@@ -97,7 +118,7 @@ const PlanView = () => {
       </div>
       {/* A habit built over a month, not a thing to react to this morning —
           it reads as planning, so it belongs beside the other planning. */}
-      <div className="mt-8">
+      <div id="savings-rhythm" className="mt-8 scroll-mt-6">
         <SavingsRhythm rhythm={rhythm} currency={config.defaultCurrency} />
       </div>
       {renderOverviewGrid(model, config.defaultCurrency, counts, t)}
@@ -160,7 +181,7 @@ const renderOverviewGrid = (
 );
 
 const buildPlanModel = (
-  expenses: ReturnType<typeof useExpensesData>,
+  expenses: Expense[],
   goals: ReturnType<typeof useGoalsData>,
   recurringExpenses: ReturnType<typeof useRecurringData>['recurringExpenses'],
 ) => {
@@ -174,6 +195,10 @@ const buildPlanModel = (
   return {
     monthKey,
     monthlySpent,
+    upcomingThisMonth: computeUpcomingRecurringThisMonth(
+      recurringExpenses,
+      now,
+    ),
     // A month-long window, where Today looks a week ahead: Plan is where you
     // come to see everything still committed, not just what lands imminently.
     upcoming: buildUpcomingBills(recurringExpenses, now, {

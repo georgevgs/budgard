@@ -5,7 +5,6 @@ import ActivityFilters from '@/components/activity/ActivityFilters';
 import ActivityMonthStepper from '@/components/activity/ActivityMonthStepper';
 import ActivityPeriodSelector from '@/components/activity/ActivityPeriodSelector';
 import ActivitySummary from '@/components/activity/ActivitySummary';
-import ActivityTemplates from '@/components/activity/ActivityTemplates';
 import ActivityFilterPanel from '@/components/activity/ActivityFilterPanel';
 import ActivityToolsMenu from '@/components/activity/ActivityToolsMenu';
 import FilterResultsAnnouncer from '@/components/expenses/FilterResultsAnnouncer';
@@ -67,11 +66,6 @@ const ActivityView = () => {
           }
         />
         <div className="mt-4 space-y-3">
-          <ActivitySummary
-            expenseTotal={activity.expenseTotal}
-            incomeTotal={activity.incomeTotal}
-            currency={defaultCurrency}
-          />
           <ActivityFilters
             search={activity.search}
             kind={activity.kind}
@@ -89,13 +83,17 @@ const ActivityView = () => {
             selectedMonth={activity.selectedMonth}
             onMonthChange={activity.setSelectedMonth}
           />
-          <ActivityTemplates onUse={quickAdd.handleUseTemplate} />
+          <ActivitySummary
+            expenseTotal={activity.expenseTotal}
+            incomeTotal={activity.incomeTotal}
+            currency={defaultCurrency}
+          />
         </div>
         <FilterResultsAnnouncer
           count={activity.filteredRows.length}
           active={activity.hasActiveFilters}
         />
-        <div className="mt-6">
+        <div className="mt-4">
           <ActivityFeed
             transactions={activity.filteredRows}
             currency={defaultCurrency}

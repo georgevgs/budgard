@@ -1,6 +1,4 @@
 import { useTranslation } from 'react-i18next';
-import BentoGrid from '@/components/bento/BentoGrid';
-import BentoTile from '@/components/bento/BentoTile';
 import TileLabel from '@/components/bento/TileLabel';
 import { cn, formatCurrency } from '@/lib/utils';
 
@@ -10,29 +8,28 @@ type Props = {
   currency: string;
 };
 
-// Three figures, three tiles, the one that answers the question last. Out and
-// in are raw facts; net is the verdict, so it takes the inverted tile and the
-// eye lands on it after reading the two that produced it.
+// A compact ledger summary, not three competing modules. The feed is the main
+// event on Activity; these numbers stay available without pushing it down.
 const ActivitySummary = ({ expenseTotal, incomeTotal, currency }: Props) => {
   const { t } = useTranslation();
   const net = incomeTotal - expenseTotal;
 
   return (
-    <BentoGrid className="grid-cols-3">
+    <div className="surface-card grid grid-cols-3 divide-x divide-border/40 px-1 py-3">
       {renderStat(t('activity.spent'), formatCurrency(expenseTotal, currency))}
       {renderStat(
         t('activity.received'),
         formatCurrency(incomeTotal, currency),
         'text-income-ink',
       )}
-      <BentoTile tone="ink" className="px-3 py-3.5">
-        <TileLabel>{t('activity.netChange')}</TileLabel>
-        <p className="mt-2.5 text-[0.9rem] font-semibold leading-none tabular-nums">
+      <div className="min-w-0 px-2 text-center">
+        <TileLabel className="truncate">{t('activity.netChange')}</TileLabel>
+        <p className="mt-2 type-figure-sm text-[0.875rem]">
           {getNetPrefix(net)}
           {formatCurrency(Math.abs(net), currency)}
         </p>
-      </BentoTile>
-    </BentoGrid>
+      </div>
+    </div>
   );
 };
 
@@ -42,17 +39,10 @@ export default ActivitySummary;
 
 const renderStat = (label: string, value: string, tone?: string) => {
   return (
-    <BentoTile key={label} className="px-3 py-3.5">
-      <TileLabel>{label}</TileLabel>
-      <p
-        className={cn(
-          'mt-2.5 text-[0.9rem] font-semibold leading-none tabular-nums',
-          tone,
-        )}
-      >
-        {value}
-      </p>
-    </BentoTile>
+    <div key={label} className="min-w-0 px-2 text-center">
+      <TileLabel className="truncate">{label}</TileLabel>
+      <p className={cn('mt-2 type-figure-sm text-[0.875rem]', tone)}>{value}</p>
+    </div>
   );
 };
 

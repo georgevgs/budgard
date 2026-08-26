@@ -203,6 +203,7 @@ const OnboardingGate = () => {
   const { categories } = useCategoriesData();
   const { isInitialized, monthlyBudget } = useDataConfig();
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [dismissedThisSession, setDismissedThisSession] = useState(false);
 
   const onboardingDue = shouldShowOnboarding(
     isInitialized,
@@ -213,26 +214,47 @@ const OnboardingGate = () => {
   // Latch during render (guarded): once due, the flow stays open even if data
   // created mid-flow makes the condition false again. Completing the flow
   // writes the onboarded flag before closing, so this never re-latches after.
-  if (onboardingDue && !showOnboarding) {
+  if (onboardingDue && !showOnboarding && !dismissedThisSession) {
     setShowOnboarding(true);
   }
 
   // A landing-page "Get Pro" choice completes here after sign-in. Blocked
   // until the data layer knows whether onboarding is due — and while it runs —
   // so the upgrade dialog never opens underneath the onboarding flow.
-  useUpgradeIntent(!isInitialized || showOnboarding || onboardingDue);
+  useUpgradeIntent(
+    !isInitialized ||
+      showOnboarding ||
+      (onboardingDue && !dismissedThisSession),
+  );
 
-  return renderOnboarding(showOnboarding, () => setShowOnboarding(false));
+  const handleDismiss = () => {
+    setDismissedThisSession(true);
+    setShowOnboarding(false);
+  };
+
+  return renderOnboarding(
+    showOnboarding,
+    () => setShowOnboarding(false),
+    handleDismiss,
+  );
 };
 
-const renderOnboarding = (isOpen: boolean, onComplete: () => void) => {
+const renderOnboarding = (
+  isOpen: boolean,
+  onComplete: () => void,
+  onDismiss: () => void,
+) => {
   if (!isOpen) {
     return null;
   }
 
   return (
     <Suspense fallback={null}>
-      <OnboardingFlow isOpen={isOpen} onComplete={onComplete} />
+      <OnboardingFlow
+        isOpen={isOpen}
+        onComplete={onComplete}
+        onDismiss={onDismiss}
+      />
     </Suspense>
   );
 };
