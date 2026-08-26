@@ -34,6 +34,7 @@ const MIN_DISMISS_DURATION_MS = 180;
 const MAX_DISMISS_DURATION_MS = 320;
 const MIN_DISMISS_VELOCITY_PX_PER_MS = 1;
 const DISMISS_EASING = 'cubic-bezier(0.32, 0.72, 0, 1)';
+const DISMISS_RESET_GRACE_MS = 50;
 
 type DragStyle = CSSProperties & {
   '--tw-exit-opacity'?: string;
@@ -62,6 +63,31 @@ export const useSwipeToClose = ({
   const lastMoveAt = useRef(0);
   const velocity = useRef(0);
   const rejectedDismissTimer = useRef<number | null>(null);
+  const dismissalResetTimer = useRef<number | null>(null);
+  const dismissingSheet = useRef<HTMLElement | null>(null);
+  const dismissAnimationEnd = useRef<((event: AnimationEvent) => void) | null>(
+    null,
+  );
+
+  const clearDismissalReset = useCallback(() => {
+    clearTimer(dismissalResetTimer);
+
+    if (dismissingSheet.current && dismissAnimationEnd.current) {
+      dismissingSheet.current.removeEventListener(
+        'animationend',
+        dismissAnimationEnd.current,
+      );
+    }
+
+    dismissingSheet.current = null;
+    dismissAnimationEnd.current = null;
+  }, []);
+
+  const resetDismissal = useCallback(() => {
+    clearDismissalReset();
+    setIsDismissing(false);
+    setTranslateY(0);
+  }, [clearDismissalReset]);
 
   const handleTouchStart = useCallback(
     (event: React.TouchEvent) => {
@@ -137,28 +163,62 @@ export const useSwipeToClose = ({
       // from this position to 100%, instead of snapping back to rest first.
       const sheet = event.currentTarget;
       const sheetHeight = sheet.getBoundingClientRect().height;
-      setDismissDurationMs(
-        dismissDuration(sheetHeight, dragged, velocity.current),
-      );
+      const duration = dismissDuration(sheetHeight, dragged, velocity.current);
+      const handleDismissAnimationEnd = (animationEvent: AnimationEvent) => {
+        if (
+          animationEvent.target !== sheet ||
+          sheet.dataset.state !== 'closed'
+        ) {
+          return;
+        }
+
+        resetDismissal();
+      };
+
+      clearDismissalReset();
+      dismissingSheet.current = sheet;
+      dismissAnimationEnd.current = handleDismissAnimationEnd;
+      sheet.addEventListener('animationend', handleDismissAnimationEnd);
+      setDismissDurationMs(duration);
       setIsDismissing(true);
       onClose();
 
       // A dirty-form guard can reject the close. Wait until React has flushed
       // the requested state change, then settle back only if the sheet stayed
       // open. A successful close keeps the release transform through unmount.
-      clearRejectedDismissTimer(rejectedDismissTimer);
+      clearTimer(rejectedDismissTimer);
       rejectedDismissTimer.current = window.setTimeout(() => {
         rejectedDismissTimer.current = null;
 
-        if (!sheet.isConnected || sheet.dataset.state === 'closed') {
+        if (!dismissingSheet.current) {
           return;
         }
 
-        setIsDismissing(false);
-        setTranslateY(0);
+        if (!sheet.isConnected || sheet.dataset.state === 'closed') {
+          // DialogContent owns this hook while Radix mounts and unmounts the
+          // portal content. Clear the release transform after the exit so a
+          // later open starts at the sheet's resting position. animationend
+          // is the exact path; the timer covers disabled or interrupted CSS.
+          dismissalResetTimer.current = window.setTimeout(
+            resetDismissal,
+            duration + DISMISS_RESET_GRACE_MS,
+          );
+
+          return;
+        }
+
+        resetDismissal();
       }, 0);
     },
-    [isDragging, enabled, translateY, threshold, onClose],
+    [
+      isDragging,
+      enabled,
+      translateY,
+      threshold,
+      onClose,
+      clearDismissalReset,
+      resetDismissal,
+    ],
   );
 
   // React's content handlers only receive the normal touch end. If the browser
@@ -185,9 +245,10 @@ export const useSwipeToClose = ({
   // Do not leave the guarded-close check alive after the sheet unmounts.
   useEffect(() => {
     return () => {
-      clearRejectedDismissTimer(rejectedDismissTimer);
+      clearTimer(rejectedDismissTimer);
+      clearDismissalReset();
     };
-  }, []);
+  }, [clearDismissalReset]);
 
   const interactionActive = isDragging || isDismissing;
   const settle = settleTransition(interactionActive);
@@ -329,9 +390,7 @@ const dismissExitOpacity = (isDismissing: boolean): string | undefined => {
   return '1';
 };
 
-const clearRejectedDismissTimer = (
-  timer: React.MutableRefObject<number | null>,
-) => {
+const clearTimer = (timer: React.MutableRefObject<number | null>) => {
   if (timer.current === null) {
     return;
   }

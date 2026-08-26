@@ -2,12 +2,14 @@ import { afterEach, describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useSwipeToClose } from '@/hooks/useSwipeToClose';
 
-const makeSheet = (height = 600) =>
-  ({
-    dataset: { state: 'open' },
-    isConnected: true,
-    getBoundingClientRect: () => ({ height }),
-  }) as unknown as HTMLElement;
+const makeSheet = (height = 600) => {
+  const sheet = document.createElement('div');
+  sheet.dataset.state = 'open';
+  Object.defineProperty(sheet, 'isConnected', { value: true });
+  sheet.getBoundingClientRect = () => ({ height }) as DOMRect;
+
+  return sheet;
+};
 
 const makeTouchEvent = (
   clientY: number,
@@ -304,6 +306,42 @@ describe('useSwipeToClose', () => {
     expect(result.current.dragStyle['--tw-exit-opacity']).toBe('1');
     expect(result.current.overlayStyle.animationDuration).toBe('320ms');
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it('clears the release transform after closing so reopening is full size', () => {
+    vi.useFakeTimers();
+    const sheet = makeSheet();
+    const onClose = vi.fn(() => {
+      sheet.dataset.state = 'closed';
+    });
+    const { result } = renderHook(() =>
+      useSwipeToClose({ onClose, threshold: 50 }),
+    );
+
+    act(() => {
+      result.current.handleTouchStart(
+        makeTouchEvent(100, {
+          dataset: { dragHandle: 'true' },
+        } as unknown as Partial<HTMLElement>),
+      );
+    });
+    act(() => {
+      result.current.handleTouchMove(makeTouchEvent(200));
+    });
+    act(() => {
+      result.current.handleTouchEnd(makeTouchEvent(200, undefined, 0, sheet));
+      vi.advanceTimersByTime(0);
+    });
+
+    expect(result.current.dragStyle.transform).toBe('translateY(100px)');
+
+    act(() => {
+      sheet.dispatchEvent(new Event('animationend'));
+    });
+
+    expect(result.current.translateY).toBe(0);
+    expect(result.current.isDismissing).toBe(false);
+    expect(result.current.dragStyle.transform).toBe('translateY(0px)');
   });
 
   it('settles back when a close guard rejects the dismissal', () => {
