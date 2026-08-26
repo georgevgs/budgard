@@ -12,7 +12,12 @@ import LegalLoadingState from '@/pages/legal/LegalLoading';
 import RouteMetadata from '@/components/common/RouteMetadata';
 import OfflineBanner from '@/components/common/OfflineBanner';
 
-const AuthenticatedApp = lazyWithRetry(() => import('@/AuthenticatedApp'));
+// On a cache-repair launch every JavaScript chunk has to come from the network.
+// Load the authenticated shell and the initial tab together so the user sees
+// one stable app skeleton, rather than shell skeleton -> tab skeleton -> data.
+// The route remains a dynamic import and therefore stays lazy for signed-out
+// visitors and for every tab other than the one being opened.
+const AuthenticatedApp = lazyWithRetry(() => loadAuthenticatedApp());
 const LandingPage = lazyWithRetry(() => import('@/pages/LandingPage'));
 const PrivacyPage = lazyWithRetry(() => import('@/pages/legal/PrivacyPage'));
 const TermsPage = lazyWithRetry(() => import('@/pages/legal/TermsPage'));
@@ -71,6 +76,14 @@ const PublicApp = () => {
 
 // --- Helpers ---
 
+const loadAuthenticatedApp = async () => {
+  const app = import('@/AuthenticatedApp');
+  const initialTab = loadInitialTab(window.location.pathname);
+  await Promise.all([app, initialTab]);
+
+  return app;
+};
+
 const renderLegalPage = (page: ReactNode) => {
   return (
     <main className="flex-1">
@@ -88,4 +101,23 @@ const renderAuthLoading = (pathname: string) => {
 
 const isLegalPath = (pathname: string): boolean => {
   return ['/privacy', '/terms', '/contact'].includes(pathname);
+};
+
+const loadInitialTab = (pathname: string): Promise<unknown> => {
+  // Installed PWAs start at `/`; the authenticated router immediately sends
+  // that route to Today, so it is the initial tab too.
+  if (pathname === '/' || pathname === '/today' || pathname === '/expenses') {
+    return import('@/components/today/TodayView');
+  }
+  if (pathname === '/activity' || pathname === '/income') {
+    return import('@/components/activity/ActivityView');
+  }
+  if (pathname === '/plan') {
+    return import('@/components/plan/PlanView');
+  }
+  if (pathname === '/trends' || pathname === '/analytics') {
+    return import('@/components/analytics/AnalyticsView');
+  }
+
+  return Promise.resolve();
 };

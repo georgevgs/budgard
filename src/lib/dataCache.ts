@@ -50,19 +50,13 @@ type StoredSnapshot = {
 
 const CACHE_KEY = 'budgard-data-snapshot';
 
-// Structural version of the snapshot envelope itself. The full cache key also
-// folds in the app version (below) so any release auto-invalidates old
-// snapshots — that removes the human step of manually bumping a version every
-// time a field inside DataSnapshot changes shape (a missed bump would
-// otherwise hydrate a wrong shape into state, silently).
+// Structural version of the snapshot envelope itself. This changes only when
+// DataSnapshot stops being backwards-compatible; ordinary app releases must
+// keep the last good snapshot so an update does not turn a warm launch into a
+// full-screen data load. isStructurallyValid below remains the final guard
+// against a stale or malformed payload when a schema bump is missed.
 const CACHE_SCHEMA = 1;
-
-// Replaced at build time by Vite's `define`. Fall back to 'dev' if it isn't
-// (e.g. an unconfigured tool) so reading it can never throw at module load.
-const APP_VERSION =
-  typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev';
-
-const CACHE_VERSION = `${CACHE_SCHEMA}:${APP_VERSION}`;
+const CACHE_VERSION = String(CACHE_SCHEMA);
 
 // Snapshots older than this are discarded: painting week-old numbers and
 // then swapping them for fresh ones is more confusing than a loading state.
@@ -106,7 +100,7 @@ export const loadDataSnapshot = (userId: string): DataSnapshot | null => {
     }
 
     const stored = JSON.parse(raw) as StoredSnapshot;
-    if (stored.version !== CACHE_VERSION) {
+    if (!isCompatibleVersion(stored.version)) {
       return null;
     }
     if (stored.userId !== userId) {
@@ -192,6 +186,17 @@ const ARRAY_FIELDS = [
   'debts',
   'noSpendDays',
 ] as const;
+
+// Releases before this cache stopped following package.json wrote versions as
+// "<schema>:<app-version>". Accept that legacy spelling for the current schema
+// so the first release containing this fix can reuse the snapshot already on
+// the device instead of causing one last cold boot.
+const isCompatibleVersion = (version: unknown): boolean => {
+  if (version === CACHE_VERSION) return true;
+  if (typeof version !== 'string') return false;
+
+  return version.startsWith(`${CACHE_VERSION}:`);
+};
 
 const NULLABLE_NUMBER_FIELDS = [
   'monthlyBudget',

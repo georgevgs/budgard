@@ -87,6 +87,24 @@ describe('dataCache', () => {
     expect(loadDataSnapshot(USER_ID)).toBeNull();
   });
 
+  it('keeps a structurally valid snapshot written by an earlier app release', () => {
+    saveDataSnapshot(USER_ID, makeSnapshot());
+    const stored = JSON.parse(localStorage.getItem(CACHE_KEY)!);
+    stored.version = '1:2.3.0';
+    localStorage.setItem(CACHE_KEY, JSON.stringify(stored));
+
+    expect(loadDataSnapshot(USER_ID)?.monthlyBudget).toBe(1500);
+  });
+
+  it('rejects a legacy app-version key from another cache schema', () => {
+    saveDataSnapshot(USER_ID, makeSnapshot());
+    const stored = JSON.parse(localStorage.getItem(CACHE_KEY)!);
+    stored.version = '2:2.3.0';
+    localStorage.setItem(CACHE_KEY, JSON.stringify(stored));
+
+    expect(loadDataSnapshot(USER_ID)).toBeNull();
+  });
+
   it('returns null when the snapshot is too old', () => {
     saveDataSnapshot(USER_ID, makeSnapshot());
     const stored = JSON.parse(localStorage.getItem(CACHE_KEY)!);

@@ -23,6 +23,10 @@ vi.mock('@/AuthenticatedApp', () => ({
   default: () => <div>authenticated application</div>,
 }));
 
+vi.mock('@/components/today/TodayView', () => ({
+  default: () => <div>today view</div>,
+}));
+
 vi.mock('@/pages/LandingPage', () => ({
   default: () => <div>public landing page</div>,
 }));

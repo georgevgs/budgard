@@ -24,32 +24,61 @@ var resolveReturnTo = function (raw) {
 };
 
 var returnTo = resolveReturnTo(params.get('from'));
+var RESET_DEADLINE_MS = 4000;
+var hasFinished = false;
+
+// WebKit occasionally leaves Cache Storage or service-worker operations
+// pending forever while a newly installed PWA worker is changing state. This
+// page is itself the escape hatch, so it must never wait forever on either API.
+var finish = function () {
+  if (hasFinished) {
+    return;
+  }
+
+  hasFinished = true;
+  status.textContent = 'Done! Loading…';
+  window.location.replace(returnTo);
+};
+
+window.setTimeout(finish, RESET_DEADLINE_MS);
+
+var clearServiceWorkers = async function () {
+  if (!('serviceWorker' in navigator)) {
+    return;
+  }
+
+  var registrations = await navigator.serviceWorker.getRegistrations();
+  await Promise.all(
+    registrations.map(function (reg) {
+      return reg.unregister();
+    }),
+  );
+};
+
+var clearAppCaches = async function () {
+  if (!('caches' in window)) {
+    return;
+  }
+
+  var keys = await caches.keys();
+  await Promise.all(
+    keys.map(function (key) {
+      return caches.delete(key);
+    }),
+  );
+};
 
 var reset = async function () {
   try {
-    if ('serviceWorker' in navigator) {
-      var registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(
-        registrations.map(function (reg) {
-          return reg.unregister();
-        }),
-      );
-    }
+    // Run independently: a stuck service-worker database must not prevent the
+    // Cache Storage half of the repair (or vice versa) from completing.
+    await Promise.all([clearServiceWorkers(), clearAppCaches()]);
 
-    if ('caches' in window) {
-      var keys = await caches.keys();
-      await Promise.all(
-        keys.map(function (key) {
-          return caches.delete(key);
-        }),
-      );
-    }
-
-    status.textContent = 'Done! Loading…';
-    window.location.replace(returnTo);
+    finish();
   } catch (err) {
-    status.textContent =
-      'Could not reset automatically. Go to iOS Settings → Safari → Clear History and Website Data, then reopen the app.';
+    // A rejected cleanup is no reason to strand the user here. Continue to
+    // the app; its boot guard remains the final breaker if recovery failed.
+    finish();
   }
 };
 
