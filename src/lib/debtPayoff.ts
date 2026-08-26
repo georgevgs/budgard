@@ -95,113 +95,27 @@ export const simulatePayoff = (input: SimInput): SimResult => {
     const active = states.filter((s) => s.remaining > 0);
     if (active.length === 0) break;
 
-    const interestThisMonth = new Map<string, number>();
-    const paymentThisMonth = new Map<string, number>();
-
+    const payments = new Map<string, number>(active.map((s) => [s.debt.id, 0]));
     const daysThisMonth = getDaysInMonth(monthDate(now, month - 1));
+    const interest = accrueInterest(active, daysThisMonth);
 
-    for (const s of active) {
-      const interest = roundMoney(
-        (s.remaining * s.debt.apr * daysThisMonth) / 100 / 365,
-      );
-      interestThisMonth.set(s.debt.id, interest);
-      s.remaining = roundMoney(s.remaining + interest);
-      s.totalInterest = roundMoney(s.totalInterest + interest);
-      paymentThisMonth.set(s.debt.id, 0);
-    }
+    // The extra pool is threaded through each phase rather than summed at the
+    // end, so the additions happen in the same order they always have — these
+    // are floating-point sums feeding a schedule that has to reconcile.
+    let pool = addFreedMinimums(input.monthlyExtra, states, month);
+    pool = payMinimums(active, payments, pool);
+    payByStrategy(active, input.strategy, payments, pool);
 
-    let extraPool = input.monthlyExtra;
+    markPaidOff(active, month);
 
-    // Recycle minimum payments from debts that finished in PRIOR months —
-    // the user's actual monthly budget is freed up by their payoff.
-    for (const s of states) {
-      if (s.payoffMonth !== null && s.payoffMonth < month) {
-        extraPool += s.debt.minimum_payment;
-      }
-    }
-
-    for (const s of active) {
-      const min = Math.min(s.debt.minimum_payment, s.remaining);
-      s.remaining -= min;
-      s.totalPaid += min;
-      paymentThisMonth.set(s.debt.id, min);
-      // If the minimum overshot the balance, the leftover cascades into
-      // the priority-sorted extra pool below.
-      extraPool += s.debt.minimum_payment - min;
-    }
-
-    const stillActive = active.filter((s) => s.remaining > 0);
-    if (input.strategy === 'snowball') {
-      stillActive.sort((a, b) => a.remaining - b.remaining);
-    } else {
-      stillActive.sort((a, b) => b.debt.apr - a.debt.apr);
-    }
-
-    for (const s of stillActive) {
-      if (extraPool <= 0) break;
-      const applied = Math.min(extraPool, s.remaining);
-      s.remaining -= applied;
-      s.totalPaid += applied;
-      paymentThisMonth.set(
-        s.debt.id,
-        (paymentThisMonth.get(s.debt.id) ?? 0) + applied,
-      );
-      extraPool -= applied;
-    }
-
-    for (const s of active) {
-      if (s.remaining <= 0 && s.payoffMonth === null) {
-        s.payoffMonth = month;
-        s.remaining = 0;
-      }
-    }
-
-    const payments: DebtMonth[] = active.map((s) => {
-      const payment = roundMoney(paymentThisMonth.get(s.debt.id) ?? 0);
-      const interest = interestThisMonth.get(s.debt.id) ?? 0;
-
-      return {
-        debtId: s.debt.id,
-        payment,
-        interest,
-        principal: roundMoney(payment - interest),
-        remaining: s.remaining,
-      };
+    schedule.push({
+      month,
+      payments: buildMonthRows(active, payments, interest),
+      totalRemaining: sumAmounts(active.map((s) => s.remaining)),
     });
-
-    const totalRemaining = sumAmounts(active.map((s) => s.remaining));
-    schedule.push({ month, payments, totalRemaining });
   }
 
-  const finished = states.every((s) => s.remaining <= 0);
-  const unpayable = !finished;
-  let monthsToPayoff = MAX_MONTHS;
-  if (!unpayable) {
-    monthsToPayoff = Math.max(...states.map((s) => s.payoffMonth ?? 0));
-  }
-
-  const totalInterestPaid = sumAmounts(states.map((s) => s.totalInterest));
-  const totalPaid = sumAmounts(states.map((s) => s.totalPaid));
-
-  const payoffDate = toIsoDate(addMonthsClamped(now, monthsToPayoff));
-
-  const perDebtPayoffMonth: Record<string, number> = {};
-  const perDebtTotalInterest: Record<string, number> = {};
-  for (const s of states) {
-    perDebtPayoffMonth[s.debt.id] = s.payoffMonth ?? monthsToPayoff;
-    perDebtTotalInterest[s.debt.id] = s.totalInterest;
-  }
-
-  return {
-    monthsToPayoff,
-    totalInterestPaid,
-    totalPaid,
-    payoffDate,
-    perDebtPayoffMonth,
-    perDebtTotalInterest,
-    schedule,
-    unpayable,
-  };
+  return summarise(states, schedule, now);
 };
 
 export const compareStrategies = (
@@ -210,7 +124,12 @@ export const compareStrategies = (
   now?: Date,
 ) => ({
   snowball: simulatePayoff({ debts, monthlyExtra, strategy: 'snowball', now }),
-  avalanche: simulatePayoff({ debts, monthlyExtra, strategy: 'avalanche', now }),
+  avalanche: simulatePayoff({
+    debts,
+    monthlyExtra,
+    strategy: 'avalanche',
+    now,
+  }),
 });
 
 // "Your minimum payment doesn't cover monthly interest, so this debt grows
@@ -251,4 +170,154 @@ const addMonthsClamped = (date: Date, months: number): Date => {
     monthStart.getMonth(),
     Math.min(date.getDate(), lastDay),
   );
+};
+
+// --- Simulation phases ---
+//
+// Each takes the month's active debts and mutates their running state. They are
+// split out so the month loop above reads as the four things a month does:
+// interest accrues, minimums are paid, whatever is left is thrown at the
+// strategy's top debt, and anything that hit zero is marked done.
+
+type DebtState = ReturnType<typeof cloneState>;
+
+// Adds this month's interest to each balance and returns what was accrued per
+// debt, for the schedule's interest column.
+const accrueInterest = (
+  active: DebtState[],
+  daysThisMonth: number,
+): Map<string, number> => {
+  const accrued = new Map<string, number>();
+
+  for (const s of active) {
+    const interest = roundMoney(
+      (s.remaining * s.debt.apr * daysThisMonth) / 100 / 365,
+    );
+    accrued.set(s.debt.id, interest);
+    s.remaining = roundMoney(s.remaining + interest);
+    s.totalInterest = roundMoney(s.totalInterest + interest);
+  }
+
+  return accrued;
+};
+
+// Recycle minimum payments from debts that finished in PRIOR months — the
+// user's actual monthly budget is freed up by their payoff.
+const addFreedMinimums = (
+  pool: number,
+  states: DebtState[],
+  month: number,
+): number => {
+  let next = pool;
+
+  for (const s of states) {
+    if (s.payoffMonth !== null && s.payoffMonth < month) {
+      next += s.debt.minimum_payment;
+    }
+  }
+
+  return next;
+};
+
+// Pays each debt's minimum. Returns the pool grown by any minimum that
+// overshot its balance — that leftover cascades into the priority-sorted pass.
+const payMinimums = (
+  active: DebtState[],
+  payments: Map<string, number>,
+  pool: number,
+): number => {
+  let next = pool;
+
+  for (const s of active) {
+    const min = Math.min(s.debt.minimum_payment, s.remaining);
+    s.remaining -= min;
+    s.totalPaid += min;
+    payments.set(s.debt.id, min);
+    next += s.debt.minimum_payment - min;
+  }
+
+  return next;
+};
+
+// Throws the pool at the debts in strategy order, cascading the overflow.
+const payByStrategy = (
+  active: DebtState[],
+  strategy: PayoffStrategy,
+  payments: Map<string, number>,
+  pool: number,
+): void => {
+  const stillActive = active.filter((s) => s.remaining > 0);
+  if (strategy === 'snowball') {
+    stillActive.sort((a, b) => a.remaining - b.remaining);
+  } else {
+    stillActive.sort((a, b) => b.debt.apr - a.debt.apr);
+  }
+
+  let left = pool;
+  for (const s of stillActive) {
+    if (left <= 0) break;
+    const applied = Math.min(left, s.remaining);
+    s.remaining -= applied;
+    s.totalPaid += applied;
+    payments.set(s.debt.id, (payments.get(s.debt.id) ?? 0) + applied);
+    left -= applied;
+  }
+};
+
+const markPaidOff = (active: DebtState[], month: number): void => {
+  for (const s of active) {
+    if (s.remaining <= 0 && s.payoffMonth === null) {
+      s.payoffMonth = month;
+      s.remaining = 0;
+    }
+  }
+};
+
+const buildMonthRows = (
+  active: DebtState[],
+  payments: Map<string, number>,
+  accrued: Map<string, number>,
+): DebtMonth[] => {
+  return active.map((s) => {
+    const payment = roundMoney(payments.get(s.debt.id) ?? 0);
+    const interest = accrued.get(s.debt.id) ?? 0;
+
+    return {
+      debtId: s.debt.id,
+      payment,
+      interest,
+      principal: roundMoney(payment - interest),
+      remaining: s.remaining,
+    };
+  });
+};
+
+const summarise = (
+  states: DebtState[],
+  schedule: ScheduleEntry[],
+  now: Date,
+): SimResult => {
+  const unpayable = !states.every((s) => s.remaining <= 0);
+  let monthsToPayoff = MAX_MONTHS;
+  if (!unpayable) {
+    monthsToPayoff = Math.max(...states.map((s) => s.payoffMonth ?? 0));
+  }
+
+  const perDebtPayoffMonth: Record<string, number> = {};
+  const perDebtTotalInterest: Record<string, number> = {};
+  for (const s of states) {
+    perDebtPayoffMonth[s.debt.id] = s.payoffMonth ?? monthsToPayoff;
+    perDebtTotalInterest[s.debt.id] = s.totalInterest;
+  }
+
+  return {
+    monthsToPayoff,
+    totalInterestPaid: sumAmounts(states.map((s) => s.totalInterest)),
+    totalPaid: sumAmounts(states.map((s) => s.totalPaid)),
+    payoffDate: toIsoDate(addMonthsClamped(now, monthsToPayoff)),
+    perDebtPayoffMonth,
+    perDebtTotalInterest,
+    schedule,
+    unpayable,
+  };
 };

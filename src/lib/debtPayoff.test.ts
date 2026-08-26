@@ -175,6 +175,38 @@ describe('simulatePayoff', () => {
     expect(r.totalPaid).toBe(1200);
   });
 
+  it('cascades a minimum that overshot its balance into the same month', () => {
+    // A owes 50 but its minimum is 500. The 450 it could not spend has to
+    // reach B in THIS month, not sit idle until A's payoff frees the minimum
+    // in the next one.
+    const a = makeDebt({
+      id: 'a',
+      apr: 0,
+      current_balance: 50,
+      minimum_payment: 500,
+    });
+    const b = makeDebt({
+      id: 'b',
+      apr: 0,
+      current_balance: 1000,
+      minimum_payment: 100,
+    });
+
+    const r = simulatePayoff({
+      debts: [a, b],
+      monthlyExtra: 0,
+      strategy: 'snowball',
+    });
+
+    const monthOne = r.schedule[0].payments;
+    const paidToB = monthOne.find((p) => p.debtId === 'b')?.payment;
+
+    // B gets its own 100 plus A's 450 overflow.
+    expect(monthOne.find((p) => p.debtId === 'a')?.payment).toBe(50);
+    expect(paidToB).toBe(550);
+    expect(r.perDebtPayoffMonth.a).toBe(1);
+  });
+
   it('produces a sensible months count for $5000 @ 18% APR / $150 min', () => {
     // Online calculators put this around 47 months. Allow a small range.
     const r = simulatePayoff({

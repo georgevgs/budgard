@@ -95,6 +95,27 @@ describe('useCategoryBudgetAlerts', () => {
     expect(mockToast).not.toHaveBeenCalled();
   });
 
+  it('forgets a category that disappears, so a re-added cap starts fresh', () => {
+    // Kept state would carry prevSpent=50 across the gap, making the 85
+    // reading look like a fresh upward crossing of 80% and firing a toast.
+    // A re-added category is a first sighting: it records silently.
+    const { rerender } = renderHook(
+      ({ alerts }) =>
+        useCategoryBudgetAlerts({
+          alerts,
+          defaultCurrency: 'EUR',
+          enabled: true,
+        }),
+      { initialProps: { alerts: make(50, 100) } },
+    );
+
+    rerender({ alerts: [] });
+    mockToast.mockClear();
+    rerender({ alerts: make(85, 100) });
+
+    expect(mockToast).not.toHaveBeenCalled();
+  });
+
   it('resets when the cap changes', () => {
     const { rerender } = renderHook(
       ({ spent, cap }: { spent: number; cap: number }) =>

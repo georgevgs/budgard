@@ -1,6 +1,6 @@
-export const ONBOARDED_KEY = 'budgard_onboarded';
-export const ONBOARDING_STARTED_KEY = 'budgard_onboarding_started';
-export const ONBOARDING_STEP_KEY = 'budgard_onboarding_step';
+const ONBOARDED_KEY = 'budgard_onboarded';
+const ONBOARDING_STARTED_KEY = 'budgard_onboarding_started';
+const ONBOARDING_STEP_KEY = 'budgard_onboarding_step';
 
 const FIRST_STEP = 0;
 const LAST_STEP = 3;

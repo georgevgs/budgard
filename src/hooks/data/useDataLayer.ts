@@ -16,6 +16,7 @@ import {
   toSnapshot,
   createSetters,
 } from '@/hooks/data/dataReducer';
+import type { DataSetters } from '@/hooks/data/dataReducer';
 import type { Expense } from '@/types/Expense';
 import { useToast } from '@/hooks/useToast';
 import type {
@@ -224,11 +225,7 @@ export const useDataLayer = () => {
             categoryBudgets: categoryBudgetsData,
             accounts: accountsData,
             noSpendDays: noSpendDaysData,
-            monthlyBudget: budgetData?.monthly_amount ?? null,
-            defaultCurrency: budgetData?.default_currency ?? 'EUR',
-            defaultSavingsPct: budgetData?.default_savings_pct ?? null,
-            dailyReminderHour: budgetData?.daily_reminder_hour ?? null,
-            notificationPreferences: budgetData?.notification_preferences ?? {},
+            ...toBudgetConfig(budgetData),
             isInitialized: true,
           },
         });
@@ -256,111 +253,32 @@ export const useDataLayer = () => {
         lastFetchAtRef.current = Date.now();
         wasAbortedRef.current = false;
 
-        // Stage 1.5: domains used by the Plan hub's child routes (goals, networth,
-        // debts). Fired immediately after stage 1 but doesn't block first paint.
-        Promise.all([
-          dataService.getGoals(controller.signal),
-          dataService.getAllAccountBalances(controller.signal),
-          // Accrue interest up to today before reading the balances, so the
-          // debt figures are current rather than frozen at the last payment.
-          // Best-effort: a refresh failure must not stop debts from loading.
-          dataService
-            .refreshDebtBalances()
-            .catch(() => undefined)
-            .then(() => dataService.getDebts(controller.signal)),
-        ])
-          .then(([goalsData, balancesData, debtsData]) => {
-            if (controller.signal.aborted) {
-              return;
-            }
-            setters.setGoals(goalsData);
-            setters.setAccountBalances(balancesData);
-            setters.setDebts(debtsData);
-            setters.setIsSecondaryLoaded(true);
-          })
-          .catch((error) => {
-            if (isAbortError(error) || isExpiredJwtError(error)) {
-              return;
-            }
-            Sentry.captureException(error, {
-              tags: { context: 'fetchSecondaryDomains' },
-            });
-          });
+        // Stage 1.5: domains used by the Plan hub's child routes (goals,
+        // networth, debts). Fired immediately after stage 1 but doesn't block
+        // first paint.
+        startSecondaryFetch(controller, setters);
 
-        // Stage 2: top up older expenses/incomes in the background. Append
-        // to whatever is in state now (which may include user mutations made
-        // during stage 2). Runs once per boot — the pre-cutoff history barely
-        // changes, and re-downloading all of it on every foreground refetch
-        // costs a long-history user their whole archive in bandwidth daily.
+        // Stage 2: top up older expenses/incomes in the background. Runs once
+        // per boot — the pre-cutoff history barely changes, and re-downloading
+        // all of it on every foreground refetch costs a long-history user
+        // their whole archive in bandwidth daily.
         if (!stage2AlreadyDone) {
-          Promise.all([
-            dataService.getExpenses(controller.signal, undefined, recentCutoff),
-            dataService.getIncomes(controller.signal, undefined, recentCutoff),
-          ])
-            .then(([olderExpenses, olderIncomes]) => {
-              if (controller.signal.aborted) {
-                return;
-              }
-              stage2DoneForUserRef.current = userId;
-              setters.setIsHistoryLoaded(true);
-              // Dedupe by id: if a refreshExpenses/refreshIncomes ran
-              // concurrently (e.g. user deleted a recurring expense,
-              // bulk-imported, or rolled back a category delete) it will have
-              // replaced state with full history, so older* may already be
-              // present.
-              if (olderExpenses.length > 0) {
-                setters.setExpenses((prev) => mergeUniqueById(prev, olderExpenses));
-              }
-              if (olderIncomes.length > 0) {
-                setters.setIncomes((prev) => mergeUniqueById(prev, olderIncomes));
-              }
-            })
-            .catch((error) => {
-              if (isAbortError(error) || isExpiredJwtError(error)) {
-                return;
-              }
-              // Resolve the flag even on failure. The tail isn't here and won't
-              // be until the next boot, so screens should fall back to their
-              // normal empty state rather than promise data that isn't coming.
-              setters.setIsHistoryLoaded(true);
-              Sentry.captureException(error, {
-                tags: { context: 'fetchOlderTransactions' },
-              });
-            });
+          startHistoryTopUp(
+            controller,
+            setters,
+            userId,
+            recentCutoff,
+            stage2DoneForUserRef,
+          );
         }
       } catch (error) {
-        // iOS PWA aborts in-flight requests when the app is backgrounded. The
-        // AbortError may be a raw DOMException or wrapped by Supabase into an
-        // object with { message: "AbortError: ..." }. Silently ignore both —
-        // the visibilitychange listener retries when the app comes to foreground.
-        if (isAbortError(error)) {
-          wasAbortedRef.current = true;
-
-          return;
-        }
-        // JWT expiry self-heals via supabase-js refresh + the visibilitychange
-        // retry, so don't toast or page the user about it.
-        if (isExpiredJwtError(error)) {
-          return;
-        }
-        Sentry.captureException(error, { tags: { context: 'fetchData' } });
-        console.error('Failed to load data:', error);
-        // Still showing cached data from this boot (no successful fetch yet) —
-        // a destructive toast over a perfectly usable view would only alarm the
-        // user. The flag is cleared the moment a fetch succeeds, so failures
-        // after that point still toast.
-        if (hydratedFromCacheRef.current) {
-          return;
-        }
-        toastRef.current({
-          title: tRef.current('common.error'),
-          description: tRef.current('common.loadDataFailed'),
-          variant: 'destructive',
-          action: {
-            label: tRef.current('common.tryAgain'),
-            onClick: () => {
-              void run();
-            },
+        handleFetchError(error, {
+          wasAbortedRef,
+          hydratedFromCacheRef,
+          toastRef,
+          tRef,
+          onRetry: () => {
+            void run();
           },
         });
       }
@@ -642,7 +560,6 @@ export const useDataLayer = () => {
     [accounts, accountBalances],
   );
 
-
   return {
     actions,
     config,
@@ -658,4 +575,148 @@ export const useDataLayer = () => {
     categoryBudgets,
     noSpendDays,
   };
+};
+
+// --- Helpers ---
+
+// The budget row is a single nullable row carrying five settings, each with
+// its own fallback. Kept together so the defaults live in one place.
+const toBudgetConfig = (
+  budgetData: Awaited<ReturnType<typeof dataService.getBudget>>,
+) => ({
+  monthlyBudget: budgetData?.monthly_amount ?? null,
+  defaultCurrency: budgetData?.default_currency ?? 'EUR',
+  defaultSavingsPct: budgetData?.default_savings_pct ?? null,
+  dailyReminderHour: budgetData?.daily_reminder_hour ?? null,
+  notificationPreferences: budgetData?.notification_preferences ?? {},
+});
+
+// Stage 1.5: the Plan hub's child routes. Fire-and-forget — a failure here
+// leaves those screens empty rather than breaking the boot.
+const startSecondaryFetch = (
+  controller: AbortController,
+  setters: DataSetters,
+): void => {
+  Promise.all([
+    dataService.getGoals(controller.signal),
+    dataService.getAllAccountBalances(controller.signal),
+    // Accrue interest up to today before reading the balances, so the debt
+    // figures are current rather than frozen at the last payment.
+    // Best-effort: a refresh failure must not stop debts from loading.
+    dataService
+      .refreshDebtBalances()
+      .catch(() => undefined)
+      .then(() => dataService.getDebts(controller.signal)),
+  ])
+    .then(([goalsData, balancesData, debtsData]) => {
+      if (controller.signal.aborted) {
+        return;
+      }
+      setters.setGoals(goalsData);
+      setters.setAccountBalances(balancesData);
+      setters.setDebts(debtsData);
+      setters.setIsSecondaryLoaded(true);
+    })
+    .catch((error) => {
+      if (isAbortError(error) || isExpiredJwtError(error)) {
+        return;
+      }
+      Sentry.captureException(error, {
+        tags: { context: 'fetchSecondaryDomains' },
+      });
+    });
+};
+
+// Stage 2: the pre-cutoff tail, appended to whatever is in state now (which
+// may include user mutations made while it was in flight).
+const startHistoryTopUp = (
+  controller: AbortController,
+  setters: DataSetters,
+  userId: string,
+  recentCutoff: string,
+  stage2DoneForUserRef: { current: string | null },
+): void => {
+  Promise.all([
+    dataService.getExpenses(controller.signal, undefined, recentCutoff),
+    dataService.getIncomes(controller.signal, undefined, recentCutoff),
+  ])
+    .then(([olderExpenses, olderIncomes]) => {
+      if (controller.signal.aborted) {
+        return;
+      }
+      stage2DoneForUserRef.current = userId;
+      setters.setIsHistoryLoaded(true);
+      // Dedupe by id: if a refreshExpenses/refreshIncomes ran concurrently
+      // (e.g. user deleted a recurring expense, bulk-imported, or rolled back
+      // a category delete) it will have replaced state with full history, so
+      // older* may already be present.
+      if (olderExpenses.length > 0) {
+        setters.setExpenses((prev) => mergeUniqueById(prev, olderExpenses));
+      }
+      if (olderIncomes.length > 0) {
+        setters.setIncomes((prev) => mergeUniqueById(prev, olderIncomes));
+      }
+    })
+    .catch((error) => {
+      if (isAbortError(error) || isExpiredJwtError(error)) {
+        return;
+      }
+      // Resolve the flag even on failure. The tail isn't here and won't be
+      // until the next boot, so screens should fall back to their normal
+      // empty state rather than promise data that isn't coming.
+      setters.setIsHistoryLoaded(true);
+      Sentry.captureException(error, {
+        tags: { context: 'fetchOlderTransactions' },
+      });
+    });
+};
+
+type FetchErrorContext = {
+  wasAbortedRef: { current: boolean };
+  hydratedFromCacheRef: { current: boolean };
+  toastRef: { current: ReturnType<typeof useToast>['toast'] };
+  tRef: { current: ReturnType<typeof useTranslation>['t'] };
+  onRetry: () => void;
+};
+
+// The three failures that are expected and must stay quiet — background abort,
+// JWT expiry, and a failure while cached data is still on screen — versus the
+// one that earns a toast.
+const handleFetchError = (error: unknown, ctx: FetchErrorContext): void => {
+  // iOS PWA aborts in-flight requests when the app is backgrounded. The
+  // AbortError may be a raw DOMException or wrapped by Supabase into an
+  // object with { message: "AbortError: ..." }. Silently ignore both — the
+  // visibilitychange listener retries when the app comes to foreground.
+  if (isAbortError(error)) {
+    ctx.wasAbortedRef.current = true;
+
+    return;
+  }
+
+  // JWT expiry self-heals via supabase-js refresh + the visibilitychange
+  // retry, so don't toast or page the user about it.
+  if (isExpiredJwtError(error)) {
+    return;
+  }
+
+  Sentry.captureException(error, { tags: { context: 'fetchData' } });
+  console.error('Failed to load data:', error);
+
+  // Still showing cached data from this boot (no successful fetch yet) — a
+  // destructive toast over a perfectly usable view would only alarm the user.
+  // The flag is cleared the moment a fetch succeeds, so failures after that
+  // point still toast.
+  if (ctx.hydratedFromCacheRef.current) {
+    return;
+  }
+
+  ctx.toastRef.current({
+    title: ctx.tRef.current('common.error'),
+    description: ctx.tRef.current('common.loadDataFailed'),
+    variant: 'destructive',
+    action: {
+      label: ctx.tRef.current('common.tryAgain'),
+      onClick: ctx.onRetry,
+    },
+  });
 };

@@ -33,40 +33,41 @@ export default RouteMetadata;
 
 type TFunc = (key: string) => string;
 
-const resolvePageTitle = (pathname: string, t: TFunc): string => {
-  if (pathname === '/today') return t('navigation.today');
-  if (pathname === '/activity') return t('navigation.activity');
-  if (pathname === '/plan') return t('navigation.plan');
-  if (pathname === '/trends') return t('navigation.trends');
-  if (pathname === '/expenses') return t('navigation.expenses');
-  if (pathname === '/income') return t('navigation.income');
-  if (pathname === '/recurring') return t('navigation.recurring');
-  if (pathname === '/analytics') return t('navigation.analytics');
-  if (pathname === '/goals') return t('navigation.goals');
-  if (pathname === '/networth') return t('navigation.networth');
-  if (pathname === '/debts') return t('navigation.debts');
-  if (pathname === '/settings') return t('navigation.settings');
-  if (pathname === '/settings/account') {
-    return t('settings.groups.account.title');
-  }
-  if (pathname === '/settings/preferences') {
-    return t('settings.groups.preferences.title');
-  }
-  if (pathname === '/settings/notifications') {
-    return t('settings.groups.notifications.title');
-  }
-  if (pathname === '/settings/data') {
-    return t('settings.groups.data.title');
-  }
-  if (pathname === '/privacy') return t('legal.privacy.title');
-  if (pathname === '/terms') return t('legal.terms.title');
-  if (pathname === '/contact') return t('legal.contact.title');
+const PAGE_TITLE_KEYS: Record<string, string> = {
+  '/today': 'navigation.today',
+  '/activity': 'navigation.activity',
+  '/plan': 'navigation.plan',
+  '/trends': 'navigation.trends',
+  '/expenses': 'navigation.expenses',
+  '/income': 'navigation.income',
+  '/recurring': 'navigation.recurring',
+  '/analytics': 'navigation.analytics',
+  '/goals': 'navigation.goals',
+  '/networth': 'navigation.networth',
+  '/debts': 'navigation.debts',
+  '/settings': 'navigation.settings',
+  '/settings/account': 'settings.groups.account.title',
+  '/settings/preferences': 'settings.groups.preferences.title',
+  '/settings/notifications': 'settings.groups.notifications.title',
+  '/settings/data': 'settings.groups.data.title',
+  '/privacy': 'legal.privacy.title',
+  '/terms': 'legal.terms.title',
+  '/contact': 'legal.contact.title',
+};
 
-  return 'Budgard';
+const resolvePageTitle = (pathname: string, t: TFunc): string => {
+  const titleKey = PAGE_TITLE_KEYS[pathname];
+  if (!titleKey) {
+    return 'Budgard';
+  }
+
+  return t(titleKey);
 };
 
 const buildDocumentTitle = (pageTitle: string): string => {
-  if (pageTitle === 'Budgard') return pageTitle;
+  if (pageTitle === 'Budgard') {
+    return pageTitle;
+  }
 
   return `${pageTitle} · Budgard`;
 };

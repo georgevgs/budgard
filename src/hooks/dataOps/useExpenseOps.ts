@@ -54,70 +54,29 @@ export const useExpenseOps = () => {
         try {
           let savedExpense: Expense;
           if (expenseId) {
-            savedExpense = await dataService.updateExpense(expenseData, expenseId);
+            savedExpense = await dataService.updateExpense(
+              expenseData,
+              expenseId,
+            );
           } else {
             savedExpense = await dataService.createExpense(expenseData);
           }
 
-          let receiptPath = savedExpense.receipt_path ?? null;
-          let receiptFailed = false;
-          let oldPathToDelete: string | null = null;
-
-          if (receiptOptions) {
-            let uploadedNewPath: string | null = null;
-            ({
-              receiptPath,
-              receiptFailed,
-              uploadedNewPath,
-              oldPathToDelete,
-            } = await processReceipt(
-              savedExpense,
-              receiptOptions,
-              savedExpense.user_id,
-            ));
-
-            if (
-              !receiptFailed &&
-              receiptPath !== (savedExpense.receipt_path ?? null)
-            ) {
-              try {
-                const updated = await dataService.updateExpense(
-                  { receipt_path: receiptPath },
-                  savedExpense.id,
-                );
-                receiptPath = updated.receipt_path ?? null;
-              } catch (err) {
-                if (uploadedNewPath) {
-                  deleteReceipt(uploadedNewPath).catch((cleanupErr) => {
-                    Sentry.captureException(cleanupErr, {
-                      tags: {
-                        operation: 'deleteReceipt',
-                        context: 'rollbackAfterReceiptUpdateFail',
-                      },
-                    });
-                  });
-                }
-                throw err;
-              }
-            }
-          }
+          const { receiptPath, receiptFailed, oldPathToDelete } =
+            await settleReceipt(savedExpense, receiptOptions);
 
           if (oldPathToDelete) {
-            deleteReceipt(oldPathToDelete).catch((err) => {
-              Sentry.captureException(err, {
-                tags: {
-                  operation: 'deleteReceipt',
-                  context: 'afterReceiptUpdateSuccess',
-                },
-              });
-            });
+            deleteReceiptQuietly(oldPathToDelete, 'afterReceiptUpdateSuccess');
           }
 
           const finalExpense = { ...savedExpense, receipt_path: receiptPath };
 
           haptics.success();
 
-          const previousDebtId = getPreviousDebtId(expenseId, expensesRef.current);
+          const previousDebtId = getPreviousDebtId(
+            expenseId,
+            expensesRef.current,
+          );
           const isDebtPayment = finalExpense.type === 'debt_payment';
           setExpenses((prev) => {
             if (expenseId) {
@@ -156,46 +115,7 @@ export const useExpenseOps = () => {
           }
         } catch (error) {
           if (isOfflineError(error)) {
-            const mutationType = pickByEdit(
-              expenseId,
-              'updateExpense',
-              'createExpense',
-            );
-            const tempId = pickByEdit<string | null>(
-              expenseId,
-              null,
-              createTempId(),
-            );
-            const idPayload = pickByEdit<Record<string, unknown>>(
-              expenseId,
-              { id: expenseId },
-              { __tempId: tempId },
-            );
-            await offlineQueue.enqueueWithReconcile(mutationType, {
-              ...expenseData,
-              ...idPayload,
-            } as Record<string, unknown>);
-            // The queued payload keeps extra_tag_ids for replay; the local
-            // optimistic row must not carry the write-only field.
-            const { extra_tag_ids: _extras, ...offlineRow } = expenseData;
-            const isDebtPayment = expenseData.type === 'debt_payment';
-            setExpenses((prev) => {
-              if (expenseId) {
-                if (isDebtPayment) return prev.filter((e) => e.id !== expenseId);
-
-                return patchById(prev, expenseId, offlineRow);
-              }
-
-              if (isDebtPayment) return prev;
-
-              const optimistic = {
-                ...offlineRow,
-                id: tempId as string,
-                created_at: new Date().toISOString(),
-              } as Expense;
-
-              return [optimistic, ...prev];
-            });
+            await queueExpenseOffline(expenseData, expenseId, setExpenses);
             haptics.success();
             toast({
               variant: 'success',
@@ -208,7 +128,11 @@ export const useExpenseOps = () => {
           haptics.error();
           Sentry.captureException(error, {
             tags: {
-              operation: pickByEdit(expenseId, 'updateExpense', 'createExpense'),
+              operation: pickByEdit(
+                expenseId,
+                'updateExpense',
+                'createExpense',
+              ),
             },
           });
           showErrorToast(
@@ -227,7 +151,15 @@ export const useExpenseOps = () => {
 
       return run();
     },
-    [isInitialized, expensesRef, setExpenses, refreshDebts, showErrorToast, toast, t],
+    [
+      isInitialized,
+      expensesRef,
+      setExpenses,
+      refreshDebts,
+      showErrorToast,
+      toast,
+      t,
+    ],
   );
 
   const handleExpenseDelete = useCallback(
@@ -255,11 +187,7 @@ export const useExpenseOps = () => {
           }
 
           if (receiptPath) {
-            deleteReceipt(receiptPath).catch((err) => {
-              Sentry.captureException(err, {
-                tags: { operation: 'deleteReceipt', context: 'afterExpenseDelete' },
-              });
-            });
+            deleteReceiptQuietly(receiptPath, 'afterExpenseDelete');
           }
         } catch (error) {
           if (isOfflineError(error)) {
@@ -277,7 +205,9 @@ export const useExpenseOps = () => {
             return;
           }
           haptics.error();
-          Sentry.captureException(error, { tags: { operation: 'deleteExpense' } });
+          Sentry.captureException(error, {
+            tags: { operation: 'deleteExpense' },
+          });
           showErrorToast(t('expenses.toasts.deleteFailed'), () => {
             void run().catch(() => undefined);
           });
@@ -287,7 +217,15 @@ export const useExpenseOps = () => {
 
       return run();
     },
-    [isInitialized, expensesRef, setExpenses, refreshDebts, showErrorToast, toast, t],
+    [
+      isInitialized,
+      expensesRef,
+      setExpenses,
+      refreshDebts,
+      showErrorToast,
+      toast,
+      t,
+    ],
   );
 
   const handleBulkExpenseImport = useCallback(
@@ -433,4 +371,103 @@ const processReceipt = async (
   }
 
   return { receiptPath, receiptFailed, uploadedNewPath, oldPathToDelete };
+};
+
+// Fire-and-forget storage cleanup. A failure here leaves an orphaned file,
+// which is worth reporting but must never fail the user's save.
+const deleteReceiptQuietly = (path: string, context: string): void => {
+  deleteReceipt(path).catch((err) => {
+    Sentry.captureException(err, {
+      tags: { operation: 'deleteReceipt', context },
+    });
+  });
+};
+
+// Resolves the receipt side of a save: uploads or clears the file, then writes
+// the resulting path back onto the row. Returns the path the expense should
+// carry and the old file (if any) that is now safe to delete.
+const settleReceipt = async (
+  savedExpense: Expense,
+  receiptOptions: ReceiptOptions | undefined,
+): Promise<ReceiptResult & { oldPathToDelete: string | null }> => {
+  if (!receiptOptions) {
+    return {
+      receiptPath: savedExpense.receipt_path ?? null,
+      receiptFailed: false,
+      oldPathToDelete: null,
+    };
+  }
+
+  const { receiptPath, receiptFailed, uploadedNewPath, oldPathToDelete } =
+    await processReceipt(savedExpense, receiptOptions, savedExpense.user_id);
+
+  // Nothing to write back: the upload failed, or the path is unchanged.
+  if (receiptFailed || receiptPath === (savedExpense.receipt_path ?? null)) {
+    return { receiptPath, receiptFailed, oldPathToDelete };
+  }
+
+  try {
+    const updated = await dataService.updateExpense(
+      { receipt_path: receiptPath },
+      savedExpense.id,
+    );
+
+    return {
+      receiptPath: updated.receipt_path ?? null,
+      receiptFailed,
+      oldPathToDelete,
+    };
+  } catch (err) {
+    // The file is in storage but no row points at it — take it back out
+    // rather than orphaning it.
+    if (uploadedNewPath) {
+      deleteReceiptQuietly(uploadedNewPath, 'rollbackAfterReceiptUpdateFail');
+    }
+
+    throw err;
+  }
+};
+
+// Queues the write for replay and applies the same row change locally, so the
+// list looks saved while the device is offline.
+const queueExpenseOffline = async (
+  expenseData: ExpenseWritePayload,
+  expenseId: string | undefined,
+  setExpenses: (updater: (prev: Expense[]) => Expense[]) => void,
+): Promise<void> => {
+  const mutationType = pickByEdit(expenseId, 'updateExpense', 'createExpense');
+  const tempId = pickByEdit<string | null>(expenseId, null, createTempId());
+  const idPayload = pickByEdit<Record<string, unknown>>(
+    expenseId,
+    { id: expenseId },
+    { __tempId: tempId },
+  );
+
+  await offlineQueue.enqueueWithReconcile(mutationType, {
+    ...expenseData,
+    ...idPayload,
+  } as Record<string, unknown>);
+
+  // The queued payload keeps extra_tag_ids for replay; the local
+  // optimistic row must not carry the write-only field.
+  const { extra_tag_ids: _extras, ...offlineRow } = expenseData;
+  const isDebtPayment = expenseData.type === 'debt_payment';
+
+  setExpenses((prev) => {
+    if (expenseId) {
+      if (isDebtPayment) return prev.filter((e) => e.id !== expenseId);
+
+      return patchById(prev, expenseId, offlineRow);
+    }
+
+    if (isDebtPayment) return prev;
+
+    const optimistic = {
+      ...offlineRow,
+      id: tempId as string,
+      created_at: new Date().toISOString(),
+    } as Expense;
+
+    return [optimistic, ...prev];
+  });
 };

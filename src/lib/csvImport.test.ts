@@ -96,6 +96,25 @@ describe('getCsvPreviewData', () => {
 // --- suggestColumnMapping ---
 
 describe('suggestColumnMapping', () => {
+  it('keeps the last header that matches a role, not the first', () => {
+    // A bank statement that carries both a booking date and a value date
+    // means the second one; the scan must not stop at the first hit.
+    const preview = getCsvPreviewData(
+      'Date,Value date,Description,Amount\n2026-01-01,2026-01-02,Coffee,3.50',
+    );
+    const mapping = suggestColumnMapping(preview);
+    expect(mapping.dateColumn).toBe(1);
+  });
+
+  it('does not pick a repeated column whose values read as prose', () => {
+    const long = 'a-very-long-cell-value-that-exceeds-thirty-characters';
+    const preview = getCsvPreviewData(
+      `A,B,C,D\n2026-01-01,Coffee,${long},3.50\n2026-01-02,Tea,${long},2.00`,
+    );
+    const mapping = suggestColumnMapping(preview);
+    expect(mapping.categoryColumn).toBeNull();
+  });
+
   it('maps English headers correctly', () => {
     const preview = getCsvPreviewData(
       'Date,Description,Category,Amount\n2026-01-01,Coffee,Food,3.50',

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/hooks/useToast';
 import { formatCurrency } from '@/lib/utils';
@@ -50,78 +51,14 @@ export const useCategoryBudgetAlerts = ({
     for (const alert of alerts) {
       seenIds.add(alert.categoryId);
 
-      if (alert.cap <= 0) continue;
+      const crossing = recordSpending(state, alert);
+      if (crossing === null) continue;
 
-      let entry = state.get(alert.categoryId);
-
-      // Reset when the cap is changed by the user.
-      if (!entry || entry.prevCap !== alert.cap) {
-        entry = {
-          prevSpent: null,
-          prevCap: alert.cap,
-          shownWarning: false,
-          shownExceeded: false,
-        };
-        state.set(alert.categoryId, entry);
-      }
-
-      if (alert.spent <= 0) continue;
-
-      // First time we see real spending — record but don't alert (page load).
-      if (entry.prevSpent === null) {
-        entry.prevSpent = alert.spent;
-        continue;
-      }
-
-      const prev = entry.prevSpent;
-      const prevPercent = (prev / alert.cap) * 100;
-      const percent = (alert.spent / alert.cap) * 100;
-      entry.prevSpent = alert.spent;
-
-      // Only fire when crossing a threshold *upward*.
-      if (alert.spent <= prev) continue;
-
-      if (
-        percent >= EXCEEDED_THRESHOLD &&
-        prevPercent < EXCEEDED_THRESHOLD &&
-        !entry.shownExceeded
-      ) {
-        entry.shownExceeded = true;
-        haptics.warning();
-        toast({
-          variant: 'destructive',
-          title: t('budget.categoryAlerts.exceeded', {
-            category: alert.categoryName,
-          }),
-          description: t('budget.categoryAlerts.exceededDescription', {
-            category: alert.categoryName,
-            spent: formatCurrency(alert.spent, defaultCurrency),
-            cap: formatCurrency(alert.cap, defaultCurrency),
-          }),
-        });
-        continue;
-      }
-
-      if (
-        percent >= WARNING_THRESHOLD &&
-        prevPercent < WARNING_THRESHOLD &&
-        !entry.shownWarning
-      ) {
-        entry.shownWarning = true;
-        haptics.warning();
-        toast({
-          title: t('budget.categoryAlerts.warning', {
-            category: alert.categoryName,
-          }),
-          description: t('budget.categoryAlerts.warningDescription', {
-            category: alert.categoryName,
-            percent: Math.round(percent),
-            remaining: formatCurrency(
-              alert.cap - alert.spent,
-              defaultCurrency,
-            ),
-          }),
-        });
+      haptics.warning();
+      if (crossing.level === 'exceeded') {
+        toast(exceededToast(t, alert, defaultCurrency));
+      } else {
+        toast(warningToast(t, alert, defaultCurrency, crossing.percent));
       }
     }
 
@@ -132,3 +69,100 @@ export const useCategoryBudgetAlerts = ({
     }
   }, [alerts, defaultCurrency, enabled, t]);
 };
+
+// --- Helpers ---
+
+// Which threshold, if any, this reading crosses upward. Mutates the category's
+// entry: this is where prevSpent advances and the shown-once flags are set.
+type Crossing = { level: 'warning' | 'exceeded'; percent: number };
+
+const recordSpending = (
+  state: Map<string, AlertState>,
+  alert: CategoryBudgetAlertInput,
+): Crossing | null => {
+  if (alert.cap <= 0) return null;
+
+  let entry = state.get(alert.categoryId);
+
+  // Reset when the cap is changed by the user.
+  if (!entry || entry.prevCap !== alert.cap) {
+    entry = {
+      prevSpent: null,
+      prevCap: alert.cap,
+      shownWarning: false,
+      shownExceeded: false,
+    };
+    state.set(alert.categoryId, entry);
+  }
+
+  if (alert.spent <= 0) return null;
+
+  // First time we see real spending — record but don't alert (page load).
+  if (entry.prevSpent === null) {
+    entry.prevSpent = alert.spent;
+
+    return null;
+  }
+
+  const prev = entry.prevSpent;
+  const prevPercent = (prev / alert.cap) * 100;
+  const percent = (alert.spent / alert.cap) * 100;
+  entry.prevSpent = alert.spent;
+
+  // Only fire when crossing a threshold *upward*.
+  if (alert.spent <= prev) return null;
+
+  if (
+    percent >= EXCEEDED_THRESHOLD &&
+    prevPercent < EXCEEDED_THRESHOLD &&
+    !entry.shownExceeded
+  ) {
+    entry.shownExceeded = true;
+
+    return { level: 'exceeded', percent };
+  }
+
+  if (
+    percent >= WARNING_THRESHOLD &&
+    prevPercent < WARNING_THRESHOLD &&
+    !entry.shownWarning
+  ) {
+    entry.shownWarning = true;
+
+    return { level: 'warning', percent };
+  }
+
+  return null;
+};
+
+const exceededToast = (
+  t: TFunction,
+  alert: CategoryBudgetAlertInput,
+  defaultCurrency: string,
+) => ({
+  variant: 'destructive' as const,
+  title: t('budget.categoryAlerts.exceeded', {
+    category: alert.categoryName,
+  }),
+  description: t('budget.categoryAlerts.exceededDescription', {
+    category: alert.categoryName,
+    spent: formatCurrency(alert.spent, defaultCurrency),
+    cap: formatCurrency(alert.cap, defaultCurrency),
+  }),
+});
+
+const warningToast = (
+  t: TFunction,
+  alert: CategoryBudgetAlertInput,
+  defaultCurrency: string,
+  percent: number,
+) => ({
+  title: t('budget.categoryAlerts.warning', {
+    category: alert.categoryName,
+  }),
+  description: t('budget.categoryAlerts.warningDescription', {
+    category: alert.categoryName,
+    percent: Math.round(percent),
+    remaining: formatCurrency(alert.cap - alert.spent, defaultCurrency),
+  }),
+});

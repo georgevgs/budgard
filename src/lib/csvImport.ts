@@ -11,14 +11,14 @@ export type ParsedExpenseRow = {
   // True when the row's amount marks it as income (bank +/- convention or an
   // explicit + prefix). Imported as an income transaction unless skipped.
   isIncome: boolean;
-}
+};
 
 export type ColumnMapping = {
   dateColumn: number;
   descriptionColumn: number;
   amountColumn: number;
   categoryColumn: number | null; // Optional
-}
+};
 
 export type CsvPreviewData = {
   headers: string[];
@@ -29,14 +29,14 @@ export type CsvPreviewData = {
   // column's membership decides the sign convention; other columns are none
   // of the amount's business.
   negativeColumns: Set<number>;
-}
+};
 
 type CsvParseResult = {
   validRows: ParsedExpenseRow[];
   errors: CsvParseError[];
   unmatchedCategories: string[];
   skippedIncomeCount: number;
-}
+};
 
 // messageKey is an i18n key (import.rowErrors.*) resolved at render time,
 // so row errors follow the app language like every other user-facing string.
@@ -46,7 +46,7 @@ export type CsvParseError = {
   messageKey: string;
   messageParams?: Record<string, unknown>;
   rawValue: string;
-}
+};
 
 /**
  * Detects the delimiter used in a CSV file (comma or semicolon)
@@ -133,98 +133,52 @@ export const usesSignedAmountConvention = (
   return preview.negativeColumns.has(amountColumn);
 };
 
+// The header vocabulary the mapper recognises, English and Greek. A header
+// matches a role if it CONTAINS one of these, so "Value date" matches both
+// date and amount — which is why the scan keeps the last match rather than
+// stopping at the first.
+const HEADER_KEYWORDS = {
+  date: ['date', 'ημ/νια', 'ημερομηνια'],
+  description: ['description', 'περιγραφη', 'details', 'memo', 'payee'],
+  amount: ['amount', 'ποσο', 'sum', 'value'],
+  category: ['category', 'κατηγορια', 'type'],
+} as const;
+
+// A category column is short, repetitive text — anything longer than this on
+// average is prose, not a label.
+const MAX_CATEGORY_LENGTH = 30;
+
 /**
  * Suggests column mapping based on header names and content
  */
-export const suggestColumnMapping = (preview: CsvPreviewData): ColumnMapping => {
-  const { headers, sampleRows } = preview;
+export const suggestColumnMapping = (
+  preview: CsvPreviewData,
+): ColumnMapping => {
+  const { headers } = preview;
 
-  let dateColumn = 0;
-  let descriptionColumn = 1;
-  let amountColumn = headers.length - 1;
-  let categoryColumn: number | null = null;
+  const dateColumn = matchHeader(headers, HEADER_KEYWORDS.date, 0);
+  const descriptionColumn = matchHeader(
+    headers,
+    HEADER_KEYWORDS.description,
+    1,
+  );
+  const amountColumn = matchHeader(
+    headers,
+    HEADER_KEYWORDS.amount,
+    headers.length - 1,
+  );
 
-  // Try to detect columns by header names
-  headers.forEach((header, idx) => {
-    const lower = header.toLowerCase().replace(/["']/g, '');
+  const byHeader = matchHeader(headers, HEADER_KEYWORDS.category, null);
+  let categoryColumn = byHeader;
 
-    // Date detection
-    if (
-      lower.includes('date') ||
-      lower.includes('ημ/νια') ||
-      lower.includes('ημερομηνια')
-    ) {
-      dateColumn = idx;
-    }
-
-    // Description detection
-    if (
-      lower.includes('description') ||
-      lower.includes('περιγραφη') ||
-      lower.includes('details') ||
-      lower.includes('memo') ||
-      lower.includes('payee')
-    ) {
-      descriptionColumn = idx;
-    }
-
-    // Amount detection
-    if (
-      lower.includes('amount') ||
-      lower.includes('ποσο') ||
-      lower.includes('sum') ||
-      lower.includes('value')
-    ) {
-      amountColumn = idx;
-    }
-
-    // Category detection
-    if (
-      lower.includes('category') ||
-      lower.includes('κατηγορια') ||
-      lower.includes('type')
-    ) {
-      categoryColumn = idx;
-    }
-  });
-
-  // If no category found by header, try to detect by content
-  // Check if any column looks like it could be a category (short text, repeated values)
-  if (categoryColumn === null && sampleRows.length > 0) {
-    const columnValues: Map<number, Set<string>> = new Map();
-
-    sampleRows.forEach((row) => {
-      row.forEach((cell, idx) => {
-        if (!columnValues.has(idx)) {
-          columnValues.set(idx, new Set());
-        }
-        columnValues.get(idx)!.add(cell.trim());
-      });
-    });
-
-    // A category column typically has repeated values and short strings
-    // Skip columns already assigned
-    for (let idx = 0; idx < headers.length; idx++) {
-      if (
-        idx === dateColumn ||
-        idx === descriptionColumn ||
-        idx === amountColumn
-      ) {
-        continue;
-      }
-
-      const values = columnValues.get(idx);
-      if (values && values.size < sampleRows.length) {
-        // Has repeated values, might be a category
-        const avgLength =
-          Array.from(values).reduce((sum, v) => sum + v.length, 0) /
-          values.size;
-        if (avgLength < 30) {
-          categoryColumn = idx;
-          break;
-        }
-      }
-    }
+  // No category header — fall back to looking for a column that behaves like
+  // one, skipping the three already spoken for.
+  if (categoryColumn === null) {
+    categoryColumn = detectCategoryByContent(preview, [
+      dateColumn,
+      descriptionColumn,
+      amountColumn,
+    ]);
   }
 
   return {
@@ -659,7 +613,7 @@ const isValidDate = (year: number, month: number, day: number): boolean => {
 type AmountParseResult = {
   amount: number | null;
   isIncome: boolean;
-}
+};
 
 /**
  * Parses an amount from a CSV cell.
@@ -708,7 +662,8 @@ const parseAmount = (
     cleaned = cleaned.slice(1, -1);
   }
 
-  const hasMinusSign = cleaned.startsWith('-') || trailingMinus || parenthesised;
+  const hasMinusSign =
+    cleaned.startsWith('-') || trailingMinus || parenthesised;
   const hasPlusSign = cleaned.startsWith('+');
 
   if (cleaned.startsWith('-') || hasPlusSign) {
@@ -793,3 +748,70 @@ const isDecimalSeparator = (value: string, separator: string): boolean => {
   return /^\d{1,2}$/.test(fraction);
 };
 
+// Index of the LAST header containing one of `keywords`, or `fallback` when
+// none do. Last-match-wins is deliberate: in "Date,Value date,..." the second
+// column is the one a bank means.
+const matchHeader = <T extends number | null>(
+  headers: string[],
+  keywords: readonly string[],
+  fallback: T,
+): number | T => {
+  let match: number | T = fallback;
+
+  headers.forEach((header, idx) => {
+    const lower = header.toLowerCase().replace(/["']/g, '');
+    if (keywords.some((keyword) => lower.includes(keyword))) {
+      match = idx;
+    }
+  });
+
+  return match;
+};
+
+// A category column typically repeats a small set of short values. Returns the
+// first unassigned column that looks that way, or null.
+const detectCategoryByContent = (
+  preview: CsvPreviewData,
+  assigned: number[],
+): number | null => {
+  const { headers, sampleRows } = preview;
+  if (sampleRows.length === 0) {
+    return null;
+  }
+
+  const distinctByColumn = new Map<number, Set<string>>();
+  sampleRows.forEach((row) => {
+    row.forEach((cell, idx) => {
+      if (!distinctByColumn.has(idx)) {
+        distinctByColumn.set(idx, new Set());
+      }
+      distinctByColumn.get(idx)!.add(cell.trim());
+    });
+  });
+
+  for (let idx = 0; idx < headers.length; idx++) {
+    if (assigned.includes(idx)) {
+      continue;
+    }
+
+    const values = distinctByColumn.get(idx);
+    if (!values) {
+      continue;
+    }
+
+    // Repeated values are the first signal, short ones the second.
+    if (values.size >= sampleRows.length) {
+      continue;
+    }
+
+    const totalLength = Array.from(values).reduce(
+      (sum, v) => sum + v.length,
+      0,
+    );
+    if (totalLength / values.size < MAX_CATEGORY_LENGTH) {
+      return idx;
+    }
+  }
+
+  return null;
+};

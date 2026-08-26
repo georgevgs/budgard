@@ -1,4 +1,4 @@
-export type MonthlyDecisionState = 'noBudget' | 'shortfall' | 'save' | 'ready';
+type MonthlyDecisionState = 'noBudget' | 'shortfall' | 'save' | 'ready';
 
 export type MonthlyDecision = {
   state: MonthlyDecisionState;

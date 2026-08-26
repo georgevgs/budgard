@@ -99,7 +99,7 @@ const versionBrandAssetUrl = (value: string): string => {
   return `${url.pathname}${url.search}${url.hash}`;
 };
 
-export const versionBrandAssetReferences = (source: string): string => {
+const versionBrandAssetReferences = (source: string): string => {
   return source.replace(ASSET_REFERENCE_PATTERN, versionBrandAssetUrl);
 };
 
