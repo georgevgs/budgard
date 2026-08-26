@@ -7,7 +7,7 @@ test.describe('preferences', () => {
   test('a theme choice survives a reload with no flash of the old one', async ({
     app,
   }) => {
-    await app.goto('/settings');
+    await app.goto('/settings/preferences');
 
     await app.getByRole('button', { name: 'Dark', exact: true }).click();
     await expect(app.locator('html')).toHaveClass(/dark/);
@@ -20,7 +20,7 @@ test.describe('preferences', () => {
   });
 
   test('a language choice survives a reload', async ({ app }) => {
-    await app.goto('/settings');
+    await app.goto('/settings/preferences');
 
     await app.getByRole('combobox', { name: /language|γλώσσα/i }).click();
     await app.getByRole('option', { name: 'Ελληνικά' }).click();
@@ -28,15 +28,21 @@ test.describe('preferences', () => {
     await expect(app.locator('html')).toHaveAttribute('lang', 'el');
     // The dock is on every screen, so its labels prove the whole UI switched
     // rather than just the control that was clicked.
-    await expect(
-      app.getByRole('navigation').getByText('Σήμερα'),
-    ).toBeVisible();
+    await expect(app.getByRole('navigation').getByText('Σήμερα')).toBeVisible();
 
     await app.reload();
 
     await expect(app.locator('html')).toHaveAttribute('lang', 'el');
+    await expect(app.getByRole('navigation').getByText('Σήμερα')).toBeVisible();
+  });
+
+  test('the settings index opens a named group route', async ({ app }) => {
+    await app.goto('/settings');
+    await app.getByRole('link', { name: /account & subscription/i }).click();
+
+    await expect(app).toHaveURL(/\/settings\/account$/);
     await expect(
-      app.getByRole('navigation').getByText('Σήμερα'),
+      app.getByRole('heading', { name: 'Account & subscription' }),
     ).toBeVisible();
   });
 });

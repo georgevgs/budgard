@@ -17,6 +17,7 @@ test.describe('transaction detail', () => {
   test('saves a note when the field loses focus', async ({ app, data }) => {
     await app.goto('/t/exp-1');
 
+    await app.getByRole('button', { name: /add a note/i }).click();
     const note = app.getByLabel(/note/i);
     await note.fill('Split with Anna');
     await note.blur();
@@ -24,6 +25,18 @@ test.describe('transaction detail', () => {
     await expect
       .poll(() => data.expenses.find((row) => row.id === 'exp-1')?.note)
       .toBe('Split with Anna');
+  });
+
+  test('opens from recent activity with the same detail route', async ({
+    app,
+  }) => {
+    await app.goto('/today');
+    await app.getByRole('link', { name: /open weekly shop/i }).click();
+
+    await expect(app).toHaveURL(/\/t\/exp-1$/);
+    await expect(
+      app.getByRole('heading', { name: 'Weekly shop' }),
+    ).toBeVisible();
   });
 
   // The exclusion has to reach every total, not just this screen.

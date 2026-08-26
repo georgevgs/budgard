@@ -25,9 +25,7 @@ const ProUpsellCard = ({ title, description }: Props) => {
           <Sparkles className="h-5 w-5" />
         </span>
         <div>
-          <p className="type-heading">
-            {title}
-          </p>
+          <h2 className="type-heading">{title}</h2>
           <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
             {description}
           </p>

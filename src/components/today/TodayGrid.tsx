@@ -15,7 +15,6 @@ import type { TopCategory } from '@/hooks/today/useTopCategory';
 import type { useTodayGuidance } from '@/hooks/today/useTodayGuidance';
 import type { Insight } from '@/hooks/useSpendingInsights';
 import type { TodayTileId } from '@/lib/bentoLayout';
-import type { Expense } from '@/types/Expense';
 
 type TodayGridProps = {
   visible: TodayTileId[];
@@ -23,8 +22,6 @@ type TodayGridProps = {
   pace: DailyPace;
   topCategory: TopCategory | null;
   monthlyBudget: number | null;
-  onExpenseEdit: (expense: Expense) => void;
-  onIncomeEdit: (income: Expense) => void;
   onArrange: () => void;
 };
 
@@ -55,9 +52,7 @@ const EmptyGrid = ({ onArrange }: { onArrange: () => void }) => {
 
   return (
     <div className="tile-ghost mt-4 px-5 py-10 text-center" role="status">
-      <p className="type-heading">
-        {t('today.arrange.emptyTitle')}
-      </p>
+      <p className="type-heading">{t('today.arrange.emptyTitle')}</p>
       <p className="mx-auto mt-1 max-w-xs text-xs leading-relaxed text-muted-foreground">
         {t('today.arrange.emptyBody')}
       </p>
@@ -142,8 +137,6 @@ const renderTile = (id: TodayTileId, props: TodayGridProps) => {
         key={id}
         items={guidance.recentActivity}
         currency={guidance.currency}
-        onExpenseEdit={props.onExpenseEdit}
-        onIncomeEdit={props.onIncomeEdit}
       />
     );
   }

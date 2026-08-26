@@ -60,8 +60,6 @@ const TrendsSections = ({
           question the bars invite and cannot settle on their own. */}
       <YearRhythm months={analytics.rhythmMonths} currency={defaultCurrency} />
 
-      {renderProSections(isPro, analytics.selectedYear, t)}
-
       <div className="space-y-3">
         <h2 className="type-heading">{t('analytics.categoryTrends')}</h2>
         {renderCategoryBreakdown(
@@ -73,6 +71,8 @@ const TrendsSections = ({
           defaultCurrency,
         )}
       </div>
+
+      {renderProSections(isPro, analytics.selectedYear, t)}
     </div>
   );
 };

@@ -51,6 +51,15 @@
       "type": "image/png"
     }
   ],
+  "screenshots": [
+    {
+      "src": "/screenshots/quick-add.png",
+      "sizes": "1082x2202",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Add an expense in seconds"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Add Expense",

@@ -43,9 +43,7 @@ const YearOverviewSection = ({
 
   return (
     <div className="space-y-3">
-      <h2 className="type-heading">
-        {t('analytics.yearOverview')}
-      </h2>
+      <h2 className="type-heading">{t('analytics.yearOverview')}</h2>
 
       {renderYearSummary(
         animatedYearTotal,
@@ -57,7 +55,7 @@ const YearOverviewSection = ({
 
       <div className="tile overflow-hidden">
         <div className="p-4">
-          <div className="w-full" aria-hidden="true">
+          <div className="w-full">
             <Suspense fallback={<div className="h-[280px]" aria-hidden />}>
               <MonthlyTrendChart
                 data={monthlyData}

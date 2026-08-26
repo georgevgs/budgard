@@ -38,6 +38,9 @@ export const isSecondaryPath = (path: string): boolean => {
   if (path.startsWith('/t/')) {
     return true;
   }
+  if (path.startsWith('/settings/')) {
+    return true;
+  }
 
   return SECONDARY_PATHS.includes(path);
 };

@@ -1,7 +1,6 @@
 import BentoGrid from '@/components/bento/BentoGrid';
 import AveragePerMonthTile from '@/components/analytics/tiles/AveragePerMonthTile';
 import BiggestMonthTile from '@/components/analytics/tiles/BiggestMonthTile';
-import FreeWindowTile from '@/components/analytics/tiles/FreeWindowTile';
 import SpentThisMonthTile from '@/components/analytics/tiles/SpentThisMonthTile';
 import WhereItWentTile from '@/components/analytics/tiles/WhereItWentTile';
 import type {
@@ -50,7 +49,6 @@ const TrendsBento = (props: Props) => {
         totalSpent={props.totalSpent}
         onCategoryClick={props.onCategoryClick}
       />
-      <FreeWindowTile />
     </BentoGrid>
   );
 };

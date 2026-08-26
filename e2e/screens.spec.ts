@@ -35,7 +35,9 @@ const seed = (data: Record<string, Record<string, unknown>[]>) => {
     amount: 39,
     frequency: 'monthly',
     start_date: new Date().toISOString().slice(0, 10),
-    next_due_date: new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10),
+    next_due_date: new Date(Date.now() + 2 * 86400000)
+      .toISOString()
+      .slice(0, 10),
     active: true,
     category_id: 'cat-transport',
     created_at: new Date().toISOString(),
@@ -54,6 +56,12 @@ const ROUTES = [
   ['goals', '/goals'],
   ['transaction', '/t/exp-1'],
 ] as const;
+
+test('screenshot landing', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForTimeout(2000);
+  await page.screenshot({ path: `${SHOTS}/landing.png` });
+});
 
 for (const [name, path] of ROUTES) {
   test(`screenshot ${name}`, async ({ app, data }) => {
@@ -103,13 +111,24 @@ test('screenshot today-empty-grid', async ({ app, data }) => {
       JSON.stringify({
         visible: [],
         hidden: [
-          'safeToSpend', 'budgetUsed', 'monthPace', 'upcoming', 'topCategory',
-          'insight', 'recentActivity', 'weeklyRecap', 'netWorth', 'debts',
+          'safeToSpend',
+          'budgetUsed',
+          'monthPace',
+          'upcoming',
+          'topCategory',
+          'insight',
+          'recentActivity',
+          'weeklyRecap',
+          'netWorth',
+          'debts',
         ],
       }),
     );
   });
   await app.goto('/today');
   await app.waitForTimeout(2000);
-  await app.screenshot({ path: `${SHOTS}/today-empty-grid.png`, fullPage: true });
+  await app.screenshot({
+    path: `${SHOTS}/today-empty-grid.png`,
+    fullPage: true,
+  });
 });

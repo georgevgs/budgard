@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
+import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
 import Target from 'lucide-react/dist/esm/icons/target';
 import Wallet from 'lucide-react/dist/esm/icons/wallet';
-import BentoGrid from '@/components/bento/BentoGrid';
 import PageHeader from '@/components/common/PageHeader';
 import BudgetProgress from '@/components/budget/BudgetProgress';
 import UpcomingBillsCard from '@/components/common/UpcomingBillsCard';
@@ -113,15 +113,8 @@ const PlanView = () => {
           })}
         />
       </div>
-      <div className="mt-8">
-        <FiftyThirtyTwentyRing selectedMonth={model.monthKey} />
-      </div>
-      {/* A habit built over a month, not a thing to react to this morning —
-          it reads as planning, so it belongs beside the other planning. */}
-      <div id="savings-rhythm" className="mt-8 scroll-mt-6">
-        <SavingsRhythm rhythm={rhythm} currency={config.defaultCurrency} />
-      </div>
-      {renderOverviewGrid(model, config.defaultCurrency, counts, t)}
+      {renderMonthlyContext(model.monthKey, rhythm, config.defaultCurrency, t)}
+      {renderPlanningTools(model, config.defaultCurrency, counts, t)}
     </div>
   );
 };
@@ -138,47 +131,107 @@ type OverviewCounts = {
   accounts: number;
 };
 
-// Every screen that plans ahead is reachable from here — Plan is the hub, so
-// nothing lives only behind a header menu.
-const renderOverviewGrid = (
+// The decision, boundary and commitments are the plan. These two analytical
+// views explain it when someone wants the detail, without making every visit
+// pass through two more dashboards first.
+const renderMonthlyContext = (
+  monthKey: string,
+  rhythm: ReturnType<typeof useSavingsRhythm>,
+  currency: string,
+  t: TFunc,
+) => (
+  <details className="group mt-8">
+    <summary className="surface-card flex cursor-pointer list-none items-center gap-4 p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+      <span className="min-w-0 flex-1">
+        <span className="block type-heading">{t('plan.context.title')}</span>
+        <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+          {t('plan.context.description')}
+        </span>
+      </span>
+      <ChevronDown
+        className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+        aria-hidden="true"
+      />
+    </summary>
+    <div className="mt-8 space-y-8">
+      <FiftyThirtyTwentyRing selectedMonth={monthKey} />
+      <div id="savings-rhythm" className="scroll-mt-6">
+        <SavingsRhythm rhythm={rhythm} currency={currency} />
+      </div>
+    </div>
+  </details>
+);
+
+// Every screen that plans ahead stays reachable from Plan, but navigation is
+// one quiet list. A figure appears only after that tool has something to say.
+const renderPlanningTools = (
   model: ReturnType<typeof buildPlanModel>,
   currency: string,
   counts: OverviewCounts,
   t: TFunc,
 ) => (
-  <BentoGrid className="mt-8 lg:grid-cols-4">
-    <PlanOverviewCard
-      title={t('plan.recurring.title')}
-      value={formatCurrency(model.recurringMonthly, currency)}
-      description={t('plan.recurring.description', {
-        count: model.recurringCount,
-      })}
-      path="/recurring"
-      icon={Repeat}
-    />
-    <PlanOverviewCard
-      title={t('plan.goals.title')}
-      value={t('plan.goals.value', { count: counts.goals })}
-      description={t('plan.goals.description')}
-      path="/goals"
-      icon={Target}
-    />
-    <PlanOverviewCard
-      title={t('plan.debts.title')}
-      value={t('plan.debts.value', { count: counts.debts })}
-      description={t('plan.debts.description')}
-      path="/debts"
-      icon={CreditCard}
-    />
-    <PlanOverviewCard
-      title={t('plan.networth.title')}
-      value={t('plan.networth.value', { count: counts.accounts })}
-      description={t('plan.networth.description')}
-      path="/networth"
-      icon={Wallet}
-    />
-  </BentoGrid>
+  <section className="mt-8" aria-labelledby="planning-tools-title">
+    <h2 id="planning-tools-title" className="mb-3 type-heading">
+      {t('plan.tools.title')}
+    </h2>
+    <div className="surface-card-flush divide-y divide-border/40">
+      <PlanOverviewCard
+        title={t('plan.recurring.title')}
+        value={resolveValue(
+          model.recurringCount,
+          formatCurrency(model.recurringMonthly, currency),
+        )}
+        description={t('plan.recurring.description', {
+          count: model.recurringCount,
+        })}
+        setupLabel={t('plan.tools.setUp')}
+        path="/recurring"
+        icon={Repeat}
+      />
+      <PlanOverviewCard
+        title={t('plan.goals.title')}
+        value={resolveValue(
+          counts.goals,
+          t('plan.goals.value', { count: counts.goals }),
+        )}
+        description={t('plan.goals.description')}
+        setupLabel={t('plan.tools.setUp')}
+        path="/goals"
+        icon={Target}
+      />
+      <PlanOverviewCard
+        title={t('plan.debts.title')}
+        value={resolveValue(
+          counts.debts,
+          t('plan.debts.value', { count: counts.debts }),
+        )}
+        description={t('plan.debts.description')}
+        setupLabel={t('plan.tools.setUp')}
+        path="/debts"
+        icon={CreditCard}
+      />
+      <PlanOverviewCard
+        title={t('plan.networth.title')}
+        value={resolveValue(
+          counts.accounts,
+          t('plan.networth.value', { count: counts.accounts }),
+        )}
+        description={t('plan.networth.description')}
+        setupLabel={t('plan.tools.setUp')}
+        path="/networth"
+        icon={Wallet}
+      />
+    </div>
+  </section>
 );
+
+const resolveValue = (count: number, value: string): string | null => {
+  if (count === 0) {
+    return null;
+  }
+
+  return value;
+};
 
 const buildPlanModel = (
   expenses: Expense[],

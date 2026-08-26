@@ -2,9 +2,10 @@ import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import LoadingScreen from '@/components/ui/loading-screen';
 
-// Row counts per section, mirroring SettingsView's real order: profile,
-// billing, appearance, language, currency, notifications, data, about.
-const SECTIONS = [2, 2, 3, 1, 1, 4, 2, 2] as const;
+// The index is four decisions plus the compact About card. A nested route may
+// briefly inherit this fallback, which is still close enough to avoid a large
+// layout jump without recreating every group's exact controls here.
+const SECTIONS = [4, 2] as const;
 
 const SettingsLoadingState = () => {
   const { t } = useTranslation();

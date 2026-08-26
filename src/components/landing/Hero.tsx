@@ -129,25 +129,22 @@ const renderHeroShot = (t: Tx) => (
   <div className="max-w-md mx-auto">
     <DeviceFrame>
       <div className="p-3">
-        {/* Built from the same tone classes the real hero uses, so the shot
-            can never drift from the product — including in dark mode. */}
-        <div className="today-hero today-hero-comfortable rounded-[1.4rem] p-5">
+        {/* The slab is the product's answer, not generic preview chrome. Using
+            its real surface and type scale makes the first product image match
+            the screen someone reaches after signing in. */}
+        <div className="tile-slab lift rounded-[1.4rem] p-5">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-semibold opacity-65">
-              {t('today.greeting.morning')}
-            </p>
-            <span className="rounded-full bg-primary/12 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-primary-ink">
+            <TileLabel>{t('today.tiles.safeToSpend')}</TileLabel>
+            <span className="rounded-full bg-current/14 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase leading-none tracking-[0.1em]">
               {t('today.chip.comfortable')}
             </span>
           </div>
-          <p className="mt-2 max-w-[16rem] type-heading text-xl">
-            {t('today.status.comfortable')}
-          </p>
-          <p className="mt-5 type-figure-xl text-[2.35rem]">
+          <p className="mt-4 type-slab text-[2.75rem]">
             {t('landing.hero.previewSafeAmount')}
           </p>
-          <p className="mt-1 text-xs opacity-65">{t('today.leftAfterBills')}</p>
-          {renderPreviewPath()}
+          <p className="mt-2 text-[0.8rem] font-semibold leading-tight opacity-92">
+            {t('today.leftAfterBills')}
+          </p>
         </div>
         <div className="space-y-1 px-2 py-3">
           {renderPreviewSummary(
@@ -162,28 +159,6 @@ const renderHeroShot = (t: Tx) => (
       </div>
     </DeviceFrame>
   </div>
-);
-
-const renderPreviewPath = () => (
-  <svg viewBox="0 0 280 78" className="mt-4 h-20 w-full" aria-hidden="true">
-    <path d="M 4 67 L 276 8 L 276 28 L 4 76 Z" className="fill-white/35" />
-    <path
-      d="M 4 72 L 276 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1"
-      strokeDasharray="4 6"
-      className="opacity-25"
-    />
-    <path
-      d="M 4 72 C 38 68, 52 62, 82 60 S 124 49, 151 48 S 181 39, 207 38"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="4"
-      strokeLinecap="round"
-    />
-    <circle cx="207" cy="38" r="5" className="fill-primary" />
-  </svg>
 );
 
 const renderPreviewSummary = (label: string, value: string) => (

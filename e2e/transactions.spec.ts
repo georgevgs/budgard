@@ -15,7 +15,7 @@ test.describe('transactions', () => {
     // the temp row and the saved row side by side for a beat, and this asserts
     // the reconcile actually collapses them instead of leaving a duplicate.
     await expect(
-      app.getByRole('button', { name: 'Edit Bus ticket' }),
+      app.getByRole('link', { name: 'Open Bus ticket' }),
     ).toHaveCount(1);
 
     // It reached the service layer, not just the optimistic list.
@@ -97,7 +97,5 @@ const openAddExpense = async (page: import('@playwright/test').Page) => {
   await page.getByRole('button', { name: /open actions menu/i }).click();
   await page.getByRole('button', { name: /add expense/i }).click();
   await page.getByRole('button', { name: /more details/i }).click();
-  await expect(
-    page.getByLabel('Description', { exact: true }),
-  ).toBeVisible();
+  await expect(page.getByLabel('Description', { exact: true })).toBeVisible();
 };

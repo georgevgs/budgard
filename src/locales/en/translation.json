@@ -213,6 +213,14 @@
   "plan": {
     "title": "Plan",
     "subtitle": "Give the month a shape, then let Budgard keep the moving parts together.",
+    "context": {
+      "title": "Understand this month",
+      "description": "Open the balance and saving views behind your plan."
+    },
+    "tools": {
+      "title": "Planning tools",
+      "setUp": "Set up"
+    },
     "monthlyPlan": "This month's boundary",
     "decision": {
       "label": {
@@ -612,6 +620,25 @@
   },
   "settings": {
     "title": "Settings",
+    "subtitle": "Choose what you want to change.",
+    "groups": {
+      "account": {
+        "title": "Account & subscription",
+        "description": "Email, sign out and your current plan"
+      },
+      "preferences": {
+        "title": "Appearance & preferences",
+        "description": "Theme, accent, language and currency"
+      },
+      "notifications": {
+        "title": "Notifications & security",
+        "description": "Reminders, app lock and signed-in devices"
+      },
+      "data": {
+        "title": "Data & privacy",
+        "description": "Export your data or delete your account"
+      }
+    },
     "profile": {
       "title": "Profile",
       "email": "Email",
@@ -1471,7 +1498,7 @@
       "subtitle": "Budgard turns budgets, bills, and daily spending into one calm answer: what is safe today.",
       "primaryCta": "Start free",
       "installCta": "Add to Home Screen",
-      "trust": "Built in the EU · No ads · No tracking · Yours to keep",
+      "trust": "Built in the EU · No ads · No cross-site tracking · Yours to keep",
       "previewSafeAmount": "€742.00",
       "previewUpcoming": "€88.40 planned this week",
       "previewInsight": "Dining out is gentler than last month"
@@ -1542,10 +1569,10 @@
       "body": "Budgard is built quietly. Your finances aren't a product we sell, and they never will be.",
       "pillar1": {
         "title": "Hosted in the EU",
-        "body": "Stored on Supabase servers in the European Union. GDPR-compliant by construction."
+        "body": "Stored on Supabase servers in the European Union, with controls to export or delete your data."
       },
       "pillar2": {
-        "title": "No ads, no tracking",
+        "title": "No ads or profiling",
         "body": "We don't run ads. We don't share your data with brokers. We don't watch you spend."
       },
       "pillar3": {
@@ -1722,8 +1749,10 @@
     "deleteConfirmation": "This removes it permanently. Anything it was counted towards will be recalculated.",
     "note": {
       "label": "Note",
+      "add": "Add a note",
       "placeholder": "What was this for?",
-      "unsaved": "Saves when you tap away"
+      "unsaved": "Saves when you tap away",
+      "done": "Done"
     },
     "exclude": {
       "label": "Don't count this as spending",

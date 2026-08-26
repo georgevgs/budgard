@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 
 // The way out of a screen you arrived at from somewhere. Lived in the app bar
@@ -8,6 +8,7 @@ import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 const BackButton = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   const handleBack = () => {
     // React Router stamps an index into history state; 0 means this entry
@@ -18,7 +19,7 @@ const BackButton = () => {
 
       return;
     }
-    navigate('/today', { viewTransition: true });
+    navigate(resolveFallback(pathname), { viewTransition: true });
   };
 
   return (
@@ -34,3 +35,13 @@ const BackButton = () => {
 };
 
 export default BackButton;
+
+// --- Helpers ---
+
+const resolveFallback = (pathname: string): string => {
+  if (pathname.startsWith('/settings/')) {
+    return '/settings';
+  }
+
+  return '/today';
+};

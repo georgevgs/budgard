@@ -20,13 +20,14 @@ const OVERVIEW_TITLES = [
 ];
 
 describe('Plan translation layout', () => {
-  it('keeps the overview in its bento grid', () => {
+  it('keeps planning destinations in one compact list', () => {
     const source = readFileSync(
       path.join(ROOT, 'src/components/plan/PlanView.tsx'),
       'utf8',
     );
 
-    expect(source).toContain('mt-8 lg:grid-cols-4');
+    expect(source).toContain('surface-card-flush divide-y divide-border/40');
+    expect(source).toContain("t('plan.tools.title')");
   });
 
   it('caps overview copy before a word can overflow a half tile', () => {
@@ -40,13 +41,13 @@ describe('Plan translation layout', () => {
     });
   });
 
-  it('shows an ellipsis while preserving the full accessible title', () => {
+  it('offers setup instead of rendering an empty zero value', () => {
     const source = readFileSync(
       path.join(ROOT, 'src/components/plan/PlanOverviewCard.tsx'),
       'utf8',
     );
 
-    expect(source).toContain('line-clamp-2');
-    expect(source).toContain('ariaLabel={title}');
+    expect(source).toContain('if (!value)');
+    expect(source).toContain('{setupLabel}');
   });
 });

@@ -6,41 +6,24 @@ import BentoTile from '@/components/bento/BentoTile';
 import TileLabel from '@/components/bento/TileLabel';
 import TransactionPill from '@/components/common/TransactionPill';
 import { useDateLocale } from '@/hooks/useDateLocale';
-import type { Expense } from '@/types/Expense';
 import type { RecentActivityItem } from '@/hooks/today/useTodayGuidance';
 
 type Props = {
   items: RecentActivityItem[];
   currency: string;
-  onExpenseEdit: (expense: Expense) => void;
-  onIncomeEdit: (income: Expense) => void;
 };
 
 type Locale = ReturnType<typeof useDateLocale>;
 
 // What already happened, as its own group of pills rather than one card. The
 // module has no ground of its own — see the `bare` tone in BentoTile.
-const RecentActivityTile = ({
-  items,
-  currency,
-  onExpenseEdit,
-  onIncomeEdit,
-}: Props) => {
+const RecentActivityTile = ({ items, currency }: Props) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
 
   if (items.length === 0) {
     return null;
   }
-
-  const handleEdit = (item: RecentActivityItem) => {
-    if (item.kind === 'income') {
-      onIncomeEdit(item.transaction);
-
-      return;
-    }
-    onExpenseEdit(item.transaction);
-  };
 
   return (
     <BentoTile tone="bare" wide className="mt-1">
@@ -56,9 +39,7 @@ const RecentActivityTile = ({
         </Link>
       </div>
       <div className="flex flex-col gap-2">
-        {items.map((item) =>
-          renderPill(item, currency, dateLocale, handleEdit),
-        )}
+        {items.map((item) => renderPill(item, currency, dateLocale))}
       </div>
     </BentoTile>
   );
@@ -72,7 +53,6 @@ const renderPill = (
   item: RecentActivityItem,
   currency: string,
   dateLocale: Locale,
-  onEdit: (item: RecentActivityItem) => void,
 ) => {
   return (
     <TransactionPill
@@ -81,7 +61,7 @@ const renderPill = (
       kind={item.kind}
       currency={currency}
       meta={buildMeta(item, dateLocale)}
-      onSelect={() => onEdit(item)}
+      to={`/t/${item.transaction.id}`}
     />
   );
 };

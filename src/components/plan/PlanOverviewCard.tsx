@@ -1,56 +1,66 @@
 import type { ComponentType } from 'react';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
-import BentoTile from '@/components/bento/BentoTile';
-import TileLabel from '@/components/bento/TileLabel';
+import { Link } from 'react-router-dom';
 
 type Props = {
   title: string;
-  value: string;
+  value: string | null;
   description: string;
+  setupLabel: string;
   path: string;
   icon: ComponentType<{ className?: string }>;
 };
 
-// The icon chip is the same on all four, and it is the same chip the rest of
-// the app already uses (`UpcomingBillsCard`, `PaywallFeatures`, `TodayArrange`).
-// The four used to carry a hue each — orange, green, gold, blue — passed in as
-// a `toneClass` prop: a pastel per destination, which is four accents on one
-// screen in an app with one. Goals are not income and net worth is not
-// information, so the hues meant nothing; what they cost was the orange, which
-// stops reading as the app's accent the moment it is one of four.
-//
-// The icon and the label do the telling apart. Colour is not a labelling
-// device here — it is reserved for the figure that needs attention.
+// Planning destinations are navigation, not four competing dashboard stats.
+// Once a tool has data its value earns a place on the row; until then the row
+// offers a clear setup action instead of presenting a dead zero as insight.
 const PlanOverviewCard = ({
   title,
   value,
   description,
+  setupLabel,
   path,
   icon: Icon,
 }: Props) => {
   return (
-    <BentoTile
+    <Link
       to={path}
-      ariaLabel={title}
-      className="group flex min-h-33 flex-col p-4"
+      viewTransition
+      aria-label={title}
+      className="group flex min-h-18 items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
     >
-      <div className="flex items-center justify-between">
-        <span className="flex h-8.5 w-8.5 items-center justify-center rounded-full bg-primary/12 text-primary-ink">
-          <Icon className="h-4 w-4" />
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary-ink">
+        <Icon className="h-4 w-4" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold">{title}</span>
+        <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">
+          {description}
         </span>
-        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-      </div>
-      <TileLabel className="mt-4 line-clamp-2 min-h-[2.7em] max-w-full whitespace-normal break-normal leading-[1.35]">
-        {title}
-      </TileLabel>
-      <p className="mt-1.5 type-figure-sm">
-        {value}
-      </p>
-      <p className="mt-1 text-[0.7rem] leading-snug text-muted-foreground">
-        {description}
-      </p>
-    </BentoTile>
+      </span>
+      {renderValue(value, setupLabel)}
+      <ArrowRight
+        className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+        aria-hidden="true"
+      />
+    </Link>
   );
 };
 
 export default PlanOverviewCard;
+
+// --- Helpers ---
+
+const renderValue = (value: string | null, setupLabel: string) => {
+  if (!value) {
+    return (
+      <span className="shrink-0 text-xs font-semibold text-primary-ink">
+        {setupLabel}
+      </span>
+    );
+  }
+
+  return (
+    <span className="shrink-0 text-xs font-semibold tabular-nums">{value}</span>
+  );
+};

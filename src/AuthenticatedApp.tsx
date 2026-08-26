@@ -563,7 +563,7 @@ const AuthenticatedApp = () => {
                     }
                   />
                   <Route
-                    path="/settings"
+                    path="/settings/:section?"
                     element={
                       <Suspense
                         fallback={renderRouteFallback(<SettingsLoadingState />)}

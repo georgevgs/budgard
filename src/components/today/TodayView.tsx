@@ -20,8 +20,7 @@ import { useTopCategory } from '@/hooks/today/useTopCategory';
 // only the default, and the order below it is theirs.
 const TodayView = () => {
   const { isInitialized, monthlyBudget } = useDataConfig();
-  const { optimisticExpenses, handleExpenseEdit, handleIncomeEdit } =
-    useQuickAdd();
+  const { optimisticExpenses } = useQuickAdd();
   const dateLocale = useDateLocale();
   const now = useMemo(() => new Date(), []);
   const guidance = useTodayGuidance(optimisticExpenses);
@@ -59,8 +58,6 @@ const TodayView = () => {
         pace,
         topCategory,
         monthlyBudget,
-        onExpenseEdit: handleExpenseEdit,
-        onIncomeEdit: handleIncomeEdit,
         onArrange: () => layout.setArranging(true),
       })}
     </div>

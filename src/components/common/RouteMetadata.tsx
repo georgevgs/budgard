@@ -46,6 +46,18 @@ const resolvePageTitle = (pathname: string, t: TFunc): string => {
   if (pathname === '/networth') return t('navigation.networth');
   if (pathname === '/debts') return t('navigation.debts');
   if (pathname === '/settings') return t('navigation.settings');
+  if (pathname === '/settings/account') {
+    return t('settings.groups.account.title');
+  }
+  if (pathname === '/settings/preferences') {
+    return t('settings.groups.preferences.title');
+  }
+  if (pathname === '/settings/notifications') {
+    return t('settings.groups.notifications.title');
+  }
+  if (pathname === '/settings/data') {
+    return t('settings.groups.data.title');
+  }
   if (pathname === '/privacy') return t('legal.privacy.title');
   if (pathname === '/terms') return t('legal.terms.title');
   if (pathname === '/contact') return t('legal.contact.title');

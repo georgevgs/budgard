@@ -22,22 +22,23 @@ test.describe('offline writes', () => {
 
     // The row is usable immediately even though nothing reached the server.
     await expect(
-      app.getByRole('button', { name: 'Edit Offline coffee' }),
+      app.getByRole('link', { name: 'Open Offline coffee' }),
     ).toBeVisible();
     expect(
       data.expenses.some((row) => row.description === 'Offline coffee'),
     ).toBe(false);
 
     // And the app says so rather than pretending the save succeeded.
-    await expect(app.getByText(/pending sync|saved offline/i).first()).toBeVisible();
+    await expect(
+      app.getByText(/pending sync|saved offline/i).first(),
+    ).toBeVisible();
 
     setBackendReachable(true);
     await app.evaluate(() => window.dispatchEvent(new Event('online')));
 
     await expect
       .poll(
-        () =>
-          data.expenses.some((row) => row.description === 'Offline coffee'),
+        () => data.expenses.some((row) => row.description === 'Offline coffee'),
         { timeout: 15_000 },
       )
       .toBe(true);

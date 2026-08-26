@@ -18,8 +18,10 @@ test.describe('app lock', () => {
   // Deriving the stored hash is deliberately slow, so the toast is the signal
   // that it actually landed. Reloading before it does races the write.
   const enableLock = async (page: import('@playwright/test').Page) => {
-    await page.goto('/settings');
-    await page.getByRole('switch', { name: /lock budgard with a pin/i }).click();
+    await page.goto('/settings/notifications');
+    await page
+      .getByRole('switch', { name: /lock budgard with a pin/i })
+      .click();
     await expect(page.getByText(/choose a pin/i)).toBeVisible();
     await enterPin(page, PIN);
     await expect(page.getByText(/enter it again/i)).toBeVisible();
@@ -37,7 +39,9 @@ test.describe('app lock', () => {
 
     await enterPin(app, PIN);
 
-    await expect(app.getByRole('heading', { name: 'Settings' })).toBeVisible();
+    await expect(
+      app.getByRole('heading', { name: 'Notifications & security' }),
+    ).toBeVisible();
   });
 
   // Covered is not enough. A fixed overlay leaves the app behind it in the tab
@@ -81,7 +85,7 @@ test.describe('app lock', () => {
   test('a mistyped confirmation starts over instead of saving', async ({
     app,
   }) => {
-    await app.goto('/settings');
+    await app.goto('/settings/notifications');
     await app.getByRole('switch', { name: /lock budgard with a pin/i }).click();
 
     await enterPin(app, PIN);

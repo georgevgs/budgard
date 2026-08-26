@@ -72,7 +72,12 @@ describe('brand asset revisions', () => {
 
     expect(manifest).toEqual(expected);
 
-    for (const source of collectSources(manifest)) {
+    const iconSources = collectSources({
+      icons: manifest.icons,
+      shortcuts: manifest.shortcuts,
+    });
+
+    for (const source of iconSources) {
       expect(source).toContain(`v=${BRAND_ASSET_REVISION}`);
     }
   });

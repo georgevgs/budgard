@@ -56,8 +56,11 @@ test.describe('year in rhythm', () => {
     await expect(
       app.getByRole('heading', { name: /year in rhythm/i }),
     ).toBeVisible();
-    // The gated section is still gated, so the line has not simply moved.
-    await expect(app.getByText(/unlock full history with pro/i)).toBeVisible();
+    // The single gate now follows all free insights, rather than interrupting
+    // them with a second locked tile near the top of the screen.
+    await expect(
+      app.getByRole('heading', { name: /see beyond 3 months/i }),
+    ).toBeVisible();
   });
 
   test('reads a rolling year, so it works for a subscriber too', async ({
