@@ -18,6 +18,7 @@ const plan = vi.hoisted(() => ({ isPro: false }));
 vi.mock('@/hooks/useIsPro', () => ({ useIsPro: () => plan.isPro }));
 
 import { useProGate } from '@/hooks/pro/useProGate';
+import { PRO_GATES } from '@/lib/proGates';
 
 const renderGate = () => renderHook(() => useProGate()).result;
 
@@ -70,14 +71,27 @@ describe('useProGate on the free plan', () => {
     expect(mockOpenUpgrade).toHaveBeenCalledTimes(3);
   });
 
-  it('opens a Pro-only upsell without a toast', () => {
-    // These gates carry no message — the dialog is the whole explanation.
+  it('names the blocked feature before opening a Pro-only upsell', () => {
+    // The upgrade dialog is generic ("Upgrade to Pro") and never says what the
+    // user just tried, so the gate has to.
     const { allow } = renderGate().current;
 
     allow('receiptScan');
 
-    expect(mockToast).not.toHaveBeenCalled();
+    expect(mockToast).toHaveBeenCalledWith({
+      title: 'pro.gate.receiptScan',
+    });
     expect(mockOpenUpgrade).toHaveBeenCalled();
+  });
+
+  it('gives every gate something to say', () => {
+    // A gate that opens the paywall silently leaves the user to infer why.
+    for (const [name, gate] of Object.entries(PRO_GATES)) {
+      expect(
+        'messageKey' in gate && Boolean(gate.messageKey),
+        `${name} has no messageKey`,
+      ).toBe(true);
+    }
   });
 
   it('runs onBlock before the upsell so a popover can get out of the way', () => {

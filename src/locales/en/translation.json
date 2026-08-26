@@ -1325,7 +1325,10 @@
       "investBody": "See your allocation, returns, YTD and annualized performance across your investments.",
       "tagLimit": "The free plan includes one tag per expense. Upgrade for multiple tags.",
       "debtPlanTitle": "The payoff planner is a Pro feature",
-      "debtPlanBody": "Compare snowball vs avalanche, add a monthly extra, and see your debt-free date. Upgrade to plan your payoff."
+      "debtPlanBody": "Compare snowball vs avalanche, add a monthly extra, and see your debt-free date. Upgrade to plan your payoff.",
+      "receiptScan": "Scanning receipts is a Pro feature. Upgrade to fill in an expense from a photo.",
+      "csvExport": "CSV export is a Pro feature. Upgrade to take your transactions anywhere.",
+      "categoryBudgets": "Per-category budgets are a Pro feature. Upgrade to cap each category."
     },
     "successTitle": "Welcome to Pro!",
     "successBody": "Your subscription is active. Enjoy the full picture.",
@@ -1504,7 +1507,9 @@
         },
         {
           "heading": "Contact",
-          "paragraphs": ["Questions about these terms: {{email}}."]
+          "paragraphs": [
+            "Questions about these terms: {{email}}."
+          ]
         }
       ]
     },

@@ -39,8 +39,13 @@ export const useProGate = () => {
 
       options.onBlock?.();
 
+      // Cap gates interpolate their limit; pro-only gates just name the
+      // feature. Either way the user is told what was blocked before the
+      // upgrade dialog asks them for money.
       if (isCapGate(gate)) {
         toast({ title: t(gate.messageKey, { limit: gate.limit }) });
+      } else if (gate.messageKey) {
+        toast({ title: t(gate.messageKey) });
       }
 
       openUpgrade();

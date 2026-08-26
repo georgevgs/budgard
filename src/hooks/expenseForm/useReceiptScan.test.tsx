@@ -25,6 +25,10 @@ vi.mock('@/contexts/UpgradeDialogContext', () => ({
 
 vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({ toast: mockToast }),
+  // The Pro gate toasts through the module-level export, not the hook. Called
+  // lazily: this factory is hoisted above `const mockToast`, so referencing it
+  // eagerly would throw at import time.
+  toast: (...args: unknown[]) => mockToast(...args),
 }));
 
 type HarnessResult = {

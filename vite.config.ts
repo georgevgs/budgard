@@ -35,6 +35,14 @@ const matchesPackage = (id: string, packages: string[]): boolean =>
   packages.some((pkg) => id.includes(`node_modules/${pkg}/`));
 
 const chunkForModule = (id: string): string | undefined => {
+  // Locale bundles get stable names so the service worker can precache the
+  // fallback language and leave the others to a runtime cache. Without this
+  // they are both `translation-<hash>.js` and indistinguishable to globIgnores.
+  const locale = id.match(/\/src\/locales\/([a-z]{2})\/translation\.json/);
+  if (locale) {
+    return `locale-${locale[1]}`;
+  }
+
   if (!id.includes("node_modules")) {
     return undefined;
   }
@@ -303,6 +311,14 @@ export default defineConfig({
           // this is. Both are kept by the app-shell runtime cache on first use.
           "**/assets/browser-image-compression-*.js",
           "**/assets/LandingPage-*.js",
+          // Only the fallback language is precached. A second locale is 29 KB
+          // gzip that the great majority of installs never read, and i18n
+          // already fetches just the detected language at runtime — this stops
+          // the service worker from downloading the others anyway. The first
+          // load in a non-English locale fetches it from the network (the user
+          // is online: they just opened the app) and the runtime cache below
+          // keeps it offline-ready from then on.
+          "**/assets/locale-!(en)-*.js",
         ],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: PWA_NAVIGATION_DENYLIST,
@@ -321,7 +337,8 @@ export default defineConfig({
           // whoever actually uses the feature keeps it after the first load.
           {
             urlPattern: ({ sameOrigin, url }) =>
-              sameOrigin && /\/assets\/(browser-image-compression|LandingPage)-/.test(url.pathname),
+              sameOrigin &&
+              /\/assets\/(browser-image-compression|LandingPage|locale)-/.test(url.pathname),
             handler: "CacheFirst",
             options: {
               cacheName: "deferred-chunks",

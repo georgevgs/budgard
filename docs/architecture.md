@@ -412,9 +412,10 @@ if (!allow('accounts', accounts.length)) return;   // toasts + opens upgrade
 the limit (where the gate has a message) and opens the upgrade flow. Pass
 `{ onBlock }` to close a popover that would otherwise sit on top of the dialog.
 
-Note the asymmetry: cap gates explain themselves, pro-only gates open the
-dialog with nothing said first. That is a deliberate current state, not an
-oversight — giving a pro-only gate a `messageKey` is all it takes to change it.
+Every gate names what was blocked before the dialog appears. The upgrade
+dialog itself is generic ("Upgrade to Pro") and never mentions the feature the
+user just tried, so a gate that stayed silent left them to infer it — the
+`useProGate` test suite fails if any gate is added without a `messageKey`.
 
 `ProRoute` guards whole routes; `useIsPro` remains for read-only branching
 (showing an upsell card rather than blocking an action).
