@@ -132,8 +132,9 @@ Prefer the narrow ones — they re-render only when their own slice changes:
 - `useDataActions()` — stable setters and refresh callbacks
 - `useExpensesData()`, `useIncomesData()`, `useCategoriesData()`,
   `useTagsData()`, and one per remaining domain
-- `useData()` — the full snapshot. A back-compat shim: it re-renders on **any**
-  data mutation, so do not reach for it in new code.
+
+There is no combined `useData()` snapshot. Consumers subscribe to the narrow
+slice they need so an unrelated data mutation does not re-render them.
 
 ---
 
@@ -264,7 +265,7 @@ months-stale PWA bundles with PGRST201.
 1. User logs in (Supabase Auth)
 2. `AuthProvider` updates session
 3. `DataProvider` fetches all data in parallel
-4. Components consume state via `useData()`
+4. Components consume state through the narrow slice contexts
 5. User triggers mutation
 6. The domain hook in `hooks/dataOps/`:
     - optimistic update
@@ -417,8 +418,8 @@ dialog itself is generic ("Upgrade to Pro") and never mentions the feature the
 user just tried, so a gate that stayed silent left them to infer it — the
 `useProGate` test suite fails if any gate is added without a `messageKey`.
 
-`ProRoute` guards whole routes; `useIsPro` remains for read-only branching
-(showing an upsell card rather than blocking an action).
+`ProRoute` guards whole routes; read-only branching gets `isPro` from
+`useSubscription` (showing an upsell card rather than blocking an action).
 
 ---
 

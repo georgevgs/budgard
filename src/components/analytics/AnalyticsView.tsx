@@ -8,7 +8,7 @@ import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import PageHeader from '@/components/common/PageHeader';
 import AnalyticsEmpty from '@/components/analytics/AnalyticsEmpty';
-import { useIsPro } from '@/hooks/useIsPro';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { CategoryDrillDown } from '@/components/analytics/CategoryDrillDown';
 import { MonthDrillDown } from '@/components/analytics/MonthDrillDown';
 import TrendsBento from '@/components/analytics/TrendsBento';
@@ -25,7 +25,7 @@ import type { Category } from '@/types/Category';
 
 const AnalyticsView = () => {
   const { t } = useTranslation();
-  const isPro = useIsPro();
+  const { isPro } = useSubscription();
   const { expenseCategories: categories } = useCategoriesData();
   const { monthlyBudget, defaultCurrency, isInitialized } = useDataConfig();
   const allExpenses = useExpensesData();

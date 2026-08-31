@@ -15,7 +15,9 @@ vi.mock('@/contexts/UpgradeDialogContext', () => ({
 }));
 
 const plan = vi.hoisted(() => ({ isPro: false }));
-vi.mock('@/hooks/useIsPro', () => ({ useIsPro: () => plan.isPro }));
+vi.mock('@/contexts/SubscriptionContext', () => ({
+  useSubscription: () => ({ isPro: plan.isPro }),
+}));
 
 import { useProGate } from '@/hooks/pro/useProGate';
 import { PRO_GATES } from '@/lib/proGates';

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/hooks/useToast';
-import { useIsPro } from '@/hooks/useIsPro';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
 import { PRO_GATES, isCapGate, type ProGateName } from '@/lib/proGates';
 
@@ -15,7 +15,7 @@ type AllowOptions = {
 // out the same three steps — check the plan, toast the limit, open the
 // upgrade flow — at its own call site.
 export const useProGate = () => {
-  const isPro = useIsPro();
+  const { isPro } = useSubscription();
   const { openUpgrade } = useUpgradeDialog();
   const { t } = useTranslation();
 

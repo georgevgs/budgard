@@ -7,7 +7,7 @@ import ProUpsellCard from '@/components/pro/ProUpsellCard';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useDateLocale } from '@/hooks/useDateLocale';
 import { useDebtPayoffPlan } from '@/hooks/useDebtPayoffPlan';
-import { useIsPro } from '@/hooks/useIsPro';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { Locale } from 'date-fns';
 import type { SimResult } from '@/lib/debtPayoff';
@@ -19,7 +19,7 @@ type Props = {
 
 const DebtPayoffPlanner = ({ debts }: Props) => {
   const { t } = useTranslation();
-  const isPro = useIsPro();
+  const { isPro } = useSubscription();
   const { defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();
   const [strategy, setStrategy] = useState<PayoffStrategy>('snowball');

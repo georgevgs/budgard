@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { parseCurrencyInput } from '@/lib/utils';
 import { useBudgetOps } from '@/hooks/dataOps/useBudgetOps';
 import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
 import {
   completeOnboarding,

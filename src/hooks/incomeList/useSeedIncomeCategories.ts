@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useCategoriesData, useDataConfig } from '@/contexts/DataContext';
 import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
 import { swatch } from '@/design/palette';

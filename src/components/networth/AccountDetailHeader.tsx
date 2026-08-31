@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import { cn, formatCurrency } from '@/lib/utils';
-import { useIsPro } from '@/hooks/useIsPro';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { type Account, isLiability } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import {
@@ -38,7 +38,7 @@ const AccountDetailHeader = ({
   onArchiveRequest,
 }: Props) => {
   const { t } = useTranslation();
-  const isPro = useIsPro();
+  const { isPro } = useSubscription();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const liability = isLiability(account.kind);

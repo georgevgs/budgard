@@ -2,8 +2,11 @@ import { parseISO } from 'date-fns';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
 import CategoryIcon from '@/components/common/CategoryIcon';
-import { amountToInput, formatCurrency } from '@/lib/utils';
-import { resolveSourceCurrency } from '@/components/expenses/ExpensesForm.helpers';
+import { amountToInput } from '@/lib/utils';
+import {
+  resolveSourceAmount,
+  resolveSourceCurrency,
+} from '@/lib/transactionAmount';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
@@ -18,20 +21,10 @@ export const getInitialAmount = (
 ): string => {
   if (!income) return '';
 
-  const sourceAmount = pickSourceAmount(income, defaultCurrency);
-
   return amountToInput(
-    sourceAmount,
+    resolveSourceAmount(income, defaultCurrency),
     resolveSourceCurrency(income, defaultCurrency),
   );
-};
-
-const pickSourceAmount = (income: Expense, defaultCurrency: string): number => {
-  const isForeign =
-    income.original_currency && income.original_currency !== defaultCurrency;
-  if (isForeign) return income.original_amount ?? income.amount;
-
-  return income.amount;
 };
 
 export const getInitialDate = (income: Expense | undefined): Date => {
@@ -63,43 +56,6 @@ export const renderSaveButtonLabel = (
   if (isSubmitting) return t('common.saving');
 
   return t('income.saveIncome');
-};
-
-export const renderConversionPreview = (
-  isLoading: boolean,
-  hasError: boolean,
-  convertedAmount: number | null,
-  currency: string,
-  targetCurrency: string,
-  t: TranslateFunction,
-) => {
-  if (currency === targetCurrency) return null;
-
-  if (isLoading) {
-    return (
-      <p className="text-xs text-muted-foreground mt-1">
-        {t('expenses.currency.fetchingRate')}
-      </p>
-    );
-  }
-
-  if (hasError) {
-    return (
-      <p className="text-xs text-destructive-ink mt-1">
-        {t('expenses.currency.rateError')}
-      </p>
-    );
-  }
-
-  if (!convertedAmount) return null;
-
-  return (
-    <p className="text-xs text-muted-foreground mt-1">
-      {t('expenses.currency.convertedAmount', {
-        amount: formatCurrency(convertedAmount, targetCurrency),
-      })}
-    </p>
-  );
 };
 
 export const renderCategoryButtonContent = (

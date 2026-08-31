@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { describeAmount } from '@/lib/transactionAmount';
+import {
+  describeAmount,
+  prepareStoredTransactionAmount,
+  resolveSourceAmount,
+  resolveSourceCurrency,
+} from '@/lib/transactionAmount';
+import type { Expense } from '@/types/Expense';
 
 describe('describeAmount', () => {
   it('writes an expense as money out', () => {
@@ -32,5 +38,46 @@ describe('describeAmount', () => {
         expect(describeAmount(amount, kind, 'EUR').text).not.toMatch(/^.[-−]/);
       }
     }
+  });
+
+  it('keeps a default-currency amount as stored', async () => {
+    const amount = await prepareStoredTransactionAmount(12.5, {
+      defaultCurrency: 'EUR',
+      selectedCurrency: 'EUR',
+      ensureRate: async () => 2,
+    });
+
+    expect(amount).toEqual({
+      amount: 12.5,
+      original_amount: null,
+      original_currency: null,
+      exchange_rate: null,
+    });
+  });
+
+  it('converts and preserves a foreign-currency amount', async () => {
+    const amount = await prepareStoredTransactionAmount(10, {
+      defaultCurrency: 'EUR',
+      selectedCurrency: 'USD',
+      ensureRate: async () => 0.85,
+    });
+
+    expect(amount).toEqual({
+      amount: 8.5,
+      original_amount: 10,
+      original_currency: 'USD',
+      exchange_rate: 0.85,
+    });
+  });
+
+  it('restores the original amount and currency when editing', () => {
+    const transaction = {
+      amount: 8.5,
+      original_amount: 10,
+      original_currency: 'USD',
+    } as Expense;
+
+    expect(resolveSourceCurrency(transaction, 'EUR')).toBe('USD');
+    expect(resolveSourceAmount(transaction, 'EUR')).toBe(10);
   });
 });

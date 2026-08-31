@@ -1,6 +1,6 @@
 import { useCallback, useOptimistic, useTransition } from 'react';
 import { format } from 'date-fns';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   useExpensesData,
   useCategoriesData,

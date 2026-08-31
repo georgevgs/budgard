@@ -1,4 +1,3 @@
-import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { markIntentionalSignOut } from '@/lib/authStore';
 
@@ -34,14 +33,4 @@ export const signOutEverywhere = async () => {
   markIntentionalSignOut();
 
   return supabase.auth.signOut({ scope: 'global' });
-};
-
-export const getSession = () => {
-  return supabase.auth.getSession();
-};
-
-export const onAuthStateChange = (callback: (session: Session | null) => void) => {
-  return supabase.auth.onAuthStateChange((_event, session) => {
-    callback(session);
-  });
 };

@@ -15,8 +15,8 @@ vi.mock('@/services/ocrService', () => ({
   resolveOcrLanguages: () => 'eng',
 }));
 
-vi.mock('@/hooks/useIsPro', () => ({
-  useIsPro: () => mockIsPro,
+vi.mock('@/contexts/SubscriptionContext', () => ({
+  useSubscription: () => ({ isPro: mockIsPro }),
 }));
 
 vi.mock('@/contexts/UpgradeDialogContext', () => ({
@@ -131,7 +131,9 @@ describe('useReceiptScan', () => {
       await result.current.scan.handleScan();
     });
 
-    expect(result.current.form.getValues('date').getTime()).toBe(chosenDate.getTime());
+    expect(result.current.form.getValues('date').getTime()).toBe(
+      chosenDate.getTime(),
+    );
   });
 
   it('shows the no-data toast when nothing could be prefilled', async () => {
@@ -142,7 +144,9 @@ describe('useReceiptScan', () => {
       await result.current.scan.handleScan();
     });
 
-    expect(mockToast).toHaveBeenCalledWith({ description: 'receipt.scanNoData' });
+    expect(mockToast).toHaveBeenCalledWith({
+      description: 'receipt.scanNoData',
+    });
   });
 
   it('shows a destructive toast when the scan fails', async () => {

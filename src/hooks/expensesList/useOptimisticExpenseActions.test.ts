@@ -5,7 +5,7 @@ import type { Expense } from '@/types/Expense';
 const auth = vi.hoisted(() => ({
   session: { user: { id: 'u1' } } as { user: { id: string } } | null,
 }));
-vi.mock('@/hooks/useAuth', () => ({ useAuth: () => auth }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => auth }));
 
 const data = vi.hoisted(() => ({
   expenses: [] as unknown[],

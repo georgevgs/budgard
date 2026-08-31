@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { parseCurrencyInput } from '@/lib/utils';
-import { convertMoney } from '@/lib/money';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useIncomeOps } from '@/hooks/dataOps/useIncomeOps';
+import { prepareStoredTransactionAmount } from '@/lib/transactionAmount';
 import type { CurrencyConversionApi } from '@/hooks/currency/useCurrencyConversionCore';
 import type { IncomeFormData } from '@/lib/validations';
 import type { Expense } from '@/types/Expense';
@@ -30,24 +30,13 @@ export const useIncomeSubmit = ({
     try {
       const rawAmount = parseCurrencyInput(values.amount);
       const dateStr = format(values.date, 'yyyy-MM-dd');
-      let finalAmount = rawAmount;
-      let originalAmount: number | null = null;
-      let originalCurrency: string | null = null;
-      let exchangeRateValue: number | null = null;
-
-      if (conversion.selectedCurrency !== conversion.defaultCurrency) {
-        const rate = await conversion.ensureRate();
-        finalAmount = convertMoney(rawAmount, rate, conversion.defaultCurrency);
-        originalAmount = rawAmount;
-        originalCurrency = conversion.selectedCurrency;
-        exchangeRateValue = rate;
-      }
+      const amount = await prepareStoredTransactionAmount(
+        rawAmount,
+        conversion,
+      );
 
       const payload: Partial<Expense> = {
-        amount: finalAmount,
-        original_amount: originalAmount,
-        original_currency: originalCurrency,
-        exchange_rate: exchangeRateValue,
+        ...amount,
         description: values.description,
         category_id: normalizeCategoryId(values.category_id),
         date: dateStr,

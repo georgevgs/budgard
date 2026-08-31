@@ -7,7 +7,7 @@ import {
 } from '@/contexts/DataContext';
 import { useBudgetAlerts } from '@/hooks/useBudgetAlerts';
 import { useCategoryBudgetAlerts } from '@/hooks/useCategoryBudgetAlerts';
-import { useIsPro } from '@/hooks/useIsPro';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useCurrentMonthSpendingByCategory } from '@/hooks/useCurrentMonthSpendingByCategory';
 
 type UseExpenseAlertsArgs = {
@@ -25,7 +25,7 @@ export const useExpenseAlerts = ({
   const { expenseCategories: categories } = useCategoriesData();
   const categoryBudgets = useCategoryBudgetsData();
   const { monthlyBudget, defaultCurrency } = useDataConfig();
-  const isPro = useIsPro();
+  const { isPro } = useSubscription();
 
   useBudgetAlerts({
     monthlyBudget,

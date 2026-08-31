@@ -12,8 +12,8 @@ vi.mock('@/contexts/AuthContext', () => ({
   useAuth: () => ({ session }),
 }));
 
-vi.mock('@/hooks/useIsPro', () => ({
-  useIsPro: () => isPro,
+vi.mock('@/contexts/SubscriptionContext', () => ({
+  useSubscription: () => ({ isPro }),
 }));
 
 vi.mock('@/contexts/UpgradeDialogContext', () => ({

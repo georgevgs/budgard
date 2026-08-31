@@ -10,7 +10,7 @@ import {
 import { useAllGoalProgress } from '@/hooks/useGoalProgress';
 import { useSavingsRhythm } from '@/hooks/savings/useSavingsRhythm';
 import { useCompletionCelebration } from '@/hooks/useCompletionCelebration';
-import { useIsPro } from '@/hooks/useIsPro';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { celebrate } from '@/lib/confetti';
 import { haptics } from '@/lib/haptics';
 import { toast } from '@/hooks/useToast';
@@ -23,7 +23,7 @@ import { formatCurrency } from '@/lib/utils';
 const MilestoneWatcher = () => {
   const { t } = useTranslation();
   const { isInitialized, isSecondaryLoaded, defaultCurrency } = useDataConfig();
-  const isPro = useIsPro();
+  const { isPro } = useSubscription();
   const goals = useGoalsData();
   const debts = useDebtsData();
   const goalProgress = useAllGoalProgress();

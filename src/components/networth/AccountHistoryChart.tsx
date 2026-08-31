@@ -8,14 +8,14 @@ import { ChartTooltipRow } from '@/components/common/ChartTooltip';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import { useDateLocale } from '@/hooks/useDateLocale';
-import { useIsPro } from '@/hooks/useIsPro';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 
 type RangeKey = '1m' | '3m' | '1y' | 'all';
 
 type Props = {
   account: Account;
   snapshots: AccountBalance[];
-}
+};
 
 type Point = {
   date: string;
@@ -23,12 +23,12 @@ type Point = {
   fullDate: string;
   balance: number;
   costBasis: number | null;
-}
+};
 
 const AccountHistoryChart = ({ account, snapshots }: Props) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
-  const isPro = useIsPro();
+  const { isPro } = useSubscription();
   const isInvestment = account.kind === 'investment';
   // The cost-basis overlay is investment analytics — Pro only. The balance
   // area chart itself stays free for every account kind.
@@ -65,7 +65,7 @@ const AccountHistoryChart = ({ account, snapshots }: Props) => {
       />
     </div>
   );
-}
+};
 
 export default AccountHistoryChart;
 
@@ -244,7 +244,7 @@ const renderValueLabel = (isInvestment: boolean, t: TranslateFunction) => {
   }
 
   return t('networth.chart.balance');
-}
+};
 
 const renderCostBasisRow = (
   isInvestment: boolean,

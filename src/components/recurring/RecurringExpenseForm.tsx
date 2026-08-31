@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import RecurringExpenseFields from '@/components/recurring/RecurringExpenseFields';
 import RecurringScheduleFields from '@/components/recurring/RecurringScheduleFields';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { amountToInput } from '@/lib/utils';
 import {
   recurringExpenseSchema,

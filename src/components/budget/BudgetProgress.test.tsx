@@ -28,8 +28,8 @@ vi.mock('@/contexts/DataContext', () => ({
   useCategoryBudgetsData: () => [],
 }));
 
-vi.mock('@/hooks/useIsPro', () => ({
-  useIsPro: () => true,
+vi.mock('@/contexts/SubscriptionContext', () => ({
+  useSubscription: () => ({ isPro: true }),
 }));
 
 vi.mock('@/contexts/UpgradeDialogContext', () => ({
@@ -54,7 +54,9 @@ describe('BudgetProgress', () => {
       />,
     );
 
-    expect(screen.getByRole('button', { name: /setBudget/ })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /setBudget/ }),
+    ).toBeInTheDocument();
   });
 
   it('opens the form from the CTA', () => {

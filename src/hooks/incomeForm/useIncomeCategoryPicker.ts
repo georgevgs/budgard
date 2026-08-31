@@ -1,6 +1,6 @@
 import { useMemo, useState, useTransition } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useCategoriesData } from '@/contexts/DataContext';
 import { useCategoryOps } from '@/hooks/dataOps/useCategoryOps';
 import { incomeColors } from '@/design/palette';
@@ -38,7 +38,10 @@ export const useIncomeCategoryPicker = (
   const showCreateOption = trimmedSearch.length > 0 && !hasExactMatch;
 
   const handleCategorySelect = (id: string) => {
-    form.setValue('category_id', id, { shouldValidate: true, shouldDirty: true });
+    form.setValue('category_id', id, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
     setCategoryPopoverOpen(false);
     setCategorySearch('');
   };

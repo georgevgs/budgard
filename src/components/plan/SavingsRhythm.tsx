@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useNoSpendOps } from '@/hooks/dataOps/useNoSpendOps';
-import { useIsPro } from '@/hooks/useIsPro';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useSetAsideGoal } from '@/hooks/savings/useSavingsRhythm';
 import RhythmDots from '@/components/plan/RhythmDots';
 import SetAsideCard from '@/components/plan/SetAsideCard';
@@ -16,7 +16,7 @@ type Props = {
 const SavingsRhythm = ({ rhythm, currency }: Props) => {
   const { t } = useTranslation();
   const { handleNoSpendClaim, handleNoSpendUndo } = useNoSpendOps();
-  const isPro = useIsPro();
+  const { isPro } = useSubscription();
   const goal = useSetAsideGoal();
 
   // No budget means no allowance, so there is nothing to score a day against.
@@ -34,10 +34,7 @@ const SavingsRhythm = ({ rhythm, currency }: Props) => {
 
   return (
     <section aria-labelledby="savings-rhythm-title">
-      <h2
-        id="savings-rhythm-title"
-        className="mb-3 type-heading"
-      >
+      <h2 id="savings-rhythm-title" className="mb-3 type-heading">
         {t(`today.rhythm.tone.${rhythm.tone}`)}
       </h2>
       <div className="surface-card px-4 py-4">

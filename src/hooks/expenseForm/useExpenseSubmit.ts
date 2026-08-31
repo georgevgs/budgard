@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { parseCurrencyInput } from '@/lib/utils';
-import { convertMoney } from '@/lib/money';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { collectExpenseTagIds } from '@/lib/expenseTags';
+import { prepareStoredTransactionAmount } from '@/lib/transactionAmount';
 import type { ReceiptOptions } from '@/hooks/dataOps/useExpenseOps';
 import type { CurrencyConversionApi } from '@/hooks/expenseForm/useCurrencyConversion';
 import type { ExpenseFormData } from '@/lib/validations';
@@ -41,18 +41,10 @@ export const useExpenseSubmit = ({
     try {
       const rawAmount = parseCurrencyInput(values.amount);
       const dateStr = format(values.date, 'yyyy-MM-dd');
-      let finalAmount = rawAmount;
-      let originalAmount: number | null = null;
-      let originalCurrency: string | null = null;
-      let exchangeRateValue: number | null = null;
-
-      if (conversion.selectedCurrency !== conversion.defaultCurrency) {
-        const rate = await conversion.ensureRate();
-        finalAmount = convertMoney(rawAmount, rate, conversion.defaultCurrency);
-        originalAmount = rawAmount;
-        originalCurrency = conversion.selectedCurrency;
-        exchangeRateValue = rate;
-      }
+      const amount = await prepareStoredTransactionAmount(
+        rawAmount,
+        conversion,
+      );
 
       // Primary tag first, extras after — re-derived here so the "extras
       // never exist without a primary" invariant holds even if the form
@@ -63,10 +55,7 @@ export const useExpenseSubmit = ({
       );
 
       const expenseData: ExpenseWritePayload = {
-        amount: finalAmount,
-        original_amount: originalAmount,
-        original_currency: originalCurrency,
-        exchange_rate: exchangeRateValue,
+        ...amount,
         description: values.description,
         category_id: normalizeCategoryId(values.category_id),
         tag_id: orderedTagIds[0] ?? null,

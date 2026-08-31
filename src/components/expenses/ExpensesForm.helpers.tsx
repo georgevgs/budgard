@@ -2,7 +2,11 @@ import type { TFunction } from 'i18next';
 import { parseISO } from 'date-fns';
 import Tag from 'lucide-react/dist/esm/icons/tag';
 import CategoryIcon from '@/components/common/CategoryIcon';
-import { amountToInput, formatCurrency } from '@/lib/utils';
+import { amountToInput } from '@/lib/utils';
+import {
+  resolveSourceAmount,
+  resolveSourceCurrency,
+} from '@/lib/transactionAmount';
 import type { Expense } from '@/types/Expense';
 import type { Category, EmbeddedCategory } from '@/types/Category';
 
@@ -27,38 +31,9 @@ export const getInitialAmount = (
   const sourceCurrency = resolveSourceCurrency(expense, defaultCurrency);
 
   return amountToInput(
-    pickSourceAmount(expense, defaultCurrency),
+    resolveSourceAmount(expense, defaultCurrency),
     sourceCurrency,
   );
-};
-
-// The currency the amount field is denominated in: the currency the row was
-// logged in when that differs from today's default, otherwise the default.
-// Editing a foreign row shows the foreign figure, so it has to be rounded and
-// masked in that currency's minor unit, not the default's.
-export const resolveSourceCurrency = (
-  transaction: Expense,
-  defaultCurrency: string,
-): string => {
-  if (
-    transaction.original_currency &&
-    transaction.original_currency !== defaultCurrency
-  ) {
-    return transaction.original_currency;
-  }
-
-  return defaultCurrency;
-};
-
-const pickSourceAmount = (
-  expense: Expense,
-  defaultCurrency: string,
-): number => {
-  const isForeign =
-    expense.original_currency && expense.original_currency !== defaultCurrency;
-  if (isForeign) return expense.original_amount ?? expense.amount;
-
-  return expense.amount;
 };
 
 export const getInitialDate = (
@@ -101,43 +76,6 @@ export const renderSaveButtonLabel = (
   if (isSubmitting) return t('common.saving');
 
   return t('expenses.saveExpense');
-};
-
-export const renderConversionPreview = (
-  isLoading: boolean,
-  hasError: boolean,
-  convertedAmount: number | null,
-  currency: string,
-  targetCurrency: string,
-  t: TranslateFunction,
-) => {
-  if (currency === targetCurrency) return null;
-
-  if (isLoading) {
-    return (
-      <p className="text-xs text-muted-foreground mt-1">
-        {t('expenses.currency.fetchingRate')}
-      </p>
-    );
-  }
-
-  if (hasError) {
-    return (
-      <p className="text-xs text-destructive-ink mt-1">
-        {t('expenses.currency.rateError')}
-      </p>
-    );
-  }
-
-  if (!convertedAmount) return null;
-
-  return (
-    <p className="text-xs text-muted-foreground mt-1">
-      {t('expenses.currency.convertedAmount', {
-        amount: formatCurrency(convertedAmount, targetCurrency),
-      })}
-    </p>
-  );
 };
 
 export const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {

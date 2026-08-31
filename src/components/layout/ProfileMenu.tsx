@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import Settings from 'lucide-react/dist/esm/icons/settings';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import { useAuth } from '@/contexts/AuthContext';
-import { useIsPro } from '@/hooks/useIsPro';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
 
 // The header's only menu. It used to sit opposite a second, identically
@@ -25,7 +25,7 @@ const ProfileMenu = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const navigate = useNavigate();
-  const isPro = useIsPro();
+  const { isPro } = useSubscription();
   const { openUpgrade } = useUpgradeDialog();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 

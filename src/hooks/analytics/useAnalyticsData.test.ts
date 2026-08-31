@@ -3,7 +3,9 @@ import { renderHook, act } from '@testing-library/react';
 import type { Expense } from '@/types/Expense';
 
 const plan = vi.hoisted(() => ({ isPro: false }));
-vi.mock('@/hooks/useIsPro', () => ({ useIsPro: () => plan.isPro }));
+vi.mock('@/contexts/SubscriptionContext', () => ({
+  useSubscription: () => ({ isPro: plan.isPro }),
+}));
 
 const data = vi.hoisted(() => ({
   expenses: [] as unknown[],
@@ -67,9 +69,9 @@ describe('free-tier window', () => {
   it('clips the analysed population to the last three months', () => {
     const r = render();
 
-    expect(r.current.expenses.map((e) => e.amount).sort((a, b) => a - b)).toEqual(
-      [25, 50, 100],
-    );
+    expect(
+      r.current.expenses.map((e) => e.amount).sort((a, b) => a - b),
+    ).toEqual([25, 50, 100]);
   });
 
   it('lets Pro see the whole history', () => {
@@ -146,10 +148,7 @@ describe('monthly data', () => {
 
 describe('month comparison', () => {
   it('reports the delta and percent change against last month', () => {
-    data.expenses = [
-      expense('2026-08-01', 150),
-      expense('2026-07-01', 100),
-    ];
+    data.expenses = [expense('2026-08-01', 150), expense('2026-07-01', 100)];
     const r = render();
 
     expect(r.current.monthComparison.thisMonthAmount).toBe(150);

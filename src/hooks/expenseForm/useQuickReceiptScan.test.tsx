@@ -15,8 +15,8 @@ vi.mock('@/services/ocrService', () => ({
   resolveOcrLanguages: () => 'eng',
 }));
 
-vi.mock('@/hooks/useIsPro', () => ({
-  useIsPro: () => mockIsPro,
+vi.mock('@/contexts/SubscriptionContext', () => ({
+  useSubscription: () => ({ isPro: mockIsPro }),
 }));
 
 vi.mock('@/contexts/UpgradeDialogContext', () => ({

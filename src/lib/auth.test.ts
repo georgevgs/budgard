@@ -6,13 +6,7 @@ vi.mock('@/lib/authStore', () => ({
   markIntentionalSignOut: vi.fn(),
 }));
 
-import {
-  requestOTP,
-  signInWithOTP,
-  signOut,
-  getSession,
-  onAuthStateChange,
-} from '@/lib/auth';
+import { requestOTP, signInWithOTP, signOut } from '@/lib/auth';
 import { markIntentionalSignOut } from '@/lib/authStore';
 
 describe('auth', () => {
@@ -64,22 +58,5 @@ describe('auth', () => {
     await signOut();
     expect(markIntentionalSignOut).toHaveBeenCalled();
     expect(supabase.auth.signOut).toHaveBeenCalled();
-  });
-
-  it('getSession returns the current session', async () => {
-    const session = { access_token: 'token' };
-    vi.mocked(supabase.auth.getSession).mockResolvedValue({
-      data: { session },
-      error: null,
-    } as never);
-
-    const result = await getSession();
-    expect(result.data.session).toEqual(session);
-  });
-
-  it('onAuthStateChange subscribes to auth changes', () => {
-    const callback = vi.fn();
-    onAuthStateChange(callback);
-    expect(supabase.auth.onAuthStateChange).toHaveBeenCalled();
   });
 });

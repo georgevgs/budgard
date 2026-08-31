@@ -9,7 +9,7 @@ import { shouldShowOnboarding } from '@/lib/onboarding';
 const mockSession = {
   user: { id: 'user-123' },
 };
-vi.mock('@/hooks/useAuth', () => ({
+vi.mock('@/contexts/AuthContext', () => ({
   useAuth: () => ({ session: mockSession }),
 }));
 
