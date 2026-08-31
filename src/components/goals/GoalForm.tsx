@@ -26,7 +26,7 @@ type Props = {
   goal?: Goal;
   onSubmit: (values: GoalFormData) => Promise<void>;
   onClose: () => void;
-}
+};
 
 const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
   const { t } = useTranslation();
@@ -42,6 +42,7 @@ const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
       source_type: goal?.source_type ?? 'net_delta',
       category_id: goal?.category_id ?? undefined,
       tag_id: goal?.tag_id ?? undefined,
+      linked_account_id: goal?.linked_account_id ?? undefined,
       icon: goal?.icon ?? DEFAULT_GOAL_ICON,
       color: goal?.color ?? DEFAULT_GOAL_COLOR,
     },
@@ -94,7 +95,10 @@ const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
             <Button type="button" variant="outline" onClick={onClose}>
               {t('common.cancel')}
             </Button>
-            <Button type="submit" disabled={form.formState.isSubmitting || !form.formState.isValid}>
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting || !form.formState.isValid}
+            >
               {renderSubmitLabel(form.formState.isSubmitting, isEditing, t)}
             </Button>
           </div>
@@ -102,7 +106,7 @@ const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
       </Form>
     </>
   );
-}
+};
 
 export default GoalForm;
 
@@ -133,7 +137,7 @@ const renderTitle = (isEditing: boolean, t: TranslateFunction) => {
   if (isEditing) return t('goals.editTitle');
 
   return t('goals.createTitle');
-}
+};
 
 const renderSubmitLabel = (
   isSubmitting: boolean,
@@ -152,4 +156,4 @@ const renderSubmitLabel = (
   if (isEditing) return t('common.update');
 
   return t('goals.create');
-}
+};

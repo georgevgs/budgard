@@ -5,8 +5,10 @@ import { dataService } from '@/services/dataService';
 import type { CategoryBudget } from '@/types/CategoryBudget';
 import { setScalarOptimistic } from '@/hooks/dataOps/helpers';
 import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
 
 export const useBudgetOps = () => {
+  const { activeOwnerId } = useFinancialSpace();
   const { isInitialized, monthlyBudget } = useDataConfig();
   const { setMonthlyBudget, setCategoryBudgets } = useDataActions();
   const { t } = useTranslation();
@@ -24,7 +26,7 @@ export const useBudgetOps = () => {
         successHaptic: 'none',
         optimistic: () =>
           setScalarOptimistic(setMonthlyBudget, monthlyBudget, amount),
-        perform: () => dataService.upsertBudget(amount),
+        perform: () => dataService.upsertBudget(amount, activeOwnerId),
       });
     };
 
@@ -58,7 +60,8 @@ export const useBudgetOps = () => {
 
           return () => setCategoryBudgets(previousBudgets);
         },
-        perform: () => dataService.upsertCategoryBudget(categoryId, amount),
+        perform: () =>
+          dataService.upsertCategoryBudget(categoryId, amount, activeOwnerId),
         commit: (saved) =>
           setCategoryBudgets((prev) => [
             ...prev.filter(
@@ -85,7 +88,8 @@ export const useBudgetOps = () => {
 
           return () => setCategoryBudgets(previousBudgets);
         },
-        perform: () => dataService.deleteCategoryBudget(categoryId),
+        perform: () =>
+          dataService.deleteCategoryBudget(categoryId, activeOwnerId),
       });
 
     return {
@@ -94,6 +98,7 @@ export const useBudgetOps = () => {
       handleCategoryBudgetDelete,
     };
   }, [
+    activeOwnerId,
     isInitialized,
     monthlyBudget,
     setMonthlyBudget,

@@ -79,7 +79,12 @@ describe('useOfflineSync', () => {
 
   it('processes createExpense mutations from queue', async () => {
     const mutations = [
-      { id: 1, type: 'createExpense', payload: { amount: 10 }, createdAt: '' },
+      {
+        id: 1,
+        type: 'createExpense',
+        payload: { amount: 10, user_id: 'owner-1' },
+        createdAt: '',
+      },
     ];
     mockGetAll.mockResolvedValue(mutations);
     mockCreateExpense.mockResolvedValue({});
@@ -87,7 +92,10 @@ describe('useOfflineSync', () => {
     renderHook(() => useOfflineSync());
     await act(async () => {});
 
-    expect(mockCreateExpense).toHaveBeenCalledWith({ amount: 10 });
+    expect(mockCreateExpense).toHaveBeenCalledWith(
+      { amount: 10, user_id: 'owner-1' },
+      'owner-1',
+    );
     expect(mockRemove).toHaveBeenCalledWith(1);
     expect(mockToast).toHaveBeenCalledWith(
       expect.objectContaining({ variant: 'success' }),
@@ -131,8 +139,18 @@ describe('useOfflineSync', () => {
 
   it('stops processing on first failure', async () => {
     const mutations = [
-      { id: 1, type: 'createExpense', payload: { amount: 10 }, createdAt: '' },
-      { id: 2, type: 'createExpense', payload: { amount: 20 }, createdAt: '' },
+      {
+        id: 1,
+        type: 'createExpense',
+        payload: { amount: 10, user_id: 'owner-1' },
+        createdAt: '',
+      },
+      {
+        id: 2,
+        type: 'createExpense',
+        payload: { amount: 20, user_id: 'owner-1' },
+        createdAt: '',
+      },
     ];
     mockGetAll.mockResolvedValue(mutations);
     mockCreateExpense.mockRejectedValueOnce(new Error('fail'));
@@ -156,7 +174,12 @@ describe('useOfflineSync', () => {
 
     mockGetAll.mockClear();
     mockGetAll.mockResolvedValue([
-      { id: 5, type: 'createExpense', payload: { amount: 5 }, createdAt: '' },
+      {
+        id: 5,
+        type: 'createExpense',
+        payload: { amount: 5, user_id: 'owner-1' },
+        createdAt: '',
+      },
     ]);
     mockCreateExpense.mockResolvedValue({});
 
@@ -169,7 +192,12 @@ describe('useOfflineSync', () => {
 
   it('leaves the queue intact when sync fails due to connectivity', async () => {
     mockGetAll.mockResolvedValue([
-      { id: 7, type: 'createExpense', payload: { amount: 1 }, createdAt: '' },
+      {
+        id: 7,
+        type: 'createExpense',
+        payload: { amount: 1, user_id: 'owner-1' },
+        createdAt: '',
+      },
     ]);
     // Online, but the request fails at the network layer (server unreachable).
     mockCreateExpense.mockRejectedValue(new TypeError('Failed to fetch'));
@@ -188,7 +216,7 @@ describe('useOfflineSync', () => {
       {
         id: 9,
         type: 'createExpense',
-        payload: { amount: 1 },
+        payload: { amount: 1, user_id: 'owner-1' },
         createdAt: '',
         retries: 4,
       },

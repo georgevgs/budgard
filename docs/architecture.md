@@ -62,11 +62,13 @@ mounts all four and hides the inactive ones, so switching tabs keeps state.
 | `/plan` | PlanView | Protected (tab) |
 | `/trends` | AnalyticsView | Protected (tab) |
 | `/t/:id` | TransactionDetailView | Protected |
+| `/review` | ReviewQueueView | Protected |
 | `/recurring` | RecurringExpensesList | Protected |
 | `/goals` | GoalsList | Protected |
 | `/networth` | NetWorthView | Protected |
 | `/debts` | DebtsView | Protected (Pro) |
 | `/settings` | SettingsView | Protected |
+| `/join?token=…` | JoinHouseholdView | Public link, authenticated acceptance |
 
 `/expenses`, `/income` and `/analytics` are the pre-redesign paths. They stay
 as permanent `LegacyRedirect`s to `/today`, `/activity` and `/trends` — old
@@ -90,7 +92,8 @@ RootProvider
 AuthenticatedProviders             # behind the auth boundary only
   └── SubscriptionProvider
       └── UpgradeDialogProvider
-          └── DataProvider
+          └── FinancialSpaceProvider
+              └── DataProvider     # remounts when active owner changes
 ```
 
 Data and billing have no consumers on the landing or legal pages, so their
@@ -111,8 +114,19 @@ Responsible for:
 
 ### DataProvider (`contexts/DataProvider.tsx`)
 
-Holds global app state and fetches it after login. The consumer hooks live in
+Holds global app state and fetches it after login. Every read is explicitly
+scoped to `FinancialSpaceProvider.activeOwnerId`; the owner/member space key
+also scopes the local cache and offline queue. The consumer hooks live in
 `contexts/DataContext.tsx`.
+
+### FinancialSpaceProvider (`contexts/FinancialSpaceProvider.tsx`)
+
+Exposes the signed-in user's own space plus any accepted household space. The
+switcher changes the active data owner, not the authenticated identity:
+notification preferences, security and billing remain personal while finance
+tables read and write the selected owner's rows. PostgreSQL RLS independently
+checks the same relationship; the owner id supplied by the client is never an
+authorization decision.
 
 #### Fetch Strategy
 
@@ -149,7 +163,8 @@ hooks/dataOps/
 One hook per domain — `useExpenseOps`, `useIncomeOps`, `useCategoryOps`,
 `useTagOps`, `useBudgetOps`, `useGoalOps`, `useDebtOps`, `useAccountOps`,
 `useRecurringExpenseOps`, `useRecurringIncomeOps`, `useTemplateOps`,
-`useNoSpendOps`, `useSettingsOps`, `useFeedbackOps`. Call the domain hook you
+`useNoSpendOps`, `useSettingsOps`, `useHouseholdOps`,
+`useTransactionReviewOps`, `useSurplusInvestmentOps`, `useFeedbackOps`. Call the domain hook you
 need directly; there is no composed `useDataOperations`.
 
 ### Responsibilities
@@ -243,6 +258,11 @@ All external communication is centralized.
 - `services/subscriptionService.ts` — Stripe checkout/portal via edge functions
 - `services/proPlansService.ts` — live Pro prices
 - `services/exchangeRateService.ts` — Frankfurter FX rates
+- `services/householdService.ts` — secure invite/accept/revoke RPCs
+- `services/transactionRuleService.ts` — merchant rules and review state
+- `services/recurringSuggestionService.ts` — dismissals and import reconciliation
+- `services/goalFundingService.ts` — atomic surplus-to-investment transfers
+- `services/financialConnectionService.ts` — non-secret connection status only
 - `services/supabaseCrud.ts` — `rows` / `row` / `maybeRow` / `done`
 
 ### Rules
@@ -257,6 +277,32 @@ the Supabase chain stays spelled out at each call site, because the `select`
 strings there name their foreign keys explicitly. A helper that assembled one
 is exactly the bug that made the bare `tags` embed ambiguous and broke
 months-stale PWA bundles with PGRST201.
+
+## Transaction automation
+
+Statement imports and future provider rows enter the same pipeline:
+
+1. Normalize the merchant and apply the highest-priority matching rule.
+2. Mark the row `pending` and show it in `/review`.
+3. Reconcile only exact recurring matches automatically; looser cadence
+   patterns remain suggestions that require confirmation.
+4. Use provider external transaction ids as the idempotency boundary for
+   connected rows.
+
+The provider-neutral connection tables contain status and account mappings,
+never access tokens or raw provider payloads. A server-side provider adapter
+must normalize data and call the service-role-only
+`ingest_connected_transactions` RPC. Until an adapter and regulated provider
+are configured, the app truthfully offers statement import rather than a fake
+"connect bank" action.
+
+## Goals and investable surplus
+
+An `account` goal reads progress from the current balance of its linked
+investment account. Today's surplus action calls `invest_goal_surplus`, which
+atomically adds a contribution snapshot and writes an excluded activity row.
+Unspent daily allowance is therefore an explicit investment decision, not a
+category rollover or an imaginary balance.
 
 ---
 

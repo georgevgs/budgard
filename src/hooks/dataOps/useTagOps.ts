@@ -5,11 +5,13 @@ import { dataService } from '@/services/dataService';
 import type { Tag } from '@/types/Tag';
 import type { Expense } from '@/types/Expense';
 import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
 
 // Tags stay sorted by name, and renaming or deleting one has to sweep the
 // expense rows that embed it — so these keep bespoke optimistic closures
 // rather than the id-based shape helpers.
 export const useTagOps = () => {
+  const { activeOwnerId } = useFinancialSpace();
   const { setTags, setExpenses, refreshExpenses } = useDataActions();
   const { t } = useTranslation();
   const runMutation = useMutationRunner();
@@ -36,7 +38,8 @@ export const useTagOps = () => {
           return () =>
             setTags((prev) => prev.filter((tag) => tag.id !== optimisticTag.id));
         },
-        perform: () => dataService.createTag({ name, color }),
+        perform: () =>
+          dataService.createTag({ name, color }, activeOwnerId),
         commit: (savedTag) =>
           setTags((prev) =>
             sortByName([
@@ -96,7 +99,7 @@ export const useTagOps = () => {
       });
 
     return { handleTagCreate, handleTagUpdate, handleTagDelete };
-  }, [setTags, setExpenses, refreshExpenses, runMutation, t]);
+  }, [activeOwnerId, setTags, setExpenses, refreshExpenses, runMutation, t]);
 };
 
 // --- Helpers ---

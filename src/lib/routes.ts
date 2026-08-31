@@ -31,6 +31,8 @@ const SECONDARY_PATHS: readonly string[] = [
   '/networth',
   '/debts',
   '/settings',
+  '/join',
+  '/review',
 ];
 
 export const isSecondaryPath = (path: string): boolean => {

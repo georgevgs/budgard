@@ -12,8 +12,10 @@ import {
   replaceById,
 } from '@/hooks/dataOps/helpers';
 import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
 
 export const useRecurringExpenseOps = () => {
+  const { activeOwnerId } = useFinancialSpace();
   const { isInitialized } = useDataConfig();
   const { setRecurringExpenses, refreshExpenses } = useDataActions();
   const { t } = useTranslation();
@@ -48,7 +50,10 @@ export const useRecurringExpenseOps = () => {
             return dataService.updateRecurringExpense(expenseData, expenseId);
           }
 
-          return dataService.createRecurringExpense(expenseData);
+          return dataService.createRecurringExpense(
+            expenseData,
+            activeOwnerId,
+          );
         },
         commit: (saved) =>
           setRecurringExpenses((prev) => {
@@ -104,5 +109,5 @@ export const useRecurringExpenseOps = () => {
       handleRecurringExpenseDelete,
       handleRecurringExpenseToggle,
     };
-  }, [isInitialized, setRecurringExpenses, refreshExpenses, runMutation, t]);
+  }, [activeOwnerId, isInitialized, setRecurringExpenses, refreshExpenses, runMutation, t]);
 };

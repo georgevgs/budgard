@@ -10,6 +10,8 @@ import type { Expense } from '@/types/Expense';
 import { replaceById, patchById, pickByEdit } from '@/hooks/dataOps/helpers';
 import { mergeUniqueById } from '@/contexts/DataContext.helpers';
 import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
+import { recurringSuggestionService } from '@/services/recurringSuggestionService';
 
 type BulkIncomeRow = {
   date: string;
@@ -19,8 +21,9 @@ type BulkIncomeRow = {
 };
 
 export const useIncomeOps = () => {
+  const { activeOwnerId } = useFinancialSpace();
   const { isInitialized } = useDataConfig();
-  const { setIncomes } = useDataActions();
+  const { setIncomes, refreshIncomes } = useDataActions();
   const { toast } = useToast();
   const { t } = useTranslation();
   const runMutation = useMutationRunner();
@@ -40,10 +43,11 @@ export const useIncomeOps = () => {
       }
 
       const tempId = pickByEdit<string | null>(incomeId, null, createTempId());
+      const scopedIncome = { ...incomeData, user_id: activeOwnerId };
       await offlineQueue.enqueueWithReconcile(
         pickByEdit(incomeId, 'updateIncome', 'createIncome'),
         {
-          ...incomeData,
+          ...scopedIncome,
           ...pickByEdit<Record<string, unknown>>(
             incomeId,
             { id: incomeId },
@@ -53,10 +57,10 @@ export const useIncomeOps = () => {
       );
 
       setIncomes((prev) => {
-        if (incomeId) return patchById(prev, incomeId, incomeData);
+        if (incomeId) return patchById(prev, incomeId, scopedIncome);
 
         const optimistic = {
-          ...incomeData,
+          ...scopedIncome,
           id: tempId as string,
           created_at: new Date().toISOString(),
         } as Expense;
@@ -96,7 +100,7 @@ export const useIncomeOps = () => {
         perform: () => {
           if (incomeId) return dataService.updateIncome(incomeData, incomeId);
 
-          return dataService.createIncome(incomeData);
+          return dataService.createIncome(incomeData, activeOwnerId);
         },
         commit: (row) =>
           setIncomes((prev) => {
@@ -143,10 +147,19 @@ export const useIncomeOps = () => {
     const handleBulkIncomeImport = async (incomesData: BulkIncomeRow[]) => {
       if (skip) return;
 
-      const created = await dataService.createIncomesBulk(incomesData);
+      const created = await dataService.createIncomesBulk(
+        incomesData,
+        activeOwnerId,
+      );
       setIncomes((prev) => mergeUniqueById(prev, created));
+      const reconciled = await recurringSuggestionService.reconcile(
+        activeOwnerId,
+      );
+      if (reconciled > 0) {
+        await refreshIncomes();
+      }
     };
 
     return { handleIncomeSubmit, handleIncomeDelete, handleBulkIncomeImport };
-  }, [isInitialized, setIncomes, runMutation, toast, t]);
+  }, [activeOwnerId, isInitialized, setIncomes, refreshIncomes, runMutation, toast, t]);
 };

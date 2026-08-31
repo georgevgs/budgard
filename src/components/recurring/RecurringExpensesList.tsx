@@ -13,6 +13,7 @@ import { calculateNextOccurrence } from '@/lib/recurring';
 import PageHeader from '@/components/common/PageHeader';
 import RecurringLoadingState from '@/components/recurring/RecurringLoading';
 import { useTranslation } from 'react-i18next';
+import RecurringSuggestions from '@/components/recurring/RecurringSuggestions';
 
 const RecurringExpensesList = () => {
   const { t } = useTranslation();
@@ -36,6 +37,13 @@ const RecurringExpensesList = () => {
 
         {renderModeToggle(list.mode, list.setMode, t)}
       </div>
+
+      <RecurringSuggestions
+        suggestions={list.suggestions}
+        currency={list.defaultCurrency}
+        onAccept={list.handleSuggestionAccept}
+        onDismiss={list.handleSuggestionDismiss}
+      />
 
       <div className="grid gap-4">
         {renderExpensesList(

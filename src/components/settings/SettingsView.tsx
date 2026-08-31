@@ -5,7 +5,9 @@ import Bell from 'lucide-react/dist/esm/icons/bell';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 import CircleUserRound from 'lucide-react/dist/esm/icons/circle-user-round';
 import Database from 'lucide-react/dist/esm/icons/database';
+import Landmark from 'lucide-react/dist/esm/icons/landmark';
 import Palette from 'lucide-react/dist/esm/icons/palette';
+import UsersRound from 'lucide-react/dist/esm/icons/users-round';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDataConfig } from '@/contexts/DataContext';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
@@ -15,13 +17,22 @@ import AboutSection from '@/components/settings/AboutSection';
 import AppearanceSection from '@/components/settings/AppearanceSection';
 import BillingSection from '@/components/settings/BillingSection';
 import CurrencySection from '@/components/settings/CurrencySection';
+import AnnualExportSection from '@/components/settings/AnnualExportSection';
 import DataManagementSection from '@/components/settings/DataManagementSection';
 import LanguageSection from '@/components/settings/LanguageSection';
 import NotificationsSection from '@/components/settings/NotificationsSection';
 import ProfileSection from '@/components/settings/ProfileSection';
 import SecuritySection from '@/components/settings/SecuritySection';
+import HouseholdSection from '@/components/settings/HouseholdSection';
+import ConnectionsSection from '@/components/settings/ConnectionsSection';
 
-type SettingsSection = 'account' | 'preferences' | 'notifications' | 'data';
+type SettingsSection =
+  | 'account'
+  | 'household'
+  | 'connections'
+  | 'preferences'
+  | 'notifications'
+  | 'data';
 
 // Settings is an index first. Low-frequency controls live on named routes, so
 // a person scans four decisions instead of nine full sections and each group
@@ -74,6 +85,8 @@ type Group = {
 
 const GROUPS: Group[] = [
   { section: 'account', icon: CircleUserRound },
+  { section: 'household', icon: UsersRound },
+  { section: 'connections', icon: Landmark },
   { section: 'preferences', icon: Palette },
   { section: 'notifications', icon: Bell },
   { section: 'data', icon: Database },
@@ -114,6 +127,12 @@ const renderContent = (section: SettingsSection | null, data: SettingsData) => {
   }
   if (section === 'notifications') {
     return renderNotifications(data);
+  }
+  if (section === 'household') {
+    return <HouseholdSection />;
+  }
+  if (section === 'connections') {
+    return <ConnectionsSection />;
   }
 
   return renderData(data);
@@ -206,9 +225,12 @@ const renderNotifications = (data: SettingsData) => (
 );
 
 const renderData = (data: SettingsData) => (
-  <DataManagementSection
-    onConfirmDelete={data.handlers.handleConfirmDelete}
-    isDeleting={data.handlers.isDeleting}
-    t={data.t}
-  />
+  <div className="space-y-8">
+    <DataManagementSection
+      onConfirmDelete={data.handlers.handleConfirmDelete}
+      isDeleting={data.handlers.isDeleting}
+      t={data.t}
+    />
+    <AnnualExportSection />
+  </div>
 );

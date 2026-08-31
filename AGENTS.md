@@ -78,8 +78,9 @@ with this file.
 - `docs/code-style.md` — the long form of the Code Style rules below.
 - `docs/ui-rules.md` — the long form of the UI/UX rules, including colour.
 - `docs/ux-principles.md` — conceptual reference (Gestalt, heuristics).
-- `docs/household-sharing-design.md` — a design doc for an **unimplemented**
-  feature. Nothing in the codebase corresponds to it.
+- `docs/household-sharing-design.md` — household sharing (Pro): one owner,
+  one partner, `private.can_access_financial_space()` as the shared RLS
+  predicate. Read before touching RLS on a finance table.
 - `design/brand/README.md` — the authority for icons, launch screens and the
   brand mark.
 

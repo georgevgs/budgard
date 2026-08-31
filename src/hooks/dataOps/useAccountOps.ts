@@ -12,8 +12,10 @@ import {
   replaceById,
 } from '@/hooks/dataOps/helpers';
 import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
 
 export const useAccountOps = () => {
+  const { activeOwnerId } = useFinancialSpace();
   const { isInitialized } = useDataConfig();
   const { setAccounts, setAccountBalances, refreshAccounts } = useDataActions();
   const { t } = useTranslation();
@@ -45,7 +47,7 @@ export const useAccountOps = () => {
         perform: () => {
           if (accountId) return dataService.updateAccount(accountId, accountData);
 
-          return dataService.createAccount(accountData);
+          return dataService.createAccount(accountData, activeOwnerId);
         },
         commit: (row) => {
           setAccounts((prev) => {
@@ -130,6 +132,7 @@ export const useAccountOps = () => {
       handleSnapshotDelete,
     };
   }, [
+    activeOwnerId,
     isInitialized,
     setAccounts,
     setAccountBalances,

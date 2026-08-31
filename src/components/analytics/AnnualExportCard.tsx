@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { parseISO, getYear } from 'date-fns';
 import Download from 'lucide-react/dist/esm/icons/download';
@@ -21,9 +21,11 @@ import type { Expense } from '@/types/Expense';
 
 type Props = {
   selectedYear: number;
+  /** A trailing control next to the heading — Settings' year picker. */
+  action?: ReactNode;
 };
 
-const AnnualExportCard = ({ selectedYear }: Props) => {
+const AnnualExportCard = ({ selectedYear, action }: Props) => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const expenses = useExpensesData();
@@ -66,9 +68,12 @@ const AnnualExportCard = ({ selectedYear }: Props) => {
 
   return (
     <div className="space-y-3">
-      <h2 className="type-heading">
-        {t('annualExport.title', { year: selectedYear })}
-      </h2>
+      <div className="flex items-center justify-between">
+        <h2 className="type-heading">
+          {t('annualExport.title', { year: selectedYear })}
+        </h2>
+        {action}
+      </div>
 
       <div className="surface-card">
         <div className="p-5 space-y-4">

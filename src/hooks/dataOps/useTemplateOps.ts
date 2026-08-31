@@ -10,8 +10,10 @@ import {
   replaceById,
 } from '@/hooks/dataOps/helpers';
 import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
 
 export const useTemplateOps = () => {
+  const { activeOwnerId } = useFinancialSpace();
   const { isInitialized } = useDataConfig();
   const { setTemplates } = useDataActions();
   const { t } = useTranslation();
@@ -33,7 +35,8 @@ export const useTemplateOps = () => {
         errorMessage: t('templates.saveFailed'),
         successMessage: t('templates.saved'),
         optimistic: () => prependOptimistic(setTemplates, optimistic),
-        perform: () => dataService.createTemplate(templateData),
+        perform: () =>
+          dataService.createTemplate(templateData, activeOwnerId),
         commit: (saved) =>
           setTemplates((prev) => replaceById(prev, optimistic.id, saved)),
       });
@@ -50,5 +53,5 @@ export const useTemplateOps = () => {
       });
 
     return { handleTemplateCreate, handleTemplateDelete };
-  }, [isInitialized, setTemplates, runMutation, t]);
+  }, [activeOwnerId, isInitialized, setTemplates, runMutation, t]);
 };

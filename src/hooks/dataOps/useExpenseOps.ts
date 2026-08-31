@@ -13,6 +13,8 @@ import type { Expense } from '@/types/Expense';
 import { replaceById, patchById, pickByEdit } from '@/hooks/dataOps/helpers';
 import { mergeUniqueById } from '@/contexts/DataContext.helpers';
 import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
+import { recurringSuggestionService } from '@/services/recurringSuggestionService';
 
 export type ReceiptOptions = {
   receiptFile: File | null;
@@ -33,6 +35,7 @@ type BulkExpenseRow = {
 };
 
 export const useExpenseOps = () => {
+  const { activeOwnerId } = useFinancialSpace();
   const { isInitialized } = useDataConfig();
   const { setExpenses, refreshDebts, refreshExpenses, expensesRef } =
     useDataActions();
@@ -71,7 +74,12 @@ export const useExpenseOps = () => {
         offlineFallback: async (error) => {
           if (!isOfflineError(error)) return false;
 
-          await queueExpenseOffline(expenseData, expenseId, setExpenses);
+          await queueExpenseOffline(
+            expenseData,
+            expenseId,
+            activeOwnerId,
+            setExpenses,
+          );
           haptics.success();
           toast({
             variant: 'success',
@@ -89,7 +97,10 @@ export const useExpenseOps = () => {
               expenseId,
             );
           } else {
-            savedExpense = await dataService.createExpense(expenseData);
+            savedExpense = await dataService.createExpense(
+              expenseData,
+              activeOwnerId,
+            );
           }
 
           const { receiptPath, receiptFailed, oldPathToDelete } =
@@ -199,8 +210,18 @@ export const useExpenseOps = () => {
     const handleBulkExpenseImport = async (expensesData: BulkExpenseRow[]) => {
       if (skip) return;
 
-      const created = await dataService.createExpensesBulk(expensesData);
+      const created = await dataService.createExpensesBulk(
+        expensesData,
+        activeOwnerId,
+        'import',
+      );
       setExpenses((prev) => mergeUniqueById(prev, created));
+      const reconciled = await recurringSuggestionService.reconcile(
+        activeOwnerId,
+      );
+      if (reconciled > 0) {
+        await refreshExpenses();
+      }
     };
 
     // Splits one expense into several: the original row keeps its receipt and
@@ -238,6 +259,7 @@ export const useExpenseOps = () => {
               note: expense.note ?? null,
               is_excluded: expense.is_excluded ?? false,
             })),
+            activeOwnerId,
           );
           const updated = await dataService.updateExpense(
             {
@@ -271,6 +293,7 @@ export const useExpenseOps = () => {
       handleExpenseSplit,
     };
   }, [
+    activeOwnerId,
     isInitialized,
     expensesRef,
     setExpenses,
@@ -396,6 +419,7 @@ const settleReceipt = async (
 const queueExpenseOffline = async (
   expenseData: ExpenseWritePayload,
   expenseId: string | undefined,
+  ownerId: string,
   setExpenses: (updater: (prev: Expense[]) => Expense[]) => void,
 ): Promise<void> => {
   const mutationType = pickByEdit(expenseId, 'updateExpense', 'createExpense');
@@ -408,12 +432,14 @@ const queueExpenseOffline = async (
 
   await offlineQueue.enqueueWithReconcile(mutationType, {
     ...expenseData,
+    user_id: ownerId,
     ...idPayload,
   } as Record<string, unknown>);
 
   // The queued payload keeps extra_tag_ids for replay; the local
   // optimistic row must not carry the write-only field.
-  const { extra_tag_ids: _extras, ...offlineRow } = expenseData;
+  const { extra_tag_ids: _extras, ...expenseRow } = expenseData;
+  const offlineRow = { ...expenseRow, user_id: ownerId };
   const isDebtPayment = expenseData.type === 'debt_payment';
 
   setExpenses((prev) => {

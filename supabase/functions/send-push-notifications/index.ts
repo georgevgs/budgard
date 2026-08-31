@@ -154,7 +154,7 @@ Deno.serve(async (req) => {
     const preferredHourByUser = new Map<string, number>();
     {
       const { data: budgetRows } = await adminClient
-        .from('user_budgets')
+        .from('user_notification_settings')
         .select('user_id, notification_preferences, daily_reminder_hour');
 
       if (budgetRows) {
@@ -415,7 +415,7 @@ Deno.serve(async (req) => {
     // this run — keeps the engagement nudge from layering on top of bills.
 
     const { data: reminderUsers, error: reminderError } = await adminClient
-      .from('user_budgets')
+      .from('user_notification_settings')
       .select('user_id')
       .eq('daily_reminder_hour', currentUtcHour);
 

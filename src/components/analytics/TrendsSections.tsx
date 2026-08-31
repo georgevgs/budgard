@@ -2,11 +2,9 @@ import { useTranslation } from 'react-i18next';
 import SpendingInsights from '@/components/analytics/SpendingInsights';
 import CategorySparkline from '@/components/analytics/CategorySparkline';
 import CategoryIcon from '@/components/common/CategoryIcon';
-import YearOverviewSection from '@/components/analytics/YearOverviewSection';
 import YearRhythm from '@/components/analytics/YearRhythm';
 import CashFlowSection from '@/components/analytics/CashFlowSection';
 import ForecastSection from '@/components/analytics/ForecastSection';
-import AnnualExportCard from '@/components/analytics/AnnualExportCard';
 import ProUpsellCard from '@/components/pro/ProUpsellCard';
 import { formatCurrency } from '@/lib/utils';
 import { getColorTint } from '@/lib/categoryColor';
@@ -46,7 +44,9 @@ const TrendsSections = ({
         defaultCurrency={defaultCurrency}
       />
 
-      <YearOverviewSection
+      <CashFlowSection
+        selectedYear={analytics.selectedYear}
+        isPro={isPro}
         monthlyData={analytics.monthlyData}
         yAxisMax={analytics.yAxisMax}
         totalSpent={analytics.yearlyStats.totalSpent}
@@ -55,7 +55,7 @@ const TrendsSections = ({
         onMonthClick={drillDown.handleMonthClick}
       />
 
-      {/* Placed right after the year overview: the bars above answer "how much
+      {/* Placed right after cash flow: the chart above answers "how much
           each month", and this answers "compared to what" — which is the
           question the bars invite and cannot settle on their own. */}
       <YearRhythm months={analytics.rhythmMonths} currency={defaultCurrency} />
@@ -72,7 +72,7 @@ const TrendsSections = ({
         )}
       </div>
 
-      {renderProSections(isPro, analytics.selectedYear, t)}
+      {renderForecast(isPro, t)}
     </div>
   );
 };
@@ -83,25 +83,20 @@ export default TrendsSections;
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-// Cash flow and the annual CSV export cover more than the free 3-month
-// window, so free users get one upsell card in their place.
-const renderProSections = (isPro: boolean, selectedYear: number, t: TFunc) => {
+// The forecast needs more than the free plan's short window to project from,
+// so free users get an upsell card in its place. Cash flow above no longer
+// needs this treatment — it adapts itself per tier instead of disappearing.
+const renderForecast = (isPro: boolean, t: TFunc) => {
   if (!isPro) {
     return (
       <ProUpsellCard
-        title={t('pro.gate.analyticsTitle')}
-        description={t('pro.gate.analyticsBody')}
+        title={t('pro.gate.forecastTitle')}
+        description={t('pro.gate.forecastBody')}
       />
     );
   }
 
-  return (
-    <>
-      <CashFlowSection selectedYear={selectedYear} />
-      <ForecastSection />
-      <AnnualExportCard selectedYear={selectedYear} />
-    </>
-  );
+  return <ForecastSection />;
 };
 
 const renderCategoryBreakdown = (

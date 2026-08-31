@@ -153,22 +153,52 @@ const BLOCKED_DOMAINS = [
   'wegwerfmail.org',
 ];
 
-export const emailSchema = z
-  .email('validation.emailInvalid')
-  .refine(
-    (email) => {
-      const atIndex = email.lastIndexOf('@');
-      if (atIndex < 0) {
-        return true;
-      }
-      const domain = email.slice(atIndex + 1).toLowerCase();
+export const emailSchema = z.email('validation.emailInvalid').refine(
+  (email) => {
+    const atIndex = email.lastIndexOf('@');
+    if (atIndex < 0) {
+      return true;
+    }
+    const domain = email.slice(atIndex + 1).toLowerCase();
 
-      return !BLOCKED_DOMAINS.some(
-        (blocked) => domain === blocked || domain.endsWith('.' + blocked),
-      );
-    },
+    return !BLOCKED_DOMAINS.some(
+      (blocked) => domain === blocked || domain.endsWith('.' + blocked),
+    );
+  },
+  {
+    message: 'validation.emailBlocked',
+  },
+);
+
+export const householdInviteSchema = z.object({
+  email: emailSchema,
+});
+
+export const transactionRuleSchema = z
+  .object({
+    match_type: z.enum(['exact', 'contains'] as const),
+    match_value: z
+      .string()
+      .min(1, 'validation.ruleMatchRequired')
+      .max(200, 'validation.ruleMatchTooLong')
+      .transform((value) => value.trim())
+      .refine((value) => value.length > 0, 'validation.ruleMatchRequired'),
+    transaction_type: z.enum(['any', 'expense', 'income'] as const),
+    rename_to: z
+      .string()
+      .max(100, 'validation.descriptionTooLong100')
+      .transform((value) => value.trim()),
+    category_id: z.string(),
+    tag_id: z.string(),
+  })
+  .refine(
+    (value) =>
+      value.rename_to.length > 0 ||
+      value.category_id.length > 0 ||
+      value.tag_id.length > 0,
     {
-      message: 'validation.emailBlocked',
+      message: 'validation.ruleActionRequired',
+      path: ['rename_to'],
     },
   );
 
@@ -317,23 +347,28 @@ export const goalSchema = z
         return amount > 0 && amount <= 10000000;
       }, 'validation.targetMax10M'),
     deadline: z.date().optional(),
-    source_type: z.enum(['category', 'tag', 'net_delta'] as const),
+    source_type: z.enum(['category', 'tag', 'net_delta', 'account'] as const),
     category_id: z.string().optional(),
     tag_id: z.string().optional(),
+    linked_account_id: z.string().optional(),
     icon: z.string().min(1).max(40),
     color: z.string().regex(HEX_COLOR, 'validation.colorInvalid'),
   })
-  .refine(
-    (data) => data.source_type !== 'category' || !!data.category_id,
-    {
-      message: 'validation.goalCategoryRequired',
-      path: ['category_id'],
-    },
-  )
+  .refine((data) => data.source_type !== 'category' || !!data.category_id, {
+    message: 'validation.goalCategoryRequired',
+    path: ['category_id'],
+  })
   .refine((data) => data.source_type !== 'tag' || !!data.tag_id, {
     message: 'validation.goalTagRequired',
     path: ['tag_id'],
-  });
+  })
+  .refine(
+    (data) => data.source_type !== 'account' || !!data.linked_account_id,
+    {
+      message: 'validation.goalAccountRequired',
+      path: ['linked_account_id'],
+    },
+  );
 
 // Account validation schema
 export const accountSchema = z.object({

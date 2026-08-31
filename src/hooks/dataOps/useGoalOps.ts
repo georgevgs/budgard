@@ -11,8 +11,10 @@ import {
   replaceById,
 } from '@/hooks/dataOps/helpers';
 import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
 
 export const useGoalOps = () => {
+  const { activeOwnerId } = useFinancialSpace();
   const { isInitialized } = useDataConfig();
   const { setGoals } = useDataActions();
   const { t } = useTranslation();
@@ -30,7 +32,7 @@ export const useGoalOps = () => {
         errorMessage: t('goals.toasts.createFailed'),
         successMessage: t('goals.toasts.created'),
         optimistic: () => prependOptimistic(setGoals, optimistic),
-        perform: () => dataService.createGoal(goalData),
+        perform: () => dataService.createGoal(goalData, activeOwnerId),
         commit: (saved) =>
           setGoals((prev) => replaceById(prev, optimistic.id, saved)),
       });
@@ -57,7 +59,7 @@ export const useGoalOps = () => {
       });
 
     return { handleGoalCreate, handleGoalUpdate, handleGoalDelete };
-  }, [isInitialized, setGoals, runMutation, t]);
+  }, [activeOwnerId, isInitialized, setGoals, runMutation, t]);
 };
 
 // --- Helpers ---

@@ -13,6 +13,7 @@ import {
 } from '@/hooks/recurring/useRecurringActions';
 import { getMonthlyAmount } from '@/lib/recurring';
 import type { RecurringExpense } from '@/types/RecurringExpense';
+import { useRecurringSuggestions } from '@/hooks/recurring/useRecurringSuggestions';
 
 // The screen shows two lists behind one toggle — recurring expenses and
 // recurring incomes — and the mode decides which data, which categories and
@@ -30,6 +31,7 @@ export const useRecurringList = () => {
   const { defaultCurrency, isInitialized } = useDataConfig();
   const { allow } = useProGate();
   const showSkeleton = useDelayedLoading(!isInitialized);
+  const suggestions = useRecurringSuggestions(mode);
 
   const closeForm = () => {
     setIsFormOpen(false);
@@ -87,6 +89,9 @@ export const useRecurringList = () => {
     handleSubmit: actions.handleSubmit,
     handleDelete: actions.handleDelete,
     handleToggle: actions.handleToggle,
+    suggestions: suggestions.suggestions,
+    handleSuggestionAccept: suggestions.accept,
+    handleSuggestionDismiss: suggestions.dismiss,
   };
 };
 

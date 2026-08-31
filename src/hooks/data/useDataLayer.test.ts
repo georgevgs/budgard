@@ -16,6 +16,10 @@ const auth = vi.hoisted(() => ({
 }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => auth }));
 
+vi.mock('@/contexts/FinancialSpaceContext', () => ({
+  useFinancialSpace: () => ({ activeOwnerId: auth.session?.user.id ?? '' }),
+}));
+
 const cache = vi.hoisted(() => ({
   loadDataSnapshot: vi.fn(() => null),
   hasDataSnapshot: vi.fn(() => false),
@@ -31,17 +35,24 @@ const svc = vi.hoisted(() => {
 
   return {
     getCategories: fn([{ id: 'cat1', type: 'expense' }]),
-    // Declared with the real three-arg shape so `calls[i][2]` (the stage-2
-    // beforeDate) is typed rather than an empty tuple.
+    // Declared with the real four-arg shape (ownerId, signal, sinceDate,
+    // beforeDate) so `calls[i][3]` (the stage-2 beforeDate) is typed rather
+    // than an empty tuple.
     getExpenses: vi.fn(
-      async (_signal?: unknown, _since?: unknown, _before?: unknown) => [
-        { id: 'e-recent', date: '2026-08-01' },
-      ],
+      async (
+        _ownerId?: unknown,
+        _signal?: unknown,
+        _since?: unknown,
+        _before?: unknown,
+      ) => [{ id: 'e-recent', date: '2026-08-01' }],
     ),
     getIncomes: vi.fn(
-      async (_signal?: unknown, _since?: unknown, _before?: unknown) => [
-        { id: 'i-recent', date: '2026-08-01' },
-      ],
+      async (
+        _ownerId?: unknown,
+        _signal?: unknown,
+        _since?: unknown,
+        _before?: unknown,
+      ) => [{ id: 'i-recent', date: '2026-08-01' }],
     ),
     getRecurringExpenses: fn([]),
     getRecurringIncomes: fn([]),
@@ -49,6 +60,8 @@ const svc = vi.hoisted(() => {
       monthly_amount: 1000,
       default_currency: 'EUR',
       default_savings_pct: 10,
+    }),
+    getNotificationSettings: fn({
       daily_reminder_hour: null,
       notification_preferences: {},
     }),
@@ -69,10 +82,11 @@ import { useDataLayer } from '@/hooks/data/useDataLayer';
 
 // --- Helpers ---
 
-// Stage 1 asks for the recent window (a `sinceDate`); stage 2 asks for the
-// tail before it (a `beforeDate` in the third argument).
+// getExpenses/getIncomes take the owner id first, then (signal, sinceDate,
+// beforeDate). Stage 1 asks for the recent window (a `sinceDate`); stage 2
+// asks for the tail before it (a `beforeDate` in the fourth argument).
 const stage2Calls = (mock: typeof svc.getExpenses) =>
-  mock.mock.calls.filter((c) => c[2] !== undefined);
+  mock.mock.calls.filter((c) => c[3] !== undefined);
 
 const olderExpenses = [{ id: 'e-old', date: '2025-03-01' }];
 const olderIncomes = [{ id: 'i-old', date: '2025-03-01' }];
@@ -80,18 +94,32 @@ const olderIncomes = [{ id: 'i-old', date: '2025-03-01' }];
 // getExpenses serves the recent window on a `sinceDate` call and the tail on a
 // `beforeDate` call, which is how the real two-stage fetch is shaped.
 const twoStageExpenses = () =>
-  vi.fn(async (_signal?: unknown, _since?: unknown, before?: unknown) => {
-    if (before !== undefined) return olderExpenses;
+  vi.fn(
+    async (
+      _ownerId?: unknown,
+      _signal?: unknown,
+      _since?: unknown,
+      before?: unknown,
+    ) => {
+      if (before !== undefined) return olderExpenses;
 
-    return [{ id: 'e-recent', date: '2026-08-01' }];
-  });
+      return [{ id: 'e-recent', date: '2026-08-01' }];
+    },
+  );
 
 const twoStageIncomes = () =>
-  vi.fn(async (_signal?: unknown, _since?: unknown, before?: unknown) => {
-    if (before !== undefined) return olderIncomes;
+  vi.fn(
+    async (
+      _ownerId?: unknown,
+      _signal?: unknown,
+      _since?: unknown,
+      before?: unknown,
+    ) => {
+      if (before !== undefined) return olderIncomes;
 
-    return [{ id: 'i-recent', date: '2026-08-01' }];
-  });
+      return [{ id: 'i-recent', date: '2026-08-01' }];
+    },
+  );
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -236,7 +264,12 @@ describe('useDataLayer boot fetch', () => {
 
   it('marks history loaded even when the tail fails to arrive', async () => {
     svc.getExpenses = vi.fn(
-      async (_s?: unknown, _since?: unknown, before?: unknown) => {
+      async (
+        _ownerId?: unknown,
+        _signal?: unknown,
+        _since?: unknown,
+        before?: unknown,
+      ) => {
         if (before !== undefined) throw new Error('tail down');
 
         return [{ id: 'e-recent', date: '2026-08-01' }];

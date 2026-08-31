@@ -3,4 +3,4 @@
 export const SUPPORT_EMAIL = 'support@budgard.com';
 
 // Bump whenever the wording in the legal i18n content changes.
-export const LEGAL_LAST_UPDATED = new Date('2026-08-26');
+export const LEGAL_LAST_UPDATED = new Date('2026-08-31');

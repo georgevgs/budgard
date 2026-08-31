@@ -4,11 +4,13 @@ import * as Sentry from '@/lib/sentry';
 import { dataService } from '@/services/dataService';
 import { useDataConfig } from '@/contexts/DataContext';
 import { toast } from '@/hooks/useToast';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
 
 // Full-account JSON export (data portability). Fetches everything fresh from
 // the server so the file is complete even before the background history
 // stream has finished. Receipt images live in storage and are not included.
 export const useDataExport = () => {
+  const { activeOwnerId } = useFinancialSpace();
   const { t } = useTranslation();
   const { monthlyBudget, defaultCurrency, defaultSavingsPct } = useDataConfig();
   const [isExporting, setIsExporting] = useState(false);
@@ -30,18 +32,18 @@ export const useDataExport = () => {
         accountBalances,
         debts,
       ] = await Promise.all([
-        dataService.getCategories(),
-        dataService.getTags(),
-        dataService.getExpenses(),
-        dataService.getIncomes(),
-        dataService.getRecurringExpenses(),
-        dataService.getRecurringIncomes(),
-        dataService.getTemplates(),
-        dataService.getCategoryBudgets(),
-        dataService.getGoals(),
-        dataService.getAccounts(),
-        dataService.getAllAccountBalances(),
-        dataService.getDebts(),
+        dataService.getCategories(activeOwnerId),
+        dataService.getTags(activeOwnerId),
+        dataService.getExpenses(activeOwnerId),
+        dataService.getIncomes(activeOwnerId),
+        dataService.getRecurringExpenses(activeOwnerId),
+        dataService.getRecurringIncomes(activeOwnerId),
+        dataService.getTemplates(activeOwnerId),
+        dataService.getCategoryBudgets(activeOwnerId),
+        dataService.getGoals(activeOwnerId),
+        dataService.getAccounts(activeOwnerId),
+        dataService.getAllAccountBalances(activeOwnerId),
+        dataService.getDebts(activeOwnerId),
       ]);
 
       const payload = {
@@ -79,7 +81,7 @@ export const useDataExport = () => {
       });
     }
     setIsExporting(false);
-  }, [monthlyBudget, defaultCurrency, defaultSavingsPct, t]);
+  }, [activeOwnerId, monthlyBudget, defaultCurrency, defaultSavingsPct, t]);
 
   return { isExporting, handleExport };
 };

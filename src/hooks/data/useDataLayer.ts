@@ -9,6 +9,7 @@ import {
 import * as Sentry from '@/lib/sentry';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
 import { dataService } from '@/services/dataService';
 import {
   dataReducer,
@@ -54,6 +55,8 @@ import {
 export const useDataLayer = () => {
   const { session, isLoading: isAuthLoading } = useAuth();
   const userId = session?.user?.id ?? null;
+  const { activeOwnerId } = useFinancialSpace();
+  const spaceCacheKey = buildSpaceCacheKey(userId, activeOwnerId);
   const { toast } = useToast();
   const toastRef = useRef(toast);
   const { t } = useTranslation();
@@ -152,13 +155,14 @@ export const useDataLayer = () => {
   const stage2DoneForUserRef = useRef<string | null>(null);
 
   const fetchData = useCallback(async () => {
-    if (!userId) {
+    if (!userId || !activeOwnerId || !spaceCacheKey) {
       return;
     }
+    const currentSpaceKey = spaceCacheKey;
 
     const run = async () => {
       // A retry tapped after sign-out must not refetch into cleared state.
-      if (bootedUserIdRef.current !== userId) {
+      if (bootedUserIdRef.current !== currentSpaceKey) {
         return;
       }
 
@@ -188,26 +192,37 @@ export const useDataLayer = () => {
           recurringExpensesData,
           recurringIncomesData,
           budgetData,
+          notificationSettingsData,
           tagsData,
           templatesData,
           categoryBudgetsData,
           accountsData,
           noSpendDaysData,
         ] = await Promise.all([
-          dataService.getCategories(controller.signal),
-          dataService.getExpenses(controller.signal, recentCutoff),
-          dataService.getIncomes(controller.signal, recentCutoff),
-          dataService.getRecurringExpenses(controller.signal),
-          dataService.getRecurringIncomes(controller.signal),
-          dataService.getBudget(controller.signal),
-          dataService.getTags(controller.signal),
-          dataService.getTemplates(controller.signal),
-          dataService.getCategoryBudgets(controller.signal),
-          dataService.getAccounts(controller.signal),
-          dataService.getNoSpendDays(controller.signal),
+          dataService.getCategories(activeOwnerId, controller.signal),
+          dataService.getExpenses(
+            activeOwnerId,
+            controller.signal,
+            recentCutoff,
+          ),
+          dataService.getIncomes(
+            activeOwnerId,
+            controller.signal,
+            recentCutoff,
+          ),
+          dataService.getRecurringExpenses(activeOwnerId, controller.signal),
+          dataService.getRecurringIncomes(activeOwnerId, controller.signal),
+          dataService.getBudget(activeOwnerId, controller.signal),
+          dataService.getNotificationSettings(controller.signal),
+          dataService.getTags(activeOwnerId, controller.signal),
+          dataService.getTemplates(activeOwnerId, controller.signal),
+          dataService.getCategoryBudgets(activeOwnerId, controller.signal),
+          dataService.getAccounts(activeOwnerId, controller.signal),
+          dataService.getNoSpendDays(activeOwnerId, controller.signal),
         ]);
 
-        const stage2AlreadyDone = stage2DoneForUserRef.current === userId;
+        const stage2AlreadyDone =
+          stage2DoneForUserRef.current === currentSpaceKey;
 
         // React 18+ automatically batches these state updates
         // One commit rather than twenty. React would batch these anyway, but
@@ -225,7 +240,7 @@ export const useDataLayer = () => {
             categoryBudgets: categoryBudgetsData,
             accounts: accountsData,
             noSpendDays: noSpendDaysData,
-            ...toBudgetConfig(budgetData),
+            ...toBudgetConfig(budgetData, notificationSettingsData),
             isInitialized: true,
           },
         });
@@ -256,7 +271,7 @@ export const useDataLayer = () => {
         // Stage 1.5: domains used by the Plan hub's child routes (goals,
         // networth, debts). Fired immediately after stage 1 but doesn't block
         // first paint.
-        startSecondaryFetch(controller, setters);
+        startSecondaryFetch(controller, setters, activeOwnerId);
 
         // Stage 2: top up older expenses/incomes in the background. Runs once
         // per boot — the pre-cutoff history barely changes, and re-downloading
@@ -266,7 +281,8 @@ export const useDataLayer = () => {
           startHistoryTopUp(
             controller,
             setters,
-            userId,
+            activeOwnerId,
+            currentSpaceKey,
             recentCutoff,
             stage2DoneForUserRef,
           );
@@ -285,7 +301,7 @@ export const useDataLayer = () => {
     };
 
     return run();
-  }, [userId, setters]);
+  }, [userId, activeOwnerId, spaceCacheKey, setters]);
 
   const refreshData = useCallback(async () => {
     await fetchData();
@@ -337,43 +353,43 @@ export const useDataLayer = () => {
 
   const refreshExpenses = useCallback(async () => {
     await runRefresh('refresh expenses', async () => {
-      setters.setExpenses(await dataService.getExpenses());
+      setters.setExpenses(await dataService.getExpenses(activeOwnerId));
     });
-  }, [runRefresh, setters]);
+  }, [runRefresh, setters, activeOwnerId]);
 
   const refreshIncomes = useCallback(async () => {
     await runRefresh('refresh incomes', async () => {
-      setters.setIncomes(await dataService.getIncomes());
+      setters.setIncomes(await dataService.getIncomes(activeOwnerId));
     });
-  }, [runRefresh, setters]);
+  }, [runRefresh, setters, activeOwnerId]);
 
   const refreshAccounts = useCallback(async () => {
     await runRefresh('refresh accounts', async () => {
       const [accountsData, balancesData] = await Promise.all([
-        dataService.getAccounts(),
-        dataService.getAllAccountBalances(),
+        dataService.getAccounts(activeOwnerId),
+        dataService.getAllAccountBalances(activeOwnerId),
       ]);
       setters.setAccounts(accountsData);
       setters.setAccountBalances(balancesData);
     });
-  }, [runRefresh, setters]);
+  }, [runRefresh, setters, activeOwnerId]);
 
   const refreshDebts = useCallback(async () => {
     await runRefresh('refresh debts', async () => {
-      setters.setDebts(await dataService.getDebts());
+      setters.setDebts(await dataService.getDebts(activeOwnerId));
     });
-  }, [runRefresh, setters]);
+  }, [runRefresh, setters, activeOwnerId]);
 
   // ── Auth-transition boot/reset ─────────────────────────────────────────────
   // The state side of login/logout happens during render (the sanctioned
   // "adjust state when props change" pattern) so the first frame under the new
   // auth state is already hydrated/cleared; the external side (fetch, abort,
   // snapshot clearing) lives in the boot effect below.
-  const [bootedUserId, setBootedUserId] = useState<string | null>(null);
-  if (!isAuthLoading && bootedUserId !== userId) {
-    setBootedUserId(userId);
-    if (userId) {
-      hydrateFromSnapshot(userId);
+  const [bootedSpaceKey, setBootedSpaceKey] = useState<string | null>(null);
+  if (!isAuthLoading && bootedSpaceKey !== spaceCacheKey) {
+    setBootedSpaceKey(spaceCacheKey);
+    if (spaceCacheKey) {
+      hydrateFromSnapshot(spaceCacheKey);
     } else {
       // Reminder hour and notification preferences are per-user too, and
       // clearing them is what stops a second account on a shared device
@@ -389,17 +405,17 @@ export const useDataLayer = () => {
       return;
     }
 
-    if (userId && bootedUserIdRef.current !== userId) {
-      bootedUserIdRef.current = userId;
+    if (spaceCacheKey && bootedUserIdRef.current !== spaceCacheKey) {
+      bootedUserIdRef.current = spaceCacheKey;
       // Suppress the load-failure toast while the cached data that
       // hydrateFromSnapshot just painted is still on screen.
-      hydratedFromCacheRef.current = hasDataSnapshot(userId);
+      hydratedFromCacheRef.current = hasDataSnapshot(spaceCacheKey);
       fetchData();
 
       return;
     }
 
-    if (!userId) {
+    if (!spaceCacheKey) {
       bootedUserIdRef.current = null;
       stage2DoneForUserRef.current = null;
       hydratedFromCacheRef.current = false;
@@ -407,7 +423,7 @@ export const useDataLayer = () => {
       clearDataSnapshot();
       abortControllerRef.current?.abort();
     }
-  }, [isAuthLoading, userId, fetchData]);
+  }, [isAuthLoading, spaceCacheKey, fetchData]);
 
   // Page Visibility API: proactively abort on background, retry on foreground.
   // On iOS PWA the OS aborts network requests mid-flight when the app is
@@ -428,7 +444,7 @@ export const useDataLayer = () => {
         return;
       }
 
-      if (!userId) {
+      if (!spaceCacheKey) {
         return;
       }
 
@@ -446,7 +462,7 @@ export const useDataLayer = () => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [userId, fetchData]);
+  }, [spaceCacheKey, fetchData]);
 
   // Persist a snapshot of the current data so the next app open paints
   // instantly from cache while the network fetch runs. Debounced because
@@ -459,7 +475,7 @@ export const useDataLayer = () => {
   const persistSnapshotRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    if (!isInitialized || !userId) {
+    if (!isInitialized || !spaceCacheKey) {
       persistSnapshotRef.current = null;
 
       return;
@@ -471,7 +487,7 @@ export const useDataLayer = () => {
     // in the dependency array below — was the third place the field list was
     // written out, and the third place it could fall behind.
     const persist = () => {
-      saveDataSnapshot(userId, toSnapshot(data));
+      saveDataSnapshot(spaceCacheKey, toSnapshot(data));
     };
     persistSnapshotRef.current = persist;
 
@@ -480,7 +496,7 @@ export const useDataLayer = () => {
     return () => clearTimeout(timer);
     // `data` is one object now, so it stands in for the twenty fields this
     // used to list. It changes identity on exactly the same commits they did.
-  }, [isInitialized, userId, data]);
+  }, [isInitialized, spaceCacheKey, data]);
 
   // Flush the pending snapshot synchronously when the app is backgrounded, so
   // data changed within the debounce window isn't lost if the OS freezes or
@@ -583,12 +599,15 @@ export const useDataLayer = () => {
 // its own fallback. Kept together so the defaults live in one place.
 const toBudgetConfig = (
   budgetData: Awaited<ReturnType<typeof dataService.getBudget>>,
+  notificationData: Awaited<
+    ReturnType<typeof dataService.getNotificationSettings>
+  >,
 ) => ({
   monthlyBudget: budgetData?.monthly_amount ?? null,
   defaultCurrency: budgetData?.default_currency ?? 'EUR',
   defaultSavingsPct: budgetData?.default_savings_pct ?? null,
-  dailyReminderHour: budgetData?.daily_reminder_hour ?? null,
-  notificationPreferences: budgetData?.notification_preferences ?? {},
+  dailyReminderHour: notificationData?.daily_reminder_hour ?? null,
+  notificationPreferences: notificationData?.notification_preferences ?? {},
 });
 
 // Stage 1.5: the Plan hub's child routes. Fire-and-forget — a failure here
@@ -596,17 +615,18 @@ const toBudgetConfig = (
 const startSecondaryFetch = (
   controller: AbortController,
   setters: DataSetters,
+  ownerId: string,
 ): void => {
   Promise.all([
-    dataService.getGoals(controller.signal),
-    dataService.getAllAccountBalances(controller.signal),
+    dataService.getGoals(ownerId, controller.signal),
+    dataService.getAllAccountBalances(ownerId, controller.signal),
     // Accrue interest up to today before reading the balances, so the debt
     // figures are current rather than frozen at the last payment.
     // Best-effort: a refresh failure must not stop debts from loading.
     dataService
-      .refreshDebtBalances()
+      .refreshDebtBalances(ownerId)
       .catch(() => undefined)
-      .then(() => dataService.getDebts(controller.signal)),
+      .then(() => dataService.getDebts(ownerId, controller.signal)),
   ])
     .then(([goalsData, balancesData, debtsData]) => {
       if (controller.signal.aborted) {
@@ -632,19 +652,30 @@ const startSecondaryFetch = (
 const startHistoryTopUp = (
   controller: AbortController,
   setters: DataSetters,
-  userId: string,
+  ownerId: string,
+  spaceCacheKey: string,
   recentCutoff: string,
   stage2DoneForUserRef: { current: string | null },
 ): void => {
   Promise.all([
-    dataService.getExpenses(controller.signal, undefined, recentCutoff),
-    dataService.getIncomes(controller.signal, undefined, recentCutoff),
+    dataService.getExpenses(
+      ownerId,
+      controller.signal,
+      undefined,
+      recentCutoff,
+    ),
+    dataService.getIncomes(
+      ownerId,
+      controller.signal,
+      undefined,
+      recentCutoff,
+    ),
   ])
     .then(([olderExpenses, olderIncomes]) => {
       if (controller.signal.aborted) {
         return;
       }
-      stage2DoneForUserRef.current = userId;
+      stage2DoneForUserRef.current = spaceCacheKey;
       setters.setIsHistoryLoaded(true);
       // Dedupe by id: if a refreshExpenses/refreshIncomes ran concurrently
       // (e.g. user deleted a recurring expense, bulk-imported, or rolled back
@@ -719,4 +750,15 @@ const handleFetchError = (error: unknown, ctx: FetchErrorContext): void => {
       onClick: ctx.onRetry,
     },
   });
+};
+
+const buildSpaceCacheKey = (
+  userId: string | null,
+  ownerId: string,
+): string | null => {
+  if (!userId || !ownerId) {
+    return null;
+  }
+
+  return `${userId}:${ownerId}`;
 };

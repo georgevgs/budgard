@@ -17,10 +17,7 @@ import {
   type CsvPreviewData,
   type ColumnMapping,
 } from '@/lib/csvImport';
-import {
-  detectStatementFormat,
-  parseStatement,
-} from '@/lib/statementImport';
+import { detectStatementFormat, parseStatement } from '@/lib/statementImport';
 import type { Category } from '@/types/Category';
 
 export type ImportStep = 'upload' | 'mapping' | 'preview' | 'importing';
@@ -101,7 +98,7 @@ export const useCsvImportFlow = (onClose: () => void) => {
         // OFX and QIF describe their own fields, so there is nothing for the
         // user to map — those files skip straight to the preview. Everything
         // past that point is the same pipeline as a CSV: the same category
-        // matching, the same duplicate handling, the same write. A second
+        // matching, the same review handling, the same write. A second
         // import path would be a second place for those to drift.
         const statementFormat = detectStatementFormat(file.name, content);
         if (statementFormat) {

@@ -3,11 +3,13 @@ import {
   useExpensesData,
   useIncomesData,
   useGoalsData,
+  useAccountsData,
 } from '@/contexts/DataContext';
 import { expenseHasTag } from '@/lib/expenseTags';
 import { sumAmounts } from '@/lib/money';
 import { countsInTotals } from '@/lib/spending';
 import type { Expense } from '@/types/Expense';
+import type { Account } from '@/types/Account';
 import type { Goal } from '@/types/Goal';
 
 export type GoalProgress = {
@@ -21,22 +23,24 @@ export type GoalProgress = {
   isOnTrack: boolean | null; // null when no deadline
   pacePerDay: number | null;
   requiredPerDay: number | null;
-}
+};
 
 export const useGoalProgress = (goal: Goal): GoalProgress => {
   const expenses = useExpensesData();
   const incomes = useIncomesData();
+  const { accounts } = useAccountsData();
 
   return useMemo(
-    () => computeProgress(goal, expenses, incomes),
-    [goal, expenses, incomes],
+    () => computeProgress(goal, expenses, incomes, accounts),
+    [goal, expenses, incomes, accounts],
   );
-}
+};
 
 export const useAllGoalProgress = (): Record<string, GoalProgress> => {
   const goals = useGoalsData();
   const expenses = useExpensesData();
   const incomes = useIncomesData();
+  const { accounts } = useAccountsData();
 
   return useMemo(() => {
     const map: Record<string, GoalProgress> = {};
@@ -46,14 +50,14 @@ export const useAllGoalProgress = (): Record<string, GoalProgress> => {
 
     // Single pass over each transaction array, bucketing amounts into every
     // goal at once — instead of re-filtering the full arrays per goal.
-    const currents = sumCurrentsForGoals(goals, expenses, incomes);
+    const currents = sumCurrentsForGoals(goals, expenses, incomes, accounts);
     for (const goal of goals) {
       map[goal.id] = buildProgress(goal, currents.get(goal.id) ?? 0);
     }
 
     return map;
-  }, [goals, expenses, incomes]);
-}
+  }, [goals, expenses, incomes, accounts]);
+};
 
 // --- Helpers ---
 
@@ -61,16 +65,24 @@ const computeProgress = (
   goal: Goal,
   expenses: Expense[],
   incomes: Expense[],
+  accounts: Account[],
 ): GoalProgress => {
-  const current = sumForSource(goal, expenses, incomes, goal.start_date);
+  const current = sumForSource(
+    goal,
+    expenses,
+    incomes,
+    accounts,
+    goal.start_date,
+  );
 
   return buildProgress(goal, current);
-}
+};
 
 const sumCurrentsForGoals = (
   goals: Goal[],
   expenses: Expense[],
   incomes: Expense[],
+  accounts: Account[],
 ): Map<string, number> => {
   const currents = new Map<string, number>();
   // Index goals by how a row contributes to them so each transaction is
@@ -87,8 +99,13 @@ const sumCurrentsForGoals = (
     } else if (goal.source_type === 'tag') {
       if (!goal.tag_id) continue;
       appendToBucket(goalsByTag, goal.tag_id, goal);
-    } else {
+    } else if (goal.source_type === 'net_delta') {
       netDeltaGoals.push(goal);
+    } else {
+      const account = accounts.find(
+        (candidate) => candidate.id === goal.linked_account_id,
+      );
+      currents.set(goal.id, Number(account?.current_balance ?? 0));
     }
   }
 
@@ -121,7 +138,7 @@ const sumCurrentsForGoals = (
   }
 
   return currents;
-}
+};
 
 // Pro multi-tag: extras count toward tag goals too. An extra that duplicates
 // the primary is skipped so the same expense can't be added to a goal twice.
@@ -142,7 +159,7 @@ const addExtraTagAmounts = (
       amount,
     );
   }
-}
+};
 
 const appendToBucket = (
   buckets: Map<string, Goal[]>,
@@ -157,7 +174,7 @@ const appendToBucket = (
   }
 
   buckets.set(key, [goal]);
-}
+};
 
 // YYYY-MM-DD dates sort lexicographically, so string comparison is safe.
 const addToMatchingGoals = (
@@ -172,7 +189,7 @@ const addToMatchingGoals = (
     if (date < goal.start_date) continue;
     currents.set(goal.id, (currents.get(goal.id) ?? 0) + amount);
   }
-}
+};
 
 const buildProgress = (goal: Goal, current: number): GoalProgress => {
   // Parse YYYY-MM-DD as local midnight; `new Date('YYYY-MM-DD')` parses as UTC
@@ -207,12 +224,13 @@ const buildProgress = (goal: Goal, current: number): GoalProgress => {
     pacePerDay,
     requiredPerDay,
   };
-}
+};
 
 const sumForSource = (
   goal: Goal,
   expenses: Expense[],
   incomes: Expense[],
+  accounts: Account[],
   startDate: string,
 ): number => {
   if (goal.source_type === 'category') {
@@ -220,9 +238,7 @@ const sumForSource = (
 
     return sumExpenses(
       expenses.filter(
-        (e) =>
-          e.category_id === goal.category_id &&
-          e.date >= startDate,
+        (e) => e.category_id === goal.category_id && e.date >= startDate,
       ),
     );
   }
@@ -239,28 +255,30 @@ const sumForSource = (
     );
   }
 
+  if (goal.source_type === 'account') {
+    const account = accounts.find(
+      (candidate) => candidate.id === goal.linked_account_id,
+    );
+
+    return Number(account?.current_balance ?? 0);
+  }
+
   // net_delta — total income minus total expenses since start_date.
   // Don't clamp at zero: a negative current is the user actually running a
   // deficit, and the progress card should reflect it (formatCurrency renders
   // it as "-€200" / "€1,000"). The percent display handles the clamp itself.
-  const incomeSum = sumExpenses(
-    incomes.filter((i) => i.date >= startDate),
-  );
-  const expenseSum = sumExpenses(
-    expenses.filter((e) => e.date >= startDate),
-  );
+  const incomeSum = sumExpenses(incomes.filter((i) => i.date >= startDate));
+  const expenseSum = sumExpenses(expenses.filter((e) => e.date >= startDate));
 
   return incomeSum - expenseSum;
-}
+};
 
 // Rows the user marked as not-spending are left out here for the same reason
 // they are everywhere else: a transfer between their own accounts is not
 // progress towards a goal, and for a net_delta goal it lands on both sides and
 // distorts the figure in whichever direction the pair happens to fall.
 const sumExpenses = (rows: Expense[]): number =>
-  sumAmounts(
-    rows.filter(countsInTotals).map((row) => Number(row.amount ?? 0)),
-  );
+  sumAmounts(rows.filter(countsInTotals).map((row) => Number(row.amount ?? 0)));
 
 const computeDeadlineState = (deadline?: string | null) => {
   if (!deadline) {
@@ -277,7 +295,7 @@ const computeDeadlineState = (deadline?: string | null) => {
   const days = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
   return { daysRemaining: days, isOverdue: days < 0 };
-}
+};
 
 const computePace = (
   current: number,
@@ -309,4 +327,4 @@ const computePace = (
   const isOnTrack = pacePerDay >= requiredPerDay || current >= target;
 
   return { isOnTrack, pacePerDay, requiredPerDay };
-}
+};

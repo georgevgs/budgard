@@ -2,29 +2,35 @@ import { useCallback } from 'react';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { useExpenseOps } from '@/hooks/dataOps/useExpenseOps';
+import { useSurplusInvestmentOps } from '@/hooks/dataOps/useSurplusInvestmentOps';
 import type { Goal } from '@/types/Goal';
 
-// Records a set-aside as a real expense in the goal's savings category.
-//
-// Goals here are derived, not funded — progress is the sum of expenses in the
-// goal's category — so this IS the transfer, in the same shape the goal already
-// reads. Nothing about the number is hypothetical: it leaves the spending pool
-// and lands somewhere with a name, which is the whole reason labelled pots
-// change behaviour where a score does not.
+// Moves a finished day's surplus into the real investment account linked to a
+// goal. Legacy savings-category goals still work, but new account goals update
+// an account balance and log the transfer atomically.
 export const useSetAside = () => {
   const { handleExpenseSubmit } = useExpenseOps();
+  const { investSurplus } = useSurplusInvestmentOps();
   const { t } = useTranslation();
 
   return useCallback(
     async (goal: Goal, amount: number) => {
+      const roundedAmount = roundToCents(amount);
+      const today = format(new Date(), 'yyyy-MM-dd');
+      if (goal.source_type === 'account') {
+        await investSurplus(goal.id, roundedAmount, today);
+
+        return;
+      }
+
       await handleExpenseSubmit({
-        amount: roundToCents(amount),
+        amount: roundedAmount,
         description: t('today.rhythm.setAside.description'),
         category_id: goal.category_id ?? undefined,
-        date: format(new Date(), 'yyyy-MM-dd'),
+        date: today,
       });
     },
-    [handleExpenseSubmit, t],
+    [handleExpenseSubmit, investSurplus, t],
   );
 };
 

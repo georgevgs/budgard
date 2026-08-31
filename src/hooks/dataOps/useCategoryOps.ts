@@ -7,11 +7,13 @@ import type { Expense } from '@/types/Expense';
 import type { CategoryBudget } from '@/types/CategoryBudget';
 import { patchById, replaceById } from '@/hooks/dataOps/helpers';
 import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
 
 // Categories are embedded in expense and income rows, so editing one has to
 // sweep those slices too — and put all of them back together on failure.
 // That is why these keep bespoke optimistic closures.
 export const useCategoryOps = () => {
+  const { activeOwnerId } = useFinancialSpace();
   const { isInitialized } = useDataConfig();
   const {
     setCategories,
@@ -44,7 +46,7 @@ export const useCategoryOps = () => {
           return () =>
             setCategories((prev) => prev.filter((c) => c.id !== optimistic.id));
         },
-        perform: () => dataService.createCategory(categoryData),
+        perform: () => dataService.createCategory(categoryData, activeOwnerId),
         commit: (saved) =>
           setCategories((prev) =>
             sortByName([
@@ -204,7 +206,9 @@ export const useCategoryOps = () => {
         errorMessage: t('categories.toasts.bulkCreateFailed'),
         perform: () =>
           Promise.all(
-            categoriesData.map((cat) => dataService.createCategory(cat)),
+            categoriesData.map((category) =>
+              dataService.createCategory(category, activeOwnerId),
+            ),
           ),
         commit: (created) =>
           setCategories((prev) => sortByName([...prev, ...created])),
@@ -218,6 +222,7 @@ export const useCategoryOps = () => {
       handleCategoriesAddBulk,
     };
   }, [
+    activeOwnerId,
     isInitialized,
     setCategories,
     setExpenses,

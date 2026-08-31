@@ -57,6 +57,24 @@ const ROUTES = [
   ['transaction', '/t/exp-1'],
 ] as const;
 
+// The flow toggle lives inside CashFlowSection, which only renders for a Pro
+// subscriber.
+const PRO_SUBSCRIPTION = {
+  id: 'sub-1',
+  status: 'active',
+  current_period_end: new Date(Date.now() + 86_400_000 * 30).toISOString(),
+  cancel_at_period_end: false,
+};
+
+const openMoneyFlow = async (app: import('@playwright/test').Page) => {
+  await app.goto('/trends');
+  await app.waitForTimeout(1500);
+  await app
+    .getByRole('tab', { name: 'This month' })
+    .click();
+  await app.waitForTimeout(500);
+};
+
 test('screenshot landing', async ({ page }) => {
   await page.goto('/');
   await page.waitForTimeout(2000);
@@ -131,4 +149,70 @@ test('screenshot today-empty-grid', async ({ app, data }) => {
     path: `${SHOTS}/today-empty-grid.png`,
     fullPage: true,
   });
+});
+
+test('screenshot moneyflow', async ({ app, data }) => {
+  data.subscriptions.push(PRO_SUBSCRIPTION);
+  await openMoneyFlow(app);
+  await app.screenshot({ path: `${SHOTS}/moneyflow.png`, fullPage: true });
+});
+
+test('screenshot moneyflow-deficit', async ({ app, data }) => {
+  data.subscriptions.push(PRO_SUBSCRIPTION);
+  data.expenses.push({
+    id: 'deficit-rent',
+    user_id: E2E_USER_ID,
+    amount: 3200,
+    description: 'Rent',
+    date: new Date().toISOString().slice(0, 10),
+    category_id: 'cat-transport',
+    type: 'expense',
+    created_at: new Date().toISOString(),
+  });
+  await openMoneyFlow(app);
+  await app.screenshot({
+    path: `${SHOTS}/moneyflow-deficit.png`,
+    fullPage: true,
+  });
+});
+
+test('screenshot moneyflow-color-collision', async ({ app, data }) => {
+  data.subscriptions.push(PRO_SUBSCRIPTION);
+  // Three categories that all picked the same swatch — a real, common case
+  // given the picker only offers so many colours.
+  data.categories.push(
+    { id: 'cat-dining', user_id: E2E_USER_ID, name: 'Dining', color: '#ff8300', icon: '🍽️', type: 'expense' },
+    { id: 'cat-shopping', user_id: E2E_USER_ID, name: 'Shopping', color: '#ff8300', icon: '🛍️', type: 'expense' },
+  );
+  data.expenses.push(
+    { id: 'cc-1', user_id: E2E_USER_ID, amount: 180, description: 'Dinner out', date: new Date().toISOString().slice(0, 10), category_id: 'cat-dining', type: 'expense', created_at: new Date().toISOString() },
+    { id: 'cc-2', user_id: E2E_USER_ID, amount: 260, description: 'New shoes', date: new Date().toISOString().slice(0, 10), category_id: 'cat-shopping', type: 'expense', created_at: new Date().toISOString() },
+  );
+  await openMoneyFlow(app);
+  await app.screenshot({
+    path: `${SHOTS}/moneyflow-color-collision.png`,
+    fullPage: true,
+  });
+});
+
+test('screenshot settings-data-export', async ({ app, data }) => {
+  data.subscriptions.push(PRO_SUBSCRIPTION);
+  await app.goto('/settings/data');
+  await app.waitForTimeout(1500);
+  await app.screenshot({
+    path: `${SHOTS}/settings-data-export.png`,
+    fullPage: true,
+  });
+});
+
+test('screenshot cashflow-pro-trend', async ({ app, data }) => {
+  data.subscriptions.push(PRO_SUBSCRIPTION);
+  data.expenses.push(
+    { id: 'ct-1', user_id: E2E_USER_ID, amount: 900, description: 'Rent', date: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 3).toISOString().slice(0, 10), category_id: 'cat-transport', type: 'expense', created_at: new Date().toISOString() },
+    { id: 'ct-2', user_id: E2E_USER_ID, amount: 2600, description: 'Paycheck', date: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toISOString().slice(0, 10), category_id: 'cat-salary', type: 'income', created_at: new Date().toISOString() },
+    { id: 'ct-3', user_id: E2E_USER_ID, amount: 2500, description: 'Paycheck', date: new Date().toISOString().slice(0, 10), category_id: 'cat-salary', type: 'income', created_at: new Date().toISOString() },
+  );
+  await app.goto('/trends');
+  await app.waitForTimeout(1800);
+  await app.screenshot({ path: `${SHOTS}/cashflow-pro-trend.png`, fullPage: true });
 });

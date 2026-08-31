@@ -7,6 +7,7 @@ import ActivityPeriodSelector from '@/components/activity/ActivityPeriodSelector
 import ActivitySummary from '@/components/activity/ActivitySummary';
 import ActivityFilterPanel from '@/components/activity/ActivityFilterPanel';
 import ActivityToolsMenu from '@/components/activity/ActivityToolsMenu';
+import ReviewQueueBanner from '@/components/activity/ReviewQueueBanner';
 import FilterResultsAnnouncer from '@/components/expenses/FilterResultsAnnouncer';
 import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
 import {
@@ -68,6 +69,7 @@ const ActivityView = () => {
           }
         />
         <div className="mt-4 space-y-3">
+          <ReviewQueueBanner />
           <ActivityFilters
             search={activity.search}
             kind={activity.kind}

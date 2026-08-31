@@ -5,7 +5,7 @@ import type { ParsedExpenseRow } from '@/lib/csvImport';
 //
 // Both are read into the same ParsedExpenseRow the CSV importer already
 // produces, so everything downstream — the preview, the category mapping, the
-// duplicate check, the write — is shared. A second import pipeline would be a
+// review queue, the write — is shared. A second import pipeline would be a
 // second place for those decisions to drift.
 
 export type StatementFormat = 'ofx' | 'qif';
@@ -233,7 +233,10 @@ const qifDate = (raw: string | undefined): string | null => {
   // A first part above 12 can only be a day, which confirms day-first. A
   // second part above 12 means the file is month-first after all.
   if (Number(second) > 12) {
-    const swapped = { day: second.padStart(2, '0'), month: first.padStart(2, '0') };
+    const swapped = {
+      day: second.padStart(2, '0'),
+      month: first.padStart(2, '0'),
+    };
     if (!isCalendarDate(year, swapped.month, swapped.day)) {
       return null;
     }
@@ -265,11 +268,7 @@ const expandYear = (raw: string): string => {
 
 // --- Shared ---
 
-const isCalendarDate = (
-  year: string,
-  month: string,
-  day: string,
-): boolean => {
+const isCalendarDate = (year: string, month: string, day: string): boolean => {
   const parsed = new Date(`${year}-${month}-${day}T00:00:00Z`);
   if (Number.isNaN(parsed.getTime())) {
     return false;

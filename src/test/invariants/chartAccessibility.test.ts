@@ -6,8 +6,8 @@ const ROOT = path.resolve(__dirname, '../../..');
 
 describe('chart accessibility', () => {
   it('does not hide the keyboard-readable year chart from assistive technology', () => {
-    const yearOverview = readFileSync(
-      path.join(ROOT, 'src/components/analytics/YearOverviewSection.tsx'),
+    const cashFlowSection = readFileSync(
+      path.join(ROOT, 'src/components/analytics/CashFlowSection.tsx'),
       'utf8',
     );
     const chart = readFileSync(
@@ -15,7 +15,7 @@ describe('chart accessibility', () => {
       'utf8',
     );
 
-    expect(yearOverview).not.toContain(
+    expect(cashFlowSection).not.toContain(
       '<div className="w-full" aria-hidden="true">',
     );
     expect(chart).toContain('tabIndex={0}');

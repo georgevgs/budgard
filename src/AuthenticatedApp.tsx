@@ -79,6 +79,12 @@ const TransactionDetailView = lazyWithRetry(
 const SettingsView = lazyWithRetry(
   () => import('@/components/settings/SettingsView'),
 );
+const JoinHouseholdView = lazyWithRetry(
+  () => import('@/components/household/JoinHouseholdView'),
+);
+const ReviewQueueView = lazyWithRetry(
+  () => import('@/components/review/ReviewQueueView'),
+);
 const LandingPage = lazyWithRetry(() => import('@/pages/LandingPage'));
 const PrivacyPage = lazyWithRetry(() => import('@/pages/legal/PrivacyPage'));
 const TermsPage = lazyWithRetry(() => import('@/pages/legal/TermsPage'));
@@ -569,6 +575,26 @@ const AuthenticatedApp = () => {
                         fallback={renderRouteFallback(<SettingsLoadingState />)}
                       >
                         <SettingsView />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="/join"
+                    element={
+                      <Suspense
+                        fallback={renderRouteFallback(<SettingsLoadingState />)}
+                      >
+                        <JoinHouseholdView />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="/review"
+                    element={
+                      <Suspense
+                        fallback={renderRouteFallback(<ExpenseLoadingState />)}
+                      >
+                        <ReviewQueueView />
                       </Suspense>
                     }
                   />

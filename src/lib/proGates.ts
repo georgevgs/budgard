@@ -42,6 +42,10 @@ export const PRO_GATES = {
     proOnly: true,
     messageKey: 'pro.gate.categoryBudgets',
   },
+  household: {
+    proOnly: true,
+    messageKey: 'pro.gate.household',
+  },
 } as const satisfies Record<string, CapGate | ProOnlyGate>;
 
 export type ProGateName = keyof typeof PRO_GATES;

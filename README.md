@@ -29,6 +29,7 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Filter and search by category, tag, date range, or keyword
 - Sort by date or amount, search across all months
 - CSV import and export (export is Pro)
+- Merchant normalization, reusable transaction rules, and an import review queue
 - Multi-currency support with live exchange rates
 - Animated number transitions on totals
 
@@ -62,8 +63,10 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 
 **Savings Goals** (Pro)
 - Create goals with a target amount and optional deadline
+- Link a goal to an investment account so progress is backed by its real balance
+- Invest yesterday's unspent daily allowance directly from Today
 - Visual progress bar with on-track / behind status
-- Edit, contribute, or delete from a single goal card
+- Edit or delete from a single goal card
 
 **Net Worth**
 - Manual accounts (checking, savings, cash, investment, other)
@@ -84,6 +87,17 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Categories can be tagged as Need, Want, or Savings to feed the 50/30/20 ring
 - Tags for finer-grained expense grouping
 - Filter by category or tag in the expense list
+
+**Household Sharing** (Pro)
+- Invite one partner into a shared financial space
+- Switch between personal and shared finances without sharing logins
+- Keep billing, notifications, push subscriptions, and security settings personal
+
+**Imports and Automation**
+- Import CSV, OFX, QFX, and QIF bank statements
+- Review every imported row before trusting the automation
+- Teach merchant/category/tag rules and apply them to matching history
+- Detect recurring patterns and confirm suggestions instead of silently guessing
 
 **Notifications**
 - Bill reminders for recurring expenses due tomorrow
@@ -111,7 +125,7 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 
 The core app is free — not a trial, not metered. The free plan includes unlimited expenses in 23 currencies, a monthly total budget, up to 3 recurring expenses, the last 3 months of analytics, and one tag per expense. Net worth and debt tracking are free too.
 
-**Budgard Pro** — €1.99/month or €19.99/year — unlocks per-category budgets, savings goals, unlimited recurring expenses, full analytics history with cash flow trends, and CSV exports, plus early access to new features.
+**Budgard Pro** — €1.99/month or €19.99/year — unlocks household sharing, account-funded investment goals, unlimited recurring expenses, full analytics history with cash flow trends, and CSV exports, plus early access to new features.
 
 Payments run through Stripe as merchant of record; subscriptions are managed or cancelled anytime from Settings via the Stripe customer portal.
 
@@ -123,8 +137,8 @@ UI components from shadcn/ui, charts hand-rolled as inline SVG in `components/ch
 
 ### Key architecture
 
-- **State**: Context API — `AuthContext` for sessions; `DataContext` is split into `useData` (full snapshot), `useDataConfig` (slow-changing scalars), and `useDataActions` (stable setters) so consumers don't re-render on unrelated mutations
-- **Data**: All Supabase calls go through `services/dataService.ts`; transactions load in two stages (last 12 months first, full history streams in)
+- **State**: Context API — `AuthContext` for sessions, `FinancialSpaceContext` for owner/household scope, and narrow `DataContext` slices so consumers don't re-render on unrelated mutations
+- **Data**: All Supabase calls go through `services/*`; transactions load in two stages (last 12 months first, full history streams in)
 - **Mutations**: Optimistic updates with rollback, one domain hook per table in `hooks/dataOps/*` (`useExpenseOps`, `useCategoryOps`, …) — called directly, there is no composed wrapper
 - **Validation**: Zod schemas in `lib/validations.ts`, react-hook-form for forms
 - **Routing**: Lazy-loaded routes with `PrivateRoute` / `PublicRoute` guards

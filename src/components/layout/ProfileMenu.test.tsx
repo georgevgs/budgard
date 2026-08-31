@@ -20,6 +20,28 @@ vi.mock('@/contexts/UpgradeDialogContext', () => ({
   useUpgradeDialog: () => ({ openUpgrade: mockOpenUpgrade }),
 }));
 
+vi.mock('@/contexts/FinancialSpaceContext', () => ({
+  useFinancialSpace: () => ({
+    activeOwnerId: session?.user.id ?? '',
+    activeSpace: {
+      ownerId: session?.user.id ?? '',
+      label: session?.user.email ?? '',
+      isShared: false,
+    },
+    spaces: [],
+    shares: [],
+    pendingInvites: [],
+    isLoading: false,
+    error: null,
+    selectSpace: vi.fn(),
+    refreshShares: vi.fn(),
+    createInvite: vi.fn(),
+    acceptInvite: vi.fn(),
+    revokeShare: vi.fn(),
+    leaveShare: vi.fn(),
+  }),
+}));
+
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual =

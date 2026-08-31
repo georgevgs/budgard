@@ -10,8 +10,10 @@ import {
   replaceById,
 } from '@/hooks/dataOps/helpers';
 import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
 
 export const useDebtOps = () => {
+  const { activeOwnerId } = useFinancialSpace();
   const { isInitialized } = useDataConfig();
   const { setDebts } = useDataActions();
   const { t } = useTranslation();
@@ -43,7 +45,7 @@ export const useDebtOps = () => {
         perform: () => {
           if (debtId) return dataService.updateDebt(debtId, debtData);
 
-          return dataService.createDebt(debtData);
+          return dataService.createDebt(debtData, activeOwnerId);
         },
         commit: (row) =>
           setDebts((prev) => {
@@ -67,5 +69,5 @@ export const useDebtOps = () => {
       });
 
     return { handleDebtSubmit, handleDebtArchive };
-  }, [isInitialized, setDebts, runMutation, t]);
+  }, [activeOwnerId, isInitialized, setDebts, runMutation, t]);
 };

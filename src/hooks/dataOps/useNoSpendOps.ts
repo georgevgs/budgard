@@ -4,10 +4,12 @@ import { dataService } from '@/services/dataService';
 import { useTranslation } from 'react-i18next';
 import type { NoSpendDay } from '@/types/NoSpendDay';
 import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
 
 // No-spend days are keyed by `day`, not by id, so these keep their own
 // optimistic closures rather than using the id-based shape helpers.
 export const useNoSpendOps = () => {
+  const { activeOwnerId } = useFinancialSpace();
   const { setNoSpendDays } = useDataActions();
   const { t } = useTranslation();
   const runMutation = useMutationRunner();
@@ -32,7 +34,7 @@ export const useNoSpendOps = () => {
         operation: 'createNoSpendDay',
         errorMessage: t('today.rhythm.toasts.claimFailed'),
         optimistic: () => claimOptimistically(day),
-        perform: () => dataService.createNoSpendDay(day),
+        perform: () => dataService.createNoSpendDay(day, activeOwnerId),
         // The upsert ignores duplicates, so a day that was already claimed
         // comes back null. The optimistic row is already correct in that
         // case — only a real insert needs reconciling with server columns.
@@ -64,11 +66,11 @@ export const useNoSpendOps = () => {
 
           return () => setNoSpendDays(previous);
         },
-        perform: () => dataService.deleteNoSpendDay(day),
+        perform: () => dataService.deleteNoSpendDay(day, activeOwnerId),
       });
 
     return { handleNoSpendClaim, handleNoSpendUndo };
-  }, [setNoSpendDays, runMutation, t]);
+  }, [activeOwnerId, setNoSpendDays, runMutation, t]);
 };
 
 // --- Helpers ---

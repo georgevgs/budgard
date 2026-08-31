@@ -124,12 +124,14 @@ const applyMutation = async (mutation: QueuedMutation): Promise<void> => {
     string,
     unknown
   >;
-
   switch (mutation.type) {
     // Expense payloads replay as ExpenseWritePayload so queued extra_tag_ids
     // (Pro multi-tag) survive the offline round-trip.
     case 'createExpense':
-      await dataService.createExpense(payload as ExpenseWritePayload);
+      await dataService.createExpense(
+        payload as ExpenseWritePayload,
+        readOwnerId(payload),
+      );
       break;
     case 'updateExpense':
       await dataService.updateExpense(
@@ -141,7 +143,10 @@ const applyMutation = async (mutation: QueuedMutation): Promise<void> => {
       await dataService.deleteExpense(payload.id as string);
       break;
     case 'createIncome':
-      await dataService.createIncome(payload as Partial<Expense>);
+      await dataService.createIncome(
+        payload as Partial<Expense>,
+        readOwnerId(payload),
+      );
       break;
     case 'updateIncome':
       await dataService.updateIncome(
@@ -159,4 +164,12 @@ const applyMutation = async (mutation: QueuedMutation): Promise<void> => {
       throw new Error(`Unknown offline mutation type: ${String(unknownType)}`);
     }
   }
+};
+
+const readOwnerId = (payload: Record<string, unknown>): string => {
+  if (typeof payload.user_id !== 'string' || payload.user_id === '') {
+    throw new Error('Offline mutation is missing its financial space');
+  }
+
+  return payload.user_id;
 };

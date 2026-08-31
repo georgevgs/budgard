@@ -57,12 +57,6 @@
       "afternoon": "Good afternoon",
       "evening": "Good evening"
     },
-    "status": {
-      "comfortable": "Your month has room to breathe.",
-      "watchful": "Your spending pace needs a little attention.",
-      "tight": "This month is tighter than planned.",
-      "noBudget": "Here's how this month is going."
-    },
     "chip": {
       "comfortable": "On track",
       "watchful": "Watch the pace",
@@ -74,9 +68,6 @@
     "overPlan": "You're past your plan for this month.",
     "upcoming": {
       "title": "Coming up"
-    },
-    "insights": {
-      "title": "Worth noticing"
     },
     "recent": {
       "title": "Recent activity",
@@ -92,14 +83,16 @@
       "claim": "I spent nothing today",
       "claimed": "Nothing spent today",
       "undo": "Undo",
-      "celebrate": "{{amount}} set aside this month",
+      "celebrate": "{{amount}} invested this month",
       "setAside": {
         "surplus": "You came in {{amount}} under yesterday.",
-        "action": "Set aside for {{goal}}",
-        "description": "Set aside",
-        "done": "Set aside today",
-        "total": "Set aside this month",
-        "milestone": "{{amount}} to {{target}}"
+        "action": "Invest for {{goal}}",
+        "description": "Invested surplus",
+        "done": "Invested today",
+        "total": "Invested this month",
+        "milestone": "{{amount}} to {{target}}",
+        "invested": "Surplus invested",
+        "investFailed": "Couldn't invest that surplus"
       },
       "toasts": {
         "claimFailed": "Couldn't save your no-spend day",
@@ -179,14 +172,11 @@
       "income": "Received"
     },
     "uncategorized": "Uncategorized",
-    "editTransaction": "Edit {{description}}",
     "emptyTitle": "Nothing here yet",
     "emptyBody": "Log money going out or coming in and it will appear here together.",
     "loadMore": "Show more activity",
     "filterByCategory": "Filter activity by category",
     "allCategories": "All categories",
-    "searchEverywhere_one": "Look through all time ({{count}} match)",
-    "searchEverywhere_other": "Look through all time ({{count}} matches)",
     "period": {
       "label": "Time period",
       "month": "By month",
@@ -448,10 +438,21 @@
   "cashFlow": {
     "title": "Cash flow",
     "yearNet": "{{year}} net",
+    "monthNet": "{{month}} net",
     "totalIncome": "Total income",
     "totalExpense": "Total expenses",
     "avgPerMonth": "{{amount}} average net per month",
-    "monthly": "Monthly breakdown"
+    "viewTrend": "Trend",
+    "viewFlow": "This month"
+  },
+  "moneyFlow": {
+    "income": "Income",
+    "savings": "Savings",
+    "uncategorized": "Uncategorized",
+    "other": "Other",
+    "emptyTitle": "Nothing to show yet",
+    "emptyDescription": "Log an income or an expense this month to see how it flows.",
+    "chartSummary": "Income {{income}} flowing into: {{categories}}"
   },
   "categories": {
     "title": "Categories",
@@ -584,6 +585,14 @@
       "quarterly": "Every 3 months",
       "yearly": "Once a year"
     },
+    "suggestions": {
+      "title": "Looks recurring",
+      "description": "These patterns are suggestions, not automatic rules. Confirm only the ones you recognize.",
+      "pattern": "{{frequency}} · seen {{count}} times · next around {{date}}",
+      "accept": "Make recurring",
+      "notRecurring": "Not recurring",
+      "dismissFailed": "Couldn't dismiss this suggestion"
+    },
     "create": "Create",
     "update": "Update",
     "toggleLabel": "Toggle {{description}}",
@@ -631,6 +640,14 @@
         "title": "Account & subscription",
         "description": "Email, sign out and your current plan"
       },
+      "household": {
+        "title": "Household",
+        "description": "Share your finances with your partner"
+      },
+      "connections": {
+        "title": "Connections & imports",
+        "description": "Bank statements, sync status and review automation"
+      },
       "preferences": {
         "title": "Appearance & preferences",
         "description": "Theme, accent, language and currency"
@@ -650,6 +667,50 @@
       "signOut": "Sign Out",
       "signOutConfirmTitle": "Sign Out",
       "signOutConfirmDescription": "Are you sure you want to sign out?"
+    },
+    "household": {
+      "title": "Household sharing",
+      "shareTogether": "One plan, two people",
+      "description": "Invite one partner to view and manage the same transactions, accounts, goals and recurring items. Your login, notifications and security settings stay personal.",
+      "email": "Partner's email",
+      "emailPlaceholder": "partner@example.com",
+      "invite": "Invite partner",
+      "inviting": "Creating invitation…",
+      "inviteCreated": "Invitation ready",
+      "inviteFailed": "Couldn't create the household invitation",
+      "copyLink": "Copy invitation link",
+      "linkCopied": "Invitation link copied",
+      "copyFailed": "Couldn't copy the invitation link",
+      "waiting": "Waiting for them to accept",
+      "memberActive": "Household member",
+      "joined": "You joined this household",
+      "remove": "Remove",
+      "leave": "Leave",
+      "removeTitle": "Remove household access?",
+      "removeDescription": "{{email}} will immediately lose access to your finances. Your records stay intact.",
+      "leaveTitle": "Leave this household?",
+      "leaveDescription": "You will immediately lose access to {{email}}'s finances. Your own records stay intact.",
+      "confirmRemove": "Remove access",
+      "accepted": "Household joined",
+      "acceptFailed": "Couldn't accept the household invitation",
+      "removeFailed": "Couldn't update household access",
+      "removed": "Household access removed"
+    },
+    "connections": {
+      "title": "Bank data",
+      "notConfigured": "Direct connections are not available yet",
+      "notConfiguredDescription": "The secure sync boundary is ready, but Budgard will not ask for bank access until a regulated data provider is configured. Statement imports already apply your rules, detect recurring payments and wait in Review.",
+      "importDescription": "Import a CSV, OFX, QFX or QIF statement. Every row waits in Review so automation stays under your control.",
+      "importAction": "Import bank statement",
+      "loadFailed": "Couldn't load connection status.",
+      "lastSynced": "Last synced {{date}}",
+      "status": {
+        "pending": "Pending",
+        "active": "Connected",
+        "reauth_required": "Reconnect",
+        "error": "Needs attention",
+        "disconnected": "Disconnected"
+      }
     },
     "appearance": {
       "title": "Appearance",
@@ -721,7 +782,7 @@
       "title": "Subscription",
       "planLabel": "Plan",
       "freePlan": "Free",
-      "freeBody": "Pro unlocks per-category budgets, savings goals, unlimited recurring expenses, full history and CSV exports.",
+      "freeBody": "Pro unlocks household sharing, account-funded investment goals, unlimited recurring expenses, full history and CSV exports.",
       "upgrade": "Upgrade to Pro",
       "pro": "Pro",
       "proMonthly": "Pro — Monthly",
@@ -774,6 +835,9 @@
     "upgrade": "Upgrade to Pro",
     "openProfileMenu": "Open profile menu",
     "signedInAs": "Signed in as",
+    "financialSpace": "Finances",
+    "myFinances": "My finances",
+    "sharedFinances": "Shared with {{email}}",
     "ariaLabel": "Main navigation",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
@@ -825,6 +889,9 @@
     "selectCategory": "Pick a category",
     "tagLabel": "Tag",
     "selectTag": "Pick a tag",
+    "accountLabel": "Investment account",
+    "selectAccount": "Pick an investment account",
+    "accountHint": "The account's current value becomes the goal's real progress.",
     "deadlineLabel": "By {{date}}",
     "daysLeft": "{{days}}d left",
     "overdue": "Overdue",
@@ -835,6 +902,10 @@
     "percentComplete": "{{percent}}% done",
     "overachieved": "{{percent}}% — over target",
     "sources": {
+      "account": {
+        "label": "Investment account",
+        "description": "Track money that has actually reached an investment account"
+      },
       "category": {
         "label": "Spending in a category",
         "description": "Track money flowing into one category (e.g. Savings)"
@@ -849,6 +920,7 @@
       }
     },
     "sourceLabel": {
+      "account": "Funded in · {{name}}",
       "category": "Tracked by category · {{name}}",
       "tag": "Tracked by tag · {{name}}",
       "netDelta": "Tracked by net surplus"
@@ -1097,10 +1169,8 @@
     "viewMonthDetails": "View month details",
     "chooseMonth": "Choose a month",
     "noCategorizedExpenses": "No categorized expenses for {{year}}",
-    "yearOverview": "Year overview",
     "sameAsLastMonth": "Same as last month",
     "budgetLabel": "Budget: {{amount}}",
-    "budgetUsed": "{{percent}}% of budget used",
     "avgPerMonth": "avg {{amount}}/mo",
     "categoryTrends": "Where your money went",
     "review": {
@@ -1154,7 +1224,6 @@
     "emptyDescription": "Add your first expenses and this screen fills with insights about your spending.",
     "trendSummary": "Spending over {{count}} months, {{first}} to {{last}}, ranging from {{low}} to {{high}}.",
     "monthlyTrend": "Monthly spending trend",
-    "cashFlowSummary": "Money in and out over {{count}} months, {{first}} to {{last}}. Net {{net}}.",
     "forecastSummary": "Projection for the next {{count}} months, ending {{last}} with a net of {{net}}.",
     "rhythm": {
       "title": "Your year in rhythm",
@@ -1175,6 +1244,45 @@
       "moreSpendingThanLastMonth": "{{percent}}% more spending than last month",
       "lessSpendingThanLastMonth": "{{percent}}% less spending than last month",
       "whereItWent": "Where it went"
+    }
+  },
+  "review": {
+    "title": "Review transactions",
+    "subtitle": "{{count}} imported transaction(s) waiting for a quick check.",
+    "bannerTitle": "{{count}} transaction(s) to review",
+    "bannerDescription": "Confirm them once, or teach Budgard what to do next time.",
+    "selectAll": "Select all",
+    "reviewSelected": "Review selected ({{count}})",
+    "selectTransaction": "Select {{merchant}}",
+    "looksRight": "Looks right",
+    "teach": "Teach Budgard",
+    "empty": "Everything is reviewed",
+    "emptyDescription": "New statement imports and connected transactions will wait here for your confirmation.",
+    "backToActivity": "Back to activity",
+    "statementSaid": "Statement: {{description}}",
+    "rowMetadata": "{{date}} · {{type}} · {{category}}",
+    "expense": "Expense",
+    "income": "Income",
+    "uncategorized": "Uncategorized",
+    "rule": {
+      "title": "Teach Budgard",
+      "description": "Turn this correction into a reusable rule for matching transactions.",
+      "matchType": "When text",
+      "exact": "Matches exactly",
+      "contains": "Contains",
+      "statementText": "Statement text",
+      "then": "Then apply",
+      "merchant": "Clean merchant name",
+      "category": "Category",
+      "keepCategory": "Keep the current category",
+      "save": "Save and apply rule",
+      "saving": "Teaching…"
+    },
+    "toasts": {
+      "reviewFailed": "Couldn't mark those transactions as reviewed",
+      "reviewed": "Reviewed {{count}} transaction(s)",
+      "ruleFailed": "Couldn't save the transaction rule",
+      "ruleCreated": "Rule saved and applied"
     }
   },
   "import": {
@@ -1235,7 +1343,6 @@
     "invalidType": "Invalid file type. Please use JPEG, PNG, WebP, or HEIC",
     "fileTooLarge": "File is too large. Maximum size is 10MB",
     "changeReceipt": "Change receipt",
-    "attached": "Attached",
     "scanReceipt": "Scan receipt",
     "scanning": "Scanning receipt…",
     "cancelScan": "Cancel scan",
@@ -1307,7 +1414,7 @@
     "redirecting": "Taking you to checkout…",
     "checkoutError": "Couldn't start checkout. Please try again.",
     "features": {
-      "f1": "Per-category budgets",
+      "f1": "Household sharing",
       "f2": "Savings goals",
       "f3": "Unlimited recurring expenses and multiple tags",
       "f4": "Full history, cash flow and 12-month forecast",
@@ -1319,10 +1426,11 @@
     "gate": {
       "goalsTitle": "Savings goals are a Pro feature",
       "goalsBody": "Set targets, watch them fill up, and celebrate when you hit them. Upgrade to start saving with intent.",
-      "analyticsTitle": "See beyond 3 months",
-      "analyticsBody": "The free plan shows your last 3 months. Pro unlocks your full history, cash flow, and CSV exports.",
+      "forecastTitle": "Forecast is a Pro feature",
+      "forecastBody": "Project your income and spending forward, and see when your balance runs low. Upgrade to plan ahead.",
+      "annualExportTitle": "Annual export is a Pro feature",
+      "annualExportBody": "Download a full year of transactions, a category summary, or a PDF report. Upgrade to take your records anywhere.",
       "recurringLimit": "The free plan includes up to {{limit}} recurring expenses. Upgrade for unlimited.",
-      "analyticsWindow": "Showing your last 3 months — unlock full history with Pro",
       "accountLimit": "The free plan tracks up to {{limit}} accounts. Upgrade for unlimited.",
       "categoryLimit": "The free plan includes up to {{limit}} categories. Upgrade for unlimited.",
       "investTitle": "Investment analytics is a Pro feature",
@@ -1332,12 +1440,24 @@
       "debtPlanBody": "Compare snowball vs avalanche, add a monthly extra, and see your debt-free date. Upgrade to plan your payoff.",
       "receiptScan": "Scanning receipts is a Pro feature. Upgrade to fill in an expense from a photo.",
       "csvExport": "CSV export is a Pro feature. Upgrade to take your transactions anywhere.",
-      "categoryBudgets": "Per-category budgets are a Pro feature. Upgrade to cap each category."
+      "categoryBudgets": "Per-category budgets are a Pro feature. Upgrade to cap each category.",
+      "household": "Household sharing is a Pro feature. Upgrade to plan and track money together."
     },
     "successTitle": "Welcome to Pro!",
     "successBody": "Your subscription is active. Enjoy the full picture.",
     "cancelledTitle": "Checkout cancelled",
     "cancelledBody": "No charge was made. You can upgrade any time."
+  },
+  "householdJoin": {
+    "title": "Join a household",
+    "subtitle": "Review the invitation before sharing your finances.",
+    "invitedBy": "{{email}} invited you",
+    "accessDescription": "You will be able to view and manage their financial records. Your login, notifications and security settings remain yours.",
+    "accept": "Join household",
+    "joining": "Joining…",
+    "unavailable": "Invitation unavailable",
+    "unavailableDescription": "This link may have expired, already been used, or belong to another email address.",
+    "back": "Back to Budgard"
   },
   "legal": {
     "backHome": "Back to Budgard",
@@ -1356,7 +1476,8 @@
           "heading": "The data we store",
           "paragraphs": [
             "Your account is your email address — we use it to sign you in with one-time codes and to send account emails. No password is stored.",
-            "Everything you enter in the app is stored so we can show it back to you and sync it across your devices: expenses, income, categories, tags, budgets, savings goals, recurring expenses, debts, accounts and net-worth snapshots, plus your preferences such as language, currency, theme, Today layout and notification choices.",
+            "Everything you enter in the app is stored so we can show it back to you and sync it across your devices: expenses, income, merchants, transaction rules, categories, tags, budgets, goals, recurring expenses, debts, accounts and net-worth snapshots, plus your preferences such as language, currency, theme, Today layout and notification choices.",
+            "If you join household sharing, the owner and invited partner can both view and manage the financial records in that shared space. Either person can end access in Settings; billing, notification and security settings are never shared.",
             "If you send feedback or report a problem, we store the message with your account, the screen you sent it from and the app version so we can understand the request or fix the issue. Financial records are not attached automatically.",
             "If you turn on push notifications, we also store the push token your browser issues for your device."
           ]
@@ -1438,13 +1559,13 @@
         {
           "heading": "Your account",
           "paragraphs": [
-            "You sign in with one-time email codes, so your account is as safe as your inbox — keep access to your email secure. You are responsible for what happens under your account, and one account is meant for one person."
+            "You sign in with one-time email codes, so your account is as safe as your inbox — keep access to your email secure. Each login belongs to one person; household sharing lets an invited partner collaborate through their own login."
           ]
         },
         {
           "heading": "Free and Pro",
           "paragraphs": [
-            "The core of Budgard is free. Pro is an optional paid subscription that unlocks additional features such as per-category budgets, savings goals, unlimited recurring expenses, full history and CSV exports.",
+            "The core of Budgard is free. Pro is an optional paid subscription that unlocks additional features such as household sharing, account-funded investment goals, unlimited recurring expenses, full history and CSV exports.",
             "Plans may evolve over time. If we materially reduce what Pro includes, we will tell you before your next renewal."
           ]
         },
@@ -1511,7 +1632,9 @@
         },
         {
           "heading": "Contact",
-          "paragraphs": ["Questions about these terms: {{email}}."]
+          "paragraphs": [
+            "Questions about these terms: {{email}}."
+          ]
         }
       ]
     },
@@ -1547,7 +1670,6 @@
       "previewPace": "€86 ahead",
       "previewPaceBody": "Less spent than this point last month",
       "previewUpcoming": "€88.40 planned this week",
-      "previewInsight": "Dining out is gentler than last month",
       "previewBillDay": "Fri",
       "previewBill": "Internet"
     },
@@ -1587,8 +1709,8 @@
       "capability2": {
         "eyebrow": "Plan",
         "title": "Give tomorrow a number.",
-        "item1": "Monthly and per-category budgets with quiet alerts",
-        "item2": "Savings goals, upcoming bills and recurring commitments",
+        "item1": "One monthly guardrail with quiet alerts",
+        "item2": "Account-funded goals, upcoming bills and recurring commitments",
         "item3": "Net worth, investments and snowball or avalanche debt plans"
       },
       "capability3": {
@@ -1607,28 +1729,6 @@
       "step3": "Tap <strong>Add to Home Screen</strong>",
       "step4": "Tap <strong>Add</strong> in the top right corner"
     },
-    "analytics": {
-      "eyebrow": "Clarity, monthly",
-      "heading": "See where your money lands.",
-      "body": "Twelve months of spending in one calm chart. No filters to fuss with, no dashboards to build. Just a clean read on where things are going.",
-      "cardLabel": "Last 12 months",
-      "cardSub": "Total spent",
-      "legendStart": "May",
-      "legendEnd": "Apr"
-    },
-    "budget": {
-      "eyebrow": "Stay on plan",
-      "heading": "A budget that breathes with your month.",
-      "body": "Set a monthly cap. Watch your categories fill up in real time. Budgard nudges quietly when you're close — no shame, no spam.",
-      "cardLabel": "Monthly budget",
-      "spent": "Spent so far",
-      "cats": {
-        "housing": "Housing",
-        "food": "Food",
-        "transport": "Transport",
-        "subs": "Subscriptions"
-      }
-    },
     "scan": {
       "eyebrow": "Pro · Receipt scanning",
       "heading": "Point at a receipt. Keep the evening.",
@@ -1642,22 +1742,6 @@
       "merchant": "Corner Market",
       "resultDate": "Today",
       "category": "Food"
-    },
-    "flow": {
-      "eyebrow": "The whole picture",
-      "heading": "Money in, money out, and what's left of it.",
-      "body": "Budgard tracks what arrives as carefully as what leaves. See income beside spending, watch net worth build across your accounts, and set goals that fill as you go.",
-      "point1": "Income and expenses in one timeline",
-      "point2": "Net worth, accounts, investments and debts",
-      "point3": "Bring your history — import a CSV from your old app",
-      "cardLabel": "Net worth",
-      "cardDelta": "+€640 this month",
-      "goal": "Emergency fund",
-      "rows": {
-        "salary": "Salary",
-        "freelance": "Freelance",
-        "spending": "Spending"
-      }
     },
     "privacy": {
       "eyebrow": "Privacy by default",
@@ -1705,8 +1789,8 @@
         "cta": "Get Pro",
         "trialNote": "7-day free trial for first-time subscribers",
         "feature1": "Everything in Free",
-        "feature2": "Per-category budgets",
-        "feature3": "Savings goals",
+        "feature2": "Household sharing with one partner",
+        "feature3": "Account-funded investment goals",
         "feature4": "Unlimited recurring expenses and multiple tags",
         "feature5": "Full analytics history, cash flow and 12-month forecast",
         "feature6": "Unlimited accounts and investment analytics",
@@ -1725,7 +1809,7 @@
       },
       "q2": {
         "question": "What's actually different on Pro?",
-        "answer": "Per-category budgets, savings goals, unlimited recurring expenses, multiple tags per expense, unlimited accounts with investment analytics, a debt payoff planner, full all-time analytics with cash-flow trends and a 12-month forecast, plus CSV and annual PDF reports. The full list is in the pricing card above."
+        "answer": "Household sharing, account-funded investment goals, unlimited recurring expenses, multiple tags per expense, unlimited accounts with investment analytics, a debt payoff planner, full all-time analytics with cash-flow trends and a 12-month forecast, plus CSV and annual PDF reports. The full list is in the pricing card above."
       },
       "q3": {
         "question": "Can I cancel anytime?",
@@ -1803,6 +1887,7 @@
     "targetMax10M": "Target must be between 0 and 10.000.000",
     "goalCategoryRequired": "Pick a category to track",
     "goalTagRequired": "Pick a tag to track",
+    "goalAccountRequired": "Pick an investment account to fund",
     "currencyRequired": "Pick a currency",
     "startingBalanceRequired": "Starting balance is required",
     "balanceRequired": "Balance is required",
@@ -1813,7 +1898,10 @@
     "minPaymentRequired": "Minimum payment is required",
     "dateInFuture": "That date is in the future",
     "feedbackTooShort": "Add at least 10 characters",
-    "feedbackTooLong": "Keep the message under 2,000 characters"
+    "feedbackTooLong": "Keep the message under 2,000 characters",
+    "ruleMatchRequired": "Add the statement text to match",
+    "ruleMatchTooLong": "Keep the match text under 200 characters",
+    "ruleActionRequired": "Choose at least one change for the rule"
   },
   "errorBoundary": {
     "updateTitle": "Update Available",

@@ -12,9 +12,13 @@ import {
 import { Button } from '@/components/ui/button';
 import Settings from 'lucide-react/dist/esm/icons/settings';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import Check from 'lucide-react/dist/esm/icons/check';
+import UsersRound from 'lucide-react/dist/esm/icons/users-round';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useUpgradeDialog } from '@/contexts/UpgradeDialogContext';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
+import type { FinancialSpace } from '@/types/Household';
 
 // The header's only menu. It used to sit opposite a second, identically
 // styled dropdown holding Goals / Net worth / Debts — two pill buttons that
@@ -27,11 +31,12 @@ const ProfileMenu = () => {
   const navigate = useNavigate();
   const { isPro } = useSubscription();
   const { openUpgrade } = useUpgradeDialog();
+  const financialSpace = useFinancialSpace();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   if (!session?.user) return null;
 
-  const initial = getInitial(session.user.email);
+  const initial = getInitial(financialSpace.activeSpace.label);
 
   return (
     <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
@@ -51,6 +56,7 @@ const ProfileMenu = () => {
       </ScrollSafeDropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         {renderEmail(session.user.email, t)}
+        {renderSpaces(financialSpace, t)}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => navigate('/settings', { viewTransition: true })}
@@ -107,4 +113,64 @@ const renderUpgradeItem = (
       {t('navigation.upgrade')}
     </DropdownMenuItem>
   );
+};
+
+type SpaceContext = ReturnType<typeof useFinancialSpace>;
+
+const renderSpaces = (spaceContext: SpaceContext, t: TranslateFunction) => {
+  if (spaceContext.spaces.length < 2) {
+    return null;
+  }
+
+  return (
+    <>
+      <DropdownMenuSeparator />
+      <DropdownMenuLabel className="flex items-center gap-2 text-xs font-normal text-muted-foreground">
+        <UsersRound className="h-3.5 w-3.5" />
+        {t('navigation.financialSpace')}
+      </DropdownMenuLabel>
+      {spaceContext.spaces.map((space) =>
+        renderSpaceItem(space, spaceContext, t),
+      )}
+    </>
+  );
+};
+
+const renderSpaceItem = (
+  space: FinancialSpace,
+  spaceContext: SpaceContext,
+  t: TranslateFunction,
+) => {
+  const isActive = space.ownerId === spaceContext.activeOwnerId;
+
+  return (
+    <DropdownMenuItem
+      key={space.ownerId}
+      onClick={() => spaceContext.selectSpace(space.ownerId)}
+    >
+      <span className="flex h-4 w-4 items-center justify-center">
+        {renderActiveCheck(isActive)}
+      </span>
+      <span className="min-w-0 flex-1 truncate">{getSpaceLabel(space, t)}</span>
+    </DropdownMenuItem>
+  );
+};
+
+const renderActiveCheck = (isActive: boolean) => {
+  if (!isActive) {
+    return null;
+  }
+
+  return <Check className="h-4 w-4 text-primary-ink" />;
+};
+
+const getSpaceLabel = (
+  space: FinancialSpace,
+  t: TranslateFunction,
+): string => {
+  if (!space.isShared) {
+    return t('navigation.myFinances');
+  }
+
+  return t('navigation.sharedFinances', { email: space.label });
 };

@@ -14,6 +14,7 @@ vi.mock('@/contexts/DataContext', () => ({
   useGoalsData: () => dataMock.goals,
   useExpensesData: () => [],
   useIncomesData: () => [],
+  useAccountsData: () => ({ accounts: [] }),
   useCategoriesData: () => ({
     categories: [],
     expenseCategories: [],

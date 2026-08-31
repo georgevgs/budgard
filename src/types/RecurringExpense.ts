@@ -21,5 +21,7 @@ export type RecurringExpense = {
   created_at: string;
   active: boolean;
   type?: 'expense' | 'income';
+  detection_source?: 'manual' | 'suggested';
+  merchant_pattern?: string | null;
   category?: EmbeddedCategory;
 }

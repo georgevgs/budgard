@@ -2,6 +2,8 @@ import { describe, it, expect, vi } from 'vitest';
 import { supabase } from '@/lib/supabase';
 import { dataService } from '@/services/dataService';
 
+const OWNER_ID = 'user-1';
+
 // Build a chainable mock that captures the final call intent
 const mockChain = (finalData: unknown = null, finalError: unknown = null) => {
   const chain: Record<string, ReturnType<typeof vi.fn>> = {};
@@ -37,7 +39,7 @@ describe('dataService', () => {
     const chain = mockChain([{ id: 'c1', name: 'Food' }]);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.getCategories();
+    const result = await dataService.getCategories(OWNER_ID);
     expect(supabase.from).toHaveBeenCalledWith('categories');
     expect(chain.select).toHaveBeenCalledWith('*');
     expect(chain.order).toHaveBeenCalledWith('name');
@@ -48,7 +50,7 @@ describe('dataService', () => {
     const chain = mockChain(null, { message: 'fail' });
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    await expect(dataService.getCategories()).rejects.toEqual({
+    await expect(dataService.getCategories(OWNER_ID)).rejects.toEqual({
       message: 'fail',
     });
   });
@@ -58,7 +60,7 @@ describe('dataService', () => {
     vi.mocked(supabase.from).mockReturnValue(chain as never);
     const controller = new AbortController();
 
-    await dataService.getCategories(controller.signal);
+    await dataService.getCategories(OWNER_ID, controller.signal);
     expect(chain.abortSignal).toHaveBeenCalledWith(controller.signal);
   });
 
@@ -67,7 +69,7 @@ describe('dataService', () => {
     const chain = mockChain([{ id: 't1', name: 'Daily' }]);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.getTags();
+    const result = await dataService.getTags(OWNER_ID);
     expect(supabase.from).toHaveBeenCalledWith('tags');
     expect(result).toEqual([{ id: 't1', name: 'Daily' }]);
   });
@@ -78,8 +80,15 @@ describe('dataService', () => {
     const chain = mockChain(tag);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.createTag({ name: 'Work', color: '#000' });
-    expect(chain.insert).toHaveBeenCalledWith({ name: 'Work', color: '#000' });
+    const result = await dataService.createTag(
+      { name: 'Work', color: '#000' },
+      OWNER_ID,
+    );
+    expect(chain.insert).toHaveBeenCalledWith({
+      name: 'Work',
+      color: '#000',
+      user_id: OWNER_ID,
+    });
     expect(chain.single).toHaveBeenCalled();
     expect(result).toEqual(tag);
   });
@@ -89,7 +98,7 @@ describe('dataService', () => {
     const chain = mockChain([{ id: 'e1', amount: 10 }]);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.getExpenses();
+    const result = await dataService.getExpenses(OWNER_ID);
     expect(supabase.from).toHaveBeenCalledWith('expenses');
     expect(chain.select).toHaveBeenCalled();
     expect(result).toEqual([{ id: 'e1', amount: 10, extra_tags: [] }]);
@@ -104,7 +113,7 @@ describe('dataService', () => {
       () => chains[call++] as never,
     );
 
-    const result = await dataService.getExpenses();
+    const result = await dataService.getExpenses(OWNER_ID);
     expect(result).toHaveLength(1001);
     expect(chains[0].range).toHaveBeenCalledWith(0, 999);
     expect(chains[1].range).toHaveBeenCalledWith(1000, 1999);
@@ -116,13 +125,17 @@ describe('dataService', () => {
     const chain = mockChain(expense);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.createExpense({
-      amount: 50,
-      description: 'Test',
-    });
+    const result = await dataService.createExpense(
+      {
+        amount: 50,
+        description: 'Test',
+      },
+      OWNER_ID,
+    );
     expect(chain.insert).toHaveBeenCalledWith({
       amount: 50,
       description: 'Test',
+      user_id: OWNER_ID,
     });
     expect(result).toEqual({ ...expense, extra_tags: [] });
   });
@@ -159,8 +172,10 @@ describe('dataService', () => {
       { date: '2026-01-01', description: 'A', amount: 10, category_id: null },
       { date: '2026-01-02', description: 'B', amount: 20, category_id: null },
     ];
-    const result = await dataService.createExpensesBulk(data);
-    expect(chain.insert).toHaveBeenCalledWith(data);
+    const result = await dataService.createExpensesBulk(data, OWNER_ID);
+    expect(chain.insert).toHaveBeenCalledWith(
+      data.map((expense) => ({ ...expense, user_id: OWNER_ID })),
+    );
     expect(result).toEqual(bulk.map((row) => ({ ...row, extra_tags: [] })));
   });
 
@@ -170,11 +185,18 @@ describe('dataService', () => {
     const chain = mockChain(cat);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.createCategory({
+    const result = await dataService.createCategory(
+      {
+        name: 'Food',
+        color: '#F00',
+      },
+      OWNER_ID,
+    );
+    expect(chain.insert).toHaveBeenCalledWith({
       name: 'Food',
       color: '#F00',
+      user_id: OWNER_ID,
     });
-    expect(chain.insert).toHaveBeenCalledWith({ name: 'Food', color: '#F00' });
     expect(result).toEqual(cat);
   });
 
@@ -232,7 +254,7 @@ describe('dataService', () => {
     const chain = mockChain([{ id: 'r1' }]);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.getRecurringExpenses();
+    const result = await dataService.getRecurringExpenses(OWNER_ID);
     expect(supabase.from).toHaveBeenCalledWith('recurring_expenses');
     expect(result).toEqual([{ id: 'r1' }]);
   });
@@ -243,9 +265,12 @@ describe('dataService', () => {
     const chain = mockChain(rec);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.createRecurringExpense({
-      frequency: 'monthly',
-    } as never);
+    const result = await dataService.createRecurringExpense(
+      {
+        frequency: 'monthly',
+      } as never,
+      OWNER_ID,
+    );
     expect(chain.insert).toHaveBeenCalled();
     expect(result).toEqual(rec);
   });
@@ -292,7 +317,7 @@ describe('dataService', () => {
     const chain = mockChain(budget);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.getBudget();
+    const result = await dataService.getBudget(OWNER_ID);
     expect(supabase.from).toHaveBeenCalledWith('user_budgets');
     expect(chain.maybeSingle).toHaveBeenCalled();
     expect(result).toEqual(budget);
@@ -302,37 +327,22 @@ describe('dataService', () => {
     const chain = mockChain(null);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.getBudget();
+    const result = await dataService.getBudget(OWNER_ID);
     expect(result).toBeNull();
   });
 
   // --- upsertBudget ---
   it('upserts budget for current user', async () => {
-    // Mock the local session read (no network round trip)
-    vi.mocked(supabase.auth.getSession).mockResolvedValue({
-      data: { session: { user: { id: 'user-1' } } },
-    } as never);
-
     const budget = { id: 'b1', monthly_amount: 3000 };
     const chain = mockChain(budget);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.upsertBudget(3000);
+    const result = await dataService.upsertBudget(3000, OWNER_ID);
     expect(chain.upsert).toHaveBeenCalledWith(
-      { user_id: 'user-1', monthly_amount: 3000 },
+      { user_id: OWNER_ID, monthly_amount: 3000 },
       { onConflict: 'user_id' },
     );
     expect(result).toEqual(budget);
-  });
-
-  it('throws when upsertBudget called without authenticated user', async () => {
-    vi.mocked(supabase.auth.getSession).mockResolvedValue({
-      data: { session: null },
-    } as never);
-
-    await expect(dataService.upsertBudget(1000)).rejects.toThrow(
-      'Not authenticated',
-    );
   });
 
   // --- getUser ---
@@ -418,7 +428,7 @@ describe('dataService', () => {
     const chain = mockChain(debts);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.getDebts();
+    const result = await dataService.getDebts(OWNER_ID);
     expect(supabase.from).toHaveBeenCalledWith('debts');
     expect(chain.eq).toHaveBeenCalledWith('is_archived', false);
     expect(chain.order).toHaveBeenCalledWith('created_at', {
@@ -438,16 +448,19 @@ describe('dataService', () => {
     const chain = mockChain(created);
     vi.mocked(supabase.from).mockReturnValue(chain as never);
 
-    const result = await dataService.createDebt({
-      name: 'Card',
-      kind: 'credit_card',
-      current_balance: 5000,
-      apr: 18,
-      minimum_payment: 150,
-      currency: 'EUR',
-      icon: 'credit-card',
-      color: '#f97316',
-    });
+    const result = await dataService.createDebt(
+      {
+        name: 'Card',
+        kind: 'credit_card',
+        current_balance: 5000,
+        apr: 18,
+        minimum_payment: 150,
+        currency: 'EUR',
+        icon: 'credit-card',
+        color: '#f97316',
+      },
+      OWNER_ID,
+    );
 
     expect(chain.insert).toHaveBeenCalledWith(
       expect.objectContaining({

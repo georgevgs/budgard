@@ -64,6 +64,14 @@ const PublicApp = () => {
             <Route path="/privacy" element={renderLegalPage(<PrivacyPage />)} />
             <Route path="/terms" element={renderLegalPage(<TermsPage />)} />
             <Route path="/contact" element={renderLegalPage(<ContactPage />)} />
+            <Route
+              path="/join"
+              element={
+                <Suspense fallback={<LandingLoadingState />}>
+                  <LandingPage />
+                </Suspense>
+              }
+            />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </ErrorBoundary>

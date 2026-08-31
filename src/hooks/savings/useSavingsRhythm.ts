@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { format, getDaysInMonth, subDays, subMonths } from 'date-fns';
 import {
   useCategoriesData,
+  useAccountsData,
   useDataConfig,
   useGoalsData,
   useNoSpendDaysData,
@@ -144,8 +145,30 @@ export const useSavingsRhythm = (expenses: Expense[]): SavingsRhythm | null => {
 export const useSetAsideGoal = (): Goal | null => {
   const goals = useGoalsData();
   const { expenseCategories } = useCategoriesData();
+  const { accounts } = useAccountsData();
 
   return useMemo(() => {
+    const investmentAccountIds = new Set(
+      accounts
+        .filter(
+          (account) => account.kind === 'investment' && !account.is_archived,
+        )
+        .map((account) => account.id),
+    );
+    const investmentGoal = goals.find((goal) => {
+      if (goal.is_completed) {
+        return false;
+      }
+      if (goal.source_type !== 'account') {
+        return false;
+      }
+
+      return investmentAccountIds.has(goal.linked_account_id ?? '');
+    });
+    if (investmentGoal) {
+      return investmentGoal;
+    }
+
     const savingsCategoryIds = buildSavingsCategoryIds(expenseCategories);
     const eligible = goals.filter((goal) => {
       if (goal.is_completed) {
@@ -159,7 +182,7 @@ export const useSetAsideGoal = (): Goal | null => {
     });
 
     return eligible[0] ?? null;
-  }, [goals, expenseCategories]);
+  }, [goals, expenseCategories, accounts]);
 };
 
 // --- Helpers ---
@@ -241,10 +264,9 @@ const computeSurplus = (
   return Math.min(allowance - (spendByDay.get(key) ?? 0), allowance);
 };
 
-// Deliberately NOT filtered by countsAsSpending. A transfer into savings is
-// exactly the kind of row someone marks as "not spending" — and it is also
-// exactly the set-aside this is measuring. Excluding it here would zero out
-// the rhythm for the users most diligently using the feature.
+// Deliberately NOT filtered by countsAsSpending. Investment transfers are
+// excluded from spending by design, while legacy savings-category transfers
+// remain recognizable for people who created goals before account funding.
 const sumSetAside = (
   expenses: Expense[],
   savingsCategoryIds: Set<string>,
@@ -252,7 +274,7 @@ const sumSetAside = (
 ): number =>
   expenses
     .filter((expense) => expense.date.slice(0, 7) === monthKey)
-    .filter((expense) => savingsCategoryIds.has(expense.category_id ?? ''))
+    .filter((expense) => isSetAsideTransaction(expense, savingsCategoryIds))
     .reduce((sum, expense) => sum + expense.amount, 0);
 
 const hasSetAsideOn = (
@@ -265,8 +287,19 @@ const hasSetAsideOn = (
       return false;
     }
 
-    return savingsCategoryIds.has(expense.category_id ?? '');
+    return isSetAsideTransaction(expense, savingsCategoryIds);
   });
+
+const isSetAsideTransaction = (
+  expense: Expense,
+  savingsCategoryIds: Set<string>,
+): boolean => {
+  if (expense.goal_id) {
+    return true;
+  }
+
+  return savingsCategoryIds.has(expense.category_id ?? '');
+};
 
 // A near target that fills, rather than a distant one that looms. Motivation
 // rises as a goal gets closer, so the ladder steps up only once each rung is
@@ -282,10 +315,7 @@ const buildMilestone = (setAside: number) => {
   // Refunds are legal, so setAside can be negative — and floor(-10/25)*25+25
   // is 0, which made milestoneProgress -Infinity. The first rung is always a
   // real target.
-  const milestone = Math.max(
-    step,
-    Math.floor(setAside / step) * step + step,
-  );
+  const milestone = Math.max(step, Math.floor(setAside / step) * step + step);
 
   return {
     milestone,

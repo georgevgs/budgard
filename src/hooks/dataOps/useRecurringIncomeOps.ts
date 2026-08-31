@@ -12,8 +12,10 @@ import {
   replaceById,
 } from '@/hooks/dataOps/helpers';
 import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
 
 export const useRecurringIncomeOps = () => {
+  const { activeOwnerId } = useFinancialSpace();
   const { isInitialized } = useDataConfig();
   const { setRecurringIncomes, refreshIncomes } = useDataActions();
   const { t } = useTranslation();
@@ -48,7 +50,7 @@ export const useRecurringIncomeOps = () => {
             return dataService.updateRecurringIncome(incomeData, incomeId);
           }
 
-          return dataService.createRecurringIncome(incomeData);
+          return dataService.createRecurringIncome(incomeData, activeOwnerId);
         },
         commit: (saved) =>
           setRecurringIncomes((prev) => {
@@ -104,5 +106,5 @@ export const useRecurringIncomeOps = () => {
       handleRecurringIncomeDelete,
       handleRecurringIncomeToggle,
     };
-  }, [isInitialized, setRecurringIncomes, refreshIncomes, runMutation, t]);
+  }, [activeOwnerId, isInitialized, setRecurringIncomes, refreshIncomes, runMutation, t]);
 };

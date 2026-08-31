@@ -15,6 +15,15 @@ export type Expense = {
   tag_id?: string | null;
   debt_id?: string | null;
   user_id: string;
+  created_by?: string | null;
+  merchant_name?: string | null;
+  review_status?: 'pending' | 'reviewed';
+  review_reason?: 'import' | 'connection' | null;
+  reviewed_at?: string | null;
+  applied_rule_id?: string | null;
+  goal_id?: string | null;
+  financial_connection_id?: string | null;
+  external_transaction_id?: string | null;
   receipt_path?: string | null;
   created_at: string;
   // Free text, distinct from `description` — the description is the row's
@@ -44,4 +53,4 @@ export type Expense = {
   tag?: EmbeddedTag;
   extra_tags?: EmbeddedTag[];
   debt?: Debt;
-}
+};

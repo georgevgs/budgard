@@ -6,11 +6,13 @@ import { signOut } from '@/lib/auth';
 import type { NotificationPreferenceKey } from '@/types/Budget';
 import { setScalarOptimistic } from '@/hooks/dataOps/helpers';
 import { useMutationRunner } from '@/hooks/dataOps/useMutationRunner';
+import { useFinancialSpace } from '@/contexts/FinancialSpaceContext';
 
 // Every setting here is the same write: show the new value, save it, put the
 // old one back if that fails. None of them buzz on success — the control
 // moving under the user's finger is the confirmation.
 export const useSettingsOps = () => {
+  const { activeOwnerId } = useFinancialSpace();
   const {
     defaultCurrency,
     defaultSavingsPct,
@@ -34,7 +36,8 @@ export const useSettingsOps = () => {
         successHaptic: 'none',
         optimistic: () =>
           setScalarOptimistic(setDefaultCurrency, defaultCurrency, currency),
-        perform: () => dataService.updateDefaultCurrency(currency),
+        perform: () =>
+          dataService.updateDefaultCurrency(currency, activeOwnerId),
       });
 
     const handleDailyReminderHourUpdate = (hour: number | null) =>
@@ -74,7 +77,8 @@ export const useSettingsOps = () => {
         successHaptic: 'none',
         optimistic: () =>
           setScalarOptimistic(setDefaultSavingsPct, defaultSavingsPct, pct),
-        perform: () => dataService.updateDefaultSavingsPct(pct),
+        perform: () =>
+          dataService.updateDefaultSavingsPct(pct, activeOwnerId),
       });
 
     // No retry: re-running an account deletion on a tap is not a kindness.
@@ -98,6 +102,7 @@ export const useSettingsOps = () => {
       handleDeleteAccount,
     };
   }, [
+    activeOwnerId,
     defaultCurrency,
     defaultSavingsPct,
     dailyReminderHour,

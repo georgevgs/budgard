@@ -14,11 +14,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useCategoriesData, useTagsData } from '@/contexts/DataContext';
+import {
+  useAccountsData,
+  useCategoriesData,
+  useTagsData,
+} from '@/contexts/DataContext';
 import type { GoalFormData } from '@/lib/validations';
+import type { Account } from '@/types/Account';
 import type { GoalSourceType } from '@/types/Goal';
 
-const sourceValues = ['category', 'tag', 'net_delta'] as const;
+const sourceValues = ['account', 'net_delta', 'category', 'tag'] as const;
 
 type Props = {
   form: UseFormReturn<GoalFormData>;
@@ -29,6 +34,7 @@ const GoalSourceFields = ({ form, sourceType }: Props) => {
   const { t } = useTranslation();
   const { expenseCategories } = useCategoriesData();
   const tags = useTagsData();
+  const { accounts } = useAccountsData();
 
   return (
     <>
@@ -41,8 +47,18 @@ const GoalSourceFields = ({ form, sourceType }: Props) => {
             <Select
               onValueChange={(value: GoalSourceType) => {
                 field.onChange(value);
-                form.setValue('category_id', undefined, { shouldValidate: true, shouldDirty: true });
-                form.setValue('tag_id', undefined, { shouldValidate: true, shouldDirty: true });
+                form.setValue('category_id', undefined, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                });
+                form.setValue('tag_id', undefined, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                });
+                form.setValue('linked_account_id', undefined, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                });
               }}
               value={field.value}
             >
@@ -72,6 +88,8 @@ const GoalSourceFields = ({ form, sourceType }: Props) => {
       {renderCategoryField(sourceType, form, expenseCategories, t)}
 
       {renderTagField(sourceType, form, tags, t)}
+
+      {renderAccountField(sourceType, form, accounts, t)}
     </>
   );
 };
@@ -125,7 +143,7 @@ const renderCategoryField = (
       )}
     />
   );
-}
+};
 
 const renderTagField = (
   sourceType: GoalSourceType,
@@ -167,4 +185,47 @@ const renderTagField = (
       )}
     />
   );
-}
+};
+
+const renderAccountField = (
+  sourceType: GoalSourceType,
+  form: UseFormReturn<GoalFormData>,
+  accounts: Account[],
+  t: TranslateFunction,
+) => {
+  if (sourceType !== 'account') return null;
+
+  const investmentAccounts = accounts.filter(
+    (account) => account.kind === 'investment' && !account.is_archived,
+  );
+
+  return (
+    <FormField
+      control={form.control}
+      name="linked_account_id"
+      render={({ field }) => (
+        <FormItem>
+          <Label>{t('goals.accountLabel')}</Label>
+          <Select onValueChange={field.onChange} value={field.value}>
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder={t('goals.selectAccount')} />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {investmentAccounts.map((account) => (
+                <SelectItem key={account.id} value={account.id}>
+                  {account.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            {t('goals.accountHint')}
+          </p>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+};

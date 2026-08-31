@@ -56,10 +56,11 @@ test.describe('year in rhythm', () => {
     await expect(
       app.getByRole('heading', { name: /year in rhythm/i }),
     ).toBeVisible();
-    // The single gate now follows all free insights, rather than interrupting
-    // them with a second locked tile near the top of the screen.
+    // The one remaining gate (forecast) follows all free insights, rather
+    // than interrupting them with a locked tile near the top of the screen —
+    // cash flow itself no longer gates at all, it adapts per tier instead.
     await expect(
-      app.getByRole('heading', { name: /see beyond 3 months/i }),
+      app.getByRole('heading', { name: /forecast is a pro feature/i }),
     ).toBeVisible();
   });
 

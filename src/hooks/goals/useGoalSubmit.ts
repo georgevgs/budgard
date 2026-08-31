@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
-import { useDataConfig } from '@/contexts/DataContext';
+import { useAccountsData, useDataConfig } from '@/contexts/DataContext';
 import { useGoalOps } from '@/hooks/dataOps/useGoalOps';
 import { parseCurrencyInput } from '@/lib/utils';
 import type { GoalFormData } from '@/lib/validations';
@@ -14,6 +14,7 @@ type UseGoalSubmitArgs = {
 export const useGoalSubmit = ({ selectedGoal, onDone }: UseGoalSubmitArgs) => {
   const { session } = useAuth();
   const { defaultCurrency } = useDataConfig();
+  const { accounts } = useAccountsData();
   const { handleGoalCreate, handleGoalUpdate } = useGoalOps();
 
   const handleSubmit = async (values: GoalFormData) => {
@@ -34,14 +35,27 @@ export const useGoalSubmit = ({ selectedGoal, onDone }: UseGoalSubmitArgs) => {
       tagId = values.tag_id ?? null;
     }
 
+    let linkedAccountId: string | null = null;
+    if (values.source_type === 'account') {
+      linkedAccountId = values.linked_account_id ?? null;
+    }
+
+    const currency = resolveGoalCurrency(
+      linkedAccountId,
+      selectedGoal,
+      accounts,
+      defaultCurrency,
+    );
+
     const payload: Partial<Goal> = {
       name: values.name,
       target_amount: parseCurrencyInput(values.target_amount),
-      currency: selectedGoal?.currency ?? defaultCurrency,
+      currency,
       deadline,
       source_type: values.source_type,
       category_id: categoryId,
       tag_id: tagId,
+      linked_account_id: linkedAccountId,
       icon: values.icon,
       color: values.color,
     };
@@ -60,4 +74,27 @@ export const useGoalSubmit = ({ selectedGoal, onDone }: UseGoalSubmitArgs) => {
   };
 
   return { handleSubmit };
+};
+
+// --- Helpers ---
+
+const resolveGoalCurrency = (
+  linkedAccountId: string | null,
+  selectedGoal: Goal | undefined,
+  accounts: { id: string; default_currency: string }[],
+  defaultCurrency: string,
+): string => {
+  if (linkedAccountId) {
+    const account = accounts.find(
+      (candidate) => candidate.id === linkedAccountId,
+    );
+    if (account) {
+      return account.default_currency;
+    }
+  }
+  if (selectedGoal) {
+    return selectedGoal.currency;
+  }
+
+  return defaultCurrency;
 };

@@ -1,19 +1,38 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useGoalProgress, useAllGoalProgress } from '@/hooks/useGoalProgress';
+import type { Account } from '@/types/Account';
 import type { Expense } from '@/types/Expense';
 import type { Goal } from '@/types/Goal';
+
+const makeAccount = (overrides: Partial<Account> = {}): Account => ({
+  id: 'a1',
+  user_id: 'u1',
+  name: 'Savings',
+  kind: 'bank',
+  default_currency: 'EUR',
+  current_balance: 0,
+  cost_basis: 0,
+  icon: 'landmark',
+  color: '#f97316',
+  is_archived: false,
+  created_at: '2026-01-01T00:00:00Z',
+  updated_at: '2026-01-01T00:00:00Z',
+  ...overrides,
+});
 
 let dataMock: {
   expenses: Expense[];
   incomes: Expense[];
   goals: Goal[];
-} = { expenses: [], incomes: [], goals: [] };
+  accounts: Account[];
+} = { expenses: [], incomes: [], goals: [], accounts: [] };
 
 vi.mock('@/contexts/DataContext', () => ({
   useExpensesData: () => dataMock.expenses,
   useIncomesData: () => dataMock.incomes,
   useGoalsData: () => dataMock.goals,
+  useAccountsData: () => ({ accounts: dataMock.accounts }),
 }));
 
 const makeExpense = (
@@ -54,7 +73,7 @@ const makeGoal = (overrides: Partial<Goal> = {}): Goal => ({
 describe('useGoalProgress', () => {
   beforeEach(() => {
     vi.setSystemTime(new Date('2026-04-01'));
-    dataMock = { expenses: [], incomes: [], goals: [] };
+    dataMock = { expenses: [], incomes: [], goals: [], accounts: [] };
   });
 
   describe('source: category', () => {
@@ -69,6 +88,7 @@ describe('useGoalProgress', () => {
         ],
         incomes: [],
         goals: [],
+        accounts: [],
       };
       const goal = makeGoal({
         source_type: 'category',
@@ -101,6 +121,7 @@ describe('useGoalProgress', () => {
         ],
         incomes: [],
         goals: [],
+        accounts: [],
       };
       const goal = makeGoal({ source_type: 'tag', tag_id: 'travel' });
 
@@ -127,6 +148,7 @@ describe('useGoalProgress', () => {
         ],
         incomes: [],
         goals: [],
+        accounts: [],
       };
       const goal = makeGoal({ source_type: 'tag', tag_id: 'travel' });
 
@@ -151,6 +173,7 @@ describe('useGoalProgress', () => {
         ],
         incomes: [],
         goals: [goal],
+        accounts: [],
       };
 
       const { result } = renderHook(() => useAllGoalProgress());
@@ -165,6 +188,7 @@ describe('useGoalProgress', () => {
         expenses: [makeExpense('2026-02-01', 200), makeExpense('2026-03-01', 100)],
         incomes: [makeExpense('2026-02-15', 800), makeExpense('2026-03-10', 500)],
         goals: [],
+        accounts: [],
       };
       const goal = makeGoal({ source_type: 'net_delta' });
 
@@ -180,6 +204,7 @@ describe('useGoalProgress', () => {
         expenses: [makeExpense('2026-03-01', 1000)],
         incomes: [makeExpense('2026-03-01', 200)],
         goals: [],
+        accounts: [],
       };
       const goal = makeGoal({ source_type: 'net_delta' });
 
@@ -192,12 +217,67 @@ describe('useGoalProgress', () => {
     });
   });
 
+  describe('source: account', () => {
+    it("reports the linked account's current balance as progress", () => {
+      dataMock = {
+        expenses: [],
+        incomes: [],
+        goals: [],
+        accounts: [
+          makeAccount({ id: 'checking', current_balance: 450 }),
+          makeAccount({ id: 'savings', current_balance: 620 }),
+        ],
+      };
+      const goal = makeGoal({
+        source_type: 'account',
+        linked_account_id: 'savings',
+      });
+
+      const { result } = renderHook(() => useGoalProgress(goal));
+
+      expect(result.current.current).toBe(620);
+    });
+
+    it('returns 0 progress when linked_account_id is missing', () => {
+      dataMock = {
+        expenses: [],
+        incomes: [],
+        goals: [],
+        accounts: [makeAccount({ id: 'savings', current_balance: 620 })],
+      };
+      const goal = makeGoal({ source_type: 'account', linked_account_id: null });
+
+      const { result } = renderHook(() => useGoalProgress(goal));
+
+      expect(result.current.current).toBe(0);
+    });
+
+    it('reflects the balance in the batched useAllGoalProgress path too', () => {
+      const goal = makeGoal({
+        id: 'g-account',
+        source_type: 'account',
+        linked_account_id: 'savings',
+      });
+      dataMock = {
+        expenses: [],
+        incomes: [],
+        goals: [goal],
+        accounts: [makeAccount({ id: 'savings', current_balance: 620 })],
+      };
+
+      const { result } = renderHook(() => useAllGoalProgress());
+
+      expect(result.current['g-account'].current).toBe(620);
+    });
+  });
+
   describe('overachievement', () => {
     it('flags isOverachieved when current > target and caps percent at 1', () => {
       dataMock = {
         expenses: [],
         incomes: [makeExpense('2026-03-01', 1500)],
         goals: [],
+        accounts: [],
       };
       const goal = makeGoal({ target_amount: 1000, source_type: 'net_delta' });
 
@@ -245,6 +325,7 @@ describe('useGoalProgress', () => {
         expenses: [],
         incomes: [makeExpense('2026-02-01', 100)],
         goals: [],
+        accounts: [],
       };
       const goal = makeGoal({
         deadline: '2026-04-11',
@@ -263,6 +344,7 @@ describe('useGoalProgress', () => {
         expenses: [],
         incomes: [makeExpense('2026-03-01', 1000)],
         goals: [],
+        accounts: [],
       };
       const goal = makeGoal({
         deadline: '2026-04-11',
@@ -289,6 +371,7 @@ describe('useAllGoalProgress', () => {
       expenses: [],
       incomes: [makeExpense('2026-03-01', 50)],
       goals: [g1, g2],
+      accounts: [],
     };
 
     const { result } = renderHook(() => useAllGoalProgress());

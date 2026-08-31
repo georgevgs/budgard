@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import PiggyBank from 'lucide-react/dist/esm/icons/piggy-bank';
+import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import { useSetAside } from '@/hooks/savings/useSetAside';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
@@ -69,7 +69,7 @@ const renderOffer = (
         })}
       </p>
       <Button onClick={onMove} disabled={isSaving} className="w-full gap-2">
-        <PiggyBank className="h-4 w-4" />
+        <TrendingUp className="h-4 w-4" />
         {t('today.rhythm.setAside.action', { goal: goal.name })}
       </Button>
     </div>

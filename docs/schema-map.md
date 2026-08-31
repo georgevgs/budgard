@@ -4,7 +4,7 @@
      Regenerate with `npm run docs:schema`. -->
 
 An index from each database object to the migrations that touch it, built by
-scanning `supabase/migrations`. Covers 77 migrations: 31 functions, 19 triggers, 20 tables, 60 policies, 35 indexes.
+scanning `supabase/migrations`. Covers 82 migrations: 48 functions, 27 triggers, 26 tables, 83 policies, 51 indexes.
 
 This is a **map, not a schema definition**. Migrations are append-only history
 and the live schema is what you get by replaying them, so nothing here states
@@ -106,6 +106,10 @@ First defined in `20250104165613_remote_schema.sql`.
 - alters — `20260821180000_add_transaction_note_and_exclusion.sql`
 - alters — `20260822000002_link_refunds_to_original.sql`
 - alters — `20260831130000_fix_expenses_category_delete_set_null.sql`
+- alters — `20260831151127_add_secure_household_spaces.sql`
+- alters — `20260831161403_add_transaction_review_and_rules.sql`
+- alters — `20260831163506_add_account_funded_goals_and_investable_surplus.sql`
+- alters — `20260831171142_add_financial_connection_boundary.sql`
 
 ### `feedback_reports`
 
@@ -113,6 +117,20 @@ First defined in `20260826160000_add_ui_preferences_and_feedback.sql`.
 
 - creates — `20260826160000_add_ui_preferences_and_feedback.sql`
 - alters — `20260826160000_add_ui_preferences_and_feedback.sql`
+
+### `financial_connection_accounts`
+
+First defined in `20260831171142_add_financial_connection_boundary.sql`.
+
+- creates — `20260831171142_add_financial_connection_boundary.sql`
+- alters — `20260831171142_add_financial_connection_boundary.sql`
+
+### `financial_connections`
+
+First defined in `20260831171142_add_financial_connection_boundary.sql`.
+
+- creates — `20260831171142_add_financial_connection_boundary.sql`
+- alters — `20260831171142_add_financial_connection_boundary.sql`
 
 ### `goals`
 
@@ -122,6 +140,14 @@ First defined in `20250104165613_remote_schema.sql`.
 - alters — `20250104165613_remote_schema.sql`
 - creates — `20260501200000_add_goals.sql`
 - alters — `20260501200000_add_goals.sql`
+- alters — `20260831163506_add_account_funded_goals_and_investable_surplus.sql`
+
+### `household_shares`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- creates — `20260831151127_add_secure_household_spaces.sql`
+- alters — `20260831151127_add_secure_household_spaces.sql`
 
 ### `monthly_budgets` — dropped
 
@@ -155,6 +181,14 @@ First defined in `20250104165613_remote_schema.sql`.
 - alters — `20260505000000_link_recurring_to_investment_accounts.sql`
 - alters — `20260511170657_add_debt_payment_type.sql`
 - alters — `20260612152230_cap_recurring_trigger_tighten_grants.sql`
+- alters — `20260831162712_add_recurring_reconciliation.sql`
+
+### `recurring_suggestion_dismissals`
+
+First defined in `20260831162712_add_recurring_reconciliation.sql`.
+
+- creates — `20260831162712_add_recurring_reconciliation.sql`
+- alters — `20260831162712_add_recurring_reconciliation.sql`
 
 ### `subscriptions`
 
@@ -171,6 +205,13 @@ First defined in `20250104165613_remote_schema.sql`.
 - creates — `20250104165613_remote_schema.sql`
 - alters — `20250104165613_remote_schema.sql`
 
+### `transaction_rules`
+
+First defined in `20260831161403_add_transaction_review_and_rules.sql`.
+
+- creates — `20260831161403_add_transaction_review_and_rules.sql`
+- alters — `20260831161403_add_transaction_review_and_rules.sql`
+
 ### `user_budgets`
 
 First defined in `20250104165613_remote_schema.sql`.
@@ -181,6 +222,13 @@ First defined in `20250104165613_remote_schema.sql`.
 - alters — `20260423211108_add_daily_reminder_hour.sql`
 - alters — `20260426181145_income_tracking_foundation.sql`
 - alters — `20260516165543_add_notification_preferences.sql`
+
+### `user_notification_settings`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- creates — `20260831151127_add_secure_household_spaces.sql`
+- alters — `20260831151127_add_secure_household_spaces.sql`
 
 ### `user_ui_preferences`
 
@@ -194,6 +242,14 @@ First defined in `20260826160000_add_ui_preferences_and_feedback.sql`.
 
 Includes the recurring-expense generator and the balance recompute triggers.
 
+### `accept_household_invite`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+- grants on — `20260831151127_add_secure_household_spaces.sql`
+- revokes on — `20260831151127_add_secure_household_spaces.sql`
+
 ### `apply_subscription_event`
 
 First defined in `20260720000000_guard_subscription_event_ordering.sql`.
@@ -201,6 +257,14 @@ First defined in `20260720000000_guard_subscription_event_ordering.sql`.
 - defines — `20260720000000_guard_subscription_event_ordering.sql`
 - grants on — `20260720000000_guard_subscription_event_ordering.sql`
 - revokes on — `20260720000000_guard_subscription_event_ordering.sql`
+
+### `apply_transaction_rule_to_existing`
+
+First defined in `20260831161403_add_transaction_review_and_rules.sql`.
+
+- defines — `20260831161403_add_transaction_review_and_rules.sql`
+- grants on — `20260831161403_add_transaction_review_and_rules.sql`
+- revokes on — `20260831161403_add_transaction_review_and_rules.sql`
 
 ### `calculate_next_occurrence`
 
@@ -243,6 +307,14 @@ Removed by `20260821010000_redrop_default_categories_function.sql`; listed so th
 - drops — `20260329000000_drop_default_categories_trigger.sql`
 - defines — `20260821000000_fix_default_categories_search_path.sql`
 - drops — `20260821010000_redrop_default_categories_function.sql`
+
+### `create_household_invite`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+- grants on — `20260831151127_add_secure_household_spaces.sql`
+- revokes on — `20260831151127_add_secure_household_spaces.sql`
 
 ### `enforce_free_account_cap`
 
@@ -394,6 +466,30 @@ First defined in `20260517000000_add_weekly_recap_helper.sql`.
 - grants on — `20260822000000_fix_recurring_anchor_and_exclusions.sql`
 - revokes on — `20260822000000_fix_recurring_anchor_and_exclusions.sql`
 
+### `ingest_connected_transactions`
+
+First defined in `20260831171142_add_financial_connection_boundary.sql`.
+
+- defines — `20260831171142_add_financial_connection_boundary.sql`
+- grants on — `20260831171142_add_financial_connection_boundary.sql`
+- revokes on — `20260831171142_add_financial_connection_boundary.sql`
+
+### `invest_goal_surplus`
+
+First defined in `20260831163506_add_account_funded_goals_and_investable_surplus.sql`.
+
+- defines — `20260831163506_add_account_funded_goals_and_investable_surplus.sql`
+- grants on — `20260831163506_add_account_funded_goals_and_investable_surplus.sql`
+- revokes on — `20260831163506_add_account_funded_goals_and_investable_surplus.sql`
+
+### `leave_household_share`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+- grants on — `20260831151127_add_secure_household_spaces.sql`
+- revokes on — `20260831151127_add_secure_household_spaces.sql`
+
 ### `merge_category`
 
 First defined in `20260831140000_add_merge_category.sql`.
@@ -401,6 +497,71 @@ First defined in `20260831140000_add_merge_category.sql`.
 - defines — `20260831140000_add_merge_category.sql`
 - grants on — `20260831140000_add_merge_category.sql`
 - revokes on — `20260831140000_add_merge_category.sql`
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `private.apply_transaction_rules`
+
+First defined in `20260831161403_add_transaction_review_and_rules.sql`.
+
+- defines — `20260831161403_add_transaction_review_and_rules.sql`
+- revokes on — `20260831161403_add_transaction_review_and_rules.sql`
+
+### `private.can_access_financial_space`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+- grants on — `20260831151127_add_secure_household_spaces.sql`
+- revokes on — `20260831151127_add_secure_household_spaces.sql`
+
+### `private.prevent_expense_creator_change`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+- revokes on — `20260831151127_add_secure_household_spaces.sql`
+
+### `private.protect_expense_connection_origin`
+
+First defined in `20260831171142_add_financial_connection_boundary.sql`.
+
+- defines — `20260831171142_add_financial_connection_boundary.sql`
+- revokes on — `20260831171142_add_financial_connection_boundary.sql`
+
+### `private.validate_connection_account_space`
+
+First defined in `20260831171142_add_financial_connection_boundary.sql`.
+
+- defines — `20260831171142_add_financial_connection_boundary.sql`
+- revokes on — `20260831171142_add_financial_connection_boundary.sql`
+
+### `private.validate_expense_connection_space`
+
+First defined in `20260831171142_add_financial_connection_boundary.sql`.
+
+- defines — `20260831171142_add_financial_connection_boundary.sql`
+- revokes on — `20260831171142_add_financial_connection_boundary.sql`
+
+### `private.validate_expense_rule_owner`
+
+First defined in `20260831161403_add_transaction_review_and_rules.sql`.
+
+- defines — `20260831161403_add_transaction_review_and_rules.sql`
+- revokes on — `20260831161403_add_transaction_review_and_rules.sql`
+
+### `private.validate_goal_account_space`
+
+First defined in `20260831163506_add_account_funded_goals_and_investable_surplus.sql`.
+
+- defines — `20260831163506_add_account_funded_goals_and_investable_surplus.sql`
+- revokes on — `20260831163506_add_account_funded_goals_and_investable_surplus.sql`
+
+### `private.validate_goal_space_reference`
+
+First defined in `20260831163506_add_account_funded_goals_and_investable_surplus.sql`.
+
+- defines — `20260831163506_add_account_funded_goals_and_investable_surplus.sql`
+- revokes on — `20260831163506_add_account_funded_goals_and_investable_surplus.sql`
 
 ### `process_all_recurring_expenses`
 
@@ -446,6 +607,14 @@ First defined in `20250104165613_remote_schema.sql`.
 - defines — `20260822000001_debt_balance_freshness.sql`
 - revokes on — `20260822000001_debt_balance_freshness.sql`
 
+### `reconcile_recurring_imports`
+
+First defined in `20260831162712_add_recurring_reconciliation.sql`.
+
+- defines — `20260831162712_add_recurring_reconciliation.sql`
+- grants on — `20260831162712_add_recurring_reconciliation.sql`
+- revokes on — `20260831162712_add_recurring_reconciliation.sql`
+
 ### `refresh_debt_balances`
 
 First defined in `20260822000001_debt_balance_freshness.sql`.
@@ -453,6 +622,17 @@ First defined in `20260822000001_debt_balance_freshness.sql`.
 - defines — `20260822000001_debt_balance_freshness.sql`
 - grants on — `20260822000001_debt_balance_freshness.sql`
 - revokes on — `20260822000001_debt_balance_freshness.sql`
+- defines — `20260831151127_add_secure_household_spaces.sql`
+- grants on — `20260831151127_add_secure_household_spaces.sql`
+- revokes on — `20260831151127_add_secure_household_spaces.sql`
+
+### `revoke_household_share`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+- grants on — `20260831151127_add_secure_household_spaces.sql`
+- revokes on — `20260831151127_add_secure_household_spaces.sql`
 
 ### `sync_account_from_balances`
 
@@ -516,6 +696,7 @@ First defined in `20250104165613_remote_schema.sql`.
 - defines — `20260507202243_sum_same_day_contribution_deltas.sql`
 - grants on — `20260507202243_sum_same_day_contribution_deltas.sql`
 - revokes on — `20260612152230_cap_recurring_trigger_tighten_grants.sql`
+- defines — `20260831151127_add_secure_household_spaces.sql`
 
 
 ## Triggers
@@ -586,6 +767,24 @@ First defined in `20260727000003_add_expense_tags.sql`.
 
 - defines — `20260727000003_add_expense_tags.sql`
 
+### `expenses_apply_transaction_rules`
+
+First defined in `20260831161403_add_transaction_review_and_rules.sql`.
+
+- defines — `20260831161403_add_transaction_review_and_rules.sql`
+
+### `expenses_keep_creator`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `expenses_protect_connection_origin`
+
+First defined in `20260831171142_add_financial_connection_boundary.sql`.
+
+- defines — `20260831171142_add_financial_connection_boundary.sql`
+
 ### `expenses_sync_debt`
 
 First defined in `20250104165613_remote_schema.sql`.
@@ -600,6 +799,30 @@ First defined in `20250104165613_remote_schema.sql`.
 - defines — `20250104165613_remote_schema.sql`
 - defines — `20260505000000_link_recurring_to_investment_accounts.sql`
 
+### `expenses_validate_connection_space`
+
+First defined in `20260831171142_add_financial_connection_boundary.sql`.
+
+- defines — `20260831171142_add_financial_connection_boundary.sql`
+
+### `expenses_validate_goal_space`
+
+First defined in `20260831163506_add_account_funded_goals_and_investable_surplus.sql`.
+
+- defines — `20260831163506_add_account_funded_goals_and_investable_surplus.sql`
+
+### `expenses_validate_rule_owner`
+
+First defined in `20260831161403_add_transaction_review_and_rules.sql`.
+
+- defines — `20260831161403_add_transaction_review_and_rules.sql`
+
+### `financial_connection_accounts_validate_space`
+
+First defined in `20260831171142_add_financial_connection_boundary.sql`.
+
+- defines — `20260831171142_add_financial_connection_boundary.sql`
+
 ### `goals_pro_only`
 
 First defined in `20260727000000_enforce_pro_only_tables.sql`.
@@ -612,6 +835,12 @@ First defined in `20250104165613_remote_schema.sql`.
 
 - defines — `20250104165613_remote_schema.sql`
 - defines — `20260501200000_add_goals.sql`
+
+### `goals_validate_linked_account_space`
+
+First defined in `20260831163506_add_account_funded_goals_and_investable_surplus.sql`.
+
+- defines — `20260831163506_add_account_funded_goals_and_investable_surplus.sql`
 
 ### `recurring_expenses_free_cap`
 
@@ -729,6 +958,18 @@ First defined in `20260727000003_add_expense_tags.sql`.
 
 - defines — `20260727000003_add_expense_tags.sql`
 
+### `expenses_applied_rule_id_idx`
+
+First defined in `20260831161403_add_transaction_review_and_rules.sql`.
+
+- defines — `20260831161403_add_transaction_review_and_rules.sql`
+
+### `expenses_created_by_idx`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
 ### `expenses_date_idx`
 
 First defined in `20250104165613_remote_schema.sql`.
@@ -748,11 +989,35 @@ First defined in `20260821180000_add_transaction_note_and_exclusion.sql`.
 
 - defines — `20260821180000_add_transaction_note_and_exclusion.sql`
 
+### `expenses_external_transaction_unique_idx`
+
+First defined in `20260831171142_add_financial_connection_boundary.sql`.
+
+- defines — `20260831171142_add_financial_connection_boundary.sql`
+
+### `expenses_goal_id_idx`
+
+First defined in `20260831163506_add_account_funded_goals_and_investable_surplus.sql`.
+
+- defines — `20260831163506_add_account_funded_goals_and_investable_surplus.sql`
+
 ### `expenses_refunded_expense_id_idx`
 
 First defined in `20260822000002_link_refunds_to_original.sql`.
 
 - defines — `20260822000002_link_refunds_to_original.sql`
+
+### `expenses_user_merchant_idx`
+
+First defined in `20260831161403_add_transaction_review_and_rules.sql`.
+
+- defines — `20260831161403_add_transaction_review_and_rules.sql`
+
+### `expenses_user_review_date_idx`
+
+First defined in `20260831161403_add_transaction_review_and_rules.sql`.
+
+- defines — `20260831161403_add_transaction_review_and_rules.sql`
 
 ### `expenses_user_type_date_idx`
 
@@ -773,12 +1038,36 @@ First defined in `20260826160000_add_ui_preferences_and_feedback.sql`.
 
 - defines — `20260826160000_add_ui_preferences_and_feedback.sql`
 
+### `financial_connection_accounts_account_id_idx`
+
+First defined in `20260831171142_add_financial_connection_boundary.sql`.
+
+- defines — `20260831171142_add_financial_connection_boundary.sql`
+
+### `financial_connection_accounts_user_id_idx`
+
+First defined in `20260831171142_add_financial_connection_boundary.sql`.
+
+- defines — `20260831171142_add_financial_connection_boundary.sql`
+
+### `financial_connections_user_id_idx`
+
+First defined in `20260831171142_add_financial_connection_boundary.sql`.
+
+- defines — `20260831171142_add_financial_connection_boundary.sql`
+
 ### `goals_category_id_idx`
 
 First defined in `20250104165613_remote_schema.sql`.
 
 - defines — `20250104165613_remote_schema.sql`
 - defines — `20260501200000_add_goals.sql`
+
+### `goals_linked_account_id_idx`
+
+First defined in `20260831163506_add_account_funded_goals_and_investable_surplus.sql`.
+
+- defines — `20260831163506_add_account_funded_goals_and_investable_surplus.sql`
 
 ### `goals_tag_id_idx`
 
@@ -793,6 +1082,18 @@ First defined in `20250104165613_remote_schema.sql`.
 
 - defines — `20250104165613_remote_schema.sql`
 - defines — `20260501200000_add_goals.sql`
+
+### `household_shares_invite_email_status_idx`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `household_shares_member_status_idx`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
 
 ### `idx_categories_user_id`
 
@@ -881,10 +1182,154 @@ First defined in `20250104165613_remote_schema.sql`.
 - defines — `20250104165613_remote_schema.sql`
 - defines — `20260426181145_income_tracking_foundation.sql`
 
+### `recurring_suggestion_dismissals_actor_idx`
+
+First defined in `20260831162712_add_recurring_reconciliation.sql`.
+
+- defines — `20260831162712_add_recurring_reconciliation.sql`
+
+### `transaction_rules_category_id_idx`
+
+First defined in `20260831161403_add_transaction_review_and_rules.sql`.
+
+- defines — `20260831161403_add_transaction_review_and_rules.sql`
+
+### `transaction_rules_tag_id_idx`
+
+First defined in `20260831161403_add_transaction_review_and_rules.sql`.
+
+- defines — `20260831161403_add_transaction_review_and_rules.sql`
+
+### `transaction_rules_user_active_priority_idx`
+
+First defined in `20260831161403_add_transaction_review_and_rules.sql`.
+
+- defines — `20260831161403_add_transaction_review_and_rules.sql`
+
 
 ## Policies
 
 Row-level security.
+
+### `Household can create expenses`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can delete expenses`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can manage account balances`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can manage accounts`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can manage budget settings`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can manage categories`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can manage category budgets`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can manage debts`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can manage expense tags`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can manage expenses`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can manage goals`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can manage no-spend days`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can manage recurring expenses`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can manage recurring suggestion dismissals`
+
+First defined in `20260831162712_add_recurring_reconciliation.sql`.
+
+- defines — `20260831162712_add_recurring_reconciliation.sql`
+
+### `Household can manage tags`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can manage templates`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can manage transaction rules`
+
+First defined in `20260831161403_add_transaction_review_and_rules.sql`.
+
+- defines — `20260831161403_add_transaction_review_and_rules.sql`
+
+### `Household can update expenses`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can view expenses`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Participants can view household shares`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
 
 ### `Users can create categories`
 
@@ -1078,6 +1523,12 @@ First defined in `20250104165613_remote_schema.sql`.
 - defines — `20250104165613_remote_schema.sql`
 - defines — `20260424200000_add_expense_templates.sql`
 - defines — `20260425000000_fix_rls_initplan_performance.sql`
+
+### `Users can manage their notification settings`
+
+First defined in `20260831151127_add_secure_household_spaces.sql`.
+
+- defines — `20260831151127_add_secure_household_spaces.sql`
 
 ### `Users can read own categories`
 
@@ -1285,4 +1736,16 @@ First defined in `20250104165613_remote_schema.sql`.
 - defines — `20260424000000_add_push_subscriptions.sql`
 - defines — `20260425000000_fix_rls_initplan_performance.sql`
 - defines — `20260430100000_scope_push_subscriptions_policy_to_authenticated.sql`
+
+### `financial_connection_accounts_household_select`
+
+First defined in `20260831171142_add_financial_connection_boundary.sql`.
+
+- defines — `20260831171142_add_financial_connection_boundary.sql`
+
+### `financial_connections_household_select`
+
+First defined in `20260831171142_add_financial_connection_boundary.sql`.
+
+- defines — `20260831171142_add_financial_connection_boundary.sql`
 

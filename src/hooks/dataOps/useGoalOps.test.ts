@@ -5,6 +5,10 @@ import type { Goal } from '@/types/Goal';
 const mockToast = vi.fn();
 vi.mock('@/hooks/useToast', () => ({ useToast: () => ({ toast: mockToast }) }));
 
+vi.mock('@/contexts/FinancialSpaceContext', () => ({
+  useFinancialSpace: () => ({ activeOwnerId: 'u1' }),
+}));
+
 const mockShowErrorToast = vi.fn();
 vi.mock('@/hooks/dataOps/useShowErrorToast', () => ({
   useShowErrorToast: () => mockShowErrorToast,
