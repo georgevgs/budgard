@@ -12,7 +12,9 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import ConfirmDestructiveDialog from '@/components/common/ConfirmDestructiveDialog';
+import CategoryDeleteDialog from '@/components/categories/CategoryDeleteDialog';
 import { useCategoryManager } from '@/hooks/categories/useCategoryManager';
+import { useDataConfig } from '@/contexts/DataContext';
 import type { Category, CategoryType } from '@/types/Category';
 import CategoryForm from '@/components/categories/CategoryForm';
 import { getColorTint } from '@/lib/categoryColor';
@@ -27,6 +29,7 @@ export const CategoryManager = ({
   onBack,
 }: CategoryManagerProps = {}) => {
   const { t } = useTranslation();
+  const { defaultCurrency } = useDataConfig();
   const manager = useCategoryManager(categoryType);
 
   if (manager.view.type === 'form') {
@@ -88,7 +91,7 @@ export const CategoryManager = ({
         </Button>
       </div>
 
-      {renderDeleteDialog(manager, t)}
+      {renderDeleteDialogs(manager, defaultCurrency, t)}
     </>
   );
 };
@@ -116,25 +119,47 @@ const renderBackButton = (onBack: (() => void) | undefined, t: TFunc) => {
   );
 };
 
-const renderDeleteDialog = (
+// A category with nothing tied to it gets the plain "are you sure" dialog; one
+// with expenses (or income rows) attached gets the impact-aware dialog, which
+// also offers moving them into another category instead of going Uncategorized.
+const renderDeleteDialogs = (
   manager: ReturnType<typeof useCategoryManager>,
+  currency: string,
   t: TFunc,
-) => (
-  <ConfirmDestructiveDialog
-    open={manager.deleteTarget !== null}
-    title={t('categories.deleteCategory')}
-    description={t('categories.deleteConfirmation', {
-      name: manager.deleteTarget?.name,
-    })}
-    confirmLabel={t('common.delete')}
-    onOpenChange={(open) => {
-      if (!open) {
-        manager.cancelDelete();
-      }
-    }}
-    onConfirm={manager.handleDelete}
-  />
-);
+) => {
+  const hasImpact =
+    manager.deleteImpact !== null && manager.deleteImpact.count > 0;
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      manager.cancelDelete();
+    }
+  };
+
+  return (
+    <>
+      <ConfirmDestructiveDialog
+        open={manager.deleteTarget !== null && !hasImpact}
+        title={t('categories.deleteCategory')}
+        description={t('categories.deleteConfirmation', {
+          name: manager.deleteTarget?.name,
+        })}
+        confirmLabel={t('common.delete')}
+        onOpenChange={handleOpenChange}
+        onConfirm={() => manager.handleConfirmDelete(null)}
+      />
+      <CategoryDeleteDialog
+        open={manager.deleteTarget !== null && hasImpact}
+        category={manager.deleteTarget}
+        impact={manager.deleteImpact}
+        mergeCandidates={manager.mergeCandidates}
+        currency={currency}
+        onOpenChange={handleOpenChange}
+        onConfirm={manager.handleConfirmDelete}
+      />
+    </>
+  );
+};
 
 const renderManagerTitle = (type: CategoryType, t: TFunc) => {
   if (type === 'income') {

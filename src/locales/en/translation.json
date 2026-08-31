@@ -472,6 +472,10 @@
     "selectIconAria": "Select icon {{icon}}",
     "emptyHelp": "Tap Add Category to start sorting things out — coffee deserves its own bucket.",
     "deleteConfirmation": "Are you sure you want to delete \"{{name}}\"? Expenses in this category will become uncategorized. This action cannot be undone.",
+    "moveTransactionsTo": "Move these transactions to",
+    "moveAndDelete": "Move & Delete",
+    "deleteImpactSummary_one": "This category has {{count}} transaction totaling {{amount}}, going back to {{date}}. This can't be undone.",
+    "deleteImpactSummary_other": "This category has {{count}} transactions totaling {{amount}}, going back to {{date}}. This can't be undone.",
     "kind": {
       "label": "50/30/20 bucket (optional)",
       "helpText": "Classify this category for the spending split insight on your dashboard.",
@@ -483,6 +487,7 @@
       "addFailed": "Failed to add category",
       "updateFailed": "Failed to update category",
       "deleteFailed": "Failed to delete category",
+      "mergeFailed": "Failed to move transactions",
       "bulkCreateFailed": "Failed to create categories"
     }
   },

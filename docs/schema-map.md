@@ -4,7 +4,7 @@
      Regenerate with `npm run docs:schema`. -->
 
 An index from each database object to the migrations that touch it, built by
-scanning `supabase/migrations`. Covers 75 migrations: 30 functions, 19 triggers, 20 tables, 60 policies, 35 indexes.
+scanning `supabase/migrations`. Covers 77 migrations: 31 functions, 19 triggers, 20 tables, 60 policies, 35 indexes.
 
 This is a **map, not a schema definition**. Migrations are append-only history
 and the live schema is what you get by replaying them, so nothing here states
@@ -105,6 +105,7 @@ First defined in `20250104165613_remote_schema.sql`.
 - alters — `20260511170657_add_debt_payment_type.sql`
 - alters — `20260821180000_add_transaction_note_and_exclusion.sql`
 - alters — `20260822000002_link_refunds_to_original.sql`
+- alters — `20260831130000_fix_expenses_category_delete_set_null.sql`
 
 ### `feedback_reports`
 
@@ -392,6 +393,14 @@ First defined in `20260517000000_add_weekly_recap_helper.sql`.
 - defines — `20260822000000_fix_recurring_anchor_and_exclusions.sql`
 - grants on — `20260822000000_fix_recurring_anchor_and_exclusions.sql`
 - revokes on — `20260822000000_fix_recurring_anchor_and_exclusions.sql`
+
+### `merge_category`
+
+First defined in `20260831140000_add_merge_category.sql`.
+
+- defines — `20260831140000_add_merge_category.sql`
+- grants on — `20260831140000_add_merge_category.sql`
+- revokes on — `20260831140000_add_merge_category.sql`
 
 ### `process_all_recurring_expenses`
 

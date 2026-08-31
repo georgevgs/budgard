@@ -3,6 +3,7 @@
 // budgets, settings scalars, and the two recurring rules.
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+import type { Category } from '@/types/Category';
 
 const mockToast = vi.fn();
 vi.mock('@/hooks/useToast', () => ({ useToast: () => ({ toast: mockToast }) }));
@@ -36,6 +37,7 @@ const svc = vi.hoisted(() => ({
   createCategory: vi.fn(),
   updateCategory: vi.fn(),
   deleteCategory: vi.fn(),
+  mergeCategory: vi.fn(),
   upsertBudget: vi.fn(),
   upsertCategoryBudget: vi.fn(),
   deleteCategoryBudget: vi.fn(),
@@ -299,7 +301,7 @@ describe('useCategoryOps', () => {
     expect(store.incomes).toEqual(incs);
   });
 
-  it('drops the category and its budget, and resyncs expenses on failure', async () => {
+  it('drops the category and its budget, and resyncs expenses and incomes on failure', async () => {
     store.categories = [{ id: 'c1', name: 'Gone' }];
     store.categoryBudgets = [{ id: 'b1', category_id: 'c1' }];
     store.expenses = [{ id: 'e1', category_id: 'c1', category: { id: 'c1' } }];
@@ -312,8 +314,70 @@ describe('useCategoryOps', () => {
 
     expect(store.categories).toHaveLength(1);
     expect(store.categoryBudgets).toHaveLength(1);
-    // The stripped embeds cannot be rebuilt locally, so they are refetched.
+    // The stripped embeds cannot be rebuilt locally, so they are refetched —
+    // an income category strips income rows, so both slices are covered.
     expect(mockRefreshExpenses).toHaveBeenCalled();
+    expect(mockRefreshIncomes).toHaveBeenCalled();
+  });
+
+  it('clears the category out of expense and income rows alike on delete', async () => {
+    store.categories = [{ id: 'c1', name: 'Gone' }];
+    store.expenses = [{ id: 'e1', category_id: 'c1', category: { id: 'c1' } }];
+    store.incomes = [{ id: 'i1', category_id: 'c1', category: { id: 'c1' } }];
+    svc.deleteCategory.mockResolvedValue(undefined);
+
+    const ops = renderHook(() => useCategoryOps()).result;
+    await act(async () => {
+      await ops.current.handleCategoryDelete('c1');
+    });
+
+    expect((store.expenses as { category_id?: string }[])[0].category_id).toBeUndefined();
+    expect((store.incomes as { category_id?: string }[])[0].category_id).toBeUndefined();
+  });
+
+  it('folds expenses and incomes into the destination category, then drops the source', async () => {
+    const destination = { id: 'c2', name: 'Food' } as Category;
+    store.categories = [{ id: 'c1', name: 'Dining' }, destination];
+    store.categoryBudgets = [{ id: 'b1', category_id: 'c1' }];
+    store.expenses = [{ id: 'e1', category_id: 'c1', category: { id: 'c1' } }];
+    store.incomes = [{ id: 'i1', category_id: 'c1', category: { id: 'c1' } }];
+    svc.mergeCategory.mockResolvedValue(1);
+
+    const ops = renderHook(() => useCategoryOps()).result;
+    await act(async () => {
+      await ops.current.handleCategoryMerge('c1', destination);
+    });
+
+    expect((store.categories as { id: string }[]).map((c) => c.id)).toEqual(['c2']);
+    expect(store.categoryBudgets).toHaveLength(0);
+    expect((store.expenses as { category_id: string }[])[0].category_id).toBe('c2');
+    expect((store.incomes as { category_id: string }[])[0].category_id).toBe('c2');
+    expect(svc.mergeCategory).toHaveBeenCalledWith('c1', 'c2');
+  });
+
+  it('restores categories, expenses, incomes and budgets when a merge fails', async () => {
+    const destination = { id: 'c2', name: 'Food' } as Category;
+    const cats = [{ id: 'c1', name: 'Dining' }, destination];
+    const budgets = [{ id: 'b1', category_id: 'c1' }];
+    const exps = [{ id: 'e1', category_id: 'c1', category: { id: 'c1' } }];
+    const incs = [{ id: 'i1', category_id: 'c1', category: { id: 'c1' } }];
+    store.categories = [...cats];
+    store.categoryBudgets = [...budgets];
+    store.expenses = [...exps];
+    store.incomes = [...incs];
+    svc.mergeCategory.mockRejectedValue(new Error('down'));
+
+    const ops = renderHook(() => useCategoryOps()).result;
+    await act(async () => {
+      await expect(
+        ops.current.handleCategoryMerge('c1', destination),
+      ).rejects.toThrow();
+    });
+
+    expect(store.categories).toEqual(cats);
+    expect(store.categoryBudgets).toEqual(budgets);
+    expect(store.expenses).toEqual(exps);
+    expect(store.incomes).toEqual(incs);
   });
 });
 

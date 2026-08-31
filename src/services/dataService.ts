@@ -331,6 +331,18 @@ export const dataService = {
     await done(supabase.from('categories').delete().eq('id', categoryId));
   },
 
+  // Atomic reassign-then-delete via Postgres function: every expense on
+  // fromCategoryId moves to toCategoryId, then fromCategoryId is removed.
+  // Returns the number of expenses moved.
+  async mergeCategory(fromCategoryId: string, toCategoryId: string) {
+    return row<number>(
+      supabase.rpc('merge_category', {
+        p_from_category_id: fromCategoryId,
+        p_to_category_id: toCategoryId,
+      }),
+    );
+  },
+
   async getRecurringExpenses(signal?: AbortSignal) {
     let query = supabase
       .from('recurring_expenses')

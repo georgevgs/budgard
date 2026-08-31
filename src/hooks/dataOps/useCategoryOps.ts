@@ -19,6 +19,7 @@ export const useCategoryOps = () => {
     setIncomes,
     setCategoryBudgets,
     refreshExpenses,
+    refreshIncomes,
   } = useDataActions();
   const { t } = useTranslation();
   const runMutation = useMutationRunner();
@@ -124,21 +125,74 @@ export const useCategoryOps = () => {
           setExpenses((prev) =>
             prev.map((e) => clearCategoryRef(e, categoryId)),
           );
+          setIncomes((prev) =>
+            prev.map((i) => clearCategoryRef(i, categoryId)),
+          );
           setCategoryBudgets((prev) => {
             previousBudgets = prev;
 
             return prev.filter((b) => b.category_id !== categoryId);
           });
 
-          // The expense rows had their embedded category stripped; rebuilding
-          // those embeds by hand is not this hook's job, so they are refetched.
+          // The transaction rows had their embedded category stripped;
+          // rebuilding those embeds by hand is not this hook's job, so they
+          // are refetched (whichever slice the category actually belonged to).
           return () => {
             setCategories(previousCategories);
             setCategoryBudgets(previousBudgets);
             refreshExpenses();
+            refreshIncomes();
           };
         },
         perform: () => dataService.deleteCategory(categoryId),
+      });
+
+    // Alternative to a plain delete: instead of letting the category's
+    // expenses go Uncategorized, fold them into toCategory first.
+    const handleCategoryMerge = (fromCategoryId: string, toCategory: Category) =>
+      runMutation({
+        operation: 'mergeCategory',
+        skip,
+        errorMessage: t('categories.toasts.mergeFailed'),
+        optimistic: () => {
+          let previousCategories: Category[] = [];
+          let previousExpenses: Expense[] = [];
+          let previousIncomes: Expense[] = [];
+          let previousBudgets: CategoryBudget[] = [];
+
+          setCategories((prev) => {
+            previousCategories = prev;
+
+            return prev.filter((c) => c.id !== fromCategoryId);
+          });
+          setExpenses((prev) => {
+            previousExpenses = prev;
+
+            return prev.map((e) =>
+              reassignCategoryRef(e, fromCategoryId, toCategory),
+            );
+          });
+          setIncomes((prev) => {
+            previousIncomes = prev;
+
+            return prev.map((i) =>
+              reassignCategoryRef(i, fromCategoryId, toCategory),
+            );
+          });
+          setCategoryBudgets((prev) => {
+            previousBudgets = prev;
+
+            return prev.filter((b) => b.category_id !== fromCategoryId);
+          });
+
+          return () => {
+            setCategories(previousCategories);
+            setExpenses(previousExpenses);
+            setIncomes(previousIncomes);
+            setCategoryBudgets(previousBudgets);
+          };
+        },
+        perform: () => dataService.mergeCategory(fromCategoryId, toCategory.id),
       });
 
     // Onboarding writes a starter set. Server-first: a half-applied optimistic
@@ -160,6 +214,7 @@ export const useCategoryOps = () => {
       handleCategoryAdd,
       handleCategoryUpdate,
       handleCategoryDelete,
+      handleCategoryMerge,
       handleCategoriesAddBulk,
     };
   }, [
@@ -169,6 +224,7 @@ export const useCategoryOps = () => {
     setIncomes,
     setCategoryBudgets,
     refreshExpenses,
+    refreshIncomes,
     runMutation,
     t,
   ]);
@@ -204,4 +260,14 @@ const clearCategoryRef = (row: Expense, categoryId: string): Expense => {
   if (row.category_id !== categoryId) return row;
 
   return { ...row, category_id: undefined, category: undefined };
+};
+
+const reassignCategoryRef = (
+  row: Expense,
+  fromCategoryId: string,
+  toCategory: Category,
+): Expense => {
+  if (row.category_id !== fromCategoryId) return row;
+
+  return { ...row, category_id: toCategory.id, category: toCategory };
 };
