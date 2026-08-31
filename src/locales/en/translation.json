@@ -467,7 +467,6 @@
     "addDescription": "Create a new category to organize your expenses",
     "editDescription": "Update this category's name, color, or icon",
     "customColor": "Custom hex",
-    "customIcon": "Paste emoji",
     "selectColorAria": "Select color {{color}}",
     "selectIconAria": "Select icon {{icon}}",
     "emptyHelp": "Tap Add Category to start sorting things out — coffee deserves its own bucket.",

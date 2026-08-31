@@ -172,23 +172,6 @@ const isDotDecimal = (value: string, lastDot: number): boolean => {
   return fraction.length > 0 && fraction.length <= 2;
 };
 
-// Strip non-emoji characters so the input only accepts emoji.
-// ZWJ (\u{200D}) and variation selectors (\u{FE0F}) are matched individually
-// so that join() reconstructs full emoji sequences (e.g. family emoji).
-/* eslint-disable no-misleading-character-class */
-const EMOJI_PATTERN =
-  /[\p{Emoji_Presentation}\p{Extended_Pictographic}\u{200D}\u{FE0F}]/gu;
-/* eslint-enable no-misleading-character-class */
-
-export const extractEmoji = (input: string): string => {
-  const matches = input.match(EMOJI_PATTERN);
-  if (!matches) {
-    return '';
-  }
-
-  return matches.join('').slice(0, 4);
-};
-
 // Calendar months elapsed within the given year, relative to `now`.
 // Past years return 12, the current year returns the current month (1–12),
 // future years return 0. Used as the denominator for year-view "average per month"

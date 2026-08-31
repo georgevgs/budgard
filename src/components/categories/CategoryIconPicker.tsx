@@ -1,8 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import CategoryIcon from '@/components/common/CategoryIcon';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { cn, extractEmoji } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 const CATEGORY_ICONS = [
   '🍔',
@@ -48,11 +47,6 @@ const CategoryIconPicker = ({
     onChange(toggleIcon(value, icon));
   };
 
-  const handleCustomChange = (raw: string) => {
-    const emoji = extractEmoji(raw);
-    onChange(emoji || undefined);
-  };
-
   const handleClear = () => {
     onChange(undefined);
   };
@@ -77,18 +71,7 @@ const CategoryIconPicker = ({
         ))}
       </div>
 
-      <div className="flex items-center gap-2 pt-1">
-        <Input
-          value={value ?? ''}
-          onChange={(e) => handleCustomChange(e.target.value)}
-          disabled={disabled}
-          placeholder={t('categories.customIcon')}
-          className="h-11 w-32 px-2 text-base sm:text-sm"
-          maxLength={4}
-          aria-label={t('categories.customIcon')}
-        />
-        {renderClearButton(value, handleClear, disabled, t)}
-      </div>
+      {renderClearButton(value, handleClear, disabled, t)}
     </>
   );
 };
@@ -125,15 +108,17 @@ const renderClearButton = (
   if (!value) return null;
 
   return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      className="min-h-11 px-2 text-xs text-muted-foreground"
-      onClick={onClear}
-      disabled={disabled}
-    >
-      {t('common.clear')}
-    </Button>
+    <div className="pt-1">
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="min-h-11 px-2 text-xs text-muted-foreground"
+        onClick={onClear}
+        disabled={disabled}
+      >
+        {t('common.clear')}
+      </Button>
+    </div>
   );
 };
