@@ -1511,9 +1511,7 @@
         },
         {
           "heading": "Contact",
-          "paragraphs": [
-            "Questions about these terms: {{email}}."
-          ]
+          "paragraphs": ["Questions about these terms: {{email}}."]
         }
       ]
     },
@@ -1535,6 +1533,7 @@
       "getStarted": "Get started"
     },
     "hero": {
+      "eyebrow": "A calmer money app",
       "headingLine1": "Spend today.",
       "headingLine2": "Stay kind to tomorrow.",
       "subtitle": "Budgard turns budgets, bills, and daily spending into one calm answer: what is safe today.",
@@ -1542,8 +1541,63 @@
       "installCta": "Add to Home Screen",
       "trust": "Built in the EU · No ads · No cross-site tracking · Yours to keep",
       "previewSafeAmount": "€742.00",
+      "previewDate": "Monday, 31 August",
+      "previewArrange": "Arrange",
+      "previewPerDay": "€24.73 / day",
+      "previewPace": "€86 ahead",
+      "previewPaceBody": "Less spent than this point last month",
       "previewUpcoming": "€88.40 planned this week",
-      "previewInsight": "Dining out is gentler than last month"
+      "previewInsight": "Dining out is gentler than last month",
+      "previewBillDay": "Fri",
+      "previewBill": "Internet"
+    },
+    "features": {
+      "eyebrow": "Four places. One money life.",
+      "heading": "The app stays simple as your plans grow.",
+      "body": "Today answers now. Activity remembers. Plan looks ahead. Trends shows the pattern. Every feature has a clear home, so the app never turns into a dashboard maze.",
+      "today": {
+        "title": "Know what today can hold",
+        "body": "Safe-to-spend, upcoming bills, budget pace and the tiles you choose — in your own order.",
+        "figure": "€742 safe",
+        "caption": "after this month's spending and planned bills"
+      },
+      "activity": {
+        "title": "Everything that moved",
+        "body": "Expenses and income share one searchable timeline, with filters, tags and quick edits when you need them.",
+        "income": "Salary",
+        "expense": "Corner Market"
+      },
+      "plan": {
+        "title": "Decide before the month does",
+        "body": "Budgets, recurring bills, goals, accounts and debts stay together because every plan affects the next one.",
+        "progress": "Monthly plan"
+      },
+      "trends": {
+        "title": "See the pattern, not the noise",
+        "body": "Monthly rhythm, category movement, cash flow and a 12-month forecast turn history into a useful next step.",
+        "caption": "Your year, with the unusual month made obvious"
+      },
+      "capability1": {
+        "eyebrow": "Capture",
+        "title": "Add it once.",
+        "item1": "Expenses, income, recurring entries and reusable templates",
+        "item2": "Quick add and offline entry for expenses and income",
+        "item3": "On-device receipt scan plus CSV, OFX, QFX and QIF imports"
+      },
+      "capability2": {
+        "eyebrow": "Plan",
+        "title": "Give tomorrow a number.",
+        "item1": "Monthly and per-category budgets with quiet alerts",
+        "item2": "Savings goals, upcoming bills and recurring commitments",
+        "item3": "Net worth, investments and snowball or avalanche debt plans"
+      },
+      "capability3": {
+        "eyebrow": "Understand",
+        "title": "Keep the whole picture.",
+        "item1": "Spending, income and category trends across your history",
+        "item2": "Cash-flow analysis and a 12-month forward view",
+        "item3": "Annual CSV and PDF reports, plus a full-account JSON backup"
+      }
     },
     "install": {
       "title": "Add to Home Screen",
@@ -1657,7 +1711,7 @@
         "feature5": "Full analytics history, cash flow and 12-month forecast",
         "feature6": "Unlimited accounts and investment analytics",
         "feature7": "Debt payoff planner",
-        "feature8": "CSV exports of your full history",
+        "feature8": "CSV exports and annual PDF reports",
         "feature9": "Receipt scanning that fills the form for you",
         "feature10": "Early access to new features"
       }
@@ -1671,7 +1725,7 @@
       },
       "q2": {
         "question": "What's actually different on Pro?",
-        "answer": "Per-category budgets, savings goals, unlimited recurring expenses, multiple tags per expense, unlimited accounts with investment analytics, a debt payoff planner, full all-time analytics with cash-flow trends and a 12-month forecast, and CSV exports. The full list is in the pricing card above."
+        "answer": "Per-category budgets, savings goals, unlimited recurring expenses, multiple tags per expense, unlimited accounts with investment analytics, a debt payoff planner, full all-time analytics with cash-flow trends and a 12-month forecast, plus CSV and annual PDF reports. The full list is in the pricing card above."
       },
       "q3": {
         "question": "Can I cancel anytime?",
@@ -1691,7 +1745,7 @@
       },
       "q7": {
         "question": "Can I bring my data from another app?",
-        "answer": "Yes. Budgard imports expenses and income from CSV, so your history comes with you instead of starting from an empty month. Exports are available too, in CSV and JSON."
+        "answer": "Yes. Budgard imports CSV, OFX, QFX and QIF statements, so your history comes with you instead of starting from an empty month. Exports are available too, as CSV reports and a full-account JSON backup."
       }
     },
     "finalCta": {

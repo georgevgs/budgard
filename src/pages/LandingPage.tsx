@@ -4,10 +4,8 @@ import { changeAppLanguage } from '@/lib/i18n';
 import LoginModal from '@/components/auth/LoginModal';
 import Header from '@/components/landing/Header';
 import Hero from '@/components/landing/Hero';
-import Analytics from '@/components/landing/Analytics';
-import Budget from '@/components/landing/Budget';
+import FeatureTour from '@/components/landing/FeatureTour';
 import Scan from '@/components/landing/Scan';
-import MoneyFlow from '@/components/landing/MoneyFlow';
 import Privacy from '@/components/landing/Privacy';
 import Pricing from '@/components/landing/Pricing';
 import Faq from '@/components/landing/Faq';
@@ -44,10 +42,8 @@ const LandingPage = () => {
     <div className="min-h-dvh bg-background">
       <Header onSignIn={handleGetStarted} />
       <Hero onGetStarted={handleGetStarted} />
-      <Analytics />
-      <Budget />
+      <FeatureTour />
       <Scan />
-      <MoneyFlow />
       <Privacy />
       <Pricing onGetStarted={handleGetStarted} onGetPro={handleGetPro} />
       <Faq />
