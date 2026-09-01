@@ -6,61 +6,61 @@ import { test, expect } from './fixtures/test';
 test.describe('arranging the Today grid', () => {
   test('hides a module, and the hide survives a reload', async ({ app }) => {
     await app.goto('/today');
-    await expect(app.getByText('Budget used')).toBeVisible();
+    await expect(app.getByText('Safe to spend')).toBeVisible();
 
     await app.getByRole('button', { name: /arrange your grid/i }).click();
-    await app.getByRole('button', { name: /hide budget used/i }).click();
+    await app.getByRole('button', { name: /hide safe to spend/i }).click();
     await app.getByRole('button', { name: /^done$/i }).click();
 
-    await expect(app.getByText('Budget used')).toBeHidden();
+    await expect(app.getByText('Safe to spend')).toBeHidden();
 
     await app.reload();
-    await expect(app.getByText('Safe to spend')).toBeVisible();
-    await expect(app.getByText('Budget used')).toBeHidden();
+    await expect(app.getByText('Recent activity')).toBeVisible();
+    await expect(app.getByText('Safe to spend')).toBeHidden();
   });
 
   test('a hidden module can be brought back', async ({ app }) => {
     await app.goto('/today');
     await app.getByRole('button', { name: /arrange your grid/i }).click();
-    await app.getByRole('button', { name: /hide month pace/i }).click();
-    const showButton = app.getByRole('button', { name: /show month pace/i });
+    await app.getByRole('button', { name: /hide safe to spend/i }).click();
+    const showButton = app.getByRole('button', { name: /show safe to spend/i });
     await expect(showButton).toBeVisible();
     await expect(showButton).toBeFocused();
     await expect(
-      app.getByRole('status').filter({ hasText: /month pace hidden/i }),
-    ).toHaveText(/month pace hidden/i);
+      app.getByRole('status').filter({ hasText: /safe to spend hidden/i }),
+    ).toHaveText(/safe to spend hidden/i);
 
     await showButton.click();
     await expect(
-      app.getByRole('button', { name: /hide month pace/i }),
+      app.getByRole('button', { name: /hide safe to spend/i }),
     ).toBeFocused();
     await expect(
-      app.getByRole('status').filter({ hasText: /month pace shown/i }),
-    ).toHaveText(/month pace shown/i);
+      app.getByRole('status').filter({ hasText: /safe to spend shown/i }),
+    ).toHaveText(/safe to spend shown/i);
     await app.getByRole('button', { name: /^done$/i }).click();
 
-    await expect(app.getByText('Month pace')).toBeVisible();
+    await expect(app.getByText('Safe to spend')).toBeVisible();
   });
 
   test('reorders modules and keeps the order after reload', async ({ app }) => {
     await app.goto('/today');
     await app.getByRole('button', { name: /arrange your grid/i }).click();
     await app
-      .getByRole('button', { name: /move budget used earlier/i })
+      .getByRole('button', { name: /move next 7 days earlier/i })
       .click();
 
     await expect(
       app
         .getByRole('status')
-        .filter({ hasText: /budget used moved to position 1/i }),
-    ).toHaveText(/budget used moved to position 1/i);
+        .filter({ hasText: /next 7 days moved to position 1/i }),
+    ).toHaveText(/next 7 days moved to position 1/i);
     await expect
       .poll(async () => (await readVisibleOrder(app)).slice(0, 2))
-      .toEqual(['budgetUsed', 'safeToSpend']);
+      .toEqual(['upcoming', 'safeToSpend']);
 
     await app.reload();
     expect((await readVisibleOrder(app)).slice(0, 2)).toEqual([
-      'budgetUsed',
+      'upcoming',
       'safeToSpend',
     ]);
   });
