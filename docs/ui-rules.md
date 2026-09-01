@@ -40,12 +40,28 @@ Two rules hold it together:
 
 ---
 
-## Layout & Structure
+## Layout
 
 - Group related elements using spacing or containers
 - Do not mix unrelated actions in the same section
 - Use vertical flow for readability
 - Avoid dense layouts — prefer whitespace
+- There is no app bar. Every screen draws its own header via `PageHeader`,
+  which decides the back button from the route — a screen cannot ship without
+  a way out by forgetting to pass one. `TopScrim` keeps the status-bar strip
+  legible while content scrolls under it.
+- Mobile dialogs are bottom sheets and use their handle or draggable header to
+  swipe closed. The shared top-right close button is hidden below `sm` and
+  remains visible on desktop, where drag dismissal is disabled. A committed
+  swipe continues from the finger's release position; the sheet stays opaque
+  while it exits and the backdrop owns the fade.
+- Today and Trends are bento grids: `BentoGrid` + `BentoTile`, two columns,
+  one full-span slab, half tiles under it. Tones are `plain` / `slab` / `ink` /
+  `accent` / `ghost` / `bare` — at most one `ink` and one `slab` per screen.
+- Today's grid is the user's: order and visibility live in `useTodayLayout`
+  (localStorage for the instant/offline copy, synchronized through the
+  owner-scoped `user_ui_preferences` row). A tile with nothing to say returns
+  `null` and gives its cell back.
 
 ---
 
@@ -144,58 +160,6 @@ Every user action must provide feedback:
   `src/design/tokens.ts`.
 
 See `src/design/palette.ts` for the written reasoning behind each value.
-
----
-
-## Type
-
-The display face is named in exactly one place: the `.type-*` scale in
-`src/index.css`. A component never writes `font-display`, and
-`src/test/invariants/typeScale.test.ts` fails the build if one does.
-
-| class             | for                                          | size      | weight |
-| ----------------- | -------------------------------------------- | --------- | ------ |
-| `.type-slab`      | the figure a screen exists to answer          | 3.5rem    | 800    |
-| `.type-figure-xl` | an amount being entered or inspected          | 2.75rem   | 780    |
-| `.type-figure-lg` | the headline figure of a section              | 2rem      | 760    |
-| `.type-figure`    | a number inside a module                      | 1.5rem    | 720    |
-| `.type-figure-sm` | a number inside a row or a small tile         | 1.25rem   | 700    |
-| `.type-title`     | a screen's own name (`PageHeader`)            | 1.375rem  | 720    |
-| `.type-heading`   | a section's name                              | 1.0625rem | 700    |
-| `.type-wordmark`  | the Budgard logotype                          | 0.9375rem | 700    |
-| `.tile-label`     | an eyebrow over a figure (use `TileLabel`)    | 0.625rem  | 700    |
-
-Two rules hold it together:
-
-- **Weight carries rank, not just size.** Overriding a class's weight with a
-  `font-semibold` flattens the ladder, and a test rejects it. Size may be
-  overridden where a screen genuinely needs a different one — the landing hero,
-  the transaction hero — and the weight and tracking come along.
-- **Tracking is optical and already set.** It tightens as the scale climbs
-  (-0.055em at the top, -0.022em at the bottom) and opens right up for the
-  eyebrow, where 10px small caps would otherwise set solid. Never put a
-  `tracking-[…]` next to a `.type-*` class.
-
----
-
-## Layout
-
-- There is no app bar. Every screen draws its own header via `PageHeader`,
-  which decides the back button from the route — a screen cannot ship without
-  a way out by forgetting to pass one. `TopScrim` keeps the status-bar strip
-  legible while content scrolls under it.
-- Mobile dialogs are bottom sheets and use their handle or draggable header to
-  swipe closed. The shared top-right close button is hidden below `sm` and
-  remains visible on desktop, where drag dismissal is disabled. A committed
-  swipe continues from the finger's release position; the sheet stays opaque
-  while it exits and the backdrop owns the fade.
-- Today and Trends are bento grids: `BentoGrid` + `BentoTile`, two columns,
-  one full-span slab, half tiles under it. Tones are `plain` / `slab` / `ink` /
-  `accent` / `ghost` / `bare` — at most one `ink` and one `slab` per screen.
-- Today's grid is the user's: order and visibility live in `useTodayLayout`
-  (localStorage for the instant/offline copy, synchronized through the
-  owner-scoped `user_ui_preferences` row). A tile with nothing to say returns
-  `null` and gives its cell back.
 
 ---
 
