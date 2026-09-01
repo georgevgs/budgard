@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+import { describeAmount } from '@/lib/transactionAmount';
 import type { Expense } from '@/types/Expense';
 
 // --- Mocks ---
@@ -65,7 +66,7 @@ const mockRefreshExpenses = vi.fn();
 const expensesRef = { current: [] as Expense[] };
 
 vi.mock('@/contexts/DataContext', () => ({
-  useDataConfig: () => ({ isInitialized: true }),
+  useDataConfig: () => ({ isInitialized: true, defaultCurrency: 'EUR' }),
   useDataActions: () => ({
     setExpenses: mockSetExpenses,
     refreshDebts: mockRefreshDebts,
@@ -132,6 +133,47 @@ describe('handleExpenseSubmit', () => {
     expect(mockHaptics.success).toHaveBeenCalled();
     expect(mockToast).toHaveBeenCalledWith(
       expect.objectContaining({ variant: 'success' }),
+    );
+  });
+
+  it('offers an undo on the added toast that deletes the new row', async () => {
+    const saved = makeExpense({ id: 'new-1', amount: 12, description: 'Sample' });
+    mockDataService.createExpense.mockResolvedValue(saved);
+    mockDataService.deleteExpense.mockResolvedValue(undefined);
+
+    const ops = renderOps();
+    await act(async () => {
+      await ops.current.handleExpenseSubmit({ amount: 12 } as never);
+    });
+
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        variant: 'success',
+        description: `${describeAmount(12, 'expense', 'EUR').text} · Sample`,
+        action: expect.objectContaining({ label: 'common.undo' }),
+      }),
+    );
+
+    const [{ action }] = mockToast.mock.calls[0] as [{ action: { onClick: () => void } }];
+    await act(async () => {
+      action.onClick();
+    });
+
+    expect(mockDataService.deleteExpense).toHaveBeenCalledWith('new-1');
+  });
+
+  it('does not offer undo when editing an existing expense', async () => {
+    mockDataService.updateExpense.mockResolvedValue(
+      makeExpense({ id: 'e1', description: 'Tea' }),
+    );
+
+    const ops = renderOps();
+    await act(async () => {
+      await ops.current.handleExpenseSubmit({ amount: 1 } as never, 'e1');
+    });
+
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({ action: undefined }),
     );
   });
 

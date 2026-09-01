@@ -122,6 +122,26 @@ test('screenshot quick-add', async ({ app, data }) => {
   await app.screenshot({ path: `${SHOTS}/quick-add.png` });
 });
 
+// Saving closes the sheet immediately (see QuickAddSheet) — the toast that
+// follows is the only confirmation left on screen, so it is what this shot
+// captures: the saved amount + name, and the Undo action beside it.
+test('screenshot quick-add-saved', async ({ app, data }) => {
+  seed(data);
+  await app.goto('/today');
+  await app.waitForTimeout(2000);
+  await app.getByRole('button', { name: /open actions menu/i }).click();
+  await app.getByRole('button', { name: /add expense/i }).click();
+  await app.waitForTimeout(900);
+  await app.getByLabel('Name', { exact: true }).fill('Coffee run');
+  await app.getByRole('button', { name: '1', exact: true }).click();
+  await app.getByRole('button', { name: '2', exact: true }).click();
+  await app.getByRole('button', { name: '0', exact: true }).click();
+  await app.getByRole('button', { name: '0', exact: true }).click();
+  await app.getByRole('button', { name: 'Save' }).click();
+  await app.waitForTimeout(500);
+  await app.screenshot({ path: `${SHOTS}/quick-add-saved.png` });
+});
+
 test('screenshot today-dark', async ({ app, data }) => {
   seed(data);
   await app.addInitScript(() => {

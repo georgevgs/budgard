@@ -12,6 +12,7 @@
     "error": "Error",
     "loadDataFailed": "Failed to load data",
     "tryAgain": "Try again",
+    "undo": "Undo",
     "success": "Success",
     "update": "Update",
     "clear": "Clear",

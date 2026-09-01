@@ -9,6 +9,7 @@ import { uploadReceipt, deleteReceipt } from '@/services/receiptService';
 import { haptics } from '@/lib/haptics';
 import { offlineQueue, createTempId } from '@/lib/offlineQueue';
 import { isOfflineError } from '@/lib/offlineError';
+import { describeAmount } from '@/lib/transactionAmount';
 import type { Expense } from '@/types/Expense';
 import { replaceById, patchById, pickByEdit } from '@/hooks/dataOps/helpers';
 import { mergeUniqueById } from '@/contexts/DataContext.helpers';
@@ -36,7 +37,7 @@ type BulkExpenseRow = {
 
 export const useExpenseOps = () => {
   const { activeOwnerId } = useFinancialSpace();
-  const { isInitialized } = useDataConfig();
+  const { isInitialized, defaultCurrency } = useDataConfig();
   const { setExpenses, refreshDebts, refreshExpenses, expensesRef } =
     useDataActions();
   const { toast } = useToast();
@@ -150,6 +151,13 @@ export const useExpenseOps = () => {
               expenseId,
               t('expenses.toasts.updated'),
               t('expenses.toasts.added'),
+            ),
+            description: describeSavedExpense(finalExpense, defaultCurrency),
+            action: buildUndoAction(
+              expenseId,
+              finalExpense,
+              handleExpenseDelete,
+              t,
             ),
           });
         },
@@ -295,6 +303,7 @@ export const useExpenseOps = () => {
   }, [
     activeOwnerId,
     isInitialized,
+    defaultCurrency,
     expensesRef,
     setExpenses,
     refreshDebts,
@@ -310,6 +319,37 @@ export const useExpenseOps = () => {
 type ReceiptResult = {
   receiptPath: string | null;
   receiptFailed: boolean;
+};
+
+// The generic "Expense added" title says a write landed; this says which one,
+// so a name typed a moment ago and a total glimpsed in passing both confirm
+// against the same line instead of the user re-opening the row to check.
+const describeSavedExpense = (expense: Expense, currency: string): string => {
+  const amount = describeAmount(expense.amount, 'expense', currency);
+
+  return `${amount.text} · ${expense.description}`;
+};
+
+type ToastAction = { label: string; onClick: () => void };
+
+// Undo only offers itself on a fresh add. An edit has no snapshot of what the
+// row looked like a moment ago to restore, where a brand new row does: taking
+// it back out is the whole undo, so `handleExpenseDelete` is enough — no
+// separate rollback machinery to build or keep in sync.
+const buildUndoAction = (
+  expenseId: string | undefined,
+  finalExpense: Expense,
+  onUndo: (id: string) => void,
+  t: (key: string) => string,
+): ToastAction | undefined => {
+  if (expenseId) {
+    return undefined;
+  }
+
+  return {
+    label: t('common.undo'),
+    onClick: () => onUndo(finalExpense.id),
+  };
 };
 
 const getPreviousDebtId = (
