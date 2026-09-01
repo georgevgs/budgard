@@ -166,10 +166,18 @@ export const useExpenseOps = () => {
 
     // The row is removed once the delete lands, not before — a failed delete
     // that already emptied the row would read as data loss.
-    const handleExpenseDelete = (expenseId: string) => {
+    //
+    // `knownDebtId` covers a row the local list never held in the first place
+    // — a debt payment, deliberately excluded from `expenses` — so undoing one
+    // can still refresh the debt it belonged to instead of leaving its balance
+    // stale until an unrelated refresh happens to catch it up.
+    const handleExpenseDelete = (
+      expenseId: string,
+      knownDebtId?: string | null,
+    ) => {
       const existing = expensesRef.current.find((e) => e.id === expenseId);
       const receiptPath = existing?.receipt_path ?? null;
-      const deletedDebtId = existing?.debt_id ?? null;
+      const deletedDebtId = existing?.debt_id ?? knownDebtId ?? null;
 
       return runMutation({
         operation: 'deleteExpense',
@@ -335,11 +343,13 @@ type ToastAction = { label: string; onClick: () => void };
 // Undo only offers itself on a fresh add. An edit has no snapshot of what the
 // row looked like a moment ago to restore, where a brand new row does: taking
 // it back out is the whole undo, so `handleExpenseDelete` is enough — no
-// separate rollback machinery to build or keep in sync.
+// separate rollback machinery to build or keep in sync. The debt id travels
+// along explicitly because a debt payment's row was never in local state for
+// `handleExpenseDelete` to read it back off of.
 const buildUndoAction = (
   expenseId: string | undefined,
   finalExpense: Expense,
-  onUndo: (id: string) => void,
+  onUndo: (id: string, knownDebtId?: string | null) => void,
   t: (key: string) => string,
 ): ToastAction | undefined => {
   if (expenseId) {
@@ -348,7 +358,7 @@ const buildUndoAction = (
 
   return {
     label: t('common.undo'),
-    onClick: () => onUndo(finalExpense.id),
+    onClick: () => onUndo(finalExpense.id, finalExpense.debt_id ?? null),
   };
 };
 

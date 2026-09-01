@@ -37,7 +37,12 @@ export const useDebtDetailActions = ({
     const id = paymentToDelete;
     setPaymentToDelete(null);
     try {
-      await handleExpenseDelete(id);
+      // A logged payment is never in the global expense list (see
+      // useExpenseOps), so the delete can't read the debt id back off a row
+      // it will never find there — pass the one we already have instead, or
+      // the balance shown on this screen goes stale until an unrelated
+      // refresh happens to catch it up.
+      await handleExpenseDelete(id, debt.id);
       removePayment(id);
     } catch {
       // toast already shown

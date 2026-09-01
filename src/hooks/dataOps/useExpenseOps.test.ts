@@ -220,6 +220,32 @@ describe('handleExpenseSubmit', () => {
     expect(applyLastSetExpenses(existing)).toEqual(existing);
   });
 
+  it('refreshes the debt when undoing a newly logged payment', async () => {
+    // The payment row is never in local state (see the test above), so
+    // undo has to carry the debt id along rather than read it back off a
+    // row that was never there.
+    mockDataService.createExpense.mockResolvedValue(
+      makeExpense({ id: 'n1', type: 'debt_payment', debt_id: 'd1' }),
+    );
+    mockDataService.deleteExpense.mockResolvedValue(undefined);
+
+    const ops = renderOps();
+    await act(async () => {
+      await ops.current.handleExpenseSubmit({} as never);
+    });
+
+    const [{ action }] = mockToast.mock.calls[0] as [
+      { action: { onClick: () => void } },
+    ];
+    mockRefreshDebts.mockClear();
+    await act(async () => {
+      action.onClick();
+    });
+
+    expect(mockDataService.deleteExpense).toHaveBeenCalledWith('n1');
+    expect(mockRefreshDebts).toHaveBeenCalled();
+  });
+
   it('refreshes debts when an expense leaves a debt it used to belong to', async () => {
     expensesRef.current = [makeExpense({ id: 'e1', debt_id: 'd-old' })];
     mockDataService.updateExpense.mockResolvedValue(
@@ -420,6 +446,18 @@ describe('handleExpenseDelete', () => {
 
     expect(applyLastSetExpenses([makeExpense({ id: 'e1' })])).toEqual([]);
     expect(mockDeleteReceipt).toHaveBeenCalledWith('r/p.jpg');
+    expect(mockRefreshDebts).toHaveBeenCalled();
+  });
+
+  it('falls back to the passed-in debt id when the row is not in local state', async () => {
+    expensesRef.current = [];
+    mockDataService.deleteExpense.mockResolvedValue(undefined);
+
+    const ops = renderOps();
+    await act(async () => {
+      await ops.current.handleExpenseDelete('n1', 'd1');
+    });
+
     expect(mockRefreshDebts).toHaveBeenCalled();
   });
 
