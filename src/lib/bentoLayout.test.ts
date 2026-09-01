@@ -29,11 +29,11 @@ describe('normalizing a stored Today layout', () => {
   // The reason both lists are stored rather than just `visible`: a tile in
   // neither is one this build added, and it has to land on its default rather
   // than be mistaken for something the user hid.
-  it('places a newly shipped tile by its default, not as hidden', () => {
+  it('places a missing default tile in the visible set', () => {
     const layout = load({ visible: ['safeToSpend'], hidden: ['netWorth'] });
 
-    expect(layout.visible).toContain('budgetUsed');
-    expect(layout.hidden).not.toContain('budgetUsed');
+    expect(layout.visible).toContain('upcoming');
+    expect(layout.hidden).not.toContain('upcoming');
     expect(layout.hidden).toContain('netWorth');
   });
 

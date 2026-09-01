@@ -49,6 +49,7 @@ const ROUTES = [
   ['activity', '/activity'],
   ['plan', '/plan'],
   ['trends', '/trends'],
+  ['trends-explore', '/trends/explore'],
   ['recurring', '/recurring'],
   ['networth', '/networth'],
   ['debts', '/debts'],

@@ -18,32 +18,42 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import ActivityCategorySelect from '@/components/activity/ActivityCategorySelect';
+import ActivityPeriodSelector from '@/components/activity/ActivityPeriodSelector';
+import type {
+  ActivityKind,
+  ActivityPeriod,
+} from '@/hooks/activity/useActivityFeed';
 import type { Category } from '@/types/Category';
 import type { Tag } from '@/types/Tag';
 
 type Props = {
   categories: Category[];
   tags: Tag[];
+  kind: ActivityKind;
+  period: ActivityPeriod;
   selectedCategoryId: string | null;
   selectedTagId: string | null;
+  onKindChange: (kind: ActivityKind) => void;
+  onPeriodChange: (period: ActivityPeriod) => void;
   onCategoryChange: (categoryId: string | null) => void;
   onTagChange: (tagId: string | null) => void;
 };
 
-// Category and tag pickers used to sit permanently above the feed, next to an
-// import button, an export button and a tag-management pencil — five rows of
-// controls before the first transaction on a phone. They live behind one
-// button now, which carries a count so an active filter is still impossible
-// to miss.
+// Every refinement lives behind one button, which carries a count so an active
+// choice remains visible without making every visit scan a control dashboard.
 const ActivityFilterPanel = (props: Props) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const activeCount = countActive(
+    props.kind,
+    props.period,
     props.selectedCategoryId,
     props.selectedTagId,
   );
 
   const handleClear = () => {
+    props.onKindChange('all');
+    props.onPeriodChange('month');
     props.onCategoryChange(null);
     props.onTagChange(null);
   };
@@ -60,66 +70,16 @@ const ActivityFilterPanel = (props: Props) => {
 
   return (
     <>
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => setIsOpen(true)}
-        aria-label={getTriggerLabel(activeCount, t)}
-        className="h-11 shrink-0 gap-2 rounded-xl bg-card px-3 shadow-none"
-      >
-        <SlidersHorizontal className="h-4 w-4" />
-        <span className="hidden sm:inline">{t('activity.refine.trigger')}</span>
-        {renderCountBadge(activeCount)}
-      </Button>
-
+      {renderTrigger(activeCount, () => setIsOpen(true), t)}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-[440px]" onOpenChange={setIsOpen}>
-          <DialogHeader className="pr-10" data-draggable-area>
-            <DialogTitle>{t('activity.refine.title')}</DialogTitle>
-            <DialogDescription>
-              {t('activity.refine.description')}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-3">
-            <ActivityCategorySelect
-              categories={props.categories}
-              selectedCategoryId={props.selectedCategoryId}
-              onChange={props.onCategoryChange}
-            />
-            <Select
-              value={props.selectedTagId ?? 'all'}
-              onValueChange={handleTagChange}
-              disabled={props.tags.length === 0}
-            >
-              <SelectTrigger
-                className="h-11 w-full rounded-xl border-input bg-card shadow-none [&>span]:flex-1 [&>span]:text-left"
-                aria-label={t('activity.filterByTag')}
-              >
-                <TagIcon className="mr-2 h-4 w-4 shrink-0 text-primary-ink" />
-                <SelectValue placeholder={t('activity.allTags')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('activity.allTags')}</SelectItem>
-                {props.tags.map((tag) => renderTagOption(tag))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex justify-between gap-3 pt-2">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handleClear}
-              disabled={activeCount === 0}
-            >
-              {t('activity.refine.clear')}
-            </Button>
-            <Button type="button" onClick={() => setIsOpen(false)}>
-              {t('activity.refine.done')}
-            </Button>
-          </div>
-        </DialogContent>
+        {renderPanel(
+          props,
+          activeCount,
+          handleClear,
+          handleTagChange,
+          () => setIsOpen(false),
+          t,
+        )}
       </Dialog>
     </>
   );
@@ -131,11 +91,131 @@ export default ActivityFilterPanel;
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
+const renderTrigger = (activeCount: number, onOpen: () => void, t: TFunc) => (
+  <Button
+    type="button"
+    variant="outline"
+    onClick={onOpen}
+    aria-label={getTriggerLabel(activeCount, t)}
+    className="h-11 shrink-0 gap-2 rounded-xl bg-card px-3 shadow-none"
+  >
+    <SlidersHorizontal className="h-4 w-4" />
+    <span className="hidden sm:inline">{t('activity.refine.trigger')}</span>
+    {renderCountBadge(activeCount)}
+  </Button>
+);
+
+const renderPanel = (
+  props: Props,
+  activeCount: number,
+  onClear: () => void,
+  onTagChange: (value: string) => void,
+  onClose: () => void,
+  t: TFunc,
+) => (
+  <DialogContent className="sm:max-w-[440px]" onOpenChange={onClose}>
+    <DialogHeader className="pr-10" data-draggable-area>
+      <DialogTitle>{t('activity.refine.title')}</DialogTitle>
+      <DialogDescription>{t('activity.refine.description')}</DialogDescription>
+    </DialogHeader>
+    <div className="space-y-5">
+      {renderKindControl(props, t)}
+      {renderPeriodControl(props, t)}
+      <ActivityCategorySelect
+        categories={props.categories}
+        selectedCategoryId={props.selectedCategoryId}
+        onChange={props.onCategoryChange}
+      />
+      {renderTagControl(props, onTagChange, t)}
+    </div>
+    <div className="flex justify-between gap-3 pt-2">
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={onClear}
+        disabled={activeCount === 0}
+      >
+        {t('activity.refine.clear')}
+      </Button>
+      <Button type="button" onClick={onClose}>
+        {t('activity.refine.done')}
+      </Button>
+    </div>
+  </DialogContent>
+);
+
+const renderKindControl = (props: Props, t: TFunc) => (
+  <section aria-labelledby="activity-kind-label">
+    <p
+      id="activity-kind-label"
+      className="mb-2 text-xs font-semibold text-muted-foreground"
+    >
+      {t('activity.kindLabel')}
+    </p>
+    <div
+      className="segmented grid w-full grid-cols-3"
+      role="group"
+      aria-labelledby="activity-kind-label"
+    >
+      {renderKindButton('all', props, t)}
+      {renderKindButton('expense', props, t)}
+      {renderKindButton('income', props, t)}
+    </div>
+  </section>
+);
+
+const renderPeriodControl = (props: Props, t: TFunc) => (
+  <section aria-labelledby="activity-period-label">
+    <p
+      id="activity-period-label"
+      className="mb-2 text-xs font-semibold text-muted-foreground"
+    >
+      {t('activity.period.label')}
+    </p>
+    <ActivityPeriodSelector
+      period={props.period}
+      onPeriodChange={props.onPeriodChange}
+    />
+  </section>
+);
+
+const renderTagControl = (
+  props: Props,
+  onTagChange: (value: string) => void,
+  t: TFunc,
+) => (
+  <Select
+    value={props.selectedTagId ?? 'all'}
+    onValueChange={onTagChange}
+    disabled={props.tags.length === 0}
+  >
+    <SelectTrigger
+      className="h-11 w-full rounded-xl border-input bg-card shadow-none [&>span]:flex-1 [&>span]:text-left"
+      aria-label={t('activity.filterByTag')}
+    >
+      <TagIcon className="mr-2 h-4 w-4 shrink-0 text-primary-ink" />
+      <SelectValue placeholder={t('activity.allTags')} />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="all">{t('activity.allTags')}</SelectItem>
+      {props.tags.map((tag) => renderTagOption(tag))}
+    </SelectContent>
+  </Select>
+);
+
 const countActive = (
+  kind: ActivityKind,
+  period: ActivityPeriod,
   categoryId: string | null,
   tagId: string | null,
 ): number => {
   let count = 0;
+  if (kind !== 'all') {
+    count += 1;
+  }
+  if (period !== 'month') {
+    count += 1;
+  }
   if (categoryId) {
     count += 1;
   }
@@ -144,6 +224,23 @@ const countActive = (
   }
 
   return count;
+};
+
+const renderKindButton = (value: ActivityKind, props: Props, t: TFunc) => {
+  const isActive = props.kind === value;
+
+  return (
+    <button
+      key={value}
+      type="button"
+      onClick={() => props.onKindChange(value)}
+      aria-pressed={isActive}
+      data-active={isActive}
+      className="segmented-item cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      {t(`activity.filters.${value}`)}
+    </button>
+  );
 };
 
 const getTriggerLabel = (activeCount: number, t: TFunc): string => {

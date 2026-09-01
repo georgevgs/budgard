@@ -1,19 +1,16 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
-import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
 import Target from 'lucide-react/dist/esm/icons/target';
 import Wallet from 'lucide-react/dist/esm/icons/wallet';
 import PageHeader from '@/components/common/PageHeader';
-import BudgetProgress from '@/components/budget/BudgetProgress';
 import UpcomingBillsCard from '@/components/common/UpcomingBillsCard';
 import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
-import FiftyThirtyTwentyRing from '@/components/income/FiftyThirtyTwentyRing';
 import PlanOverviewCard from '@/components/plan/PlanOverviewCard';
 import MonthlyDecisionCard from '@/components/plan/MonthlyDecisionCard';
-import SavingsRhythm from '@/components/plan/SavingsRhythm';
+import PlanDetails from '@/components/plan/PlanDetails';
 import {
   useAccountsData,
   useDataConfig,
@@ -43,6 +40,7 @@ const PlanView = () => {
   const { summary: debtSummary } = useDebts();
   const { handleBudgetUpdate } = useBudgetOps();
   const { optimisticExpenses } = useQuickAdd();
+  const [areDetailsOpen, setDetailsOpen] = useState(false);
   const now = useCurrentDate();
   const rhythm = useSavingsRhythm(optimisticExpenses);
   const model = useMemo(
@@ -84,22 +82,8 @@ const PlanView = () => {
       <MonthlyDecisionCard
         decision={decision}
         currency={config.defaultCurrency}
+        onOpenDetails={() => setDetailsOpen(true)}
       />
-      <section
-        id="monthly-plan"
-        className="surface-card mt-6 scroll-mt-6 p-5"
-        aria-labelledby="monthly-plan-title"
-      >
-        <h2 id="monthly-plan-title" className="mb-4 type-heading">
-          {t('plan.monthlyPlan')}
-        </h2>
-        <BudgetProgress
-          monthlyBudget={config.monthlyBudget}
-          monthlySpent={model.monthlySpent}
-          onBudgetUpdate={handleBudgetUpdate}
-          currencyCode={config.defaultCurrency}
-        />
-      </section>
       <div className="mt-8">
         <UpcomingBillsCard
           items={model.upcoming.items}
@@ -115,7 +99,16 @@ const PlanView = () => {
           })}
         />
       </div>
-      {renderMonthlyContext(model.monthKey, rhythm, config.defaultCurrency, t)}
+      <PlanDetails
+        isOpen={areDetailsOpen}
+        monthKey={model.monthKey}
+        monthlyBudget={config.monthlyBudget}
+        monthlySpent={model.monthlySpent}
+        currency={config.defaultCurrency}
+        rhythm={rhythm}
+        onOpenChange={setDetailsOpen}
+        onBudgetUpdate={handleBudgetUpdate}
+      />
       {renderPlanningTools(model, config.defaultCurrency, counts, t)}
     </div>
   );
@@ -132,37 +125,6 @@ type OverviewCounts = {
   debts: number;
   accounts: number;
 };
-
-// The decision, boundary and commitments are the plan. These two analytical
-// views explain it when someone wants the detail, without making every visit
-// pass through two more dashboards first.
-const renderMonthlyContext = (
-  monthKey: string,
-  rhythm: ReturnType<typeof useSavingsRhythm>,
-  currency: string,
-  t: TFunc,
-) => (
-  <details className="group mt-8">
-    <summary className="surface-card flex cursor-pointer list-none items-center gap-4 p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
-      <span className="min-w-0 flex-1">
-        <span className="block type-heading">{t('plan.context.title')}</span>
-        <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
-          {t('plan.context.description')}
-        </span>
-      </span>
-      <ChevronDown
-        className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
-        aria-hidden="true"
-      />
-    </summary>
-    <div className="mt-8 space-y-8">
-      <FiftyThirtyTwentyRing selectedMonth={monthKey} />
-      <div id="savings-rhythm" className="scroll-mt-6">
-        <SavingsRhythm rhythm={rhythm} currency={currency} />
-      </div>
-    </div>
-  </details>
-);
 
 // Every screen that plans ahead stays reachable from Plan, but navigation is
 // one quiet list. A figure appears only after that tool has something to say.

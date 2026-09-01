@@ -2,11 +2,7 @@ import BentoGrid from '@/components/bento/BentoGrid';
 import AveragePerMonthTile from '@/components/analytics/tiles/AveragePerMonthTile';
 import BiggestMonthTile from '@/components/analytics/tiles/BiggestMonthTile';
 import SpentThisMonthTile from '@/components/analytics/tiles/SpentThisMonthTile';
-import WhereItWentTile from '@/components/analytics/tiles/WhereItWentTile';
-import type {
-  CategoryRow,
-  MonthComparison,
-} from '@/hooks/analytics/useAnalyticsData';
+import type { MonthComparison } from '@/hooks/analytics/useAnalyticsData';
 
 type MonthlyDatum = {
   month: string;
@@ -20,15 +16,11 @@ type Props = {
   monthlyData: MonthlyDatum[];
   monthlyAverage: number;
   monthsElapsed: number;
-  totalSpent: number;
-  breakdown: CategoryRow[];
   onMonthClick: (index: number) => void;
-  onCategoryClick: (category: CategoryRow) => void;
 };
 
-// The top of Trends: the five answers most people open the screen for, before
-// any chart they have to read. Everything below this grid is the detail behind
-// one of these tiles.
+// The quick figures that explain the deeper analysis: this month, the usual
+// month and the outlier. Composition stays in its full, scannable list below.
 const TrendsBento = (props: Props) => {
   return (
     <BentoGrid className="mt-4">
@@ -43,11 +35,6 @@ const TrendsBento = (props: Props) => {
       <BiggestMonthTile
         monthlyData={props.monthlyData}
         onMonthClick={props.onMonthClick}
-      />
-      <WhereItWentTile
-        breakdown={props.breakdown}
-        totalSpent={props.totalSpent}
-        onCategoryClick={props.onCategoryClick}
       />
     </BentoGrid>
   );

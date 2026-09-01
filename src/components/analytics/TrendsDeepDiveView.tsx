@@ -1,39 +1,30 @@
 import { useTranslation } from 'react-i18next';
+import AnalyticsDrillDownDialogs from '@/components/analytics/AnalyticsDrillDownDialogs';
+import AnalyticsEmpty from '@/components/analytics/AnalyticsEmpty';
+import TrendsBento from '@/components/analytics/TrendsBento';
+import TrendsDeepDiveLoadingState from '@/components/analytics/TrendsDeepDiveLoading';
+import TrendsSections from '@/components/analytics/TrendsSections';
+import YearPill from '@/components/analytics/YearPill';
+import PageHeader from '@/components/common/PageHeader';
 import {
-  useDataConfig,
   useCategoriesData,
+  useDataConfig,
   useExpensesData,
 } from '@/contexts/DataContext';
-import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
-import { useDelayedLoading } from '@/hooks/useDelayedLoading';
-import PageHeader from '@/components/common/PageHeader';
-import AnalyticsEmpty from '@/components/analytics/AnalyticsEmpty';
 import { useSubscription } from '@/contexts/SubscriptionContext';
-import AnalyticsDrillDownDialogs from '@/components/analytics/AnalyticsDrillDownDialogs';
-import TrendsOverview from '@/components/analytics/TrendsOverview';
-import YearPill from '@/components/analytics/YearPill';
 import { useAnalyticsData } from '@/hooks/analytics/useAnalyticsData';
 import { useAnalyticsDrillDown } from '@/hooks/analytics/useAnalyticsDrillDown';
-import { useMonthlyReview } from '@/hooks/analytics/useMonthlyReview';
 import { useCurrentDate } from '@/hooks/useCurrentDate';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 
-const AnalyticsView = () => {
+const TrendsDeepDiveView = () => {
   const { t } = useTranslation();
   const { isPro } = useSubscription();
   const { expenseCategories: categories } = useCategoriesData();
   const { monthlyBudget, defaultCurrency, isInitialized } = useDataConfig();
   const allExpenses = useExpensesData();
   const now = useCurrentDate();
-
   const analytics = useAnalyticsData(now);
-  const review = useMonthlyReview({
-    expenses: analytics.expenses,
-    categories,
-    comparison: analytics.monthComparison,
-    monthlyBudget,
-    currency: defaultCurrency,
-    now,
-  });
   const drillDown = useAnalyticsDrillDown(
     analytics.yearExpenses,
     analytics.selectedYear,
@@ -43,17 +34,20 @@ const AnalyticsView = () => {
   if (!isInitialized) {
     return renderLoading(showSkeleton);
   }
-
-  // First run: a wall of zeroed charts explains nothing — point the user
-  // at adding an expense instead.
   if (allExpenses.length === 0) {
-    return <AnalyticsEmpty />;
+    return (
+      <AnalyticsEmpty
+        title={t('analytics.explore.title')}
+        subtitle={t('analytics.explore.description')}
+      />
+    );
   }
 
   return (
     <div className="page-shell">
       <PageHeader
-        title={t('navigation.trends')}
+        title={t('analytics.explore.title')}
+        subtitle={t('analytics.explore.description')}
         action={
           <YearPill
             selectedYear={analytics.selectedYear}
@@ -62,15 +56,22 @@ const AnalyticsView = () => {
           />
         }
       />
-
-      <TrendsOverview
-        analytics={analytics}
-        review={review}
-        isPro={isPro}
+      <TrendsBento
+        monthComparison={analytics.monthComparison}
+        rhythmMonths={analytics.rhythmMonths}
+        monthlyData={analytics.monthlyData}
+        monthlyAverage={analytics.yearlyStats.monthlyAverage}
+        monthsElapsed={analytics.yearlyStats.monthsElapsed}
         onMonthClick={drillDown.handleMonthClick}
+      />
+      <TrendsSections
+        analytics={analytics}
+        isPro={isPro}
+        categories={categories}
+        monthlyBudget={monthlyBudget}
+        defaultCurrency={defaultCurrency}
         onCategoryClick={drillDown.handleCategoryClick}
       />
-
       <AnalyticsDrillDownDialogs
         drillDown={drillDown}
         expenses={analytics.yearExpenses}
@@ -80,7 +81,7 @@ const AnalyticsView = () => {
   );
 };
 
-export default AnalyticsView;
+export default TrendsDeepDiveView;
 
 // --- Helpers ---
 
@@ -89,5 +90,5 @@ const renderLoading = (showSkeleton: boolean) => {
     return null;
   }
 
-  return <AnalyticsLoadingState />;
+  return <TrendsDeepDiveLoadingState />;
 };

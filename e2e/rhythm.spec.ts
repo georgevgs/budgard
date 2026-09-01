@@ -35,7 +35,7 @@ test.describe('year in rhythm', () => {
   }) => {
     data.expenses.push(...monthsOfSpending(8));
 
-    await app.goto('/trends');
+    await app.goto('/trends/explore');
 
     await expect(
       app.getByRole('heading', { name: /year in rhythm/i }),
@@ -51,7 +51,7 @@ test.describe('year in rhythm', () => {
   test('is visible without a subscription', async ({ app, data }) => {
     data.expenses.push(...monthsOfSpending(8));
 
-    await app.goto('/trends');
+    await app.goto('/trends/explore');
 
     await expect(
       app.getByRole('heading', { name: /year in rhythm/i }),
@@ -71,7 +71,7 @@ test.describe('year in rhythm', () => {
     data.subscriptions.push(PRO);
     data.expenses.push(...monthsOfSpending(8));
 
-    await app.goto('/trends');
+    await app.goto('/trends/explore');
 
     await expect(
       app.getByRole('heading', { name: /year in rhythm/i }),
@@ -83,7 +83,7 @@ test.describe('year in rhythm', () => {
   test('stays away until a pattern actually exists', async ({ app, data }) => {
     data.expenses.push(...monthsOfSpending(2));
 
-    await app.goto('/trends');
+    await app.goto('/trends/explore');
     await expect(app.getByRole('heading', { name: /trends/i })).toBeVisible();
 
     await expect(

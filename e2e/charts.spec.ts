@@ -38,7 +38,7 @@ test.describe('charts', () => {
     await expect(app.locator('svg[role="img"]').first()).toBeVisible();
 
     const charts = app.locator('svg[role="img"]');
-    await expect.poll(() => charts.count()).toBeGreaterThanOrEqual(2);
+    await expect.poll(() => charts.count()).toBeGreaterThanOrEqual(1);
 
     // Every chart names itself for a screen reader.
     for (const label of await charts.evaluateAll((nodes) =>

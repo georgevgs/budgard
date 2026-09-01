@@ -126,6 +126,9 @@ const loadInitialTab = (pathname: string): Promise<unknown> => {
   if (pathname === '/trends' || pathname === '/analytics') {
     return import('@/components/analytics/AnalyticsView');
   }
+  if (pathname === '/trends/explore') {
+    return import('@/components/analytics/TrendsDeepDiveView');
+  }
 
   return Promise.resolve();
 };

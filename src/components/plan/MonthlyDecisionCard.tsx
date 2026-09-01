@@ -8,9 +8,10 @@ import type { MonthlyDecision } from '@/lib/monthlyDecision';
 type Props = {
   decision: MonthlyDecision;
   currency: string;
+  onOpenDetails: () => void;
 };
 
-const MonthlyDecisionCard = ({ decision, currency }: Props) => {
+const MonthlyDecisionCard = ({ decision, currency, onOpenDetails }: Props) => {
   const { t } = useTranslation();
 
   return (
@@ -25,7 +26,7 @@ const MonthlyDecisionCard = ({ decision, currency }: Props) => {
         {decisionBody(decision, currency, t)}
       </p>
       {renderAllocation(decision, currency, t)}
-      {renderAction(decision.state, t)}
+      {renderAction(decision.state, onOpenDetails, t)}
     </section>
   );
 };
@@ -95,13 +96,17 @@ const allocation = (label: string, amount: number, currency: string) => (
   </div>
 );
 
-const renderAction = (state: MonthlyDecision['state'], t: TFunc) => {
+const renderAction = (
+  state: MonthlyDecision['state'],
+  onOpenDetails: () => void,
+  t: TFunc,
+) => {
   const className =
     'mt-4 inline-flex items-center gap-1.5 rounded-full bg-current/14 px-3 py-1.5 text-[0.8rem] font-semibold leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current';
 
   if (state === 'noBudget') {
     return (
-      <a href="#monthly-plan" className={className}>
+      <a href="#monthly-details" className={className} onClick={onOpenDetails}>
         {t('plan.decision.action.setBudget')}
         <ArrowRight className="h-3.5 w-3.5" />
       </a>
@@ -117,7 +122,7 @@ const renderAction = (state: MonthlyDecision['state'], t: TFunc) => {
   }
   if (state === 'save') {
     return (
-      <a href="#savings-rhythm" className={className}>
+      <a href="#monthly-details" className={className} onClick={onOpenDetails}>
         {t('plan.decision.action.save')}
         <ArrowRight className="h-3.5 w-3.5" />
       </a>

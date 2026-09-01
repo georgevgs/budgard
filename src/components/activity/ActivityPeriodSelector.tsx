@@ -23,10 +23,9 @@ const PERIODS: ActivityPeriod[] = [
   'all',
 ];
 
-// The window the whole screen is showing, as the pill beside the search box.
-// It used to be a full-width select stacked above everything; a range is a
-// qualifier on the search, not a step before it, so it sits where a qualifier
-// goes.
+// The window the whole screen is showing. It lives with the other refinements
+// so the feed has one obvious filter entry point instead of overlapping time
+// controls above it.
 const ActivityPeriodSelector = (props: Props) => {
   const { t } = useTranslation();
 
@@ -36,7 +35,7 @@ const ActivityPeriodSelector = (props: Props) => {
       onValueChange={(value) => props.onPeriodChange(value as ActivityPeriod)}
     >
       <SelectTrigger
-        className="h-10.5 w-auto shrink-0 gap-1.5 rounded-full border-0 bg-primary/13 px-3.5 text-xs font-semibold text-primary-ink shadow-none"
+        className="h-11 w-full rounded-xl border-input bg-card text-sm shadow-none"
         aria-label={t('activity.period.label')}
       >
         <SelectValue />

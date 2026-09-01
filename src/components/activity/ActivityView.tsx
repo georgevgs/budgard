@@ -3,7 +3,6 @@ import PageHeader from '@/components/common/PageHeader';
 import ActivityFeed from '@/components/activity/ActivityFeed';
 import ActivityFilters from '@/components/activity/ActivityFilters';
 import ActivityMonthStepper from '@/components/activity/ActivityMonthStepper';
-import ActivityPeriodSelector from '@/components/activity/ActivityPeriodSelector';
 import ActivitySummary from '@/components/activity/ActivitySummary';
 import ActivityFilterPanel from '@/components/activity/ActivityFilterPanel';
 import ActivityToolsMenu from '@/components/activity/ActivityToolsMenu';
@@ -52,30 +51,32 @@ const ActivityView = () => {
         <PageHeader
           title={t('activity.title')}
           action={
-            <div className="flex items-center gap-2">
-              <ActivityFilterPanel
-                categories={categories}
-                tags={tags}
-                selectedCategoryId={activity.selectedCategoryId}
-                selectedTagId={activity.selectedTagId}
-                onCategoryChange={activity.setSelectedCategoryId}
-                onTagChange={activity.setSelectedTagId}
-              />
-              <ActivityToolsMenu
-                isExportDisabled={csvExport.isExportDisabled}
-                onExport={csvExport.handleExport}
-              />
-            </div>
+            <ActivityToolsMenu
+              isExportDisabled={csvExport.isExportDisabled}
+              onExport={csvExport.handleExport}
+            />
           }
         />
         <div className="mt-4 space-y-3">
           <ReviewQueueBanner />
           <ActivityFilters
             search={activity.search}
-            kind={activity.kind}
+            isSearchingAllTime={activity.isSearchingAllTime}
             onSearchChange={activity.setSearch}
-            onKindChange={activity.setKind}
-            trailing={renderPeriodControl(activity, t)}
+            trailing={
+              <ActivityFilterPanel
+                categories={categories}
+                tags={tags}
+                kind={activity.kind}
+                period={activity.period}
+                selectedCategoryId={activity.selectedCategoryId}
+                selectedTagId={activity.selectedTagId}
+                onKindChange={activity.setKind}
+                onPeriodChange={activity.setPeriod}
+                onCategoryChange={activity.setSelectedCategoryId}
+                onTagChange={activity.setSelectedTagId}
+              />
+            }
           />
           <ActivityMonthStepper
             period={activity.effectivePeriod}
@@ -116,26 +117,6 @@ const ActivityView = () => {
 export default ActivityView;
 
 // --- Helpers ---
-
-type Activity = ReturnType<typeof useActivityFeed>;
-type TFunc = (key: string) => string;
-
-const renderPeriodControl = (activity: Activity, t: TFunc) => {
-  if (activity.isSearchingAllTime) {
-    return (
-      <span className="tile flex h-10 min-w-20 items-center justify-center rounded-full px-3 text-xs font-semibold text-primary-ink">
-        {t('activity.searchScope')}
-      </span>
-    );
-  }
-
-  return (
-    <ActivityPeriodSelector
-      period={activity.period}
-      onPeriodChange={activity.setPeriod}
-    />
-  );
-};
 
 // Stage 1 fetches the last 12 months; everything older streams in afterwards.
 // Only the periods that can actually reach past that horizon care.

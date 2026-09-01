@@ -38,6 +38,7 @@ const PAGE_TITLE_KEYS: Record<string, string> = {
   '/activity': 'navigation.activity',
   '/plan': 'navigation.plan',
   '/trends': 'navigation.trends',
+  '/trends/explore': 'analytics.explore.title',
   '/expenses': 'navigation.expenses',
   '/income': 'navigation.income',
   '/recurring': 'navigation.recurring',

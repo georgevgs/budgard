@@ -36,6 +36,7 @@ import {
 } from '@/components/expenses/ExpensesLoading';
 import RecurringLoadingState from '@/components/recurring/RecurringLoading';
 import AnalyticsLoadingState from '@/components/analytics/AnalyticsLoading';
+import TrendsDeepDiveLoadingState from '@/components/analytics/TrendsDeepDiveLoading';
 import GoalsLoadingState from '@/components/goals/GoalsLoading';
 import NetWorthLoadingState from '@/components/networth/NetWorthLoading';
 import DebtsLoadingState from '@/components/debts/DebtsLoading';
@@ -58,6 +59,9 @@ const ActivityView = lazyWithRetry(
 const PlanView = lazyWithRetry(() => import('@/components/plan/PlanView'));
 const AnalyticsView = lazyWithRetry(
   () => import('@/components/analytics/AnalyticsView'),
+);
+const TrendsDeepDiveView = lazyWithRetry(
+  () => import('@/components/analytics/TrendsDeepDiveView'),
 );
 const RecurringExpensesList = lazyWithRetry(
   () => import('@/components/recurring/RecurringExpensesList'),
@@ -517,6 +521,18 @@ const AuthenticatedApp = () => {
                   <Route
                     path="/analytics"
                     element={<LegacyRedirect to="/trends" />}
+                  />
+                  <Route
+                    path="/trends/explore"
+                    element={
+                      <Suspense
+                        fallback={renderRouteFallback(
+                          <TrendsDeepDiveLoadingState />,
+                        )}
+                      >
+                        <TrendsDeepDiveView />
+                      </Suspense>
+                    }
                   />
                   <Route
                     path="/t/:id"

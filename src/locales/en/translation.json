@@ -152,6 +152,8 @@
   },
   "activity": {
     "title": "Activity",
+    "summaryTitle": "Period summary",
+    "kindLabel": "Transaction type",
     "netChange": "Net change",
     "spent": "Spent",
     "received": "Received",
@@ -205,8 +207,8 @@
     "title": "Plan",
     "subtitle": "Give the month a shape, then let Budgard keep the moving parts together.",
     "context": {
-      "title": "Understand this month",
-      "description": "Open the balance and saving views behind your plan."
+      "title": "Adjust this month",
+      "description": "Open your budget, balance, and saving details."
     },
     "tools": {
       "title": "Planning tools",
@@ -1165,6 +1167,10 @@
     "close": "Close actions menu"
   },
   "analytics": {
+    "explore": {
+      "title": "More trends",
+      "description": "Explore insights, yearly rhythm, categories, and forecast."
+    },
     "selectYear": "Select year",
     "viewMonthDetails": "View month details",
     "chooseMonth": "Choose a month",

@@ -27,13 +27,10 @@ export type TodayLayout = {
   hidden: TodayTileId[];
 };
 
-/** What a new account sees: the money, then the pace, then what is coming. */
+/** What a new account sees: one answer, what is coming, and recent context. */
 export const DEFAULT_VISIBLE: TodayTileId[] = [
   'safeToSpend',
-  'budgetUsed',
-  'monthPace',
   'upcoming',
-  'topCategory',
   'insight',
   'recentActivity',
 ];

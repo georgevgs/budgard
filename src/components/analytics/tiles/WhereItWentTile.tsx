@@ -14,7 +14,7 @@ type Props = {
 const TOP = 3;
 
 // The year's spending as one bar and its three biggest names. The full list is
-// still below — this is the answer most people came for, hoisted above it.
+// one level deeper — this is the answer most people came for.
 const WhereItWentTile = ({ breakdown, totalSpent, onCategoryClick }: Props) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();

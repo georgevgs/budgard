@@ -13,7 +13,7 @@ const MonthlyReview = ({ label, items }: Props) => {
   const { t } = useTranslation();
 
   return (
-    <section className="mt-8 space-y-3">
+    <section className="space-y-3">
       <div>
         <h2 className="type-heading">{t('analytics.review.title')}</h2>
         <p className="mt-1 text-xs text-muted-foreground">{label}</p>

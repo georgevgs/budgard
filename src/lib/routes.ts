@@ -33,6 +33,7 @@ const SECONDARY_PATHS: readonly string[] = [
   '/settings',
   '/join',
   '/review',
+  '/trends/explore',
 ];
 
 export const isSecondaryPath = (path: string): boolean => {

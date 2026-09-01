@@ -2,22 +2,19 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import Search from 'lucide-react/dist/esm/icons/search';
 import { Input } from '@/components/ui/input';
-import type { ActivityKind } from '@/hooks/activity/useActivityFeed';
 
 type Props = {
   search: string;
-  kind: ActivityKind;
+  isSearchingAllTime: boolean;
   onSearchChange: (value: string) => void;
-  onKindChange: (value: ActivityKind) => void;
-  /** Sits beside the search box — the category/tag filter entry point. */
+  /** Sits beside search — the single entry point for every refinement. */
   trailing?: ReactNode;
 };
 
 const ActivityFilters = ({
   search,
-  kind,
+  isSearchingAllTime,
   onSearchChange,
-  onKindChange,
   trailing,
 }: Props) => {
   const { t } = useTranslation();
@@ -40,15 +37,7 @@ const ActivityFilters = ({
         </div>
         {trailing}
       </div>
-      <div
-        className="segmented grid w-full grid-cols-3"
-        role="group"
-        aria-label={t('activity.filterLabel')}
-      >
-        {renderFilterButton('all', kind, onKindChange, t)}
-        {renderFilterButton('expense', kind, onKindChange, t)}
-        {renderFilterButton('income', kind, onKindChange, t)}
-      </div>
+      {renderSearchScope(isSearchingAllTime, t)}
     </div>
   );
 };
@@ -57,26 +46,17 @@ export default ActivityFilters;
 
 // --- Helpers ---
 
-type TFunc = (key: string) => string;
-
-const renderFilterButton = (
-  value: ActivityKind,
-  current: ActivityKind,
-  onChange: (value: ActivityKind) => void,
-  t: TFunc,
+const renderSearchScope = (
+  isSearchingAllTime: boolean,
+  t: (key: string) => string,
 ) => {
-  const isActive = current === value;
+  if (!isSearchingAllTime) {
+    return null;
+  }
 
   return (
-    <button
-      key={value}
-      type="button"
-      onClick={() => onChange(value)}
-      aria-pressed={isActive}
-      data-active={isActive}
-      className="segmented-item cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    >
-      {t(`activity.filters.${value}`)}
-    </button>
+    <p className="px-2 text-xs text-muted-foreground" role="status">
+      {t('activity.searchScope')}
+    </p>
   );
 };
