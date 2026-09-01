@@ -16,13 +16,13 @@ const MonthlyDecisionCard = ({ decision, currency, onOpenDetails }: Props) => {
 
   return (
     <section
-      className="tile-slab lift mt-6 px-5.5 py-5.5"
+      className="surface-card mt-8 px-5 py-5"
       aria-label={t(`plan.decision.label.${decision.state}`)}
       aria-live="polite"
     >
       <TileLabel>{t(`plan.decision.label.${decision.state}`)}</TileLabel>
       {renderFigure(decision, currency, t)}
-      <p className="mt-2.5 max-w-[34rem] text-[0.84rem] font-semibold leading-tight opacity-92">
+      <p className="mt-2 max-w-[34rem] text-sm leading-relaxed text-muted-foreground">
         {decisionBody(decision, currency, t)}
       </p>
       {renderAllocation(decision, currency, t)}
@@ -43,11 +43,11 @@ const renderFigure = (
   t: TFunc,
 ) => {
   if (decision.amount === null) {
-    return <p className="mt-3.5 type-figure-xl">{t('plan.decision.start')}</p>;
+    return <p className="mt-3 type-figure-lg">{t('plan.decision.start')}</p>;
   }
 
   return (
-    <p className="mt-3.5 type-slab text-[2.75rem] sm:text-[3.5rem]">
+    <p className="mt-3 type-figure-xl">
       {formatCurrency(decision.amount, currency)}
     </p>
   );
@@ -73,7 +73,7 @@ const renderAllocation = (
   }
 
   return (
-    <div className="mt-5 grid grid-cols-3 divide-x divide-current/20 border-t border-current/20 pt-4">
+    <div className="mt-5 grid grid-cols-3 divide-x divide-border/50 border-t border-border/50 pt-4">
       {allocation(t('plan.decision.spent'), decision.spent, currency)}
       {allocation(t('plan.decision.committed'), decision.committed, currency)}
       {allocation(
@@ -102,7 +102,7 @@ const renderAction = (
   t: TFunc,
 ) => {
   const className =
-    'mt-4 inline-flex items-center gap-1.5 rounded-full bg-current/14 px-3 py-1.5 text-[0.8rem] font-semibold leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current';
+    'mt-4 inline-flex min-h-10 items-center gap-1.5 rounded-full bg-primary/10 px-3 text-[0.8rem] font-semibold leading-none text-primary-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 
   if (state === 'noBudget') {
     return (

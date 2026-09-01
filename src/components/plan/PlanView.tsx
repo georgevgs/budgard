@@ -6,11 +6,11 @@ import Repeat from 'lucide-react/dist/esm/icons/repeat';
 import Target from 'lucide-react/dist/esm/icons/target';
 import Wallet from 'lucide-react/dist/esm/icons/wallet';
 import PageHeader from '@/components/common/PageHeader';
-import UpcomingBillsCard from '@/components/common/UpcomingBillsCard';
 import { ExpenseLoadingState } from '@/components/expenses/ExpensesLoading';
 import PlanOverviewCard from '@/components/plan/PlanOverviewCard';
 import MonthlyDecisionCard from '@/components/plan/MonthlyDecisionCard';
 import PlanDetails from '@/components/plan/PlanDetails';
+import PlanTimeline from '@/components/plan/PlanTimeline';
 import {
   useAccountsData,
   useDataConfig,
@@ -22,11 +22,11 @@ import { useBudgetOps } from '@/hooks/dataOps/useBudgetOps';
 import { useDebts } from '@/hooks/useDebts';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { useCurrentDate } from '@/hooks/useCurrentDate';
+import { useMoneyTimeline } from '@/hooks/plan/useMoneyTimeline';
 import { useSavingsRhythm } from '@/hooks/savings/useSavingsRhythm';
 import { getMonthlyAmount } from '@/lib/recurring';
 import { computeUpcomingRecurringThisMonth } from '@/lib/forecast';
 import { buildMonthlyDecision } from '@/lib/monthlyDecision';
-import { buildUpcomingBills } from '@/lib/upcomingBills';
 import { formatCurrency } from '@/lib/utils';
 import { sumSpending } from '@/lib/spending';
 import type { Expense } from '@/types/Expense';
@@ -35,7 +35,7 @@ const PlanView = () => {
   const { t } = useTranslation();
   const config = useDataConfig();
   const goals = useGoalsData();
-  const { recurringExpenses } = useRecurringData();
+  const { recurringExpenses, recurringIncomes } = useRecurringData();
   const { accounts } = useAccountsData();
   const { summary: debtSummary } = useDebts();
   const { handleBudgetUpdate } = useBudgetOps();
@@ -43,6 +43,11 @@ const PlanView = () => {
   const [areDetailsOpen, setDetailsOpen] = useState(false);
   const now = useCurrentDate();
   const rhythm = useSavingsRhythm(optimisticExpenses);
+  const timeline = useMoneyTimeline({
+    recurringExpenses,
+    recurringIncomes,
+    now,
+  });
   const model = useMemo(
     () => buildPlanModel(optimisticExpenses, goals, recurringExpenses, now),
     [optimisticExpenses, goals, recurringExpenses, now],
@@ -79,26 +84,12 @@ const PlanView = () => {
   return (
     <div className="page-shell">
       <PageHeader title={t('plan.title')} subtitle={t('plan.subtitle')} />
+      <PlanTimeline timeline={timeline} currency={config.defaultCurrency} />
       <MonthlyDecisionCard
         decision={decision}
         currency={config.defaultCurrency}
         onOpenDetails={() => setDetailsOpen(true)}
       />
-      <div className="mt-8">
-        <UpcomingBillsCard
-          items={model.upcoming.items}
-          count={model.upcoming.count}
-          currency={config.defaultCurrency}
-          title={t('plan.commitments.title')}
-          summary={t('plan.commitments.summary', {
-            amount: formatCurrency(
-              model.upcoming.total,
-              config.defaultCurrency,
-            ),
-            count: model.upcoming.count,
-          })}
-        />
-      </div>
       <PlanDetails
         isOpen={areDetailsOpen}
         monthKey={model.monthKey}
@@ -216,12 +207,6 @@ const buildPlanModel = (
       recurringExpenses,
       now,
     ),
-    // A month-long window, where Today looks a week ahead: Plan is where you
-    // come to see everything still committed, not just what lands imminently.
-    upcoming: buildUpcomingBills(recurringExpenses, now, {
-      withinDays: 30,
-      limit: 6,
-    }),
     recurringMonthly: activeRecurring.reduce(
       (sum, item) => sum + getMonthlyAmount(item),
       0,

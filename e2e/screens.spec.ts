@@ -42,6 +42,18 @@ const seed = (data: Record<string, Record<string, unknown>[]>) => {
     category_id: 'cat-transport',
     created_at: new Date().toISOString(),
   });
+  data.recurring_expenses.push({
+    id: 'rec-income-1',
+    user_id: E2E_USER_ID,
+    type: 'income',
+    description: 'Monthly salary',
+    amount: 2400,
+    frequency: 'monthly',
+    start_date: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+    active: true,
+    category_id: 'cat-salary',
+    created_at: new Date().toISOString(),
+  });
 };
 
 const ROUTES = [

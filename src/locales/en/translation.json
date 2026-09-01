@@ -205,7 +205,24 @@
   },
   "plan": {
     "title": "Plan",
-    "subtitle": "Give the month a shape, then let Budgard keep the moving parts together.",
+    "subtitle": "See what is moving in the next 30 days, then shape the month around it.",
+    "timeline": {
+      "title": "Next 30 days",
+      "manage": "Manage",
+      "summary": {
+        "both": "{{income}} coming in · {{expenses}} going out",
+        "incomeOnly": "{{income}} expected to come in",
+        "expensesOnly": "{{expenses}} scheduled to go out"
+      },
+      "kind": {
+        "expense": "Planned payment",
+        "income": "Expected income"
+      },
+      "emptyTitle": "Nothing scheduled yet",
+      "emptyBody": "Add planned payments or income to see the month unfold here.",
+      "emptyAction": "Add a plan",
+      "more": "{{count}} more scheduled"
+    },
     "context": {
       "title": "Adjust this month",
       "description": "Open your budget, balance, and saving details."
