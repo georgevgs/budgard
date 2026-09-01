@@ -259,7 +259,7 @@
       }
     },
     "recurring": {
-      "title": "Planned payments",
+      "title": "Recurring expenses",
       "description": "{{count}} active recurring items"
     },
     "goals": {
