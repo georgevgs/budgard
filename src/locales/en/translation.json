@@ -1166,7 +1166,9 @@
       "added": "Debt added",
       "updateFailed": "Failed to update debt",
       "addFailed": "Failed to add debt",
-      "archiveFailed": "Failed to archive debt"
+      "archiveFailed": "Failed to archive debt",
+      "paymentLogged": "Payment logged",
+      "paymentUpdated": "Payment updated"
     }
   },
   "templates": {

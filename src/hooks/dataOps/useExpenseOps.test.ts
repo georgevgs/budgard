@@ -220,6 +220,36 @@ describe('handleExpenseSubmit', () => {
     expect(applyLastSetExpenses(existing)).toEqual(existing);
   });
 
+  it('shows payment-specific copy for a new debt payment, not "expense added"', async () => {
+    mockDataService.createExpense.mockResolvedValue(
+      makeExpense({ id: 'n1', type: 'debt_payment', debt_id: 'd1' }),
+    );
+
+    const ops = renderOps();
+    await act(async () => {
+      await ops.current.handleExpenseSubmit({} as never);
+    });
+
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'debts.toasts.paymentLogged' }),
+    );
+  });
+
+  it('shows payment-specific copy when a debt payment is edited', async () => {
+    mockDataService.updateExpense.mockResolvedValue(
+      makeExpense({ id: 'e1', type: 'debt_payment', debt_id: 'd1' }),
+    );
+
+    const ops = renderOps();
+    await act(async () => {
+      await ops.current.handleExpenseSubmit({} as never, 'e1');
+    });
+
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'debts.toasts.paymentUpdated' }),
+    );
+  });
+
   it('refreshes the debt when undoing a newly logged payment', async () => {
     // The payment row is never in local state (see the test above), so
     // undo has to carry the debt id along rather than read it back off a

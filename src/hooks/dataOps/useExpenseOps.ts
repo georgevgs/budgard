@@ -147,11 +147,7 @@ export const useExpenseOps = () => {
 
           toast({
             variant: 'success',
-            title: pickByEdit(
-              expenseId,
-              t('expenses.toasts.updated'),
-              t('expenses.toasts.added'),
-            ),
+            title: resolveSuccessTitle(expenseId, isDebtPayment, t),
             description: describeSavedExpense(finalExpense, defaultCurrency),
             action: buildUndoAction(
               expenseId,
@@ -336,6 +332,28 @@ const describeSavedExpense = (expense: Expense, currency: string): string => {
   const amount = describeAmount(expense.amount, 'expense', currency);
 
   return `${amount.text} · ${expense.description}`;
+};
+
+// A debt payment is stored as an expense row, but it isn't one to the person
+// who just logged it — "Expense added" doesn't match what they did.
+const resolveSuccessTitle = (
+  expenseId: string | undefined,
+  isDebtPayment: boolean,
+  t: (key: string) => string,
+): string => {
+  if (isDebtPayment) {
+    return pickByEdit(
+      expenseId,
+      t('debts.toasts.paymentUpdated'),
+      t('debts.toasts.paymentLogged'),
+    );
+  }
+
+  return pickByEdit(
+    expenseId,
+    t('expenses.toasts.updated'),
+    t('expenses.toasts.added'),
+  );
 };
 
 type ToastAction = { label: string; onClick: () => void };
