@@ -1,8 +1,8 @@
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import PageHeader from '@/components/common/PageHeader';
 import ActivityFeed from '@/components/activity/ActivityFeed';
-import ActivityFilters from '@/components/activity/ActivityFilters';
-import ActivityMonthStepper from '@/components/activity/ActivityMonthStepper';
+import ActivityToolbar from '@/components/activity/ActivityToolbar';
 import ActivitySummary from '@/components/activity/ActivitySummary';
 import ActivityFilterPanel from '@/components/activity/ActivityFilterPanel';
 import ActivityToolsMenu from '@/components/activity/ActivityToolsMenu';
@@ -20,6 +20,7 @@ import {
   type ActivityPeriod,
 } from '@/hooks/activity/useActivityFeed';
 import { useActivityCsvExport } from '@/hooks/activity/useActivityCsvExport';
+import { useStickyToolbarOffset } from '@/hooks/activity/useStickyToolbarOffset';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { useCurrentDate } from '@/hooks/useCurrentDate';
 import { useSeedIncomeCategories } from '@/hooks/incomeList/useSeedIncomeCategories';
@@ -38,6 +39,7 @@ const ActivityView = () => {
     activity.exportScope,
   );
   const showSkeleton = useDelayedLoading(!isInitialized);
+  const toolbar = useStickyToolbarOffset();
 
   useSeedIncomeCategories();
 
@@ -47,7 +49,7 @@ const ActivityView = () => {
 
   return (
     <div>
-      <div className="page-shell">
+      <div className="page-shell" style={toolbarOffsetStyle(toolbar.height)}>
         <PageHeader
           title={t('activity.title')}
           action={
@@ -57,13 +59,19 @@ const ActivityView = () => {
             />
           }
         />
-        <div className="mt-4 space-y-3">
+        <div className="mt-3">
           <ReviewQueueBanner />
-          <ActivityFilters
+        </div>
+        <div className="mt-3">
+          <ActivityToolbar
+            containerRef={toolbar.ref}
             search={activity.search}
             isSearchingAllTime={activity.isSearchingAllTime}
             onSearchChange={activity.setSearch}
-            trailing={
+            period={activity.effectivePeriod}
+            selectedMonth={activity.selectedMonth}
+            onMonthChange={activity.setSelectedMonth}
+            filterPanel={
               <ActivityFilterPanel
                 categories={categories}
                 tags={tags}
@@ -78,22 +86,20 @@ const ActivityView = () => {
               />
             }
           />
-          <ActivityMonthStepper
-            period={activity.effectivePeriod}
-            selectedMonth={activity.selectedMonth}
-            onMonthChange={activity.setSelectedMonth}
-          />
-          <ActivitySummary
-            expenseTotal={activity.expenseTotal}
-            incomeTotal={activity.incomeTotal}
-            currency={defaultCurrency}
-          />
         </div>
         <FilterResultsAnnouncer
           count={activity.filteredRows.length}
           active={activity.hasActiveFilters}
         />
-        <div className="mt-4">
+        <div className="mt-3">
+          <ActivitySummary
+            count={activity.filteredRows.length}
+            expenseTotal={activity.expenseTotal}
+            incomeTotal={activity.incomeTotal}
+            currency={defaultCurrency}
+          />
+        </div>
+        <div className="mt-2">
           <ActivityFeed
             transactions={activity.filteredRows}
             currency={defaultCurrency}
@@ -145,3 +151,11 @@ const renderLoading = (showSkeleton: boolean) => {
 
   return <ExpenseLoadingState />;
 };
+
+// Hands the sticky toolbar's measured height to the day-group headers below
+// it, via the CSS custom property `.activity-day-header` reads in index.css.
+// CSSProperties has no index signature for custom properties on purpose (see
+// the DefinitelyTyped note on the interface), so this is the one place that
+// asserts past it.
+const toolbarOffsetStyle = (height: number): CSSProperties =>
+  ({ '--activity-toolbar-height': `${height}px` }) as CSSProperties;

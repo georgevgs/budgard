@@ -97,7 +97,7 @@ const renderTrigger = (activeCount: number, onOpen: () => void, t: TFunc) => (
     variant="outline"
     onClick={onOpen}
     aria-label={getTriggerLabel(activeCount, t)}
-    className="h-11 shrink-0 gap-2 rounded-xl bg-card px-3 shadow-none"
+    className="h-10 shrink-0 gap-2 rounded-full border-0 bg-tile px-3.5 shadow-[inset_0_0_0_1px_hsl(var(--tile-ring))]"
   >
     <SlidersHorizontal className="h-4 w-4" />
     <span className="hidden sm:inline">{t('activity.refine.trigger')}</span>

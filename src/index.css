@@ -865,7 +865,14 @@
 
   .activity-day-header {
     position: sticky;
-    top: calc(var(--header-height) + env(safe-area-inset-top));
+    /* Sticks below the toolbar rather than behind it. `--activity-toolbar-height`
+       is measured by useStickyToolbarOffset and set on a page-shell ancestor,
+       since the toolbar's own height moves with the locale and with whether
+       the month row is showing at all. */
+    top: calc(
+      var(--header-height) + env(safe-area-inset-top) +
+        var(--activity-toolbar-height, 0px)
+    );
     z-index: 10;
     backdrop-filter: blur(12px);
     background-color: hsl(var(--background) / 0.82);

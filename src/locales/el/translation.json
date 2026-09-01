@@ -152,9 +152,10 @@
   },
   "activity": {
     "title": "Δραστηριότητα",
-    "summaryTitle": "Σύνοψη περιόδου",
     "kindLabel": "Τύπος συναλλαγής",
     "netChange": "Καθαρή μεταβολή",
+    "transactionCount_one": "{{count}} συναλλαγή",
+    "transactionCount_other": "{{count}} συναλλαγές",
     "spent": "Έξοδα",
     "received": "Έσοδα",
     "searchPlaceholder": "Αναζήτηση…",

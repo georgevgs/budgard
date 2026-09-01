@@ -152,9 +152,10 @@
   },
   "activity": {
     "title": "Activity",
-    "summaryTitle": "Period summary",
     "kindLabel": "Transaction type",
     "netChange": "Net change",
+    "transactionCount_one": "{{count}} transaction",
+    "transactionCount_other": "{{count}} transactions",
     "spent": "Spent",
     "received": "Received",
     "searchPlaceholder": "Search activity…",

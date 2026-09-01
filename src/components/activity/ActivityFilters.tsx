@@ -20,7 +20,7 @@ const ActivityFilters = ({
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -32,7 +32,7 @@ const ActivityFilters = ({
             /* Not `.tile`: the Input primitive carries its own `bg-card`
                utility, which outranks a component-layer class, so the surface
                has to be stated as utilities here to land at all. */
-            className="h-10.5 w-full rounded-full border-0 bg-tile pl-9.5 text-base shadow-[inset_0_0_0_1px_hsl(var(--tile-ring))] placeholder:text-[0.6875rem] sm:text-sm"
+            className="h-10 w-full rounded-full border-0 bg-tile pl-9.5 text-base shadow-[inset_0_0_0_1px_hsl(var(--tile-ring))] placeholder:text-[0.6875rem] sm:text-sm"
           />
         </div>
         {trailing}

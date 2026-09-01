@@ -14,16 +14,18 @@ type Props = {
 // itself stays a link, so tapping it still opens the transaction — the swipe
 // only adds a second way in, it does not take the first one away.
 //
-// The wrapper is also the row's surface. Since the bento redesign a row is its
-// own rounded pill rather than a band inside a list card, and the pill has to
-// be the thing that clips the delete action — otherwise the reveal shows up
-// square behind a rounded row.
+// Flat rather than its own pill: rows inside one day now share a single
+// `tile-flush` surface (see ActivityFeed) with a hairline between them, so
+// this wrapper carries no fill or radius of its own. It still needs its own
+// stacking context, though — each row's Delete reveal is positioned against
+// ITS wrapper, not the shared surface, or every row in the group would
+// uncover the same one spot.
 const SwipeableRow = ({ children, onDelete, deleteLabel }: Props) => {
   const { t } = useTranslation();
   const swipe = useSwipeActions();
 
   return (
-    <div className="tile-flush rounded-[1.375rem]">
+    <div className="relative overflow-hidden">
       <div
         className="absolute inset-y-0 right-0 flex items-stretch"
         style={{ width: SWIPE_ACTION_WIDTH }}

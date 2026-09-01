@@ -67,7 +67,7 @@ const ActivityFeed = (props: Props) => {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {groups.map((group) => renderGroup(group, props, t))}
       {renderPendingHistory(props.isHistoryPending)}
       <div ref={sentinelRef} aria-hidden="true" className="h-px" />
@@ -102,7 +102,7 @@ const renderGroup = (group: DateGroup, props: Props, t: TFunc) => (
     aria-labelledby={`activity-${group.date}`}
     className="activity-day-group"
   >
-    <div className="activity-day-header mb-2.5 flex items-baseline justify-between gap-3 rounded-full px-1 py-1.5">
+    <div className="activity-day-header mb-2 flex items-baseline justify-between gap-3 rounded-full px-1 py-1.5">
       <h2
         id={`activity-${group.date}`}
         className="text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
@@ -111,7 +111,10 @@ const renderGroup = (group: DateGroup, props: Props, t: TFunc) => (
       </h2>
       {renderDayTotal(group, props.currency)}
     </div>
-    <div className="flex flex-col gap-2">
+    {/* One flat surface per day rather than a stack of separately-filled
+        capsules — see the note on SwipeableRow for why each row still needs
+        its own positioning context under this shared one. */}
+    <div className="tile-flush divide-y divide-border/40">
       {group.expenses.map((transaction) => (
         <SwipeableRow
           key={transaction.id}
