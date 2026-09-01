@@ -25,7 +25,7 @@ const PlanTimeline = ({ timeline, currency }: Props) => {
           {renderSummary(timeline, currency, t)}
         </div>
         <Link
-          to="/recurring"
+          to={buildManageLink(timeline)}
           viewTransition
           className="inline-flex min-h-11 shrink-0 items-center gap-1 text-sm font-semibold text-primary-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
@@ -85,9 +85,22 @@ const renderBody = (
           renderEntry(entry, currency, dateLocale, t),
         )}
       </ol>
-      {renderRemaining(timeline.remainingCount, t)}
+      {renderRemaining(timeline, t)}
     </div>
   );
+};
+
+// The timeline can hold recurring income and expenses side by side, but
+// /recurring only ever shows one at a time (defaulting to expenses). When the
+// next 30 days are income alone, Manage should land there instead of a tab
+// with nothing in it — otherwise the destination stays the same one it's
+// always been.
+const buildManageLink = (timeline: MoneyTimeline): string => {
+  if (timeline.expenseTotal === 0 && timeline.incomeTotal > 0) {
+    return '/recurring?mode=income';
+  }
+
+  return '/recurring';
 };
 
 const renderEmpty = (t: TFunc) => (
@@ -161,18 +174,18 @@ const renderEntry = (
   );
 };
 
-const renderRemaining = (remainingCount: number, t: TFunc) => {
-  if (remainingCount === 0) {
+const renderRemaining = (timeline: MoneyTimeline, t: TFunc) => {
+  if (timeline.remainingCount === 0) {
     return null;
   }
 
   return (
     <Link
-      to="/recurring"
+      to={buildManageLink(timeline)}
       viewTransition
       className="flex min-h-11 items-center justify-center border-t border-border/30 px-4 text-xs font-semibold text-primary-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
     >
-      {t('plan.timeline.more', { count: remainingCount })}
+      {t('plan.timeline.more', { count: timeline.remainingCount })}
     </Link>
   );
 };

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   useAccountsData,
   useCategoriesData,
@@ -19,8 +20,21 @@ import { useRecurringSuggestions } from '@/hooks/recurring/useRecurringSuggestio
 // recurring incomes — and the mode decides which data, which categories and
 // which cap apply. Holding all of that here keeps the component to layout.
 export const useRecurringList = () => {
-  const [mode, setMode] = useState<RecurringMode>('expense');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [mode, setMode] = useState<RecurringMode>(() =>
+    resolveInitialMode(searchParams),
+  );
   const [isFormOpen, setIsFormOpen] = useState(false);
+
+  // A caller that already knows which side the user was looking at (Plan's
+  // money timeline, a push notification) can land here in the right mode via
+  // ?mode=income instead of always opening on expenses. Consumed once, then
+  // dropped so a later manual toggle isn't fought by a stale param on
+  // back/forward navigation.
+  useEffect(() => {
+    if (!searchParams.has('mode')) return;
+    setSearchParams({}, { replace: true });
+  }, [searchParams, setSearchParams]);
   const [selectedExpense, setSelectedExpense] = useState<
     RecurringExpense | undefined
   >(undefined);
@@ -103,4 +117,14 @@ const pick = <T,>(isIncome: boolean, income: T, expense: T): T => {
   }
 
   return expense;
+};
+
+export const resolveInitialMode = (
+  params: URLSearchParams,
+): RecurringMode => {
+  if (params.get('mode') === 'income') {
+    return 'income';
+  }
+
+  return 'expense';
 };
