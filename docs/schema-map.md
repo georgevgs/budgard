@@ -4,7 +4,7 @@
      Regenerate with `npm run docs:schema`. -->
 
 An index from each database object to the migrations that touch it, built by
-scanning `supabase/migrations`. Covers 83 migrations: 48 functions, 27 triggers, 26 tables, 87 policies, 51 indexes.
+scanning `supabase/migrations`. Covers 84 migrations: 48 functions, 27 triggers, 26 tables, 87 policies, 51 indexes.
 
 This is a **map, not a schema definition**. Migrations are append-only history
 and the live schema is what you get by replaying them, so nothing here states
@@ -297,6 +297,9 @@ First defined in `20260720090000_add_checkout_rate_limit.sql`.
 - defines — `20260720090000_add_checkout_rate_limit.sql`
 - grants on — `20260720090000_add_checkout_rate_limit.sql`
 - revokes on — `20260720090000_add_checkout_rate_limit.sql`
+- defines — `20260904120958_optimize_household_policy_and_checkout_window.sql`
+- grants on — `20260904120958_optimize_household_policy_and_checkout_window.sql`
+- revokes on — `20260904120958_optimize_household_policy_and_checkout_window.sql`
 
 ### `create_default_categories_for_user` — dropped
 
@@ -1354,6 +1357,7 @@ First defined in `20260831151127_add_secure_household_spaces.sql`.
 First defined in `20260831151127_add_secure_household_spaces.sql`.
 
 - defines — `20260831151127_add_secure_household_spaces.sql`
+- defines — `20260904120958_optimize_household_policy_and_checkout_window.sql`
 
 ### `Users can create categories`
 
