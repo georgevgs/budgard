@@ -1659,9 +1659,7 @@
         },
         {
           "heading": "Contact",
-          "paragraphs": [
-            "Questions about these terms: {{email}}."
-          ]
+          "paragraphs": ["Questions about these terms: {{email}}."]
         }
       ]
     },

@@ -49,10 +49,7 @@ export const useCategoryOps = () => {
         perform: () => dataService.createCategory(categoryData, activeOwnerId),
         commit: (saved) =>
           setCategories((prev) =>
-            sortByName([
-              ...prev.filter((c) => c.id !== optimistic.id),
-              saved,
-            ]),
+            sortByName([...prev.filter((c) => c.id !== optimistic.id), saved]),
           ),
       });
     };
@@ -151,7 +148,10 @@ export const useCategoryOps = () => {
 
     // Alternative to a plain delete: instead of letting the category's
     // expenses go Uncategorized, fold them into toCategory first.
-    const handleCategoryMerge = (fromCategoryId: string, toCategory: Category) =>
+    const handleCategoryMerge = (
+      fromCategoryId: string,
+      toCategory: Category,
+    ) =>
       runMutation({
         operation: 'mergeCategory',
         skip,
@@ -239,7 +239,6 @@ export const useCategoryOps = () => {
 
 const sortByName = <T extends { name: string }>(items: T[]): T[] =>
   [...items].sort((a, b) => a.name.localeCompare(b.name));
-
 
 const mergeCategoryPatch = (
   row: Expense,

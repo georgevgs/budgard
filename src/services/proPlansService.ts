@@ -1,7 +1,4 @@
-import {
-  type ProPlanPrice,
-  type ProPlanPrices,
-} from '@/lib/proPlans';
+import { type ProPlanPrice, type ProPlanPrices } from '@/lib/proPlans';
 
 // Fetches the live Pro prices from the public stripe-prices Edge Function.
 // Throws on any malformed payload so callers can fall back to the compiled-in

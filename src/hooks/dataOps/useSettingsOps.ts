@@ -77,8 +77,7 @@ export const useSettingsOps = () => {
         successHaptic: 'none',
         optimistic: () =>
           setScalarOptimistic(setDefaultSavingsPct, defaultSavingsPct, pct),
-        perform: () =>
-          dataService.updateDefaultSavingsPct(pct, activeOwnerId),
+        perform: () => dataService.updateDefaultSavingsPct(pct, activeOwnerId),
       });
 
     // No retry: re-running an account deletion on a tap is not a kindness.

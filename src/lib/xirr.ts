@@ -9,7 +9,7 @@ import type { AccountBalance } from '@/types/AccountBalance';
 export type Cashflow = {
   date: Date;
   amount: number;
-}
+};
 
 const DAYS_PER_YEAR = 365;
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -192,7 +192,8 @@ export const computeAccountXirr = (
 
     return earliest;
   }, cashflows[0].date);
-  const spanDays = (lastDate.getTime() - firstCashflowDate.getTime()) / MS_PER_DAY;
+  const spanDays =
+    (lastDate.getTime() - firstCashflowDate.getTime()) / MS_PER_DAY;
   if (spanDays < MIN_ANNUALIZATION_DAYS) {
     return null;
   }

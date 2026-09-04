@@ -20,10 +20,7 @@ type Props = {
   onMonthChange: (month: string) => void;
 };
 
-const ExpensesMonthlySelector = ({
-  selectedMonth,
-  onMonthChange,
-}: Props) => {
+const ExpensesMonthlySelector = ({ selectedMonth, onMonthChange }: Props) => {
   const { t } = useTranslation();
   const selectedDate = parseISO(`${selectedMonth}-01`);
   const dateLocale = useDateLocale();

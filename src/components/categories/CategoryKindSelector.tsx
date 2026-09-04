@@ -73,7 +73,10 @@ const CategoryKindSelector = ({
             disabled={disabled}
             className={cn(
               'rounded-xl py-2.5 px-3 border text-sm transition-colors',
-              renderKindButtonState(value === option.value, option.activeClasses),
+              renderKindButtonState(
+                value === option.value,
+                option.activeClasses,
+              ),
             )}
           >
             <div className="font-medium">

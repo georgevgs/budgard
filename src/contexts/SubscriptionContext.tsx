@@ -13,14 +13,15 @@ type SubscriptionContextType = {
 
 // The provider component lives in SubscriptionProvider.tsx so this module
 // exports no components and useSubscription keeps fast refresh.
-export const SubscriptionContext = createContext<SubscriptionContextType | null>(
-  null,
-);
+export const SubscriptionContext =
+  createContext<SubscriptionContextType | null>(null);
 
 export const useSubscription = () => {
   const context = useContext(SubscriptionContext);
   if (!context) {
-    throw new Error('useSubscription must be used within a SubscriptionProvider');
+    throw new Error(
+      'useSubscription must be used within a SubscriptionProvider',
+    );
   }
 
   return context;

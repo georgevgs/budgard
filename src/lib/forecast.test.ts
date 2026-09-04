@@ -374,7 +374,12 @@ describe('computeTwelveMonthProjection', () => {
 
 describe('computeSpendableBalance', () => {
   const account = (over: Record<string, unknown>) =>
-    ({ kind: 'bank', current_balance: 100, is_archived: false, ...over }) as never;
+    ({
+      kind: 'bank',
+      current_balance: 100,
+      is_archived: false,
+      ...over,
+    }) as never;
 
   it('adds up cash and bank accounts', () => {
     expect(

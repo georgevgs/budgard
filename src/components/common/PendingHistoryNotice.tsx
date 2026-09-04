@@ -21,10 +21,7 @@ const PendingHistoryNotice = () => {
 
       <div className="space-y-2" aria-hidden="true">
         {ROWS.map((width, i) => (
-          <div
-            key={`pending-history-${i}`}
-            className="tile-flush rounded-2xl"
-          >
+          <div key={`pending-history-${i}`} className="tile-flush rounded-2xl">
             <div className="flex">
               <Skeleton className="w-1 h-16 rounded-none shrink-0" />
               <div className="p-4 flex-1 flex items-center justify-between gap-4">

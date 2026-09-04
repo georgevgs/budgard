@@ -102,7 +102,12 @@ export const MonthDrillDown = ({
         </DialogHeader>
 
         <div className="overflow-y-auto max-h-[60dvh]">
-          {renderCategoryBreakdown(categoryBreakdown, totalAmount, t, defaultCurrency)}
+          {renderCategoryBreakdown(
+            categoryBreakdown,
+            totalAmount,
+            t,
+            defaultCurrency,
+          )}
           {renderTopExpenses(topExpenses, dateLocale, t, defaultCurrency)}
         </div>
       </DialogContent>

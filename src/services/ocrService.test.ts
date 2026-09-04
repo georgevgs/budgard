@@ -13,7 +13,8 @@ vi.mock('tesseract.js', () => ({
   createWorker: (...args: unknown[]) => mockCreateWorker(...args),
 }));
 
-const makeFile = (): File => new File(['data'], 'receipt.jpg', { type: 'image/jpeg' });
+const makeFile = (): File =>
+  new File(['data'], 'receipt.jpg', { type: 'image/jpeg' });
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -104,7 +105,8 @@ describe('runReceiptOcr', () => {
   });
 
   it('resolves null when cancelled mid-recognition', async () => {
-    let resolveRecognize: (value: { data: { text: string } }) => void = () => undefined;
+    let resolveRecognize: (value: { data: { text: string } }) => void = () =>
+      undefined;
     mockRecognize.mockReturnValue(
       new Promise((resolve) => {
         resolveRecognize = resolve;

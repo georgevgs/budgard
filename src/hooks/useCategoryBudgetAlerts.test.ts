@@ -1,6 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useCategoryBudgetAlerts, type CategoryBudgetAlertInput } from '@/hooks/useCategoryBudgetAlerts';
+import {
+  useCategoryBudgetAlerts,
+  type CategoryBudgetAlertInput,
+} from '@/hooks/useCategoryBudgetAlerts';
 
 const mockToast = vi.fn();
 vi.mock('@/hooks/useToast', () => ({
@@ -12,10 +15,7 @@ vi.mock('@/lib/haptics', () => ({
   haptics: { warning: () => mockWarning(), success: vi.fn(), error: vi.fn() },
 }));
 
-const make = (
-  spent: number,
-  cap: number = 100,
-): CategoryBudgetAlertInput[] => [
+const make = (spent: number, cap: number = 100): CategoryBudgetAlertInput[] => [
   { categoryId: 'c1', categoryName: 'Food', cap, spent },
 ];
 

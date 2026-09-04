@@ -15,10 +15,7 @@ const row = (overrides: Partial<Expense>): Expense =>
 
 describe('getCategoryImpact', () => {
   it('reports no impact for a category nothing points at', () => {
-    const impact = getCategoryImpact(
-      [row({ category_id: 'other' })],
-      'c1',
-    );
+    const impact = getCategoryImpact([row({ category_id: 'other' })], 'c1');
 
     expect(impact).toEqual({ count: 0, total: 0, earliestDate: null });
   });

@@ -41,7 +41,12 @@ describe('buildSparkline', () => {
   });
 
   it('never emits NaN for any plausible series', () => {
-    for (const values of [[0, 1], [1, 0], [3, 3, 3], [0.1, 99999]]) {
+    for (const values of [
+      [0, 1],
+      [1, 0],
+      [3, 3, 3],
+      [0.1, 99999],
+    ]) {
       const path = buildSparkline(values, VIEW);
 
       expect(path?.line).not.toContain('NaN');

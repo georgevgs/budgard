@@ -11,9 +11,7 @@ type Props = {
 // sections with generous spacing between them (larger than within, so each
 // topic reads as its own group).
 const LegalSections = ({ sections }: Props) => (
-  <div className="mt-10 space-y-10">
-    {sections.map(renderSection)}
-  </div>
+  <div className="mt-10 space-y-10">{sections.map(renderSection)}</div>
 );
 
 export default LegalSections;
@@ -28,10 +26,7 @@ const renderSection = (section: LegalSection) => (
 );
 
 const renderParagraph = (paragraph: string) => (
-  <p
-    key={paragraph}
-    className="text-[15px] leading-relaxed text-foreground/85"
-  >
+  <p key={paragraph} className="text-[15px] leading-relaxed text-foreground/85">
     {paragraph}
   </p>
 );

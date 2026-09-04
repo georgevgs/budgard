@@ -182,10 +182,8 @@ const resolveTransactionTags = (
   tagById: Map<string, string>,
 ): string => {
   const names: string[] = [];
-  const primaryName = transaction.tag?.name ?? lookupOrEmpty(
-    transaction.tag_id,
-    tagById,
-  );
+  const primaryName =
+    transaction.tag?.name ?? lookupOrEmpty(transaction.tag_id, tagById);
   if (primaryName) {
     names.push(primaryName);
   }

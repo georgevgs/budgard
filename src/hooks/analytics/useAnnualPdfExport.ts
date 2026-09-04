@@ -168,7 +168,9 @@ const buildCategoryRows = (
   currency: string,
   t: TFunc,
 ): PdfCategoryRow[] => {
-  const nameById = new Map(categories.map((category) => [category.id, category.name]));
+  const nameById = new Map(
+    categories.map((category) => [category.id, category.name]),
+  );
   const uncategorizedLabel = t('annualExport.csv.uncategorized');
   const totalsByName = new Map<string, number>();
 
@@ -176,7 +178,11 @@ const buildCategoryRows = (
     if (!countsAsSpending(expense)) {
       continue;
     }
-    const name = resolveCategoryName(expense.category_id, nameById, uncategorizedLabel);
+    const name = resolveCategoryName(
+      expense.category_id,
+      nameById,
+      uncategorizedLabel,
+    );
     totalsByName.set(name, (totalsByName.get(name) ?? 0) + expense.amount);
   }
 

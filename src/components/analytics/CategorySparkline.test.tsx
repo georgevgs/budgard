@@ -51,7 +51,9 @@ describe('CategorySparkline', () => {
   });
 
   it('renders placeholder for empty values', () => {
-    const { container } = render(<CategorySparkline values={[]} color="#000" />);
+    const { container } = render(
+      <CategorySparkline values={[]} color="#000" />,
+    );
 
     expect(container.querySelector('svg')).toBeNull();
   });

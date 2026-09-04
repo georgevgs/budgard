@@ -43,15 +43,11 @@ describe('xirr', () => {
   });
 
   it('returns null when all cashflows share the same sign', () => {
-    expect(
-      xirr([cf('2026-01-01', -1000), cf('2026-06-01', -500)]),
-    ).toBeNull();
+    expect(xirr([cf('2026-01-01', -1000), cf('2026-06-01', -500)])).toBeNull();
   });
 
   it('returns null when first and last cashflows are on the same date', () => {
-    expect(
-      xirr([cf('2026-01-01', -1000), cf('2026-01-01', 1100)]),
-    ).toBeNull();
+    expect(xirr([cf('2026-01-01', -1000), cf('2026-01-01', 1100)])).toBeNull();
   });
 
   it('computes 10% annualized return for a one-year doubling-then-halving toy case', () => {

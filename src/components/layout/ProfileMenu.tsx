@@ -164,10 +164,7 @@ const renderActiveCheck = (isActive: boolean) => {
   return <Check className="h-4 w-4 text-primary-ink" />;
 };
 
-const getSpaceLabel = (
-  space: FinancialSpace,
-  t: TranslateFunction,
-): string => {
+const getSpaceLabel = (space: FinancialSpace, t: TranslateFunction): string => {
   if (!space.isShared) {
     return t('navigation.myFinances');
   }

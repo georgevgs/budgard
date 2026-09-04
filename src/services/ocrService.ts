@@ -32,7 +32,10 @@ const STAGE_RANGES = [
   { status: 'recognizing text', from: 30, to: 100 },
 ];
 
-export const mapOcrProgress = (status: string, progress: number): number | null => {
+export const mapOcrProgress = (
+  status: string,
+  progress: number,
+): number | null => {
   const stage = STAGE_RANGES.find((entry) => entry.status === status);
 
   if (!stage) {
@@ -129,7 +132,10 @@ const MAX_OCR_DIMENSION = 2200;
 const normalizeImage = async (file: File): Promise<Blob> => {
   try {
     const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, MAX_OCR_DIMENSION / Math.max(bitmap.width, bitmap.height));
+    const scale = Math.min(
+      1,
+      MAX_OCR_DIMENSION / Math.max(bitmap.width, bitmap.height),
+    );
     const width = Math.max(1, Math.round(bitmap.width * scale));
     const height = Math.max(1, Math.round(bitmap.height * scale));
 

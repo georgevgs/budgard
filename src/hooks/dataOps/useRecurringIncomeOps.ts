@@ -106,5 +106,12 @@ export const useRecurringIncomeOps = () => {
       handleRecurringIncomeDelete,
       handleRecurringIncomeToggle,
     };
-  }, [activeOwnerId, isInitialized, setRecurringIncomes, refreshIncomes, runMutation, t]);
+  }, [
+    activeOwnerId,
+    isInitialized,
+    setRecurringIncomes,
+    refreshIncomes,
+    runMutation,
+    t,
+  ]);
 };

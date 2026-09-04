@@ -59,7 +59,9 @@ const renderHeader = (
   dateLocale: Locale,
   t: TFunc,
 ) => {
-  const startLabel = format(parseISO(startStr), 'd LLL', { locale: dateLocale });
+  const startLabel = format(parseISO(startStr), 'd LLL', {
+    locale: dateLocale,
+  });
   const endLabel = format(parseISO(endStr), 'd LLL', { locale: dateLocale });
 
   return (

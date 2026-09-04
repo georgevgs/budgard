@@ -120,7 +120,9 @@ describe('addMonthsAnchored', () => {
   });
 
   it('returns local midnight', () => {
-    expect(addMonthsAnchored(new Date(2026, 0, 15, 23, 59), 1, 15).getHours()).toBe(0);
+    expect(
+      addMonthsAnchored(new Date(2026, 0, 15, 23, 59), 1, 15).getHours(),
+    ).toBe(0);
   });
 });
 

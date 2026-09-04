@@ -57,7 +57,7 @@ export const calculateNextOccurrence = (
   }
 
   return next;
-}
+};
 
 // The next occurrence of a schedule after `fromDate`, anchored on the
 // schedule's own start day. Mirrors calculate_next_occurrence in
@@ -72,7 +72,7 @@ export const advanceOccurrence = (
     expense.frequency,
     anchorDayOf(expense.start_date),
   );
-}
+};
 
 export const getMonthlyAmount = (expense: RecurringExpense): number => {
   switch (expense.frequency) {
@@ -87,7 +87,7 @@ export const getMonthlyAmount = (expense: RecurringExpense): number => {
     default:
       return expense.amount;
   }
-}
+};
 
 // --- Helpers ---
 
@@ -115,4 +115,4 @@ const advanceByFrequency = (
     default:
       return addMonthsAnchored(fromDate, 1, anchor);
   }
-}
+};

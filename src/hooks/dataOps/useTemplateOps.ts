@@ -35,8 +35,7 @@ export const useTemplateOps = () => {
         errorMessage: t('templates.saveFailed'),
         successMessage: t('templates.saved'),
         optimistic: () => prependOptimistic(setTemplates, optimistic),
-        perform: () =>
-          dataService.createTemplate(templateData, activeOwnerId),
+        perform: () => dataService.createTemplate(templateData, activeOwnerId),
         commit: (saved) =>
           setTemplates((prev) => replaceById(prev, optimistic.id, saved)),
       });

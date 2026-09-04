@@ -31,7 +31,11 @@ const AmountKeypad = ({ pad }: Props) => {
       aria-label={t('expenses.pad.label')}
     >
       {DIGITS.map((digit) => (
-        <KeypadButton key={digit} label={String(digit)} onPress={() => press(digit)} />
+        <KeypadButton
+          key={digit}
+          label={String(digit)}
+          onPress={() => press(digit)}
+        />
       ))}
       <span aria-hidden="true" />
       <KeypadButton label="0" onPress={() => press(0)} />

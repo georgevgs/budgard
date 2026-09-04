@@ -55,12 +55,7 @@ describe('useMutationRunner', () => {
       });
     });
 
-    expect(order).toEqual([
-      'start',
-      'optimistic',
-      'perform',
-      'commit:saved-1',
-    ]);
+    expect(order).toEqual(['start', 'optimistic', 'perform', 'commit:saved-1']);
     expect(mockHaptics.success).toHaveBeenCalled();
     expect(mockToast).toHaveBeenCalledWith({
       variant: 'success',

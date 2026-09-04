@@ -17,7 +17,9 @@ beforeEach(() => {
 
 describe('ReceiptScanButton', () => {
   it('renders nothing when not visible', () => {
-    const { container } = render(<ReceiptScanButton scan={makeScan()} visible={false} />);
+    const { container } = render(
+      <ReceiptScanButton scan={makeScan()} visible={false} />,
+    );
 
     expect(container).toBeEmptyDOMElement();
   });
@@ -26,7 +28,9 @@ describe('ReceiptScanButton', () => {
     const scan = makeScan();
     render(<ReceiptScanButton scan={scan} visible={true} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /receipt\.scanReceipt/ }));
+    fireEvent.click(
+      screen.getByRole('button', { name: /receipt\.scanReceipt/ }),
+    );
 
     expect(scan.handleScan).toHaveBeenCalled();
   });

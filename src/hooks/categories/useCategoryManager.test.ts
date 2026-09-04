@@ -53,7 +53,9 @@ describe('useCategoryManager', () => {
   it('freezes the impact count at request time instead of tracking it live', () => {
     expensesData = [expense({ id: 'e1' }), expense({ id: 'e2' })];
 
-    const { result, rerender } = renderHook(() => useCategoryManager('expense'));
+    const { result, rerender } = renderHook(() =>
+      useCategoryManager('expense'),
+    );
 
     act(() => {
       result.current.requestDelete(category);

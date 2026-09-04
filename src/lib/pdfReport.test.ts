@@ -70,7 +70,9 @@ describe('buildAnnualReportDocDefinition', () => {
     });
 
     const summaryWith = (withIncome.content as unknown[])[3] as TableContent;
-    const summaryWithout = (withoutIncome.content as unknown[])[3] as TableContent;
+    const summaryWithout = (
+      withoutIncome.content as unknown[]
+    )[3] as TableContent;
     expect(summaryWith.table.body).toHaveLength(3);
     expect(summaryWithout.table.body).toHaveLength(2);
   });

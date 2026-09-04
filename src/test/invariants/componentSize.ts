@@ -79,10 +79,7 @@ const measureFile = (file: string): ComponentSize[] => {
 // Walks forward from the declaration tracking `{ ( [` depth, ignoring anything
 // inside a string, template literal or comment. The declaration ends on the
 // line where depth first returns to zero.
-const findDeclarationEnd = (
-  lines: string[],
-  start: number,
-): number | null => {
+const findDeclarationEnd = (lines: string[], start: number): number | null => {
   const state: ScanState = { depth: 0, inBlockComment: false, opened: false };
 
   for (let index = start; index < lines.length; index += 1) {

@@ -13,7 +13,7 @@ import { lazy, type ComponentType } from 'react';
  * the current page so the browser fetches fresh assets. The .html suffix is
  * important: even an older worker will exclude it from its app-shell route.
  */
-const lazyWithRetry = <P,>(
+const lazyWithRetry = <P>(
   importFn: () => Promise<{ default: ComponentType<P> }>,
 ): ReturnType<typeof lazy<ComponentType<P>>> =>
   lazy(async () => {

@@ -15,7 +15,6 @@ type Particle = {
   color: string;
 };
 
-
 const PARTICLE_COUNT = 90;
 const GRAVITY = 0.18;
 const DRAG = 0.992;

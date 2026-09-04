@@ -45,7 +45,8 @@ export const useAccountOps = () => {
           t('networth.toasts.accountAdded'),
         ),
         perform: () => {
-          if (accountId) return dataService.updateAccount(accountId, accountData);
+          if (accountId)
+            return dataService.updateAccount(accountId, accountData);
 
           return dataService.createAccount(accountData, activeOwnerId);
         },

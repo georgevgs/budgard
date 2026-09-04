@@ -209,4 +209,3 @@ const getToggleClass = (isOpen: boolean): string => {
 
   return base;
 };
-

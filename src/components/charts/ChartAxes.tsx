@@ -1,5 +1,13 @@
-import { bandScale, pointScale, type Plot, type Scale } from '@/components/charts/chartScales';
-import type { ChartPoint, ReferenceMarker } from '@/components/charts/chartTypes';
+import {
+  bandScale,
+  pointScale,
+  type Plot,
+  type Scale,
+} from '@/components/charts/chartScales';
+import type {
+  ChartPoint,
+  ReferenceMarker,
+} from '@/components/charts/chartTypes';
 
 type YProps = {
   ticks: number[];
@@ -51,7 +59,9 @@ type XProps = {
 };
 
 export const XAxis = ({ data, xKey, plot, hasBars, format }: XProps) => {
-  const scale = hasBars ? bandScale(data.length, plot) : pointScale(data.length, plot);
+  const scale = hasBars
+    ? bandScale(data.length, plot)
+    : pointScale(data.length, plot);
   const visible = visibleTickIndices(data.length, plot.width);
 
   return (
@@ -118,7 +128,10 @@ const visibleTickIndices = (count: number, width: number): Set<number> => {
     return new Set();
   }
 
-  const stride = Math.max(1, Math.ceil((count * LABEL_WIDTH) / Math.max(width, 1)));
+  const stride = Math.max(
+    1,
+    Math.ceil((count * LABEL_WIDTH) / Math.max(width, 1)),
+  );
   const last = count - 1;
   const indices = new Set<number>();
   for (let index = 0; index <= last; index += stride) {

@@ -31,7 +31,12 @@ const ReviewQueueView = () => {
         {renderQueueActions(review, t)}
         {renderQueue(review, defaultCurrency, setRuleTransaction, navigate, t)}
       </div>
-      {renderRuleDialog(ruleTransaction, categories, review, setRuleTransaction)}
+      {renderRuleDialog(
+        ruleTransaction,
+        categories,
+        review,
+        setRuleTransaction,
+      )}
     </div>
   );
 };
@@ -52,7 +57,12 @@ const renderQueueActions = (review: Review, t: TFunc) => {
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
-      <Button type="button" size="sm" variant="ghost" onClick={review.selectAll}>
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        onClick={review.selectAll}
+      >
         <ListChecks className="mr-2 h-4 w-4" />
         {t('review.selectAll')}
       </Button>

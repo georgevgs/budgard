@@ -41,9 +41,18 @@ export const useDescriptionSuggestions = (
   }, [suggestions, descriptionValue]);
 
   const handleSuggestionSelect = (selected: Expense) => {
-    form.setValue('description', selected.description, { shouldValidate: true, shouldDirty: true });
-    form.setValue('category_id', selected.category_id ?? 'none', { shouldValidate: true, shouldDirty: true });
-    form.setValue('tag_id', selected.tag_id ?? undefined, { shouldValidate: true, shouldDirty: true });
+    form.setValue('description', selected.description, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    form.setValue('category_id', selected.category_id ?? 'none', {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    form.setValue('tag_id', selected.tag_id ?? undefined, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
     setSuggestionsOpen(false);
   };
 

@@ -114,7 +114,9 @@ export const linePath = (
   }
   if (points.length === 1 || !smooth) {
     return points
-      .map(([x, y], index) => `${index === 0 ? 'M' : 'L'}${round(x)},${round(y)}`)
+      .map(
+        ([x, y], index) => `${index === 0 ? 'M' : 'L'}${round(x)},${round(y)}`,
+      )
       .join(' ');
   }
 

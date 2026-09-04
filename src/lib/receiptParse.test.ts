@@ -33,7 +33,9 @@ describe('parseReceiptText', () => {
 
     it('reads Greek ΣΥΝΟΛΟ with the value on the next line', () => {
       const result = parseReceiptText(
-        ['ΣΟΥΠΕΡ ΜΑΡΚΕΤ', 'ΓΑΛΑ 1,20', 'ΣΥΝΟΛΟ', '15,80', 'ΦΠΑ 24% 3,06'].join('\n'),
+        ['ΣΟΥΠΕΡ ΜΑΡΚΕΤ', 'ΓΑΛΑ 1,20', 'ΣΥΝΟΛΟ', '15,80', 'ΦΠΑ 24% 3,06'].join(
+          '\n',
+        ),
       );
 
       expect(result.amount).toBe(15.8);
@@ -140,7 +142,9 @@ describe('parseReceiptText', () => {
       const other = recentDate(40);
 
       const result = parseReceiptText(
-        [`Printed ${formatDmy(other)}`, `DATE: ${formatDmy(labeled)}`].join('\n'),
+        [`Printed ${formatDmy(other)}`, `DATE: ${formatDmy(labeled)}`].join(
+          '\n',
+        ),
       );
 
       expect(result.date?.getTime()).toBe(labeled.getTime());
@@ -180,16 +184,22 @@ describe('parseReceiptText', () => {
 
     it('skips ΑΦΜ, ΤΗΛ and URL lines', () => {
       const result = parseReceiptText(
-        ['ΑΦΜ 123456789', 'ΤΗΛ 2101234567', 'WWW.SHOP.GR', 'ΚΑΦΕΤΕΡΙΑ ΑΘΗΝΑ', 'ΣΥΝΟΛΟ 4,50'].join(
-          '\n',
-        ),
+        [
+          'ΑΦΜ 123456789',
+          'ΤΗΛ 2101234567',
+          'WWW.SHOP.GR',
+          'ΚΑΦΕΤΕΡΙΑ ΑΘΗΝΑ',
+          'ΣΥΝΟΛΟ 4,50',
+        ].join('\n'),
       );
 
       expect(result.merchant).toBe('ΚΑΦΕΤΕΡΙΑ ΑΘΗΝΑ');
     });
 
     it('skips mostly-numeric lines', () => {
-      const result = parseReceiptText(['1234567 AB', 'CORNER BAKERY'].join('\n'));
+      const result = parseReceiptText(
+        ['1234567 AB', 'CORNER BAKERY'].join('\n'),
+      );
 
       expect(result.merchant).toBe('CORNER BAKERY');
     });
@@ -202,7 +212,14 @@ describe('parseReceiptText', () => {
 
     it('gives up after the top lines', () => {
       const result = parseReceiptText(
-        ['111 222', '333 444', '555 666', '777 888', '999 000', 'REAL SHOP NAME'].join('\n'),
+        [
+          '111 222',
+          '333 444',
+          '555 666',
+          '777 888',
+          '999 000',
+          'REAL SHOP NAME',
+        ].join('\n'),
       );
 
       expect(result.merchant).toBeNull();
@@ -210,7 +227,11 @@ describe('parseReceiptText', () => {
   });
 
   it('returns all nulls for empty and garbage input', () => {
-    expect(parseReceiptText('')).toEqual({ amount: null, date: null, merchant: null });
+    expect(parseReceiptText('')).toEqual({
+      amount: null,
+      date: null,
+      merchant: null,
+    });
     expect(parseReceiptText('~~ ## @@\n\n123')).toEqual({
       amount: null,
       date: null,

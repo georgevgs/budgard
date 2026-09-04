@@ -32,7 +32,9 @@ export const row = async <T>(query: PostgrestResult): Promise<T> => {
 
 // The single row a query returned, or null when nothing matched. Use with
 // `.maybeSingle()`.
-export const maybeRow = async <T>(query: PostgrestResult): Promise<T | null> => {
+export const maybeRow = async <T>(
+  query: PostgrestResult,
+): Promise<T | null> => {
   const { data, error } = await query;
 
   if (error) throw error;

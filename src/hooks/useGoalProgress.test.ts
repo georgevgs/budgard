@@ -158,7 +158,11 @@ describe('useGoalProgress', () => {
     });
 
     it('counts extra-tag matches in the batched useAllGoalProgress path', () => {
-      const goal = makeGoal({ id: 'g-tag', source_type: 'tag', tag_id: 'travel' });
+      const goal = makeGoal({
+        id: 'g-tag',
+        source_type: 'tag',
+        tag_id: 'travel',
+      });
       dataMock = {
         expenses: [
           makeExpense('2026-02-01', 100, { tag_id: 'travel' }),
@@ -185,8 +189,14 @@ describe('useGoalProgress', () => {
   describe('source: net_delta', () => {
     it('returns income minus expenses since start_date', () => {
       dataMock = {
-        expenses: [makeExpense('2026-02-01', 200), makeExpense('2026-03-01', 100)],
-        incomes: [makeExpense('2026-02-15', 800), makeExpense('2026-03-10', 500)],
+        expenses: [
+          makeExpense('2026-02-01', 200),
+          makeExpense('2026-03-01', 100),
+        ],
+        incomes: [
+          makeExpense('2026-02-15', 800),
+          makeExpense('2026-03-10', 500),
+        ],
         goals: [],
         accounts: [],
       };
@@ -245,7 +255,10 @@ describe('useGoalProgress', () => {
         goals: [],
         accounts: [makeAccount({ id: 'savings', current_balance: 620 })],
       };
-      const goal = makeGoal({ source_type: 'account', linked_account_id: null });
+      const goal = makeGoal({
+        source_type: 'account',
+        linked_account_id: null,
+      });
 
       const { result } = renderHook(() => useGoalProgress(goal));
 

@@ -115,7 +115,9 @@ describe('AnnualExportCard', () => {
     render(<AnnualExportCard selectedYear={2025} />);
 
     expect(screen.getByText(/annualExport\.title/)).toBeInTheDocument();
-    expect(screen.getByText(/annualExport\.transactionCount/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/annualExport\.transactionCount/),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /annualExport\.exportTransactions/ }),
     ).toBeInTheDocument();

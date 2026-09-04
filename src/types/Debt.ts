@@ -31,7 +31,7 @@ export type Debt = {
   completed_at?: string | null;
   created_at: string;
   updated_at: string;
-}
+};
 
 export const DEBT_KINDS: ReadonlyArray<DebtKind> = [
   'credit_card',

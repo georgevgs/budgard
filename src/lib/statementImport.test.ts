@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  detectStatementFormat,
-  parseStatement,
-} from '@/lib/statementImport';
+import { detectStatementFormat, parseStatement } from '@/lib/statementImport';
 
 const OFX = `OFXHEADER:100
 DATA:OFXSGML
@@ -140,7 +137,10 @@ describe('QIF', () => {
   });
 
   it('falls back to the memo when there is no payee', () => {
-    const rows = parseStatement('qif', 'D01/08/2026\nT-9\nMOnly a memo\n^').rows;
+    const rows = parseStatement(
+      'qif',
+      'D01/08/2026\nT-9\nMOnly a memo\n^',
+    ).rows;
 
     expect(rows[0].description).toBe('Only a memo');
   });
@@ -162,7 +162,7 @@ describe('QIF', () => {
 
     it('accepts the separators QIF exporters actually use', () => {
       expect(dateOf('05-08-2026')).toBe('2026-08-05');
-      expect(dateOf("05.08.2026")).toBe('2026-08-05');
+      expect(dateOf('05.08.2026')).toBe('2026-08-05');
       expect(dateOf("05/08'26")).toBe('2026-08-05');
     });
 

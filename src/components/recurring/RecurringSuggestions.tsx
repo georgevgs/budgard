@@ -29,7 +29,9 @@ const RecurringSuggestions = ({
           <Sparkles className="h-4 w-4" />
         </span>
         <div>
-          <p className="text-sm font-semibold">{t('recurring.suggestions.title')}</p>
+          <p className="text-sm font-semibold">
+            {t('recurring.suggestions.title')}
+          </p>
           <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
             {t('recurring.suggestions.description')}
           </p>

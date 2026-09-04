@@ -20,11 +20,15 @@ describe('Supabase maintenance configuration', () => {
   });
 
   it('keeps household JWT lookup in an RLS initplan', () => {
-    expect(MIGRATION).toContain("COALESCE((SELECT auth.jwt()) ->> 'email', '')");
+    expect(MIGRATION).toContain(
+      "COALESCE((SELECT auth.jwt()) ->> 'email', '')",
+    );
   });
 
   it('serializes checkout limits with an explicitly typed window', () => {
-    expect(MIGRATION).toContain("v_window CONSTANT INTERVAL := INTERVAL '10 minutes'");
+    expect(MIGRATION).toContain(
+      "v_window CONSTANT INTERVAL := INTERVAL '10 minutes'",
+    );
     expect(MIGRATION).toContain('pg_catalog.pg_advisory_xact_lock');
     expect(MIGRATION).toContain("SET search_path = ''");
   });

@@ -113,7 +113,9 @@ type GuardRun = {
 // Runs the exact string that gets inlined into <head>. The globals it touches
 // arrive as parameters, which shadow the real ones inside the function body —
 // jsdom makes window.location.replace unforgeable, so it cannot be spied on.
-const runGuard = (options: { path?: string; online?: boolean } = {}): GuardRun => {
+const runGuard = (
+  options: { path?: string; online?: boolean } = {},
+): GuardRun => {
   const url = new URL(options.path ?? '/activity', 'https://budgard.com');
   const replace = vi.fn();
   let onError: ((event: unknown) => void) | null = null;

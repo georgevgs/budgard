@@ -18,7 +18,9 @@ describe('isOfflineError', () => {
 
   it('treats fetch / network failures as offline', () => {
     expect(isOfflineError(new TypeError('Failed to fetch'))).toBe(true);
-    expect(isOfflineError({ message: 'TypeError: Failed to fetch' })).toBe(true);
+    expect(isOfflineError({ message: 'TypeError: Failed to fetch' })).toBe(
+      true,
+    );
     expect(isOfflineError({ message: 'Load failed' })).toBe(true); // Safari
     expect(
       isOfflineError({ message: 'NetworkError when attempting to fetch' }),
@@ -26,9 +28,9 @@ describe('isOfflineError', () => {
   });
 
   it('treats aborts / timeouts as offline', () => {
-    expect(
-      isOfflineError(new DOMException('aborted', 'AbortError')),
-    ).toBe(true);
+    expect(isOfflineError(new DOMException('aborted', 'AbortError'))).toBe(
+      true,
+    );
     expect(
       isOfflineError(new DOMException('signal timed out', 'TimeoutError')),
     ).toBe(true);

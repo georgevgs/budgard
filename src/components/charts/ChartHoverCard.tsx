@@ -39,9 +39,7 @@ const ChartHoverCard = ({
       className="pointer-events-none absolute top-0 z-10 w-[168px]"
       style={{ left: clampToContainer(x, containerWidth) }}
     >
-      <div className="chart-tooltip">
-        {render(point, activeIndex)}
-      </div>
+      <div className="chart-tooltip">{render(point, activeIndex)}</div>
     </div>
   );
 };
@@ -56,5 +54,8 @@ const clampToContainer = (x: number, containerWidth: number): number => {
   const ideal = x - CARD_WIDTH / 2;
   const furthest = containerWidth - CARD_WIDTH - EDGE_GUTTER;
 
-  return Math.max(EDGE_GUTTER, Math.min(ideal, Math.max(furthest, EDGE_GUTTER)));
+  return Math.max(
+    EDGE_GUTTER,
+    Math.min(ideal, Math.max(furthest, EDGE_GUTTER)),
+  );
 };

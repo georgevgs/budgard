@@ -167,11 +167,7 @@ const renderJoinedState = (
   );
 };
 
-const renderInviteForm = (
-  share: HouseholdShare | null,
-  ops: Ops,
-  t: TFunc,
-) => {
+const renderInviteForm = (share: HouseholdShare | null, ops: Ops, t: TFunc) => {
   if (share) {
     return null;
   }
@@ -181,9 +177,7 @@ const renderInviteForm = (
   return (
     <form className="space-y-3" onSubmit={ops.submitInvite}>
       <div className="space-y-1.5">
-        <Label htmlFor="household-email">
-          {t('settings.household.email')}
-        </Label>
+        <Label htmlFor="household-email">{t('settings.household.email')}</Label>
         <Input
           id="household-email"
           type="email"
@@ -206,11 +200,7 @@ const renderInviteForm = (
   );
 };
 
-const renderInviteLink = (
-  share: HouseholdShare,
-  ops: Ops,
-  t: TFunc,
-) => {
+const renderInviteLink = (share: HouseholdShare, ops: Ops, t: TFunc) => {
   if (share.status !== 'pending') {
     return null;
   }
@@ -248,10 +238,15 @@ const renderRemovalDialog = (
   }
 
   return (
-    <AlertDialog open onOpenChange={(open) => handleDialogChange(open, setRemoval)}>
+    <AlertDialog
+      open
+      onOpenChange={(open) => handleDialogChange(open, setRemoval)}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{getRemoveTitle(removal.isOwner, t)}</AlertDialogTitle>
+          <AlertDialogTitle>
+            {getRemoveTitle(removal.isOwner, t)}
+          </AlertDialogTitle>
           <AlertDialogDescription>
             {getRemoveDescription(removal, t)}
           </AlertDialogDescription>
@@ -286,10 +281,7 @@ const getInviteAction = (ops: Ops, t: TFunc): string => {
   return t('settings.household.invite');
 };
 
-const buildRemoval = (
-  share: HouseholdShare,
-  isOwner: boolean,
-): Removal => {
+const buildRemoval = (share: HouseholdShare, isOwner: boolean): Removal => {
   if (isOwner) {
     return { ownerId: share.owner_id, isOwner, label: share.invite_email };
   }

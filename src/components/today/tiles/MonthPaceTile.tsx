@@ -24,7 +24,10 @@ const MonthPaceTile = ({ pace }: Props) => {
       className="flex flex-col justify-between p-4"
     >
       <TileLabel>{t('today.tiles.monthPace')}</TileLabel>
-      <div className="mt-3 flex h-[4.6rem] items-end gap-[5px]" aria-hidden="true">
+      <div
+        className="mt-3 flex h-[4.6rem] items-end gap-[5px]"
+        aria-hidden="true"
+      >
         {pace.days.map((day) => renderBar(day, pace.peak))}
       </div>
       <p className="mt-3 text-[0.72rem] leading-snug text-muted-foreground">

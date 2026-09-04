@@ -78,10 +78,7 @@ export const dataService = {
     return rows<Tag>(query);
   },
 
-  async createTag(
-    tagData: { name: string; color: string },
-    ownerId: string,
-  ) {
+  async createTag(tagData: { name: string; color: string }, ownerId: string) {
     return row<Tag>(
       supabase
         .from('tags')
@@ -316,15 +313,13 @@ export const dataService = {
     if (deleteError) throw deleteError;
     if (tagIds.length === 0) return;
 
-    const { error: insertError } = await supabase
-      .from('expense_tags')
-      .insert(
-        tagIds.map((tagId) => ({
-          expense_id: expenseId,
-          tag_id: tagId,
-          user_id: ownerId,
-        })),
-      );
+    const { error: insertError } = await supabase.from('expense_tags').insert(
+      tagIds.map((tagId) => ({
+        expense_id: expenseId,
+        tag_id: tagId,
+        user_id: ownerId,
+      })),
+    );
 
     if (insertError) throw insertError;
   },
@@ -902,9 +897,7 @@ export const dataService = {
   // means the number is fresh exactly when someone is looking at it.
   // Best-effort: a failure here must not stop the debts from loading.
   async refreshDebtBalances(ownerId: string) {
-    await done(
-      supabase.rpc('refresh_debt_balances', { p_owner_id: ownerId }),
-    );
+    await done(supabase.rpc('refresh_debt_balances', { p_owner_id: ownerId }));
   },
 
   async getDebts(ownerId: string, signal?: AbortSignal) {

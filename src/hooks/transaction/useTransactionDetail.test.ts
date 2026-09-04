@@ -37,8 +37,7 @@ const row = (over: Partial<Expense> = {}): Expense =>
     ...over,
   }) as Expense;
 
-const render = (id = 'e1') =>
-  renderHook(() => useTransactionDetail(id)).result;
+const render = (id = 'e1') => renderHook(() => useTransactionDetail(id)).result;
 
 beforeEach(() => {
   vi.clearAllMocks();

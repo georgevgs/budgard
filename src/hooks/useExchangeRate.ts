@@ -9,7 +9,7 @@ export type UseExchangeRateResult = {
   isFetching: boolean;
   error: boolean;
   ensureRate: () => Promise<number>;
-}
+};
 
 export const useExchangeRate = (
   fromCurrency: string,
@@ -68,7 +68,11 @@ export const useExchangeRate = (
       return 1;
     }
 
-    if (fetched !== null && fetched.key === requestKey && fetched.rate !== null) {
+    if (
+      fetched !== null &&
+      fetched.key === requestKey &&
+      fetched.rate !== null
+    ) {
       return fetched.rate;
     }
 

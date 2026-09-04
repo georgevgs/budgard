@@ -12,8 +12,7 @@ import type { Expense } from '@/types/Expense';
 import type { CategoryImpact } from '@/lib/categoryDeleteImpact';
 
 export type CategoryManagerView =
-  | { type: 'list' }
-  | { type: 'form'; category?: Category };
+  { type: 'list' } | { type: 'form'; category?: Category };
 
 // Snapshotted once, when the user taps delete — not recomputed live. A merge
 // reassigns the affected rows' category_id as its very first (optimistic)

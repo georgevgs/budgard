@@ -13,8 +13,7 @@ type FetchExchangeRate = (
 const makeOkResponse = (rate: number, quote = 'EUR', base = 'USD') =>
   Promise.resolve({
     ok: true,
-    json: () =>
-      Promise.resolve([{ date: '2024-01-15', base, quote, rate }]),
+    json: () => Promise.resolve([{ date: '2024-01-15', base, quote, rate }]),
   } as Response);
 
 const makeErrorResponse = (status: number) =>
@@ -72,7 +71,10 @@ describe('fetchExchangeRate', () => {
   });
 
   it('caches result — second call with same key skips fetch', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockReturnValue(makeOkResponse(0.85, 'EUR', 'GBP')));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockReturnValue(makeOkResponse(0.85, 'EUR', 'GBP')),
+    );
     const rate1 = await fetchExchangeRate('GBP', '2024-01-15');
     const rate2 = await fetchExchangeRate('GBP', '2024-01-15');
     expect(rate1).toBe(0.85);
@@ -131,7 +133,10 @@ describe('fetchExchangeRate', () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockReturnValue(
-        Promise.resolve({ ok: true, json: () => Promise.resolve([]) } as Response),
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([]),
+        } as Response),
       ),
     );
     await expect(fetchExchangeRate('USD', '2024-01-15')).rejects.toThrow(

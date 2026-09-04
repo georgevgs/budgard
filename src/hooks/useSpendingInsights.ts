@@ -16,7 +16,7 @@ export type Insight = {
   icon: LucideIcon;
   text: string;
   variant: 'default' | 'warning' | 'positive';
-}
+};
 
 export type SpendingInsightsParams = {
   expenses: Expense[];
@@ -24,12 +24,20 @@ export type SpendingInsightsParams = {
   monthComparison: { thisMonthAmount: number; lastMonthAmount: number };
   categories: Category[];
   defaultCurrency: string;
-}
+};
 
 const MIN_DAYS_FOR_TRENDS = 7;
 
-export const useSpendingInsights = (params: SpendingInsightsParams): Insight[] => {
-  const { expenses, monthlyBudget, monthComparison, categories, defaultCurrency } = params;
+export const useSpendingInsights = (
+  params: SpendingInsightsParams,
+): Insight[] => {
+  const {
+    expenses,
+    monthlyBudget,
+    monthComparison,
+    categories,
+    defaultCurrency,
+  } = params;
   const { t } = useTranslation();
 
   return useMemo(() => {
@@ -66,7 +74,14 @@ export const useSpendingInsights = (params: SpendingInsightsParams): Insight[] =
     ];
 
     return insights.filter((i): i is Insight => i !== null);
-  }, [expenses, categories, monthlyBudget, monthComparison, defaultCurrency, t]);
+  }, [
+    expenses,
+    categories,
+    monthlyBudget,
+    monthComparison,
+    defaultCurrency,
+    t,
+  ]);
 };
 
 // ─── Insight builders ───────────────────────────────────────────────────────
@@ -117,7 +132,14 @@ type DailyArgs = {
 };
 
 const dailyBudgetRemainingInsight = (args: DailyArgs): Insight | null => {
-  const { monthlyBudget, thisMonthAmount, dayOfMonth, daysInMonth, defaultCurrency, t } = args;
+  const {
+    monthlyBudget,
+    thisMonthAmount,
+    dayOfMonth,
+    daysInMonth,
+    defaultCurrency,
+    t,
+  } = args;
   if (monthlyBudget === null || monthlyBudget === 0) return null;
 
   const daysRemaining = daysInMonth - dayOfMonth;

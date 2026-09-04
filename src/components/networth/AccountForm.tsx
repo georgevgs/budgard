@@ -21,10 +21,7 @@ import AccountIdentityFields from '@/components/networth/AccountIdentityFields';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useAccountSubmit } from '@/hooks/networth/useAccountSubmit';
 import { getCurrencySymbol } from '@/lib/currencies';
-import {
-  amountToInput,
-  formatCurrencyInput,
-} from '@/lib/utils';
+import { amountToInput, formatCurrencyInput } from '@/lib/utils';
 import { accountSchema, type AccountFormData } from '@/lib/validations';
 import type { Account, AccountKind } from '@/types/Account';
 import { swatch } from '@/design/palette';
@@ -34,7 +31,7 @@ const DEFAULT_COLOR = swatch.sky;
 type Props = {
   account?: Account;
   onClose: () => void;
-}
+};
 
 const AccountForm = ({ account, onClose }: Props) => {
   const { t } = useTranslation();
@@ -122,7 +119,10 @@ const AccountForm = ({ account, onClose }: Props) => {
             <Button type="button" variant="outline" onClick={onClose}>
               {t('common.cancel')}
             </Button>
-            <Button type="submit" disabled={isSubmitting || !form.formState.isValid}>
+            <Button
+              type="submit"
+              disabled={isSubmitting || !form.formState.isValid}
+            >
               {renderSubmitLabel(isSubmitting, t)}
             </Button>
           </div>
@@ -130,7 +130,7 @@ const AccountForm = ({ account, onClose }: Props) => {
       </Form>
     </>
   );
-}
+};
 
 export default AccountForm;
 
@@ -210,4 +210,4 @@ const renderInitialBalanceField = (
       )}
     />
   );
-}
+};

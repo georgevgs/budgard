@@ -36,10 +36,11 @@ export const useTagOps = () => {
           setTags((prev) => sortByName([...prev, optimisticTag]));
 
           return () =>
-            setTags((prev) => prev.filter((tag) => tag.id !== optimisticTag.id));
+            setTags((prev) =>
+              prev.filter((tag) => tag.id !== optimisticTag.id),
+            );
         },
-        perform: () =>
-          dataService.createTag({ name, color }, activeOwnerId),
+        perform: () => dataService.createTag({ name, color }, activeOwnerId),
         commit: (savedTag) =>
           setTags((prev) =>
             sortByName([
@@ -106,7 +107,6 @@ export const useTagOps = () => {
 
 const sortByName = (tags: Tag[]): Tag[] =>
   [...tags].sort((a, b) => a.name.localeCompare(b.name));
-
 
 const renameTag = (tag: Tag, tagId: string, name: string): Tag => {
   if (tag.id !== tagId) {

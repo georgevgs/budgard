@@ -14,12 +14,15 @@ type UpgradeDialogContextType = {
 
 // The provider component lives in UpgradeDialogProvider.tsx so this module
 // exports no components and useUpgradeDialog keeps fast refresh.
-export const UpgradeDialogContext = createContext<UpgradeDialogContextType | null>(null);
+export const UpgradeDialogContext =
+  createContext<UpgradeDialogContextType | null>(null);
 
 export const useUpgradeDialog = () => {
   const context = useContext(UpgradeDialogContext);
   if (!context) {
-    throw new Error('useUpgradeDialog must be used within an UpgradeDialogProvider');
+    throw new Error(
+      'useUpgradeDialog must be used within an UpgradeDialogProvider',
+    );
   }
 
   return context;

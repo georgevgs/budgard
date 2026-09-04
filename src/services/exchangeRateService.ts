@@ -46,12 +46,16 @@ export const fetchExchangeRate = async (
   const cached = rateCache.get(cacheKey);
   if (cached && isCacheEntryFresh(cached, today)) return cached.rate;
 
-  const params = new URLSearchParams({ base: fromCurrency, quotes: toCurrency });
+  const params = new URLSearchParams({
+    base: fromCurrency,
+    quotes: toCurrency,
+  });
   if (date < today) params.set('date', date);
   const url = `${BASE_URL}/rates?${params.toString()}`;
 
   const response = await fetch(url, { signal });
-  if (!response.ok) throw new Error(`Exchange rate fetch failed: ${response.status}`);
+  if (!response.ok)
+    throw new Error(`Exchange rate fetch failed: ${response.status}`);
 
   const data = (await response.json()) as RateEntry[];
   const entry = data.find((r) => r.quote === toCurrency);

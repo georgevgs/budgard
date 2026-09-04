@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { buildBalancedParts, isSettled } from '@/hooks/expensesList/useExpenseSplit';
+import {
+  buildBalancedParts,
+  isSettled,
+} from '@/hooks/expensesList/useExpenseSplit';
 import { sumAmounts } from '@/lib/money';
 import type { Expense } from '@/types/Expense';
 
@@ -44,10 +47,7 @@ describe('buildBalancedParts', () => {
   });
 
   it('puts the residual on the largest part', () => {
-    const rows = buildBalancedParts(expense(10), [
-      part('2,00'),
-      part('7,99'),
-    ]);
+    const rows = buildBalancedParts(expense(10), [part('2,00'), part('7,99')]);
 
     expect(rows.map((row) => row.amount)).toEqual([2, 8]);
   });

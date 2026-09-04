@@ -34,8 +34,6 @@ export const householdService = {
   },
 
   async leaveShare(ownerId: string) {
-    await done(
-      supabase.rpc('leave_household_share', { p_owner_id: ownerId }),
-    );
+    await done(supabase.rpc('leave_household_share', { p_owner_id: ownerId }));
   },
 };

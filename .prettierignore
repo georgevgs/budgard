@@ -1,0 +1,5 @@
+# Generated from src/design/tokens.ts by plugins/designTokens.ts.
+src/design/tokens.generated.css
+
+# shadcn primitives are repository-protected vendor code.
+src/components/ui/

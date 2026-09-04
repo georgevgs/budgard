@@ -117,11 +117,7 @@ const renderMatchFields = (form: Form, t: TFunc) => (
   </div>
 );
 
-const renderActionFields = (
-  form: Form,
-  categories: Category[],
-  t: TFunc,
-) => (
+const renderActionFields = (form: Form, categories: Category[], t: TFunc) => (
   <div className="space-y-3 rounded-lg border border-border/50 p-3">
     <p className="text-xs font-semibold text-muted-foreground">
       {t('review.rule.then')}

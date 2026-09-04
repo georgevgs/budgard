@@ -56,7 +56,8 @@ const extractAmount = (lines: string[]): number | null => {
         return;
       }
 
-      const value = largestMoneyOnLine(line) ?? largestMoneyOnLine(lines[index + 1] ?? '');
+      const value =
+        largestMoneyOnLine(line) ?? largestMoneyOnLine(lines[index + 1] ?? '');
 
       if (value !== null) {
         tierValues.push(value);
@@ -121,7 +122,9 @@ const DMY_DATE = /(?<!\d)(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})(?!\d)/;
 const DMY_SHORT_DATE = /(?<!\d)(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2})(?!\d)/;
 
 const extractDate = (lines: string[]): Date | null => {
-  const labeledLines = lines.filter((line) => DATE_LABEL.test(normalizeForMatching(line)));
+  const labeledLines = lines.filter((line) =>
+    DATE_LABEL.test(normalizeForMatching(line)),
+  );
 
   for (const line of [...labeledLines, ...lines]) {
     const parsed = parseDateFromLine(line);
@@ -179,7 +182,11 @@ const parseDateFromLine = (line: string): Date | null => {
 
 // Real-calendar check plus a receipt-plausibility window: nothing beyond
 // tomorrow (timezone slack) and nothing older than five years.
-const buildValidDate = (year: number, month: number, day: number): Date | null => {
+const buildValidDate = (
+  year: number,
+  month: number,
+  day: number,
+): Date | null => {
   if (month < 1 || month > 12 || day < 1 || day > 31) {
     return null;
   }
@@ -248,7 +255,4 @@ const extractMerchant = (lines: string[]): string | null => {
 // Uppercases and strips Greek tonos (ΣΎΝΟΛΟ → ΣΥΝΟΛΟ) so keyword regexes
 // match accented OCR output.
 const normalizeForMatching = (line: string): string =>
-  line
-    .toUpperCase()
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '');
+  line.toUpperCase().normalize('NFD').replace(/\p{M}/gu, '');

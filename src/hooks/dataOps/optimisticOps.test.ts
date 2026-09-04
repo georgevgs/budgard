@@ -131,9 +131,12 @@ describe('useDebtOps', () => {
       await expect(ops.current.handleDebtSubmit({})).rejects.toThrow();
     });
 
-    expect(mockSentry.captureException).toHaveBeenCalledWith(expect.any(Error), {
-      tags: { operation: 'createDebt' },
-    });
+    expect(mockSentry.captureException).toHaveBeenCalledWith(
+      expect.any(Error),
+      {
+        tags: { operation: 'createDebt' },
+      },
+    );
   });
 
   it('restores the debt when archiving fails', async () => {
@@ -266,7 +269,10 @@ describe('useNoSpendOps', () => {
 
 describe('useTagOps', () => {
   it('keeps the tag list sorted by name and returns the saved tag', async () => {
-    store.tags = [{ id: 'a', name: 'Apple' }, { id: 'z', name: 'Zebra' }];
+    store.tags = [
+      { id: 'a', name: 'Apple' },
+      { id: 'z', name: 'Zebra' },
+    ];
     svc.createTag.mockResolvedValue({ id: 'srv', name: 'Mango' } as Tag);
 
     const ops = renderHook(() => useTagOps()).result;
@@ -288,7 +294,9 @@ describe('useTagOps', () => {
 
     const ops = renderHook(() => useTagOps()).result;
     await act(async () => {
-      await expect(ops.current.handleTagCreate('Mango', '#fff')).rejects.toThrow();
+      await expect(
+        ops.current.handleTagCreate('Mango', '#fff'),
+      ).rejects.toThrow();
     });
 
     expect(store.tags).toEqual([]);
@@ -296,7 +304,9 @@ describe('useTagOps', () => {
 
   it('renames the tag across expense rows too', async () => {
     store.tags = [{ id: 't1', name: 'Old' }];
-    store.expenses = [{ id: 'e1', tag_id: 't1', tag: { id: 't1', name: 'Old' } }];
+    store.expenses = [
+      { id: 'e1', tag_id: 't1', tag: { id: 't1', name: 'Old' } },
+    ];
     svc.updateTag.mockResolvedValue(undefined);
 
     const ops = renderHook(() => useTagOps()).result;
@@ -313,7 +323,9 @@ describe('useTagOps', () => {
     // restores the tag list and refetches the expenses.
     const beforeTags = [{ id: 't1', name: 'Old' }];
     store.tags = [...beforeTags];
-    store.expenses = [{ id: 'e1', tag_id: 't1', tag: { id: 't1', name: 'Old' } }];
+    store.expenses = [
+      { id: 'e1', tag_id: 't1', tag: { id: 't1', name: 'Old' } },
+    ];
     svc.updateTag.mockRejectedValue(new Error('down'));
 
     const ops = renderHook(() => useTagOps()).result;
@@ -327,7 +339,9 @@ describe('useTagOps', () => {
 
   it('clears the tag off expenses when it is deleted', async () => {
     store.tags = [{ id: 't1', name: 'Gone' }];
-    store.expenses = [{ id: 'e1', tag_id: 't1', tag: { id: 't1', name: 'Gone' } }];
+    store.expenses = [
+      { id: 'e1', tag_id: 't1', tag: { id: 't1', name: 'Gone' } },
+    ];
     svc.deleteTag.mockResolvedValue(undefined);
 
     const ops = renderHook(() => useTagOps()).result;

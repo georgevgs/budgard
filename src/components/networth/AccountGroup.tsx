@@ -7,7 +7,7 @@ type Props = {
   accounts: Account[];
   latestSnapshotByAccount: Map<string, AccountBalance>;
   onAccountClick: (account: Account) => void;
-}
+};
 
 const AccountGroup = ({
   title,
@@ -21,7 +21,9 @@ const AccountGroup = ({
 
   return (
     <section className="space-y-2">
-      <h3 className="text-sm font-medium text-muted-foreground px-1">{title}</h3>
+      <h3 className="text-sm font-medium text-muted-foreground px-1">
+        {title}
+      </h3>
       <div className="space-y-2">
         {accounts.map((a) => (
           <AccountCard
@@ -34,6 +36,6 @@ const AccountGroup = ({
       </div>
     </section>
   );
-}
+};
 
 export default AccountGroup;

@@ -43,8 +43,14 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
   const showCreateOption = tagSearch.trim().length > 0 && !hasExactMatch;
 
   const applySelection = (ids: string[]) => {
-    form.setValue('tag_id', ids[0], { shouldValidate: true, shouldDirty: true });
-    form.setValue('extra_tag_ids', ids.slice(1), { shouldValidate: true, shouldDirty: true });
+    form.setValue('tag_id', ids[0], {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    form.setValue('extra_tag_ids', ids.slice(1), {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
   };
 
   // Free tier: exactly one tag per expense. Adding a second fires the upsell

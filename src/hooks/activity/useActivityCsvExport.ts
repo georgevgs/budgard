@@ -1,9 +1,6 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  useCategoriesData,
-  useTagsData,
-} from '@/contexts/DataContext';
+import { useCategoriesData, useTagsData } from '@/contexts/DataContext';
 import { useProGate } from '@/hooks/pro/useProGate';
 import { useToast } from '@/hooks/useToast';
 import { buildTransactionsCsv, downloadCsv } from '@/lib/csvExport';
@@ -36,15 +33,7 @@ export const useActivityCsvExport = (
         count: transactions.length,
       }),
     });
-  }, [
-    categories,
-    allow,
-    exportScope,
-    t,
-    tags,
-    toast,
-    transactions,
-  ]);
+  }, [categories, allow, exportScope, t, tags, toast, transactions]);
 
   return {
     handleExport,

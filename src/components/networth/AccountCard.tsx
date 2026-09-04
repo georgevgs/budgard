@@ -19,7 +19,7 @@ type Props = {
   account: Account;
   latestSnapshot?: AccountBalance;
   onClick: (account: Account) => void;
-}
+};
 
 const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
   const { t } = useTranslation();
@@ -27,11 +27,7 @@ const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
   const liability = isLiability(account.kind);
   const Icon = ICON_BY_KIND[account.kind];
 
-  const lastUpdatedLabel = getLastUpdatedLabel(
-    latestSnapshot,
-    dateLocale,
-    t,
-  );
+  const lastUpdatedLabel = getLastUpdatedLabel(latestSnapshot, dateLocale, t);
 
   return (
     <SurfaceCard
@@ -49,7 +45,10 @@ const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
       <div className="p-4 flex items-center gap-3">
         <div
           className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
-          style={{ backgroundColor: getColorTint(account.color), color: account.color }}
+          style={{
+            backgroundColor: getColorTint(account.color),
+            color: account.color,
+          }}
         >
           <Icon className="h-5 w-5" />
         </div>
@@ -72,13 +71,16 @@ const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
       </div>
     </SurfaceCard>
   );
-}
+};
 
 export default AccountCard;
 
 // --- Helpers ---
 
-type TranslateFunction = (key: string, options?: Record<string, unknown>) => string;
+type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
 
 const getLastUpdatedLabel = (
   latestSnapshot: AccountBalance | undefined,

@@ -215,7 +215,10 @@ const isStructurallyValid = (data: unknown): data is DataSnapshot => {
       return false;
     }
   }
-  if (typeof record.defaultCurrency !== 'string' || record.defaultCurrency === '') {
+  if (
+    typeof record.defaultCurrency !== 'string' ||
+    record.defaultCurrency === ''
+  ) {
     return false;
   }
   if (typeof record.secondaryLoaded !== 'boolean') {
@@ -230,7 +233,10 @@ const isStructurallyValid = (data: unknown): data is DataSnapshot => {
       return false;
     }
   }
-  if (typeof record.notificationPreferences !== 'object' || record.notificationPreferences === null) {
+  if (
+    typeof record.notificationPreferences !== 'object' ||
+    record.notificationPreferences === null
+  ) {
     return false;
   }
 

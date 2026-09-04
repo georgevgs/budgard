@@ -11,9 +11,7 @@ describe('TagChip', () => {
     expect(screen.getByText('Groceries')).toBeInTheDocument();
     const dot = document.querySelector('[style*="background-color"]');
     expect(dot).not.toBeNull();
-    expect((dot as HTMLElement).style.backgroundColor).toBe(
-      'rgb(34, 197, 94)',
-    );
+    expect((dot as HTMLElement).style.backgroundColor).toBe('rgb(34, 197, 94)');
   });
 
   it('renders a real remove button (chips live outside the popover trigger)', () => {

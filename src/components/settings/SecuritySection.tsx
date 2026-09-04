@@ -42,7 +42,10 @@ const SecuritySection = () => {
       <SurfaceCard>
         <div className="space-y-3 p-4">
           <p className="flex items-center gap-2 text-sm font-medium">
-            <ShieldCheck className="h-4 w-4 text-income-ink" aria-hidden="true" />
+            <ShieldCheck
+              className="h-4 w-4 text-income-ink"
+              aria-hidden="true"
+            />
             {t('security.sessions.label')}
           </p>
           <p className="text-xs leading-relaxed text-muted-foreground">

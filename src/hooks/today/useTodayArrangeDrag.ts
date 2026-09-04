@@ -15,22 +15,10 @@ type Options = {
 
 export type TodayArrangeDrag = {
   draggingId: TodayTileId | null;
-  start: (
-    id: TodayTileId,
-    event: ReactPointerEvent<HTMLElement>,
-  ) => void;
-  move: (
-    id: TodayTileId,
-    event: ReactPointerEvent<HTMLElement>,
-  ) => void;
-  end: (
-    id: TodayTileId,
-    event: ReactPointerEvent<HTMLElement>,
-  ) => void;
-  cancel: (
-    id: TodayTileId,
-    event: ReactPointerEvent<HTMLElement>,
-  ) => void;
+  start: (id: TodayTileId, event: ReactPointerEvent<HTMLElement>) => void;
+  move: (id: TodayTileId, event: ReactPointerEvent<HTMLElement>) => void;
+  end: (id: TodayTileId, event: ReactPointerEvent<HTMLElement>) => void;
+  cancel: (id: TodayTileId, event: ReactPointerEvent<HTMLElement>) => void;
 };
 
 const EDGE_SCROLL_ZONE_PX = 80;
@@ -65,19 +53,14 @@ export const useTodayArrangeDrag = ({
     return clearOverlay;
   }, []);
 
-  const start = (
-    id: TodayTileId,
-    event: ReactPointerEvent<HTMLElement>,
-  ) => {
+  const start = (id: TodayTileId, event: ReactPointerEvent<HTMLElement>) => {
     if (event.button !== 0 || activeId.current) {
-
       return;
     }
     const tile = event.currentTarget.closest<HTMLElement>(
       '[data-arrange-tile]',
     );
     if (!tile) {
-
       return;
     }
     event.preventDefault();
@@ -96,15 +79,11 @@ export const useTodayArrangeDrag = ({
     haptics.light();
   };
 
-  const move = (
-    id: TodayTileId,
-    event: ReactPointerEvent<HTMLElement>,
-  ) => {
+  const move = (id: TodayTileId, event: ReactPointerEvent<HTMLElement>) => {
     if (
       activeId.current !== id ||
       activePointerId.current !== event.pointerId
     ) {
-
       return;
     }
     event.preventDefault();
@@ -114,13 +93,11 @@ export const useTodayArrangeDrag = ({
     const order = visibleRef.current;
     const targetId = readTargetId(event.clientX, event.clientY, order);
     if (!targetId || targetId === id) {
-
       return;
     }
     const currentIndex = order.indexOf(id);
     const targetIndex = order.indexOf(targetId);
     if (currentIndex < 0 || targetIndex < 0) {
-
       return;
     }
     didMove.current = true;
@@ -137,7 +114,6 @@ export const useTodayArrangeDrag = ({
       activeId.current !== id ||
       activePointerId.current !== event.pointerId
     ) {
-
       return;
     }
     releasePointer(event);
@@ -147,28 +123,22 @@ export const useTodayArrangeDrag = ({
     clearOverlay();
 
     if (!didMove.current || !shouldAnnounce) {
-
       return;
     }
     const order = visibleRef.current;
     const position = order.indexOf(id);
     if (position < 0) {
-
       return;
     }
     haptics.selection();
     onDropRef.current(id, position + 1, order.length);
   };
 
-  const end = (
-    id: TodayTileId,
-    event: ReactPointerEvent<HTMLElement>,
-  ) => finish(id, event, true);
+  const end = (id: TodayTileId, event: ReactPointerEvent<HTMLElement>) =>
+    finish(id, event, true);
 
-  const cancel = (
-    id: TodayTileId,
-    event: ReactPointerEvent<HTMLElement>,
-  ) => finish(id, event, false);
+  const cancel = (id: TodayTileId, event: ReactPointerEvent<HTMLElement>) =>
+    finish(id, event, false);
 
   return { draggingId, start, move, end, cancel };
 };
@@ -177,7 +147,6 @@ export const useTodayArrangeDrag = ({
 
 const capturePointer = (event: ReactPointerEvent<HTMLElement>): void => {
   if (typeof event.currentTarget.setPointerCapture !== 'function') {
-
     return;
   }
   event.currentTarget.setPointerCapture(event.pointerId);
@@ -185,14 +154,12 @@ const capturePointer = (event: ReactPointerEvent<HTMLElement>): void => {
 
 const releasePointer = (event: ReactPointerEvent<HTMLElement>): void => {
   if (typeof event.currentTarget.releasePointerCapture !== 'function') {
-
     return;
   }
   if (
     typeof event.currentTarget.hasPointerCapture === 'function' &&
     !event.currentTarget.hasPointerCapture(event.pointerId)
   ) {
-
     return;
   }
   event.currentTarget.releasePointerCapture(event.pointerId);
@@ -204,7 +171,6 @@ const readTargetId = (
   visible: TodayTileId[],
 ): TodayTileId | null => {
   if (typeof document.elementFromPoint !== 'function') {
-
     return null;
   }
   const target = document
@@ -213,7 +179,6 @@ const readTargetId = (
   const candidate = target?.dataset.arrangeTile;
   const match = visible.find((id) => id === candidate);
   if (!match) {
-
     return null;
   }
 

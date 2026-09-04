@@ -1,8 +1,5 @@
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
-import {
-  useExpensesData,
-  useCategoriesData,
-} from '@/contexts/DataContext';
+import { useExpensesData, useCategoriesData } from '@/contexts/DataContext';
 import { buildWeeklyRecap, type WeeklyRecap } from '@/lib/weeklyAnomalies';
 
 const STORAGE_KEY = 'budgard_weekly_recap_dismissed';

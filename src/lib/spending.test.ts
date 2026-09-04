@@ -99,8 +99,12 @@ describe('countsInTotals', () => {
   });
 
   it('drops an excluded row of either kind', () => {
-    expect(countsInTotals(row({ type: 'expense', is_excluded: true }))).toBe(false);
-    expect(countsInTotals(row({ type: 'income', is_excluded: true }))).toBe(false);
+    expect(countsInTotals(row({ type: 'expense', is_excluded: true }))).toBe(
+      false,
+    );
+    expect(countsInTotals(row({ type: 'income', is_excluded: true }))).toBe(
+      false,
+    );
   });
 
   it('drops a debt payment, which is neither spending nor income', () => {

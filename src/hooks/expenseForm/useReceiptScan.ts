@@ -40,7 +40,6 @@ export const useReceiptScan = ({ form, receiptFile }: UseReceiptScanArgs) => {
 
   const handleScan = async () => {
     if (!allow('receiptScan')) {
-
       return;
     }
 
@@ -153,5 +152,7 @@ const canFillDate = (
 
   // Only the untouched new-expense default (today) is considered "empty",
   // and a receipt dated today would be a visual no-op — skip it.
-  return isSameDay(currentDate, new Date()) && !isSameDay(parsedDate, currentDate);
+  return (
+    isSameDay(currentDate, new Date()) && !isSameDay(parsedDate, currentDate)
+  );
 };

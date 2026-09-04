@@ -131,7 +131,8 @@ describe('authStore', () => {
   });
 
   it('markIntentionalSignOut prevents recovery attempt', async () => {
-    const { markIntentionalSignOut, authStore } = await import('@/lib/authStore');
+    const { markIntentionalSignOut, authStore } =
+      await import('@/lib/authStore');
 
     const session = {
       user: { id: 'u1' },

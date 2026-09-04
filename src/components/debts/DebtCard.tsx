@@ -18,7 +18,7 @@ import { getColorTint } from '@/lib/categoryColor';
 type Props = {
   debt: Debt;
   onClick: (debt: Debt) => void;
-}
+};
 
 const DebtCard = ({ debt, onClick }: Props) => {
   const { t } = useTranslation();
@@ -42,14 +42,18 @@ const DebtCard = ({ debt, onClick }: Props) => {
         <div className="flex items-center gap-3">
           <div
             className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
-            style={{ backgroundColor: getColorTint(debt.color), color: debt.color }}
+            style={{
+              backgroundColor: getColorTint(debt.color),
+              color: debt.color,
+            }}
           >
             <Icon className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="font-medium truncate">{debt.name}</p>
             <p className="text-xs text-muted-foreground truncate">
-              {t(`debts.kind.${debt.kind}`)} · {t('debts.aprSuffix', { apr: debt.apr.toFixed(2) })}
+              {t(`debts.kind.${debt.kind}`)} ·{' '}
+              {t('debts.aprSuffix', { apr: debt.apr.toFixed(2) })}
             </p>
           </div>
           <p className="text-base font-semibold tabular-nums shrink-0 text-destructive-ink">
@@ -63,7 +67,7 @@ const DebtCard = ({ debt, onClick }: Props) => {
       </div>
     </SurfaceCard>
   );
-}
+};
 
 export default DebtCard;
 
@@ -93,4 +97,4 @@ const renderUnpayableHint = (isUnpayable: boolean, t: TranslateFunction) => {
       <span>{t('debts.unpayableShort')}</span>
     </div>
   );
-}
+};

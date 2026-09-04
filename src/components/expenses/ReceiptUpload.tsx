@@ -13,7 +13,7 @@ type ReceiptUploadProps = {
   onFileSelect: (file: File | null) => void;
   onRemoveExisting: () => void;
   scan: ReceiptScanApi;
-}
+};
 
 const ReceiptUpload = ({
   currentReceiptPath,

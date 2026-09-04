@@ -109,9 +109,7 @@ describe('dataService', () => {
     const lastPage = [{ id: 'e1000' }];
     const chains = [mockChain(fullPage), mockChain(lastPage)];
     let call = 0;
-    vi.mocked(supabase.from).mockImplementation(
-      () => chains[call++] as never,
-    );
+    vi.mocked(supabase.from).mockImplementation(() => chains[call++] as never);
 
     const result = await dataService.getExpenses(OWNER_ID);
     expect(result).toHaveLength(1001);

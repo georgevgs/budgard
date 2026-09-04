@@ -6,7 +6,7 @@ import type { DebtProgress } from '@/hooks/useDebtProgress';
 type Props = {
   progress: DebtProgress;
   currency: string;
-}
+};
 
 const DebtProgressBar = ({ progress, currency }: Props) => {
   const { t } = useTranslation();
@@ -30,13 +30,15 @@ const DebtProgressBar = ({ progress, currency }: Props) => {
             {formatCurrency(progress.originalPrincipal, currency)}
           </span>
         </span>
-        <span className={cn('tabular-nums', getPercentClass(progress, isCleared))}>
+        <span
+          className={cn('tabular-nums', getPercentClass(progress, isCleared))}
+        >
           {renderPercentLabel(progress, isCleared, currency, t)}
         </span>
       </div>
     </div>
   );
-}
+};
 
 export default DebtProgressBar;
 
@@ -49,10 +51,11 @@ type TranslateFunction = (
 
 const pickIndicatorClass = (progress: DebtProgress, isCleared: boolean) => {
   if (isCleared) return 'bg-income';
-  if (progress.isUnpayable || progress.balanceIncreased) return 'bg-destructive';
+  if (progress.isUnpayable || progress.balanceIncreased)
+    return 'bg-destructive';
 
   return 'bg-primary';
-}
+};
 
 const getPercentClass = (progress: DebtProgress, isCleared: boolean) => {
   if (isCleared) return 'text-income-ink font-semibold';
@@ -61,7 +64,7 @@ const getPercentClass = (progress: DebtProgress, isCleared: boolean) => {
   }
 
   return 'text-foreground';
-}
+};
 
 const renderPercentLabel = (
   progress: DebtProgress,
@@ -76,5 +79,7 @@ const renderPercentLabel = (
     });
   }
 
-  return t('debts.percentPaid', { percent: Math.round(progress.percentPaid * 100) });
-}
+  return t('debts.percentPaid', {
+    percent: Math.round(progress.percentPaid * 100),
+  });
+};

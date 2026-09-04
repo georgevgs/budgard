@@ -79,9 +79,7 @@ describe('downloadCsv', () => {
     downloadCsv('transactions_2026.csv', 'A,B\r\n1,2');
 
     expect(createObjectURLSpy).toHaveBeenCalledOnce();
-    expect(clickedLink?.getAttribute('download')).toBe(
-      'transactions_2026.csv',
-    );
+    expect(clickedLink?.getAttribute('download')).toBe('transactions_2026.csv');
   });
 
   it('marks the blob as UTF-8 CSV', () => {
@@ -100,10 +98,13 @@ describe('downloadCsv', () => {
 
 describe('buildCsv', () => {
   it('joins headers and rows with CRLF', () => {
-    const csv = buildCsv(['A', 'B'], [
-      ['1', '2'],
-      ['3', '4'],
-    ]);
+    const csv = buildCsv(
+      ['A', 'B'],
+      [
+        ['1', '2'],
+        ['3', '4'],
+      ],
+    );
 
     expect(csv).toBe('A,B\r\n1,2\r\n3,4');
   });
@@ -124,14 +125,17 @@ describe('buildCsv', () => {
   });
 
   it('defuses formula triggers (=, +, -, @, tab, CR) with a leading apostrophe', () => {
-    const csv = buildCsv(['x'], [
-      ['=SUM(A1:A2)'],
-      ['+1+1'],
-      ['-2+3'],
-      ['@cmd'],
-      ['\tleading-tab'],
-      ['\rleading-cr'],
-    ]);
+    const csv = buildCsv(
+      ['x'],
+      [
+        ['=SUM(A1:A2)'],
+        ['+1+1'],
+        ['-2+3'],
+        ['@cmd'],
+        ['\tleading-tab'],
+        ['\rleading-cr'],
+      ],
+    );
     const lines = csv.split('\r\n');
 
     expect(lines[1]).toBe("'=SUM(A1:A2)");
@@ -309,8 +313,8 @@ describe('buildCategorySummaryCsv', () => {
     const csv = buildCategorySummaryCsv(transactions, categories, t);
     const lines = csv.split('\r\n').slice(1);
 
-    const incomeRow = lines.find(
-      (l) => l.startsWith('annualExport.csv.income,Food'),
+    const incomeRow = lines.find((l) =>
+      l.startsWith('annualExport.csv.income,Food'),
     );
     expect(incomeRow).toBe('annualExport.csv.income,Food,1500.00,2');
   });

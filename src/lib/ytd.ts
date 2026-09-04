@@ -7,7 +7,7 @@ import type { AccountBalance } from '@/types/AccountBalance';
 export type YtdResult = {
   growth: number;
   pct: number;
-}
+};
 
 export const computeAccountYtd = (
   account: Account,

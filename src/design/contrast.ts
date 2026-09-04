@@ -17,7 +17,9 @@ const toChannels = (value: string): [number, number, number] => {
   const channel = (offset: number): number => {
     const position = (offset + hue / 30) % 12;
 
-    return light - chroma * Math.max(-1, Math.min(position - 3, 9 - position, 1));
+    return (
+      light - chroma * Math.max(-1, Math.min(position - 3, 9 - position, 1))
+    );
   };
 
   return [channel(0), channel(8), channel(4)];
@@ -39,7 +41,10 @@ const luminance = (hsl: string): number => {
 };
 
 /** Contrast between two HSL triples, 1 (identical) to 21 (black on white). */
-export const contrastRatio = (foreground: string, background: string): number => {
+export const contrastRatio = (
+  foreground: string,
+  background: string,
+): number => {
   const first = luminance(foreground);
   const second = luminance(background);
   const lighter = Math.max(first, second);

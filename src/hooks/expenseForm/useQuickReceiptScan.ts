@@ -85,7 +85,6 @@ export const useQuickReceiptScan = ({
 
   const openPicker = (input?: HTMLInputElement | null) => {
     if (!allow('receiptScan')) {
-
       return;
     }
 

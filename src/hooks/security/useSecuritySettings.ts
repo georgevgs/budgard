@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { signOutEverywhere } from '@/lib/auth';
-import { clearLock, isLockEnabled, loadLock, setBiometrics } from '@/lib/appLock';
+import {
+  clearLock,
+  isLockEnabled,
+  loadLock,
+  setBiometrics,
+} from '@/lib/appLock';
 import {
   enrolDeviceUnlock,
   forgetDeviceUnlock,

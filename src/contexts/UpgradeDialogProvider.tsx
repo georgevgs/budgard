@@ -2,7 +2,11 @@ import { useMemo, useState, type ReactNode } from 'react';
 import type { ProPlanId } from '@/lib/proPlans';
 import { UpgradeDialogContext } from '@/contexts/UpgradeDialogContext';
 
-export const UpgradeDialogProvider = ({ children }: { children: ReactNode }) => {
+export const UpgradeDialogProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
   const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
   const [preferredPlan, setPreferredPlan] = useState<ProPlanId>('yearly');
 

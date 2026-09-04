@@ -38,15 +38,15 @@ describe('supabaseCrud', () => {
     ['row', row],
     ['maybeRow', maybeRow],
     ['done', done],
-  ])('%s throws the PostgREST error rather than returning data', async (
-    _name,
-    fn,
-  ) => {
-    const err = new Error('permission denied');
+  ])(
+    '%s throws the PostgREST error rather than returning data',
+    async (_name, fn) => {
+      const err = new Error('permission denied');
 
-    // Data alongside an error must never be handed back as a success.
-    await expect(fn(result([{ id: 'leaked' }], err))).rejects.toThrow(
-      'permission denied',
-    );
-  });
+      // Data alongside an error must never be handed back as a success.
+      await expect(fn(result([{ id: 'leaked' }], err))).rejects.toThrow(
+        'permission denied',
+      );
+    },
+  );
 });

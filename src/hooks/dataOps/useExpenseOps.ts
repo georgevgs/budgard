@@ -228,9 +228,8 @@ export const useExpenseOps = () => {
         'import',
       );
       setExpenses((prev) => mergeUniqueById(prev, created));
-      const reconciled = await recurringSuggestionService.reconcile(
-        activeOwnerId,
-      );
+      const reconciled =
+        await recurringSuggestionService.reconcile(activeOwnerId);
       if (reconciled > 0) {
         await refreshExpenses();
       }

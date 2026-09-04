@@ -97,7 +97,10 @@ const FiftyThirtyTwentyRing = ({ selectedMonth }: Props) => {
         format(parseISO(i.date), 'yyyy-MM') === selectedMonth,
     );
     for (const income of monthIncomes) {
-      if (income.savings_allocation_amount && income.savings_allocation_amount > 0) {
+      if (
+        income.savings_allocation_amount &&
+        income.savings_allocation_amount > 0
+      ) {
         totals.savings += income.savings_allocation_amount;
       }
     }
@@ -214,10 +217,7 @@ const BucketRow = ({ bucket, actual, total, currency, t }: BucketRowProps) => {
   );
 };
 
-const renderRing = (
-  totals: Record<Bucket, number>,
-  total: number,
-) => {
+const renderRing = (totals: Record<Bucket, number>, total: number) => {
   if (total === 0) return null;
 
   const stops: string[] = [];

@@ -9,7 +9,10 @@ export const cn = (...inputs: ClassValue[]) => {
 // Decimals follow the currency's ISO 4217 minor unit, so a yen amount reads
 // "¥1.250" rather than the "¥1.250,00" that a two-decimal default would print
 // for a currency that has no cents.
-export const formatCurrency = (amount: number, currencyCode: string = 'EUR'): string => {
+export const formatCurrency = (
+  amount: number,
+  currencyCode: string = 'EUR',
+): string => {
   const decimals = getCurrencyDecimals(currencyCode);
   const formatted = amount.toLocaleString('de-DE', {
     minimumFractionDigits: decimals,
@@ -21,7 +24,10 @@ export const formatCurrency = (amount: number, currencyCode: string = 'EUR'): st
 
 // Axis-tick variant of formatCurrency: same de-DE separators so chart axes
 // agree with tooltips, but without decimals to keep tick labels narrow.
-export const formatCurrencyCompact = (amount: number, currencyCode: string = 'EUR'): string => {
+export const formatCurrencyCompact = (
+  amount: number,
+  currencyCode: string = 'EUR',
+): string => {
   const formatted = amount.toLocaleString('de-DE', {
     maximumFractionDigits: 0,
   });
@@ -176,7 +182,10 @@ const isDotDecimal = (value: string, lastDot: number): boolean => {
 // Past years return 12, the current year returns the current month (1–12),
 // future years return 0. Used as the denominator for year-view "average per month"
 // metrics so partial years aren't smeared across 12 calendar months.
-export const monthsElapsedInYear = (year: number, now: Date = new Date()): number => {
+export const monthsElapsedInYear = (
+  year: number,
+  now: Date = new Date(),
+): number => {
   const currentYear = now.getFullYear();
 
   if (year < currentYear) {

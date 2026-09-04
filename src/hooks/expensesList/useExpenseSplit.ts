@@ -123,7 +123,8 @@ export const buildBalancedParts = (
     category_id: normalizeCategoryId(part.category_id),
   }));
 
-  const residual = toMinorUnits(expense.amount) -
+  const residual =
+    toMinorUnits(expense.amount) -
     toMinorUnits(sumAmounts(rows.map((row) => row.amount)));
   if (residual === 0) {
     return rows;

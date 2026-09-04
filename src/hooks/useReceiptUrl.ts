@@ -8,7 +8,7 @@ export type UseReceiptUrlResult = {
   url: string | null;
   isLoading: boolean;
   error: boolean;
-}
+};
 
 export const useReceiptUrl = (
   receiptPath: string,

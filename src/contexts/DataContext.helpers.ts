@@ -34,7 +34,6 @@ export const replaceRecentWindow = <T extends { id: string; date: string }>(
 export const isAbortError = (error: unknown): boolean => {
   if (error instanceof DOMException && error.name === 'AbortError') return true;
   if (error instanceof Error && error.message.includes('AbortError'))
-
     return true;
   if (
     typeof error === 'object' &&
@@ -42,7 +41,6 @@ export const isAbortError = (error: unknown): boolean => {
     'message' in error &&
     String((error as Record<string, unknown>).message).includes('AbortError')
   )
-
     return true;
 
   return false;
@@ -59,7 +57,6 @@ export const isExpiredJwtError = (error: unknown): boolean => {
     typeof record.message === 'string' &&
     record.message.toLowerCase().includes('jwt expired')
   )
-
     return true;
 
   return false;

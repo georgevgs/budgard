@@ -34,9 +34,7 @@ export const useRecurringSuggestions = (mode: RecurringMode) => {
     const controller = new AbortController();
     recurringSuggestionService
       .getDismissals(activeOwnerId, controller.signal)
-      .then((rows) =>
-        setDismissed(new Set(rows.map((row) => row.fingerprint))),
-      )
+      .then((rows) => setDismissed(new Set(rows.map((row) => row.fingerprint))))
       .catch((error) => {
         if (controller.signal.aborted) {
           return;

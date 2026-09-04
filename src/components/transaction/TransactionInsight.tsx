@@ -25,10 +25,7 @@ const TransactionInsight = (props: Props) => {
   }
 
   return (
-    <section
-      className="surface-card p-4"
-      aria-labelledby="tx-insight-title"
-    >
+    <section className="surface-card p-4" aria-labelledby="tx-insight-title">
       <h2
         id="tx-insight-title"
         className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground"

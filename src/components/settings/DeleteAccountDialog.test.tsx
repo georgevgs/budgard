@@ -76,9 +76,7 @@ describe('DeleteAccountDialog', () => {
       screen.getByText('settings.data.deleteAccountConfirmTitle'),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'settings.data.deleteAccountCodeNotice',
-      ),
+      screen.getByText('settings.data.deleteAccountCodeNotice'),
     ).toBeInTheDocument();
   });
 

@@ -24,7 +24,7 @@ const getPageBuildId = (): string | null => {
 // something unexpected, or can't be messaged at all (became redundant).
 export const requestWaitingBuildId = (
   worker: ServiceWorker,
-  timeoutMs: number = REPLY_TIMEOUT_MS
+  timeoutMs: number = REPLY_TIMEOUT_MS,
 ): Promise<string | null> =>
   new Promise((resolve) => {
     const channel = new MessageChannel();
@@ -60,7 +60,7 @@ export const requestWaitingBuildId = (
 // a prompt; anything unknown is treated as "different" (fail open).
 export const compareBuildIds = (
   pageBuildId: string | null,
-  workerBuildId: string | null
+  workerBuildId: string | null,
 ): boolean => {
   if (!isComparableBuildId(pageBuildId)) return false;
   if (!isComparableBuildId(workerBuildId)) return false;
@@ -70,7 +70,9 @@ export const compareBuildIds = (
 
 // True only when the waiting worker provably carries the SAME build as the
 // running page — the one case where the update prompt must be suppressed.
-export const isSameBuildAsPage = async (worker: ServiceWorker): Promise<boolean> => {
+export const isSameBuildAsPage = async (
+  worker: ServiceWorker,
+): Promise<boolean> => {
   const pageBuildId = getPageBuildId();
   if (!isComparableBuildId(pageBuildId)) return false;
 

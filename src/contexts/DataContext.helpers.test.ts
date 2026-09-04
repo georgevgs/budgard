@@ -19,11 +19,7 @@ describe('replaceRecentWindow', () => {
 
     const result = replaceRecentWindow(prev, fresh, cutoff);
 
-    expect(result.map((r) => r.id)).toEqual([
-      'recent-new',
-      'tail-1',
-      'tail-2',
-    ]);
+    expect(result.map((r) => r.id)).toEqual(['recent-new', 'tail-1', 'tail-2']);
   });
 
   it('drops recent rows deleted on another device', () => {

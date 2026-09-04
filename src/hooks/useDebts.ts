@@ -9,17 +9,14 @@ export type DebtSummary = {
   weightedAverageApr: number;
   activeCount: number;
   completedCount: number;
-}
+};
 
 export type DebtsByCurrency = Record<string, Debt[]>;
 
 export const useDebts = () => {
   const debts = useDebtsData();
 
-  const active = useMemo(
-    () => debts.filter((d) => !d.is_archived),
-    [debts],
-  );
+  const active = useMemo(() => debts.filter((d) => !d.is_archived), [debts]);
 
   const summary = useMemo((): DebtSummary => {
     const live = active.filter((d) => !d.is_completed && d.current_balance > 0);

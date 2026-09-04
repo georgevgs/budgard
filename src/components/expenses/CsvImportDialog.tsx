@@ -35,7 +35,7 @@ import type {
 type CsvImportDialogProps = {
   open: boolean;
   onClose: () => void;
-}
+};
 
 const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
   const { t } = useTranslation();
@@ -96,7 +96,11 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
             t,
             defaultCurrency,
           )}
-          {renderImportingStep(flow.step === 'importing', flow.validRows.length, t)}
+          {renderImportingStep(
+            flow.step === 'importing',
+            flow.validRows.length,
+            t,
+          )}
         </div>
       </DialogContent>
     </Dialog>
@@ -182,15 +186,19 @@ const renderUploadStep = (
       onDrop={onDrop}
     >
       <Upload className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
-      <p className="text-sm text-muted-foreground mb-2">{t('import.dropzone')}</p>
-      <p className="text-xs text-muted-foreground mb-4">{t('import.formatHint')}</p>
+      <p className="text-sm text-muted-foreground mb-2">
+        {t('import.dropzone')}
+      </p>
+      <p className="text-xs text-muted-foreground mb-4">
+        {t('import.formatHint')}
+      </p>
       <label>
         <input
-              type="file"
-              accept=".csv,.ofx,.qfx,.qif"
-              onChange={onFileInput}
-              className="hidden"
-            />
+          type="file"
+          accept=".csv,.ofx,.qfx,.qif"
+          onChange={onFileInput}
+          className="hidden"
+        />
         <Button variant="outline" asChild>
           <span>{t('import.selectFile')}</span>
         </Button>
@@ -204,7 +212,10 @@ const renderMappingStep = (
   csvPreview: CsvPreviewData | null,
   columnMapping: ColumnMapping,
   skipIncome: boolean,
-  updateColumnMapping: (field: keyof ColumnMapping, value: number | null) => void,
+  updateColumnMapping: (
+    field: keyof ColumnMapping,
+    value: number | null,
+  ) => void,
   setSkipIncome: (v: boolean) => void,
   onBack: () => void,
   onContinue: () => void,
@@ -214,14 +225,18 @@ const renderMappingStep = (
 
   return (
     <div className="flex flex-col space-y-4 pb-4">
-      <p className="text-sm text-muted-foreground">{t('import.mappingDescription')}</p>
+      <p className="text-sm text-muted-foreground">
+        {t('import.mappingDescription')}
+      </p>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <Label className="text-xs">{t('import.dateColumn')}</Label>
           <Select
             value={columnMapping.dateColumn.toString()}
-            onValueChange={(v) => updateColumnMapping('dateColumn', parseInt(v))}
+            onValueChange={(v) =>
+              updateColumnMapping('dateColumn', parseInt(v))
+            }
           >
             <SelectTrigger aria-label={t('import.dateColumn')}>
               <SelectValue />
@@ -240,7 +255,9 @@ const renderMappingStep = (
           <Label className="text-xs">{t('import.descriptionColumn')}</Label>
           <Select
             value={columnMapping.descriptionColumn.toString()}
-            onValueChange={(v) => updateColumnMapping('descriptionColumn', parseInt(v))}
+            onValueChange={(v) =>
+              updateColumnMapping('descriptionColumn', parseInt(v))
+            }
           >
             <SelectTrigger aria-label={t('import.descriptionColumn')}>
               <SelectValue />
@@ -259,7 +276,9 @@ const renderMappingStep = (
           <Label className="text-xs">{t('import.amountColumn')}</Label>
           <Select
             value={columnMapping.amountColumn.toString()}
-            onValueChange={(v) => updateColumnMapping('amountColumn', parseInt(v))}
+            onValueChange={(v) =>
+              updateColumnMapping('amountColumn', parseInt(v))
+            }
           >
             <SelectTrigger aria-label={t('import.amountColumn')}>
               <SelectValue />
@@ -300,7 +319,9 @@ const renderMappingStep = (
       <div className="flex items-center justify-between py-2 px-3 bg-muted/50 rounded-md">
         <div className="space-y-0.5">
           <Label className="text-sm">{t('import.skipIncome')}</Label>
-          <p className="text-xs text-muted-foreground">{t('import.skipIncomeDescription')}</p>
+          <p className="text-xs text-muted-foreground">
+            {t('import.skipIncomeDescription')}
+          </p>
         </div>
         <Switch checked={skipIncome} onCheckedChange={setSkipIncome} />
       </div>
@@ -314,7 +335,10 @@ const renderMappingStep = (
             <thead className="bg-muted sticky top-0">
               <tr>
                 {csvPreview.headers.map((header, idx) => (
-                  <th key={`th-${idx}`} className="px-2 py-1 text-left font-medium whitespace-nowrap">
+                  <th
+                    key={`th-${idx}`}
+                    className="px-2 py-1 text-left font-medium whitespace-nowrap"
+                  >
                     {shortColumnLabel(header, idx, t)}
                   </th>
                 ))}
@@ -328,7 +352,8 @@ const renderMappingStep = (
                       key={`cell-${rowIdx}-${cellIdx}`}
                       className={cn(
                         'px-2 py-1 truncate max-w-[120px]',
-                        isMappedColumn(cellIdx, columnMapping) && 'bg-primary/10',
+                        isMappedColumn(cellIdx, columnMapping) &&
+                          'bg-primary/10',
                       )}
                     >
                       {cell}
@@ -342,7 +367,9 @@ const renderMappingStep = (
       </div>
 
       <div className="flex gap-2 justify-end pt-2 border-t">
-        <Button variant="outline" onClick={onBack}>{t('import.back')}</Button>
+        <Button variant="outline" onClick={onBack}>
+          {t('import.back')}
+        </Button>
         <Button onClick={onContinue}>
           {t('import.continue')}
           <ArrowRight className="h-4 w-4 ml-2" />
@@ -413,9 +440,13 @@ const renderUnmatchedCategories = (
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="_skip">{t('import.skipCategory')}</SelectItem>
+                <SelectItem value="_skip">
+                  {t('import.skipCategory')}
+                </SelectItem>
                 {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -450,19 +481,36 @@ const renderValidRowsTable = (
         <table className="w-full text-sm">
           <thead className="bg-muted sticky top-0">
             <tr>
-              <th className="px-2 py-1 text-left font-medium">{t('expenses.date')}</th>
-              <th className="px-2 py-1 text-left font-medium">{t('expenses.description')}</th>
-              <th className="px-2 py-1 text-left font-medium">{t('expenses.category')}</th>
-              <th className="px-2 py-1 text-right font-medium">{t('expenses.amount')}</th>
+              <th className="px-2 py-1 text-left font-medium">
+                {t('expenses.date')}
+              </th>
+              <th className="px-2 py-1 text-left font-medium">
+                {t('expenses.description')}
+              </th>
+              <th className="px-2 py-1 text-left font-medium">
+                {t('expenses.category')}
+              </th>
+              <th className="px-2 py-1 text-right font-medium">
+                {t('expenses.amount')}
+              </th>
             </tr>
           </thead>
           <tbody>
             {validRows.slice(0, 50).map((row, idx) => (
-              <tr key={`${row.date}-${row.description}-${idx}`} className="border-t">
+              <tr
+                key={`${row.date}-${row.description}-${idx}`}
+                className="border-t"
+              >
                 <td className="px-2 py-1">{row.date}</td>
-                <td className="px-2 py-1 truncate max-w-[150px]">{row.description}</td>
-                <td className="px-2 py-1 truncate max-w-[100px]">{row.categoryName || '-'}</td>
-                <td className="px-2 py-1 text-right">{formatCurrency(row.amount, currency)}</td>
+                <td className="px-2 py-1 truncate max-w-[150px]">
+                  {row.description}
+                </td>
+                <td className="px-2 py-1 truncate max-w-[100px]">
+                  {row.categoryName || '-'}
+                </td>
+                <td className="px-2 py-1 text-right">
+                  {formatCurrency(row.amount, currency)}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -488,10 +536,15 @@ const renderErrorsList = (errors: CsvParseError[], t: TranslateFunction) => {
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium text-destructive-ink">{t('import.errors')}</p>
+      <p className="text-sm font-medium text-destructive-ink">
+        {t('import.errors')}
+      </p>
       <div className="max-h-24 overflow-y-auto space-y-1">
         {errors.slice(0, 10).map((error) => (
-          <div key={error.rowNumber} className="flex items-start gap-2 text-xs text-destructive-ink">
+          <div
+            key={error.rowNumber}
+            className="flex items-start gap-2 text-xs text-destructive-ink"
+          >
             <X className="h-3 w-3 mt-0.5 shrink-0" />
             <span>
               {t('import.errorRow', { row: error.rowNumber })}:{' '}
@@ -545,11 +598,19 @@ const renderPreviewStep = (
         {renderIncomeCount(validRows, t)}
         {renderErrorCount(errors.length, t)}
       </div>
-      {renderUnmatchedCategories(unmatchedCategories, categories, categoryMappings, onCategoryMap, t)}
+      {renderUnmatchedCategories(
+        unmatchedCategories,
+        categories,
+        categoryMappings,
+        onCategoryMap,
+        t,
+      )}
       {renderValidRowsTable(validRows, t, currency)}
       {renderErrorsList(errors, t)}
       <div className="flex gap-2 justify-end pt-2 border-t">
-        <Button variant="outline" onClick={onBack}>{t('import.back')}</Button>
+        <Button variant="outline" onClick={onBack}>
+          {t('import.back')}
+        </Button>
         <Button onClick={onImport} disabled={validRows.length === 0}>
           {t('import.importButton', { count: validRows.length })}
         </Button>

@@ -64,9 +64,7 @@ describe('useCurrentMonthSpendingByCategory', () => {
   });
 
   it('returns an empty map for an empty list', () => {
-    const { result } = renderHook(() =>
-      useCurrentMonthSpendingByCategory([]),
-    );
+    const { result } = renderHook(() => useCurrentMonthSpendingByCategory([]));
 
     expect(result.current.size).toBe(0);
   });

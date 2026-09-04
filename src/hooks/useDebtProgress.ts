@@ -19,7 +19,7 @@ export type DebtProgress = {
   projectedPayoffDate: string;
   projectedTotalInterest: number;
   isUnpayable: boolean;
-}
+};
 
 // Per-debt projection. Runs the payoff simulation against just this debt
 // (no monthlyExtra, snowball strategy is irrelevant for a single debt).

@@ -283,7 +283,8 @@ const forceReloadAfterSkipWaiting = (): void => {
     }
 
     const controller = navigator.serviceWorker?.controller ?? null;
-    const controlTransferred = controller !== null && controller !== previousController;
+    const controlTransferred =
+      controller !== null && controller !== previousController;
     if (controlTransferred) {
       window.clearInterval(poll);
       reload();
@@ -317,7 +318,10 @@ const reloadedForUpdateRecently = (): boolean => {
 
     const reloadedAt = Number(raw);
 
-    return Number.isFinite(reloadedAt) && Date.now() - reloadedAt < RELOAD_LOOP_WINDOW_MS;
+    return (
+      Number.isFinite(reloadedAt) &&
+      Date.now() - reloadedAt < RELOAD_LOOP_WINDOW_MS
+    );
   } catch {
     return false;
   }

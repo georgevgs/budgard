@@ -179,7 +179,10 @@ const weeklyTotalsByCategory = (
   // A week the category was never touched is a real zero, not a gap: "you
   // usually spend nothing here" is information the baseline needs.
   for (const [categoryId, weeks] of byCategory) {
-    const filled = Array.from({ length: BASELINE_WEEKS }, (_, index) => weeks[index] ?? 0);
+    const filled = Array.from(
+      { length: BASELINE_WEEKS },
+      (_, index) => weeks[index] ?? 0,
+    );
     byCategory.set(categoryId, filled);
   }
 

@@ -125,8 +125,7 @@ export const computeUpcomingRecurringThisMonth = (
 export const computeTwelveMonthProjection = (
   input: ProjectionInput,
 ): ProjectionMonth[] => {
-  const { expenses, incomes, recurringExpenses, recurringIncomes, now } =
-    input;
+  const { expenses, incomes, recurringExpenses, recurringIncomes, now } = input;
   const formatMonthLabel = input.formatMonthLabel ?? defaultMonthLabel;
 
   const variableExpenseAvg = computeVariableMonthlyAverage(expenses, now);
@@ -187,8 +186,7 @@ export const computeSpendableBalance = (
   accounts: readonly SpendableAccount[],
 ): number | null => {
   const spendable = accounts.filter(
-    (account) =>
-      !account.is_archived && SPENDABLE_KINDS.includes(account.kind),
+    (account) => !account.is_archived && SPENDABLE_KINDS.includes(account.kind),
   );
 
   if (spendable.length === 0) {

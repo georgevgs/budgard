@@ -103,7 +103,14 @@ describe('buildUpcomingBills', () => {
     // 5 Sep all land inside it. Counting the item once said 25 for something
     // that removes 125.
     const result = buildUpcomingBills(
-      [bill({ id: 'weekly', amount: 25, frequency: 'weekly', start_date: '2026-08-08' })],
+      [
+        bill({
+          id: 'weekly',
+          amount: 25,
+          frequency: 'weekly',
+          start_date: '2026-08-08',
+        }),
+      ],
       NOW,
       { withinDays: 30, limit: 10 },
     );

@@ -32,7 +32,11 @@ export const detectRecurringSuggestions = (
     if (!suggestion) {
       continue;
     }
-    if (existing.has(buildExistingKey(suggestion.merchantPattern, suggestion.type))) {
+    if (
+      existing.has(
+        buildExistingKey(suggestion.merchantPattern, suggestion.type),
+      )
+    ) {
       continue;
     }
     if (dismissed.has(suggestion.fingerprint)) {
@@ -41,9 +45,7 @@ export const detectRecurringSuggestions = (
     suggestions.push(suggestion);
   }
 
-  return suggestions
-    .sort((a, b) => b.occurrences - a.occurrences)
-    .slice(0, 5);
+  return suggestions.sort((a, b) => b.occurrences - a.occurrences).slice(0, 5);
 };
 
 // --- Helpers ---
@@ -88,7 +90,9 @@ const buildSuggestion = (unsorted: Expense[]): RecurringSuggestion | null => {
   if (unsorted.length < 3) {
     return null;
   }
-  const transactions = [...unsorted].sort((a, b) => a.date.localeCompare(b.date));
+  const transactions = [...unsorted].sort((a, b) =>
+    a.date.localeCompare(b.date),
+  );
   const intervals = buildIntervals(transactions);
   const cadence = findCadence(intervals);
   if (!cadence) {

@@ -21,10 +21,7 @@ const TransactionActions = (props: Props) => {
     <section className="space-y-4">
       <div className="surface-card flex items-start justify-between gap-4 p-4">
         <div className="min-w-0">
-          <p
-            className="text-sm font-medium"
-            id="tx-exclude-label"
-          >
+          <p className="text-sm font-medium" id="tx-exclude-label">
             {t('transaction.exclude.label')}
           </p>
           <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">

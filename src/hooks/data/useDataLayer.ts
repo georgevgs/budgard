@@ -664,12 +664,7 @@ const startHistoryTopUp = (
       undefined,
       recentCutoff,
     ),
-    dataService.getIncomes(
-      ownerId,
-      controller.signal,
-      undefined,
-      recentCutoff,
-    ),
+    dataService.getIncomes(ownerId, controller.signal, undefined, recentCutoff),
   ])
     .then(([olderExpenses, olderIncomes]) => {
       if (controller.signal.aborted) {

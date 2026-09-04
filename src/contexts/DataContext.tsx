@@ -154,7 +154,9 @@ export const useDebtsData = () => {
 export const useCategoryBudgetsData = () => {
   const ctx = useContext(CategoryBudgetsDataContext);
   if (ctx === null) {
-    throw new Error('useCategoryBudgetsData must be used within a DataProvider');
+    throw new Error(
+      'useCategoryBudgetsData must be used within a DataProvider',
+    );
   }
 
   return ctx;

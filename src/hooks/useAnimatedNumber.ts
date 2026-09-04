@@ -103,12 +103,9 @@ export const useAnimatedNumber = (target: number): number => {
 
 // --- Helpers ---
 
-const isAtRest = (
-  value: number,
-  target: number,
-  velocity: number,
-): boolean => {
+const isAtRest = (value: number, target: number, velocity: number): boolean => {
   return (
-    Math.abs(value - target) < REST_DISTANCE && Math.abs(velocity) < REST_VELOCITY
+    Math.abs(value - target) < REST_DISTANCE &&
+    Math.abs(velocity) < REST_VELOCITY
   );
 };

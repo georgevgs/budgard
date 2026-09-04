@@ -22,4 +22,4 @@ export type Subscription = {
   livemode: boolean;
   created_at: string;
   updated_at: string;
-}
+};

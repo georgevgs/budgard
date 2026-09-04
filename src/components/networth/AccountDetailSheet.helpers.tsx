@@ -231,18 +231,14 @@ const renderYtd = (
       <p className="text-muted-foreground">{t('networth.detail.ytd')}</p>
       <p className={cn('font-medium tabular-nums', getGainClass(isPositive))}>
         {renderGainSign(isPositive)}
-        {formatCurrency(ytd.growth, currency)} (
-        {renderGainSign(isPositive)}
+        {formatCurrency(ytd.growth, currency)} ({renderGainSign(isPositive)}
         {formatPercent(ytd.pct, 1)}%)
       </p>
     </div>
   );
 };
 
-const renderAnnualized = (
-  annualized: number | null,
-  t: TranslateFunction,
-) => {
+const renderAnnualized = (annualized: number | null, t: TranslateFunction) => {
   if (annualized == null) return null;
 
   const isPositive = annualized >= 0;
@@ -250,9 +246,7 @@ const renderAnnualized = (
 
   return (
     <div>
-      <p className="text-muted-foreground">
-        {t('networth.detail.annualized')}
-      </p>
+      <p className="text-muted-foreground">{t('networth.detail.annualized')}</p>
       <p className={cn('font-medium tabular-nums', getGainClass(isPositive))}>
         {renderGainSign(isPositive)}
         {formatPercent(pct, 1)}%

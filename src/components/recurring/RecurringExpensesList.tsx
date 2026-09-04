@@ -103,7 +103,13 @@ const renderHeader = (
 ) => (
   <PageHeader
     title={renderModeTitle(mode, t)}
-    subtitle={renderMonthlySummary(activeCount, monthlyTotal, mode, t, currency)}
+    subtitle={renderMonthlySummary(
+      activeCount,
+      monthlyTotal,
+      mode,
+      t,
+      currency,
+    )}
     action={
       <Button
         onClick={onAddClick}

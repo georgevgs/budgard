@@ -43,11 +43,7 @@ describe('computeAccountYtd', () => {
       makeSnapshot({ recorded_at: '2026-02-01', balance: 1000 }),
     ];
     expect(
-      computeAccountYtd(
-        makeAccount({ current_balance: 1100 }),
-        snapshots,
-        NOW,
-      ),
+      computeAccountYtd(makeAccount({ current_balance: 1100 }), snapshots, NOW),
     ).toBeNull();
   });
 
@@ -115,15 +111,9 @@ describe('computeAccountYtd', () => {
   });
 
   it('returns null when baseline balance is zero', () => {
-    const snapshots = [
-      makeSnapshot({ recorded_at: '2025-12-31', balance: 0 }),
-    ];
+    const snapshots = [makeSnapshot({ recorded_at: '2025-12-31', balance: 0 })];
     expect(
-      computeAccountYtd(
-        makeAccount({ current_balance: 100 }),
-        snapshots,
-        NOW,
-      ),
+      computeAccountYtd(makeAccount({ current_balance: 100 }), snapshots, NOW),
     ).toBeNull();
   });
 });

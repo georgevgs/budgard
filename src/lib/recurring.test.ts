@@ -108,7 +108,10 @@ describe('calculateNextOccurrence', () => {
   });
 
   it('returns a schedule starting today rather than skipping to next period', () => {
-    const r = buildRecurring({ frequency: 'monthly', start_date: '2026-05-07' });
+    const r = buildRecurring({
+      frequency: 'monthly',
+      start_date: '2026-05-07',
+    });
     expect(localDate(calculateNextOccurrence(r))).toBe('2026-05-07');
   });
 

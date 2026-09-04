@@ -82,7 +82,12 @@ export const CategoryDrillDown = ({
         </DialogHeader>
 
         <div className="overflow-y-auto max-h-[60dvh]">
-          {renderMonthlyBreakdown(monthlyBreakdown, categoryColor, t, defaultCurrency)}
+          {renderMonthlyBreakdown(
+            monthlyBreakdown,
+            categoryColor,
+            t,
+            defaultCurrency,
+          )}
 
           <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground mt-5 mb-2">
             {t('analytics.drillDown.allExpenses')}
@@ -146,7 +151,11 @@ const renderMonthlyBreakdown = (
   );
 };
 
-const renderExpenseRow = (expense: Expense, dateLocale: Locale, currency: string) => {
+const renderExpenseRow = (
+  expense: Expense,
+  dateLocale: Locale,
+  currency: string,
+) => {
   return (
     <div
       key={expense.id}

@@ -97,13 +97,18 @@ describe('useGoalOps create', () => {
 
     const ops = renderOps();
     await act(async () => {
-      await expect(ops.current.handleGoalCreate({ name: 'Trip' })).rejects.toThrow();
+      await expect(
+        ops.current.handleGoalCreate({ name: 'Trip' }),
+      ).rejects.toThrow();
     });
 
     expect(finalState()).toEqual([]);
-    expect(mockSentry.captureException).toHaveBeenCalledWith(expect.any(Error), {
-      tags: { operation: 'createGoal' },
-    });
+    expect(mockSentry.captureException).toHaveBeenCalledWith(
+      expect.any(Error),
+      {
+        tags: { operation: 'createGoal' },
+      },
+    );
     expect(mockShowErrorToast).toHaveBeenCalledWith(
       expect.any(String),
       expect.any(Function),
@@ -164,8 +169,11 @@ describe('useGoalOps delete', () => {
     });
 
     expect(finalState()).toEqual(before);
-    expect(mockSentry.captureException).toHaveBeenCalledWith(expect.any(Error), {
-      tags: { operation: 'deleteGoal' },
-    });
+    expect(mockSentry.captureException).toHaveBeenCalledWith(
+      expect.any(Error),
+      {
+        tags: { operation: 'deleteGoal' },
+      },
+    );
   });
 });

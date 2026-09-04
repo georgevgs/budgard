@@ -51,7 +51,9 @@ describe('the type scale', () => {
   });
 
   it('owns the weight of every element it sets', () => {
-    const offenders = linesMatching(/\btype-(slab|figure|title|heading|wordmark)[\w-]*\b[^"'`]*\bfont-(thin|extralight|light|normal|medium|semibold|bold|extrabold|black)\b/);
+    const offenders = linesMatching(
+      /\btype-(slab|figure|title|heading|wordmark)[\w-]*\b[^"'`]*\bfont-(thin|extralight|light|normal|medium|semibold|bold|extrabold|black)\b/,
+    );
 
     expect(
       offenders,

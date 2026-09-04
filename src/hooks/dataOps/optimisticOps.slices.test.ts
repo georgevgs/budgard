@@ -256,7 +256,10 @@ describe('useAccountOps', () => {
 
 describe('useCategoryOps', () => {
   it('sorts the category list once the server row arrives', async () => {
-    store.categories = [{ id: 'a', name: 'Apple' }, { id: 'z', name: 'Zebra' }];
+    store.categories = [
+      { id: 'a', name: 'Apple' },
+      { id: 'z', name: 'Zebra' },
+    ];
     svc.createCategory.mockResolvedValue({ id: 'm', name: 'Mango' });
 
     const ops = renderHook(() => useCategoryOps()).result;
@@ -271,8 +274,12 @@ describe('useCategoryOps', () => {
 
   it('renames the category inside expense and income rows too', async () => {
     store.categories = [{ id: 'c1', name: 'Old' }];
-    store.expenses = [{ id: 'e1', category_id: 'c1', category: { id: 'c1', name: 'Old' } }];
-    store.incomes = [{ id: 'i1', category_id: 'c1', category: { id: 'c1', name: 'Old' } }];
+    store.expenses = [
+      { id: 'e1', category_id: 'c1', category: { id: 'c1', name: 'Old' } },
+    ];
+    store.incomes = [
+      { id: 'i1', category_id: 'c1', category: { id: 'c1', name: 'Old' } },
+    ];
     svc.updateCategory.mockResolvedValue({ id: 'c1', name: 'New' });
 
     const ops = renderHook(() => useCategoryOps()).result;
@@ -280,14 +287,22 @@ describe('useCategoryOps', () => {
       await ops.current.handleCategoryUpdate('c1', { name: 'New' });
     });
 
-    expect((store.expenses as { category: { name: string } }[])[0].category.name).toBe('New');
-    expect((store.incomes as { category: { name: string } }[])[0].category.name).toBe('New');
+    expect(
+      (store.expenses as { category: { name: string } }[])[0].category.name,
+    ).toBe('New');
+    expect(
+      (store.incomes as { category: { name: string } }[])[0].category.name,
+    ).toBe('New');
   });
 
   it('restores categories, expenses and incomes together when the edit fails', async () => {
     const cats = [{ id: 'c1', name: 'Old' }];
-    const exps = [{ id: 'e1', category_id: 'c1', category: { id: 'c1', name: 'Old' } }];
-    const incs = [{ id: 'i1', category_id: 'c1', category: { id: 'c1', name: 'Old' } }];
+    const exps = [
+      { id: 'e1', category_id: 'c1', category: { id: 'c1', name: 'Old' } },
+    ];
+    const incs = [
+      { id: 'i1', category_id: 'c1', category: { id: 'c1', name: 'Old' } },
+    ];
     store.categories = [...cats];
     store.expenses = [...exps];
     store.incomes = [...incs];
@@ -335,8 +350,12 @@ describe('useCategoryOps', () => {
       await ops.current.handleCategoryDelete('c1');
     });
 
-    expect((store.expenses as { category_id?: string }[])[0].category_id).toBeUndefined();
-    expect((store.incomes as { category_id?: string }[])[0].category_id).toBeUndefined();
+    expect(
+      (store.expenses as { category_id?: string }[])[0].category_id,
+    ).toBeUndefined();
+    expect(
+      (store.incomes as { category_id?: string }[])[0].category_id,
+    ).toBeUndefined();
   });
 
   it('folds expenses and incomes into the destination category, then drops the source', async () => {
@@ -352,10 +371,16 @@ describe('useCategoryOps', () => {
       await ops.current.handleCategoryMerge('c1', destination);
     });
 
-    expect((store.categories as { id: string }[]).map((c) => c.id)).toEqual(['c2']);
+    expect((store.categories as { id: string }[]).map((c) => c.id)).toEqual([
+      'c2',
+    ]);
     expect(store.categoryBudgets).toHaveLength(0);
-    expect((store.expenses as { category_id: string }[])[0].category_id).toBe('c2');
-    expect((store.incomes as { category_id: string }[])[0].category_id).toBe('c2');
+    expect((store.expenses as { category_id: string }[])[0].category_id).toBe(
+      'c2',
+    );
+    expect((store.incomes as { category_id: string }[])[0].category_id).toBe(
+      'c2',
+    );
     expect(svc.mergeCategory).toHaveBeenCalledWith('c1', 'c2');
   });
 

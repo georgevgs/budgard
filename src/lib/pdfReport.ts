@@ -1,4 +1,8 @@
-import type { Content, TableCell, TDocumentDefinitions } from 'pdfmake/interfaces';
+import type {
+  Content,
+  TableCell,
+  TDocumentDefinitions,
+} from 'pdfmake/interfaces';
 
 // All user-facing strings arrive pre-translated and all amounts arrive
 // pre-formatted: this module stays i18n- and currency-agnostic so the
@@ -70,7 +74,11 @@ export const buildAnnualReportDocDefinition = (
     },
     content: [
       { text: `Budgard — ${input.year}`, style: 'title' },
-      { text: input.labels.generatedOn, style: 'subtle', margin: [0, 2, 0, 16] },
+      {
+        text: input.labels.generatedOn,
+        style: 'subtle',
+        margin: [0, 2, 0, 16],
+      },
       { text: input.labels.summaryTitle, style: 'sectionTitle' },
       buildSummaryTable(input),
       { text: input.labels.monthlyTitle, style: 'sectionTitle' },
@@ -145,7 +153,11 @@ const buildSummaryRow = (label: string, value: string): TableCell[] => {
 const buildMonthlyTable = (input: AnnualPdfReportInput): Content => {
   const headerRow: TableCell[] = [
     { text: input.labels.monthHeader, style: 'tableHeader' },
-    { text: input.labels.amountHeader, style: 'tableHeader', alignment: 'right' },
+    {
+      text: input.labels.amountHeader,
+      style: 'tableHeader',
+      alignment: 'right',
+    },
   ];
 
   const rows = input.monthlyTotals.map((month): TableCell[] => {
@@ -169,8 +181,16 @@ const buildMonthlyTable = (input: AnnualPdfReportInput): Content => {
 const buildCategoryTable = (input: AnnualPdfReportInput): Content => {
   const headerRow: TableCell[] = [
     { text: input.labels.categoryHeader, style: 'tableHeader' },
-    { text: input.labels.amountHeader, style: 'tableHeader', alignment: 'right' },
-    { text: input.labels.percentHeader, style: 'tableHeader', alignment: 'right' },
+    {
+      text: input.labels.amountHeader,
+      style: 'tableHeader',
+      alignment: 'right',
+    },
+    {
+      text: input.labels.percentHeader,
+      style: 'tableHeader',
+      alignment: 'right',
+    },
   ];
 
   const rows = input.categoryBreakdown.map((category): TableCell[] => {

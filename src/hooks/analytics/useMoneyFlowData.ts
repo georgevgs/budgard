@@ -54,7 +54,9 @@ export const useMoneyFlowData = (now: Date = new Date()): MoneyFlowData => {
   return useMemo(() => {
     const income = sumAmounts(
       incomes
-        .filter((row) => countsInTotals(row) && row.date.slice(0, 7) === monthKey)
+        .filter(
+          (row) => countsInTotals(row) && row.date.slice(0, 7) === monthKey,
+        )
         .map((row) => row.amount),
     );
 
@@ -73,7 +75,11 @@ export const useMoneyFlowData = (now: Date = new Date()): MoneyFlowData => {
       );
     }
 
-    const categoryRows = buildCategoryRows(categories, byCategory, uncategorized);
+    const categoryRows = buildCategoryRows(
+      categories,
+      byCategory,
+      uncategorized,
+    );
     const totalExpenses = sumAmounts(categoryRows.map((row) => row.amount));
     const savings = income - totalExpenses;
 

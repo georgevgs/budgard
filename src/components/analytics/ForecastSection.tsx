@@ -21,9 +21,7 @@ const ForecastSection = () => {
 
   return (
     <div className="space-y-3">
-      <h2 className="type-heading">
-        {t('analytics.forecast.title')}
-      </h2>
+      <h2 className="type-heading">{t('analytics.forecast.title')}</h2>
 
       <div className="surface-card">
         <div className="p-5 space-y-4">

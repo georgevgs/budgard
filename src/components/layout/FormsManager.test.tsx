@@ -80,9 +80,9 @@ describe('FormsManager', () => {
       />,
     );
 
-    expect(screen.getByTestId('expense-form').getAttribute('data-expense-id')).toBe(
-      'e1',
-    );
+    expect(
+      screen.getByTestId('expense-form').getAttribute('data-expense-id'),
+    ).toBe('e1');
   });
 
   it('renders no form when formType is null', () => {

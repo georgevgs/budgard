@@ -121,9 +121,7 @@ const renderNotFound = (t: TFunc) => (
       className="mt-10 rounded-2xl border border-dashed border-border/50 px-5 py-12 text-center"
       role="status"
     >
-      <p className="type-heading">
-        {t('transaction.notFound')}
-      </p>
+      <p className="type-heading">{t('transaction.notFound')}</p>
       <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
         {t('transaction.notFoundBody')}
       </p>

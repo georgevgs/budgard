@@ -17,9 +17,17 @@ type ToastParams = {
     onClick: () => void;
   };
   onDismiss?: () => void;
-}
+};
 
-const toast = ({ variant, title, description, duration, id, action, onDismiss }: ToastParams) => {
+const toast = ({
+  variant,
+  title,
+  description,
+  duration,
+  id,
+  action,
+  onDismiss,
+}: ToastParams) => {
   const message = title ?? description ?? '';
   const opts: ExternalToast = {};
   if (title && description) opts.description = description;

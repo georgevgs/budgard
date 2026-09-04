@@ -36,7 +36,12 @@ describe('useDebtPayoffPlan', () => {
 
   it('filters out archived, completed, and zero-balance debts', () => {
     const debts = [
-      makeDebt({ id: 'live', current_balance: 1000, minimum_payment: 100, apr: 0 }),
+      makeDebt({
+        id: 'live',
+        current_balance: 1000,
+        minimum_payment: 100,
+        apr: 0,
+      }),
       makeDebt({ id: 'archived', is_archived: true }),
       makeDebt({ id: 'completed', is_completed: true }),
       makeDebt({ id: 'zero', current_balance: 0 }),

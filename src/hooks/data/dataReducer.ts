@@ -154,7 +154,7 @@ export const dataReducer = (
 
 // --- Helpers ---
 
-const resolve = <T,>(value: Updater<T>, previous: T): T => {
+const resolve = <T>(value: Updater<T>, previous: T): T => {
   if (typeof value === 'function') {
     return (value as (previous: T) => T)(previous);
   }
@@ -212,22 +212,35 @@ export const createSetters = (
   setCategories: (value) => dispatch({ type: 'set', key: 'categories', value }),
   setExpenses: (value) => dispatch({ type: 'set', key: 'expenses', value }),
   setIncomes: (value) => dispatch({ type: 'set', key: 'incomes', value }),
-  setRecurringExpenses: (value) => dispatch({ type: 'set', key: 'recurringExpenses', value }),
-  setRecurringIncomes: (value) => dispatch({ type: 'set', key: 'recurringIncomes', value }),
+  setRecurringExpenses: (value) =>
+    dispatch({ type: 'set', key: 'recurringExpenses', value }),
+  setRecurringIncomes: (value) =>
+    dispatch({ type: 'set', key: 'recurringIncomes', value }),
   setTags: (value) => dispatch({ type: 'set', key: 'tags', value }),
-  setNoSpendDays: (value) => dispatch({ type: 'set', key: 'noSpendDays', value }),
+  setNoSpendDays: (value) =>
+    dispatch({ type: 'set', key: 'noSpendDays', value }),
   setTemplates: (value) => dispatch({ type: 'set', key: 'templates', value }),
   setGoals: (value) => dispatch({ type: 'set', key: 'goals', value }),
   setAccounts: (value) => dispatch({ type: 'set', key: 'accounts', value }),
-  setAccountBalances: (value) => dispatch({ type: 'set', key: 'accountBalances', value }),
+  setAccountBalances: (value) =>
+    dispatch({ type: 'set', key: 'accountBalances', value }),
   setDebts: (value) => dispatch({ type: 'set', key: 'debts', value }),
-  setCategoryBudgets: (value) => dispatch({ type: 'set', key: 'categoryBudgets', value }),
-  setMonthlyBudget: (value) => dispatch({ type: 'set', key: 'monthlyBudget', value }),
-  setDefaultCurrency: (value) => dispatch({ type: 'set', key: 'defaultCurrency', value }),
-  setDefaultSavingsPct: (value) => dispatch({ type: 'set', key: 'defaultSavingsPct', value }),
-  setDailyReminderHour: (value) => dispatch({ type: 'set', key: 'dailyReminderHour', value }),
-  setNotificationPreferences: (value) => dispatch({ type: 'set', key: 'notificationPreferences', value }),
-  setIsInitialized: (value) => dispatch({ type: 'set', key: 'isInitialized', value }),
-  setIsSecondaryLoaded: (value) => dispatch({ type: 'set', key: 'isSecondaryLoaded', value }),
-  setIsHistoryLoaded: (value) => dispatch({ type: 'set', key: 'isHistoryLoaded', value }),
+  setCategoryBudgets: (value) =>
+    dispatch({ type: 'set', key: 'categoryBudgets', value }),
+  setMonthlyBudget: (value) =>
+    dispatch({ type: 'set', key: 'monthlyBudget', value }),
+  setDefaultCurrency: (value) =>
+    dispatch({ type: 'set', key: 'defaultCurrency', value }),
+  setDefaultSavingsPct: (value) =>
+    dispatch({ type: 'set', key: 'defaultSavingsPct', value }),
+  setDailyReminderHour: (value) =>
+    dispatch({ type: 'set', key: 'dailyReminderHour', value }),
+  setNotificationPreferences: (value) =>
+    dispatch({ type: 'set', key: 'notificationPreferences', value }),
+  setIsInitialized: (value) =>
+    dispatch({ type: 'set', key: 'isInitialized', value }),
+  setIsSecondaryLoaded: (value) =>
+    dispatch({ type: 'set', key: 'isSecondaryLoaded', value }),
+  setIsHistoryLoaded: (value) =>
+    dispatch({ type: 'set', key: 'isHistoryLoaded', value }),
 });

@@ -28,12 +28,19 @@ vi.mock('@/contexts/DataContext', () => ({
 
 vi.mock('@/services/exchangeRateService', () => ({
   // USD→EUR fixed at 0.9 for tests so multi-currency math is predictable.
-  fetchExchangeRate: vi.fn(async (from: string, _date: string, _signal: AbortSignal | undefined, to: string) => {
-    if (from === to) return 1;
-    if (from === 'USD' && to === 'EUR') return 0.9;
+  fetchExchangeRate: vi.fn(
+    async (
+      from: string,
+      _date: string,
+      _signal: AbortSignal | undefined,
+      to: string,
+    ) => {
+      if (from === to) return 1;
+      if (from === 'USD' && to === 'EUR') return 0.9;
 
-    return 1;
-  }),
+      return 1;
+    },
+  ),
 }));
 
 const makeAccount = (overrides: Partial<Account> = {}): Account => ({
@@ -220,7 +227,9 @@ describe('useNetWorth', () => {
   it('adds active debts to liabilities and reduces total', () => {
     dataMock = {
       defaultCurrency: 'EUR',
-      accounts: [makeAccount({ id: 'cash', kind: 'cash', current_balance: 1000 })],
+      accounts: [
+        makeAccount({ id: 'cash', kind: 'cash', current_balance: 1000 }),
+      ],
       accountBalances: [],
       debts: [
         makeDebt({ id: 'card-debt', current_balance: 300 }),
@@ -239,7 +248,9 @@ describe('useNetWorth', () => {
   it('ignores archived, completed, and zero-balance debts', () => {
     dataMock = {
       defaultCurrency: 'EUR',
-      accounts: [makeAccount({ id: 'cash', kind: 'cash', current_balance: 1000 })],
+      accounts: [
+        makeAccount({ id: 'cash', kind: 'cash', current_balance: 1000 }),
+      ],
       accountBalances: [],
       debts: [
         makeDebt({ id: 'd1', current_balance: 300 }),
@@ -259,9 +270,13 @@ describe('useNetWorth', () => {
   it('converts foreign-currency debt balances to default currency', async () => {
     dataMock = {
       defaultCurrency: 'EUR',
-      accounts: [makeAccount({ id: 'cash', kind: 'cash', current_balance: 1000 })],
+      accounts: [
+        makeAccount({ id: 'cash', kind: 'cash', current_balance: 1000 }),
+      ],
       accountBalances: [],
-      debts: [makeDebt({ id: 'usd-debt', currency: 'USD', current_balance: 1000 })],
+      debts: [
+        makeDebt({ id: 'usd-debt', currency: 'USD', current_balance: 1000 }),
+      ],
     };
 
     const { result } = renderHook(() => useNetWorth());
@@ -276,7 +291,9 @@ describe('useNetWorth', () => {
   it('applies debt total as a constant baseline across the time series', () => {
     dataMock = {
       defaultCurrency: 'EUR',
-      accounts: [makeAccount({ id: 'a1', kind: 'bank', current_balance: 1000 })],
+      accounts: [
+        makeAccount({ id: 'a1', kind: 'bank', current_balance: 1000 }),
+      ],
       accountBalances: [
         makeBalance('a1', '2026-01-01', 800),
         makeBalance('a1', '2026-02-01', 1000),

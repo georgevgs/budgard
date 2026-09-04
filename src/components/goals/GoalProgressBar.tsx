@@ -6,7 +6,7 @@ import type { GoalProgress } from '@/hooks/useGoalProgress';
 type Props = {
   progress: GoalProgress;
   currency: string;
-}
+};
 
 const GoalProgressBar = ({ progress, currency }: Props) => {
   const { t } = useTranslation();
@@ -34,7 +34,7 @@ const GoalProgressBar = ({ progress, currency }: Props) => {
       </div>
     </div>
   );
-}
+};
 
 export default GoalProgressBar;
 
@@ -59,7 +59,7 @@ const pickIndicatorClass = (progress: GoalProgress) => {
   }
 
   return 'bg-primary';
-}
+};
 
 const getPercentClass = (progress: GoalProgress) => {
   if (progress.isOverachieved || progress.percent >= 1) {
@@ -71,7 +71,7 @@ const getPercentClass = (progress: GoalProgress) => {
   }
 
   return 'text-foreground';
-}
+};
 
 const renderPercentLabel = (
   percent: number,
@@ -83,4 +83,4 @@ const renderPercentLabel = (
   }
 
   return t('goals.percentComplete', { percent });
-}
+};

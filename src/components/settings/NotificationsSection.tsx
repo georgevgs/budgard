@@ -14,11 +14,7 @@ import type {
 } from '@/types/Budget';
 
 type PushState =
-  | 'loading'
-  | 'unsupported'
-  | 'denied'
-  | 'subscribed'
-  | 'unsubscribed';
+  'loading' | 'unsupported' | 'denied' | 'subscribed' | 'unsubscribed';
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
@@ -30,7 +26,10 @@ type NotificationsSectionProps = {
   onPushUnsubscribe: () => Promise<void>;
   onDailyReminderToggle: (enabled: boolean) => void;
   onDailyReminderTimeChange: (localHour: number) => void;
-  onPreferenceToggle: (key: NotificationPreferenceKey, enabled: boolean) => void;
+  onPreferenceToggle: (
+    key: NotificationPreferenceKey,
+    enabled: boolean,
+  ) => void;
   t: TFunc;
 };
 
@@ -52,7 +51,12 @@ const NotificationsSection = ({
       </p>
       <SurfaceCard>
         <div className="p-4 space-y-4">
-          {renderNotificationToggle(pushState, onPushSubscribe, onPushUnsubscribe, t)}
+          {renderNotificationToggle(
+            pushState,
+            onPushSubscribe,
+            onPushUnsubscribe,
+            t,
+          )}
           {renderDailyReminder(
             pushState,
             dailyReminderHour,
@@ -209,7 +213,9 @@ const renderDailyReminder = (
     <div className="border-t border-border/50 pt-4 space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm">{t('settings.notifications.dailyReminderLabel')}</p>
+          <p className="text-sm">
+            {t('settings.notifications.dailyReminderLabel')}
+          </p>
           <p className="text-xs text-muted-foreground">
             {t('settings.notifications.dailyReminderDescription')}
           </p>
@@ -271,13 +277,17 @@ const renderPreferences = (
   return (
     <div className="border-t border-border/50 pt-4 space-y-3">
       <div>
-        <p className="text-sm">{t('settings.notifications.preferencesTitle')}</p>
+        <p className="text-sm">
+          {t('settings.notifications.preferencesTitle')}
+        </p>
         <p className="text-xs text-muted-foreground">
           {t('settings.notifications.preferencesDescription')}
         </p>
       </div>
       <div className="space-y-3 pt-1">
-        {PREFERENCE_KEYS.map((key) => renderPreferenceRow(key, prefs, onToggle, t))}
+        {PREFERENCE_KEYS.map((key) =>
+          renderPreferenceRow(key, prefs, onToggle, t),
+        )}
       </div>
     </div>
   );

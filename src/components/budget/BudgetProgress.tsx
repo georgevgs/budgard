@@ -44,7 +44,8 @@ const BudgetProgress = ({
   const expenses = useExpensesData();
   const spendingByCategory = useCurrentMonthSpendingByCategory(expenses);
   const categoryRows = useMemo(
-    () => buildCategoryRows(expenseCategories, categoryBudgets, spendingByCategory),
+    () =>
+      buildCategoryRows(expenseCategories, categoryBudgets, spendingByCategory),
     [expenseCategories, categoryBudgets, spendingByCategory],
   );
 
@@ -236,10 +237,7 @@ const renderBudgetState = ({
         currencyCode={currencyCode}
       />
 
-      <CategoryBudgetsManager
-        isOpen={isManagerOpen}
-        onClose={onManagerClose}
-      />
+      <CategoryBudgetsManager isOpen={isManagerOpen} onClose={onManagerClose} />
     </>
   );
 };

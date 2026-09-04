@@ -50,10 +50,7 @@ export const useRecurringExpenseOps = () => {
             return dataService.updateRecurringExpense(expenseData, expenseId);
           }
 
-          return dataService.createRecurringExpense(
-            expenseData,
-            activeOwnerId,
-          );
+          return dataService.createRecurringExpense(expenseData, activeOwnerId);
         },
         commit: (saved) =>
           setRecurringExpenses((prev) => {
@@ -90,7 +87,9 @@ export const useRecurringExpenseOps = () => {
         skip,
         errorMessage: t('recurring.toasts.expenseToggleFailed'),
         optimistic: () => {
-          setRecurringExpenses((prev) => patchById(prev, expenseId, { active }));
+          setRecurringExpenses((prev) =>
+            patchById(prev, expenseId, { active }),
+          );
 
           // Flip it back rather than restoring the whole list: the switch is
           // the only thing that moved.
@@ -109,5 +108,12 @@ export const useRecurringExpenseOps = () => {
       handleRecurringExpenseDelete,
       handleRecurringExpenseToggle,
     };
-  }, [activeOwnerId, isInitialized, setRecurringExpenses, refreshExpenses, runMutation, t]);
+  }, [
+    activeOwnerId,
+    isInitialized,
+    setRecurringExpenses,
+    refreshExpenses,
+    runMutation,
+    t,
+  ]);
 };

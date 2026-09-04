@@ -42,10 +42,7 @@ const YearRhythm = ({ months, currency }: Props) => {
 
   return (
     <section className="surface-card p-4" aria-labelledby="year-rhythm-title">
-      <h2
-        id="year-rhythm-title"
-        className="type-heading"
-      >
+      <h2 id="year-rhythm-title" className="type-heading">
         {t('analytics.rhythm.title')}
       </h2>
       <p className="mt-1 text-sm leading-relaxed text-muted-foreground">

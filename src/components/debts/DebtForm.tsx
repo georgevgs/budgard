@@ -22,10 +22,7 @@ import DebtNumbersFields from '@/components/debts/DebtNumbersFields';
 import { useDataConfig } from '@/contexts/DataContext';
 import { useDebtSubmit } from '@/hooks/debts/useDebtSubmit';
 import { getCurrencySymbol } from '@/lib/currencies';
-import {
-  amountToInput,
-  formatCurrencyInput,
-} from '@/lib/utils';
+import { amountToInput, formatCurrencyInput } from '@/lib/utils';
 import { debtSchema, type DebtFormData } from '@/lib/validations';
 import { type Debt } from '@/types/Debt';
 import { swatch } from '@/design/palette';
@@ -36,7 +33,7 @@ const DEFAULT_ICON = 'credit-card';
 type Props = {
   debt?: Debt;
   onClose: () => void;
-}
+};
 
 const DebtForm = ({ debt, onClose }: Props) => {
   const { t } = useTranslation();
@@ -109,7 +106,10 @@ const DebtForm = ({ debt, onClose }: Props) => {
             <Button type="button" variant="outline" onClick={onClose}>
               {t('common.cancel')}
             </Button>
-            <Button type="submit" disabled={isSubmitting || !form.formState.isValid}>
+            <Button
+              type="submit"
+              disabled={isSubmitting || !form.formState.isValid}
+            >
               {renderSubmitLabel(isSubmitting, t)}
             </Button>
           </div>
@@ -117,7 +117,7 @@ const DebtForm = ({ debt, onClose }: Props) => {
       </Form>
     </>
   );
-}
+};
 
 export default DebtForm;
 
@@ -200,4 +200,4 @@ const renderBalanceField = (
       )}
     />
   );
-}
+};

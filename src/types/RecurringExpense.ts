@@ -1,11 +1,7 @@
 import { EmbeddedCategory } from '@/types/Category';
 
 type RecurringExpenseFrequency =
-  | 'weekly'
-  | 'biweekly'
-  | 'monthly'
-  | 'quarterly'
-  | 'yearly';
+  'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly';
 
 export type RecurringExpense = {
   id: string;
@@ -24,4 +20,4 @@ export type RecurringExpense = {
   detection_source?: 'manual' | 'suggested';
   merchant_pattern?: string | null;
   category?: EmbeddedCategory;
-}
+};

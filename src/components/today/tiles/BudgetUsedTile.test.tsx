@@ -49,8 +49,8 @@ describe('BudgetUsedTile', () => {
   it('reads as no budget rather than as zero percent', () => {
     renderTile({ monthlyBudget: null });
 
-    expect(screen.getAllByText('today.tile.noBudgetYet').length).toBeGreaterThan(
-      0,
-    );
+    expect(
+      screen.getAllByText('today.tile.noBudgetYet').length,
+    ).toBeGreaterThan(0);
   });
 });

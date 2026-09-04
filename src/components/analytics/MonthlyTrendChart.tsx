@@ -34,10 +34,7 @@ const MonthlyTrendChart = ({
   showCashFlow,
 }: Props) => {
   const { t } = useTranslation();
-  const series = useMemo(
-    () => buildSeries(showCashFlow, t),
-    [showCashFlow, t],
-  );
+  const series = useMemo(() => buildSeries(showCashFlow, t), [showCashFlow, t]);
 
   return (
     <CartesianChart
@@ -64,7 +61,12 @@ type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 const buildSeries = (showCashFlow: boolean, t: TFunc): Series[] => {
   const series: Series[] = [
-    { kind: 'area', key: 'amount', label: t('expenses.title'), color: '--primary' },
+    {
+      kind: 'area',
+      key: 'amount',
+      label: t('expenses.title'),
+      color: '--primary',
+    },
   ];
   if (!showCashFlow) {
     return series;
@@ -97,7 +99,11 @@ const renderTooltip = (point: ChartPoint, currency: string, t: TFunc) => {
   return renderCashFlowTooltip(point, currency, t);
 };
 
-const renderCashFlowTooltip = (point: ChartPoint, currency: string, t: TFunc) => {
+const renderCashFlowTooltip = (
+  point: ChartPoint,
+  currency: string,
+  t: TFunc,
+) => {
   const income = Number(point.income ?? 0);
   const expense = Number(point.amount ?? 0);
   const net = Number(point.net ?? 0);
@@ -111,7 +117,9 @@ const renderCashFlowTooltip = (point: ChartPoint, currency: string, t: TFunc) =>
       </p>
       <p className="flex items-center justify-between gap-3 text-xs">
         <span className="text-destructive-ink">{t('expenses.title')}</span>
-        <span className="tabular-nums">{formatCurrency(expense, currency)}</span>
+        <span className="tabular-nums">
+          {formatCurrency(expense, currency)}
+        </span>
       </p>
       <p className="flex items-center justify-between gap-3 border-t border-border/40 pt-1 text-xs font-semibold">
         <span>{t('income.netCashFlow')}</span>

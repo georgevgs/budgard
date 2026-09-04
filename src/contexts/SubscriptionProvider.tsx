@@ -1,6 +1,9 @@
 import { useMemo, type ReactNode } from 'react';
 import { useSubscriptionState } from '@/hooks/pro/useSubscriptionState';
-import { subscriptionService, type CheckoutPlan } from '@/services/subscriptionService';
+import {
+  subscriptionService,
+  type CheckoutPlan,
+} from '@/services/subscriptionService';
 import { isSubscriptionPro } from '@/lib/subscription';
 import { SubscriptionContext } from '@/contexts/SubscriptionContext';
 

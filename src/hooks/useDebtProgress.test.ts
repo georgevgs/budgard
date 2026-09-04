@@ -85,9 +85,7 @@ describe('useDebtProgress', () => {
 
   it('returns zero monthsRemaining for a cleared debt', () => {
     const { result } = renderHook(() =>
-      useDebtProgress(
-        makeDebt({ current_balance: 0, is_completed: true }),
-      ),
+      useDebtProgress(makeDebt({ current_balance: 0, is_completed: true })),
     );
 
     expect(result.current.monthsRemaining).toBe(0);

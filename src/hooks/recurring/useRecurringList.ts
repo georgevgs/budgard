@@ -111,7 +111,7 @@ export const useRecurringList = () => {
 
 // --- Helpers ---
 
-const pick = <T,>(isIncome: boolean, income: T, expense: T): T => {
+const pick = <T>(isIncome: boolean, income: T, expense: T): T => {
   if (isIncome) {
     return income;
   }
@@ -119,9 +119,7 @@ const pick = <T,>(isIncome: boolean, income: T, expense: T): T => {
   return expense;
 };
 
-export const resolveInitialMode = (
-  params: URLSearchParams,
-): RecurringMode => {
+export const resolveInitialMode = (params: URLSearchParams): RecurringMode => {
   if (params.get('mode') === 'income') {
     return 'income';
   }

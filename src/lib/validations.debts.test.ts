@@ -56,12 +56,12 @@ describe('debtSchema', () => {
   });
 
   it('accepts apr at the boundaries', () => {
-    expect(
-      debtSchema.safeParse({ ...baseValidDebt, apr: '0' }).success,
-    ).toBe(true);
-    expect(
-      debtSchema.safeParse({ ...baseValidDebt, apr: '100' }).success,
-    ).toBe(true);
+    expect(debtSchema.safeParse({ ...baseValidDebt, apr: '0' }).success).toBe(
+      true,
+    );
+    expect(debtSchema.safeParse({ ...baseValidDebt, apr: '100' }).success).toBe(
+      true,
+    );
   });
 
   it('rejects apr above 100', () => {

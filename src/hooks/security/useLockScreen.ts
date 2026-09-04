@@ -2,10 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { haptics } from '@/lib/haptics';
 import { loadLock, verifyPin, PIN_LENGTH } from '@/lib/appLock';
-import {
-  hasEnrolledCredential,
-  requestDeviceUnlock,
-} from '@/lib/deviceUnlock';
+import { hasEnrolledCredential, requestDeviceUnlock } from '@/lib/deviceUnlock';
 
 // How long the wrong-pin state stays on screen before the dots clear. Long
 // enough to read the message, short enough not to be a punishment.
@@ -20,7 +17,8 @@ export const useLockScreen = (onUnlock: () => void) => {
     () => loadLock()?.lockedUntil ?? null,
   );
 
-  const canUseDevice = loadLock()?.biometrics === true && hasEnrolledCredential();
+  const canUseDevice =
+    loadLock()?.biometrics === true && hasEnrolledCredential();
 
   const tryDeviceUnlock = async () => {
     const ok = await requestDeviceUnlock();

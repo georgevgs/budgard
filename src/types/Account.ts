@@ -2,12 +2,7 @@
 // reduce net worth; everything else adds to it. current_balance and cost_basis
 // are denormalized caches kept in sync by a DB trigger on account_balances.
 export type AccountKind =
-  | 'cash'
-  | 'bank'
-  | 'credit_card'
-  | 'loan'
-  | 'investment'
-  | 'other';
+  'cash' | 'bank' | 'credit_card' | 'loan' | 'investment' | 'other';
 
 export type Account = {
   id: string;
@@ -22,7 +17,7 @@ export type Account = {
   is_archived: boolean;
   created_at: string;
   updated_at: string;
-}
+};
 
 const LIABILITY_KINDS: ReadonlyArray<AccountKind> = ['credit_card', 'loan'];
 

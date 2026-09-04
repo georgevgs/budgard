@@ -15,4 +15,4 @@ export type AccountBalance = {
   recorded_at: string;
   note?: string | null;
   created_at: string;
-}
+};

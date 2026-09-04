@@ -16,7 +16,7 @@ export type NetWorthPoint = {
   total: number;
   assets: number;
   liabilities: number;
-}
+};
 
 export type NetWorthSummary = {
   total: number;
@@ -34,7 +34,7 @@ export type NetWorthSummary = {
   // total above mixes raw foreign-currency balances at rate=1 — the UI must
   // surface this so users don't trust the headline number blindly.
   staleCurrencies: string[];
-}
+};
 
 /**
  * The rate to convert `currency` into the default, recording any currency the
@@ -188,8 +188,7 @@ export const useNetWorth = () => {
   // completion).
   const rates = deriveRates(required, rateComputation);
   const failedKeys = deriveFailedKeys(required, rateComputation);
-  const isComputing =
-    required.size > 0 && rateComputation?.key !== requiredKey;
+  const isComputing = required.size > 0 && rateComputation?.key !== requiredKey;
 
   const summary = useMemo<NetWorthSummary>(() => {
     const today = format(new Date(), 'yyyy-MM-dd');
@@ -320,7 +319,8 @@ export const useNetWorth = () => {
 
         let rate = 1;
         if (a.default_currency !== defaultCurrency) {
-          rate = rates.get(RATE_KEY(a.default_currency, latest.recorded_at)) ?? 1;
+          rate =
+            rates.get(RATE_KEY(a.default_currency, latest.recorded_at)) ?? 1;
         }
 
         const balance = latest.balance * rate;

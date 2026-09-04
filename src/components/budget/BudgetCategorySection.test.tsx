@@ -4,7 +4,9 @@ import BudgetCategorySection, {
   type BudgetCategoryRow,
 } from '@/components/budget/BudgetCategorySection';
 
-const row = (overrides: Partial<BudgetCategoryRow> = {}): BudgetCategoryRow => ({
+const row = (
+  overrides: Partial<BudgetCategoryRow> = {},
+): BudgetCategoryRow => ({
   id: 'c1',
   name: 'Food',
   color: '#000000',

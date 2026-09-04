@@ -7,7 +7,7 @@ import type { Account } from '@/types/Account';
 
 type Props = {
   accounts: Account[];
-}
+};
 
 type Slice = DonutSlice & {
   name: string;
@@ -84,7 +84,7 @@ const InvestmentAllocationCard = ({ accounts }: Props) => {
       </div>
     </SurfaceCard>
   );
-}
+};
 
 export default InvestmentAllocationCard;
 

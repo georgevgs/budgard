@@ -159,7 +159,12 @@ const renderStatCell = (
 ) => (
   <div>
     <p className="text-xs text-muted-foreground">{label}</p>
-    <p className={cn('mt-0.5 text-base font-semibold tabular-nums', valueClassName)}>
+    <p
+      className={cn(
+        'mt-0.5 text-base font-semibold tabular-nums',
+        valueClassName,
+      )}
+    >
       {formatCurrency(amount, currency)}
     </p>
   </div>
@@ -178,7 +183,13 @@ const renderStats = (
   t: TFunc,
 ) => {
   if (!isPro) {
-    return renderFreeStats(totalSpent, monthlyAverage, monthsElapsed, currency, t);
+    return renderFreeStats(
+      totalSpent,
+      monthlyAverage,
+      monthsElapsed,
+      currency,
+      t,
+    );
   }
   if (view === 'flow') {
     return renderFlowStats(flow, currency, t);
@@ -282,7 +293,12 @@ const renderFlowStats = (flow: MoneyFlowData, currency: string, t: TFunc) => (
       </p>
     </div>
     <div className="grid grid-cols-2 gap-4 border-t border-border/40 pt-2">
-      {renderStatCell(t('income.title'), flow.income, currency, 'text-income-ink')}
+      {renderStatCell(
+        t('income.title'),
+        flow.income,
+        currency,
+        'text-income-ink',
+      )}
       {renderStatCell(
         t('expenses.title'),
         flow.totalExpenses,

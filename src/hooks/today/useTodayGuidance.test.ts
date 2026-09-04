@@ -33,7 +33,9 @@ const spend = (
   }) as unknown as Expense;
 
 const atDay = (day: number) => {
-  vi.setSystemTime(new Date(`2026-08-${String(day).padStart(2, '0')}T12:00:00Z`));
+  vi.setSystemTime(
+    new Date(`2026-08-${String(day).padStart(2, '0')}T12:00:00Z`),
+  );
 };
 
 describe('useTodayGuidance pace', () => {

@@ -136,7 +136,12 @@ describe('simulatePayoff', () => {
 
   it('avalanche pays less total interest than snowball when APRs differ', () => {
     const debts = [
-      makeDebt({ id: 'a', apr: 25, current_balance: 3000, minimum_payment: 80 }),
+      makeDebt({
+        id: 'a',
+        apr: 25,
+        current_balance: 3000,
+        minimum_payment: 80,
+      }),
       makeDebt({ id: 'b', apr: 5, current_balance: 1000, minimum_payment: 30 }),
     ];
     const { snowball, avalanche } = compareStrategies(debts, 100);

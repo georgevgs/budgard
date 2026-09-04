@@ -64,7 +64,9 @@ const ExpenseDescriptionField = ({ form, suggestions }: Props) => {
                     type="button"
                     className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-sm hover:bg-accent active:bg-accent text-left focus-visible:outline-none focus-visible:bg-accent"
                     onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => suggestions.handleSuggestionSelect(suggestion)}
+                    onClick={() =>
+                      suggestions.handleSuggestionSelect(suggestion)
+                    }
                   >
                     <span className="truncate">{suggestion.description}</span>
                     {renderSuggestionMeta(suggestion)}

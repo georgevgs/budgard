@@ -1,14 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import {
-  compareBuildIds,
-  requestWaitingBuildId,
-} from '@/lib/swBuildId';
+import { compareBuildIds, requestWaitingBuildId } from '@/lib/swBuildId';
 
 // A ServiceWorker stand-in that lets each test script the worker's reply.
 const fakeWorker = (
-  onMessage: (message: unknown, transfer: Transferable[]) => void
-): ServiceWorker =>
-  ({ postMessage: onMessage } as unknown as ServiceWorker);
+  onMessage: (message: unknown, transfer: Transferable[]) => void,
+): ServiceWorker => ({ postMessage: onMessage }) as unknown as ServiceWorker;
 
 const replyPortFrom = (transfer: Transferable[]): MessagePort =>
   transfer[0] as MessagePort;

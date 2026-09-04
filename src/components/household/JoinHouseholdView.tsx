@@ -22,7 +22,9 @@ const JoinHouseholdView = () => {
         subtitle={t('householdJoin.subtitle')}
       />
       <div className="mt-8">
-        <SurfaceCard>{renderInviteState(invite, token, ops, navigate, t)}</SurfaceCard>
+        <SurfaceCard>
+          {renderInviteState(invite, token, ops, navigate, t)}
+        </SurfaceCard>
       </div>
     </div>
   );
@@ -65,7 +67,9 @@ const renderInviteState = (
   if (!token || !invite) {
     return (
       <div className="p-5 text-center">
-        <p className="text-sm font-semibold">{t('householdJoin.unavailable')}</p>
+        <p className="text-sm font-semibold">
+          {t('householdJoin.unavailable')}
+        </p>
         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
           {t('householdJoin.unavailableDescription')}
         </p>

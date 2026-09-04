@@ -14,7 +14,10 @@
 type SentrySdk = typeof import('@sentry/react');
 
 type QueuedCall =
-  | { method: 'captureException'; args: Parameters<SentrySdk['captureException']> }
+  | {
+      method: 'captureException';
+      args: Parameters<SentrySdk['captureException']>;
+    }
   | { method: 'setUser'; args: Parameters<SentrySdk['setUser']> };
 
 const QUEUE_LIMIT = 50;

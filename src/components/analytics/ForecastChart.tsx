@@ -92,7 +92,11 @@ const buildZeroLine = (hasBalance: boolean, t: TFunc) => {
     return undefined;
   }
 
-  return { value: 0, color: '--muted-foreground', label: t('analytics.forecast.empty') };
+  return {
+    value: 0,
+    color: '--muted-foreground',
+    label: t('analytics.forecast.empty'),
+  };
 };
 
 const renderTooltip = (point: ChartPoint, currency: string, t: TFunc) => {

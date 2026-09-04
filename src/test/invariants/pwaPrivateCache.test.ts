@@ -7,7 +7,6 @@ const ROOT = path.resolve(import.meta.dirname, '../../..');
 const LEGACY_PRIVATE_CACHE_NAME = 'supabase-cache';
 
 const read = (file: string): string => {
-
   return readFileSync(path.join(ROOT, file), 'utf8');
 };
 

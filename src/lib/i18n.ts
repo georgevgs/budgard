@@ -23,7 +23,9 @@ const detectInitialLanguage = (): Lang => {
   return 'en';
 };
 
-const loadTranslation = async (lang: Lang): Promise<Record<string, unknown>> => {
+const loadTranslation = async (
+  lang: Lang,
+): Promise<Record<string, unknown>> => {
   const mod = await import(`../locales/${lang}/translation.json`);
 
   return mod.default;

@@ -139,7 +139,8 @@ export const useIncomeOps = () => {
           return true;
         },
         perform: () => dataService.deleteIncome(incomeId),
-        commit: () => setIncomes((prev) => prev.filter((e) => e.id !== incomeId)),
+        commit: () =>
+          setIncomes((prev) => prev.filter((e) => e.id !== incomeId)),
       });
 
     // The insert returns the created rows with their embeds, so merging them
@@ -152,14 +153,21 @@ export const useIncomeOps = () => {
         activeOwnerId,
       );
       setIncomes((prev) => mergeUniqueById(prev, created));
-      const reconciled = await recurringSuggestionService.reconcile(
-        activeOwnerId,
-      );
+      const reconciled =
+        await recurringSuggestionService.reconcile(activeOwnerId);
       if (reconciled > 0) {
         await refreshIncomes();
       }
     };
 
     return { handleIncomeSubmit, handleIncomeDelete, handleBulkIncomeImport };
-  }, [activeOwnerId, isInitialized, setIncomes, refreshIncomes, runMutation, toast, t]);
+  }, [
+    activeOwnerId,
+    isInitialized,
+    setIncomes,
+    refreshIncomes,
+    runMutation,
+    toast,
+    t,
+  ]);
 };

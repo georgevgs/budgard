@@ -137,7 +137,11 @@ describe('handleExpenseSubmit', () => {
   });
 
   it('offers an undo on the added toast that deletes the new row', async () => {
-    const saved = makeExpense({ id: 'new-1', amount: 12, description: 'Sample' });
+    const saved = makeExpense({
+      id: 'new-1',
+      amount: 12,
+      description: 'Sample',
+    });
     mockDataService.createExpense.mockResolvedValue(saved);
     mockDataService.deleteExpense.mockResolvedValue(undefined);
 
@@ -154,7 +158,9 @@ describe('handleExpenseSubmit', () => {
       }),
     );
 
-    const [{ action }] = mockToast.mock.calls[0] as [{ action: { onClick: () => void } }];
+    const [{ action }] = mockToast.mock.calls[0] as [
+      { action: { onClick: () => void } },
+    ];
     await act(async () => {
       action.onClick();
     });

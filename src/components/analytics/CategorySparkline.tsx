@@ -1,7 +1,7 @@
 type CategorySparklineProps = {
   values: number[];
   color: string;
-}
+};
 
 const CategorySparkline = ({ values, color }: CategorySparklineProps) => {
   let lastNonZero = -1;

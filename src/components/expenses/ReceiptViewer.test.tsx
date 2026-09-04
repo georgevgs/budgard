@@ -20,9 +20,7 @@ describe('ReceiptViewer', () => {
 
   it('renders the receipt image after a successful fetch', async () => {
     mockedGetReceiptUrl.mockResolvedValueOnce('blob:abc');
-    render(
-      <ReceiptViewer receiptPath="r.png" open={true} onClose={vi.fn()} />,
-    );
+    render(<ReceiptViewer receiptPath="r.png" open={true} onClose={vi.fn()} />);
 
     await waitFor(() =>
       expect(screen.getByAltText('receipt.receiptImage')).toHaveAttribute(
@@ -34,9 +32,7 @@ describe('ReceiptViewer', () => {
 
   it('shows the error state when the fetch rejects', async () => {
     mockedGetReceiptUrl.mockRejectedValueOnce(new Error('boom'));
-    render(
-      <ReceiptViewer receiptPath="r.png" open={true} onClose={vi.fn()} />,
-    );
+    render(<ReceiptViewer receiptPath="r.png" open={true} onClose={vi.fn()} />);
 
     await waitFor(() =>
       expect(screen.getByText('receipt.loadError')).toBeInTheDocument(),
@@ -45,9 +41,7 @@ describe('ReceiptViewer', () => {
 
   it('falls back to the error state when the image fails to load', async () => {
     mockedGetReceiptUrl.mockResolvedValueOnce('blob:bad');
-    render(
-      <ReceiptViewer receiptPath="r.png" open={true} onClose={vi.fn()} />,
-    );
+    render(<ReceiptViewer receiptPath="r.png" open={true} onClose={vi.fn()} />);
 
     const img = await screen.findByAltText('receipt.receiptImage');
     fireEvent.error(img);
@@ -58,7 +52,9 @@ describe('ReceiptViewer', () => {
   });
 
   it('revokes the object url when closed after loading', async () => {
-    const revokeSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    const revokeSpy = vi
+      .spyOn(URL, 'revokeObjectURL')
+      .mockImplementation(() => {});
     mockedGetReceiptUrl.mockResolvedValueOnce('blob:abc');
 
     const { rerender } = render(
@@ -71,6 +67,8 @@ describe('ReceiptViewer', () => {
     );
 
     expect(revokeSpy).toHaveBeenCalledWith('blob:abc');
-    expect(screen.queryByAltText('receipt.receiptImage')).not.toBeInTheDocument();
+    expect(
+      screen.queryByAltText('receipt.receiptImage'),
+    ).not.toBeInTheDocument();
   });
 });
