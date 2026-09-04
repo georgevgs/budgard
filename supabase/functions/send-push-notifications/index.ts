@@ -112,19 +112,27 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: {
+        ...corsHeaders,
+        Allow: 'POST, OPTIONS',
+        'Content-Type': 'application/json',
+      },
+    });
+  }
+
   try {
     // Authenticate via cron secret (not user JWT — called by pg_cron)
     const authHeader = req.headers.get('Authorization') ?? '';
     const cronSecret = Deno.env.get('CRON_SECRET');
 
     if (!cronSecret || !constantTimeEqual(authHeader, `Bearer ${cronSecret}`)) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        },
-      );
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -502,12 +510,9 @@ Deno.serve(async (req) => {
   } catch (err) {
     console.error('send-push-notifications error:', err);
 
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
-    );
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });

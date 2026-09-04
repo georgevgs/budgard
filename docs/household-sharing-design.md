@@ -7,8 +7,9 @@ Status: **implemented** on 2026-08-31.
 - One Pro owner can invite one partner by email.
 - The partner keeps a separate login and can switch between their own finances
   and the owner's shared financial space.
-- Finance data is shared as one space: transactions, categories, tags,
-  recurring items, templates, goals, debts, accounts and balances.
+- Finance data is shared as one space: transactions and their receipt
+  attachments, categories, tags, recurring items, templates, goals, debts,
+  accounts and balances.
 - Billing, subscription state, notification preferences, push subscriptions
   and security settings are always personal.
 - Sharing stops immediately when revoked, when the partner leaves, or when the
@@ -31,6 +32,12 @@ invite email must match the accepting account.
 returns true only for the owner or an accepted member whose owner still has
 Pro. Every finance table uses that predicate for reads and writes, with
 additional cross-space checks for foreign keys.
+
+Receipt objects follow the same boundary. Their first Storage path segment is
+the financial-space owner's UUID, and all four `storage.objects` policies call
+`private.can_access_financial_space()` for that owner. A partner can therefore
+open and maintain attachments in the shared space without gaining access to
+any unrelated user's folder.
 
 The authenticated role cannot mutate `household_shares` directly. Invite,
 accept, revoke and leave transitions go through narrow RPCs that enforce the

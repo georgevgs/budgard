@@ -29,6 +29,10 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeadersFor(req) });
   }
 
+  if (req.method !== 'POST') {
+    return jsonResponse({ error: 'Method not allowed' }, 405);
+  }
+
   try {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
@@ -41,9 +45,17 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } },
     );
 
-    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    const {
+      data: { user },
+      error: userError,
+    } = await userClient.auth.getUser();
     if (userError || !user) {
       return jsonResponse({ error: 'Unauthorized' }, 401);
+    }
+
+    const plan = await readPlan(req);
+    if (!plan) {
+      return jsonResponse({ error: 'plan must be "monthly" or "yearly"' }, 400);
     }
 
     // Durable per-user rate limit (5 attempts / 10 min, enforced in
@@ -63,26 +75,29 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Too many attempts. Try again soon.' }, 429);
     }
 
-    // RLS scopes this to the caller's own row. Fail open on query errors:
-    // blocking checkout over a transient read failure loses a sale, and the
-    // webhook upsert keeps one row per user regardless.
-    const { data: existing } = await userClient
+    // RLS scopes this to the caller's own row. Fail closed on query errors: an
+    // active subscriber must never reach a second Checkout Session because a
+    // transient database failure hid their current row.
+    const { data: existing, error: subscriptionError } = await userClient
       .from('subscriptions')
       .select('status')
       .maybeSingle();
+    if (subscriptionError) {
+      console.error(
+        'stripe-checkout: subscription lookup failed:',
+        subscriptionError,
+      );
+
+      return jsonResponse({ error: 'Unable to verify subscription' }, 503);
+    }
     if (existing && ACTIVE_STATUSES.includes(existing.status)) {
       return jsonResponse({ error: 'Already subscribed' }, 409);
     }
 
     // No row at all means this user has never subscribed — they get the
-    // trial. Same fail-open stance as the 409 check above: a transient read
-    // error grants a trial rather than blocking the sale.
+    // trial. Query failures returned above, so this decision is made only
+    // from a successful read.
     const trialEligible = !existing;
-
-    const plan = await readPlan(req);
-    if (!plan) {
-      return jsonResponse({ error: 'plan must be "monthly" or "yearly"' }, 400);
-    }
 
     const priceId = getPriceId(plan);
     const secretKey = Deno.env.get('STRIPE_SECRET_KEY');

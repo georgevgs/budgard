@@ -42,10 +42,8 @@ export const useSubscriptionState = (): SubscriptionState => {
     setPrevUserId(userId);
     if (userId) {
       const cached = loadSubscriptionSnapshot(userId);
-      if (cached) {
-        setSubscription(cached);
-        setIsLoading(false);
-      }
+      setSubscription(cached);
+      setIsLoading(cached === null);
     } else {
       setSubscription(null);
       setIsLoading(false);
@@ -79,6 +77,7 @@ export const useSubscriptionState = (): SubscriptionState => {
   // cascade even though its writes all sit behind awaits, so the effect keeps
   // every setState inside promise continuations instead.
   useEffect(() => {
+    lastFetchedAtRef.current = 0;
     if (!userId) {
       // State was already reset by the sign-out adjust above; just make sure
       // no subscription snapshot lingers behind on a shared device.
@@ -142,7 +141,6 @@ export const useSubscriptionState = (): SubscriptionState => {
     return () =>
       document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [userId, refresh]);
-
 
   return { subscription, isLoading, refresh };
 };

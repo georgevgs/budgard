@@ -1005,8 +1005,10 @@ export const dataService = {
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to delete account');
+      const errorData = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+      throw new Error(errorData?.error || 'Failed to delete account');
     }
 
     return response.json() as Promise<{ success: boolean }>;

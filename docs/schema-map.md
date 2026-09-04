@@ -4,7 +4,7 @@
      Regenerate with `npm run docs:schema`. -->
 
 An index from each database object to the migrations that touch it, built by
-scanning `supabase/migrations`. Covers 82 migrations: 48 functions, 27 triggers, 26 tables, 83 policies, 51 indexes.
+scanning `supabase/migrations`. Covers 83 migrations: 48 functions, 27 triggers, 26 tables, 87 policies, 51 indexes.
 
 This is a **map, not a schema definition**. Migrations are append-only history
 and the live schema is what you get by replaying them, so nothing here states
@@ -1223,6 +1223,18 @@ First defined in `20260831151127_add_secure_household_spaces.sql`.
 
 - defines — `20260831151127_add_secure_household_spaces.sql`
 
+### `Household can delete receipts`
+
+First defined in `20260904113851_share_household_receipts.sql`.
+
+- defines — `20260904113851_share_household_receipts.sql`
+
+### `Household can insert receipts`
+
+First defined in `20260904113851_share_household_receipts.sql`.
+
+- defines — `20260904113851_share_household_receipts.sql`
+
 ### `Household can manage account balances`
 
 First defined in `20260831151127_add_secure_household_spaces.sql`.
@@ -1313,11 +1325,23 @@ First defined in `20260831161403_add_transaction_review_and_rules.sql`.
 
 - defines — `20260831161403_add_transaction_review_and_rules.sql`
 
+### `Household can read receipts`
+
+First defined in `20260904113851_share_household_receipts.sql`.
+
+- defines — `20260904113851_share_household_receipts.sql`
+
 ### `Household can update expenses`
 
 First defined in `20260831151127_add_secure_household_spaces.sql`.
 
 - defines — `20260831151127_add_secure_household_spaces.sql`
+
+### `Household can update receipts`
+
+First defined in `20260904113851_share_household_receipts.sql`.
+
+- defines — `20260904113851_share_household_receipts.sql`
 
 ### `Household can view expenses`
 

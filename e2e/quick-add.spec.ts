@@ -50,13 +50,15 @@ test.describe('quick add', () => {
           data.expenses.find((row) => row.description === 'Bus fare')?.amount,
       )
       .toBe(8.25);
-    const savedRow = app.getByText('Bus fare');
+    // The success toast repeats the description. Target the transaction's
+    // accessible name so feedback timing cannot turn this into two matches.
+    const savedRow = app.getByLabel('Open Bus fare');
     await expect(savedRow).toHaveCount(1);
     await expect(savedRow).toBeVisible();
 
     await app.reload();
-    await expect(app.getByText('Bus fare')).toHaveCount(1);
-    await expect(app.getByText('Bus fare')).toBeVisible();
+    await expect(app.getByLabel('Open Bus fare')).toHaveCount(1);
+    await expect(app.getByLabel('Open Bus fare')).toBeVisible();
   });
 
   test('cannot save nothing', async ({ app }) => {

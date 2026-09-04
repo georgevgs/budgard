@@ -112,6 +112,25 @@ describe('useSubscriptionState', () => {
     expect(result.current.subscription).toEqual(OTHER_PRO);
   });
 
+  it('clears the previous user Pro state when the next user has no cache', async () => {
+    cache.loadSubscriptionSnapshot.mockImplementation((userId) => {
+      if (userId === 'u1') {
+        return PRO;
+      }
+
+      return null;
+    });
+    const { result, rerender } = renderHook(() => useSubscriptionState());
+    await waitFor(() => expect(result.current.subscription).toEqual(PRO));
+
+    svc.getSubscription.mockImplementation(() => new Promise(() => {}));
+    auth.session = { user: { id: 'u2' } };
+    rerender();
+
+    expect(result.current.subscription).toBeNull();
+    expect(result.current.isLoading).toBe(true);
+  });
+
   it('refresh is a no-op without a session', async () => {
     auth.session = null;
     const { result } = renderHook(() => useSubscriptionState());

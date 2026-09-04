@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeadersFor } from '../_shared/cors.ts';
+import { emptyStorageFolder } from '../_shared/storageCleanup.ts';
 
 Deno.serve(async (req) => {
   const corsHeaders = corsHeadersFor(req);
@@ -9,13 +10,27 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: {
+        ...corsHeaders,
+        Allow: 'POST, OPTIONS',
+        'Content-Type': 'application/json',
+      },
+    });
+  }
+
   try {
     // Get the JWT from the Authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(
         JSON.stringify({ error: 'Missing authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
@@ -29,12 +44,15 @@ Deno.serve(async (req) => {
     });
 
     // Verify the user is authenticated
-    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    const {
+      data: { user },
+      error: userError,
+    } = await userClient.auth.getUser();
     if (userError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Deletion is irreversible, so a valid JWT alone is not enough: the
@@ -43,10 +61,10 @@ Deno.serve(async (req) => {
     // session cannot destroy the account without access to the user's inbox.
     // The client verifies a fresh OTP right before calling this function.
     if (!isRecentlyAuthenticated(authHeader)) {
-      return new Response(
-        JSON.stringify({ error: 'reauth_required' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return new Response(JSON.stringify({ error: 'reauth_required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Use the service role client to delete user data and auth record
@@ -55,22 +73,10 @@ Deno.serve(async (req) => {
     // Delete receipt images from storage. Account deletion via the auth
     // cascade only removes DB rows, not storage objects, so without this the
     // user's images would persist indefinitely (GDPR right-to-erasure).
-    // Paginated in case a user has more than the default 100-entry page.
-    const STORAGE_PAGE_SIZE = 1000;
-    let storagePageOffset = 0;
-    while (true) {
-      const { data: files } = await adminClient.storage
-        .from('receipts')
-        .list(user.id, { limit: STORAGE_PAGE_SIZE, offset: storagePageOffset });
-      if (!files || files.length === 0) break;
-
-      await adminClient.storage
-        .from('receipts')
-        .remove(files.map((f) => `${user.id}/${f.name}`));
-
-      if (files.length < STORAGE_PAGE_SIZE) break;
-      storagePageOffset += STORAGE_PAGE_SIZE;
-    }
+    // Paginated in case a user has more than the default 100-entry page. A
+    // cleanup error aborts before the auth record is removed, so the user can
+    // retry instead of leaving receipt objects with no owner to clean them up.
+    await emptyStorageFolder(adminClient.storage.from('receipts'), user.id);
 
     // Delete the auth user. All public.* tables that reference auth.users.id
     // are configured with ON DELETE CASCADE, so the user's rows in expenses,
@@ -78,25 +84,30 @@ Deno.serve(async (req) => {
     // accounts, account_balances, debts, goals, category_budgets,
     // push_subscriptions, user_ui_preferences, and feedback_reports all
     // delete automatically.
-    const { error: deleteError } = await adminClient.auth.admin.deleteUser(user.id);
+    const { error: deleteError } = await adminClient.auth.admin.deleteUser(
+      user.id,
+    );
     if (deleteError) {
       return new Response(
         JSON.stringify({ error: 'Failed to delete account' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    );
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (err) {
     console.error('delete-account error:', err);
 
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    );
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });
 

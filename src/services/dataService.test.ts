@@ -422,6 +422,25 @@ describe('dataService', () => {
     vi.unstubAllGlobals();
   });
 
+  it('uses a stable fallback when account deletion returns a non-JSON error', async () => {
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: { access_token: 'tok' } },
+    } as never);
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        json: () => Promise.reject(new SyntaxError('Unexpected token')),
+      }),
+    );
+
+    await expect(dataService.deleteAccount()).rejects.toThrow(
+      'Failed to delete account',
+    );
+    vi.unstubAllGlobals();
+  });
+
   // --- getDebts ---
   it('fetches active (non-archived) debts ordered by created_at', async () => {
     const debts = [{ id: 'd1', name: 'Card' }];

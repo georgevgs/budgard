@@ -1951,9 +1951,6 @@
     "noTags": "No tags yet",
     "emptyHelp": "Create tags from the expense form to label and filter your spending."
   },
-  "upcomingBills": {
-    "manage": "Manage"
-  },
   "transaction": {
     "notFound": "That transaction is no longer here",
     "notFoundBody": "It may have been deleted, or the link is out of date.",
