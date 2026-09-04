@@ -4,6 +4,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -22,12 +23,12 @@ const IncomeDescriptionField = ({ form }: Props) => {
       name="description"
       render={({ field }) => (
         <FormItem>
+          <FormLabel>{t('income.descriptionLabel')}</FormLabel>
           <FormControl>
             <Input
               placeholder={t('income.descriptionPlaceholder')}
               {...field}
               autoComplete="off"
-              aria-label={t('income.descriptionLabel')}
             />
           </FormControl>
           <FormMessage />

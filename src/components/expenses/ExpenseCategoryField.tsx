@@ -5,6 +5,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import {
@@ -54,6 +55,7 @@ const ExpenseCategoryField = ({
       name="category_id"
       render={({ field }) => (
         <FormItem>
+          <FormLabel>{t('expenses.category')}</FormLabel>
           <Select
             onValueChange={(value) => handleChange(value, field.onChange)}
             defaultValue={field.value}

@@ -20,9 +20,14 @@ const buttonVariants = cva(
         link: 'text-primary-ink underline-offset-4 hover:underline',
       },
       size: {
-        default: 'h-10 px-4 py-2',
-        sm: 'h-9 rounded-md px-3',
-        lg: 'h-11 rounded-md px-8',
+        // 48px is the target-size floor a thumb needs (Practical UI,
+        // "Define 3 button weights") — this is the size every Save, Cancel
+        // and Delete in the app resolves to unless it opts into `sm`.
+        default: 'h-12 px-4 py-2',
+        sm: 'h-11 rounded-md px-3',
+        // Kept taller than `default` now that default is 48px — `lg` staying
+        // at the old 44px would make "large" the smallest button in the set.
+        lg: 'h-14 rounded-md px-8',
         icon: 'h-11 w-11',
       },
     },

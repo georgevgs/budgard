@@ -106,6 +106,17 @@ export const neutral = {
   50: '0 0% 94%',
   100: '0 0% 90%',
   200: '0 0% 83%',
+  /**
+   * `--input` only. A decorative rule can sit below 3:1 — WCAG 1.4.11 exempts
+   * anything that doesn't carry meaning — but a form field's own boundary is
+   * the thing that tells someone where to tap, so it is held to the
+   * non-text-contrast floor (`AA_LARGE` in `tokens.test.ts`) on purpose. `200`
+   * measures 1.49:1 against the white card and stays exactly where it is for
+   * every OTHER hairline; this step exists so the one boundary that has to
+   * read as a control can clear 3:1 without dragging the other hundred call
+   * sites along with it. 57% clears it at 3.14:1, with room for rounding.
+   */
+  300: '0 0% 57%',
   500: '0 0% 42%',
   700: '0 0% 15%',
   800: '0 0% 11%',
@@ -135,6 +146,10 @@ export const ink = {
   800: '0 0% 15%',
   700: '0 0% 20%',
   600: '0 0% 27%',
+  /** `--input` only, dark theme — the mirror of `neutral[300]` above. `600`
+   *  measures 1.99:1 against the near-black card; `400` clears 3:1, at
+   *  3.21:1 with room for rounding. */
+  400: '0 0% 39%',
   300: '0 0% 68%',
   50: '0 0% 96%',
 } as const;
@@ -294,6 +309,9 @@ export const barbie = {
   mint: '172 100% 88%',
   mintInk: '178 90% 16%',
   rule: '318 80% 86%',
+  /** `--input` only — same hue as `rule`, taken dark enough to clear 3:1
+   *  against the white card instead of the tinted canvas. */
+  inputRule: '318 70% 56%',
   glass: '326 100% 98%',
   glassDrop: '328 85% 45%',
 } as const;

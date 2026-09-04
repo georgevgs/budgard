@@ -4,6 +4,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import {
@@ -47,6 +48,7 @@ const IncomeCategoryField = ({ form, picker }: Props) => {
       name="category_id"
       render={() => (
         <FormItem>
+          <FormLabel>{t('income.categoryLabel')}</FormLabel>
           <Popover
             open={picker.categoryPopoverOpen}
             onOpenChange={picker.setCategoryPopoverOpen}

@@ -375,6 +375,7 @@
     "amountLabel": "Ποσό",
     "descriptionLabel": "Πηγή",
     "descriptionPlaceholder": "π.χ. Μηνιαίος μισθός",
+    "categoryLabel": "Κατηγορία",
     "selectCategory": "Επιλέξτε πηγή",
     "noCategory": "Χωρίς πηγή",
     "searchOrCreateCategory": "Αναζήτηση ή δημιουργία πηγής...",

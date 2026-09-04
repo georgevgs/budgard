@@ -69,7 +69,9 @@ const AlertDialogContent = React.forwardRef<
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           className={cn(
-            'fixed z-50 grid w-full gap-4 border border-border/40 bg-card shadow-lg duration-200',
+            // See the note in dialog.tsx — `lift` is the app's own themed
+            // elevation, not Tailwind's flat default.
+            'fixed z-50 grid w-full gap-4 border border-border/40 bg-card lift duration-200',
             // Mobile: drawer from bottom with rounded top corners
             'bottom-0 left-0 right-0 rounded-t-[24px]',
             'p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]',

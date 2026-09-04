@@ -152,7 +152,11 @@ const DialogContent = React.forwardRef<
             (e.currentTarget as HTMLElement).focus();
           }}
           className={cn(
-            'fixed z-50 grid w-full gap-4 border border-border bg-card shadow-lg duration-200',
+            // `lift` over `shadow-lg`: the app's own two-part shadow, tuned
+            // per theme (see `--lift-strength` in tokens.ts), so the biggest
+            // surface in the app doesn't fall back to Tailwind's flat,
+            // un-themed default right where dark mode needs the most help.
+            'fixed z-50 grid w-full gap-4 border border-border bg-card lift duration-200',
             // Mobile: drawer from bottom with rounded top corners.
             // Default padding keeps content clear of the rounded corners and
             // the iOS home indicator; consumers with bespoke layouts pass p-0.

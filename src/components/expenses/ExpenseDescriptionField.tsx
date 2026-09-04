@@ -4,6 +4,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import {
@@ -30,6 +31,7 @@ const ExpenseDescriptionField = ({ form, suggestions }: Props) => {
       name="description"
       render={({ field }) => (
         <FormItem>
+          <FormLabel>{t('expenses.descriptionLabel')}</FormLabel>
           <Popover
             open={suggestions.isPopoverOpen}
             onOpenChange={suggestions.setSuggestionsOpen}
@@ -47,7 +49,6 @@ const ExpenseDescriptionField = ({ form, suggestions }: Props) => {
                   onFocus={() => suggestions.setSuggestionsOpen(true)}
                   autoComplete="off"
                   className="text-ellipsis"
-                  aria-label={t('expenses.descriptionLabel')}
                 />
               </FormControl>
             </PopoverAnchor>

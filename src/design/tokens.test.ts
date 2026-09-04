@@ -227,6 +227,22 @@ describe('contrast', () => {
     expect(ratio).toBeGreaterThanOrEqual(AA_LARGE);
   });
 
+  // A form field's own boundary is a UI component, not a decorative rule —
+  // WCAG 1.4.11 holds it to AA_LARGE even though `--border` (used for plain
+  // dividers) is deliberately allowed to sit below it. Checked against
+  // `--card`, which is what every Input/Select actually sits on.
+  it.each(themes)('%s: an input boundary reads against its card', (theme) => {
+    const ratio = contrastRatio(
+      resolve(theme, '--input'),
+      resolve(theme, '--card'),
+    );
+
+    expect(
+      ratio,
+      `--input on --card in ${theme} is ${ratio.toFixed(2)}:1`,
+    ).toBeGreaterThanOrEqual(AA_LARGE);
+  });
+
   // Same four rules again, but against the raw swatches rather than the token
   // maps: an accent the picker can select is never written into the light
   // theme, so it would otherwise ship unchecked.

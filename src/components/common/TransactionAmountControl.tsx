@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { FormControl } from '@/components/ui/form';
+import { FormControl, FormLabel } from '@/components/ui/form';
 import {
   Select,
   SelectContent,
@@ -29,6 +29,7 @@ const TransactionAmountControl = ({
 
   return (
     <>
+      <FormLabel>{amountLabel}</FormLabel>
       <div className="flex gap-2">
         <Select
           value={conversion.selectedCurrency}
@@ -54,7 +55,6 @@ const TransactionAmountControl = ({
             value={value}
             onChange={onChange}
             placeholder={t('expenses.amountPlaceholder')}
-            aria-label={amountLabel}
             wrapperClassName="flex-1"
           />
         </FormControl>

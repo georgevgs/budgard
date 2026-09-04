@@ -138,7 +138,9 @@ const light: TokenMap = {
   '--tile': neutral[25],
   '--tile-ring': '0 0% 7% / 0.07',
   '--border': neutral[200],
-  '--input': neutral[200],
+  // A decorative rule can sit below 3:1; a field boundary can't — see the
+  // note on `neutral[300]` in palette.ts.
+  '--input': neutral[300],
   // The focus ring is the ink, never the fill: a ring has to clear 3:1 against
   // the canvas it is drawn on, which is exactly what the ink guarantees.
   '--ring': accent.orange.ink,
@@ -207,7 +209,7 @@ const dark: TokenMap = {
   '--tile': ink[900],
   '--tile-ring': '0 0% 100% / 0.08',
   '--border': ink[600],
-  '--input': ink[600],
+  '--input': ink[400],
   '--ring': accent.orange.inkDark,
   '--income': status.income.solidDark,
   '--income-foreground': status.income.on,
@@ -257,7 +259,7 @@ const barbieTheme: TokenMap = {
   '--tile': neutral[0],
   '--tile-ring': `${barbie.rule} / 0.5`,
   '--border': barbie.rule,
-  '--input': barbie.rule,
+  '--input': barbie.inputRule,
   '--ring': accent.pink.ink,
   '--income': status.income.solid,
   '--income-foreground': status.income.on,
