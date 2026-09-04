@@ -24,6 +24,7 @@ const QuickReceiptScanAction = ({ scan }: Props) => {
         accept={RECEIPT_ALLOWED_TYPES.join(',')}
         capture="environment"
         className="sr-only"
+        aria-label={getButtonLabel(scan.receiptFile, t)}
         onChange={scan.handleChange}
       />
       {renderControl(scan, inputRef, t)}

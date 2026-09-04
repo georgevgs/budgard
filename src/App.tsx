@@ -5,7 +5,6 @@ import { usePwaUpdate } from '@/hooks/usePwaUpdate';
 import { useTheme } from '@/hooks/useTheme';
 import { lazyWithRetry } from '@/lib/lazyWithRetry';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
-import { Toaster } from '@/components/ui/toaster';
 import { AppLoadingSkeleton } from '@/components/expenses/ExpensesLoading';
 import LandingLoadingState from '@/components/landing/LandingLoading';
 import LegalLoadingState from '@/pages/legal/LegalLoading';
@@ -18,6 +17,9 @@ import OfflineBanner from '@/components/common/OfflineBanner';
 // The route remains a dynamic import and therefore stays lazy for signed-out
 // visitors and for every tab other than the one being opened.
 const AuthenticatedApp = lazyWithRetry(() => loadAuthenticatedApp());
+const AppToaster = lazyWithRetry(
+  () => import('@/components/common/AppToaster'),
+);
 const LandingPage = lazyWithRetry(() => import('@/pages/LandingPage'));
 const PrivacyPage = lazyWithRetry(() => import('@/pages/legal/PrivacyPage'));
 const TermsPage = lazyWithRetry(() => import('@/pages/legal/TermsPage'));
@@ -76,7 +78,9 @@ const PublicApp = () => {
           </Routes>
         </ErrorBoundary>
         <OfflineBanner />
-        <Toaster />
+        <Suspense fallback={null}>
+          <AppToaster />
+        </Suspense>
       </div>
     </BrowserRouter>
   );

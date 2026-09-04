@@ -311,6 +311,10 @@ export default defineConfig({
           // this is. Both are kept by the app-shell runtime cache on first use.
           "**/assets/browser-image-compression-*.js",
           "**/assets/LandingPage-*.js",
+          // Settings is a large, infrequently opened route. Fetch it on first
+          // use and retain it in the deferred cache instead of charging every
+          // installed app update 16+ KB gzip for it up front.
+          "**/assets/SettingsView-*.js",
           // Only the fallback language is precached. A second locale is 29 KB
           // gzip that the great majority of installs never read, and i18n
           // already fetches just the detected language at runtime — this stops
@@ -338,7 +342,7 @@ export default defineConfig({
           {
             urlPattern: ({ sameOrigin, url }) =>
               sameOrigin &&
-              /\/assets\/(browser-image-compression|LandingPage|locale)-/.test(url.pathname),
+              /\/assets\/(browser-image-compression|LandingPage|locale|SettingsView)-/.test(url.pathname),
             handler: "CacheFirst",
             options: {
               cacheName: "deferred-chunks",

@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { buildKeysetFilter } from '@/services/keysetPagination';
 import { rows, row, maybeRow, done } from '@/services/supabaseCrud';
 import type {
   Budget,
@@ -143,7 +144,7 @@ export const dataService = {
     sinceDate?: string,
     beforeDate?: string,
   ) {
-    const rows = await fetchAllPages<Expense>((from, to) => {
+    const rows = await fetchAllPages<Expense>((cursor) => {
       let query = supabase
         .from('expenses')
         .select(SELECT_WITH_CATEGORY_AND_TAG)
@@ -152,9 +153,10 @@ export const dataService = {
         .order('date', { ascending: false })
         .order('created_at', { ascending: false })
         .order('id', { ascending: false })
-        .range(from, to);
+        .limit(SUPABASE_PAGE_SIZE);
       if (sinceDate) query = query.gte('date', sinceDate);
       if (beforeDate) query = query.lt('date', beforeDate);
+      if (cursor) query = query.or(transactionCursorFilter(cursor));
       if (signal) query = query.abortSignal(signal);
 
       return query;
@@ -169,7 +171,7 @@ export const dataService = {
     sinceDate?: string,
     beforeDate?: string,
   ) {
-    return fetchAllPages<Expense>((from, to) => {
+    return fetchAllPages<Expense>((cursor) => {
       let query = supabase
         .from('expenses')
         .select(SELECT_WITH_CATEGORY)
@@ -178,9 +180,10 @@ export const dataService = {
         .order('date', { ascending: false })
         .order('created_at', { ascending: false })
         .order('id', { ascending: false })
-        .range(from, to);
+        .limit(SUPABASE_PAGE_SIZE);
       if (sinceDate) query = query.gte('date', sinceDate);
       if (beforeDate) query = query.lt('date', beforeDate);
+      if (cursor) query = query.or(transactionCursorFilter(cursor));
       if (signal) query = query.abortSignal(signal);
 
       return query;
@@ -813,7 +816,7 @@ export const dataService = {
   },
 
   async getAccountBalances(accountId: string, signal?: AbortSignal) {
-    return fetchAllPages<AccountBalance>((from, to) => {
+    return fetchAllPages<AccountBalance>((cursor) => {
       let query = supabase
         .from('account_balances')
         .select('*')
@@ -821,7 +824,10 @@ export const dataService = {
         .order('recorded_at', { ascending: false })
         .order('created_at', { ascending: false })
         .order('id', { ascending: false })
-        .range(from, to);
+        .limit(SUPABASE_PAGE_SIZE);
+      if (cursor) {
+        query = query.or(accountBalanceCursorFilter(cursor, 'descending'));
+      }
       if (signal) query = query.abortSignal(signal);
 
       return query;
@@ -829,14 +835,17 @@ export const dataService = {
   },
 
   async getAllAccountBalances(ownerId: string, signal?: AbortSignal) {
-    return fetchAllPages<AccountBalance>((from, to) => {
+    return fetchAllPages<AccountBalance>((cursor) => {
       let query = supabase
         .from('account_balances')
         .select('*')
         .eq('user_id', ownerId)
         .order('recorded_at', { ascending: true })
         .order('id', { ascending: true })
-        .range(from, to);
+        .limit(SUPABASE_PAGE_SIZE);
+      if (cursor) {
+        query = query.or(accountBalanceCursorFilter(cursor, 'ascending'));
+      }
       if (signal) query = query.abortSignal(signal);
 
       return query;
@@ -962,7 +971,7 @@ export const dataService = {
   },
 
   async getDebtPayments(debtId: string, signal?: AbortSignal) {
-    return fetchAllPages<Expense>((from, to) => {
+    return fetchAllPages<Expense>((cursor) => {
       let query = supabase
         .from('expenses')
         .select(SELECT_WITH_CATEGORY)
@@ -970,7 +979,8 @@ export const dataService = {
         .order('date', { ascending: false })
         .order('created_at', { ascending: false })
         .order('id', { ascending: false })
-        .range(from, to);
+        .limit(SUPABASE_PAGE_SIZE);
+      if (cursor) query = query.or(transactionCursorFilter(cursor));
       if (signal) query = query.abortSignal(signal);
 
       return query;
@@ -1015,6 +1025,32 @@ export const dataService = {
 // page until a short page arrives — otherwise older rows just vanish.
 const SUPABASE_PAGE_SIZE = 1000;
 
+const transactionCursorFilter = (cursor: Expense): string => {
+  return buildKeysetFilter(
+    [
+      { name: 'date', value: cursor.date },
+      { name: 'created_at', value: cursor.created_at },
+      { name: 'id', value: cursor.id },
+    ],
+    'descending',
+  );
+};
+
+const accountBalanceCursorFilter = (
+  cursor: AccountBalance,
+  direction: 'ascending' | 'descending',
+): string => {
+  const columns = [
+    { name: 'recorded_at', value: cursor.recorded_at },
+    { name: 'id', value: cursor.id },
+  ];
+  if (direction === 'descending') {
+    columns.splice(1, 0, { name: 'created_at', value: cursor.created_at });
+  }
+
+  return buildKeysetFilter(columns, direction);
+};
+
 // PostgREST returns the expense_tags embed as [{ tag: {...} }]; the app wants
 // a plain EmbeddedTag[]. Rows from sources without the embed (incomes, cached
 // snapshots) pass through with an empty array.
@@ -1055,26 +1091,22 @@ type PageResult = {
 };
 
 const fetchAllPages = async <T>(
-  buildPage: (from: number, to: number) => PromiseLike<PageResult>,
+  buildPage: (cursor: T | null) => PromiseLike<PageResult>,
 ): Promise<T[]> => {
   const rows: T[] = [];
-  let from = 0;
+  let cursor: T | null = null;
 
-  // Offset pagination over a fully-ordered query (stable id tiebreaker).
-  // A concurrent insert can shift a page boundary; callers merge by id, and
-  // the next refresh self-heals, so keyset pagination isn't worth the extra
-  // complexity here.
+  // Each page starts after the last fully ordered row from the previous page.
+  // Unlike OFFSET, the cost stays flat for deep histories and concurrent
+  // inserts cannot shift rows across a page boundary.
   for (;;) {
-    const { data, error } = await buildPage(
-      from,
-      from + SUPABASE_PAGE_SIZE - 1,
-    );
+    const { data, error } = await buildPage(cursor);
     if (error) throw error;
 
     const page = (data ?? []) as T[];
     rows.push(...page);
     if (page.length < SUPABASE_PAGE_SIZE) break;
-    from += SUPABASE_PAGE_SIZE;
+    cursor = page[page.length - 1];
   }
 
   return rows;

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { useTranslation } from 'react-i18next';
-import { useToast } from '@/hooks/useToast';
+import type { ToastParams } from '@/hooks/useToast';
 import { swRegistration } from '@/lib/swRegistration';
 import { isSameBuildAsPage } from '@/lib/swBuildId';
 
@@ -9,7 +9,6 @@ const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
 const MIN_VISIBILITY_CHECK_INTERVAL_MS = 30 * 60 * 1000;
 
 export const usePwaUpdate = (): void => {
-  const { toast } = useToast();
   const { t } = useTranslation();
   const needRefreshRef = useRef(false);
   const lastUpdateCheckRef = useRef<number>(0);
@@ -54,13 +53,13 @@ export const usePwaUpdate = (): void => {
   // what loops. The reliable finish is a full close + reopen, which lets the
   // waiting worker activate on a clean boot with no client to race.
   const showStuckToast = useCallback((): void => {
-    toast({
+    showToast({
       id: 'pwa-update',
       title: t('pwa.stuckTitle'),
       description: t('pwa.stuckDescription'),
       duration: 10000,
     });
-  }, [toast, t]);
+  }, [t]);
 
   const applyUpdate = useCallback((): void => {
     // A previous apply already looped this session — reloading again would just
@@ -97,7 +96,7 @@ export const usePwaUpdate = (): void => {
 
   const showUpdateToast = useCallback((): void => {
     toastDismissedRef.current = false;
-    toast({
+    showToast({
       // Stable id → at most one update toast ever exists; a repeat call
       // replaces it rather than stacking a second "Update available".
       id: 'pwa-update',
@@ -112,7 +111,7 @@ export const usePwaUpdate = (): void => {
         toastDismissedRef.current = true;
       },
     });
-  }, [toast, applyUpdate, t]);
+  }, [applyUpdate, t]);
 
   // Keep ref in sync so the visibility handler can read it
   useEffect(() => {
@@ -249,6 +248,10 @@ const RELOAD_LOOP_WINDOW_MS = 30000;
 // escape hatch). We stamp the time right before reloading to apply an update;
 // the needRefresh effect reads it to spot a reload that looped.
 const UPDATE_RELOAD_FLAG = 'pwa-update-reloaded-at';
+
+const showToast = (options: ToastParams): void => {
+  void import('@/hooks/useToast').then(({ toast }) => toast(options));
+};
 
 // After SKIP_WAITING is posted, reload onto the freshly activated worker — but
 // only once it ACTUALLY controls the page. Reloading while the old worker still

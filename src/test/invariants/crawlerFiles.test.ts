@@ -69,19 +69,19 @@ describe('crawler files', () => {
 
 // --- Helpers ---
 
-// Both routers declare paths as `path="/thing"`, so the literals can be read
-// straight out of the source. Reading the files rather than importing a shared
-// constant is deliberate: a list the routers do not actually use could drift
-// from the real routes without anything noticing, which is the whole failure
-// this test exists to prevent.
+// Both route definitions keep literal paths in source, so they can be read
+// without importing a second list that could drift from the router itself.
 const collectRoutes = (): string[] => {
-  const sources = ['src/App.tsx', 'src/AuthenticatedApp.tsx'].map((path) =>
-    readFileSync(path, 'utf8'),
-  );
+  const sources = [
+    'src/App.tsx',
+    'src/components/routing/AppRouteTree.tsx',
+  ].map((path) => readFileSync(path, 'utf8'));
 
   const paths = new Set<string>();
   for (const source of sources) {
-    for (const match of source.matchAll(/path="([^"]+)"/g)) {
+    for (const match of source.matchAll(
+      /(?:path=|path:\s*)['"]([^'"]+)['"]/g,
+    )) {
       const route = match[1];
       // `*` is the catch-all redirect, and `/` is the landing page, which is
       // asserted separately above.

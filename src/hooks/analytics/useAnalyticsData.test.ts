@@ -11,12 +11,20 @@ const data = vi.hoisted(() => ({
   expenses: [] as unknown[],
   categories: [] as unknown[],
   monthlyBudget: null as number | null,
+  isInitialized: true,
+  isHistoryLoaded: false,
+  loadHistory: vi.fn(async () => undefined),
 }));
 
 vi.mock('@/contexts/DataContext', () => ({
   useExpensesData: () => data.expenses,
   useCategoriesData: () => ({ expenseCategories: data.categories }),
-  useDataConfig: () => ({ monthlyBudget: data.monthlyBudget }),
+  useDataConfig: () => ({
+    monthlyBudget: data.monthlyBudget,
+    isInitialized: data.isInitialized,
+    isHistoryLoaded: data.isHistoryLoaded,
+  }),
+  useDataActions: () => ({ loadHistory: data.loadHistory }),
 }));
 
 vi.mock('@/hooks/useDateLocale', () => ({ useDateLocale: () => undefined }));
@@ -48,10 +56,13 @@ const category = (id: string, name: string) => ({
 const render = () => renderHook(() => useAnalyticsData(NOW)).result;
 
 beforeEach(() => {
+  vi.clearAllMocks();
   plan.isPro = false;
   data.expenses = [];
   data.categories = [];
   data.monthlyBudget = null;
+  data.isInitialized = true;
+  data.isHistoryLoaded = false;
 });
 
 describe('free-tier window', () => {
@@ -80,6 +91,13 @@ describe('free-tier window', () => {
 
     expect(r.current.expenses).toHaveLength(5);
     expect(r.current.availableYears).toContain(2025);
+    expect(data.loadHistory).toHaveBeenCalledOnce();
+  });
+
+  it('does not download older history for the free tier', () => {
+    render();
+
+    expect(data.loadHistory).not.toHaveBeenCalled();
   });
 
   it('hides years that fall outside the free window', () => {

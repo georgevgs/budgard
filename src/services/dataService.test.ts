@@ -15,6 +15,8 @@ const mockChain = (finalData: unknown = null, finalError: unknown = null) => {
     'upsert',
     'eq',
     'order',
+    'or',
+    'limit',
     'range',
     'single',
     'maybeSingle',
@@ -104,17 +106,30 @@ describe('dataService', () => {
     expect(result).toEqual([{ id: 'e1', amount: 10, extra_tags: [] }]);
   });
 
-  it('pages past the PostgREST 1000-row cap until a short page arrives', async () => {
-    const fullPage = Array.from({ length: 1000 }, (_, i) => ({ id: `e${i}` }));
-    const lastPage = [{ id: 'e1000' }];
+  it('uses a keyset cursor past the PostgREST 1000-row cap', async () => {
+    const fullPage = Array.from({ length: 1000 }, (_, i) => ({
+      id: `e${i}`,
+      date: '2026-01-15',
+      created_at: `2026-01-15T12:00:00.${String(i).padStart(3, '0')}+00:00`,
+    }));
+    const lastPage = [
+      {
+        id: 'e1000',
+        date: '2026-01-14',
+        created_at: '2026-01-14T12:00:00+00:00',
+      },
+    ];
     const chains = [mockChain(fullPage), mockChain(lastPage)];
     let call = 0;
     vi.mocked(supabase.from).mockImplementation(() => chains[call++] as never);
 
     const result = await dataService.getExpenses(OWNER_ID);
     expect(result).toHaveLength(1001);
-    expect(chains[0].range).toHaveBeenCalledWith(0, 999);
-    expect(chains[1].range).toHaveBeenCalledWith(1000, 1999);
+    expect(chains[0].limit).toHaveBeenCalledWith(1000);
+    expect(chains[0].or).not.toHaveBeenCalled();
+    expect(chains[1].or).toHaveBeenCalledWith(
+      expect.stringContaining('id.lt.e999'),
+    );
   });
 
   // --- createExpense ---

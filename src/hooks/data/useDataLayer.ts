@@ -41,7 +41,7 @@ import {
   getRecentCutoff,
 } from '@/lib/dataCache';
 
-// The whole data layer: every slice of app state, the two-stage boot fetch,
+// The whole data layer: every slice of app state, the recent-first boot fetch,
 // the per-domain refreshers, the session lifecycle effects, and the memoised
 // values behind each split context.
 //
@@ -98,10 +98,6 @@ export const useDataLayer = () => {
   //
   // Built once. A useState setter is stable, and so is dispatch, so nothing
   // here can change identity and force a consumer to re-render.
-  // The setter surface the dataOps hooks already consume, kept exactly as it
-  // was and backed by the reducer. Rewriting fifteen call sites to dispatch
-  // actions would be churn: their code is fine, and the debt was never the
-  // shape of this API — it was the state handling behind it.
   const setters = useMemo(() => createSetters(dispatch), []);
 
   // Expose latest data via refs so handlers can read it inside async callbacks
@@ -148,11 +144,16 @@ export const useDataLayer = () => {
   // ran, so token refreshes re-triggering the boot effect don't refetch.
   // The render-time twin `bootedUserId` below guards the state side.
   const bootedUserIdRef = useRef<string | null>(null);
-  // User id whose stage-2 top-up (pre-cutoff history) completed this boot.
-  // Old rows change rarely, so re-downloading the full history on every
-  // foreground refetch is pure waste — stage 2 runs once per boot and the
-  // recent window alone refreshes afterwards.
-  const stage2DoneForUserRef = useRef<string | null>(null);
+  // Financial-space key whose on-demand pre-cutoff top-up completed this boot.
+  // Old rows change rarely, so they are fetched only when a screen asks for
+  // full history; the recent window alone loads on startup and foregrounding.
+  const historyLoadedForSpaceRef = useRef<string | null>(null);
+  const historyAbortControllerRef = useRef<AbortController | null>(null);
+  const historyLoadRef = useRef<{
+    spaceKey: string;
+    promise: Promise<void>;
+  } | null>(null);
+  const historyRequestedForSpaceRef = useRef<string | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!userId || !activeOwnerId || !spaceCacheKey) {
@@ -171,12 +172,10 @@ export const useDataLayer = () => {
       const controller = new AbortController();
       abortControllerRef.current = controller;
 
-      // Two-stage expense/income fetch: load the last RECENT_MONTHS of history
-      // first so the user sees a working app fast, then top up older rows in
-      // the background. Search across all months still works once stage 2
-      // resolves; until then, "all months" search is limited to recent rows.
-      // Cutoff comes from the cache module so the hydrated snapshot and this
-      // fetch always trim to the identical window.
+      // Load only the last RECENT_MONTHS of history on boot. Screens that need
+      // older rows call loadHistory; routine startup and foreground refreshes
+      // stay bounded for long-running accounts. Cutoff comes from the cache
+      // module so the hydrated snapshot and this fetch use the same window.
       const recentCutoff = getRecentCutoff();
 
       try {
@@ -221,8 +220,8 @@ export const useDataLayer = () => {
           dataService.getNoSpendDays(activeOwnerId, controller.signal),
         ]);
 
-        const stage2AlreadyDone =
-          stage2DoneForUserRef.current === currentSpaceKey;
+        const historyAlreadyLoaded =
+          historyLoadedForSpaceRef.current === currentSpaceKey;
 
         // React 18+ automatically batches these state updates
         // One commit rather than twenty. React would batch these anyway, but
@@ -245,7 +244,7 @@ export const useDataLayer = () => {
           },
         });
 
-        if (stage2AlreadyDone) {
+        if (historyAlreadyLoaded) {
           // The pre-cutoff tail already lives in state; a plain replace with
           // the recent window would wipe it until the next boot. These stay as
           // functional updates because they read what is already there.
@@ -272,21 +271,6 @@ export const useDataLayer = () => {
         // networth, debts). Fired immediately after stage 1 but doesn't block
         // first paint.
         startSecondaryFetch(controller, setters, activeOwnerId);
-
-        // Stage 2: top up older expenses/incomes in the background. Runs once
-        // per boot — the pre-cutoff history barely changes, and re-downloading
-        // all of it on every foreground refetch costs a long-history user
-        // their whole archive in bandwidth daily.
-        if (!stage2AlreadyDone) {
-          startHistoryTopUp(
-            controller,
-            setters,
-            activeOwnerId,
-            currentSpaceKey,
-            recentCutoff,
-            stage2DoneForUserRef,
-          );
-        }
       } catch (error) {
         handleFetchError(error, {
           wasAbortedRef,
@@ -306,6 +290,43 @@ export const useDataLayer = () => {
   const refreshData = useCallback(async () => {
     await fetchData();
   }, [fetchData]);
+
+  const loadHistory = useCallback(async () => {
+    if (!activeOwnerId || !spaceCacheKey) {
+      return;
+    }
+    historyRequestedForSpaceRef.current = spaceCacheKey;
+    if (historyLoadedForSpaceRef.current === spaceCacheKey) {
+      setters.setIsHistoryLoaded(true);
+
+      return;
+    }
+
+    const activeLoad = historyLoadRef.current;
+    if (activeLoad?.spaceKey === spaceCacheKey) {
+      return activeLoad.promise;
+    }
+
+    historyAbortControllerRef.current?.abort();
+    const controller = new AbortController();
+    historyAbortControllerRef.current = controller;
+    const currentSpaceKey = spaceCacheKey;
+    const promise = fetchHistoryTopUp(
+      controller,
+      setters,
+      activeOwnerId,
+      currentSpaceKey,
+      getRecentCutoff(),
+      historyLoadedForSpaceRef,
+    ).finally(() => {
+      if (historyLoadRef.current?.promise === promise) {
+        historyLoadRef.current = null;
+      }
+    });
+    historyLoadRef.current = { spaceKey: currentSpaceKey, promise };
+
+    return promise;
+  }, [activeOwnerId, spaceCacheKey, setters]);
 
   // Applies the locally persisted snapshot of the last session. Called from
   // the auth-transition adjust during render (the sanctioned setState-in-render
@@ -353,15 +374,55 @@ export const useDataLayer = () => {
 
   const refreshExpenses = useCallback(async () => {
     await runRefresh('refresh expenses', async () => {
-      setters.setExpenses(await dataService.getExpenses(activeOwnerId));
+      const recentCutoff = getRecentCutoff();
+      const includeFullHistory =
+        historyLoadedForSpaceRef.current === spaceCacheKey;
+      let sinceDate: string | undefined;
+      if (!includeFullHistory) {
+        sinceDate = recentCutoff;
+      }
+      const expensesData = await dataService.getExpenses(
+        activeOwnerId,
+        undefined,
+        sinceDate,
+      );
+      if (includeFullHistory) {
+        setters.setExpenses(expensesData);
+
+        return;
+      }
+
+      setters.setExpenses((prev) =>
+        replaceRecentWindow(prev, expensesData, recentCutoff),
+      );
     });
-  }, [runRefresh, setters, activeOwnerId]);
+  }, [runRefresh, setters, activeOwnerId, spaceCacheKey]);
 
   const refreshIncomes = useCallback(async () => {
     await runRefresh('refresh incomes', async () => {
-      setters.setIncomes(await dataService.getIncomes(activeOwnerId));
+      const recentCutoff = getRecentCutoff();
+      const includeFullHistory =
+        historyLoadedForSpaceRef.current === spaceCacheKey;
+      let sinceDate: string | undefined;
+      if (!includeFullHistory) {
+        sinceDate = recentCutoff;
+      }
+      const incomesData = await dataService.getIncomes(
+        activeOwnerId,
+        undefined,
+        sinceDate,
+      );
+      if (includeFullHistory) {
+        setters.setIncomes(incomesData);
+
+        return;
+      }
+
+      setters.setIncomes((prev) =>
+        replaceRecentWindow(prev, incomesData, recentCutoff),
+      );
     });
-  }, [runRefresh, setters, activeOwnerId]);
+  }, [runRefresh, setters, activeOwnerId, spaceCacheKey]);
 
   const refreshAccounts = useCallback(async () => {
     await runRefresh('refresh accounts', async () => {
@@ -406,6 +467,10 @@ export const useDataLayer = () => {
     }
 
     if (spaceCacheKey && bootedUserIdRef.current !== spaceCacheKey) {
+      historyAbortControllerRef.current?.abort();
+      historyLoadRef.current = null;
+      historyRequestedForSpaceRef.current = null;
+      historyLoadedForSpaceRef.current = null;
       bootedUserIdRef.current = spaceCacheKey;
       // Suppress the load-failure toast while the cached data that
       // hydrateFromSnapshot just painted is still on screen.
@@ -417,11 +482,14 @@ export const useDataLayer = () => {
 
     if (!spaceCacheKey) {
       bootedUserIdRef.current = null;
-      stage2DoneForUserRef.current = null;
+      historyLoadedForSpaceRef.current = null;
+      historyLoadRef.current = null;
+      historyRequestedForSpaceRef.current = null;
       hydratedFromCacheRef.current = false;
       // Never leave financial data behind on a shared device after sign-out.
       clearDataSnapshot();
       abortControllerRef.current?.abort();
+      historyAbortControllerRef.current?.abort();
     }
   }, [isAuthLoading, spaceCacheKey, fetchData]);
 
@@ -440,6 +508,8 @@ export const useDataLayer = () => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         abortControllerRef.current?.abort();
+        historyAbortControllerRef.current?.abort();
+        historyLoadRef.current = null;
 
         return;
       }
@@ -455,6 +525,13 @@ export const useDataLayer = () => {
       if (needsRefetch) {
         fetchData();
       }
+
+      const shouldResumeHistory =
+        historyRequestedForSpaceRef.current === spaceCacheKey &&
+        historyLoadedForSpaceRef.current !== spaceCacheKey;
+      if (shouldResumeHistory) {
+        void loadHistory();
+      }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -462,7 +539,7 @@ export const useDataLayer = () => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [spaceCacheKey, fetchData]);
+  }, [spaceCacheKey, fetchData, loadHistory]);
 
   // Persist a snapshot of the current data so the next app open paints
   // instantly from cache while the network fetch runs. Debounced because
@@ -519,6 +596,7 @@ export const useDataLayer = () => {
   const actions = useMemo<DataActions>(
     () => ({
       refreshData,
+      loadHistory,
       refreshExpenses,
       refreshIncomes,
       refreshAccounts,
@@ -532,6 +610,7 @@ export const useDataLayer = () => {
     }),
     [
       refreshData,
+      loadHistory,
       refreshExpenses,
       refreshIncomes,
       refreshAccounts,
@@ -647,17 +726,17 @@ const startSecondaryFetch = (
     });
 };
 
-// Stage 2: the pre-cutoff tail, appended to whatever is in state now (which
+// On-demand history: the pre-cutoff tail, appended to the recent rows (which
 // may include user mutations made while it was in flight).
-const startHistoryTopUp = (
+const fetchHistoryTopUp = (
   controller: AbortController,
   setters: DataSetters,
   ownerId: string,
   spaceCacheKey: string,
   recentCutoff: string,
-  stage2DoneForUserRef: { current: string | null },
-): void => {
-  Promise.all([
+  historyLoadedForSpaceRef: { current: string | null },
+): Promise<void> => {
+  return Promise.all([
     dataService.getExpenses(
       ownerId,
       controller.signal,
@@ -670,7 +749,7 @@ const startHistoryTopUp = (
       if (controller.signal.aborted) {
         return;
       }
-      stage2DoneForUserRef.current = spaceCacheKey;
+      historyLoadedForSpaceRef.current = spaceCacheKey;
       setters.setIsHistoryLoaded(true);
       // Dedupe by id: if a refreshExpenses/refreshIncomes ran concurrently
       // (e.g. user deleted a recurring expense, bulk-imported, or rolled back

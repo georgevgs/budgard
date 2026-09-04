@@ -23,6 +23,7 @@ import { useActivityCsvExport } from '@/hooks/activity/useActivityCsvExport';
 import { useStickyToolbarOffset } from '@/hooks/activity/useStickyToolbarOffset';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { useCurrentDate } from '@/hooks/useCurrentDate';
+import { useOnDemandHistory } from '@/hooks/data/useOnDemandHistory';
 import { useSeedIncomeCategories } from '@/hooks/incomeList/useSeedIncomeCategories';
 import { isMonthPendingHistory } from '@/lib/dataCache';
 
@@ -38,9 +39,15 @@ const ActivityView = () => {
     activity.filteredRows,
     activity.exportScope,
   );
+  const isHistoryPending = isPendingHistory(
+    isHistoryLoaded,
+    activity.effectivePeriod,
+    activity.selectedMonth,
+  );
   const showSkeleton = useDelayedLoading(!isInitialized);
   const toolbar = useStickyToolbarOffset();
 
+  useOnDemandHistory(isHistoryPending);
   useSeedIncomeCategories();
 
   if (!isInitialized) {
@@ -103,11 +110,7 @@ const ActivityView = () => {
           <ActivityFeed
             transactions={activity.filteredRows}
             currency={defaultCurrency}
-            isHistoryPending={isPendingHistory(
-              isHistoryLoaded,
-              activity.effectivePeriod,
-              activity.selectedMonth,
-            )}
+            isHistoryPending={isHistoryPending}
             onExpenseEdit={quickAdd.handleExpenseEdit}
             onExpenseDelete={quickAdd.handleExpenseDelete}
             onSaveAsTemplate={quickAdd.handleSaveAsTemplate}

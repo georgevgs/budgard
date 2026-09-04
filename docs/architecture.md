@@ -35,7 +35,9 @@ The app follows a **client-driven architecture** with:
 
 ## Routing
 
-Defined in `src/App.tsx`.
+The signed-out router is defined in `src/App.tsx`; authenticated route objects,
+guards, lazy-module declarations and the keep-alive tab layout live under
+`src/components/routing/`.
 
 - All routes are **lazy-loaded**
 - Route protection handled via wrappers:
@@ -130,12 +132,13 @@ authorization decision.
 
 #### Fetch Strategy
 
-Two stages, so first paint does not wait on full history:
-
-1. Categories, budget, and the **last 12 months** of transactions
-2. The rest of the history streams in from a background `Promise.all`
-
-`isHistoryLoaded` tells a screen which stage it is looking at.
+The provider boots categories, planning data, and the **last 12 months** of
+transactions. Older transaction history is explicit and on demand: Activity
+requests it for all-time search or an older month, while Pro Trends and annual
+export request it when those views mount. Concurrent requests share one
+keyset-paginated fetch and `isHistoryLoaded` tells consumers whether the tail
+is present. Routine foreground refreshes stay bounded unless the tail was
+already loaded.
 
 #### Consumer hooks
 
@@ -256,6 +259,7 @@ All external communication is centralized.
 - `services/uiPreferencesService.ts` — owner-scoped Today layout sync
 - `services/feedbackService.ts` — append-only feedback/problem reports
 - `services/subscriptionService.ts` — Stripe checkout/portal via edge functions
+- `services/pushSubscriptionService.ts` — push subscription persistence
 - `services/proPlansService.ts` — live Pro prices
 - `services/exchangeRateService.ts` — Frankfurter FX rates
 - `services/householdService.ts` — secure invite/accept/revoke RPCs
@@ -310,7 +314,7 @@ category rollover or an imaginary balance.
 
 1. User logs in (Supabase Auth)
 2. `AuthProvider` updates session
-3. `DataProvider` fetches all data in parallel
+3. `DataProvider` fetches the bounded boot dataset in parallel
 4. Components consume state through the narrow slice contexts
 5. User triggers mutation
 6. The domain hook in `hooks/dataOps/`:
@@ -337,6 +341,7 @@ src/
   │     ├── recurring/  goals/  debts/  networth/
   │     ├── auth/  security/  onboarding/  pro/  settings/
   │     ├── layout/  landing/  recap/  transaction/
+  │     ├── routing/          # route tree, guards, shell and lazy modules
   │
   ├── contexts/          # *Provider.tsx + *Context.tsx pairs
   ├── design/            # tokens.ts, palette.ts, generate.ts
@@ -485,6 +490,10 @@ Migrations are in `supabase/migrations/` and are append-only history — never
 edit an applied one. Run `supabase migration list --linked` to see what is
 applied.
 
+Security-definer functions use an empty `search_path` with schema-qualified
+objects. Compatibility parameters in legacy RPCs must be validated rather
+than silently ignored.
+
 ---
 
 ## Edge Functions
@@ -495,7 +504,22 @@ deployed by hand (`supabase functions deploy <name>`).
 - `stripe-checkout`, `stripe-portal`, `stripe-prices`, `stripe-webhook` — Pro
   billing
 - `send-push-notifications` — hourly cron; bill reminders, budget crossings
-- `delete-account` — OTP-reauthenticated account deletion
+- `delete-account` — OTP-reauthenticated account deletion; clears receipt
+  storage and immediately cancels a non-terminal Stripe subscription before
+  removing the auth user
+
+Functions that use Supabase JS import the local `supabase` specifier. Each
+function's `deno.json` maps it to the same exact npm version so deployments do
+not float to a new SDK release independently.
+
+The hosted project uses email OTP rather than app passwords. Supabase's leaked
+password check remains a useful defense-in-depth setting if password auth is
+ever introduced, but it is available only on Supabase Pro and above.
+
+The data provider boots with a bounded 12-month transaction window. Activity
+requests the older tail for all-time search or an older selected month; Pro
+Trends and annual export request it when those screens mount. Concurrent
+requests share one fetch, and routine foreground refreshes remain bounded.
 
 Recurring expense generation is **not** an edge function. It runs in Postgres:
 `pg_cron` calls `process_all_recurring_expenses()`, which is service-role only.

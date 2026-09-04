@@ -21,6 +21,7 @@ import type { NotificationPreferences } from '@/types/Budget';
 // by data mutations.
 export type DataActions = {
   refreshData: () => Promise<void>;
+  loadHistory: () => Promise<void>;
   refreshExpenses: () => Promise<void>;
   refreshIncomes: () => Promise<void>;
   refreshAccounts: () => Promise<void>;
@@ -56,12 +57,11 @@ export type DataConfig = {
   // accountBalances and debts. Views that depend on those (GoalsList,
   // NetWorthView, DebtsView) wait on this before rendering content.
   isSecondaryLoaded: boolean;
-  // Flips true once the pre-cutoff transaction tail has landed (or has
-  // definitively failed). Until then only the recent window is in state, so a
-  // month older than the cutoff looks empty when it may not be — screens that
-  // can show old months use this to say "still loading" instead of "nothing
-  // here". Resolves on failure too: a placeholder that never goes away is
-  // worse than an honest empty state.
+  // Flips true once a screen has requested the pre-cutoff transaction tail and
+  // it has landed (or definitively failed). Until then only the recent window
+  // is in state, so consumers requesting older periods show "still loading"
+  // instead of an incorrect empty state. Resolves on failure too: a placeholder
+  // that never goes away is worse than an honest empty state.
   isHistoryLoaded: boolean;
   monthlyBudget: number | null;
   defaultCurrency: string;

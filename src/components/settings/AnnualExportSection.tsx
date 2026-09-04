@@ -5,6 +5,7 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 import YearPill from '@/components/analytics/YearPill';
 import AnnualExportCard from '@/components/analytics/AnnualExportCard';
 import ProUpsellCard from '@/components/pro/ProUpsellCard';
+import { useOnDemandHistory } from '@/hooks/data/useOnDemandHistory';
 
 // An export utility, not a trend — it used to sit at the bottom of the
 // Trends scroll for no reason but proximity. It owns its own year picker
@@ -18,6 +19,7 @@ const AnnualExportSection = () => {
   const { isPro } = useSubscription();
   const expenses = useExpensesData();
   const incomes = useIncomesData();
+  useOnDemandHistory(isPro);
   const availableYears = useAvailableYears(expenses, incomes);
   const [selectedYear, setSelectedYear] = useState(() => availableYears[0]);
 

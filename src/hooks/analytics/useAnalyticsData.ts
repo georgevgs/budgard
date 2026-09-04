@@ -9,6 +9,7 @@ import { useDateLocale } from '@/hooks/useDateLocale';
 import { onlySpending } from '@/lib/spending';
 import { sumAmounts } from '@/lib/money';
 import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useOnDemandHistory } from '@/hooks/data/useOnDemandHistory';
 import { getFreeAnalyticsCutoff } from '@/lib/proLimits';
 import { monthsElapsedInYear } from '@/lib/utils';
 import type { Expense } from '@/types/Expense';
@@ -37,6 +38,8 @@ export const useAnalyticsData = (now: Date = new Date()) => {
   const { monthlyBudget } = useDataConfig();
   const dateLocale = useDateLocale();
   const { isPro } = useSubscription();
+
+  useOnDemandHistory(isPro);
 
   // Free tier sees the last 3 months only; everything downstream (year list,
   // charts, breakdowns, month comparison) derives from this window.

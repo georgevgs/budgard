@@ -25,7 +25,7 @@ const cache = vi.hoisted(() => ({
   hasDataSnapshot: vi.fn(() => false),
   saveDataSnapshot: vi.fn(),
   clearDataSnapshot: vi.fn(),
-  // Fixed cutoff so the two-stage window is deterministic.
+  // Fixed cutoff so the recent and on-demand windows are deterministic.
   getRecentCutoff: vi.fn(() => '2026-01-01'),
 }));
 vi.mock('@/lib/dataCache', () => cache);
@@ -36,7 +36,7 @@ const svc = vi.hoisted(() => {
   return {
     getCategories: fn([{ id: 'cat1', type: 'expense' }]),
     // Declared with the real four-arg shape (ownerId, signal, sinceDate,
-    // beforeDate) so `calls[i][3]` (the stage-2 beforeDate) is typed rather
+    // beforeDate) so `calls[i][3]` (the history beforeDate) is typed rather
     // than an empty tuple.
     getExpenses: vi.fn(
       async (
@@ -83,7 +83,7 @@ import { useDataLayer } from '@/hooks/data/useDataLayer';
 // --- Helpers ---
 
 // getExpenses/getIncomes take the owner id first, then (signal, sinceDate,
-// beforeDate). Stage 1 asks for the recent window (a `sinceDate`); stage 2
+// beforeDate). Boot asks for the recent window (a `sinceDate`); loadHistory
 // asks for the tail before it (a `beforeDate` in the fourth argument).
 const stage2Calls = (mock: typeof svc.getExpenses) =>
   mock.mock.calls.filter((c) => c[3] !== undefined);
@@ -92,7 +92,7 @@ const olderExpenses = [{ id: 'e-old', date: '2025-03-01' }];
 const olderIncomes = [{ id: 'i-old', date: '2025-03-01' }];
 
 // getExpenses serves the recent window on a `sinceDate` call and the tail on a
-// `beforeDate` call, which is how the real two-stage fetch is shaped.
+// `beforeDate` call, which is how the real on-demand fetch is shaped.
 const twoStageExpenses = () =>
   vi.fn(
     async (
@@ -143,6 +143,8 @@ describe('useDataLayer boot fetch', () => {
     expect(result.current.config.monthlyBudget).toBe(1000);
     expect(result.current.config.defaultCurrency).toBe('EUR');
     expect(result.current.expenses.map((e) => e.id)).toContain('e-recent');
+    expect(result.current.config.isHistoryLoaded).toBe(false);
+    expect(stage2Calls(svc.getExpenses)).toHaveLength(0);
   });
 
   it('stage 1.5 loads the secondary domains without blocking stage 1', async () => {
@@ -170,12 +172,15 @@ describe('useDataLayer boot fetch', () => {
     expect(result.current.debts).toHaveLength(1);
   });
 
-  it('stage 2 appends the pre-cutoff tail and marks history loaded', async () => {
+  it('loads the pre-cutoff tail only when requested', async () => {
     const { result } = renderHook(() => useDataLayer());
 
-    await waitFor(() =>
-      expect(result.current.config.isHistoryLoaded).toBe(true),
-    );
+    await waitFor(() => expect(result.current.config.isInitialized).toBe(true));
+    expect(stage2Calls(svc.getExpenses)).toHaveLength(0);
+
+    await act(async () => {
+      await result.current.actions.loadHistory();
+    });
 
     const ids = result.current.expenses.map((e) => e.id);
     expect(ids).toContain('e-recent');
@@ -183,12 +188,16 @@ describe('useDataLayer boot fetch', () => {
     expect(result.current.incomes.map((i) => i.id)).toContain('i-old');
   });
 
-  it('runs stage 2 once per boot and keeps the tail on a refetch', async () => {
+  it('deduplicates history loads and keeps the tail on a refetch', async () => {
     const { result } = renderHook(() => useDataLayer());
 
-    await waitFor(() =>
-      expect(result.current.config.isHistoryLoaded).toBe(true),
-    );
+    await waitFor(() => expect(result.current.config.isInitialized).toBe(true));
+    await act(async () => {
+      await Promise.all([
+        result.current.actions.loadHistory(),
+        result.current.actions.loadHistory(),
+      ]);
+    });
     expect(stage2Calls(svc.getExpenses)).toHaveLength(1);
 
     await act(async () => {
@@ -278,9 +287,25 @@ describe('useDataLayer boot fetch', () => {
 
     const { result } = renderHook(() => useDataLayer());
 
+    await waitFor(() => expect(result.current.config.isInitialized).toBe(true));
+    await act(async () => {
+      await result.current.actions.loadHistory();
+    });
+
     // Screens must fall back to their empty state rather than wait forever.
-    await waitFor(() =>
-      expect(result.current.config.isHistoryLoaded).toBe(true),
-    );
+    expect(result.current.config.isHistoryLoaded).toBe(true);
+  });
+
+  it('keeps a routine expense refresh inside the recent window', async () => {
+    const { result } = renderHook(() => useDataLayer());
+
+    await waitFor(() => expect(result.current.config.isInitialized).toBe(true));
+    svc.getExpenses.mockClear();
+
+    await act(async () => {
+      await result.current.actions.refreshExpenses();
+    });
+
+    expect(svc.getExpenses).toHaveBeenCalledWith('u1', undefined, '2026-01-01');
   });
 });
