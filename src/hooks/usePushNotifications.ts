@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/useToast';
+import { pushSubscriptionService } from '@/services/pushSubscriptionService';
 
 type PushState =
   'loading' | 'unsupported' | 'denied' | 'subscribed' | 'unsubscribed';
@@ -12,8 +12,6 @@ type UsePushNotificationsReturn = {
   subscribe: () => Promise<void>;
   unsubscribe: () => Promise<void>;
 };
-
-const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string;
 
 const urlBase64ToUint8Array = (
   base64String: string,
@@ -32,7 +30,9 @@ const urlBase64ToUint8Array = (
 };
 
 const getRegistration = async (): Promise<ServiceWorkerRegistration | null> => {
-  if (!('serviceWorker' in navigator)) return null;
+  if (!('serviceWorker' in navigator)) {
+    return null;
+  }
 
   try {
     const reg = await navigator.serviceWorker.getRegistration();
@@ -81,11 +81,15 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
   }, []);
 
   const subscribe = useCallback(async () => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      return;
+    }
 
     // Show the switch as pending while the permission prompt and push
     // registration are in flight — otherwise it visibly snaps back off.
     setState('loading');
+    let createdSubscription: PushSubscription | null = null;
+
     try {
       const permission = await Notification.requestPermission();
       if (permission === 'denied') {
@@ -111,29 +115,27 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
         return;
       }
 
-      const subscription = await reg.pushManager.subscribe({
+      createdSubscription = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        applicationServerKey: urlBase64ToUint8Array(
+          import.meta.env.VITE_VAPID_PUBLIC_KEY as string,
+        ),
       });
 
-      const json = subscription.toJSON();
+      const json = createdSubscription.toJSON();
       const p256dh = json.keys?.p256dh ?? '';
       const auth = json.keys?.auth ?? '';
 
-      const { error } = await supabase.from('push_subscriptions').upsert(
-        {
-          user_id: session.user.id,
-          endpoint: subscription.endpoint,
-          p256dh,
-          auth,
-        },
-        { onConflict: 'endpoint' },
-      );
-
-      if (error) throw error;
+      await pushSubscriptionService.save({
+        userId: session.user.id,
+        endpoint: createdSubscription.endpoint,
+        p256dh,
+        auth,
+      });
 
       setState('subscribed');
     } catch {
+      await unsubscribeQuietly(createdSubscription);
       setState('unsubscribed');
       toast({
         variant: 'destructive',
@@ -159,12 +161,8 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
         return;
       }
 
-      await supabase
-        .from('push_subscriptions')
-        .delete()
-        .eq('endpoint', subscription.endpoint);
-
-      await subscription.unsubscribe();
+      await pushSubscriptionService.remove(subscription.endpoint);
+      await unsubscribeQuietly(subscription);
 
       setState('unsubscribed');
     } catch {
@@ -194,4 +192,19 @@ const resolveInitialPushState = (): PushState => {
   }
 
   return 'loading';
+};
+
+const unsubscribeQuietly = async (
+  subscription: PushSubscription | null,
+): Promise<void> => {
+  if (!subscription) {
+    return;
+  }
+
+  try {
+    await subscription.unsubscribe();
+  } catch {
+    // The server row is authoritative. Browser cleanup is best effort so a
+    // stale local subscription cannot keep the UI stuck in an enabled state.
+  }
 };
