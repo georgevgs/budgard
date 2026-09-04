@@ -113,8 +113,11 @@ const renderGroup = (group: DateGroup, props: Props, t: TFunc) => (
     </div>
     {/* One flat surface per day rather than a stack of separately-filled
         capsules — see the note on SwipeableRow for why each row still needs
-        its own positioning context under this shared one. */}
-    <div className="tile-flush divide-y divide-border/40">
+        its own positioning context under this shared one. `activity-day-rows`
+        (not the `section` above) carries the content-visibility windowing —
+        see the comment on it in index.css for why it's kept off the sticky
+        header's own element. */}
+    <div className="activity-day-rows tile-flush divide-y divide-border/40">
       {group.expenses.map((transaction) => (
         <SwipeableRow
           key={transaction.id}

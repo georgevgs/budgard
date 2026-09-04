@@ -849,18 +849,27 @@
      date a row belongs to is never off screen. The offset reads the header's
      own height token rather than restating 4rem, which silently desynced the
      moment the header's padding changed. */
-  /* Browser-native windowing. A day the user has scrolled past still exists in
-     the DOM — so Find-in-page, Ctrl+End and the accessibility tree all still
-     reach it — but costs no layout or paint until it comes back on screen.
+  /* Browser-native windowing, scoped to the row list rather than the whole
+     group. A day the user has scrolled past still exists in the DOM — so
+     Find-in-page, Ctrl+End and the accessibility tree all still reach it —
+     but costs no layout or paint until it comes back on screen.
      contain-intrinsic-size keeps the scrollbar honest by reserving a plausible
-     height for a skipped group instead of collapsing it to nothing.
+     height for a skipped list instead of collapsing it to nothing.
 
      Chosen over hand-rolled virtualisation: windowing variable-height grouped
      rows means measuring every row and reimplementing anchoring, and it breaks
-     exactly the things above. */
-  .activity-day-group {
+     exactly the things above.
+
+     This lives on the row list, NOT on `.activity-day-group` itself, so that
+     `.activity-day-header` — which is sticky — is a sibling of the contained
+     box rather than a descendant of it. Several browsers have shipped bugs
+     where a `position: sticky` descendant of a `content-visibility: auto`
+     element mis-tracks its container once that container gets skipped; this
+     structure was not proven to be the cause of any specific report, but the
+     pairing is a known-risky one and avoiding it costs nothing here. */
+  .activity-day-rows {
     content-visibility: auto;
-    contain-intrinsic-size: auto 220px;
+    contain-intrinsic-size: auto 180px;
   }
 
   .activity-day-header {
