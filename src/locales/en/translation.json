@@ -784,9 +784,9 @@
     "data": {
       "title": "Data Management",
       "deleteAccount": "Delete Account",
-      "deleteAccountDescription": "Permanently delete your account and all associated data. This action cannot be undone.",
+      "deleteAccountDescription": "Permanently delete your account, associated data, and any active Pro subscription. This action cannot be undone.",
       "deleteAccountConfirmTitle": "Delete Account",
-      "deleteAccountConfirmDescription": "This will permanently delete your account and all your data including expenses, categories, tags, and recurring expenses. This action cannot be undone.",
+      "deleteAccountConfirmDescription": "This will permanently delete your account and all your data including expenses, categories, tags, and recurring expenses. Any active Pro subscription will be canceled immediately. This action cannot be undone.",
       "deleteAccountConfirmButton": "Delete My Account",
       "deleteAccountCodeNotice": "To confirm it's you, we'll email a 6-digit verification code to {{email}}.",
       "deleteAccountVerifyTitle": "Confirm Deletion",

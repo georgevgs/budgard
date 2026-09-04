@@ -1,5 +1,6 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'supabase';
 import { corsHeadersFor, jsonResponder } from '../_shared/cors.ts';
+import { resolveStripeCustomerReference } from '../_shared/stripeBilling.ts';
 
 // Creates a Stripe customer portal session for the authenticated user and
 // returns its URL. The portal is Stripe-hosted and interoperates with Managed
@@ -109,17 +110,13 @@ Deno.serve(async (req) => {
 // --- Helpers ---
 
 const buildPortalParams = (customerId: string): URLSearchParams | null => {
+  const customerReference = resolveStripeCustomerReference(customerId);
+  if (!customerReference) {
+    return null;
+  }
+
   const params = new URLSearchParams({ return_url: RETURN_URL });
-  if (customerId.startsWith('cus_')) {
-    params.set('customer', customerId);
+  params.set(customerReference.parameter, customerReference.id);
 
-    return params;
-  }
-  if (customerId.startsWith('acct_')) {
-    params.set('customer_account', customerId);
-
-    return params;
-  }
-
-  return null;
+  return params;
 };

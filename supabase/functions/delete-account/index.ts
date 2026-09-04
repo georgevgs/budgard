@@ -1,6 +1,8 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'supabase';
+import { runAccountDeletion } from '../_shared/accountDeletion.ts';
 import { corsHeadersFor } from '../_shared/cors.ts';
 import { emptyStorageFolder } from '../_shared/storageCleanup.ts';
+import { cancelStripeSubscription } from '../_shared/stripeBilling.ts';
 
 Deno.serve(async (req) => {
   const corsHeaders = corsHeadersFor(req);
@@ -67,35 +69,56 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Use the service role client to delete user data and auth record
+    // Use the service role client to clean up server-owned resources and the
+    // auth record. The key stays inside the Edge Function environment.
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
 
-    // Delete receipt images from storage. Account deletion via the auth
-    // cascade only removes DB rows, not storage objects, so without this the
-    // user's images would persist indefinitely (GDPR right-to-erasure).
-    // Paginated in case a user has more than the default 100-entry page. A
-    // cleanup error aborts before the auth record is removed, so the user can
-    // retry instead of leaving receipt objects with no owner to clean them up.
-    await emptyStorageFolder(adminClient.storage.from('receipts'), user.id);
+    await runAccountDeletion({
+      // Auth cascades do not remove Storage objects. Cleanup happens first so
+      // a storage failure leaves the account intact and safely retryable.
+      deleteReceipts: async () => {
+        await emptyStorageFolder(
+          adminClient.storage.from('receipts'),
+          user.id,
+        );
+      },
+      // Read billing before deleting auth: the cascade removes this row and
+      // with it the only local link to the Stripe subscription.
+      loadSubscription: async () => {
+        const { data, error } = await adminClient
+          .from('subscriptions')
+          .select('stripe_subscription_id, status')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (error) {
+          throw new Error('Subscription lookup failed');
+        }
 
-    // Delete the auth user. All public.* tables that reference auth.users.id
-    // are configured with ON DELETE CASCADE, so the user's rows in expenses,
-    // categories, tags, recurring_expenses, expense_templates, user_budgets,
-    // accounts, account_balances, debts, goals, category_budgets,
-    // push_subscriptions, user_ui_preferences, and feedback_reports all
-    // delete automatically.
-    const { error: deleteError } = await adminClient.auth.admin.deleteUser(
-      user.id,
-    );
-    if (deleteError) {
-      return new Response(
-        JSON.stringify({ error: 'Failed to delete account' }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        },
-      );
-    }
+        return data;
+      },
+      // Immediate cancellation prevents another renewal after the account and
+      // its billing portal are gone. The helper verifies already-canceled
+      // subscriptions so retries remain safe after a partial failure.
+      cancelSubscription: async (subscriptionId) => {
+        if (!stripeSecretKey) {
+          throw new Error('Stripe billing is not configured');
+        }
+
+        await cancelStripeSubscription({
+          subscriptionId,
+          secretKey: stripeSecretKey,
+        });
+      },
+      // All public.* rows referencing auth.users cascade only after every
+      // external cleanup step has succeeded.
+      deleteAuthUser: async () => {
+        const { error } = await adminClient.auth.admin.deleteUser(user.id);
+        if (error) {
+          throw new Error('Auth user deletion failed');
+        }
+      },
+    });
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

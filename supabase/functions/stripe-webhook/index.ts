@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'supabase';
 
 // Stripe webhook receiver. Mirrors subscription state into the subscriptions
 // table. Called by Stripe servers with a signed Stripe-Signature header

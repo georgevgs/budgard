@@ -1,5 +1,9 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'supabase';
 import { corsHeadersFor, jsonResponder } from '../_shared/cors.ts';
+import {
+  resolveStripeCustomerReference,
+  type StripeCustomerReference,
+} from '../_shared/stripeBilling.ts';
 
 // Creates a Stripe (Managed Payments) subscription Checkout Session for the
 // authenticated user and returns its URL. The user's id travels in
@@ -80,7 +84,7 @@ Deno.serve(async (req) => {
     // transient database failure hid their current row.
     const { data: existing, error: subscriptionError } = await userClient
       .from('subscriptions')
-      .select('status')
+      .select('status, stripe_customer_id')
       .maybeSingle();
     if (subscriptionError) {
       console.error(
@@ -92,6 +96,15 @@ Deno.serve(async (req) => {
     }
     if (existing && ACTIVE_STATUSES.includes(existing.status)) {
       return jsonResponse({ error: 'Already subscribed' }, 409);
+    }
+
+    const customerReference = resolveStripeCustomerReference(
+      existing?.stripe_customer_id,
+    );
+    if (existing && !customerReference) {
+      console.error('stripe-checkout: stored Stripe customer id is invalid');
+
+      return jsonResponse({ error: 'Unable to verify subscription' }, 503);
     }
 
     // No row at all means this user has never subscribed — they get the
@@ -115,7 +128,13 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Idempotency-Key': buildIdempotencyKey(user.id, plan, trialEligible),
       },
-      body: buildSessionParams(priceId, user.id, user.email, trialEligible),
+      body: buildSessionParams(
+        priceId,
+        user.id,
+        user.email,
+        customerReference,
+        trialEligible,
+      ),
     });
 
     if (!stripeResponse.ok) {
@@ -209,6 +228,7 @@ const buildSessionParams = (
   priceId: string,
   userId: string,
   email: string | undefined,
+  customerReference: StripeCustomerReference | null,
   trialEligible: boolean,
 ): URLSearchParams => {
   const params = new URLSearchParams({
@@ -221,7 +241,9 @@ const buildSessionParams = (
     client_reference_id: userId,
     'subscription_data[metadata][user_id]': userId,
   });
-  if (email) {
+  if (customerReference) {
+    params.set(customerReference.parameter, customerReference.id);
+  } else if (email) {
     params.set('customer_email', email);
   }
   // Card is still collected up front (Checkout default); Stripe charges it
