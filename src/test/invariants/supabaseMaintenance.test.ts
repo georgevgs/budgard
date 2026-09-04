@@ -11,6 +11,13 @@ const MIGRATION = readFileSync(
   ),
   'utf8',
 );
+const FUNCTION_HARDENING_MIGRATION = readFileSync(
+  path.join(
+    ROOT,
+    'supabase/migrations/20260904170059_harden_advisor_functions.sql',
+  ),
+  'utf8',
+);
 
 describe('Supabase maintenance configuration', () => {
   it('matches production Postgres and current local email configuration', () => {
@@ -31,5 +38,18 @@ describe('Supabase maintenance configuration', () => {
     );
     expect(MIGRATION).toContain('pg_catalog.pg_advisory_xact_lock');
     expect(MIGRATION).toContain("SET search_path = ''");
+  });
+
+  it('hardens legacy database functions without changing their signatures', () => {
+    expect(FUNCTION_HARDENING_MIGRATION).toContain(
+      "ALTER FUNCTION public.tags(public.expenses) SET search_path = ''",
+    );
+    expect(FUNCTION_HARDENING_MIGRATION).toContain(
+      'p_user_id IS NOT NULL AND p_user_id <> v_caller_id',
+    );
+    expect(FUNCTION_HARDENING_MIGRATION).toContain("SET search_path = ''");
+    expect(FUNCTION_HARDENING_MIGRATION).toContain(
+      'FROM public.recurring_expenses re',
+    );
   });
 });
