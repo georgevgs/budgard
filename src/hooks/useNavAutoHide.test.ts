@@ -94,6 +94,34 @@ describe('useNavAutoHide', () => {
     expect(isHidden()).toBe(false);
   });
 
+  // Main tabs stay mounted and restore their own remembered scroll position
+  // on switch (useRouteScrollRestoration) — a jump, not a gesture. Its
+  // window.scrollTo runs in a layout effect, which always fires before this
+  // hook's own (passive) route-change effect, so window.scrollY already
+  // reflects the new tab's position by the time that effect runs. If the
+  // hook compared the jump's own scroll event against the *previous* tab's
+  // last-known Y instead of resetting to where the jump landed, a tab
+  // remembered further down than wherever you'd scrolled to on the last one
+  // would hide the dock the instant you landed, with no scroll from the user.
+  it('does not hide itself off a stale baseline from the previous tab', () => {
+    const { rerender } = renderHook(({ path }) => useNavAutoHide(path), {
+      initialProps: { path: '/expenses' },
+    });
+
+    scrollTo(90);
+    expect(isHidden()).toBe(true);
+
+    // useRouteScrollRestoration's window.scrollTo has already landed here by
+    // the time the route-change effect below runs.
+    window.scrollY = 500;
+    rerender({ path: '/analytics' });
+    expect(isHidden()).toBe(false);
+
+    // The scroll event that same window.scrollTo call itself triggers.
+    scrollTo(500);
+    expect(isHidden()).toBe(false);
+  });
+
   // The layout reserves space for the dock at the end of every page. If the
   // dock stayed hidden there, that reservation would read as an empty gap.
   it('comes back at the end of the page even while scrolling down', () => {

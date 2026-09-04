@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 // Short lists should never lose their navigation, so nothing hides until the
 // user is meaningfully into the page.
@@ -23,8 +23,12 @@ const HIDDEN_ATTRIBUTE = 'data-nav-hidden';
  * attribute lets a single CSS rule move both as one object.
  */
 export const useNavAutoHide = (pathname: string): void => {
+  // Shared with the route-change effect below, so a tab switch can reset the
+  // baseline instead of leaving it at wherever the previous tab's scroll left
+  // off — see the effect's comment for why that matters.
+  const lastYRef = useRef(window.scrollY);
+
   useEffect(() => {
-    let lastY = window.scrollY;
     let isTicking = false;
 
     const applyScrollState = () => {
@@ -34,17 +38,17 @@ export const useNavAutoHide = (pathname: string): void => {
       // At either end of the page the dock is always available, whatever the
       // direction of travel.
       if (currentY <= HIDE_THRESHOLD_PX || isAtBottomOfPage(currentY)) {
-        lastY = currentY;
+        lastYRef.current = currentY;
         setHidden(false);
 
         return;
       }
 
-      const delta = currentY - lastY;
+      const delta = currentY - lastYRef.current;
 
       if (Math.abs(delta) < DIRECTION_DELTA_PX) return;
 
-      lastY = currentY;
+      lastYRef.current = currentY;
       setHidden(delta > 0);
     };
 
@@ -63,8 +67,15 @@ export const useNavAutoHide = (pathname: string): void => {
     };
   }, []);
 
-  // Every route change starts at the top, so the dock comes back with it.
+  // Every route change starts at the top, so the dock comes back with it —
+  // except the main tabs, which stay mounted and jump straight to their own
+  // remembered scroll position (useRouteScrollRestoration) rather than 0.
+  // Resetting the baseline to wherever that jump landed, not just clearing
+  // the attribute, stops the next scroll event from comparing the new tab's
+  // position against the old tab's and hiding the dock off a jump the user
+  // never made.
   useEffect(() => {
+    lastYRef.current = window.scrollY;
     document.body.removeAttribute(HIDDEN_ATTRIBUTE);
   }, [pathname]);
 };
