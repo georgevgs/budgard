@@ -18,12 +18,12 @@ import type { Expense } from '@/types/Expense';
 import type { TransactionRuleDraft } from '@/types/TransactionRule';
 
 type Values = z.infer<typeof transactionRuleSchema>;
-type Props = {
+interface Props {
   transaction: Expense;
   categories: Category[];
   onSave: (draft: TransactionRuleDraft) => Promise<boolean>;
   onClose: () => void;
-};
+}
 
 const TransactionRuleDialog = ({
   transaction,

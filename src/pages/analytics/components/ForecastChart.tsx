@@ -6,7 +6,7 @@ import { ChartTooltipRow } from '@/common/components/common/ChartTooltip';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { ProjectionMonth } from '@/constants/forecast';
 
-type Props = {
+interface Props {
   data: ProjectionMonth[];
   currencySymbol: string;
   currency: string;
@@ -14,7 +14,7 @@ type Props = {
   // here anchored to something the user actually has, rather than modelled
   // from an average.
   hasBalance: boolean;
-};
+}
 
 const ForecastChart = ({
   data,

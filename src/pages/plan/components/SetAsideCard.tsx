@@ -7,11 +7,11 @@ import { formatCurrency } from '@/constants/utils';
 import type { SavingsRhythm } from '@/common/hooks/savings/useSavingsRhythm';
 import type { Goal } from '@/types/Goal';
 
-type Props = {
+interface Props {
   rhythm: SavingsRhythm;
   goal: Goal;
   currency: string;
-};
+}
 
 const SetAsideCard = ({ rhythm, goal, currency }: Props) => {
   const { t } = useTranslation();

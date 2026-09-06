@@ -7,7 +7,7 @@ import { cn } from '@/constants/utils';
 import { describeAmount } from '@/constants/transactionAmount';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+interface Props {
   transaction: Expense;
   currency: string;
   onExpenseEdit: (expense: Expense) => void;
@@ -15,7 +15,7 @@ type Props = {
   onSaveAsTemplate: (expense: Expense) => void;
   onIncomeEdit: (income: Expense) => void;
   onIncomeDelete: (id: string) => void;
-};
+}
 
 const ActivityTransactionRow = (props: Props) => {
   const { t } = useTranslation();

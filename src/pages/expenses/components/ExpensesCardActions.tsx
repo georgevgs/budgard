@@ -21,12 +21,12 @@ import SplitExpenseDialog from '@/pages/expenses/components/SplitExpenseDialog';
 import RefundExpenseDialog from '@/pages/expenses/components/RefundExpenseDialog';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+interface Props {
   expense: Expense;
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
   onSaveAsTemplate?: (expense: Expense) => void;
-};
+}
 
 const ExpensesCardActions = ({
   expense,

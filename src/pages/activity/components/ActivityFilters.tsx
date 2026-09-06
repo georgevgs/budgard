@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next';
 import Search from 'lucide-react/dist/esm/icons/search';
 import { Input } from '@/common/ui/input';
 
-type Props = {
+interface Props {
   search: string;
   isSearchingAllTime: boolean;
   onSearchChange: (value: string) => void;
   /** Sits beside search — the single entry point for every refinement. */
   trailing?: ReactNode;
-};
+}
 
 const ActivityFilters = ({
   search,

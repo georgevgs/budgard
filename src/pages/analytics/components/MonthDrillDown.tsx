@@ -16,13 +16,13 @@ import type { Expense } from '@/types/Expense';
 import { countsAsSpending, sumSpending } from '@/constants/spending';
 import type { Category } from '@/types/Category';
 
-type Props = {
+interface Props {
   isOpen: boolean;
   onClose: () => void;
   monthKey: string;
   expenses: Expense[];
   categories: Category[];
-};
+}
 
 export const MonthDrillDown = ({
   isOpen,

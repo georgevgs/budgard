@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import * as Sentry from '@/config/sentry';
+import { captureException } from '@/config/sentry';
 import { useTranslation } from 'react-i18next';
 import { useDataActions, useDataConfig } from '@/common/contexts/DataContext';
 import { dataService } from '@/common/api/dataService';
@@ -61,7 +61,7 @@ export const useAccountOps = () => {
           // derived; refetch so the list shows it.
           if (!accountId) {
             refreshAccounts().catch((err) => {
-              Sentry.captureException(err, {
+              captureException(err, {
                 tags: { context: 'afterAccountCreate' },
               });
             });

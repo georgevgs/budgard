@@ -8,10 +8,10 @@ import { Button } from '@/common/ui/button';
 import type { SavingsRhythm as Rhythm } from '@/common/hooks/savings/useSavingsRhythm';
 import type { Goal } from '@/types/Goal';
 
-type Props = {
+interface Props {
   rhythm: Rhythm | null;
   currency: string;
-};
+}
 
 const SavingsRhythm = ({ rhythm, currency }: Props) => {
   const { t } = useTranslation();

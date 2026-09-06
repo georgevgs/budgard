@@ -111,7 +111,10 @@ const buildStats = (
     return { similar: [], monthTotal: 0, monthCount: 0 };
   }
 
-  const pool = transaction.type === 'income' ? incomes : expenses;
+  let pool = expenses;
+  if (transaction.type === 'income') {
+    pool = incomes;
+  }
   const label = normalise(transaction.description);
   const monthKey = transaction.date.slice(0, 7);
 

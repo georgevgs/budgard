@@ -24,7 +24,7 @@ type YearTotals = ReturnType<typeof useCashFlowData>['yearTotals'];
 type View = 'trend' | 'flow';
 type TFunc = ReturnType<typeof useTranslation>['t'];
 
-type Props = {
+interface Props {
   selectedYear: number;
   isPro: boolean;
   monthlyData: MonthlyDatum[];
@@ -33,7 +33,7 @@ type Props = {
   monthlyAverage: number;
   monthsElapsed: number;
   onMonthClick: (index: number) => void;
-};
+}
 
 // One card, one question — "how has my money moved" — answered at whichever
 // depth the plan pays for. Free sees a year of spending against budget, the

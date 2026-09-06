@@ -11,11 +11,11 @@ import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import ConfirmDestructiveDialog from '@/common/components/common/ConfirmDestructiveDialog';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
-type Props = {
+interface Props {
   expense: RecurringExpense;
   onEdit: (expense: RecurringExpense) => void;
   onDelete: (id: string) => void;
-};
+}
 
 const RecurringExpenseCardActions = ({ expense, onEdit, onDelete }: Props) => {
   const { t } = useTranslation();

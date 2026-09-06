@@ -2,12 +2,12 @@ import { useTranslation } from 'react-i18next';
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import { formatCurrency } from '@/constants/utils';
 
-type Props = {
+interface Props {
   count: number;
   expenseTotal: number;
   incomeTotal: number;
   currency: string;
-};
+}
 
 // The transaction list's own heading. Spent and received ride along with the
 // count instead of waiting behind a tap; only the net change — which needs

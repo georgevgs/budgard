@@ -24,12 +24,12 @@ import {
   renderLiabilitySign,
 } from '@/pages/networth/components/AccountDetailSheet.helpers';
 
-type Props = {
+interface Props {
   account: Account;
   snapshots: AccountBalance[];
   onEdit: (account: Account) => void;
   onArchiveRequest: () => void;
-};
+}
 
 const AccountDetailHeader = ({
   account,

@@ -4,7 +4,7 @@ import { useSubscription } from '@/common/contexts/SubscriptionContext';
 import PageHeader from '@/common/components/common/PageHeader';
 import ProUpsellCard from '@/pages/pro/components/ProUpsellCard';
 
-type Props = {
+interface Props {
   /** The screen's own name. The gate replaces the whole screen, so it has to
    *  keep the screen's header — otherwise the one state every free user sees
    *  is the only one in the app with no title and no way back. */
@@ -12,7 +12,7 @@ type Props = {
   titleKey: string;
   descriptionKey: string;
   children: ReactNode;
-};
+}
 
 // Route-level gate for Pro-only screens. While the subscription is still
 // loading it renders the screen optimistically so Pro users never see a

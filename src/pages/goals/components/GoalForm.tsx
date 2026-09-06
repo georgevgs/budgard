@@ -22,11 +22,11 @@ import { swatch } from '@/design/palette';
 const DEFAULT_GOAL_COLOR = swatch.violet;
 const DEFAULT_GOAL_ICON = 'target';
 
-type Props = {
+interface Props {
   goal?: Goal;
   onSubmit: (values: GoalFormData) => Promise<void>;
   onClose: () => void;
-};
+}
 
 const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
   const { t } = useTranslation();

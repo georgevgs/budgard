@@ -8,14 +8,14 @@ import type { useAnalyticsData } from '@/pages/analytics/hooks/useAnalyticsData'
 import type { CategoryRow } from '@/pages/analytics/hooks/useAnalyticsData';
 import type { Category } from '@/types/Category';
 
-type Props = {
+interface Props {
   analytics: ReturnType<typeof useAnalyticsData>;
   isPro: boolean;
   categories: Category[];
   monthlyBudget: number | null;
   defaultCurrency: string;
   onCategoryClick: (category: CategoryRow) => void;
-};
+}
 
 // The analysis someone explicitly asked to explore. The overview keeps the
 // everyday answers; this route keeps the power without making it the toll.

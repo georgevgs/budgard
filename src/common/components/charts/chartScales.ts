@@ -71,6 +71,16 @@ export const bandScale = (count: number, plot: Plot) => {
   };
 };
 
+// A chart holding bars puts its line marks on band centres so the two line up;
+// otherwise points sit on the plot edges and use the full width.
+export const scaleFor = (hasBars: boolean, count: number, plot: Plot) => {
+  if (hasBars) {
+    return bandScale(count, plot);
+  }
+
+  return pointScale(count, plot);
+};
+
 // Axis labels land on round numbers rather than wherever the data happens to
 // end — 0 / 250 / 500 / 750 reads instantly where 0 / 237 / 474 / 711 does not.
 export const niceTicks = (max: number, count = 4): number[] => {
@@ -105,6 +115,14 @@ export const niceMax = (max: number, count = 4): number => {
 // keeps the curve from overshooting past a local maximum the way a plain
 // cardinal spline does — an overshoot on a spending chart draws a peak that
 // never happened.
+const moveOrLine = (index: number): string => {
+  if (index === 0) {
+    return 'M';
+  }
+
+  return 'L';
+};
+
 export const linePath = (
   points: readonly [number, number][],
   smooth: boolean,
@@ -114,9 +132,7 @@ export const linePath = (
   }
   if (points.length === 1 || !smooth) {
     return points
-      .map(
-        ([x, y], index) => `${index === 0 ? 'M' : 'L'}${round(x)},${round(y)}`,
-      )
+      .map(([x, y], index) => `${moveOrLine(index)}${round(x)},${round(y)}`)
       .join(' ');
   }
 

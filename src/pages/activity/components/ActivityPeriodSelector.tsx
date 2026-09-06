@@ -8,10 +8,10 @@ import {
 } from '@/common/ui/select';
 import type { ActivityPeriod } from '@/pages/activity/hooks/useActivityFeed';
 
-type Props = {
+interface Props {
   period: ActivityPeriod;
   onPeriodChange: (period: ActivityPeriod) => void;
-};
+}
 
 const PERIODS: ActivityPeriod[] = [
   'month',

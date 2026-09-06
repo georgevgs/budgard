@@ -5,13 +5,13 @@ import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { formatCurrency } from '@/constants/utils';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+interface Props {
   description: string;
   monthTotal: number;
   monthCount: number;
   similar: Expense[];
   currency: string;
-};
+}
 
 // The part of the screen a list row cannot give you: how often this repeats
 // and what it comes to. One coffee is a number; twelve coffees is a habit.

@@ -6,7 +6,7 @@ import {
   useRef,
   useCallback,
 } from 'react';
-import * as Sentry from '@/config/sentry';
+import { captureException } from '@/config/sentry';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
@@ -351,7 +351,7 @@ export const useDataLayer = () => {
         try {
           await load();
         } catch (error) {
-          Sentry.captureException(error, { tags: { context } });
+          captureException(error, { tags: { context } });
           console.error(`Failed to ${context}:`, error);
           toastRef.current({
             title: tRef.current('common.error'),
@@ -720,7 +720,7 @@ const startSecondaryFetch = (
       if (isAbortError(error) || isExpiredJwtError(error)) {
         return;
       }
-      Sentry.captureException(error, {
+      captureException(error, {
         tags: { context: 'fetchSecondaryDomains' },
       });
     });
@@ -770,7 +770,7 @@ const fetchHistoryTopUp = (
       // until the next boot, so screens should fall back to their normal
       // empty state rather than promise data that isn't coming.
       setters.setIsHistoryLoaded(true);
-      Sentry.captureException(error, {
+      captureException(error, {
         tags: { context: 'fetchOlderTransactions' },
       });
     });
@@ -804,7 +804,7 @@ const handleFetchError = (error: unknown, ctx: FetchErrorContext): void => {
     return;
   }
 
-  Sentry.captureException(error, { tags: { context: 'fetchData' } });
+  captureException(error, { tags: { context: 'fetchData' } });
   console.error('Failed to load data:', error);
 
   // Still showing cached data from this boot (no successful fetch yet) — a

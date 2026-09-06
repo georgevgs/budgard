@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import * as Sentry from '@/config/sentry';
+import { captureException } from '@/config/sentry';
 import { useToast } from '@/common/hooks/useToast';
 import { haptics } from '@/constants/haptics';
 import { useShowErrorToast } from '@/common/hooks/dataOps/useShowErrorToast';
@@ -91,7 +91,7 @@ export const useMutationRunner = () => {
 
           haptics.error();
           rollback?.();
-          Sentry.captureException(error, {
+          captureException(error, {
             tags: { operation: spec.operation },
           });
           if (spec.retryable === false) {

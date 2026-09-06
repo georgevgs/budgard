@@ -4,11 +4,11 @@ import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import { useSwipeActions, SWIPE_ACTION_WIDTH } from '@/pages/activity/hooks/useSwipeActions';
 import { prefersReducedMotion } from '@/constants/motion';
 
-type Props = {
+interface Props {
   children: ReactNode;
   onDelete: () => void;
   deleteLabel: string;
-};
+}
 
 // Wraps an activity row so it can be pulled aside to reveal Delete. The row
 // itself stays a link, so tapping it still opens the transaction — the swipe

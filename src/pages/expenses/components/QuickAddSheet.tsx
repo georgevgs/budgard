@@ -13,7 +13,7 @@ import type { ReceiptOptions } from '@/common/hooks/dataOps/useExpenseOps';
 import type { ExpenseWritePayload } from '@/common/api/dataService';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 
-type Props = {
+interface Props {
   open: boolean;
   onClose: () => void;
   onSubmit: (
@@ -23,7 +23,7 @@ type Props = {
   ) => void;
   onOpenFullForm: (draft: ExpenseWritePayload, receiptFile?: File) => void;
   onUseTemplate: (template: ExpenseTemplate) => void;
-};
+}
 
 // An amount, a name and a category. The full form is still there behind "More
 // details" for the expense that needs a date, a tag or a receipt — but it is

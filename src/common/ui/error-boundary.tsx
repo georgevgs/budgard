@@ -1,6 +1,6 @@
 import { Component, type ReactNode } from 'react';
 import i18n from 'i18next';
-import * as Sentry from '@/config/sentry';
+import { captureException } from '@/config/sentry';
 import { Button } from '@/common/ui/button';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
@@ -36,7 +36,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    Sentry.captureException(error, {
+    captureException(error, {
       extra: { componentStack: errorInfo.componentStack },
     });
 

@@ -18,7 +18,10 @@ export const buildPlot = (
   formatY: ((value: number) => string) | undefined,
   top: number,
 ): Plot => {
-  const label = formatY ? formatY(top) : String(top);
+  let label = String(top);
+  if (formatY) {
+    label = formatY(top);
+  }
   const left = Math.max(MIN_AXIS_LEFT, label.length * CHAR_WIDTH + 10);
 
   return {

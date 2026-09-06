@@ -14,11 +14,11 @@ import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+interface Props {
   income: Expense;
   onEdit: (income: Expense) => void;
   onDelete: (id: string) => void;
-};
+}
 
 const IncomeCardActions = ({ income, onEdit, onDelete }: Props) => {
   const { t } = useTranslation();

@@ -178,6 +178,7 @@ const vendorOcrAssets = (): PluginOption => {
 
         if (!url || !url.startsWith(`${ocrAssetBase}/`)) {
           next();
+
           return;
         }
 
@@ -188,6 +189,7 @@ const vendorOcrAssets = (): PluginOption => {
 
         if (!source) {
           next();
+
           return;
         }
 

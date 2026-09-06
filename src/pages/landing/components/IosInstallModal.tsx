@@ -7,10 +7,10 @@ import {
   DialogDescription,
 } from '@/common/ui/dialog';
 
-type Props = {
+interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-};
+}
 
 const BOLD_COMPONENTS = {
   strong: <span className="font-semibold text-foreground" />,

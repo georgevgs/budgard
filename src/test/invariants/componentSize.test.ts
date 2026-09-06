@@ -4,10 +4,10 @@ import {
   measureComponents,
 } from '@/test/invariants/componentSize';
 
-// CLAUDE.md: "Structure: 1. Component (max 100 lines) -> 2. export default
-// -> 3. // --- Helpers --- section." The June 2026 sweep brought every
-// component under the cap; this test is what keeps it there, because drift
-// is invisible in review — a component grows six lines at a time.
+// https://react-typescript-style-guide.com/ — "Size Limit: keep components
+// under approximately 150 lines" and "Component Splitting Criteria". This
+// test is what keeps them there, because drift is invisible in review: a
+// component grows six lines at a time.
 describe('component line cap', () => {
   const components = measureComponents([
     'src/pages',

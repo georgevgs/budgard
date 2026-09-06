@@ -12,9 +12,9 @@ import { countsAsSpending, countsInTotals } from '@/constants/spending';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
-type Props = {
+interface Props {
   selectedMonth: string;
-};
+}
 
 type Bucket = 'need' | 'want' | 'savings';
 

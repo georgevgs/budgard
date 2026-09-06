@@ -21,10 +21,10 @@ import {
 import type { Category } from '@/types/Category';
 import { getColorTint } from '@/constants/categoryColor';
 
-type Props = {
+interface Props {
   isOpen: boolean;
   onClose: () => void;
-};
+}
 
 const CategoryBudgetsManager = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation();

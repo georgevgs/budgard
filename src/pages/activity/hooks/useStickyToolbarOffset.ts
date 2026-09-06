@@ -27,7 +27,13 @@ export const useStickyToolbarOffset = () => {
   // for that first frame.
   const ref = useCallback((node: HTMLDivElement | null) => {
     setElement(node);
-    setHeight(node ? node.getBoundingClientRect().height : 0);
+    if (!node) {
+      setHeight(0);
+
+      return;
+    }
+
+    setHeight(node.getBoundingClientRect().height);
   }, []);
 
   useEffect(() => {

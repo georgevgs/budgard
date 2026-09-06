@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next';
 import LayoutGrid from 'lucide-react/dist/esm/icons/layout-grid';
 import ProfileMenu from '@/common/components/layout/ProfileMenu';
 
-type Props = {
+interface Props {
   greeting: 'morning' | 'afternoon' | 'evening';
   dateLabel: string;
   isArranging: boolean;
   onArrange: () => void;
   onDone: () => void;
-};
+}
 
 // Today's own header. There is no app bar behind it any more, so this is also
 // where the account lives — the avatar is the way into Settings from the tab

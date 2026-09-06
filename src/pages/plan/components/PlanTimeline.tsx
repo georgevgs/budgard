@@ -6,10 +6,10 @@ import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { MoneyTimeline, MoneyTimelineEntry } from '@/pages/plan/utils/moneyTimeline';
 
-type Props = {
+interface Props {
   timeline: MoneyTimeline;
   currency: string;
-};
+}
 
 const PlanTimeline = ({ timeline, currency }: Props) => {
   const { t } = useTranslation();

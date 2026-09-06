@@ -12,10 +12,10 @@ import {
 } from '@/pages/analytics/hooks/useMoneyFlowData';
 import { formatCurrency } from '@/constants/utils';
 
-type Props = {
+interface Props {
   flow: MoneyFlowData;
   currency: string;
-};
+}
 
 // The chart half of the money-flow view — CashFlowSection owns the stats
 // row (it swaps between year totals and this month's, so it stays in one
@@ -140,7 +140,10 @@ const shadeStep = (hex: string, index: number, count: number): string => {
 
 const mixTint = (hex: string, percent: number): string => {
   const { r, g, b } = hexToRgb(hex);
-  const target = percent >= 0 ? 255 : 0;
+  let target = 0;
+  if (percent >= 0) {
+    target = 255;
+  }
   const amount = Math.min(1, Math.abs(percent) / 100);
   const mix = (channel: number) =>
     Math.round(channel + (target - channel) * amount);

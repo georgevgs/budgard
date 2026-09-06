@@ -4,10 +4,10 @@ import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import SurfaceCard from '@/common/components/common/SurfaceCard';
 import type { MonthlyReviewItem } from '@/pages/analytics/hooks/useMonthlyReview';
 
-type Props = {
+interface Props {
   label: string;
   items: MonthlyReviewItem[];
-};
+}
 
 const MonthlyReview = ({ label, items }: Props) => {
   const { t } = useTranslation();

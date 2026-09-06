@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import * as Sentry from '@/config/sentry';
+import { captureException } from '@/config/sentry';
 import { useToast } from '@/common/hooks/useToast';
 import { haptics } from '@/constants/haptics';
 import { feedbackService, type FeedbackKind } from '@/common/api/feedbackService';
@@ -29,7 +29,7 @@ export const useFeedbackOps = () => {
         });
       } catch (error) {
         haptics.error();
-        Sentry.captureException(error, {
+        captureException(error, {
           tags: { operation: 'submitFeedback', kind: input.kind },
         });
         toast({

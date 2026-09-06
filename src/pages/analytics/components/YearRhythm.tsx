@@ -11,10 +11,10 @@ type MonthPoint = {
   amount: number;
 };
 
-type Props = {
+interface Props {
   months: MonthPoint[];
   currency: string;
-};
+}
 
 const SERIES: Series[] = [
   { kind: 'area', key: 'deviation', label: 'rhythm', color: '--primary' },

@@ -11,11 +11,11 @@ import ConfirmDestructiveDialog from '@/common/components/common/ConfirmDestruct
 import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
 import type { Goal } from '@/types/Goal';
 
-type Props = {
+interface Props {
   goal: Goal;
   onEdit: (goal: Goal) => void;
   onDelete: (id: string) => void;
-};
+}
 
 const GoalCardActions = ({ goal, onEdit, onDelete }: Props) => {
   const { t } = useTranslation();

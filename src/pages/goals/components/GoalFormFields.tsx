@@ -15,10 +15,10 @@ import { formatCurrencyInput } from '@/constants/utils';
 import type { GoalFormData } from '@/constants/validations';
 import type { GoalSourceType } from '@/types/Goal';
 
-type Props = {
+interface Props {
   form: UseFormReturn<GoalFormData>;
   sourceType: GoalSourceType;
-};
+}
 
 const GoalFormFields = ({ form, sourceType }: Props) => {
   const { t } = useTranslation();

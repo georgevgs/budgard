@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import * as Sentry from '@/config/sentry';
+import { captureException } from '@/config/sentry';
 import { dataService } from '@/common/api/dataService';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { toast } from '@/common/hooks/useToast';
@@ -74,7 +74,7 @@ export const useDataExport = () => {
         title: t('settings.data.exportReady'),
       });
     } catch (error) {
-      Sentry.captureException(error, { tags: { context: 'dataExport' } });
+      captureException(error, { tags: { context: 'dataExport' } });
       toast({
         variant: 'destructive',
         description: t('settings.data.exportFailed'),

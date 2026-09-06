@@ -21,8 +21,15 @@ const CACHE_SCHEMA = 1;
 
 // Replaced at build time by Vite's `define`. Fall back to 'dev' if it isn't
 // (e.g. an unconfigured tool) so reading it can never throw at module load.
-const APP_VERSION =
-  typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev';
+const resolveAppVersion = (): string => {
+  if (typeof __APP_VERSION__ === 'string') {
+    return __APP_VERSION__;
+  }
+
+  return 'dev';
+};
+
+const APP_VERSION = resolveAppVersion();
 
 const CACHE_VERSION = `${CACHE_SCHEMA}:${APP_VERSION}`;
 

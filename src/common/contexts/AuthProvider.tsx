@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore, type ReactNode } from 'react';
-import * as Sentry from '@/config/sentry';
+import { setUser } from '@/config/sentry';
 import { authStore } from '@/constants/authStore';
 import { AuthContext } from '@/common/contexts/AuthContext';
 
@@ -12,9 +12,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (session?.user) {
-      Sentry.setUser({ id: session.user.id });
+      setUser({ id: session.user.id });
     } else {
-      Sentry.setUser(null);
+      setUser(null);
     }
   }, [session]);
 

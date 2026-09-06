@@ -727,7 +727,10 @@ const normalizeSeparators = (value: string): string => {
     return value.replace(/,/g, '');
   }
 
-  const separator = lastDot === -1 ? ',' : '.';
+  let separator = '.';
+  if (lastDot === -1) {
+    separator = ',';
+  }
   if (isDecimalSeparator(value, separator)) {
     return value.replace(separator, '.');
   }

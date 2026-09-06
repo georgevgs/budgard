@@ -15,11 +15,11 @@ import type { AccountBalance } from '@/types/AccountBalance';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { getColorTint } from '@/constants/categoryColor';
 
-type Props = {
+interface Props {
   account: Account;
   latestSnapshot?: AccountBalance;
   onClick: (account: Account) => void;
-};
+}
 
 const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
   const { t } = useTranslation();

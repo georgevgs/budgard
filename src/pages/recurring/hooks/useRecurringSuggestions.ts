@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import * as Sentry from '@/config/sentry';
+import { captureException } from '@/config/sentry';
 import { useTranslation } from 'react-i18next';
 import {
   useExpensesData,
@@ -39,7 +39,7 @@ export const useRecurringSuggestions = (mode: RecurringMode) => {
         if (controller.signal.aborted) {
           return;
         }
-        Sentry.captureException(error, {
+        captureException(error, {
           tags: { context: 'loadRecurringSuggestionDismissals' },
         });
       });

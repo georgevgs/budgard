@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import BrandMark from '@/common/components/common/BrandMark';
 import TileLabel from '@/common/components/bento/TileLabel';
 
-type Props = {
+interface Props {
   currentLang: string;
   onChangeLanguage: (lang: string) => void;
-};
+}
 
 type Tx = (key: string, opts?: Record<string, unknown>) => string;
 

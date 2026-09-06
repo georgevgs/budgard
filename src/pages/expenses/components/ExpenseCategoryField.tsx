@@ -22,11 +22,11 @@ import type { ExpenseFormData } from '@/constants/validations';
 // Sentinel option value. Not a category id, so it can never collide with one.
 const MANAGE_VALUE = '__manage__';
 
-type Props = {
+interface Props {
   form: UseFormReturn<ExpenseFormData>;
   categories: Category[];
   onManageCategories: () => void;
-};
+}
 
 const ExpenseCategoryField = ({
   form,

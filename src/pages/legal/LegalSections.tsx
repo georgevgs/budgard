@@ -3,9 +3,9 @@ export type LegalSection = {
   paragraphs: string[];
 };
 
-type Props = {
+interface Props {
   sections: LegalSection[];
-};
+}
 
 // Renders the i18n-driven body of a legal page: numbered-free, scannable
 // sections with generous spacing between them (larger than within, so each

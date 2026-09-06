@@ -12,11 +12,11 @@ import { UNCATEGORIZED_VALUE } from '@/pages/activity/utils/expenseFilters';
 import { getColorTint } from '@/constants/categoryColor';
 import type { Category } from '@/types/Category';
 
-type Props = {
+interface Props {
   categories: Category[];
   selectedCategoryId: string | null;
   onChange: (categoryId: string | null) => void;
-};
+}
 
 const ActivityCategorySelect = ({
   categories,

@@ -172,9 +172,13 @@ export const useCsvImportFlow = (onClose: () => void) => {
     // the amount. Reading it from "any negative cell anywhere in the file"
     // meant one minus sign in a balance or a description flipped every
     // unsigned row in the import from expense to income.
-    const signedConvention = csvPreview
-      ? usesSignedAmountConvention(csvPreview, columnMapping.amountColumn)
-      : false;
+    let signedConvention = false;
+    if (csvPreview) {
+      signedConvention = usesSignedAmountConvention(
+        csvPreview,
+        columnMapping.amountColumn,
+      );
+    }
     const result = parseExpensesCsv(
       csvContent,
       categories,

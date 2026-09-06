@@ -1,4 +1,4 @@
-import * as Sentry from '@/config/sentry';
+import { captureException } from '@/config/sentry';
 import { supabase } from '@/config/supabase';
 import type { Session } from '@supabase/supabase-js';
 
@@ -91,7 +91,7 @@ supabase.auth.onAuthStateChange((event, session) => {
           } else {
             // Only report when online — offline refreshes fail expectedly
             if (error && navigator.onLine) {
-              Sentry.captureException(error, {
+              captureException(error, {
                 tags: { operation: 'refreshSession', context: 'recovery' },
               });
             }
@@ -101,7 +101,7 @@ supabase.auth.onAuthStateChange((event, session) => {
         })
         .catch((err) => {
           if (navigator.onLine) {
-            Sentry.captureException(err, {
+            captureException(err, {
               tags: { operation: 'refreshSession', context: 'recovery' },
             });
           }
@@ -109,6 +109,7 @@ supabase.auth.onAuthStateChange((event, session) => {
           notify({ session: null, isLoading: false });
         });
     }, 2000);
+
     // Don't update the snapshot yet — keep the user on their current page.
     return;
   }

@@ -6,12 +6,12 @@ import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import Calendar from 'lucide-react/dist/esm/icons/calendar';
 import type { DebtSummary } from '@/common/hooks/useDebts';
 
-type Props = {
+interface Props {
   summary: DebtSummary;
   defaultCurrency: string;
   monthsToDebtFree: number | null;
   payoffDate: string | null;
-};
+}
 
 const DebtsHeader = ({
   summary,

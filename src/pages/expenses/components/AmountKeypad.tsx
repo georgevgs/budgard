@@ -3,9 +3,9 @@ import Delete from 'lucide-react/dist/esm/icons/delete';
 import { haptics } from '@/constants/haptics';
 import type { AmountPad } from '@/pages/expenses/hooks/useAmountPad';
 
-type Props = {
+interface Props {
   pad: AmountPad;
-};
+}
 
 const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import * as Sentry from '@/config/sentry';
+import { captureException } from '@/config/sentry';
 import { useTranslation } from 'react-i18next';
 import { useDataActions, useDataConfig } from '@/common/contexts/DataContext';
 import { dataService } from '@/common/api/dataService';
@@ -71,7 +71,7 @@ export const useRecurringIncomeOps = () => {
         // Deleting the rule can strip generated rows, so the ledger is resynced.
         commit: () => {
           refreshIncomes().catch((err) => {
-            Sentry.captureException(err, {
+            captureException(err, {
               tags: {
                 operation: 'refreshIncomes',
                 context: 'afterRecurringIncomeDelete',

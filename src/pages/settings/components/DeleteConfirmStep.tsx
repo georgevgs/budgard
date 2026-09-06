@@ -10,7 +10,7 @@ import {
 } from '@/common/ui/alert-dialog';
 import { Button } from '@/common/ui/button';
 
-type Props = {
+interface Props {
   email: string;
   turnstileRef: RefObject<TurnstileInstance | null>;
   turnstileToken: string | null;
@@ -18,7 +18,7 @@ type Props = {
   error: string | null;
   isSending: boolean;
   onSendCode: () => void;
-};
+}
 
 const DeleteConfirmStep = ({
   email,

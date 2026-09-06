@@ -12,11 +12,11 @@ import QuickAddName from '@/pages/expenses/components/QuickAddName';
 import { useQuickAddDraft } from '@/pages/expenses/hooks/useQuickAddDraft';
 import { cn, formatCurrency } from '@/constants/utils';
 
-type Props = {
+interface Props {
   draft: ReturnType<typeof useQuickAddDraft>;
   onBack: () => void;
   onSkip: () => void;
-};
+}
 
 const OnboardingFirstExpenseStep = ({ draft, onBack, onSkip }: Props) => {
   const { t } = useTranslation();

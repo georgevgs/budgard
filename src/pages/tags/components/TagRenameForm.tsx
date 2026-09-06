@@ -10,10 +10,10 @@ import {
 import { useTagOps } from '@/common/hooks/dataOps/useTagOps';
 import type { Tag } from '@/types/Tag';
 
-type Props = {
+interface Props {
   tag: Tag;
   onClose: () => void;
-};
+}
 
 const TagRenameForm = ({ tag, onClose }: Props) => {
   const { t } = useTranslation();

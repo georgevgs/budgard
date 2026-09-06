@@ -27,10 +27,10 @@ import {
 } from '@/pages/expenses/hooks/useTagListboxNav';
 import type { ExpenseFormData } from '@/constants/validations';
 
-type Props = {
+interface Props {
   form: UseFormReturn<ExpenseFormData>;
   tagPicker: TagPickerApi;
-};
+}
 
 const ExpenseTagField = ({ form, tagPicker }: Props) => {
   const { t } = useTranslation();

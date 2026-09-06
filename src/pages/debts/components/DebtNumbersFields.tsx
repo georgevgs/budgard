@@ -13,10 +13,10 @@ import { getCurrencySymbol } from '@/constants/currencies';
 import { formatCurrencyInput } from '@/constants/utils';
 import type { DebtFormData } from '@/constants/validations';
 
-type Props = {
+interface Props {
   form: UseFormReturn<DebtFormData>;
   selectedCurrency: string;
-};
+}
 
 const DebtNumbersFields = ({ form, selectedCurrency }: Props) => {
   const { t } = useTranslation();

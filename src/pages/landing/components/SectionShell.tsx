@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/constants/utils';
 
-type Props = {
+interface Props {
   id?: string;
   tone?: 'default' | 'muted' | 'inverted';
   children: ReactNode;
   className?: string;
-};
+}
 
 const SectionShell = ({ id, tone = 'default', children, className }: Props) => {
   return (

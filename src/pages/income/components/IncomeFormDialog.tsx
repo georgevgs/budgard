@@ -3,11 +3,11 @@ import { Dialog, DialogContent } from '@/common/ui/dialog';
 import IncomeForm from '@/pages/income/components/IncomeForm';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+interface Props {
   open: boolean;
   income: Expense | undefined;
   onClose: () => void;
-};
+}
 
 const IncomeFormDialog = ({ open, income, onClose }: Props) => {
   const { t } = useTranslation();

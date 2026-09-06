@@ -5,10 +5,10 @@ import TransactionAmountControl from '@/common/components/common/TransactionAmou
 import type { CurrencyConversionApi } from '@/pages/expenses/hooks/useCurrencyConversion';
 import type { ExpenseFormData } from '@/constants/validations';
 
-type Props = {
+interface Props {
   form: UseFormReturn<ExpenseFormData>;
   conversion: CurrencyConversionApi;
-};
+}
 
 const ExpenseAmountField = ({ form, conversion }: Props) => {
   const { t } = useTranslation();

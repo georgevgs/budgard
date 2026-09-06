@@ -3,11 +3,11 @@ import BentoTile from '@/common/components/bento/BentoTile';
 import TileLabel from '@/common/components/bento/TileLabel';
 import { formatCurrency } from '@/constants/utils';
 
-type Props = {
+interface Props {
   spentThisMonth: number;
   monthlyBudget: number | null;
   currency: string;
-};
+}
 
 const RADIUS = 34;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;

@@ -4,11 +4,7 @@ import type {
   MouseEvent as ReactMouseEvent,
   KeyboardEvent,
 } from 'react';
-import {
-  bandScale,
-  pointScale,
-  type Plot,
-} from '@/common/components/charts/chartScales';
+import { type Plot, scaleFor } from '@/common/components/charts/chartScales';
 
 type Params = {
   count: number;
@@ -30,7 +26,7 @@ export const useChartInteraction = ({
 
   const indexAt = (clientX: number, element: Element): number => {
     const bounds = element.getBoundingClientRect();
-    const scale = hasBars ? bandScale(count, plot) : pointScale(count, plot);
+    const scale = scaleFor(hasBars, count, plot);
 
     return scale.indexAt(clientX - bounds.left);
   };

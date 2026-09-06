@@ -1,8 +1,7 @@
 import {
-  bandScale,
-  pointScale,
   type Plot,
   type Scale,
+  scaleFor,
 } from '@/common/components/charts/chartScales';
 import type {
   ChartPoint,
@@ -59,9 +58,7 @@ type XProps = {
 };
 
 export const XAxis = ({ data, xKey, plot, hasBars, format }: XProps) => {
-  const scale = hasBars
-    ? bandScale(data.length, plot)
-    : pointScale(data.length, plot);
+  const scale = scaleFor(hasBars, data.length, plot);
   const visible = visibleTickIndices(data.length, plot.width);
 
   return (

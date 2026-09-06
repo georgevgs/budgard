@@ -2,11 +2,11 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { prefersReducedMotion } from '@/constants/motion';
 import { cn } from '@/constants/utils';
 
-type Props = {
+interface Props {
   children: ReactNode;
   delay?: number;
   className?: string;
-};
+}
 
 const Reveal = ({ children, delay = 0, className }: Props) => {
   const ref = useRef<HTMLDivElement | null>(null);

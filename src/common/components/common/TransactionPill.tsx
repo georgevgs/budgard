@@ -5,14 +5,14 @@ import { cn } from '@/constants/utils';
 import { describeAmount } from '@/constants/transactionAmount';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+interface Props {
   transaction: Expense;
   kind: 'expense' | 'income';
   currency: string;
   /** Line under the description — category, time, or both. */
   meta: string;
   to: string;
-};
+}
 
 // One transaction, as its own rounded object rather than a row inside a list
 // card. The bento redesign makes every list a stack of these: a row that is

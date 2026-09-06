@@ -2,9 +2,9 @@ import { useTranslation } from 'react-i18next';
 import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
 import { EmptyStateCard } from '@/common/ui/empty-state-card';
 
-type Props = {
+interface Props {
   onAddClick: () => void;
-};
+}
 
 const DebtsEmpty = ({ onAddClick }: Props) => {
   const { t } = useTranslation();

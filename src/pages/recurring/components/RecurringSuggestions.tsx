@@ -4,12 +4,12 @@ import { Button } from '@/common/ui/button';
 import { formatCurrency } from '@/constants/utils';
 import type { RecurringSuggestion } from '@/types/RecurringSuggestion';
 
-type Props = {
+interface Props {
   suggestions: RecurringSuggestion[];
   currency: string;
   onAccept: (suggestion: RecurringSuggestion) => Promise<void>;
   onDismiss: (suggestion: RecurringSuggestion) => Promise<void>;
-};
+}
 
 const RecurringSuggestions = ({
   suggestions,

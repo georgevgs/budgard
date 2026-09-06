@@ -31,12 +31,12 @@ vi.mock('@/common/hooks/useToast', () => ({
   toast: (...args: unknown[]) => mockToast(...args),
 }));
 
-type Props = {
+interface Props {
   isOpen: boolean;
   amountIsEmpty: boolean;
   date: string;
   name: string;
-};
+}
 
 const setAmount = vi.fn();
 const setDate = vi.fn();

@@ -4,11 +4,11 @@ import { cn } from '@/constants/utils';
 import { getColorTint } from '@/constants/categoryColor';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+interface Props {
   transaction: Expense;
   className?: string;
   style?: CSSProperties;
-};
+}
 
 // What identifies a transaction's category at the head of a row: a consistent
 // SVG mark on a disc tinted with the category's own colour.

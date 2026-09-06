@@ -15,10 +15,10 @@ import { useDebtProgress } from '@/pages/debts/hooks/useDebtProgress';
 import DebtProgressBar from '@/pages/debts/components/DebtProgressBar';
 import { getColorTint } from '@/constants/categoryColor';
 
-type Props = {
+interface Props {
   debt: Debt;
   onClick: (debt: Debt) => void;
-};
+}
 
 const DebtCard = ({ debt, onClick }: Props) => {
   const { t } = useTranslation();

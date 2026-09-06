@@ -4,10 +4,10 @@ import TileLabel from '@/common/components/bento/TileLabel';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { formatCurrency } from '@/constants/utils';
 
-type Props = {
+interface Props {
   monthlyAverage: number;
   monthsElapsed: number;
-};
+}
 
 // Trends' one inverted tile — the figure every other number on the screen is
 // implicitly measured against, so it is the one that gets to be loud.

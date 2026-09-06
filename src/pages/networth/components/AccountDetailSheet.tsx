@@ -15,12 +15,12 @@ import {
   renderHistoryList,
 } from '@/pages/networth/components/AccountDetailSheet.helpers';
 
-type Props = {
+interface Props {
   account: Account;
   open: boolean;
   onClose: () => void;
   onEdit: (account: Account) => void;
-};
+}
 
 const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
   const { t } = useTranslation();

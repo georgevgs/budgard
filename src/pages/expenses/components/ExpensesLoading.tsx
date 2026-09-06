@@ -4,9 +4,9 @@ import LoadingScreen from '@/common/ui/loading-screen';
 
 type Section = 'expenses' | 'income';
 
-type Props = {
+interface Props {
   section?: Section;
-};
+}
 
 // Full-page skeleton shown during the auth check phase so users never
 // see a spinner — the skeleton is visible from the very first frame.

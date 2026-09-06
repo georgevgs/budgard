@@ -16,11 +16,11 @@ import { useRefundDialog } from '@/pages/expenses/hooks/useRefundDialog';
 import { formatCurrency } from '@/constants/utils';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+interface Props {
   expense: Expense;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-};
+}
 
 // Records a refund as a negative expense in the same category, so spending
 // totals, budgets and analytics all net out without special cases. The row

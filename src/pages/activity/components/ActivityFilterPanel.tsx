@@ -26,7 +26,7 @@ import type {
 import type { Category } from '@/types/Category';
 import type { Tag } from '@/types/Tag';
 
-type Props = {
+interface Props {
   categories: Category[];
   tags: Tag[];
   kind: ActivityKind;
@@ -37,7 +37,7 @@ type Props = {
   onPeriodChange: (period: ActivityPeriod) => void;
   onCategoryChange: (categoryId: string | null) => void;
   onTagChange: (tagId: string | null) => void;
-};
+}
 
 // Every refinement lives behind one button, which carries a count so an active
 // choice remains visible without making every visit scan a control dashboard.

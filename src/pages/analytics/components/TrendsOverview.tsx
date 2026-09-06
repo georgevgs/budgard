@@ -9,7 +9,7 @@ import WhereItWentTile from '@/pages/analytics/components/tiles/WhereItWentTile'
 import type { useAnalyticsData } from '@/pages/analytics/hooks/useAnalyticsData';
 import type { useMonthlyReview } from '@/pages/analytics/hooks/useMonthlyReview';
 
-type Props = {
+interface Props {
   analytics: ReturnType<typeof useAnalyticsData>;
   review: ReturnType<typeof useMonthlyReview>;
   isPro: boolean;
@@ -19,7 +19,7 @@ type Props = {
       typeof useAnalyticsData
     >['yearlyStats']['categoryBreakdown'][number],
   ) => void;
-};
+}
 
 // Trends opens with a conclusion, one movement chart and one composition
 // answer. Everything analytical beyond those three jobs lives one level down.

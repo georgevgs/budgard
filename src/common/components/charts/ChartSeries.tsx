@@ -1,10 +1,10 @@
 import {
+  type Plot,
+  type Scale,
   areaPath,
   bandScale,
   linePath,
-  pointScale,
-  type Plot,
-  type Scale,
+  scaleFor,
 } from '@/common/components/charts/chartScales';
 import type { ChartPoint, Series } from '@/common/components/charts/chartTypes';
 
@@ -77,11 +77,7 @@ const runsOf = (
 
 const renderCurve = (series: Series, context: Context) => {
   const { data, plot, y, activeIndex, hasBars } = context;
-  // A chart holding bars puts its line marks on band centres so the two line
-  // up; otherwise points sit on the plot edges and use the full width.
-  const scale = hasBars
-    ? bandScale(data.length, plot)
-    : pointScale(data.length, plot);
+  const scale = scaleFor(hasBars, data.length, plot);
   const xAt = (index: number) => scale.at(index);
   const values = valuesOf(data, series.key);
   const runs = runsOf(values, xAt, y);

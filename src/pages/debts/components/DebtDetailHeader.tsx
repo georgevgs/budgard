@@ -19,12 +19,12 @@ import type { DebtProgress } from '@/pages/debts/hooks/useDebtProgress';
 import type { Debt } from '@/types/Debt';
 import DebtProgressBar from '@/pages/debts/components/DebtProgressBar';
 
-type Props = {
+interface Props {
   debt: Debt;
   progress: DebtProgress;
   onEdit: (debt: Debt) => void;
   onArchiveRequest: () => void;
-};
+}
 
 const DebtDetailHeader = ({
   debt,

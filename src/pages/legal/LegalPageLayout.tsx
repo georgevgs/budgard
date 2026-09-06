@@ -4,10 +4,10 @@ import { useTranslation } from 'react-i18next';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import Wallet from 'lucide-react/dist/esm/icons/wallet';
 
-type Props = {
+interface Props {
   title: string;
   children: ReactNode;
-};
+}
 
 // Shared shell for the public legal pages (/privacy, /terms, /contact):
 // narrow reading column, a way back home at the top, and cross-links to the

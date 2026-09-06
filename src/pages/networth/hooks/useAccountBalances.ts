@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import * as Sentry from '@/config/sentry';
+import { captureException } from '@/config/sentry';
 import { dataService } from '@/common/api/dataService';
 import type { AccountBalance } from '@/types/AccountBalance';
 
@@ -51,7 +51,7 @@ export const useAccountBalances = (
         setSnapshots(data);
         setSettled({ key, failed: false });
       } catch (error) {
-        Sentry.captureException(error, {
+        captureException(error, {
           tags: { context: 'useAccountBalances.load' },
         });
         if (!cancelled) {

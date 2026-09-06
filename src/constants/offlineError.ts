@@ -71,9 +71,25 @@ const extractError = (error: unknown): ExtractedError => {
   const e = error as Record<string, unknown>;
 
   return {
-    name: typeof e.name === 'string' ? e.name : '',
-    message: typeof e.message === 'string' ? e.message : '',
-    status: typeof e.status === 'number' ? e.status : undefined,
-    code: typeof e.code === 'string' ? e.code : undefined,
+    name: asString(e.name) ?? '',
+    message: asString(e.message) ?? '',
+    status: asNumber(e.status),
+    code: asString(e.code),
   };
+};
+
+const asString = (value: unknown): string | undefined => {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  return undefined;
+};
+
+const asNumber = (value: unknown): number | undefined => {
+  if (typeof value === 'number') {
+    return value;
+  }
+
+  return undefined;
 };

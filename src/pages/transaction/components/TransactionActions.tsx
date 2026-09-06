@@ -6,12 +6,12 @@ import { Button } from '@/common/ui/button';
 import { Switch } from '@/common/ui/switch';
 import ConfirmDestructiveDialog from '@/common/components/common/ConfirmDestructiveDialog';
 
-type Props = {
+interface Props {
   isExcluded: boolean;
   onToggleExcluded: () => void;
   onEdit: () => void;
   onDelete: () => void;
-};
+}
 
 const TransactionActions = (props: Props) => {
   const { t } = useTranslation();

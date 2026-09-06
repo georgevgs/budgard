@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import * as Sentry from '@/config/sentry';
+import { captureException } from '@/config/sentry';
 import { getReceiptUrl } from '@/common/api/receiptService';
 
 // Loads a signed receipt URL when `enabled` is true. Keeps service access
@@ -50,7 +50,7 @@ export const useReceiptUrl = (
         setLoaded({ key: receiptPath, url: next, error: false });
       })
       .catch((err) => {
-        Sentry.captureException(err, { tags: { operation: 'getReceiptUrl' } });
+        captureException(err, { tags: { operation: 'getReceiptUrl' } });
         if (cancelled) {
           return;
         }

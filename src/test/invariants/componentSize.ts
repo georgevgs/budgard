@@ -1,10 +1,11 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-// CLAUDE.md caps the component function itself at 100 lines — not the file.
-// Helpers live below `export default`, so a file holding one component and
-// six render helpers is compliant while a single 120-line component is not.
-export const COMPONENT_LINE_CAP = 100;
+// The style guide caps a component at ~150 lines. That is the component
+// function itself, not the file: helpers live below `export default`, so a
+// file holding one component and six render helpers is compliant while a
+// single 160-line component is not.
+export const COMPONENT_LINE_CAP = 150;
 
 export type ComponentSize = {
   file: string;

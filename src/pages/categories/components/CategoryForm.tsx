@@ -22,14 +22,14 @@ import { swatch } from '@/design/palette';
 const DEFAULT_CATEGORY_COLOR = swatch.violet;
 const DEFAULT_INCOME_COLOR = swatch.mint;
 
-type Props = {
+interface Props {
   category?: Category;
   // For new categories: what type to create. Defaults to 'expense'.
   // For existing categories: ignored (we preserve the row's original type).
   categoryType?: 'expense' | 'income';
   onBack: () => void;
   onClose: () => void;
-};
+}
 
 const CategoryForm = ({
   category,

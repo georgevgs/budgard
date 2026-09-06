@@ -26,7 +26,7 @@ import type { CategoryImpact } from '@/pages/categories/utils/categoryDeleteImpa
 
 const NONE = 'none';
 
-type Props = {
+interface Props {
   open: boolean;
   category: Category | null;
   impact: CategoryImpact | null;
@@ -34,7 +34,7 @@ type Props = {
   currency: string;
   onOpenChange: (open: boolean) => void;
   onConfirm: (destinationCategoryId: string | null) => void;
-};
+}
 
 const CategoryDeleteDialog = ({
   open,

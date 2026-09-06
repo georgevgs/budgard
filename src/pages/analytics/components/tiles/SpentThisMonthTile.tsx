@@ -12,11 +12,11 @@ type RhythmMonth = {
   amount: number;
 };
 
-type Props = {
+interface Props {
   monthComparison: MonthComparison;
   /** Rolling months, oldest first. The last six are charted. */
   rhythmMonths: RhythmMonth[];
-};
+}
 
 const WINDOW = 6;
 const VIEW = { width: 330, height: 120 };

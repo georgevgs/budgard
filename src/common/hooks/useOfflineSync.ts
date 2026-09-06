@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react';
-import * as Sentry from '@/config/sentry';
+import { captureException } from '@/config/sentry';
 import { useTranslation } from 'react-i18next';
 import { offlineQueue, type QueuedMutation } from '@/constants/offlineQueue';
 import { dataService } from '@/common/api/dataService';
@@ -46,7 +46,7 @@ export const useOfflineSync = (): void => {
 
         // Permanent failure: count a retry, and drop it once it's clearly poison.
         const retries = (mutation.retries ?? 0) + 1;
-        Sentry.captureException(error, {
+        captureException(error, {
           tags: { operation: 'offlineSync', mutationType: mutation.type },
           extra: { retries },
         });
@@ -70,12 +70,12 @@ export const useOfflineSync = (): void => {
       });
       // Refresh to get server state (real ids replace optimistic temp rows).
       refreshExpenses().catch((err) => {
-        Sentry.captureException(err, {
+        captureException(err, {
           tags: { operation: 'refreshExpenses', context: 'afterOfflineSync' },
         });
       });
       refreshIncomes().catch((err) => {
-        Sentry.captureException(err, {
+        captureException(err, {
           tags: { operation: 'refreshIncomes', context: 'afterOfflineSync' },
         });
       });

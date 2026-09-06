@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/constants/utils';
 
-type Props = {
+interface Props {
   children: ReactNode;
   className?: string;
-};
+}
 
 // Every module names itself in the same voice — letterspaced small caps, never
 // a heading size. The module's number is the heading; this is the caption that

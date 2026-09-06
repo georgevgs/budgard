@@ -18,9 +18,9 @@ import { SUPPORTED_CURRENCIES } from '@/constants/currencies';
 import type { DebtFormData } from '@/constants/validations';
 import { DEBT_KINDS } from '@/types/Debt';
 
-type Props = {
+interface Props {
   form: UseFormReturn<DebtFormData>;
-};
+}
 
 const DebtIdentityFields = ({ form }: Props) => {
   const { t } = useTranslation();

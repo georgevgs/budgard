@@ -2,14 +2,14 @@ import type { ComponentType } from 'react';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import { Link } from 'react-router-dom';
 
-type Props = {
+interface Props {
   title: string;
   value: string | null;
   description: string;
   setupLabel: string;
   path: string;
   icon: ComponentType<{ className?: string }>;
-};
+}
 
 // Planning destinations are navigation, not four competing dashboard stats.
 // Once a tool has data its value earns a place on the row; until then the row

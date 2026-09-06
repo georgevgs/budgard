@@ -10,13 +10,13 @@ export type DonutSlice = {
   color: string;
 };
 
-type Props = {
+interface Props {
   slices: DonutSlice[];
   size?: number;
   thickness?: number;
   renderTooltip?: (slice: DonutSlice) => ReactNode;
   ariaLabel: string;
-};
+}
 
 const GAP_DEGREES = 2;
 

@@ -30,10 +30,10 @@ import { swatch } from '@/design/palette';
 const DEFAULT_COLOR = swatch.rose;
 const DEFAULT_ICON = 'credit-card';
 
-type Props = {
+interface Props {
   debt?: Debt;
   onClose: () => void;
-};
+}
 
 const DebtForm = ({ debt, onClose }: Props) => {
   const { t } = useTranslation();

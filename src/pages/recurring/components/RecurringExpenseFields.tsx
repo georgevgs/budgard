@@ -20,10 +20,10 @@ import {
 import type { RecurringExpenseFormData } from '@/constants/validations';
 import type { Category } from '@/types/Category';
 
-type Props = {
+interface Props {
   form: UseFormReturn<RecurringExpenseFormData>;
   categories: Category[];
-};
+}
 
 const RecurringExpenseFields = ({ form, categories }: Props) => {
   const { t } = useTranslation();

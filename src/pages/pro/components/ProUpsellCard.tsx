@@ -4,10 +4,10 @@ import SurfaceCard from '@/common/components/common/SurfaceCard';
 import { Button } from '@/common/ui/button';
 import { useUpgradeDialog } from '@/common/contexts/UpgradeDialogContext';
 
-type Props = {
+interface Props {
   title: string;
   description: string;
-};
+}
 
 // A gate should read as an offer, not a locked door. This used to borrow
 // EmptyStateCard, which meant every Pro gate in the app showed a grey padlock

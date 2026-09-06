@@ -19,11 +19,11 @@ import { Textarea } from '@/common/ui/textarea';
 import { useFeedbackForm } from '@/pages/settings/hooks/useFeedbackForm';
 import type { FeedbackKind } from '@/common/api/feedbackService';
 
-type Props = {
+interface Props {
   open: boolean;
   kind: FeedbackKind;
   onClose: () => void;
-};
+}
 
 const FeedbackDialog = ({ open, kind, onClose }: Props) => {
   const { t } = useTranslation();

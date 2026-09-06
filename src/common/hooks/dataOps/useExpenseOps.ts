@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import * as Sentry from '@/config/sentry';
+import { captureException } from '@/config/sentry';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/common/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/common/contexts/DataContext';
@@ -49,7 +49,7 @@ export const useExpenseOps = () => {
 
     const refreshDebtsQuietly = () => {
       refreshDebts().catch((err) => {
-        Sentry.captureException(err, {
+        captureException(err, {
           tags: { context: 'afterExpenseSubmitDebt' },
         });
       });
@@ -203,7 +203,7 @@ export const useExpenseOps = () => {
 
           if (deletedDebtId) {
             refreshDebts().catch((err) => {
-              Sentry.captureException(err, {
+              captureException(err, {
                 tags: { context: 'afterExpenseDeleteDebt' },
               });
             });
@@ -413,7 +413,7 @@ const processReceipt = async (
         oldPathToDelete = existingReceiptPath;
       }
     } catch (error) {
-      Sentry.captureException(error, { tags: { operation: 'uploadReceipt' } });
+      captureException(error, { tags: { operation: 'uploadReceipt' } });
       receiptFailed = true;
     }
   } else if (removeExistingReceipt) {
@@ -430,7 +430,7 @@ const processReceipt = async (
 // which is worth reporting but must never fail the user's save.
 const deleteReceiptQuietly = (path: string, context: string): void => {
   deleteReceipt(path).catch((err) => {
-    Sentry.captureException(err, {
+    captureException(err, {
       tags: { operation: 'deleteReceipt', context },
     });
   });

@@ -5,11 +5,11 @@ import { useDataConfig } from '@/common/contexts/DataContext';
 import { formatCurrency } from '@/constants/utils';
 import type { CategoryRow } from '@/pages/analytics/hooks/useAnalyticsData';
 
-type Props = {
+interface Props {
   breakdown: CategoryRow[];
   totalSpent: number;
   onCategoryClick: (category: CategoryRow) => void;
-};
+}
 
 const TOP = 3;
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import * as Sentry from '@/config/sentry';
+import { captureException } from '@/config/sentry';
 import { format } from 'date-fns';
 import {
   useAccountsData,
@@ -159,7 +159,7 @@ export const useNetWorth = () => {
 
             return { key, rate, failed: false };
           } catch (error) {
-            Sentry.captureException(error, {
+            captureException(error, {
               tags: { context: 'useNetWorth.fetchExchangeRate' },
             });
 

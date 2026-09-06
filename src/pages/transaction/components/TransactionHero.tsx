@@ -6,11 +6,11 @@ import { getColorTint } from '@/constants/categoryColor';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+interface Props {
   transaction: Expense;
   currency: string;
   isIncome: boolean;
-};
+}
 
 // The top of the detail screen: what it was, and how much. Carries the
 // view-transition name that pairs it with the row it was opened from, so the

@@ -5,13 +5,13 @@ import { formatCurrency } from '@/constants/utils';
 import { getColorTint } from '@/constants/categoryColor';
 import type { CategoryRow } from '@/pages/analytics/hooks/useAnalyticsData';
 
-type Props = {
+interface Props {
   breakdown: CategoryRow[];
   totalSpent: number;
   selectedYear: number;
   currency: string;
   onCategoryClick: (category: CategoryRow) => void;
-};
+}
 
 const CategoryBreakdownSection = (props: Props) => {
   const { t } = useTranslation();

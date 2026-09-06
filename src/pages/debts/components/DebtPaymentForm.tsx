@@ -19,10 +19,10 @@ import DebtPaymentFields from '@/pages/debts/components/DebtPaymentFields';
 import { debtPaymentSchema, type DebtPaymentFormData } from '@/constants/validations';
 import type { Debt } from '@/types/Debt';
 
-type Props = {
+interface Props {
   debt: Debt;
   onClose: () => void;
-};
+}
 
 const DebtPaymentForm = ({ debt, onClose }: Props) => {
   const { t } = useTranslation();

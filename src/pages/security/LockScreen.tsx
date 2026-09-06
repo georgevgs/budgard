@@ -7,10 +7,10 @@ import { useLockScreen } from '@/pages/security/hooks/useLockScreen';
 import { PIN_LENGTH } from '@/constants/appLock';
 import { cn } from '@/constants/utils';
 
-type Props = {
+interface Props {
   onUnlock: () => void;
   onSignOut: () => void;
-};
+}
 
 // Covers the whole app, above everything including dialogs. Deliberately not a
 // route: locking must not touch history, or the back button would walk out of

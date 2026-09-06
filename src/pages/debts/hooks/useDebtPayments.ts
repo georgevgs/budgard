@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import * as Sentry from '@/config/sentry';
+import { captureException } from '@/config/sentry';
 import { dataService } from '@/common/api/dataService';
 import type { Expense } from '@/types/Expense';
 
@@ -51,7 +51,7 @@ export const useDebtPayments = (
         setPayments(data);
         setSettled({ key, failed: false });
       } catch (error) {
-        Sentry.captureException(error, {
+        captureException(error, {
           tags: { context: 'useDebtPayments.load' },
         });
         if (!cancelled) {

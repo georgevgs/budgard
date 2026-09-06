@@ -14,7 +14,7 @@ type MonthlyDataPoint = {
   net?: number;
 };
 
-type Props = {
+interface Props {
   data: MonthlyDataPoint[];
   monthlyBudget: number | null;
   defaultCurrency: string;
@@ -22,7 +22,7 @@ type Props = {
   yAxisMax: number | undefined;
   onMonthClick: (monthIndex: number) => void;
   showCashFlow: boolean;
-};
+}
 
 const MonthlyTrendChart = ({
   data,

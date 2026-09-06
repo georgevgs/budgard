@@ -11,11 +11,11 @@ import { useSetPin } from '@/pages/security/hooks/useSetPin';
 import { PIN_LENGTH } from '@/constants/appLock';
 import { cn } from '@/constants/utils';
 
-type Props = {
+interface Props {
   open: boolean;
   onClose: () => void;
   onSaved: () => void;
-};
+}
 
 // Two passes: choose, then repeat. A single-entry PIN is one slip away from
 // locking someone out of their own app with no way to discover the typo.

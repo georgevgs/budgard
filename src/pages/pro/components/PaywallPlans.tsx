@@ -4,11 +4,11 @@ import { yearlySavingsPercent } from '@/constants/proPlans';
 import type { CheckoutPlan } from '@/common/api/subscriptionService';
 import { cn } from '@/constants/utils';
 
-type Props = {
+interface Props {
   plan: CheckoutPlan;
   onSelect: (plan: CheckoutPlan) => void;
   plans: ProPlansDisplay;
-};
+}
 
 // Stacked selectable plan cards, yearly first with its savings badge —
 // the price a card shows is always the per-month figure so the two plans

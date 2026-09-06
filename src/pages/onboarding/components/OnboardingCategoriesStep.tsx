@@ -13,12 +13,12 @@ import {
 import { cn } from '@/constants/utils';
 import { PRESET_CATEGORIES } from '@/pages/onboarding/components/presetCategories';
 
-type Props = {
+interface Props {
   isSubmitting: boolean;
   onBack: () => void;
   onSkip: () => void;
   onNext: (selectedIndices: number[]) => void;
-};
+}
 
 const OnboardingCategoriesStep = ({
   isSubmitting,

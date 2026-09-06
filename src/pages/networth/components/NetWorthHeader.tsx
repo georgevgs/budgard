@@ -8,10 +8,10 @@ import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import type { NetWorthSummary } from '@/common/hooks/useNetWorth';
 
-type Props = {
+interface Props {
   summary: NetWorthSummary;
   defaultCurrency: string;
-};
+}
 
 const NetWorthHeader = ({ summary, defaultCurrency }: Props) => {
   const { t } = useTranslation();
