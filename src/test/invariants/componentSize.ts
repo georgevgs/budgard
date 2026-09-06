@@ -17,12 +17,23 @@ export type ComponentSize = {
 const SKIPPED_DIRS = ['ui'];
 
 export const measureComponents = (roots: string[]): ComponentSize[] => {
-  return roots.flatMap(collectFiles).flatMap(measureFile);
+  return roots
+    .flatMap((root) => collectFiles(root))
+    .flatMap((file) => measureFile(file, COMPONENT));
+};
+
+// The same walk over camelCase top-level declarations: hooks, API modules and
+// utilities. A 600-line hook is the same failure as a 600-line component, and
+// until now nothing looked outside src/pages and src/common/components.
+export const measureFunctions = (roots: string[]): ComponentSize[] => {
+  return roots
+    .flatMap((root) => collectFiles(root, ['.ts', '.tsx']))
+    .flatMap((file) => measureFile(file, FUNCTION));
 };
 
 // --- Helpers ---
 
-const collectFiles = (dir: string): string[] => {
+const collectFiles = (dir: string, extensions = ['.tsx']): string[] => {
   if (!isDirectory(dir)) {
     return [];
   }
@@ -34,12 +45,12 @@ const collectFiles = (dir: string): string[] => {
         return [];
       }
 
-      return collectFiles(path);
+      return collectFiles(path, extensions);
     }
-    if (!path.endsWith('.tsx')) {
+    if (!extensions.some((extension) => path.endsWith(extension))) {
       return [];
     }
-    if (path.endsWith('.test.tsx')) {
+    if (path.endsWith('.test.ts') || path.endsWith('.test.tsx')) {
       return [];
     }
 
@@ -58,13 +69,14 @@ const isDirectory = (path: string): boolean => {
 // A component is a top-level arrow assigned to a capitalised const. Prettier
 // is not clean across this repo (see the project notes), so the closing line
 // cannot be matched by shape — the span is found by counting delimiters.
-const DECLARATION = /^(?:export )?const ([A-Z]\w*)\s*[:=]/;
+const COMPONENT = /^(?:export )?const ([A-Z]\w*)\s*[:=]/;
+const FUNCTION = /^(?:export )?const ([a-z]\w*)\s*[:=]/;
 
-const measureFile = (file: string): ComponentSize[] => {
+const measureFile = (file: string, declaration: RegExp): ComponentSize[] => {
   const lines = readFileSync(file, 'utf8').split('\n');
 
   return lines.flatMap((line, index) => {
-    const match = DECLARATION.exec(line);
+    const match = declaration.exec(line);
     if (!match) {
       return [];
     }
