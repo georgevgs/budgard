@@ -61,38 +61,17 @@ export const useTodayLayout = (): TodayLayoutControls => {
   }, []);
 
   useEffect(() => {
-    let active = true;
-
-    void uiPreferencesService
-      .getTodayLayout()
-      .then((remote) => {
-        if (!active || hasCommittedRef.current) {
-          return;
-        }
-        if (hasTodayLayoutSyncPending()) {
-          persist(layoutRef.current);
-
-          return;
-        }
-        if (!remote) {
-          persist(layoutRef.current);
-
-          return;
-        }
-
-        layoutRef.current = remote;
-        setLayout(remote);
-        writeStoredLayout(remote);
-        setIsPersisted(true);
-      })
-      .catch(() => {
-        if (active) {
-          setIsPersisted(false);
-        }
-      });
+    const run = { active: true };
+    void hydrateFromServer(run, {
+      persist,
+      layoutRef,
+      hasCommittedRef,
+      setLayout,
+      setIsPersisted,
+    });
 
     return () => {
-      active = false;
+      run.active = false;
     };
   }, [persist]);
 
@@ -186,3 +165,48 @@ export const useTodayLayout = (): TodayLayoutControls => {
 // --- Helpers ---
 
 type LayoutUpdate = (current: TodayLayout) => TodayLayout;
+
+
+// --- Helpers ---
+
+type HydrateDeps = {
+  persist: (next: TodayLayout) => void;
+  layoutRef: { current: TodayLayout };
+  hasCommittedRef: { current: boolean };
+  setLayout: (next: TodayLayout) => void;
+  setIsPersisted: (value: boolean) => void;
+};
+
+// On mount, reconcile the layout held locally with the owner-scoped row. A
+// local edit that never reached the server wins and is re-sent; otherwise the
+// server's copy is adopted so a second device sees the same grid.
+const hydrateFromServer = async (
+  run: { active: boolean },
+  { persist, layoutRef, hasCommittedRef, setLayout, setIsPersisted }: HydrateDeps,
+): Promise<void> => {
+  try {
+    const remote = await uiPreferencesService.getTodayLayout();
+    if (!run.active || hasCommittedRef.current) {
+      return;
+    }
+    if (hasTodayLayoutSyncPending()) {
+      persist(layoutRef.current);
+
+      return;
+    }
+    if (!remote) {
+      persist(layoutRef.current);
+
+      return;
+    }
+
+    layoutRef.current = remote;
+    setLayout(remote);
+    writeStoredLayout(remote);
+    setIsPersisted(true);
+  } catch {
+    if (run.active) {
+      setIsPersisted(false);
+    }
+  }
+};
