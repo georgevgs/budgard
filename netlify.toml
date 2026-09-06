@@ -76,7 +76,11 @@
   status = 200
 
 [build]
-  command = "npm run test && npm run build"
+  # Lint runs first because it is the cheapest and because the style rules it
+  # carries (no ternaries, no && in JSX children, named imports, a test that
+  # actually asserts) otherwise gate nothing — there is no CI and no commit
+  # hook, so this is the only place they are enforced.
+  command = "npm run lint && npm run test && npm run build"
   publish = "dist"
 
 [[context.production.plugins]]
