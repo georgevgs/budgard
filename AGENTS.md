@@ -59,7 +59,9 @@ src/design/              tokens and palette
 - `src/common/components/bento`: `BentoGrid` / `BentoTile` / `TileLabel` — the
   grid language Today and Trends are built from. A new module goes in
   `<feature>/components/tiles/`, never inline in the view.
-- `src/constants/validations.ts`: all Zod schemas.
+- Zod schemas live with their feature (`<feature>/validations.ts`);
+  `src/constants/validations.ts` holds only the shared primitives they are
+  built from.
 - `src/design/tokens.ts`: **every colour in the app.** The only file to edit for
   a theme change — the generated CSS, the pre-paint script in `index.html`, the
   CSP hash in `netlify.toml` and the manifest colours are all built from it by
@@ -154,7 +156,7 @@ constrain new work:
 ## ✅ Before you finish
 
 - **I18n**: every user-facing string goes through `t()`, including `aria-label`s.
-- **Forms**: Zod schema in `src/constants/validations.ts`; disable submit while
+- **Forms**: Zod schema in the feature's `validations.ts`; disable submit while
   invalid or submitting.
 - **A way out**: every modal and flow has a visible cancel or exit.
 - **Empty states** explain how to get started; errors offer a retry.
