@@ -1,0 +1,63 @@
+import type { ReactNode } from 'react';
+import { Button } from '@/common/ui/button';
+import { cn } from '@/constants/utils';
+
+type Props = {
+  isOpen: boolean;
+  label: string;
+  icon: ReactNode;
+  onClick: () => void;
+  labelDelayClass?: string;
+};
+
+const SpeedDialAction = ({
+  isOpen,
+  label,
+  icon,
+  onClick,
+  labelDelayClass,
+}: Props) => {
+  return (
+    <div className="flex items-center gap-2">
+      <div className={getLabelClass(isOpen, labelDelayClass)}>
+        <span className="text-sm font-medium">{label}</span>
+      </div>
+      <Button
+        size="icon"
+        className="lift h-12 w-12 rounded-full"
+        onClick={onClick}
+        aria-label={label}
+        tabIndex={getTabIndex(isOpen)}
+      >
+        {icon}
+      </Button>
+    </div>
+  );
+};
+
+export default SpeedDialAction;
+
+// --- Helpers ---
+
+const getTabIndex = (isOpen: boolean): number => {
+  if (isOpen) {
+    return 0;
+  }
+
+  return -1;
+};
+
+const getLabelClass = (
+  isOpen: boolean,
+  labelDelayClass: string | undefined,
+): string => {
+  const base = cn(
+    'tile lift-soft rounded-xl px-2 py-1',
+    'opacity-0 -translate-x-4 transition-[opacity,transform] duration-200',
+  );
+  if (isOpen) {
+    return cn(base, 'opacity-100 translate-x-0', labelDelayClass);
+  }
+
+  return base;
+};

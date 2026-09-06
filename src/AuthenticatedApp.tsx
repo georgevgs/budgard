@@ -1,13 +1,13 @@
 import { Suspense } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import OfflineBanner from '@/components/common/OfflineBanner';
-import RouteMetadata from '@/components/common/RouteMetadata';
-import { AppLoadingSkeleton } from '@/components/expenses/ExpensesLoading';
-import AppRouteTree from '@/components/routing/AppRouteTree';
-import RouteFallback from '@/components/routing/RouteFallback';
-import { ErrorBoundary } from '@/components/ui/error-boundary';
-import { Toaster } from '@/components/ui/toaster';
-import AuthenticatedProviders from '@/contexts/AuthenticatedProviders';
+import OfflineBanner from '@/common/components/common/OfflineBanner';
+import RouteMetadata from '@/common/components/common/RouteMetadata';
+import { AppLoadingSkeleton } from '@/pages/expenses/components/ExpensesLoading';
+import AppRouteTree from '@/common/components/routing/AppRouteTree';
+import RouteFallback from '@/common/components/routing/RouteFallback';
+import { ErrorBoundary } from '@/common/ui/error-boundary';
+import { Toaster } from '@/common/ui/toaster';
+import AuthenticatedProviders from '@/common/contexts/AuthenticatedProviders';
 
 const AuthenticatedApp = () => (
   <BrowserRouter>

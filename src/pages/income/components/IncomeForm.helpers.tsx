@@ -1,0 +1,125 @@
+import { parseISO } from 'date-fns';
+import Plus from 'lucide-react/dist/esm/icons/plus';
+import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
+import CategoryIcon from '@/common/components/common/CategoryIcon';
+import { amountToInput } from '@/constants/utils';
+import {
+  resolveSourceAmount,
+  resolveSourceCurrency,
+} from '@/constants/transactionAmount';
+import type { Expense } from '@/types/Expense';
+import type { Category } from '@/types/Category';
+
+export type TranslateFunction = (
+  key: string,
+  options?: Record<string, unknown>,
+) => string;
+
+export const getInitialAmount = (
+  income: Expense | undefined,
+  defaultCurrency: string,
+): string => {
+  if (!income) return '';
+
+  return amountToInput(
+    resolveSourceAmount(income, defaultCurrency),
+    resolveSourceCurrency(income, defaultCurrency),
+  );
+};
+
+export const getInitialDate = (income: Expense | undefined): Date => {
+  if (income) return parseISO(income.date);
+
+  return new Date();
+};
+
+const getQuickCreateLabel = (
+  isCreating: boolean,
+  trimmedSearch: string,
+  t: TranslateFunction,
+): string => {
+  if (isCreating) return t('common.saving');
+
+  return t('income.createCategory', { name: trimmedSearch });
+};
+
+export const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {
+  if (isEditing) return t('income.editIncome');
+
+  return t('income.addIncome');
+};
+
+export const renderSaveButtonLabel = (
+  isSubmitting: boolean,
+  t: TranslateFunction,
+) => {
+  if (isSubmitting) return t('common.saving');
+
+  return t('income.saveIncome');
+};
+
+export const renderCategoryButtonContent = (
+  category: Category | undefined,
+  t: TranslateFunction,
+) => {
+  if (!category) {
+    return <span>{t('income.selectCategory')}</span>;
+  }
+
+  return (
+    <span className="flex items-center gap-2">
+      {renderCategoryDot(category)}
+      {category.name}
+    </span>
+  );
+};
+
+export const renderCategoryDot = (category: Category) => {
+  if (category.icon) {
+    return <CategoryIcon icon={category.icon} />;
+  }
+
+  return (
+    <div
+      className="w-3 h-3 rounded-full shrink-0"
+      style={{ backgroundColor: category.color }}
+      aria-hidden="true"
+    />
+  );
+};
+
+export const renderBottomAction = (
+  showCreate: boolean,
+  isCreating: boolean,
+  trimmedSearch: string,
+  onCreate: () => void,
+  onManage: () => void,
+  t: TranslateFunction,
+) => {
+  if (showCreate) {
+    const label = getQuickCreateLabel(isCreating, trimmedSearch, t);
+
+    return (
+      <button
+        type="button"
+        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-accent focus-visible:outline-none focus-visible:bg-accent text-left text-primary-ink border-t border-border/40 disabled:opacity-50 disabled:cursor-not-allowed"
+        onClick={onCreate}
+        disabled={isCreating}
+      >
+        <Plus className="h-3.5 w-3.5 shrink-0" />
+        {label}
+      </button>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-accent focus-visible:outline-none focus-visible:bg-accent text-left text-muted-foreground hover:text-foreground border-t border-border/40"
+      onClick={onManage}
+    >
+      <Settings2 className="h-3.5 w-3.5 shrink-0" />
+      {t('income.manageSources')}
+    </button>
+  );
+};

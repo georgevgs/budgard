@@ -33,7 +33,7 @@ export default tseslint.config(
     // shadcn primitives are generated code we do not modify (see CLAUDE.md),
     // and exporting cva variants beside the component (e.g. buttonVariants)
     // is their canonical API shape.
-    files: ['src/components/ui/**'],
+    files: ['src/common/ui/**'],
     rules: {
       'react-refresh/only-export-components': 'off',
     },

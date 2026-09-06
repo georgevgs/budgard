@@ -47,7 +47,7 @@ const chunkForModule = (id: string): string | undefined => {
     return undefined;
   }
 
-  // Whole Sentry SDK (loaded lazily via src/lib/sentry.ts) in one chunk.
+  // Whole Sentry SDK (loaded lazily via src/config/sentry.ts) in one chunk.
   if (matchesPackage(id, ["@sentry", "@sentry-internal"])) {
     return "sentry";
   }
@@ -67,7 +67,7 @@ const chunkForModule = (id: string): string | undefined => {
   // supabase-js is needed at boot but is large, so the whole scope gets its
   // own chunk: the entry shrinks and supabase parses in parallel. The
   // realtime stack is no longer part of that weight — the alias below swaps
-  // @supabase/realtime-js for src/lib/realtimeStub.ts — but the rest of the
+  // @supabase/realtime-js for src/config/realtimeStub.ts — but the rest of the
   // client still is.
   if (matchesPackage(id, ["@supabase"])) {
     return "supabase-vendor";
@@ -434,10 +434,10 @@ export default defineConfig({
       // every write goes through the offline queue — so it is aliased to a
       // stub that throws loudly if anything ever asks for a channel.
       //
-      // See src/lib/realtimeStub.ts. Deleting this line turns realtime back on.
+      // See src/config/realtimeStub.ts. Deleting this line turns realtime back on.
       "@supabase/realtime-js": path.resolve(
         import.meta.dirname,
-        "./src/lib/realtimeStub.ts",
+        "./src/config/realtimeStub.ts",
       ),
     },
   },
@@ -477,8 +477,8 @@ export default defineConfig({
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
     coverage: {
       provider: 'v8',
-      include: ['src/lib/**', 'src/hooks/**', 'src/services/**', 'src/components/**'],
-      exclude: ['src/lib/supabase.ts', 'src/lib/i18n.ts', 'src/hooks/usePwaUpdate.ts', 'src/**/*.d.ts', 'src/components/ui/**'],
+      include: ['src/pages/**', 'src/common/**', 'src/constants/**', 'src/config/**'],
+      exclude: ['src/config/supabase.ts', 'src/config/i18n.ts', 'src/common/hooks/usePwaUpdate.ts', 'src/**/*.d.ts', 'src/common/ui/**'],
     },
   },
 });

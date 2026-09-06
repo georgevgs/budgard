@@ -50,13 +50,13 @@ describe('locale precache policy', () => {
   it('names the fallback language that i18n actually falls back to', () => {
     // If these two ever disagree, the precached locale is not the one a user
     // with no match gets, and the fallback path costs a network round trip.
-    const i18n = read('src/lib/i18n.ts');
+    const i18n = read('src/config/i18n.ts');
 
     expect(i18n).toContain(`fallbackLng: '${FALLBACK_LANG}'`);
   });
 
   it('has a locale directory for every supported language', () => {
-    const i18n = read('src/lib/i18n.ts');
+    const i18n = read('src/config/i18n.ts');
     const supported = [
       ...i18n.matchAll(/const SUPPORTED = \[([^\]]+)\]/g),
     ][0]?.[1];

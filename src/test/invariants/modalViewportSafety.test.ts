@@ -11,20 +11,20 @@ const read = (file: string): string => {
 };
 
 const SCROLLABLE_DIALOGS = [
-  'src/components/auth/LoginModal.tsx',
-  'src/components/budget/BudgetForm.tsx',
-  'src/components/landing/IosInstallModal.tsx',
-  'src/components/onboarding/OnboardingFlow.tsx',
-  'src/components/security/SetPinDialog.tsx',
+  'src/pages/auth/components/LoginModal.tsx',
+  'src/pages/budget/components/BudgetForm.tsx',
+  'src/pages/landing/components/IosInstallModal.tsx',
+  'src/pages/onboarding/OnboardingFlow.tsx',
+  'src/pages/security/components/SetPinDialog.tsx',
 ] as const;
 
 const ZERO_PADDING_ACTION_SHEETS = [
-  'src/components/categories/CategoryManager.tsx',
-  'src/components/debts/DebtForm.tsx',
-  'src/components/debts/DebtPaymentForm.tsx',
-  'src/components/goals/GoalForm.tsx',
-  'src/components/networth/AccountForm.tsx',
-  'src/components/networth/BalanceSnapshotForm.tsx',
+  'src/pages/categories/components/CategoryManager.tsx',
+  'src/pages/debts/components/DebtForm.tsx',
+  'src/pages/debts/components/DebtPaymentForm.tsx',
+  'src/pages/goals/components/GoalForm.tsx',
+  'src/pages/networth/components/AccountForm.tsx',
+  'src/pages/networth/components/BalanceSnapshotForm.tsx',
 ] as const;
 
 describe('modal viewport safety', () => {
@@ -65,8 +65,8 @@ describe('modal viewport safety', () => {
 
   it('keeps the landing header visible in an iOS Home Screen web app', () => {
     const css = read('src/index.css');
-    const header = read('src/components/landing/Header.tsx');
-    const loading = read('src/components/landing/LandingLoading.tsx');
+    const header = read('src/pages/landing/components/Header.tsx');
+    const loading = read('src/pages/landing/components/LandingLoading.tsx');
     const document = read('index.html');
     const manifest = read('public/manifest.json');
 
@@ -87,7 +87,7 @@ describe('modal viewport safety', () => {
 
   it('uses swipe as the only mobile dialog chrome and keeps desktop close', () => {
     const css = read('src/index.css');
-    const dialog = read('src/components/ui/dialog.tsx');
+    const dialog = read('src/common/ui/dialog.tsx');
 
     expect(css).toMatch(
       /@media \(max-width: 639px\) \{\s+\[role='dialog'\]\[data-state\] > button:last-child \{\s+display: none;\s+\}\s+\}/,
@@ -106,11 +106,11 @@ describe('modal viewport safety', () => {
   );
 
   it('keeps secondary tasks inside their parent sheet', () => {
-    const accountSheet = read('src/components/networth/AccountDetailSheet.tsx');
-    const debtSheet = read('src/components/debts/DebtDetailSheet.tsx');
-    const incomeForm = read('src/components/income/IncomeForm.tsx');
+    const accountSheet = read('src/pages/networth/components/AccountDetailSheet.tsx');
+    const debtSheet = read('src/pages/debts/components/DebtDetailSheet.tsx');
+    const incomeForm = read('src/pages/income/components/IncomeForm.tsx');
     const expenseCategory = read(
-      'src/components/expenses/ExpenseCategoryField.tsx',
+      'src/pages/expenses/components/ExpenseCategoryField.tsx',
     );
 
     expect(countDialogRoots(accountSheet)).toBe(1);
@@ -125,8 +125,8 @@ describe('modal viewport safety', () => {
   // its own pill and has to clip its own swipe-to-delete reveal.
   it('paints flush surface rims above opaque child rows', () => {
     const css = read('src/index.css');
-    const swipeableRow = read('src/components/activity/SwipeableRow.tsx');
-    const activityFeed = read('src/components/activity/ActivityFeed.tsx');
+    const swipeableRow = read('src/pages/activity/components/SwipeableRow.tsx');
+    const activityFeed = read('src/pages/activity/components/ActivityFeed.tsx');
 
     expect(css).toContain('.surface-card-flush::after');
     expect(css).toContain('.tile-flush::after');

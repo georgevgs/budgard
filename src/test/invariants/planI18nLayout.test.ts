@@ -22,7 +22,7 @@ const OVERVIEW_TITLES = [
 describe('Plan translation layout', () => {
   it('keeps planning destinations in one compact list', () => {
     const source = readFileSync(
-      path.join(ROOT, 'src/components/plan/PlanView.tsx'),
+      path.join(ROOT, 'src/pages/plan/PlanView.tsx'),
       'utf8',
     );
 
@@ -43,7 +43,7 @@ describe('Plan translation layout', () => {
 
   it('offers setup instead of rendering an empty zero value', () => {
     const source = readFileSync(
-      path.join(ROOT, 'src/components/plan/PlanOverviewCard.tsx'),
+      path.join(ROOT, 'src/pages/plan/components/PlanOverviewCard.tsx'),
       'utf8',
     );
 

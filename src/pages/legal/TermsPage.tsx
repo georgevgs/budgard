@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import LegalPageLayout from '@/pages/legal/LegalPageLayout';
 import LegalSections, { type LegalSection } from '@/pages/legal/LegalSections';
-import { useDateLocale } from '@/hooks/useDateLocale';
-import { LEGAL_LAST_UPDATED, SUPPORT_EMAIL } from '@/lib/legal';
+import { useDateLocale } from '@/common/hooks/useDateLocale';
+import { LEGAL_LAST_UPDATED, SUPPORT_EMAIL } from '@/pages/legal/utils/legal';
 
 const TermsPage = () => {
   const { t } = useTranslation();

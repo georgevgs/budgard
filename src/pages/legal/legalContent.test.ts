@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { createInstance, type i18n as I18nInstance } from 'i18next';
 import en from '@/locales/en/translation.json';
 import el from '@/locales/el/translation.json';
-import { SUPPORT_EMAIL } from '@/lib/legal';
+import { SUPPORT_EMAIL } from '@/pages/legal/utils/legal';
 import type { LegalSection } from '@/pages/legal/LegalSections';
 
 // The legal pages rely on i18next returning structured section arrays with

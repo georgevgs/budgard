@@ -7,11 +7,11 @@ const ROOT = path.resolve(__dirname, '../../..');
 describe('chart accessibility', () => {
   it('does not hide the keyboard-readable year chart from assistive technology', () => {
     const cashFlowSection = readFileSync(
-      path.join(ROOT, 'src/components/analytics/CashFlowSection.tsx'),
+      path.join(ROOT, 'src/pages/analytics/components/CashFlowSection.tsx'),
       'utf8',
     );
     const chart = readFileSync(
-      path.join(ROOT, 'src/components/charts/CartesianChart.tsx'),
+      path.join(ROOT, 'src/common/components/charts/CartesianChart.tsx'),
       'utf8',
     );
 

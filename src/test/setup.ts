@@ -26,7 +26,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 // Mock Supabase client
-vi.mock('@/lib/supabase', () => {
+vi.mock('@/config/supabase', () => {
   const chain = () => {
     const obj: Record<string, unknown> = {};
     const methods = [

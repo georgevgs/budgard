@@ -1,9 +1,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RootProvider } from '@/contexts/RootProvider';
+import { RootProvider } from '@/common/contexts/RootProvider';
 import App from '@/App';
-import { i18nReady } from '@/lib/i18n';
-import { captureException, loadSentry } from '@/lib/sentry';
+import { i18nReady } from '@/config/i18n';
+import { captureException, loadSentry } from '@/config/sentry';
 // Imported through the module graph rather than @import-ed from index.css:
 // Tailwind inlines its own @import chain and the relative url()s inside would
 // stop resolving, shipping dead font URLs. Vite rebases them correctly here.
@@ -72,7 +72,7 @@ scheduleIdleWork(() => {
       return;
     }
 
-    import('@/lib/sentryHeavy')
+    import('@/config/sentryHeavy')
       .then((m) => m.initHeavySentryIntegrations())
       .catch(() => {
         // Best-effort: replay/profiling must never block or break the app.

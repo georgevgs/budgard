@@ -74,7 +74,7 @@ describe('crawler files', () => {
 const collectRoutes = (): string[] => {
   const sources = [
     'src/App.tsx',
-    'src/components/routing/AppRouteTree.tsx',
+    'src/common/components/routing/AppRouteTree.tsx',
   ].map((path) => readFileSync(path, 'utf8'));
 
   const paths = new Set<string>();

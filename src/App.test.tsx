@@ -8,14 +8,14 @@ const authState = vi.hoisted(() => ({
   isLoading: false,
 }));
 
-vi.mock('@/contexts/AuthContext', () => ({
+vi.mock('@/common/contexts/AuthContext', () => ({
   useAuth: () => ({
     ...authState,
     isAuthenticated: authState.session !== null,
   }),
 }));
 
-vi.mock('@/hooks/usePwaUpdate', () => ({
+vi.mock('@/common/hooks/usePwaUpdate', () => ({
   usePwaUpdate: vi.fn(),
 }));
 
@@ -23,35 +23,35 @@ vi.mock('@/AuthenticatedApp', () => ({
   default: () => <div>authenticated application</div>,
 }));
 
-vi.mock('@/components/today/TodayView', () => ({
+vi.mock('@/pages/today/TodayView', () => ({
   default: () => <div>today view</div>,
 }));
 
-vi.mock('@/pages/LandingPage', () => ({
+vi.mock('@/pages/landing/LandingPage', () => ({
   default: () => <div>public landing page</div>,
 }));
 
-vi.mock('@/components/common/RouteMetadata', () => ({
+vi.mock('@/common/components/common/RouteMetadata', () => ({
   default: () => null,
 }));
 
-vi.mock('@/components/common/OfflineBanner', () => ({
+vi.mock('@/common/components/common/OfflineBanner', () => ({
   default: () => null,
 }));
 
-vi.mock('@/components/ui/toaster', () => ({
+vi.mock('@/common/ui/toaster', () => ({
   Toaster: () => null,
 }));
 
-vi.mock('@/components/ui/error-boundary', () => ({
+vi.mock('@/common/ui/error-boundary', () => ({
   ErrorBoundary: ({ children }: { children: ReactNode }) => children,
 }));
 
-vi.mock('@/components/expenses/ExpensesLoading', () => ({
+vi.mock('@/pages/expenses/components/ExpensesLoading', () => ({
   AppLoadingSkeleton: () => <div>authenticated loading</div>,
 }));
 
-vi.mock('@/components/landing/LandingLoading', () => ({
+vi.mock('@/pages/landing/components/LandingLoading', () => ({
   default: () => <div>public loading</div>,
 }));
 

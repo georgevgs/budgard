@@ -1,0 +1,56 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useDataActions, useDataConfig } from '@/common/contexts/DataContext';
+import { dataService } from '@/common/api/dataService';
+import { haptics } from '@/constants/haptics';
+import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
+import {
+  prependOptimistic,
+  removeOptimistic,
+  replaceById,
+} from '@/common/hooks/dataOps/helpers';
+import { useMutationRunner } from '@/common/hooks/dataOps/useMutationRunner';
+import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
+
+export const useTemplateOps = () => {
+  const { activeOwnerId } = useFinancialSpace();
+  const { isInitialized } = useDataConfig();
+  const { setTemplates } = useDataActions();
+  const { t } = useTranslation();
+  const runMutation = useMutationRunner();
+
+  return useMemo(() => {
+    const skip = !isInitialized;
+
+    const handleTemplateCreate = (templateData: Partial<ExpenseTemplate>) => {
+      const optimistic = {
+        ...templateData,
+        id: `temp-${Date.now()}`,
+        created_at: new Date().toISOString(),
+      } as ExpenseTemplate;
+
+      return runMutation({
+        operation: 'createTemplate',
+        skip,
+        errorMessage: t('templates.saveFailed'),
+        successMessage: t('templates.saved'),
+        optimistic: () => prependOptimistic(setTemplates, optimistic),
+        perform: () => dataService.createTemplate(templateData, activeOwnerId),
+        commit: (saved) =>
+          setTemplates((prev) => replaceById(prev, optimistic.id, saved)),
+      });
+    };
+
+    const handleTemplateDelete = (templateId: string) =>
+      runMutation({
+        operation: 'deleteTemplate',
+        skip,
+        errorMessage: t('templates.deleteFailed'),
+        onStart: () => haptics.warning(),
+        optimistic: () => removeOptimistic(setTemplates, templateId),
+        perform: () => dataService.deleteTemplate(templateId),
+      });
+
+    return { handleTemplateCreate, handleTemplateDelete };
+  }, [activeOwnerId, isInitialized, setTemplates, runMutation, t]);
+};

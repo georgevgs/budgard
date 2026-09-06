@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Skeleton } from '@/components/ui/skeleton';
-import LoadingScreen from '@/components/ui/loading-screen';
+import { Skeleton } from '@/common/ui/skeleton';
+import LoadingScreen from '@/common/ui/loading-screen';
 
 // Prose placeholder for /privacy, /terms and /contact. Mirrors
 // LegalPageLayout: header bar, narrow reading column, then paragraph blocks.

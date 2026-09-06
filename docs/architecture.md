@@ -37,7 +37,7 @@ The app follows a **client-driven architecture** with:
 
 The signed-out router is defined in `src/App.tsx`; authenticated route objects,
 guards, lazy-module declarations and the keep-alive tab layout live under
-`src/components/routing/`.
+`src/common/components/routing/`.
 
 - All routes are **lazy-loaded**
 - Route protection handled via wrappers:
@@ -51,13 +51,13 @@ guards, lazy-module declarations and the keep-alive tab layout live under
 
 ### Routes
 
-The four main tabs live in `src/lib/routes.ts` (`MAIN_TAB_PATHS`) because more
+The four main tabs live in `src/constants/routes.ts` (`MAIN_TAB_PATHS`) because more
 than one place has to know exactly which routes are tabs. `MainTabsLayout`
 mounts each tab when first visited and hides inactive tabs. It lives in
 `AuthenticatedLayout` beside the route outlet, so opening a secondary screen
 also preserves tab filters and loaded rows. `useRouteScrollRestoration` records
 scroll positions while each route is visible and restores them on navigation.
-`getOwningTab` in `src/lib/routes.ts` supplies both the dock's active section
+`getOwningTab` in `src/constants/routes.ts` supplies both the dock's active section
 and the Back button's fallback when a secondary screen is opened directly.
 
 | Route | Component | Access |
@@ -412,7 +412,7 @@ Use aliases for all internal imports.
 
 ## Forms & Validation
 
-- Schemas: `src/lib/validations.ts` (Zod)
+- Schemas: `src/constants/validations.ts` (Zod)
 - Forms: `react-hook-form`
 - Validation: `@hookform/resolvers/zod`
 
@@ -426,7 +426,7 @@ Use aliases for all internal imports.
 ## i18n
 
 - Library: i18next
-- Config: `src/lib/i18n.ts`
+- Config: `src/config/i18n.ts`
 
 ### Files
 

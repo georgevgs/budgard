@@ -4,7 +4,7 @@ import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 
 const ROOT = path.resolve(__dirname, '../../..');
-const COMPONENTS = path.join(ROOT, 'src/components');
+const COMPONENTS = path.join(ROOT, 'src');
 const EDITABLE_TAGS = new Set([
   'Input',
   'Textarea',

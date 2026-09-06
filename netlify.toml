@@ -96,7 +96,7 @@
     # change it makes — src/design/tokens.test.ts fails the build if the hash
     # here does not match the script that would be inlined.
     # connect-src carries no wss:// origin on purpose. supabase-js builds a
-    # RealtimeClient in its constructor, but src/lib/realtimeStub.ts is aliased
+    # RealtimeClient in its constructor, but src/config/realtimeStub.ts is aliased
     # over @supabase/realtime-js in vite.config.ts and throws on channel(), so
     # no socket is ever opened. Deleting that alias means adding
     # wss://htamokfphaqudeivpowr.supabase.co back here.

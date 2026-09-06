@@ -10,9 +10,8 @@ import {
 // is invisible in review — a component grows six lines at a time.
 describe('component line cap', () => {
   const components = measureComponents([
-    'src/components',
     'src/pages',
-    'src/contexts',
+    'src/common',
   ]);
 
   it('finds the components to measure', () => {
