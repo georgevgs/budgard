@@ -39,12 +39,36 @@ describe('useSwipeActions', () => {
     expect(result.current.offset).toBe(0);
     expect(result.current.isDragging).toBe(false);
   });
+
+  it('does not reveal Delete during a two-finger gesture', () => {
+    const { result } = renderHook(() => useSwipeActions());
+
+    act(() => result.current.handlers.onTouchStart(touchAt(100, 100, 2)));
+    act(() => result.current.handlers.onTouchMove(touchAt(40, 103, 2)));
+    act(() => result.current.handlers.onTouchEnd());
+
+    expect(result.current.offset).toBe(0);
+    expect(result.current.isOpen).toBe(false);
+  });
+
+  it('cancels a row drag when a second finger joins and ignores the remaining finger', () => {
+    const { result } = renderHook(() => useSwipeActions());
+
+    act(() => result.current.handlers.onTouchStart(touchAt(100, 100)));
+    act(() => result.current.handlers.onTouchMove(touchAt(40, 103)));
+    act(() => result.current.handlers.onTouchStart(touchAt(40, 103, 2)));
+    act(() => result.current.handlers.onTouchMove(touchAt(10, 103)));
+    act(() => result.current.handlers.onTouchEnd());
+
+    expect(result.current.offset).toBe(0);
+    expect(result.current.isDragging).toBe(false);
+  });
 });
 
 // --- Helpers ---
 
-const touchAt = (clientX: number, clientY: number) => {
+const touchAt = (clientX: number, clientY: number, count = 1) => {
   return {
-    touches: [{ clientX, clientY }],
+    touches: Array.from({ length: count }, () => ({ clientX, clientY })),
   } as unknown as React.TouchEvent;
 };

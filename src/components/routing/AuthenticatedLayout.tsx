@@ -5,6 +5,7 @@ import PullToRefreshIndicator from '@/components/common/PullToRefreshIndicator';
 import NavTabs from '@/components/layout/NavTabs';
 import TopScrim from '@/components/layout/TopScrim';
 import OnboardingGate from '@/components/onboarding/OnboardingGate';
+import MainTabsLayout from '@/components/routing/MainTabsLayout';
 import UpgradeDialog from '@/components/pro/UpgradeDialog';
 import {
   LockScreen,
@@ -40,6 +41,7 @@ const AuthenticatedLayout = () => {
           tabIndex={-1}
           className="pull-shell route-transition-content flex-1 pb-(--dock-inset) focus:outline-none"
         >
+          <MainTabsLayout />
           <Outlet />
         </main>
         <NavTabs />

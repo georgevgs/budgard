@@ -27,6 +27,7 @@ const OVERPULL_RESISTANCE = 0.55;
 // requiring distance alone made the sheet feel like it was ignoring them.
 const FLICK_VELOCITY_PX_PER_MS = 0.5;
 const FLICK_MIN_DISTANCE_RATIO = 0.25;
+const MAX_FLICK_PAUSE_MS = 100;
 
 // Once a dismissal commits, finish it at a speed that feels connected to the
 // release without letting a slow drag crawl or a fast flick disappear.
@@ -89,9 +90,20 @@ export const useSwipeToClose = ({
     setTranslateY(0);
   }, [clearDismissalReset]);
 
+  const cancelDrag = useCallback(() => {
+    velocity.current = 0;
+    setIsDragging(false);
+    setTranslateY(0);
+  }, []);
+
   const handleTouchStart = useCallback(
     (event: React.TouchEvent) => {
       if (!enabled || isDismissing) {
+        return;
+      }
+      if (event.touches.length !== 1) {
+        cancelDrag();
+
         return;
       }
 
@@ -117,12 +129,17 @@ export const useSwipeToClose = ({
       velocity.current = 0;
       setIsDragging(true);
     },
-    [enabled, isDismissing],
+    [enabled, isDismissing, cancelDrag],
   );
 
   const handleTouchMove = useCallback(
     (event: React.TouchEvent) => {
       if (!isDragging || !enabled) {
+        return;
+      }
+      if (event.touches.length !== 1) {
+        cancelDrag();
+
         return;
       }
 
@@ -136,7 +153,7 @@ export const useSwipeToClose = ({
 
       setTranslateY(resist(y - startY.current));
     },
-    [isDragging, enabled],
+    [isDragging, enabled, cancelDrag],
   );
 
   const handleTouchEnd = useCallback(
@@ -146,6 +163,10 @@ export const useSwipeToClose = ({
       }
 
       const dragged = translateY;
+      // Holding a short drag still before letting go cancels the flick.
+      if (event.timeStamp - lastMoveAt.current > MAX_FLICK_PAUSE_MS) {
+        velocity.current = 0;
+      }
       const flicked =
         velocity.current > FLICK_VELOCITY_PX_PER_MS &&
         dragged > threshold * FLICK_MIN_DISTANCE_RATIO;
@@ -229,18 +250,12 @@ export const useSwipeToClose = ({
       return;
     }
 
-    const handleTouchCancel = () => {
-      velocity.current = 0;
-      setIsDragging(false);
-      setTranslateY(0);
-    };
-
-    document.addEventListener('touchcancel', handleTouchCancel, {
+    document.addEventListener('touchcancel', cancelDrag, {
       passive: true,
     });
 
-    return () => document.removeEventListener('touchcancel', handleTouchCancel);
-  }, [isDragging]);
+    return () => document.removeEventListener('touchcancel', cancelDrag);
+  }, [isDragging, cancelDrag]);
 
   // Do not leave the guarded-close check alive after the sheet unmounts.
   useEffect(() => {

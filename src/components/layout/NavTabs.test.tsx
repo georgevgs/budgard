@@ -41,7 +41,7 @@ describe('NavTabs', () => {
     expect(links[3]).toHaveAttribute('href', '/trends');
   });
 
-  it('marks the current tab active via NavLink', () => {
+  it('marks the current tab active', () => {
     renderAt('/trends');
     const links = screen.getAllByRole('link');
 
@@ -93,6 +93,21 @@ describe('NavTabs', () => {
   it('hides the indicator on routes that own no tab', () => {
     expect(indicatorAt('/settings')).toBeNull();
   });
+
+  it.each([
+    ['/networth', 'navigation.plan'],
+    ['/t/expense-1', 'navigation.activity'],
+    ['/review', 'navigation.activity'],
+  ])(
+    'identifies the owning tab on %s for sighted and screen-reader users',
+    (path, label) => {
+      renderAt(path);
+      const tab = screen.getByRole('link', { name: label });
+
+      expect(tab).toHaveAttribute('aria-current', 'page');
+      expect(screen.getByText(label)).toHaveClass('text-primary-ink');
+    },
+  );
 
   it('hides the indicator on a route that merely prefixes a tab path', () => {
     expect(indicatorAt('/activities')).toBeNull();

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
+import { getOwningTab } from '@/lib/routes';
 
 // The way out of a screen you arrived at from somewhere. Lived in the app bar
 // until the bar itself went; it is now part of the screen's own header, which
@@ -43,5 +44,5 @@ const resolveFallback = (pathname: string): string => {
     return '/settings';
   }
 
-  return '/today';
+  return getOwningTab(pathname) ?? '/today';
 };

@@ -53,7 +53,12 @@ guards, lazy-module declarations and the keep-alive tab layout live under
 
 The four main tabs live in `src/lib/routes.ts` (`MAIN_TAB_PATHS`) because more
 than one place has to know exactly which routes are tabs. `MainTabsLayout`
-mounts all four and hides the inactive ones, so switching tabs keeps state.
+mounts each tab when first visited and hides inactive tabs. It lives in
+`AuthenticatedLayout` beside the route outlet, so opening a secondary screen
+also preserves tab filters and loaded rows. `useRouteScrollRestoration` records
+scroll positions while each route is visible and restores them on navigation.
+`getOwningTab` in `src/lib/routes.ts` supplies both the dock's active section
+and the Back button's fallback when a secondary screen is opened directly.
 
 | Route | Component | Access |
 |------|----------|--------|

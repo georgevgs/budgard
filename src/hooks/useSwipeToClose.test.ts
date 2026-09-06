@@ -16,6 +16,7 @@ const makeTouchEvent = (
   target?: Partial<HTMLElement>,
   timeStamp = 0,
   currentTarget = makeSheet(),
+  touchCount = 1,
 ) => {
   const el = {
     closest: vi.fn((selector: string) => {
@@ -33,7 +34,7 @@ const makeTouchEvent = (
   };
 
   return {
-    touches: [{ clientY }],
+    touches: Array.from({ length: touchCount }, () => ({ clientY })),
     target: el as unknown as EventTarget,
     currentTarget,
     timeStamp,
@@ -201,6 +202,89 @@ describe('useSwipeToClose', () => {
     });
 
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('settles a short drag after the user pauses before releasing', () => {
+    const onClose = vi.fn();
+    const { result } = renderHook(() => useSwipeToClose({ onClose }));
+    const handle = {
+      dataset: { dragHandle: 'true' },
+    } as unknown as Partial<HTMLElement>;
+
+    act(() => result.current.handleTouchStart(makeTouchEvent(100, handle, 0)));
+    act(() =>
+      result.current.handleTouchMove(makeTouchEvent(160, undefined, 40)),
+    );
+    act(() =>
+      result.current.handleTouchEnd(makeTouchEvent(160, undefined, 1000)),
+    );
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(result.current.translateY).toBe(0);
+  });
+
+  it('does not dismiss a sheet during a pinch gesture', () => {
+    const onClose = vi.fn();
+    const { result } = renderHook(() => useSwipeToClose({ onClose }));
+    const handle = {
+      dataset: { dragHandle: 'true' },
+    } as unknown as Partial<HTMLElement>;
+    const sheet = makeSheet();
+
+    act(() =>
+      result.current.handleTouchStart(makeTouchEvent(100, handle, 0, sheet, 2)),
+    );
+    act(() =>
+      result.current.handleTouchMove(
+        makeTouchEvent(250, undefined, 100, sheet, 2),
+      ),
+    );
+    act(() =>
+      result.current.handleTouchEnd(
+        makeTouchEvent(250, undefined, 100, sheet, 0),
+      ),
+    );
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(result.current.translateY).toBe(0);
+    expect(result.current.isDragging).toBe(false);
+  });
+
+  it('cancels dismissal when a second finger joins a drag', () => {
+    const onClose = vi.fn();
+    const { result } = renderHook(() => useSwipeToClose({ onClose }));
+    const handle = {
+      dataset: { dragHandle: 'true' },
+    } as unknown as Partial<HTMLElement>;
+    const sheet = makeSheet();
+
+    act(() =>
+      result.current.handleTouchStart(makeTouchEvent(100, handle, 0, sheet)),
+    );
+    act(() =>
+      result.current.handleTouchMove(
+        makeTouchEvent(250, undefined, 100, sheet),
+      ),
+    );
+    act(() =>
+      result.current.handleTouchStart(
+        makeTouchEvent(250, handle, 100, sheet, 2),
+      ),
+    );
+    act(() =>
+      result.current.handleTouchMove(
+        makeTouchEvent(350, undefined, 200, sheet),
+      ),
+    );
+    act(() =>
+      result.current.handleTouchEnd(
+        makeTouchEvent(350, undefined, 200, sheet, 0),
+      ),
+    );
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(result.current.translateY).toBe(0);
+    expect(result.current.isDragging).toBe(false);
   });
 
   it('calls onClose when swiped past threshold', () => {

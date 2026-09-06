@@ -102,7 +102,8 @@ const renderGroup = (group: DateGroup, props: Props, t: TFunc) => (
     aria-labelledby={`activity-${group.date}`}
     className="activity-day-group"
   >
-    <div className="activity-day-header mb-2 flex items-baseline justify-between gap-3 rounded-full px-1 py-1.5">
+    {/* Dates scroll with their group so they never float over transaction rows. */}
+    <div className="activity-day-header mb-2 flex items-baseline justify-between gap-3 px-1 py-1.5">
       <h2
         id={`activity-${group.date}`}
         className="text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
@@ -113,11 +114,8 @@ const renderGroup = (group: DateGroup, props: Props, t: TFunc) => (
     </div>
     {/* One flat surface per day rather than a stack of separately-filled
         capsules — see the note on SwipeableRow for why each row still needs
-        its own positioning context under this shared one. `activity-day-rows`
-        (not the `section` above) carries the content-visibility windowing —
-        see the comment on it in index.css for why it's kept off the sticky
-        header's own element. */}
-    <div className="activity-day-rows tile-flush divide-y divide-border/40">
+        its own positioning context under this shared one. */}
+    <div className="tile-flush divide-y divide-border/40">
       {group.expenses.map((transaction) => (
         <SwipeableRow
           key={transaction.id}

@@ -13,10 +13,19 @@ export const useRouteScrollRestoration = (): void => {
   useLayoutEffect(() => {
     const routePositions = positions.current;
     const savedPosition = routePositions.get(pathname) ?? 0;
+    let lastPosition = savedPosition;
     window.scrollTo(0, savedPosition);
 
+    // Capture while the route is visible. Reading scrollY during cleanup can
+    // force layout after its tab has been hidden and save a clamped position.
+    const rememberScroll = () => {
+      lastPosition = Math.max(0, window.scrollY);
+    };
+    window.addEventListener('scroll', rememberScroll, { passive: true });
+
     return () => {
-      routePositions.set(pathname, window.scrollY);
+      window.removeEventListener('scroll', rememberScroll);
+      routePositions.set(pathname, lastPosition);
     };
   }, [pathname]);
 };

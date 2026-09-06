@@ -148,4 +148,21 @@ describe('useNavAutoHide', () => {
     unmount();
     expect(isHidden()).toBe(false);
   });
+
+  it('does not hide navigation after unmounting with a queued scroll frame', () => {
+    const frames = new Map<number, FrameRequestCallback>();
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+      frames.set(1, callback);
+
+      return 1;
+    });
+    vi.stubGlobal('cancelAnimationFrame', (id: number) => frames.delete(id));
+    const { unmount } = renderHook(() => useNavAutoHide('/activity'));
+
+    scrollTo(400);
+    unmount();
+    act(() => frames.forEach((callback) => callback(0)));
+
+    expect(isHidden()).toBe(false);
+  });
 });

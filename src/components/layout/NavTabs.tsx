@@ -1,9 +1,10 @@
 import type { ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { haptics } from '@/lib/haptics';
 import { useNavAutoHide } from '@/hooks/useNavAutoHide';
+import { getOwningTab } from '@/lib/routes';
 import House from 'lucide-react/dist/esm/icons/house';
 import List from 'lucide-react/dist/esm/icons/list';
 import CalendarRange from 'lucide-react/dist/esm/icons/calendar-range';
@@ -18,6 +19,7 @@ type Tab = {
 const NavTabs = () => {
   const { t } = useTranslation();
   const { pathname } = useLocation();
+  const owningTab = getOwningTab(pathname);
 
   useNavAutoHide(pathname);
 
@@ -50,8 +52,11 @@ const NavTabs = () => {
       aria-label={t('navigation.ariaLabel')}
     >
       <div className="glass-capsule pointer-events-auto relative flex h-(--dock-height) items-stretch p-1">
-        {renderIndicator(getActiveIndex(pathname, tabs), tabs.length)}
-        {tabs.map((tab) => renderTab(tab))}
+        {renderIndicator(
+          tabs.findIndex((tab) => tab.path === owningTab),
+          tabs.length,
+        )}
+        {tabs.map((tab) => renderTab(tab, tab.path === owningTab))}
       </div>
     </nav>
   );
@@ -61,36 +66,36 @@ export default NavTabs;
 
 // --- Helpers ---
 
-const renderTab = (tab: Tab) => {
+const renderTab = (tab: Tab, isActive: boolean) => {
   const Icon = tab.icon;
 
   return (
-    <NavLink
+    <Link
       key={tab.path}
       to={tab.path}
       viewTransition
       onClick={() => haptics.selection()}
-      className="relative z-10 flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    >
-      {({ isActive }) => (
-        <>
-          <Icon
-            className={cn(
-              'h-5 w-5 shrink-0 transition-colors',
-              getTabToneClassName(isActive),
-            )}
-          />
-          <span
-            className={cn(
-              'w-full whitespace-normal break-normal px-0.5 text-center text-[11px] font-semibold leading-tight transition-colors',
-              getTabToneClassName(isActive),
-            )}
-          >
-            {tab.name}
-          </span>
-        </>
+      aria-current={currentPage(isActive)}
+      className={cn(
+        'relative z-10 flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        { active: isActive },
       )}
-    </NavLink>
+    >
+      <Icon
+        className={cn(
+          'h-5 w-5 shrink-0 transition-colors',
+          getTabToneClassName(isActive),
+        )}
+      />
+      <span
+        className={cn(
+          'w-full whitespace-normal break-normal px-0.5 text-center text-[11px] font-semibold leading-tight transition-colors',
+          getTabToneClassName(isActive),
+        )}
+      >
+        {tab.name}
+      </span>
+    </Link>
   );
 };
 
@@ -117,32 +122,12 @@ const renderIndicator = (activeIndex: number, tabCount: number) => {
   );
 };
 
-// Screens reached from a tab but living on their own route. Without this the
-// dock went dark the moment you opened Recurring or Debts, so a screen you
-// arrived at from Plan gave no clue which part of the app you were in.
-const TAB_OWNED_ROUTES: Record<string, string> = {
-  '/recurring': '/plan',
-  '/goals': '/plan',
-  '/debts': '/plan',
-  '/networth': '/plan',
-};
-
-const getActiveIndex = (pathname: string, tabs: Tab[]): number => {
-  // A transaction is something you reached from a list of transactions, so
-  // the dock keeps Activity lit while you are looking at one.
-  if (pathname.startsWith('/t/')) {
-    return tabs.findIndex((tab) => tab.path === '/activity');
+const currentPage = (isActive: boolean): 'page' | undefined => {
+  if (isActive) {
+    return 'page';
   }
 
-  const owningPath = TAB_OWNED_ROUTES[pathname] ?? pathname;
-
-  return tabs.findIndex((tab) => {
-    if (owningPath === tab.path) {
-      return true;
-    }
-
-    return owningPath.startsWith(`${tab.path}/`);
-  });
+  return undefined;
 };
 
 const getTabToneClassName = (isActive: boolean): string => {

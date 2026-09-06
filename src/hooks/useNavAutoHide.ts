@@ -30,6 +30,7 @@ export const useNavAutoHide = (pathname: string): void => {
 
   useEffect(() => {
     let isTicking = false;
+    let frameId = 0;
 
     const applyScrollState = () => {
       isTicking = false;
@@ -56,13 +57,14 @@ export const useNavAutoHide = (pathname: string): void => {
       if (isTicking) return;
 
       isTicking = true;
-      requestAnimationFrame(applyScrollState);
+      frameId = requestAnimationFrame(applyScrollState);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      cancelAnimationFrame(frameId);
       document.body.removeAttribute(HIDDEN_ATTRIBUTE);
     };
   }, []);

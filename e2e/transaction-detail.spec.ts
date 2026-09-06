@@ -11,7 +11,9 @@ test.describe('transaction detail', () => {
     await expect(
       app.getByRole('heading', { name: 'Weekly shop' }),
     ).toBeVisible();
-    await expect(app.getByText('24,50€')).toBeVisible();
+    await expect(
+      app.getByRole('paragraph').filter({ hasText: '−24,50€' }),
+    ).toBeVisible();
   });
 
   test('saves a note when the field loses focus', async ({ app, data }) => {

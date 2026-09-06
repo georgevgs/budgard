@@ -7,7 +7,6 @@ import GoalsLoadingState from '@/components/goals/GoalsLoading';
 import NetWorthLoadingState from '@/components/networth/NetWorthLoading';
 import ProRoute from '@/components/pro/ProRoute';
 import RecurringLoadingState from '@/components/recurring/RecurringLoading';
-import MainTabsLayout from '@/components/routing/MainTabsLayout';
 import RouteFallback from '@/components/routing/RouteFallback';
 import {
   CatchAllRedirect,
@@ -77,15 +76,10 @@ const buildRoutes = (): RouteObject[] => [
   {
     element: <PrivateRoute />,
     children: [
-      {
-        element: <MainTabsLayout />,
-        children: [
-          { path: '/today' },
-          { path: '/activity' },
-          { path: '/plan' },
-          { path: '/trends' },
-        ],
-      },
+      { path: '/today' },
+      { path: '/activity' },
+      { path: '/plan' },
+      { path: '/trends' },
       { path: '/expenses', element: <LegacyRedirect to="/today" /> },
       { path: '/income', element: <LegacyRedirect to="/activity" /> },
       { path: '/analytics', element: <LegacyRedirect to="/trends" /> },

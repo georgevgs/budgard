@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 // Activity's day-group headers stick just below this toolbar rather than
 // behind it, so the current date stays legible while the list scrolls (see
@@ -7,21 +7,31 @@ import { useEffect, useRef, useState } from 'react';
 // sooner than English ones) and with whether the month row is showing at
 // all, so a hard-coded constant would drift out of sync with either.
 export const useStickyToolbarOffset = () => {
-  const ref = useRef<HTMLDivElement | null>(null);
+  const [element, setElement] = useState<HTMLDivElement | null>(null);
   const [height, setHeight] = useState(0);
 
+  // A callback ref, not a plain `useRef`. ActivityView calls this hook
+  // before its own `isInitialized` check, so on a cold load — landing
+  // straight on Activity rather than tabbing into it — the very first
+  // commit is the loading skeleton, with no toolbar in the tree at all. A
+  // `useRef` would sit at `null` through that commit, and a `[]`-deps effect
+  // reading it would never get a second chance to see the real toolbar once
+  // the skeleton was replaced: the day headers would stick at `top: 0`,
+  // right under the toolbar instead of below it, for the rest of the
+  // session. Reported Sep 5 2026 (looked like the sticky header "moving"
+  // while scrolling) and reproduced directly — confirmed the toolbar was
+  // genuinely rendered at its real height while this hook still reported 0.
+  // Measuring here, the moment the node actually attaches, fixes that
+  // regardless of which commit it happens on — and does it earlier than an
+  // effect could, which is what avoids the header sitting under the toolbar
+  // for that first frame.
+  const ref = useCallback((node: HTMLDivElement | null) => {
+    setElement(node);
+    setHeight(node ? node.getBoundingClientRect().height : 0);
+  }, []);
+
   useEffect(() => {
-    const element = ref.current;
-    if (!element) {
-      return;
-    }
-
-    // Measure synchronously on mount so the first paint already reserves the
-    // right gap — waiting for the observer's first callback shows the day
-    // header sitting under the toolbar for one frame.
-    setHeight(element.getBoundingClientRect().height);
-
-    if (typeof ResizeObserver !== 'function') {
+    if (!element || typeof ResizeObserver !== 'function') {
       return;
     }
 
@@ -44,7 +54,7 @@ export const useStickyToolbarOffset = () => {
     observer.observe(element);
 
     return () => observer.disconnect();
-  }, []);
+  }, [element]);
 
   return { ref, height };
 };

@@ -42,20 +42,42 @@ export const useSwipeActions = ({
   const start = useRef({ x: 0, y: 0 });
   const axis = useRef<'none' | 'horizontal' | 'vertical'>('none');
   const openedAt = useRef(0);
+  const isTracking = useRef(false);
+
+  const cancelSwipe = () => {
+    if (!isTracking.current) {
+      return;
+    }
+    isTracking.current = false;
+    axis.current = 'none';
+    setIsDragging(false);
+    setOffset(openedAt.current);
+  };
 
   const handlers = {
     onTouchStart: (event: React.TouchEvent) => {
       if (!enabled) {
         return;
       }
+      if (event.touches.length !== 1) {
+        cancelSwipe();
+
+        return;
+      }
       const touch = event.touches[0];
+      isTracking.current = true;
       start.current = { x: touch.clientX, y: touch.clientY };
       axis.current = 'none';
       openedAt.current = offset;
     },
 
     onTouchMove: (event: React.TouchEvent) => {
-      if (!enabled) {
+      if (!enabled || !isTracking.current) {
+        return;
+      }
+      if (event.touches.length !== 1) {
+        cancelSwipe();
+
         return;
       }
       const touch = event.touches[0];
@@ -85,6 +107,10 @@ export const useSwipeActions = ({
     },
 
     onTouchEnd: () => {
+      if (!isTracking.current) {
+        return;
+      }
+      isTracking.current = false;
       if (axis.current !== 'horizontal') {
         axis.current = 'none';
 
@@ -98,11 +124,7 @@ export const useSwipeActions = ({
     // A browser can cancel a touch when the OS takes over the gesture. Return
     // to where the row started instead of leaving a half-revealed surface with
     // transitions disabled.
-    onTouchCancel: () => {
-      axis.current = 'none';
-      setIsDragging(false);
-      setOffset(openedAt.current);
-    },
+    onTouchCancel: cancelSwipe,
   };
 
   return {

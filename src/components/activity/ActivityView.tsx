@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import PageHeader from '@/components/common/PageHeader';
 import ActivityFeed from '@/components/activity/ActivityFeed';
@@ -20,7 +19,6 @@ import {
   type ActivityPeriod,
 } from '@/hooks/activity/useActivityFeed';
 import { useActivityCsvExport } from '@/hooks/activity/useActivityCsvExport';
-import { useStickyToolbarOffset } from '@/hooks/activity/useStickyToolbarOffset';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { useCurrentDate } from '@/hooks/useCurrentDate';
 import { useOnDemandHistory } from '@/hooks/data/useOnDemandHistory';
@@ -45,7 +43,6 @@ const ActivityView = () => {
     activity.selectedMonth,
   );
   const showSkeleton = useDelayedLoading(!isInitialized);
-  const toolbar = useStickyToolbarOffset();
 
   useOnDemandHistory(isHistoryPending);
   useSeedIncomeCategories();
@@ -56,7 +53,7 @@ const ActivityView = () => {
 
   return (
     <div>
-      <div className="page-shell" style={toolbarOffsetStyle(toolbar.height)}>
+      <div className="page-shell">
         <PageHeader
           title={t('activity.title')}
           action={
@@ -69,31 +66,28 @@ const ActivityView = () => {
         <div className="mt-3">
           <ReviewQueueBanner />
         </div>
-        <div className="mt-3">
-          <ActivityToolbar
-            containerRef={toolbar.ref}
-            search={activity.search}
-            isSearchingAllTime={activity.isSearchingAllTime}
-            onSearchChange={activity.setSearch}
-            period={activity.effectivePeriod}
-            selectedMonth={activity.selectedMonth}
-            onMonthChange={activity.setSelectedMonth}
-            filterPanel={
-              <ActivityFilterPanel
-                categories={categories}
-                tags={tags}
-                kind={activity.kind}
-                period={activity.period}
-                selectedCategoryId={activity.selectedCategoryId}
-                selectedTagId={activity.selectedTagId}
-                onKindChange={activity.setKind}
-                onPeriodChange={activity.setPeriod}
-                onCategoryChange={activity.setSelectedCategoryId}
-                onTagChange={activity.setSelectedTagId}
-              />
-            }
-          />
-        </div>
+        <ActivityToolbar
+          search={activity.search}
+          isSearchingAllTime={activity.isSearchingAllTime}
+          onSearchChange={activity.setSearch}
+          period={activity.effectivePeriod}
+          selectedMonth={activity.selectedMonth}
+          onMonthChange={activity.setSelectedMonth}
+          filterPanel={
+            <ActivityFilterPanel
+              categories={categories}
+              tags={tags}
+              kind={activity.kind}
+              period={activity.period}
+              selectedCategoryId={activity.selectedCategoryId}
+              selectedTagId={activity.selectedTagId}
+              onKindChange={activity.setKind}
+              onPeriodChange={activity.setPeriod}
+              onCategoryChange={activity.setSelectedCategoryId}
+              onTagChange={activity.setSelectedTagId}
+            />
+          }
+        />
         <FilterResultsAnnouncer
           count={activity.filteredRows.length}
           active={activity.hasActiveFilters}
@@ -154,11 +148,3 @@ const renderLoading = (showSkeleton: boolean) => {
 
   return <ExpenseLoadingState />;
 };
-
-// Hands the sticky toolbar's measured height to the day-group headers below
-// it, via the CSS custom property `.activity-day-header` reads in index.css.
-// CSSProperties has no index signature for custom properties on purpose (see
-// the DefinitelyTyped note on the interface), so this is the one place that
-// asserts past it.
-const toolbarOffsetStyle = (height: number): CSSProperties =>
-  ({ '--activity-toolbar-height': `${height}px` }) as CSSProperties;

@@ -8,6 +8,29 @@ export type MainTabPath = (typeof MAIN_TAB_PATHS)[number];
 export const isMainTabPath = (path: string): path is MainTabPath =>
   (MAIN_TAB_PATHS as readonly string[]).includes(path);
 
+const TAB_OWNED_ROUTES: Record<string, MainTabPath> = {
+  '/recurring': '/plan',
+  '/goals': '/plan',
+  '/debts': '/plan',
+  '/networth': '/plan',
+  '/review': '/activity',
+};
+
+// The dock and direct-entry Back button must agree on a screen's section.
+export const getOwningTab = (path: string): MainTabPath | undefined => {
+  if (path.startsWith('/t/')) {
+    return '/activity';
+  }
+  const owner = TAB_OWNED_ROUTES[path];
+  if (owner) {
+    return owner;
+  }
+
+  return MAIN_TAB_PATHS.find(
+    (tab) => path === tab || path.startsWith(`${tab}/`),
+  );
+};
+
 // Where logging a transaction is the screen's own primary action, which is a
 // narrower question than "is this a tab". Today and Activity are both views of
 // transactions, so "add one" is what you came to do. Plan is where you set a
