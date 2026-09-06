@@ -30,11 +30,11 @@ const CATEGORY_ICONS = [
   '👶',
 ] as const;
 
-type CategoryIconPickerProps = {
+interface CategoryIconPickerProps {
   value: string | undefined;
   onChange: (icon: string | undefined) => void;
   disabled?: boolean;
-};
+}
 
 const CategoryIconPicker = ({
   value,

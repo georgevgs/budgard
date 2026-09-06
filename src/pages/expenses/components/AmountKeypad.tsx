@@ -55,11 +55,11 @@ export default AmountKeypad;
 
 // --- Helpers ---
 
-type ButtonProps = {
+interface ButtonProps {
   label: string;
   onPress: () => void;
   icon?: boolean;
-};
+}
 
 const KeypadButton = ({ label, onPress, icon }: ButtonProps) => (
   <button

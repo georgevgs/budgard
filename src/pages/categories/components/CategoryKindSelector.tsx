@@ -41,11 +41,11 @@ const KIND_OPTIONS: KindOption[] = [
 const INACTIVE_CLASSES =
   'border-border/60 text-muted-foreground hover:bg-accent/50';
 
-type CategoryKindSelectorProps = {
+interface CategoryKindSelectorProps {
   value: SelectableCategoryKind | undefined;
   onChange: (kind: SelectableCategoryKind | undefined) => void;
   disabled?: boolean;
-};
+}
 
 const CategoryKindSelector = ({
   value,

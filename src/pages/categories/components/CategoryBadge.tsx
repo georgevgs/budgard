@@ -3,10 +3,10 @@ import { cn } from '@/constants/utils.ts';
 import type { EmbeddedCategory } from '@/types/Category.ts';
 import { getColorTint } from '@/constants/categoryColor';
 
-type CategoryBadgeProps = {
+interface CategoryBadgeProps {
   category: EmbeddedCategory;
   className?: string;
-};
+}
 
 // A category, as a chip. The tint is the category's own colour — the sanctioned
 // way to carry a user-picked hue, same as the transaction hero and the quick-add

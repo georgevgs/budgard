@@ -21,10 +21,10 @@ import SpeedDialAction from '@/common/components/layout/SpeedDialAction';
 // button did different things depending on where you tapped it, and most
 // people never found income at all. Category management now lives inside the
 // expense form's category picker, where you actually need it.
-type SpeedDialProps = {
+interface SpeedDialProps {
   onAddExpense: () => void;
   onAddIncome: () => void;
-};
+}
 
 const SpeedDial = ({ onAddExpense, onAddIncome }: SpeedDialProps) => {
   const { t } = useTranslation();
@@ -147,10 +147,10 @@ const useSpeedDialFocus = (
   }, [isOpen, closeMenuAndRestoreFocus]);
 };
 
-type OverlayProps = {
+interface OverlayProps {
   isOpen: boolean;
   onClose: () => void;
-};
+}
 
 const SpeedDialOverlay = ({ isOpen, onClose }: OverlayProps) => {
   if (!isOpen) {

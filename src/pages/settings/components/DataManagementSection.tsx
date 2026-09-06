@@ -8,11 +8,11 @@ import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-type DataManagementSectionProps = {
+interface DataManagementSectionProps {
   onConfirmDelete: () => Promise<void>;
   isDeleting: boolean;
   t: TFunc;
-};
+}
 
 const DataManagementSection = ({
   onConfirmDelete,

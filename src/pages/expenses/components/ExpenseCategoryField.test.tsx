@@ -53,9 +53,9 @@ const categories: Category[] = [
 
 // The selected id is rendered into the DOM rather than captured out through a
 // ref, so the assertions read the same value a user's screen would show.
-type HarnessProps = {
+interface HarnessProps {
   onManageCategories: () => void;
-};
+}
 
 const Harness = ({ onManageCategories }: HarnessProps) => {
   const form = useForm<ExpenseFormData>({

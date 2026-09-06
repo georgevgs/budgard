@@ -53,7 +53,7 @@ export default CategoryBudgetsManager;
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-type DialogRenderProps = {
+interface DialogRenderProps {
   isOpen: boolean;
   onClose: () => void;
   sortedCategories: Category[];
@@ -67,7 +67,7 @@ type DialogRenderProps = {
   onClearDraft: (categoryId: string) => void;
   onSave: () => void;
   t: TFunc;
-};
+}
 
 const renderDialog = ({
   isOpen,

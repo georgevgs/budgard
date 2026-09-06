@@ -2,9 +2,9 @@ import { useOtpAction } from '@/pages/auth/hooks/useOtpAction';
 import OtpRequestStep from '@/pages/auth/components/OtpRequestStep';
 import OtpVerifyStep from '@/pages/auth/components/OtpVerifyStep';
 
-type OtpFormProps = {
+interface OtpFormProps {
   onSuccess?: () => void;
-};
+}
 
 const OtpForm = ({ onSuccess }: OtpFormProps) => {
   const otpFlow = useOtpAction(onSuccess);

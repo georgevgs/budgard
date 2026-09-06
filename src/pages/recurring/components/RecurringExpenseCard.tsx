@@ -12,14 +12,14 @@ import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import { useTranslation } from 'react-i18next';
 
-type RecurringExpenseCardProps = {
+interface RecurringExpenseCardProps {
   expense: RecurringExpense;
   nextOccurrence: Date | null;
   isOverdue: boolean;
   onEdit: (expense: RecurringExpense) => void;
   onDelete: (id: string) => void;
   onToggle: (id: string, active: boolean) => void;
-};
+}
 
 const RecurringExpenseCard = ({
   expense,

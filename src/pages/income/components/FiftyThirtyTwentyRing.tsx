@@ -162,13 +162,13 @@ type TranslateFunction = (
   options?: Record<string, unknown>,
 ) => string;
 
-type BucketRowProps = {
+interface BucketRowProps {
   bucket: BucketConfig;
   actual: number;
   total: number;
   currency: string;
   t: TranslateFunction;
-};
+}
 
 const BucketRow = ({ bucket, actual, total, currency, t }: BucketRowProps) => {
   let actualPct = 0;

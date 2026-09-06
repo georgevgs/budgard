@@ -15,7 +15,7 @@ import type { Theme } from '@/common/hooks/useTheme';
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-type AppearanceSectionProps = {
+interface AppearanceSectionProps {
   theme: Theme;
   accent: AccentColorKey;
   isHapticsSupported: boolean;
@@ -24,7 +24,7 @@ type AppearanceSectionProps = {
   onAccentSelect: (key: AccentColorKey) => void;
   onHapticsToggle: (enabled: boolean) => void;
   t: TFunc;
-};
+}
 
 const AppearanceSection = ({
   theme,

@@ -6,14 +6,14 @@ import ReceiptScanButton from '@/pages/expenses/components/ReceiptScanButton';
 import { useReceiptUpload } from '@/pages/expenses/hooks/useReceiptUpload';
 import type { ReceiptScanApi } from '@/pages/expenses/hooks/useReceiptScan';
 
-type ReceiptUploadProps = {
+interface ReceiptUploadProps {
   currentReceiptPath?: string | null;
   selectedFile: File | null;
   isRemoving: boolean;
   onFileSelect: (file: File | null) => void;
   onRemoveExisting: () => void;
   scan: ReceiptScanApi;
-};
+}
 
 const ReceiptUpload = ({
   currentReceiptPath,

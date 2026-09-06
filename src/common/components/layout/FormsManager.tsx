@@ -7,7 +7,7 @@ import ExpensesForm from '@/pages/expenses/components/ExpensesForm';
 import { useCategoriesData, useDataConfig } from '@/common/contexts/DataContext';
 import { FORM_TYPES, type FormType } from '@/common/components/layout/formTypes';
 
-type FormsManagerProps = {
+interface FormsManagerProps {
   formType: FormType;
   onClose: () => void;
   selectedExpense?: Expense;
@@ -18,7 +18,7 @@ type FormsManagerProps = {
     expenseId?: string,
     receiptOptions?: ReceiptOptions,
   ) => void;
-};
+}
 
 const FormsManager = ({
   formType,

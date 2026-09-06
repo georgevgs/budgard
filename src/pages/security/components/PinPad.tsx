@@ -46,12 +46,12 @@ export default PinPad;
 
 // --- Helpers ---
 
-type ButtonProps = {
+interface ButtonProps {
   label: string;
   onPress: () => void;
   disabled?: boolean;
   icon?: boolean;
-};
+}
 
 const PadButton = ({ label, onPress, disabled, icon }: ButtonProps) => (
   <button
