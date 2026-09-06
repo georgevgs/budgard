@@ -2,9 +2,9 @@ import BentoTile from '@/common/components/bento/BentoTile';
 import InsightIcon from '@/common/components/common/InsightIcon';
 import type { Insight } from '@/common/hooks/useSpendingInsights';
 
-interface Props {
+type Props = {
   insight: Insight | null;
-}
+};
 
 // One thing worth noticing, in a tinted tile rather than an ink one — an
 // observation is not a number, and it should not compete with the ones around

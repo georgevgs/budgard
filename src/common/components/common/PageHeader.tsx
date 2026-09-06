@@ -3,13 +3,13 @@ import { useLocation } from 'react-router-dom';
 import BackButton from '@/common/components/common/BackButton';
 import { isSecondaryPath } from '@/constants/routes';
 
-interface Props {
+type Props = {
   title: string;
   /** Optional line under the title — context, never a second instruction. */
   subtitle?: string;
   /** Optional trailing control. One round chrome button, or one pill. */
   action?: ReactNode;
-}
+};
 
 // Every screen's own header, and the only header there is: the sticky app bar
 // went with the bento redesign, because a grid of modules that starts 62px

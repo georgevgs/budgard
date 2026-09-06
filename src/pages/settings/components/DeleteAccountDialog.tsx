@@ -13,12 +13,12 @@ import { requestOTP, signInWithOTP } from '@/constants/auth';
 
 type Step = 'confirm' | 'verify';
 
-interface Props {
+type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirmDelete: () => Promise<void>;
   isDeleting: boolean;
-}
+};
 
 const DeleteAccountDialog = ({
   open,

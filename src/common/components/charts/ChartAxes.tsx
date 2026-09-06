@@ -8,12 +8,12 @@ import type {
   ReferenceMarker,
 } from '@/common/components/charts/chartTypes';
 
-interface YProps {
+type YProps = {
   ticks: number[];
   y: Scale;
   plot: Plot;
   format: (value: number) => string;
-}
+};
 
 // Horizontal gridlines with their value on the left. The lines are the axis —
 // there is no drawn spine, because a rule at every labelled value already tells
@@ -49,13 +49,13 @@ export const YAxis = ({ ticks, y, plot, format }: YProps) => (
   </g>
 );
 
-interface XProps {
+type XProps = {
   data: ChartPoint[];
   xKey: string;
   plot: Plot;
   hasBars: boolean;
   format?: (value: string, index: number) => string;
-}
+};
 
 export const XAxis = ({ data, xKey, plot, hasBars, format }: XProps) => {
   const scale = scaleFor(hasBars, data.length, plot);
@@ -85,11 +85,11 @@ export const XAxis = ({ data, xKey, plot, hasBars, format }: XProps) => {
   );
 };
 
-interface ReferenceProps {
+type ReferenceProps = {
   marker: ReferenceMarker;
   y: Scale;
   plot: Plot;
-}
+};
 
 export const ReferenceLine = ({ marker, y, plot }: ReferenceProps) => {
   const position = y.to(marker.value);

@@ -17,10 +17,10 @@ import { renderSuggestionMeta } from '@/pages/expenses/components/ExpensesForm.h
 import type { DescriptionSuggestionsApi } from '@/pages/expenses/hooks/useDescriptionSuggestions';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
 
-interface Props {
+type Props = {
   form: UseFormReturn<ExpenseFormData>;
   suggestions: DescriptionSuggestionsApi;
-}
+};
 
 const ExpenseDescriptionField = ({ form, suggestions }: Props) => {
   const { t } = useTranslation();

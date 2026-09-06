@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import type { PullToRefreshState } from '@/common/hooks/usePullToRefresh';
 
-interface Props {
+type Props = {
   state: PullToRefreshState;
-}
+};
 
 // Rides out from behind the header as the page is pulled and lands clear of it
 // at the moment the gesture arms, so the puck and the bar are never overlapped.

@@ -27,11 +27,11 @@ import type { Account } from '@/types/Account';
 
 export type SnapshotMode = 'value' | 'contribution' | 'withdrawal';
 
-interface Props {
+type Props = {
   account: Account;
   onClose: () => void;
   mode?: SnapshotMode;
-}
+};
 
 const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
   const { t } = useTranslation();

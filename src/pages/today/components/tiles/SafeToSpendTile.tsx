@@ -5,7 +5,7 @@ import TileLabel from '@/common/components/bento/TileLabel';
 import { formatCurrency } from '@/constants/utils';
 import type { TodayStatus } from '@/pages/today/hooks/useTodayGuidance';
 
-interface Props {
+type Props = {
   status: TodayStatus;
   safeToSpend: number | null;
   spentThisMonth: number;
@@ -15,7 +15,7 @@ interface Props {
   typicalDay: number | null;
   daysRemaining: number;
   currency: string;
-}
+};
 
 // The one number the screen exists to answer, on the one slab of colour in the
 // app. Everything else in the grid is a supporting fact about this figure.

@@ -4,11 +4,11 @@ import { getColorTint } from '@/constants/categoryColor';
 import { haptics } from '@/constants/haptics';
 import type { Category } from '@/types/Category';
 
-interface Props {
+type Props = {
   categories: Category[];
   selectedId: string | null;
   onSelect: (id: string | null) => void;
-}
+};
 
 // A horizontal run of chips rather than a select: picking a category is the
 // second of the two taps this screen exists to make cheap, and a dropdown

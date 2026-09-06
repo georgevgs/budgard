@@ -12,10 +12,10 @@ import { useSubscription } from '@/common/contexts/SubscriptionContext';
 
 type RangeKey = '1m' | '3m' | '1y' | 'all';
 
-interface Props {
+type Props = {
   account: Account;
   snapshots: AccountBalance[];
-}
+};
 
 type Point = {
   date: string;

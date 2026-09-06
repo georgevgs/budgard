@@ -26,12 +26,12 @@ const frequencyValues = [
   'yearly',
 ] as const;
 
-interface Props {
+type Props = {
   form: UseFormReturn<RecurringExpenseFormData>;
   isEditing: boolean;
   showLinkedAccount: boolean;
   investmentAccounts: Account[];
-}
+};
 
 const RecurringScheduleFields = ({
   form,

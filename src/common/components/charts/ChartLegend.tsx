@@ -1,9 +1,9 @@
 import type { Series } from '@/common/components/charts/chartTypes';
 
-interface Props {
+type Props = {
   series: Series[];
   show?: boolean;
-}
+};
 
 // Only shown when a chart carries more than one series — a single-series chart
 // with a legend is a label pretending to be a key.

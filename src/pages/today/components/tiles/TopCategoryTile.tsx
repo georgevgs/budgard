@@ -5,10 +5,10 @@ import CategoryIcon from '@/common/components/common/CategoryIcon';
 import { formatCurrency } from '@/constants/utils';
 import type { TopCategory } from '@/pages/today/hooks/useTopCategory';
 
-interface Props {
+type Props = {
   category: TopCategory | null;
   currency: string;
-}
+};
 
 // The grid's one inverted tile. It is the loudest thing here that costs no
 // colour, which is why there is exactly one — a second would flatten the

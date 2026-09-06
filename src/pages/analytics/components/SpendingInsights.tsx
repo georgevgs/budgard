@@ -4,13 +4,13 @@ import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import { useSpendingInsights, type Insight } from '@/common/hooks/useSpendingInsights';
 
-interface SpendingInsightsProps {
+type SpendingInsightsProps = {
   expenses: Expense[];
   monthlyBudget: number | null;
   monthComparison: { thisMonthAmount: number; lastMonthAmount: number };
   categories: Category[];
   defaultCurrency: string;
-}
+};
 
 const SpendingInsights = (props: SpendingInsightsProps) => {
   const { t } = useTranslation();

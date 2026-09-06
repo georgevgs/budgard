@@ -11,7 +11,7 @@ import { formatCurrency } from '@/constants/utils';
 import { sumSpending } from '@/constants/spending';
 import type { Expense } from '@/types/Expense';
 
-interface Props {
+type Props = {
   transactions: Expense[];
   currency: string;
   isHistoryPending: boolean;
@@ -20,7 +20,7 @@ interface Props {
   onSaveAsTemplate: (expense: Expense) => void;
   onIncomeEdit: (income: Expense) => void;
   onIncomeDelete: (id: string) => void;
-}
+};
 
 const PAGE_SIZE = 20;
 

@@ -1,9 +1,9 @@
 import { cn } from '@/constants/utils';
 import type { DayOutcome, RhythmDay } from '@/common/hooks/savings/useSavingsRhythm';
 
-interface Props {
+type Props = {
   days: RhythmDay[];
-}
+};
 
 // aria-hidden, not role="img": the sentence rendered directly beneath these
 // dots already states the same count, and labelling both made a screen reader

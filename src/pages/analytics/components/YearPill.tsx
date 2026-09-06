@@ -7,11 +7,11 @@ import {
   SelectValue,
 } from '@/common/ui/select';
 
-interface Props {
+type Props = {
   selectedYear: number;
   availableYears: number[];
   onYearChange: (year: number) => void;
-}
+};
 
 // The year the whole screen is about, in the header's trailing slot. It used
 // to sit halfway down beside the chart, which made it look like the chart's

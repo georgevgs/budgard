@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import Delete from 'lucide-react/dist/esm/icons/delete';
 
-interface Props {
+type Props = {
   onPress: (digit: number) => void;
   onBackspace: () => void;
   disabled?: boolean;
-}
+};
 
 const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -46,12 +46,12 @@ export default PinPad;
 
 // --- Helpers ---
 
-interface ButtonProps {
+type ButtonProps = {
   label: string;
   onPress: () => void;
   disabled?: boolean;
   icon?: boolean;
-}
+};
 
 const PadButton = ({ label, onPress, disabled, icon }: ButtonProps) => (
   <button

@@ -35,7 +35,7 @@ import {
   renderFormTitle,
 } from '@/pages/expenses/components/ExpensesForm.helpers';
 
-interface ExpensesFormProps {
+type ExpensesFormProps = {
   expense?: Expense;
   // What the quick-add pad captured before the user asked for more detail.
   // Only read when creating; an edit always wins from the row itself.
@@ -48,7 +48,7 @@ interface ExpensesFormProps {
     expenseId?: string,
     receiptOptions?: ReceiptOptions,
   ) => void;
-}
+};
 
 const ExpensesForm = ({
   expense,

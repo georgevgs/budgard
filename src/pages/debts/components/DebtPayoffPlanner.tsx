@@ -13,9 +13,9 @@ import type { Locale } from 'date-fns';
 import type { SimResult } from '@/pages/debts/utils/debtPayoff';
 import type { Debt, PayoffStrategy } from '@/types/Debt';
 
-interface Props {
+type Props = {
   debts: Debt[];
-}
+};
 
 const DebtPayoffPlanner = ({ debts }: Props) => {
   const { t } = useTranslation();

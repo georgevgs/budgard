@@ -12,10 +12,10 @@ import {
 } from '@/pages/analytics/hooks/useMoneyFlowData';
 import { formatCurrency } from '@/constants/utils';
 
-interface Props {
+type Props = {
   flow: MoneyFlowData;
   currency: string;
-}
+};
 
 // The chart half of the money-flow view — CashFlowSection owns the stats
 // row (it swaps between year totals and this month's, so it stays in one

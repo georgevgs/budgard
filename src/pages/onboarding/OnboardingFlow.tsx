@@ -15,11 +15,11 @@ import OnboardingFirstExpenseStep from '@/pages/onboarding/components/Onboarding
 
 const STEP_COUNT = 4;
 
-interface Props {
+type Props = {
   isOpen: boolean;
   onComplete: () => void;
   onDismiss?: () => void;
-}
+};
 
 const OnboardingFlow = ({ isOpen, onComplete, onDismiss }: Props) => {
   const { t } = useTranslation();

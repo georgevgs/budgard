@@ -1,8 +1,8 @@
 import { cn } from '@/constants/utils';
 
-interface Props {
+type Props = {
   className?: string;
-}
+};
 
 const BRAND_MARK_SRC = `/brand/budgard-mark.svg?v=${__BRAND_ASSET_REVISION__}`;
 

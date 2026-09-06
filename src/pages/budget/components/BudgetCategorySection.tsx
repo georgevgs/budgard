@@ -21,12 +21,12 @@ export type BudgetCategoryRow = {
   isWarning: boolean;
 };
 
-interface Props {
+type Props = {
   totalCategoryCount: number;
   rows: BudgetCategoryRow[];
   currency: string;
   onManage: () => void;
-}
+};
 
 const BudgetCategorySection = ({
   totalCategoryCount,

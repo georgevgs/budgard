@@ -6,10 +6,10 @@ import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { formatCurrency } from '@/constants/utils';
 import type { UpcomingBills, UpcomingEntry } from '@/pages/today/utils/upcomingBills';
 
-interface Props {
+type Props = {
   upcoming: UpcomingBills;
   currency: string;
-}
+};
 
 type Locale = ReturnType<typeof useDateLocale>;
 

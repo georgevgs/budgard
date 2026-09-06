@@ -10,14 +10,14 @@ type MonthlyDatum = {
   amount: number;
 };
 
-interface Props {
+type Props = {
   monthComparison: MonthComparison;
   rhythmMonths: { month: string; amount: number }[];
   monthlyData: MonthlyDatum[];
   monthlyAverage: number;
   monthsElapsed: number;
   onMonthClick: (index: number) => void;
-}
+};
 
 // The quick figures that explain the deeper analysis: this month, the usual
 // month and the outlier. Composition stays in its full, scannable list below.

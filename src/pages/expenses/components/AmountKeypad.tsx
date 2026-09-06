@@ -3,9 +3,9 @@ import Delete from 'lucide-react/dist/esm/icons/delete';
 import { haptics } from '@/constants/haptics';
 import type { AmountPad } from '@/pages/expenses/hooks/useAmountPad';
 
-interface Props {
+type Props = {
   pad: AmountPad;
-}
+};
 
 const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -55,11 +55,11 @@ export default AmountKeypad;
 
 // --- Helpers ---
 
-interface ButtonProps {
+type ButtonProps = {
   label: string;
   onPress: () => void;
   icon?: boolean;
-}
+};
 
 const KeypadButton = ({ label, onPress, icon }: ButtonProps) => (
   <button

@@ -10,11 +10,11 @@ import {
   AlertDialogTitle,
 } from '@/common/ui/alert-dialog';
 
-interface Props {
+type Props = {
   open: boolean;
   onCancel: () => void;
   onConfirm: () => void;
-}
+};
 
 const TemplateDeleteDialog = ({ open, onCancel, onConfirm }: Props) => {
   const { t } = useTranslation();

@@ -6,11 +6,11 @@ import { cn } from '@/constants/utils';
 
 const HEX_PATTERN = /^#[0-9A-Fa-f]{0,6}$/;
 
-interface CategoryColorPickerProps {
+type CategoryColorPickerProps = {
   value: string;
   onChange: (color: string) => void;
   disabled?: boolean;
-}
+};
 
 const CategoryColorPicker = ({
   value,

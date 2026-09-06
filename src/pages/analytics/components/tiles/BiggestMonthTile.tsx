@@ -10,10 +10,10 @@ type MonthlyDatum = {
   amount: number;
 };
 
-interface Props {
+type Props = {
   monthlyData: MonthlyDatum[];
   onMonthClick: (index: number) => void;
-}
+};
 
 // The year's high-water mark, and a doorway into the month that set it —
 // "which month was that" is the immediate next question, and the tile is the

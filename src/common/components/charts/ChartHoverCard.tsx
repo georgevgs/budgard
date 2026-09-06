@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react';
 import type { ChartPoint } from '@/common/components/charts/chartTypes';
 
-interface Props {
+type Props = {
   activeIndex: number | null;
   data: ChartPoint[];
   // Pixel position of the active point, so the card can follow it.
   x: number;
   containerWidth: number;
   render?: (point: ChartPoint, index: number) => ReactNode;
-}
+};
 
 const CARD_WIDTH = 168;
 const EDGE_GUTTER = 4;

@@ -15,14 +15,14 @@ import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
 import { countsAsSpending } from '@/constants/spending';
 
-interface Props {
+type Props = {
   isOpen: boolean;
   onClose: () => void;
   categoryName: string;
   categoryColor: string;
   expenses: Expense[];
   totalAmount: number;
-}
+};
 
 export const CategoryDrillDown = ({
   isOpen,

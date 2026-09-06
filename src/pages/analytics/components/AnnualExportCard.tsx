@@ -19,11 +19,11 @@ import {
 } from '@/constants/csvExport';
 import type { Expense } from '@/types/Expense';
 
-interface Props {
+type Props = {
   selectedYear: number;
   /** A trailing control next to the heading — Settings' year picker. */
   action?: ReactNode;
-}
+};
 
 const AnnualExportCard = ({ selectedYear, action }: Props) => {
   const { t } = useTranslation();

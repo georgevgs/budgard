@@ -5,7 +5,7 @@ import FiftyThirtyTwentyRing from '@/pages/income/components/FiftyThirtyTwentyRi
 import SavingsRhythm from '@/pages/plan/components/SavingsRhythm';
 import type { useSavingsRhythm } from '@/common/hooks/savings/useSavingsRhythm';
 
-interface Props {
+type Props = {
   isOpen: boolean;
   monthKey: string;
   monthlyBudget: number | null;
@@ -14,7 +14,7 @@ interface Props {
   rhythm: ReturnType<typeof useSavingsRhythm>;
   onOpenChange: (isOpen: boolean) => void;
   onBudgetUpdate: (amount: number) => Promise<void>;
-}
+};
 
 // Budget controls and explanatory analysis are useful, but they are not the
 // plan's first answer. One disclosure keeps both available without stacking

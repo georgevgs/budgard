@@ -28,10 +28,10 @@ import {
   renderSaveButtonLabel,
 } from '@/pages/income/components/IncomeForm.helpers';
 
-interface IncomeFormProps {
+type IncomeFormProps = {
   income?: Expense;
   onClose: (savedIncome?: Expense) => void;
-}
+};
 
 const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
   const { t } = useTranslation();

@@ -17,12 +17,12 @@ import DebtDetailHeader from '@/pages/debts/components/DebtDetailHeader';
 import DebtPaymentForm from '@/pages/debts/components/DebtPaymentForm';
 import ConfirmDestructiveDialog from '@/common/components/common/ConfirmDestructiveDialog';
 
-interface Props {
+type Props = {
   debt: Debt;
   open: boolean;
   onClose: () => void;
   onEdit: (debt: Debt) => void;
-}
+};
 
 const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
   const { t } = useTranslation();

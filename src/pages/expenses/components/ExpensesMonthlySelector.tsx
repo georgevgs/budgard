@@ -14,11 +14,11 @@ import {
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import MonthYearPickerContent from '@/pages/expenses/components/MonthYearPickerContent';
 
-interface Props {
+type Props = {
   /** Format: "yyyy-MM". */
   selectedMonth: string;
   onMonthChange: (month: string) => void;
-}
+};
 
 const ExpensesMonthlySelector = ({ selectedMonth, onMonthChange }: Props) => {
   const { t } = useTranslation();

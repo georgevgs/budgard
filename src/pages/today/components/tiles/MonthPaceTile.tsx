@@ -4,9 +4,9 @@ import TileLabel from '@/common/components/bento/TileLabel';
 import { cn } from '@/constants/utils';
 import type { DailyPace, PaceDay } from '@/pages/today/hooks/useDailyPace';
 
-interface Props {
+type Props = {
   pace: DailyPace;
-}
+};
 
 // Seven days, one bar each, the ones that ran hot in the accent. Where the
 // ring next to it answers "how much of the plan is gone", this answers the

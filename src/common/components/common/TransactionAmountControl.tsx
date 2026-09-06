@@ -12,12 +12,12 @@ import { SUPPORTED_CURRENCIES } from '@/constants/currencies';
 import { formatCurrency } from '@/constants/utils';
 import type { CurrencyConversionApi } from '@/common/hooks/currency/useCurrencyConversionCore';
 
-interface Props {
+type Props = {
   amountLabel: string;
   conversion: CurrencyConversionApi;
   value: string;
   onChange: (value: string) => void;
-}
+};
 
 const TransactionAmountControl = ({
   amountLabel,

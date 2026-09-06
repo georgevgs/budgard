@@ -19,10 +19,10 @@ import type { Category, CategoryType } from '@/types/Category';
 import CategoryForm from '@/pages/categories/components/CategoryForm';
 import { getColorTint } from '@/constants/categoryColor';
 
-interface CategoryManagerProps {
+type CategoryManagerProps = {
   categoryType?: CategoryType;
   onBack?: () => void;
-}
+};
 
 export const CategoryManager = ({
   categoryType = 'expense',

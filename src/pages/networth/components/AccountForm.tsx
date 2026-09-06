@@ -28,10 +28,10 @@ import { swatch } from '@/design/palette';
 
 const DEFAULT_COLOR = swatch.sky;
 
-interface Props {
+type Props = {
   account?: Account;
   onClose: () => void;
-}
+};
 
 const AccountForm = ({ account, onClose }: Props) => {
   const { t } = useTranslation();

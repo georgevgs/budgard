@@ -12,7 +12,7 @@ import FormSubmitButton from '@/common/ui/form-submit-button';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useResendCooldown } from '@/pages/auth/hooks/useResendCooldown';
 
-interface Props {
+type Props = {
   formAction: (formData: FormData) => void;
   email: string;
   error: string | null;
@@ -22,7 +22,7 @@ interface Props {
   turnstileToken: string | null;
   onTokenChange: (token: string | null) => void;
   turnstileRef: RefObject<TurnstileInstance | null>;
-}
+};
 
 const OtpVerifyStep = ({
   formAction,

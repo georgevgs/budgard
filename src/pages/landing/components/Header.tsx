@@ -4,9 +4,9 @@ import BrandMark from '@/common/components/common/BrandMark';
 import { Button } from '@/common/ui/button';
 import { cn } from '@/constants/utils';
 
-interface Props {
+type Props = {
   onSignIn: () => void;
-}
+};
 
 const Header = ({ onSignIn }: Props) => {
   const { t } = useTranslation();

@@ -11,13 +11,13 @@ import {
 } from '@/common/ui/dialog';
 import { formatCurrencyInput } from '@/constants/utils';
 
-interface Props {
+type Props = {
   isSubmitting: boolean;
   currencySymbol: string;
   onBack: () => void;
   onSkip: () => void;
   onNext: (budgetInput: string) => void;
-}
+};
 
 const OnboardingBudgetStep = ({
   isSubmitting,

@@ -8,10 +8,10 @@ import Check from 'lucide-react/dist/esm/icons/check';
 import { useProPlans, type ProPlansDisplay } from '@/pages/pro/hooks/useProPlans';
 import { yearlySavingsPercent, type ProPlanId } from '@/constants/proPlans';
 
-interface Props {
+type Props = {
   onGetStarted: () => void;
   onGetPro: (plan: Cycle) => void;
-}
+};
 
 type Tx = (key: string, opts?: Record<string, unknown>) => string;
 type Cycle = ProPlanId;

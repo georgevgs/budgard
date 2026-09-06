@@ -18,7 +18,7 @@ type PushState =
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-interface NotificationsSectionProps {
+type NotificationsSectionProps = {
   pushState: PushState;
   dailyReminderHour: number | null;
   notificationPreferences: NotificationPreferences;
@@ -31,7 +31,7 @@ interface NotificationsSectionProps {
     enabled: boolean,
   ) => void;
   t: TFunc;
-}
+};
 
 const NotificationsSection = ({
   pushState,

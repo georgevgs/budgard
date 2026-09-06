@@ -22,12 +22,12 @@ import { useProGate } from '@/pages/pro/hooks/useProGate';
 import type { Category } from '@/types/Category';
 import type { CategoryBudget } from '@/types/CategoryBudget';
 
-interface BudgetProgressProps {
+type BudgetProgressProps = {
   monthlyBudget: number | null;
   monthlySpent: number;
   onBudgetUpdate: (amount: number) => Promise<void>;
   currencyCode?: string;
-}
+};
 
 const BudgetProgress = ({
   monthlyBudget,
@@ -98,14 +98,14 @@ type TranslateFunction = (
   options?: Record<string, unknown>,
 ) => string;
 
-interface NoBudgetProps {
+type NoBudgetProps = {
   isFormOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
   onSubmit: (amount: number) => Promise<void>;
   currencyCode: string;
   t: TranslateFunction;
-}
+};
 
 const renderNoBudgetState = ({
   isFormOpen,
@@ -138,7 +138,7 @@ const renderNoBudgetState = ({
   );
 };
 
-interface BudgetStateProps {
+type BudgetStateProps = {
   monthlyBudget: number;
   monthlySpent: number;
   currencyCode: string;
@@ -152,7 +152,7 @@ interface BudgetStateProps {
   expenseCategoryCount: number;
   categoryRows: BudgetCategoryRow[];
   t: TranslateFunction;
-}
+};
 
 const renderBudgetState = ({
   monthlyBudget,

@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
 
-interface Props {
+type Props = {
   count: number;
   active: boolean;
-}
+};
 
 // Screen-reader-only live region. While filters or search are active it
 // announces how many expenses match, giving non-sighted users the same feedback

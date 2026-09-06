@@ -16,14 +16,14 @@ import type { useTodayGuidance } from '@/pages/today/hooks/useTodayGuidance';
 import type { Insight } from '@/common/hooks/useSpendingInsights';
 import type { TodayTileId } from '@/pages/today/utils/bentoLayout';
 
-interface TodayGridProps {
+type TodayGridProps = {
   visible: TodayTileId[];
   guidance: ReturnType<typeof useTodayGuidance>;
   pace: DailyPace;
   topCategory: TopCategory | null;
   monthlyBudget: number | null;
   onArrange: () => void;
-}
+};
 
 // The user's own arrangement, drawn. Order is theirs; which tiles exist at all
 // is still ours, and a tile that has nothing to say returns null and gives its

@@ -1,10 +1,10 @@
 import { cn } from '@/constants/utils';
 import type { Insight } from '@/common/hooks/useSpendingInsights';
 
-interface Props {
+type Props = {
   icon: Insight['icon'];
   className?: string;
-}
+};
 
 // Every insight uses the same foreground SVG treatment. The sentence carries
 // the meaning; changing glyph colour by variant made the same insight look

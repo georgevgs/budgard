@@ -11,12 +11,12 @@ import {
 } from '@/common/ui/alert-dialog';
 import type { Expense } from '@/types/Expense';
 
-interface Props {
+type Props = {
   expense: Expense;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
-}
+};
 
 const ExpenseDeleteDialog = ({
   expense,

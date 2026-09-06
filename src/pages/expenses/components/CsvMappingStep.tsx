@@ -15,7 +15,7 @@ import type {
   CsvPreviewData,
 } from '@/pages/expenses/utils/csvTypes';
 
-interface Props {
+type Props = {
   csvPreview: CsvPreviewData;
   columnMapping: ColumnMapping;
   skipIncome: boolean;
@@ -27,7 +27,7 @@ interface Props {
   onBack: () => void;
   onContinue: () => void;
   t: TranslateFunction;
-}
+};
 
 // Which column of the file is the date, the description, the amount and
 // (optionally) the category, with a live sample of the file underneath so the
@@ -130,7 +130,7 @@ type TranslateFunction = (
 // sentinel of its own.
 const NO_COLUMN = '_none';
 
-interface ColumnSelectProps {
+type ColumnSelectProps = {
   idPrefix: string;
   label: string;
   value: string;
@@ -138,7 +138,7 @@ interface ColumnSelectProps {
   noneLabel?: string;
   onChange: (value: string) => void;
   t: TranslateFunction;
-}
+};
 
 const ColumnSelect = ({
   idPrefix,
@@ -177,11 +177,11 @@ const renderNoneOption = (noneLabel?: string) => {
   return <SelectItem value={NO_COLUMN}>{noneLabel}</SelectItem>;
 };
 
-interface SampleTableProps {
+type SampleTableProps = {
   csvPreview: CsvPreviewData;
   columnMapping: ColumnMapping;
   t: TranslateFunction;
-}
+};
 
 const SampleTable = ({ csvPreview, columnMapping, t }: SampleTableProps) => {
   return (

@@ -3,7 +3,7 @@ import ActivityFilters from '@/pages/activity/components/ActivityFilters';
 import ActivityMonthStepper from '@/pages/activity/components/ActivityMonthStepper';
 import type { ActivityPeriod } from '@/pages/activity/hooks/useActivityFeed';
 
-interface Props {
+type Props = {
   search: string;
   isSearchingAllTime: boolean;
   onSearchChange: (value: string) => void;
@@ -12,7 +12,7 @@ interface Props {
   onMonthChange: (month: string) => void;
   /** The ActivityFilterPanel trigger + dialog, built by the caller. */
   filterPanel: ReactNode;
-}
+};
 
 // Search, the filter drawer and the month stepper used to be three rows a
 // scroll would carry away one at a time. Pinning them together keeps every

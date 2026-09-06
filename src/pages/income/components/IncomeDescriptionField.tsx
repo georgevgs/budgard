@@ -10,9 +10,9 @@ import {
 import { Input } from '@/common/ui/input';
 import type { IncomeFormData } from '@/pages/income/validations';
 
-interface Props {
+type Props = {
   form: UseFormReturn<IncomeFormData>;
-}
+};
 
 const IncomeDescriptionField = ({ form }: Props) => {
   const { t } = useTranslation();

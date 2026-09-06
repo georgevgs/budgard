@@ -21,10 +21,10 @@ import {
 import type { Category } from '@/types/Category';
 import { getColorTint } from '@/constants/categoryColor';
 
-interface Props {
+type Props = {
   isOpen: boolean;
   onClose: () => void;
-}
+};
 
 const CategoryBudgetsManager = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation();
@@ -53,7 +53,7 @@ export default CategoryBudgetsManager;
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-interface DialogRenderProps {
+type DialogRenderProps = {
   isOpen: boolean;
   onClose: () => void;
   sortedCategories: Category[];
@@ -67,7 +67,7 @@ interface DialogRenderProps {
   onClearDraft: (categoryId: string) => void;
   onSave: () => void;
   t: TFunc;
-}
+};
 
 const renderDialog = ({
   isOpen,

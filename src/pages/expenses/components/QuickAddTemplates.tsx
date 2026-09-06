@@ -3,10 +3,10 @@ import { useDataConfig, useTemplatesData } from '@/common/contexts/DataContext';
 import { useTemplateOps } from '@/common/hooks/dataOps/useTemplateOps';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 
-interface Props {
+type Props = {
   onUse: (template: ExpenseTemplate) => void;
   onClose: () => void;
-}
+};
 
 // A saved transaction is an entry shortcut, so it lives where transactions
 // are added. Activity can now stay focused on finding and reading the ledger.

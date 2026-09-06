@@ -2,12 +2,12 @@ import AccountCard from '@/pages/networth/components/AccountCard';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 
-interface Props {
+type Props = {
   title: string;
   accounts: Account[];
   latestSnapshotByAccount: Map<string, AccountBalance>;
   onAccountClick: (account: Account) => void;
-}
+};
 
 const AccountGroup = ({
   title,

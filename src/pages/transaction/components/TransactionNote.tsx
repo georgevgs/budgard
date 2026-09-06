@@ -3,12 +3,12 @@ import { useTranslation } from 'react-i18next';
 import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import { Textarea } from '@/common/ui/textarea';
 
-interface Props {
+type Props = {
   value: string;
   isDirty: boolean;
   onChange: (value: string) => void;
   onSave: () => void;
-}
+};
 
 // Notes stay compact until the person asks to change one. An empty three-line
 // field made the detail screen look unfinished and pushed the useful context

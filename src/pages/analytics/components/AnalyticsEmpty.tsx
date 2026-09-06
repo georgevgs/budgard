@@ -4,10 +4,10 @@ import ChartSpline from 'lucide-react/dist/esm/icons/chart-spline';
 import PageHeader from '@/common/components/common/PageHeader';
 import { EmptyStateCard } from '@/common/ui/empty-state-card';
 
-interface Props {
+type Props = {
   title?: string;
   subtitle?: string;
-}
+};
 
 const AnalyticsEmpty = ({ title: titleOverride, subtitle }: Props) => {
   const { t } = useTranslation();

@@ -9,13 +9,13 @@ import { Input } from '@/common/ui/input';
 import { renderSuggestionMeta } from '@/pages/expenses/components/ExpensesForm.helpers';
 import type { Expense } from '@/types/Expense';
 
-interface Props {
+type Props = {
   value: string;
   suggestions: Expense[];
   errorKey: string | null;
   onChange: (value: string) => void;
   onSelect: (suggestion: Expense) => void;
-}
+};
 
 // The keypad screen used to name every expense after its category, which is
 // fine for a coffee and useless for the row you go looking for later. The

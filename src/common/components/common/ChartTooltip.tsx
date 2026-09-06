@@ -4,13 +4,13 @@ import { cn } from '@/constants/utils';
 // The chrome around a chart tooltip is `.chart-tooltip` in index.css, with the
 // other surfaces. This file is only what goes inside one.
 
-interface RowProps {
+type RowProps = {
   label: ReactNode;
   value: ReactNode;
   labelClassName?: string;
   valueClassName?: string;
   separated?: boolean;
-}
+};
 
 // A single label/value line inside a tooltip. `separated` draws a divider above
 // the row (used for emphasised "net"/total lines).

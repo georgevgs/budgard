@@ -63,8 +63,9 @@
 
 ## Types and interfaces
 
-- **`interface` for component props.** **[enforced by convention]**
-- **`type` for everything else** — hooks, utilities, unions, query results.
+- **`type` for everything, props included.** This is the one place Budgard
+  departs from the guide, which asks for `interface` on component props — see
+  *Where this repo differs* below.
 - `Pick<>` to select, `Omit<>` to remove, `&` to merge.
 - Do not reach for `interface` on a utility or a hook return type.
 
@@ -79,10 +80,17 @@
 
 ---
 
+## Where this repo differs
+
+**Props are `type`, not `interface`.** The guide asks for `interface` on
+component props. Budgard uses `type Props = { … }` everywhere instead, for one
+consistent way to declare a shape rather than two. `src/common/ui/` is vendored
+shadcn and keeps whatever upstream ships.
+
 ## Where this repo is stricter
 
-The guide is silent on these; Budgard is not, and both are **[enforced]** in
-`eslint.config.js` for `src/**` (build scripts and tests are exempt):
+The guide is silent on these; both are **[enforced]** in `eslint.config.js` for
+`src/**` (build scripts and tests are exempt):
 
 - **No ternaries.** Use an `if`/`else` block or a helper that returns early.
 - **No `&&` in JSX children.** Use a helper render function with an `if`

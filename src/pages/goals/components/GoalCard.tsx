@@ -19,11 +19,11 @@ import type { Locale } from 'date-fns';
 import type { GoalProgress } from '@/common/hooks/useGoalProgress';
 import { getColorTint } from '@/constants/categoryColor';
 
-interface Props {
+type Props = {
   goal: Goal;
   onEdit: (goal: Goal) => void;
   onDelete: (id: string) => void;
-}
+};
 
 const GoalCard = ({ goal, onEdit, onDelete }: Props) => {
   const { t } = useTranslation();

@@ -25,10 +25,10 @@ import type { GoalSourceType } from '@/types/Goal';
 
 const sourceValues = ['account', 'net_delta', 'category', 'tag'] as const;
 
-interface Props {
+type Props = {
   form: UseFormReturn<GoalFormData>;
   sourceType: GoalSourceType;
-}
+};
 
 const GoalSourceFields = ({ form, sourceType }: Props) => {
   const { t } = useTranslation();

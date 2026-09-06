@@ -15,11 +15,11 @@ import MonthYearPickerContent from '@/pages/expenses/components/MonthYearPickerC
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { ActivityPeriod } from '@/pages/activity/hooks/useActivityFeed';
 
-interface Props {
+type Props = {
   period: ActivityPeriod;
   selectedMonth: string;
   onMonthChange: (month: string) => void;
-}
+};
 
 // The detail control for one period option, so it only appears while that
 // option is chosen. Showing it under "last 30 days" would imply the month

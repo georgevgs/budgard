@@ -8,10 +8,10 @@ import {
 import OtpForm from '@/pages/auth/components/OtpForm';
 import { useTranslation } from 'react-i18next';
 
-interface LoginModalProps {
+type LoginModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
+};
 
 const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
   const { t } = useTranslation();

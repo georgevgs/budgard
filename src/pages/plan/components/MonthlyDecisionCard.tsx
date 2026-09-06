@@ -5,11 +5,11 @@ import TileLabel from '@/common/components/bento/TileLabel';
 import { formatCurrency } from '@/constants/utils';
 import type { MonthlyDecision } from '@/pages/plan/utils/monthlyDecision';
 
-interface Props {
+type Props = {
   decision: MonthlyDecision;
   currency: string;
   onOpenDetails: () => void;
-}
+};
 
 const MonthlyDecisionCard = ({ decision, currency, onOpenDetails }: Props) => {
   const { t } = useTranslation();

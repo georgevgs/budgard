@@ -14,9 +14,9 @@ import Reveal from '@/pages/landing/components/Reveal';
 import { Button } from '@/common/ui/button';
 import { useInstallPrompt } from '@/pages/landing/hooks/useInstallPrompt';
 
-interface Props {
+type Props = {
   onGetStarted: () => void;
-}
+};
 
 type Tx = (key: string, opts?: Record<string, unknown>) => string;
 type PreviewTab = {

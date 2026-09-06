@@ -2,13 +2,13 @@ import type { ReactNode } from 'react';
 import { Button } from '@/common/ui/button';
 import { cn } from '@/constants/utils';
 
-interface Props {
+type Props = {
   isOpen: boolean;
   label: string;
   icon: ReactNode;
   onClick: () => void;
   labelDelayClass?: string;
-}
+};
 
 const SpeedDialAction = ({
   isOpen,

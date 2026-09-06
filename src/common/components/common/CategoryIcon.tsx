@@ -29,10 +29,10 @@ import Undo2 from 'lucide-react/dist/esm/icons/undo-2';
 import Utensils from 'lucide-react/dist/esm/icons/utensils';
 import { cn } from '@/constants/utils';
 
-interface Props {
+type Props = {
   icon: string | null | undefined;
   className?: string;
-}
+};
 
 // Categories are still stored as the user's existing emoji value, but they
 // render through one coherent SVG family. This keeps old data compatible while

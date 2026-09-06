@@ -2,10 +2,10 @@ import X from 'lucide-react/dist/esm/icons/x';
 import { useTranslation } from 'react-i18next';
 import type { EmbeddedTag } from '@/types/Tag';
 
-interface TagChipProps {
+type TagChipProps = {
   tag: EmbeddedTag;
   onRemove: () => void;
-}
+};
 
 // Removable chip for a selected tag in the expense form's multi-select.
 export const TagChip = ({ tag, onRemove }: TagChipProps) => {

@@ -5,7 +5,7 @@ import { cn } from '@/constants/utils';
 /** How loud the module is allowed to be. See `.tile-*` in index.css. */
 type BentoTone = 'plain' | 'slab' | 'ink' | 'accent' | 'ghost' | 'bare';
 
-interface Props {
+type Props = {
   children: ReactNode;
   tone?: BentoTone;
   /** Full width of the grid rather than half. */
@@ -17,7 +17,7 @@ interface Props {
    *  so the accessible name has to say where tapping it goes. */
   ariaLabel?: string;
   className?: string;
-}
+};
 
 // One module of the bento grid. A tile is a thing you can tap, reorder and
 // hide, so most of them are doorways — but the shell is the same object either

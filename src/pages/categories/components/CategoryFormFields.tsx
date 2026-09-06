@@ -15,11 +15,11 @@ import CategoryKindSelector, {
 } from '@/pages/categories/components/CategoryKindSelector';
 import type { CategoryFormData } from '@/pages/categories/validations';
 
-interface Props {
+type Props = {
   form: UseFormReturn<CategoryFormData>;
   isIncomeCategory: boolean;
   isDisabled: boolean;
-}
+};
 
 const CategoryFormFields = ({ form, isIncomeCategory, isDisabled }: Props) => {
   const { t } = useTranslation();

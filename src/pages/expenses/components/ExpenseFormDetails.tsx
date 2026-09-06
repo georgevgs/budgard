@@ -12,7 +12,7 @@ import type { TagPickerApi } from '@/pages/expenses/hooks/useTagPicker';
 import { useReceiptScan } from '@/pages/expenses/hooks/useReceiptScan';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
 
-interface Props {
+type Props = {
   form: UseFormReturn<ExpenseFormData>;
   tagPicker: TagPickerApi;
   showDetails: boolean;
@@ -22,7 +22,7 @@ interface Props {
   isRemovingReceipt: boolean;
   onReceiptSelect: (file: File | null) => void;
   onRemoveExistingReceipt: () => void;
-}
+};
 
 const ExpenseFormDetails = ({
   form,

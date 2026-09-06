@@ -3,10 +3,10 @@ import { Progress } from '@/common/ui/progress';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { GoalProgress } from '@/common/hooks/useGoalProgress';
 
-interface Props {
+type Props = {
   progress: GoalProgress;
   currency: string;
-}
+};
 
 const GoalProgressBar = ({ progress, currency }: Props) => {
   const { t } = useTranslation();

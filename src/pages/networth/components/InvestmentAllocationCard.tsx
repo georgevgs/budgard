@@ -5,9 +5,9 @@ import DonutChart, { type DonutSlice } from '@/common/components/charts/DonutCha
 import { formatCurrency, formatPercent } from '@/constants/utils';
 import type { Account } from '@/types/Account';
 
-interface Props {
+type Props = {
   accounts: Account[];
-}
+};
 
 type Slice = DonutSlice & {
   name: string;

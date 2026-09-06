@@ -21,10 +21,10 @@ const CsvImportDialog = lazyWithRetry(
   () => import('@/pages/expenses/components/CsvImportDialog'),
 );
 
-interface Props {
+type Props = {
   isExportDisabled: boolean;
   onExport: () => void;
-}
+};
 
 // Import, export and tag management are things you do a handful of times a
 // year. They used to be pinned above a list opened every day; an overflow menu

@@ -23,10 +23,10 @@ import {
 import type { IncomeCategoryPickerApi } from '@/pages/income/hooks/useIncomeCategoryPicker';
 import type { IncomeFormData } from '@/pages/income/validations';
 
-interface Props {
+type Props = {
   form: UseFormReturn<IncomeFormData>;
   picker: IncomeCategoryPickerApi;
-}
+};
 
 const IncomeCategoryField = ({ form, picker }: Props) => {
   const { t } = useTranslation();

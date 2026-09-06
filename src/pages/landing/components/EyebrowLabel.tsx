@@ -1,8 +1,8 @@
 import TileLabel from '@/common/components/bento/TileLabel';
 
-interface Props {
+type Props = {
   children: string;
-}
+};
 
 const EyebrowLabel = ({ children }: Props) => (
   <TileLabel className="text-primary-ink">{children}</TileLabel>

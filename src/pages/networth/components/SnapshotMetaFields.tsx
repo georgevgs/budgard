@@ -11,10 +11,10 @@ import {
 } from '@/common/ui/form';
 import type { AccountBalanceFormData } from '@/pages/networth/validations';
 
-interface Props {
+type Props = {
   form: UseFormReturn<AccountBalanceFormData>;
   dateLocale: Locale | undefined;
-}
+};
 
 const SnapshotMetaFields = ({ form, dateLocale }: Props) => {
   const { t } = useTranslation();

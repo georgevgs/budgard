@@ -8,9 +8,9 @@ import { Progress } from '@/common/ui/progress';
 import type { QuickReceiptScanApi } from '@/pages/expenses/hooks/useQuickReceiptScan';
 import { RECEIPT_ALLOWED_TYPES } from '@/constants/validations';
 
-interface Props {
+type Props = {
   scan: QuickReceiptScanApi;
-}
+};
 
 const QuickReceiptScanAction = ({ scan }: Props) => {
   const { t } = useTranslation();

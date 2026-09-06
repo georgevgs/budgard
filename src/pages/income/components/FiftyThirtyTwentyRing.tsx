@@ -12,9 +12,9 @@ import { countsAsSpending, countsInTotals } from '@/constants/spending';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
-interface Props {
+type Props = {
   selectedMonth: string;
-}
+};
 
 type Bucket = 'need' | 'want' | 'savings';
 
@@ -162,13 +162,13 @@ type TranslateFunction = (
   options?: Record<string, unknown>,
 ) => string;
 
-interface BucketRowProps {
+type BucketRowProps = {
   bucket: BucketConfig;
   actual: number;
   total: number;
   currency: string;
   t: TranslateFunction;
-}
+};
 
 const BucketRow = ({ bucket, actual, total, currency, t }: BucketRowProps) => {
   let actualPct = 0;

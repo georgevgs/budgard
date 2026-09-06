@@ -7,12 +7,12 @@ import { Button } from '@/common/ui/button';
 import { PopoverContent } from '@/common/ui/popover';
 import { cn } from '@/constants/utils';
 
-interface Props {
+type Props = {
   selectedDate: Date;
   dateLocale: Locale | undefined;
   onYearChange: (direction: 'prev' | 'next') => void;
   onMonthSelect: (month: number) => void;
-}
+};
 
 const MonthYearPickerContent = ({
   selectedDate,

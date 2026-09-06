@@ -19,9 +19,9 @@ import { cn } from '@/constants/utils';
 import type { TodayLayoutControls } from '@/pages/today/hooks/useTodayLayout';
 import { isWideTodayTile, type TodayTileId } from '@/pages/today/utils/bentoLayout';
 
-interface Props {
+type Props = {
   layout: TodayLayoutControls;
-}
+};
 
 // The grid, stood down to its labels so it can be rearranged. Real tiles are
 // not shown here on purpose: arranging is about which module goes where, and

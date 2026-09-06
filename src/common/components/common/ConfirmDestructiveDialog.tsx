@@ -10,14 +10,14 @@ import {
   AlertDialogTitle,
 } from '@/common/ui/alert-dialog';
 
-interface Props {
+type Props = {
   open: boolean;
   title: string;
   description: string;
   confirmLabel: string;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
-}
+};
 
 const ConfirmDestructiveDialog = ({
   open,

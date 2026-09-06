@@ -3,10 +3,10 @@ import { Progress } from '@/common/ui/progress';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { DebtProgress } from '@/pages/debts/hooks/useDebtProgress';
 
-interface Props {
+type Props = {
   progress: DebtProgress;
   currency: string;
-}
+};
 
 const DebtProgressBar = ({ progress, currency }: Props) => {
   const { t } = useTranslation();

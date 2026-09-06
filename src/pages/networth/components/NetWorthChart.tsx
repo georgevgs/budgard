@@ -9,12 +9,12 @@ import { cn, formatCurrency, formatCurrencyCompact } from '@/constants/utils';
 import type { NetWorthPoint } from '@/common/hooks/useNetWorth';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 
-interface Props {
+type Props = {
   series: NetWorthPoint[];
   defaultCurrency: string;
   /** True when any live debt is folded into the line as a flat constant. */
   hasDebtConstant?: boolean;
-}
+};
 
 const SERIES: Series[] = [
   { kind: 'area', key: 'total', label: 'total', color: '--primary' },

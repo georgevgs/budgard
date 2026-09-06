@@ -7,12 +7,12 @@ import X from 'lucide-react/dist/esm/icons/x';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 
-interface TemplatesBarProps {
+type TemplatesBarProps = {
   templates: ExpenseTemplate[];
   defaultCurrency: string;
   onUse: (template: ExpenseTemplate) => void;
   onDelete: (templateId: string) => void;
-}
+};
 
 const TemplatesBar = ({
   templates,

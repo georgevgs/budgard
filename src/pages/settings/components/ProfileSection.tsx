@@ -15,11 +15,11 @@ import LogOut from 'lucide-react/dist/esm/icons/log-out';
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-interface ProfileSectionProps {
+type ProfileSectionProps = {
   email: string | undefined;
   onSignOut: () => Promise<void>;
   t: TFunc;
-}
+};
 
 const ProfileSection = ({ email, onSignOut, t }: ProfileSectionProps) => {
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);

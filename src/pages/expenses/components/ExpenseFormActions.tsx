@@ -2,11 +2,11 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
 import { renderSaveButtonLabel } from '@/pages/expenses/components/ExpensesForm.helpers';
 
-interface Props {
+type Props = {
   isValid: boolean;
   isSubmitting: boolean;
   onClose: () => void;
-}
+};
 
 const ExpenseFormActions = ({ isValid, isSubmitting, onClose }: Props) => {
   const { t } = useTranslation();

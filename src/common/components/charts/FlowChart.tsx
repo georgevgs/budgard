@@ -15,13 +15,13 @@ export type FlowNode = {
   color: string;
 };
 
-interface Props {
+type Props = {
   sourceLabel: string;
   sourceSublabel: string;
   sourceValue: number;
   nodes: FlowNode[];
   ariaLabel: string;
-}
+};
 
 const NODE_WIDTH = 6;
 const NODE_GAP = 10;

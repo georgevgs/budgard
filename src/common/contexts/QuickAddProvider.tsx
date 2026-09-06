@@ -17,9 +17,9 @@ import { useIncomeFormState } from '@/pages/income/hooks/useIncomeFormState';
 import { isTransactionEntryPath } from '@/constants/routes';
 import { FORM_TYPES } from '@/common/components/layout/formTypes';
 
-interface Props {
+type Props = {
   children: ReactNode;
-}
+};
 
 const QuickAddProvider = ({ children }: Props) => {
   const { pathname } = useLocation();

@@ -11,10 +11,10 @@ import {
 import { DatePickerField } from '@/common/ui/date-picker-field';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
 
-interface Props {
+type Props = {
   form: UseFormReturn<ExpenseFormData>;
   dateLocale: Locale | undefined;
-}
+};
 
 const ExpenseDateField = ({ form, dateLocale }: Props) => {
   const { t } = useTranslation();

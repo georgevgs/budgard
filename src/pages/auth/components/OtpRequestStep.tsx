@@ -6,14 +6,14 @@ import FormSubmitButton from '@/common/ui/form-submit-button';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { cn } from '@/constants/utils';
 
-interface Props {
+type Props = {
   formAction: (formData: FormData) => void;
   error: string | null;
   initialEmail: string;
   turnstileToken: string | null;
   onTokenChange: (token: string | null) => void;
   turnstileRef: RefObject<TurnstileInstance | null>;
-}
+};
 
 const OtpRequestStep = ({
   formAction,

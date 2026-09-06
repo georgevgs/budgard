@@ -21,14 +21,14 @@ import type { Category } from '@/types/Category';
 import type { Account } from '@/types/Account';
 import { useTranslation } from 'react-i18next';
 
-interface RecurringExpenseFormProps {
+type RecurringExpenseFormProps = {
   expense?: RecurringExpense;
   categories: Category[];
   investmentAccounts?: Account[];
   type?: 'expense' | 'income';
   onSubmit: (values: RecurringExpenseFormData) => Promise<void>;
   onClose: () => void;
-}
+};
 
 const RecurringExpenseForm = ({
   expense,

@@ -13,14 +13,14 @@ import {
   InputOTPSlot,
 } from '@/common/ui/input-otp';
 
-interface Props {
+type Props = {
   email: string;
   otp: string;
   onOtpChange: (otp: string) => void;
   error: string | null;
   isDeleting: boolean;
   onVerifyAndDelete: () => void;
-}
+};
 
 const DeleteVerifyStep = ({
   email,

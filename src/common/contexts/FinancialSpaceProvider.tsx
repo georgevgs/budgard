@@ -13,9 +13,9 @@ import {
 import { householdService } from '@/common/api/householdService';
 import type { FinancialSpace, HouseholdShare } from '@/types/Household';
 
-interface Props {
+type Props = {
   children: ReactNode;
-}
+};
 
 const FinancialSpaceProvider = ({ children }: Props) => {
   const { session } = useAuth();

@@ -8,10 +8,10 @@ import TransactionPill from '@/common/components/common/TransactionPill';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { RecentActivityItem } from '@/pages/today/hooks/useTodayGuidance';
 
-interface Props {
+type Props = {
   items: RecentActivityItem[];
   currency: string;
-}
+};
 
 type Locale = ReturnType<typeof useDateLocale>;
 

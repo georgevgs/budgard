@@ -8,9 +8,9 @@ import {
   DialogTitle,
 } from '@/common/ui/dialog';
 
-interface Props {
+type Props = {
   onNext: () => void;
-}
+};
 
 const OnboardingWelcomeStep = ({ onNext }: Props) => {
   const { t } = useTranslation();

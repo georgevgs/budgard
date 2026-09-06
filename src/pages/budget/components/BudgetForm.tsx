@@ -16,13 +16,13 @@ import {
   DialogTitle,
 } from '@/common/ui/dialog';
 
-interface BudgetFormProps {
+type BudgetFormProps = {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (amount: number) => Promise<void>;
   currentBudget: number | null;
   currencyCode?: string;
-}
+};
 
 const BudgetForm = ({
   isOpen,

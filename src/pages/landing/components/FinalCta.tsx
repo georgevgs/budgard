@@ -3,9 +3,9 @@ import { Button } from '@/common/ui/button';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import Reveal from '@/pages/landing/components/Reveal';
 
-interface Props {
+type Props = {
   onGetStarted: () => void;
-}
+};
 
 const FinalCta = ({ onGetStarted }: Props) => {
   const { t } = useTranslation();

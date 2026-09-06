@@ -28,10 +28,10 @@ import type {
   ParsedExpenseRow,
 } from '@/pages/expenses/utils/csvTypes';
 
-interface CsvImportDialogProps {
+type CsvImportDialogProps = {
   open: boolean;
   onClose: () => void;
-}
+};
 
 const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
   const { t } = useTranslation();

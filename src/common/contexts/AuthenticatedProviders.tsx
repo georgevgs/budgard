@@ -5,9 +5,9 @@ import { DataProvider } from '@/common/contexts/DataProvider';
 import FinancialSpaceProvider from '@/common/contexts/FinancialSpaceProvider';
 import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
 
-interface Props {
+type Props = {
   children: ReactNode;
-}
+};
 
 // Data and billing have no consumers on the landing or legal pages. Keeping
 // their providers behind the authenticated boundary avoids downloading and

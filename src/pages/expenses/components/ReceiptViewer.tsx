@@ -10,11 +10,11 @@ import {
 import { Skeleton } from '@/common/ui/skeleton';
 import { useReceiptUrl } from '@/pages/expenses/hooks/useReceiptUrl';
 
-interface ReceiptViewerProps {
+type ReceiptViewerProps = {
   receiptPath: string;
   open: boolean;
   onClose: () => void;
-}
+};
 
 const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
   const { t } = useTranslation();

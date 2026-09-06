@@ -28,11 +28,11 @@ import { cn, formatCurrency } from '@/constants/utils';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 
-interface Props {
+type Props = {
   expense: Expense;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
+};
 
 const SplitExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
   const { t } = useTranslation();

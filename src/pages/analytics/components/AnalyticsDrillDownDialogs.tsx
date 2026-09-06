@@ -4,11 +4,11 @@ import type { useAnalyticsDrillDown } from '@/pages/analytics/hooks/useAnalytics
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 
-interface Props {
+type Props = {
   drillDown: ReturnType<typeof useAnalyticsDrillDown>;
   expenses: Expense[];
   categories: Category[];
-}
+};
 
 const AnalyticsDrillDownDialogs = ({
   drillDown,
