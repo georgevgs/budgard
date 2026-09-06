@@ -5,18 +5,24 @@ import { useToast } from '@/common/hooks/useToast';
 import { useExpenseOps } from '@/common/hooks/dataOps/useExpenseOps';
 import { useIncomeOps } from '@/common/hooks/dataOps/useIncomeOps';
 import {
-  parseExpensesCsv,
+  suggestColumnMapping,
+  usesSignedAmountConvention,
+} from '@/pages/expenses/utils/csvColumns';
+import {
   mapRowsToExpenses,
   mapRowsToIncomes,
-  readFileAsText,
+  parseExpensesCsv,
+} from '@/pages/expenses/utils/csvImport';
+import {
   getCsvPreviewData,
-  usesSignedAmountConvention,
-  suggestColumnMapping,
-  type ParsedExpenseRow,
+  readFileAsText,
+} from '@/pages/expenses/utils/csvText';
+import {
+  type ColumnMapping,
   type CsvParseError,
   type CsvPreviewData,
-  type ColumnMapping,
-} from '@/pages/expenses/utils/csvImport';
+  type ParsedExpenseRow,
+} from '@/pages/expenses/utils/csvTypes';
 import { detectStatementFormat, parseStatement } from '@/pages/expenses/utils/statementImport';
 import type { Category } from '@/types/Category';
 

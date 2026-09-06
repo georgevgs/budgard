@@ -26,11 +26,11 @@ import { useCsvImportFlow } from '@/pages/expenses/hooks/useCsvImportFlow';
 import type { Category } from '@/types/Category';
 import { cn, formatCurrency } from '@/constants/utils';
 import type {
-  ParsedExpenseRow,
+  ColumnMapping,
   CsvParseError,
   CsvPreviewData,
-  ColumnMapping,
-} from '@/pages/expenses/utils/csvImport';
+  ParsedExpenseRow,
+} from '@/pages/expenses/utils/csvTypes';
 
 type CsvImportDialogProps = {
   open: boolean;

@@ -1,12 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import {
-  getCsvPreviewData,
-  usesSignedAmountConvention,
   suggestColumnMapping,
-  parseExpensesCsv,
+  usesSignedAmountConvention,
+} from '@/pages/expenses/utils/csvColumns';
+import {
   mapRowsToExpenses,
   mapRowsToIncomes,
+  parseExpensesCsv,
 } from '@/pages/expenses/utils/csvImport';
+import {
+  getCsvPreviewData,
+} from '@/pages/expenses/utils/csvText';
 import type { Category } from '@/types/Category';
 
 const categories: Category[] = [
