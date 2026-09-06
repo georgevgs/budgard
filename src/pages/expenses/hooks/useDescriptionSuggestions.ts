@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { useExpensesData } from '@/common/contexts/DataContext';
-import type { ExpenseFormData } from '@/constants/validations';
+import type { ExpenseFormData } from '@/pages/expenses/validations';
 import type { Expense } from '@/types/Expense';
 
 export const useDescriptionSuggestions = (

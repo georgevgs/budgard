@@ -9,7 +9,7 @@ import {
   FormMessage,
 } from '@/common/ui/form';
 import { DatePickerField } from '@/common/ui/date-picker-field';
-import type { ExpenseFormData } from '@/constants/validations';
+import type { ExpenseFormData } from '@/pages/expenses/validations';
 
 interface Props {
   form: UseFormReturn<ExpenseFormData>;

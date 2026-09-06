@@ -4,7 +4,7 @@ import { useAuth } from '@/common/contexts/AuthContext';
 import { useCategoriesData } from '@/common/contexts/DataContext';
 import { useCategoryOps } from '@/common/hooks/dataOps/useCategoryOps';
 import { incomeColors } from '@/design/palette';
-import type { IncomeFormData } from '@/constants/validations';
+import type { IncomeFormData } from '@/pages/income/validations';
 
 export const useIncomeCategoryPicker = (
   form: UseFormReturn<IncomeFormData>,

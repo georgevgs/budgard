@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import type { UseFormReturn } from 'react-hook-form';
 import { useAccountOps } from '@/common/hooks/dataOps/useAccountOps';
 import { parseCurrencyInput } from '@/constants/utils';
-import type { AccountBalanceFormData } from '@/constants/validations';
+import type { AccountBalanceFormData } from '@/pages/networth/validations';
 import type { Account } from '@/types/Account';
 import type { SnapshotMode } from '@/pages/networth/components/BalanceSnapshotForm';
 

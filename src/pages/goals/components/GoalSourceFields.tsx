@@ -19,7 +19,7 @@ import {
   useCategoriesData,
   useTagsData,
 } from '@/common/contexts/DataContext';
-import type { GoalFormData } from '@/constants/validations';
+import type { GoalFormData } from '@/pages/goals/validations';
 import type { Account } from '@/types/Account';
 import type { GoalSourceType } from '@/types/Goal';
 

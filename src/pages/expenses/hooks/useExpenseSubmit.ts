@@ -6,7 +6,7 @@ import { collectExpenseTagIds } from '@/constants/expenseTags';
 import { prepareStoredTransactionAmount } from '@/constants/transactionAmount';
 import type { ReceiptOptions } from '@/common/hooks/dataOps/useExpenseOps';
 import type { CurrencyConversionApi } from '@/pages/expenses/hooks/useCurrencyConversion';
-import type { ExpenseFormData } from '@/constants/validations';
+import type { ExpenseFormData } from '@/pages/expenses/validations';
 import type { ExpenseWritePayload } from '@/common/api/dataService';
 import type { Expense } from '@/types/Expense';
 

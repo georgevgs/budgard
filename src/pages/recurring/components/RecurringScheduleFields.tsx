@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/common/ui/select';
-import type { RecurringExpenseFormData } from '@/constants/validations';
+import type { RecurringExpenseFormData } from '@/pages/recurring/validations';
 import type { Account } from '@/types/Account';
 
 const frequencyValues = [

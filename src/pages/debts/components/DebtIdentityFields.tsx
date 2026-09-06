@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/common/ui/select';
 import { SUPPORTED_CURRENCIES } from '@/constants/currencies';
-import type { DebtFormData } from '@/constants/validations';
+import type { DebtFormData } from '@/pages/debts/validations';
 import { DEBT_KINDS } from '@/types/Debt';
 
 interface Props {

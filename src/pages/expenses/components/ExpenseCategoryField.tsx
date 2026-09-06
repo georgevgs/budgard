@@ -17,7 +17,7 @@ import {
 } from '@/common/ui/select';
 import { renderCategoryIndicator } from '@/pages/expenses/components/ExpensesForm.helpers';
 import type { Category } from '@/types/Category';
-import type { ExpenseFormData } from '@/constants/validations';
+import type { ExpenseFormData } from '@/pages/expenses/validations';
 
 // Sentinel option value. Not a category id, so it can never collide with one.
 const MANAGE_VALUE = '__manage__';

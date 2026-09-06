@@ -16,7 +16,7 @@ import { useExpenseOps } from '@/common/hooks/dataOps/useExpenseOps';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { amountToInput, parseCurrencyInput } from '@/constants/utils';
 import DebtPaymentFields from '@/pages/debts/components/DebtPaymentFields';
-import { debtPaymentSchema, type DebtPaymentFormData } from '@/constants/validations';
+import { debtPaymentSchema, type DebtPaymentFormData } from '@/pages/debts/validations';
 import type { Debt } from '@/types/Debt';
 
 interface Props {

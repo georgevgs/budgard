@@ -15,7 +15,7 @@ import {
 import { Input } from '@/common/ui/input';
 import { renderSuggestionMeta } from '@/pages/expenses/components/ExpensesForm.helpers';
 import type { DescriptionSuggestionsApi } from '@/pages/expenses/hooks/useDescriptionSuggestions';
-import type { ExpenseFormData } from '@/constants/validations';
+import type { ExpenseFormData } from '@/pages/expenses/validations';
 
 interface Props {
   form: UseFormReturn<ExpenseFormData>;

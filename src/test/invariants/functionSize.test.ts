@@ -13,6 +13,10 @@ import {
 // ceiling, so an entry that grows fails, an entry that drops under the cap
 // fails until it is deleted from the list, and a new offender fails outright.
 const GRANDFATHERED = new Map<string, number>([
+  // Deliberate, not debt: the fetch, the visibility handler and the sign-out
+  // reset share one set of mutable refs, and splitting them across hook
+  // boundaries is what the React compiler rejects. The reasoning is written at
+  // the top of useDataLayer.ts — read it before trying to shrink this one.
   ['useDataLayer', 619],
   ['useExpenseOps', 281],
   ['useCsvImportFlow', 263],

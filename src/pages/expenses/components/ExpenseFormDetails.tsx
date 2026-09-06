@@ -10,7 +10,7 @@ import {
 } from '@/pages/expenses/components/ExpensesForm.helpers';
 import type { TagPickerApi } from '@/pages/expenses/hooks/useTagPicker';
 import { useReceiptScan } from '@/pages/expenses/hooks/useReceiptScan';
-import type { ExpenseFormData } from '@/constants/validations';
+import type { ExpenseFormData } from '@/pages/expenses/validations';
 
 interface Props {
   form: UseFormReturn<ExpenseFormData>;

@@ -3,7 +3,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import { FormField, FormItem, FormMessage } from '@/common/ui/form';
 import TransactionAmountControl from '@/common/components/common/TransactionAmountControl';
 import type { CurrencyConversionApi } from '@/pages/expenses/hooks/useCurrencyConversion';
-import type { ExpenseFormData } from '@/constants/validations';
+import type { ExpenseFormData } from '@/pages/expenses/validations';
 
 interface Props {
   form: UseFormReturn<ExpenseFormData>;

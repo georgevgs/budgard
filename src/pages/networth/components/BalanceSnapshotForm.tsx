@@ -22,10 +22,7 @@ import { useSnapshotSubmit } from '@/pages/networth/hooks/useSnapshotSubmit';
 import SnapshotMetaFields from '@/pages/networth/components/SnapshotMetaFields';
 import { amountToInput } from '@/constants/utils';
 import { getCurrencySymbol } from '@/constants/currencies';
-import {
-  accountBalanceSchema,
-  type AccountBalanceFormData,
-} from '@/constants/validations';
+import { accountBalanceSchema, type AccountBalanceFormData } from '@/pages/networth/validations';
 import type { Account } from '@/types/Account';
 
 export type SnapshotMode = 'value' | 'contribution' | 'withdrawal';

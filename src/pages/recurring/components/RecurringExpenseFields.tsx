@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/common/ui/select';
-import type { RecurringExpenseFormData } from '@/constants/validations';
+import type { RecurringExpenseFormData } from '@/pages/recurring/validations';
 import type { Category } from '@/types/Category';
 
 interface Props {

@@ -15,7 +15,7 @@ import { useDataConfig } from '@/common/contexts/DataContext';
 import { useIncomeCurrencyConversion } from '@/pages/income/hooks/useIncomeCurrencyConversion';
 import { useIncomeCategoryPicker } from '@/pages/income/hooks/useIncomeCategoryPicker';
 import { useIncomeSubmit } from '@/pages/income/hooks/useIncomeSubmit';
-import { incomeSchema, type IncomeFormData } from '@/constants/validations';
+import { incomeSchema, type IncomeFormData } from '@/pages/income/validations';
 import type { Expense } from '@/types/Expense';
 import IncomeAmountField from '@/pages/income/components/IncomeAmountField';
 import IncomeDescriptionField from '@/pages/income/components/IncomeDescriptionField';

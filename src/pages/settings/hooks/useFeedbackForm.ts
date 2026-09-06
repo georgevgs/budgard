@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useFeedbackOps } from '@/common/hooks/dataOps/useFeedbackOps';
-import { feedbackFormSchema, type FeedbackFormData } from '@/constants/validations';
+import { feedbackFormSchema, type FeedbackFormData } from '@/pages/settings/validations';
 import type { FeedbackKind } from '@/common/api/feedbackService';
 
 type Params = {

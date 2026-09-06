@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useAccountOps } from '@/common/hooks/dataOps/useAccountOps';
 import { parseCurrencyInput } from '@/constants/utils';
-import type { AccountFormData } from '@/constants/validations';
+import type { AccountFormData } from '@/pages/networth/validations';
 import type { Account } from '@/types/Account';
 
 type UseAccountSubmitArgs = {

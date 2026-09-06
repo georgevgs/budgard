@@ -15,7 +15,7 @@ import { Form } from '@/common/ui/form';
 import GoalFormFields from '@/pages/goals/components/GoalFormFields';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { amountToInput } from '@/constants/utils';
-import { goalSchema, type GoalFormData } from '@/constants/validations';
+import { goalSchema, type GoalFormData } from '@/pages/goals/validations';
 import type { Goal } from '@/types/Goal';
 import { swatch } from '@/design/palette';
 

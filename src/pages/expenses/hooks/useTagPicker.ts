@@ -6,7 +6,7 @@ import { useProGate } from '@/pages/pro/hooks/useProGate';
 import { dataColors } from '@/design/palette';
 import { collectExpenseTagIds } from '@/constants/expenseTags';
 import type { Tag } from '@/types/Tag';
-import type { ExpenseFormData } from '@/constants/validations';
+import type { ExpenseFormData } from '@/pages/expenses/validations';
 
 export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
   const tags = useTagsData();

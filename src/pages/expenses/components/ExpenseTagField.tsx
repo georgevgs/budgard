@@ -25,7 +25,7 @@ import {
   useTagListboxNav,
   type TagListboxNavApi,
 } from '@/pages/expenses/hooks/useTagListboxNav';
-import type { ExpenseFormData } from '@/constants/validations';
+import type { ExpenseFormData } from '@/pages/expenses/validations';
 
 interface Props {
   form: UseFormReturn<ExpenseFormData>;

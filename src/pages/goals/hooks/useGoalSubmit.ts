@@ -3,7 +3,7 @@ import { useAuth } from '@/common/contexts/AuthContext';
 import { useAccountsData, useDataConfig } from '@/common/contexts/DataContext';
 import { useGoalOps } from '@/common/hooks/dataOps/useGoalOps';
 import { parseCurrencyInput } from '@/constants/utils';
-import type { GoalFormData } from '@/constants/validations';
+import type { GoalFormData } from '@/pages/goals/validations';
 import type { Goal } from '@/types/Goal';
 
 type UseGoalSubmitArgs = {

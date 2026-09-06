@@ -13,7 +13,7 @@ import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import { Form } from '@/common/ui/form';
 import { useCategorySubmit } from '@/pages/categories/hooks/useCategorySubmit';
-import { categorySchema, type CategoryFormData } from '@/constants/validations';
+import { categorySchema, type CategoryFormData } from '@/pages/categories/validations';
 import type { Category } from '@/types/Category';
 import CategoryFormFields from '@/pages/categories/components/CategoryFormFields';
 import { type SelectableCategoryKind } from '@/pages/categories/components/CategoryKindSelector';

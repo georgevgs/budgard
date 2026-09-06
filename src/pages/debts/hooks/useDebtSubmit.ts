@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useDebtOps } from '@/common/hooks/dataOps/useDebtOps';
 import { parseCurrencyInput } from '@/constants/utils';
-import type { DebtFormData } from '@/constants/validations';
+import type { DebtFormData } from '@/pages/debts/validations';
 import type { Debt } from '@/types/Debt';
 
 type UseDebtSubmitArgs = {

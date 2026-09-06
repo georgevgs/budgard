@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useForm, useWatch } from 'react-hook-form';
 import type { Category } from '@/types/Category';
-import type { ExpenseFormData } from '@/constants/validations';
+import type { ExpenseFormData } from '@/pages/expenses/validations';
 
 // The real Select is a Radix portal driven by pointer events that jsdom does
 // not implement. A plain listbox keeps the assertions about *behaviour* —

@@ -1,9 +1,6 @@
 import { useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  RECEIPT_ALLOWED_TYPES,
-  RECEIPT_MAX_FILE_SIZE,
-} from '@/constants/validations';
+import { RECEIPT_ALLOWED_TYPES, RECEIPT_MAX_FILE_SIZE } from '@/constants/validations';
 import { useToast } from '@/common/hooks/useToast';
 
 type UseReceiptUploadArgs = {

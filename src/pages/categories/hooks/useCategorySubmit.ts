@@ -2,7 +2,7 @@ import type { Session } from '@supabase/supabase-js';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useCategoryOps } from '@/common/hooks/dataOps/useCategoryOps';
 import { useDataConfig } from '@/common/contexts/DataContext';
-import type { CategoryFormData } from '@/constants/validations';
+import type { CategoryFormData } from '@/pages/categories/validations';
 import type { Category } from '@/types/Category';
 import type { CategoryKind } from '@/types/Category';
 

@@ -10,7 +10,7 @@ import {
 } from '@/common/ui/form';
 import { CurrencyInput } from '@/common/ui/currency-input';
 import { DatePickerField } from '@/common/ui/date-picker-field';
-import type { DebtPaymentFormData } from '@/constants/validations';
+import type { DebtPaymentFormData } from '@/pages/debts/validations';
 
 interface Props {
   form: UseFormReturn<DebtPaymentFormData>;

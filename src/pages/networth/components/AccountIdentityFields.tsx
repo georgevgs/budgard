@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/common/ui/select';
 import { SUPPORTED_CURRENCIES } from '@/constants/currencies';
-import type { AccountFormData } from '@/constants/validations';
+import type { AccountFormData } from '@/pages/networth/validations';
 import type { AccountKind } from '@/types/Account';
 
 const KINDS: ReadonlyArray<AccountKind> = [

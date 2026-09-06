@@ -12,7 +12,7 @@ import {
 import CategoryColorPicker from '@/pages/categories/components/CategoryColorPicker';
 import GoalSourceFields from '@/pages/goals/components/GoalSourceFields';
 import { formatCurrencyInput } from '@/constants/utils';
-import type { GoalFormData } from '@/constants/validations';
+import type { GoalFormData } from '@/pages/goals/validations';
 import type { GoalSourceType } from '@/types/Goal';
 
 interface Props {

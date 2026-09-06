@@ -23,7 +23,7 @@ import { useDataConfig } from '@/common/contexts/DataContext';
 import { useDebtSubmit } from '@/pages/debts/hooks/useDebtSubmit';
 import { getCurrencySymbol } from '@/constants/currencies';
 import { amountToInput, formatCurrencyInput } from '@/constants/utils';
-import { debtSchema, type DebtFormData } from '@/constants/validations';
+import { debtSchema, type DebtFormData } from '@/pages/debts/validations';
 import { type Debt } from '@/types/Debt';
 import { swatch } from '@/design/palette';
 

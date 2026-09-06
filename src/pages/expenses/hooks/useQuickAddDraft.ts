@@ -4,7 +4,7 @@ import { useCategoriesData, useDataConfig } from '@/common/contexts/DataContext'
 import { useExpensesData } from '@/common/contexts/DataContext';
 import { useAmountPad } from '@/pages/expenses/hooks/useAmountPad';
 import { toIsoDate, todayIso } from '@/constants/dates';
-import { expenseDescriptionSchema } from '@/constants/validations';
+import { expenseDescriptionSchema } from '@/pages/expenses/validations';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { ExpenseWritePayload } from '@/common/api/dataService';

@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useForm } from 'react-hook-form';
 import { useReceiptScan } from '@/pages/expenses/hooks/useReceiptScan';
-import type { ExpenseFormData } from '@/constants/validations';
+import type { ExpenseFormData } from '@/pages/expenses/validations';
 
 const mockRunReceiptOcr = vi.fn();
 const mockCancel = vi.fn();

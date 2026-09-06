@@ -3,7 +3,7 @@ import { useAuth } from '@/common/contexts/AuthContext';
 import { useRecurringExpenseOps } from '@/common/hooks/dataOps/useRecurringExpenseOps';
 import { useRecurringIncomeOps } from '@/common/hooks/dataOps/useRecurringIncomeOps';
 import { parseCurrencyInput } from '@/constants/utils';
-import type { RecurringExpenseFormData } from '@/constants/validations';
+import type { RecurringExpenseFormData } from '@/pages/recurring/validations';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
 export type RecurringMode = 'expense' | 'income';

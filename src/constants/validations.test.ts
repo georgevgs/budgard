@@ -1,14 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import {
-  emailSchema,
-  expenseSchema,
-  categorySchema,
-  recurringExpenseSchema,
-  budgetSchema,
-  feedbackFormSchema,
-  RECEIPT_ALLOWED_TYPES,
-  RECEIPT_MAX_FILE_SIZE,
-} from '@/constants/validations';
+import { RECEIPT_ALLOWED_TYPES, RECEIPT_MAX_FILE_SIZE, emailSchema } from '@/constants/validations';
+import { budgetSchema } from '@/pages/budget/validations';
+import { categorySchema } from '@/pages/categories/validations';
+import { expenseSchema } from '@/pages/expenses/validations';
+import { recurringExpenseSchema } from '@/pages/recurring/validations';
+import { feedbackFormSchema } from '@/pages/settings/validations';
 
 describe('feedbackFormSchema', () => {
   it('accepts a useful free-form message', () => {

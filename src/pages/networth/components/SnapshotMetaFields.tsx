@@ -9,7 +9,7 @@ import {
   FormItem,
   FormMessage,
 } from '@/common/ui/form';
-import type { AccountBalanceFormData } from '@/constants/validations';
+import type { AccountBalanceFormData } from '@/pages/networth/validations';
 
 interface Props {
   form: UseFormReturn<AccountBalanceFormData>;

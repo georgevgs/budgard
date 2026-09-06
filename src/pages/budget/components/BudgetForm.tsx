@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { UseFormRegister } from 'react-hook-form';
 import { useBudgetForm } from '@/pages/budget/hooks/useBudgetForm';
-import type { BudgetFormData } from '@/constants/validations';
+import type { BudgetFormData } from '@/pages/budget/validations';
 import { formatCurrency } from '@/constants/utils';
 import { getCurrencySymbol } from '@/constants/currencies';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';

@@ -21,7 +21,7 @@ import {
   renderBottomAction,
 } from '@/pages/income/components/IncomeForm.helpers';
 import type { IncomeCategoryPickerApi } from '@/pages/income/hooks/useIncomeCategoryPicker';
-import type { IncomeFormData } from '@/constants/validations';
+import type { IncomeFormData } from '@/pages/income/validations';
 
 interface Props {
   form: UseFormReturn<IncomeFormData>;

@@ -5,7 +5,7 @@ import { useAuth } from '@/common/contexts/AuthContext';
 import { useIncomeOps } from '@/common/hooks/dataOps/useIncomeOps';
 import { prepareStoredTransactionAmount } from '@/constants/transactionAmount';
 import type { CurrencyConversionApi } from '@/common/hooks/currency/useCurrencyConversionCore';
-import type { IncomeFormData } from '@/constants/validations';
+import type { IncomeFormData } from '@/pages/income/validations';
 import type { Expense } from '@/types/Expense';
 
 type UseIncomeSubmitArgs = {

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDialogDirty } from '@/common/hooks/useDialogDirty';
-import { budgetSchema, type BudgetFormData } from '@/constants/validations';
+import { budgetSchema, type BudgetFormData } from '@/pages/budget/validations';
 import {
   amountToInput,
   formatCurrencyInput,

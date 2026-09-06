@@ -13,7 +13,7 @@ import CategoryIconPicker from '@/pages/categories/components/CategoryIconPicker
 import CategoryKindSelector, {
   type SelectableCategoryKind,
 } from '@/pages/categories/components/CategoryKindSelector';
-import type { CategoryFormData } from '@/constants/validations';
+import type { CategoryFormData } from '@/pages/categories/validations';
 
 interface Props {
   form: UseFormReturn<CategoryFormData>;

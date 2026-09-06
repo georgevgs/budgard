@@ -1,6 +1,6 @@
 import type { UseFormReturn } from 'react-hook-form';
 import { useCurrencyConversionCore } from '@/common/hooks/currency/useCurrencyConversionCore';
-import type { ExpenseFormData } from '@/constants/validations';
+import type { ExpenseFormData } from '@/pages/expenses/validations';
 import type { Expense } from '@/types/Expense';
 
 export const useCurrencyConversion = (

@@ -17,7 +17,7 @@ import { useDescriptionSuggestions } from '@/pages/expenses/hooks/useDescription
 import { useTagPicker } from '@/pages/expenses/hooks/useTagPicker';
 import { useExpenseSubmit } from '@/pages/expenses/hooks/useExpenseSubmit';
 import type { ReceiptOptions } from '@/common/hooks/dataOps/useExpenseOps';
-import { expenseSchema, type ExpenseFormData } from '@/constants/validations';
+import { expenseSchema, type ExpenseFormData } from '@/pages/expenses/validations';
 import type { ExpenseWritePayload } from '@/common/api/dataService';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';

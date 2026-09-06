@@ -12,7 +12,7 @@ import {
 } from '@/common/ui/dialog';
 import { Input } from '@/common/ui/input';
 import { Label } from '@/common/ui/label';
-import { transactionRuleSchema } from '@/constants/validations';
+import { transactionRuleSchema } from '@/pages/review/validations';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { TransactionRuleDraft } from '@/types/TransactionRule';

@@ -9,7 +9,7 @@ import {
   FormMessage,
 } from '@/common/ui/form';
 import { DatePickerField } from '@/common/ui/date-picker-field';
-import type { IncomeFormData } from '@/constants/validations';
+import type { IncomeFormData } from '@/pages/income/validations';
 
 interface Props {
   form: UseFormReturn<IncomeFormData>;

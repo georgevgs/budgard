@@ -22,7 +22,7 @@ import { useDataConfig } from '@/common/contexts/DataContext';
 import { useAccountSubmit } from '@/pages/networth/hooks/useAccountSubmit';
 import { getCurrencySymbol } from '@/constants/currencies';
 import { amountToInput, formatCurrencyInput } from '@/constants/utils';
-import { accountSchema, type AccountFormData } from '@/constants/validations';
+import { accountSchema, type AccountFormData } from '@/pages/networth/validations';
 import type { Account, AccountKind } from '@/types/Account';
 import { swatch } from '@/design/palette';
 

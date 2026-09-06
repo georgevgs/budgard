@@ -11,7 +11,7 @@ import {
 import CategoryColorPicker from '@/pages/categories/components/CategoryColorPicker';
 import { getCurrencySymbol } from '@/constants/currencies';
 import { formatCurrencyInput } from '@/constants/utils';
-import type { DebtFormData } from '@/constants/validations';
+import type { DebtFormData } from '@/pages/debts/validations';
 
 interface Props {
   form: UseFormReturn<DebtFormData>;

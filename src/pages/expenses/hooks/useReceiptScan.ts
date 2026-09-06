@@ -11,7 +11,7 @@ import {
   runReceiptOcr,
   type OcrRunHandle,
 } from '@/pages/expenses/ocrService';
-import type { ExpenseFormData } from '@/constants/validations';
+import type { ExpenseFormData } from '@/pages/expenses/validations';
 
 type UseReceiptScanArgs = {
   form: UseFormReturn<ExpenseFormData>;
