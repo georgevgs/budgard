@@ -71,7 +71,6 @@ with this file.
 
 - `docs/architecture.md` — routes, provider tree, `dataOps`, services, schema,
   edge functions. Read before touching data flow.
-- `docs/code-style.md` — the long form of the Code Style rules below.
 - `docs/ui-rules.md` — the long form of the UI/UX rules, including colour.
 - `docs/ux-principles.md` — conceptual reference (Gestalt, heuristics).
 - `docs/household-sharing-design.md` — household sharing (Pro): one owner,
