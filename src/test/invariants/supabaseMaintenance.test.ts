@@ -20,10 +20,16 @@ const FUNCTION_HARDENING_MIGRATION = readFileSync(
 );
 
 describe('Supabase maintenance configuration', () => {
+  // The local email service is [inbucket]. A previous pass renamed it to
+  // [local_smtp] and pinned that here, which made config.toml unparseable —
+  // every `supabase` command failed with "'config.config' has invalid keys"
+  // from 4 Sep until it was noticed. The CLI's own config schema has no
+  // local_smtp key at all, `supabase init` emits [inbucket], and so do the
+  // docs. This assertion is the way round that keeps the CLI working.
   it('matches production Postgres and current local email configuration', () => {
     expect(CONFIG).toContain('major_version = 17');
-    expect(CONFIG).toContain('[local_smtp]');
-    expect(CONFIG).not.toContain('[inbucket]');
+    expect(CONFIG).toContain('[inbucket]');
+    expect(CONFIG).not.toContain('[local_smtp]');
   });
 
   it('keeps household JWT lookup in an RLS initplan', () => {
