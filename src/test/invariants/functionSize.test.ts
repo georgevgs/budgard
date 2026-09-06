@@ -26,7 +26,6 @@ const GRANDFATHERED = new Map<string, number>([
   ['useCategoryOps', 222],
   ['usePullToRefresh', 205],
   ['useAnalyticsData', 201],
-  ['renderMappingStep', 171],
   ['useTodayLayout', 153],
   ['useIncomeOps', 151],
 ]);

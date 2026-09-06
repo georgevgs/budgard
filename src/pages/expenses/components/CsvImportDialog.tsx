@@ -4,7 +4,6 @@ import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
 import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 import X from 'lucide-react/dist/esm/icons/x';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import {
   Dialog,
   DialogContent,
@@ -19,16 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/common/ui/select';
-import { Switch } from '@/common/ui/switch';
-import { Label } from '@/common/ui/label';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useCsvImportFlow } from '@/pages/expenses/hooks/useCsvImportFlow';
+import CsvMappingStep from '@/pages/expenses/components/CsvMappingStep';
 import type { Category } from '@/types/Category';
 import { cn, formatCurrency } from '@/constants/utils';
 import type {
-  ColumnMapping,
   CsvParseError,
-  CsvPreviewData,
   ParsedExpenseRow,
 } from '@/pages/expenses/utils/csvTypes';
 
@@ -70,17 +66,7 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
             flow.setIsDragging,
             t,
           )}
-          {renderMappingStep(
-            flow.step === 'mapping',
-            flow.csvPreview,
-            flow.columnMapping,
-            flow.skipIncome,
-            flow.updateColumnMapping,
-            flow.setSkipIncome,
-            flow.resetState,
-            flow.handleProceedToPreview,
-            t,
-          )}
+          {renderMappingStep(flow, t)}
           {renderPreviewStep(
             flow.step === 'preview',
             flow.validRows,
@@ -109,6 +95,32 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
 
 export default CsvImportDialog;
 
+// --- Helpers ---
+
+type CsvFlow = ReturnType<typeof useCsvImportFlow>;
+
+const renderMappingStep = (flow: CsvFlow, t: TranslateFunction) => {
+  if (flow.step !== 'mapping') {
+    return null;
+  }
+  if (!flow.csvPreview) {
+    return null;
+  }
+
+  return (
+    <CsvMappingStep
+      csvPreview={flow.csvPreview}
+      columnMapping={flow.columnMapping}
+      skipIncome={flow.skipIncome}
+      updateColumnMapping={flow.updateColumnMapping}
+      setSkipIncome={flow.setSkipIncome}
+      onBack={flow.resetState}
+      onContinue={flow.handleProceedToPreview}
+      t={t}
+    />
+  );
+};
+
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 type TranslateFunction = (
@@ -122,43 +134,6 @@ const parseCategoryMapValue = (value: string): string | null => {
   }
 
   return value;
-};
-
-const parseCategoryColumnValue = (v: string): number | null => {
-  if (v === '_none') {
-    return null;
-  }
-
-  return parseInt(v);
-};
-
-const columnLabel = (
-  header: string,
-  idx: number,
-  t: TranslateFunction,
-): string => {
-  if (header) return header;
-
-  return t('import.columnN', { n: idx + 1 });
-};
-
-const shortColumnLabel = (
-  header: string,
-  idx: number,
-  t: TranslateFunction,
-): string => {
-  if (header) return header;
-
-  return t('import.colN', { n: idx + 1 });
-};
-
-const isMappedColumn = (cellIdx: number, mapping: ColumnMapping): boolean => {
-  if (cellIdx === mapping.dateColumn) return true;
-  if (cellIdx === mapping.descriptionColumn) return true;
-  if (cellIdx === mapping.amountColumn) return true;
-  if (cellIdx === mapping.categoryColumn) return true;
-
-  return false;
 };
 
 const renderUploadStep = (
@@ -203,178 +178,6 @@ const renderUploadStep = (
           <span>{t('import.selectFile')}</span>
         </Button>
       </label>
-    </div>
-  );
-};
-
-const renderMappingStep = (
-  isCurrentStep: boolean,
-  csvPreview: CsvPreviewData | null,
-  columnMapping: ColumnMapping,
-  skipIncome: boolean,
-  updateColumnMapping: (
-    field: keyof ColumnMapping,
-    value: number | null,
-  ) => void,
-  setSkipIncome: (v: boolean) => void,
-  onBack: () => void,
-  onContinue: () => void,
-  t: TranslateFunction,
-) => {
-  if (!isCurrentStep || !csvPreview) return null;
-
-  return (
-    <div className="flex flex-col space-y-4 pb-4">
-      <p className="text-sm text-muted-foreground">
-        {t('import.mappingDescription')}
-      </p>
-
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <Label className="text-xs">{t('import.dateColumn')}</Label>
-          <Select
-            value={columnMapping.dateColumn.toString()}
-            onValueChange={(v) =>
-              updateColumnMapping('dateColumn', parseInt(v))
-            }
-          >
-            <SelectTrigger aria-label={t('import.dateColumn')}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {csvPreview.headers.map((header, idx) => (
-                <SelectItem key={`date-${idx}`} value={idx.toString()}>
-                  {columnLabel(header, idx, t)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1">
-          <Label className="text-xs">{t('import.descriptionColumn')}</Label>
-          <Select
-            value={columnMapping.descriptionColumn.toString()}
-            onValueChange={(v) =>
-              updateColumnMapping('descriptionColumn', parseInt(v))
-            }
-          >
-            <SelectTrigger aria-label={t('import.descriptionColumn')}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {csvPreview.headers.map((header, idx) => (
-                <SelectItem key={`desc-${idx}`} value={idx.toString()}>
-                  {columnLabel(header, idx, t)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1">
-          <Label className="text-xs">{t('import.amountColumn')}</Label>
-          <Select
-            value={columnMapping.amountColumn.toString()}
-            onValueChange={(v) =>
-              updateColumnMapping('amountColumn', parseInt(v))
-            }
-          >
-            <SelectTrigger aria-label={t('import.amountColumn')}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {csvPreview.headers.map((header, idx) => (
-                <SelectItem key={`amount-${idx}`} value={idx.toString()}>
-                  {columnLabel(header, idx, t)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1">
-          <Label className="text-xs">{t('import.categoryColumn')}</Label>
-          <Select
-            value={columnMapping.categoryColumn?.toString() ?? '_none'}
-            onValueChange={(v) =>
-              updateColumnMapping('categoryColumn', parseCategoryColumnValue(v))
-            }
-          >
-            <SelectTrigger aria-label={t('import.categoryColumn')}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="_none">{t('import.noCategory')}</SelectItem>
-              {csvPreview.headers.map((header, idx) => (
-                <SelectItem key={`cat-${idx}`} value={idx.toString()}>
-                  {columnLabel(header, idx, t)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between py-2 px-3 bg-muted/50 rounded-md">
-        <div className="space-y-0.5">
-          <Label className="text-sm">{t('import.skipIncome')}</Label>
-          <p className="text-xs text-muted-foreground">
-            {t('import.skipIncomeDescription')}
-          </p>
-        </div>
-        <Switch checked={skipIncome} onCheckedChange={setSkipIncome} />
-      </div>
-
-      <div className="flex flex-col">
-        <p className="text-sm font-medium mb-2">
-          {t('import.sampleData', { count: csvPreview.totalRows })}
-        </p>
-        <div className="overflow-auto border rounded-md text-xs max-h-48">
-          <table className="w-full">
-            <thead className="bg-muted sticky top-0">
-              <tr>
-                {csvPreview.headers.map((header, idx) => (
-                  <th
-                    key={`th-${idx}`}
-                    className="px-2 py-1 text-left font-medium whitespace-nowrap"
-                  >
-                    {shortColumnLabel(header, idx, t)}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {csvPreview.sampleRows.map((row, rowIdx) => (
-                <tr key={`row-${rowIdx}`} className="border-t">
-                  {row.map((cell, cellIdx) => (
-                    <td
-                      key={`cell-${rowIdx}-${cellIdx}`}
-                      className={cn(
-                        'px-2 py-1 truncate max-w-[120px]',
-                        isMappedColumn(cellIdx, columnMapping) &&
-                          'bg-primary/10',
-                      )}
-                    >
-                      {cell}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="flex gap-2 justify-end pt-2 border-t">
-        <Button variant="outline" onClick={onBack}>
-          {t('import.back')}
-        </Button>
-        <Button onClick={onContinue}>
-          {t('import.continue')}
-          <ArrowRight className="h-4 w-4 ml-2" />
-        </Button>
-      </div>
     </div>
   );
 };
