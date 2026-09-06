@@ -31,51 +31,17 @@ export const useIncomeOps = () => {
   return useMemo(() => {
     const skip = !isInitialized;
 
-    // Queues the write and applies it locally, so the row looks saved while
-    // the device is offline. Returns true to tell the runner it is handled.
-    const queueOffline = async (
+    const queueOffline = (
       incomeData: Partial<Expense>,
       incomeId: string | undefined,
       error: unknown,
-    ): Promise<boolean> => {
-      if (!isOfflineError(error)) {
-        return false;
-      }
-
-      const tempId = pickByEdit<string | null>(incomeId, null, createTempId());
-      const scopedIncome = { ...incomeData, user_id: activeOwnerId };
-      await offlineQueue.enqueueWithReconcile(
-        pickByEdit(incomeId, 'updateIncome', 'createIncome'),
-        {
-          ...scopedIncome,
-          ...pickByEdit<Record<string, unknown>>(
-            incomeId,
-            { id: incomeId },
-            { __tempId: tempId },
-          ),
-        } as Record<string, unknown>,
-      );
-
-      setIncomes((prev) => {
-        if (incomeId) return patchById(prev, incomeId, scopedIncome);
-
-        const optimistic = {
-          ...scopedIncome,
-          id: tempId as string,
-          created_at: new Date().toISOString(),
-        } as Expense;
-
-        return [optimistic, ...prev];
+    ): Promise<boolean> =>
+      queueIncomeOffline(incomeData, incomeId, error, {
+        ownerId: activeOwnerId,
+        setIncomes,
+        toast,
+        t,
       });
-      haptics.success();
-      toast({
-        variant: 'success',
-        title: t('offline.savedOffline'),
-        description: t('offline.willSync'),
-      });
-
-      return true;
-    };
 
     // Server-first: an income row carries server-derived columns, so it is
     // shown only once the write lands (or once it is safely queued).
@@ -170,4 +136,60 @@ export const useIncomeOps = () => {
     toast,
     t,
   ]);
+};
+
+// --- Helpers ---
+
+type OfflineDeps = {
+  ownerId: string;
+  setIncomes: (updater: (prev: Expense[]) => Expense[]) => void;
+  toast: ReturnType<typeof useToast>['toast'];
+  t: (key: string) => string;
+};
+
+// Queues the write and applies it locally, so the row looks saved while the
+// device is offline. Returns true to tell the runner it is handled.
+const queueIncomeOffline = async (
+  incomeData: Partial<Expense>,
+  incomeId: string | undefined,
+  error: unknown,
+  { ownerId, setIncomes, toast, t }: OfflineDeps,
+): Promise<boolean> => {
+  if (!isOfflineError(error)) {
+    return false;
+  }
+
+  const tempId = pickByEdit<string | null>(incomeId, null, createTempId());
+  const scopedIncome = { ...incomeData, user_id: ownerId };
+  await offlineQueue.enqueueWithReconcile(
+    pickByEdit(incomeId, 'updateIncome', 'createIncome'),
+    {
+      ...scopedIncome,
+      ...pickByEdit<Record<string, unknown>>(
+        incomeId,
+        { id: incomeId },
+        { __tempId: tempId },
+      ),
+    } as Record<string, unknown>,
+  );
+
+  setIncomes((prev) => {
+    if (incomeId) return patchById(prev, incomeId, scopedIncome);
+
+    const optimistic = {
+      ...scopedIncome,
+      id: tempId as string,
+      created_at: new Date().toISOString(),
+    } as Expense;
+
+    return [optimistic, ...prev];
+  });
+  haptics.success();
+  toast({
+    variant: 'success',
+    title: t('offline.savedOffline'),
+    description: t('offline.willSync'),
+  });
+
+  return true;
 };
