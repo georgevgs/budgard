@@ -4,19 +4,19 @@ import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import FolderOpen from 'lucide-react/dist/esm/icons/folder-open';
-import CategoryIcon from '@/common/components/common/CategoryIcon';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { Button } from '@/common/ui/button';
 import {
   DialogTitle,
   DialogHeader,
   DialogDescription,
 } from '@/common/ui/dialog';
-import ConfirmDestructiveDialog from '@/common/components/common/ConfirmDestructiveDialog';
-import CategoryDeleteDialog from '@/pages/categories/components/CategoryDeleteDialog';
+import { ConfirmDestructiveDialog } from '@/common/components/common/ConfirmDestructiveDialog';
+import { CategoryDeleteDialog } from '@/pages/categories/components/CategoryDeleteDialog';
 import { useCategoryManager } from '@/pages/categories/hooks/useCategoryManager';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import type { Category, CategoryType } from '@/types/Category';
-import CategoryForm from '@/pages/categories/components/CategoryForm';
+import { CategoryForm } from '@/pages/categories/components/CategoryForm';
 import { getColorTint } from '@/constants/categoryColor';
 
 type CategoryManagerProps = {

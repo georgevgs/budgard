@@ -26,7 +26,7 @@ import type { CategoryImpact } from '@/pages/categories/utils/categoryDeleteImpa
 
 const NONE = 'none';
 
-type Props = {
+type CategoryDeleteDialogProps = {
   open: boolean;
   category: Category | null;
   impact: CategoryImpact | null;
@@ -36,7 +36,7 @@ type Props = {
   onConfirm: (destinationCategoryId: string | null) => void;
 };
 
-const CategoryDeleteDialog = ({
+export const CategoryDeleteDialog = ({
   open,
   category,
   impact,
@@ -44,7 +44,7 @@ const CategoryDeleteDialog = ({
   currency,
   onOpenChange,
   onConfirm,
-}: Props) => {
+}: CategoryDeleteDialogProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const [destination, setDestination] = useState(NONE);
@@ -112,9 +112,6 @@ const CategoryDeleteDialog = ({
     </AlertDialog>
   );
 };
-
-export default CategoryDeleteDialog;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

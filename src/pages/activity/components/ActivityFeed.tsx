@@ -2,16 +2,16 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
 import { useInfiniteScroll } from '@/pages/activity/hooks/useInfiniteScroll';
-import ActivityTransactionRow from '@/pages/activity/components/ActivityTransactionRow';
-import SwipeableRow from '@/pages/activity/components/SwipeableRow';
-import PendingHistoryNotice from '@/common/components/common/PendingHistoryNotice';
+import { ActivityTransactionRow } from '@/pages/activity/components/ActivityTransactionRow';
+import { SwipeableRow } from '@/pages/activity/components/SwipeableRow';
+import { PendingHistoryNotice } from '@/common/components/common/PendingHistoryNotice';
 import { groupExpensesByDate } from '@/pages/activity/utils/dateGrouping';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { formatCurrency } from '@/constants/utils';
 import { sumSpending } from '@/constants/spending';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+type ActivityFeedProps = {
   transactions: Expense[];
   currency: string;
   isHistoryPending: boolean;
@@ -24,12 +24,12 @@ type Props = {
 
 const PAGE_SIZE = 20;
 
-const ActivityFeed = (props: Props) => {
+export const ActivityFeed = (props: ActivityFeedProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const hasMore = visibleCount < props.transactions.length;
-  // The list extends itself as it is scrolled. A "Show more" button asks the
+  // The list extends itself as it is hasScrolled. A "Show more" button asks the
   // user to keep confirming that they do, in fact, want to keep reading.
   const sentinelRef = useInfiniteScroll({
     hasMore,
@@ -79,9 +79,6 @@ const ActivityFeed = (props: Props) => {
     </div>
   );
 };
-
-export default ActivityFeed;
-
 // --- Helpers ---
 
 // Rows already on screen stay usable while the rest streams in underneath.
@@ -96,7 +93,7 @@ const renderPendingHistory = (isHistoryPending: boolean) => {
 type DateGroup = ReturnType<typeof groupExpensesByDate>[number];
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-const renderGroup = (group: DateGroup, props: Props, t: TFunc) => (
+const renderGroup = (group: DateGroup, props: ActivityFeedProps, t: TFunc) => (
   <section
     key={group.date}
     aria-labelledby={`activity-${group.date}`}
@@ -139,7 +136,7 @@ const renderGroup = (group: DateGroup, props: Props, t: TFunc) => (
   </section>
 );
 
-const deleteTransaction = (transaction: Expense, props: Props) => {
+const deleteTransaction = (transaction: Expense, props: ActivityFeedProps) => {
   if (transaction.type === 'income') {
     props.onIncomeDelete(transaction.id);
 

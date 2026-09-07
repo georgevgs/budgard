@@ -41,13 +41,13 @@ export type CartesianChartProps = {
   // Forces the top of the y axis. Without it the axis fits the data.
   yMax?: number;
   // Allows the y axis to run below zero, for a net figure that can be negative.
-  allowNegative?: boolean;
+  shouldAllowNegative?: boolean;
   formatY?: (value: number) => string;
   formatX?: (value: string, index: number) => string;
   reference?: ReferenceMarker;
   renderTooltip?: (point: ChartPoint, index: number) => ReactNode;
   onPointClick?: (index: number) => void;
-  showLegend?: boolean;
+  shouldShowLegend?: boolean;
   // Sentence describing the chart for anyone who cannot see it. Required —
   // an unlabelled chart is invisible to a screen reader, not merely awkward.
   ariaLabel: string;

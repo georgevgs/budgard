@@ -5,7 +5,7 @@ import { useState } from 'react';
 // form will reject after the fact.
 const MAX_CENTS = 100_000_000;
 
-export type AmountPad = {
+export type UseAmountPadReturn = {
   cents: number;
   amount: number;
   isEmpty: boolean;
@@ -24,7 +24,7 @@ export type AmountPad = {
  * type things like "1.2.3" that have to be rejected afterwards. Filling from
  * the right cannot produce an invalid number at all.
  */
-export const useAmountPad = (initialCents = 0): AmountPad => {
+export const useAmountPad = (initialCents = 0): UseAmountPadReturn => {
   const [cents, setCents] = useState(initialCents);
 
   return {

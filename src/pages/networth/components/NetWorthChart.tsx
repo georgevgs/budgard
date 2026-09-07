@@ -1,15 +1,15 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
-import CartesianChart from '@/common/components/charts/CartesianChart';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
+import { CartesianChart } from '@/common/components/charts/CartesianChart';
 import type { ChartPoint, Series } from '@/common/components/charts/chartTypes';
 import { ChartTooltipRow } from '@/common/components/common/ChartTooltip';
 import { cn, formatCurrency, formatCurrencyCompact } from '@/constants/utils';
 import type { NetWorthPoint } from '@/common/hooks/useNetWorth';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 
-type Props = {
+type NetWorthChartProps = {
   series: NetWorthPoint[];
   defaultCurrency: string;
   /** True when any live debt is folded into the line as a flat constant. */
@@ -20,11 +20,11 @@ const SERIES: Series[] = [
   { kind: 'area', key: 'total', label: 'total', color: '--primary' },
 ];
 
-const NetWorthChart = ({
+export const NetWorthChart = ({
   series,
   defaultCurrency,
   hasDebtConstant = false,
-}: Props) => {
+}: NetWorthChartProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
 
@@ -52,7 +52,7 @@ const NetWorthChart = ({
           xKey="label"
           series={SERIES}
           height={220}
-          allowNegative
+          shouldAllowNegative
           formatY={(value) =>
             formatCurrencyCompact(Math.abs(value), defaultCurrency)
           }
@@ -65,9 +65,6 @@ const NetWorthChart = ({
     </SurfaceCard>
   );
 };
-
-export default NetWorthChart;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

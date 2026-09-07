@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Button } from '@/common/ui/button';
 import {
   AlertDialog,
@@ -21,8 +21,8 @@ type ProfileSectionProps = {
   t: TFunc;
 };
 
-const ProfileSection = ({ email, onSignOut, t }: ProfileSectionProps) => {
-  const [showSignOutDialog, setShowSignOutDialog] = useState(false);
+export const ProfileSection = ({ email, onSignOut, t }: ProfileSectionProps) => {
+  const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
 
   return (
     <section className="space-y-2">
@@ -40,7 +40,7 @@ const ProfileSection = ({ email, onSignOut, t }: ProfileSectionProps) => {
           <Button
             variant="outline"
             className="w-full justify-start text-destructive-ink hover:text-destructive-ink hover:bg-destructive/10 focus-visible:ring-destructive"
-            onClick={() => setShowSignOutDialog(true)}
+            onClick={() => setIsSignOutDialogOpen(true)}
           >
             <LogOut className="h-4 w-4 mr-2" />
             {t('settings.profile.signOut')}
@@ -48,10 +48,10 @@ const ProfileSection = ({ email, onSignOut, t }: ProfileSectionProps) => {
         </div>
       </SurfaceCard>
 
-      <AlertDialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
+      <AlertDialog open={isSignOutDialogOpen} onOpenChange={setIsSignOutDialogOpen}>
         <AlertDialogContent
           className="sm:max-w-[425px]"
-          onOpenChange={setShowSignOutDialog}
+          onOpenChange={setIsSignOutDialogOpen}
         >
           <AlertDialogHeader data-draggable-area>
             <AlertDialogTitle>
@@ -72,5 +72,3 @@ const ProfileSection = ({ email, onSignOut, t }: ProfileSectionProps) => {
     </section>
   );
 };
-
-export default ProfileSection;

@@ -13,7 +13,7 @@ import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import X from 'lucide-react/dist/esm/icons/x';
 import { cn } from '@/constants/utils';
 import { haptics } from '@/constants/haptics';
-import SpeedDialAction from '@/common/components/layout/SpeedDialAction';
+import { SpeedDialAction } from '@/common/components/layout/SpeedDialAction';
 
 // The two things a money app is for. Both are always present: this used to
 // hand out different actions per screen — income only on Activity, plus a
@@ -26,7 +26,7 @@ type SpeedDialProps = {
   onAddIncome: () => void;
 };
 
-const SpeedDial = ({ onAddExpense, onAddIncome }: SpeedDialProps) => {
+export const SpeedDial = ({ onAddExpense, onAddIncome }: SpeedDialProps) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -102,9 +102,6 @@ const SpeedDial = ({ onAddExpense, onAddIncome }: SpeedDialProps) => {
     </>
   );
 };
-
-export default SpeedDial;
-
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 const useSpeedDialFocus = (

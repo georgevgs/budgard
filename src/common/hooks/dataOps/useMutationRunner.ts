@@ -35,7 +35,7 @@ export type MutationSpec<TSaved> = {
   successHaptic?: 'success' | 'selection' | 'none';
   // Defaults to true. Set false where an automatic retry would be wrong —
   // deleting an account is not something to offer a one-tap re-run of.
-  retryable?: boolean;
+  isRetryable?: boolean;
   // Applies the optimistic change and returns its undo.
   optimistic?: () => Rollback;
   // The write itself.
@@ -94,7 +94,7 @@ export const useMutationRunner = () => {
           captureException(error, {
             tags: { operation: spec.operation },
           });
-          if (spec.retryable === false) {
+          if (spec.isRetryable === false) {
             showErrorToast(spec.errorMessage);
           } else {
             showErrorToast(spec.errorMessage, () => {

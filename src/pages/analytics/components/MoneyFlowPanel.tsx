@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { EmptyStateCard } from '@/common/ui/empty-state-card';
 import Waves from 'lucide-react/dist/esm/icons/waves';
-import FlowChart from '@/common/components/charts/FlowChart';
+import { FlowChart } from '@/common/components/charts/FlowChart';
 import type { FlowNode } from '@/common/components/charts/FlowChart';
 import {
   UNCATEGORIZED_ID,
@@ -12,7 +12,7 @@ import {
 } from '@/pages/analytics/hooks/useMoneyFlowData';
 import { formatCurrency } from '@/constants/utils';
 
-type Props = {
+type MoneyFlowPanelProps = {
   flow: MoneyFlowData;
   currency: string;
 };
@@ -20,7 +20,7 @@ type Props = {
 // The chart half of the money-flow view — CashFlowSection owns the stats
 // row (it swaps between year totals and this month's, so it stays in one
 // place) and renders this alongside it when the flow toggle is active.
-const MoneyFlowPanel = ({ flow, currency }: Props) => {
+export const MoneyFlowPanel = ({ flow, currency }: MoneyFlowPanelProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -48,9 +48,6 @@ const MoneyFlowPanel = ({ flow, currency }: Props) => {
     />
   );
 };
-
-export default MoneyFlowPanel;
-
 // --- Helpers ---
 
 type TFunc = ReturnType<typeof useTranslation>['t'];

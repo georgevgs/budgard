@@ -10,7 +10,7 @@ export type DonutSlice = {
   color: string;
 };
 
-type Props = {
+type DonutChartProps = {
   slices: DonutSlice[];
   size?: number;
   thickness?: number;
@@ -22,13 +22,13 @@ const GAP_DEGREES = 2;
 
 // A ring rather than a pie: the hole is what lets a small slice still read as
 // an arc length instead of a sliver converging on a point.
-const DonutChart = ({
+export const DonutChart = ({
   slices,
   size = 112,
   thickness = 22,
   renderTooltip,
   ariaLabel,
-}: Props) => {
+}: DonutChartProps) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const total = slices.reduce((sum, slice) => sum + slice.value, 0);
 
@@ -67,9 +67,6 @@ const DonutChart = ({
     </div>
   );
 };
-
-export default DonutChart;
-
 // --- Helpers ---
 
 type Arc = {

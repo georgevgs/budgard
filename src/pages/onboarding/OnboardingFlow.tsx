@@ -8,20 +8,20 @@ import { useDataConfig } from '@/common/contexts/DataContext';
 import { useQuickAdd } from '@/common/contexts/QuickAddContext';
 import { useQuickAddDraft } from '@/pages/expenses/hooks/useQuickAddDraft';
 import { useOnboardingActions } from '@/pages/onboarding/hooks/useOnboardingActions';
-import OnboardingWelcomeStep from '@/pages/onboarding/components/OnboardingWelcomeStep';
-import OnboardingBudgetStep from '@/pages/onboarding/components/OnboardingBudgetStep';
-import OnboardingCategoriesStep from '@/pages/onboarding/components/OnboardingCategoriesStep';
-import OnboardingFirstExpenseStep from '@/pages/onboarding/components/OnboardingFirstExpenseStep';
+import { OnboardingWelcomeStep } from '@/pages/onboarding/components/OnboardingWelcomeStep';
+import { OnboardingBudgetStep } from '@/pages/onboarding/components/OnboardingBudgetStep';
+import { OnboardingCategoriesStep } from '@/pages/onboarding/components/OnboardingCategoriesStep';
+import { OnboardingFirstExpenseStep } from '@/pages/onboarding/components/OnboardingFirstExpenseStep';
 
 const STEP_COUNT = 4;
 
-type Props = {
+type OnboardingFlowProps = {
   isOpen: boolean;
   onComplete: () => void;
   onDismiss?: () => void;
 };
 
-const OnboardingFlow = ({ isOpen, onComplete, onDismiss }: Props) => {
+const OnboardingFlow = ({ isOpen, onComplete, onDismiss }: OnboardingFlowProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { defaultCurrency } = useDataConfig();

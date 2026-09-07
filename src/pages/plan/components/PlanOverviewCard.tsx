@@ -2,7 +2,7 @@ import type { ComponentType } from 'react';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import { Link } from 'react-router-dom';
 
-type Props = {
+type PlanOverviewCardProps = {
   title: string;
   value: string | null;
   description: string;
@@ -14,14 +14,14 @@ type Props = {
 // Planning destinations are navigation, not four competing dashboard stats.
 // Once a tool has data its value earns a place on the row; until then the row
 // offers a clear setup action instead of presenting a dead zero as insight.
-const PlanOverviewCard = ({
+export const PlanOverviewCard = ({
   title,
   value,
   description,
   setupLabel,
   path,
   icon: Icon,
-}: Props) => {
+}: PlanOverviewCardProps) => {
   return (
     <Link
       to={path}
@@ -46,9 +46,6 @@ const PlanOverviewCard = ({
     </Link>
   );
 };
-
-export default PlanOverviewCard;
-
 // --- Helpers ---
 
 const renderValue = (value: string | null, setupLabel: string) => {

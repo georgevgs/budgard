@@ -9,8 +9,8 @@ import {
 } from '@/common/components/charts/chartScales';
 import { XAxis, YAxis, ReferenceLine } from '@/common/components/charts/ChartAxes';
 import { renderSeries } from '@/common/components/charts/ChartSeries';
-import ChartLegend from '@/common/components/charts/ChartLegend';
-import ChartHoverCard from '@/common/components/charts/ChartHoverCard';
+import { ChartLegend } from '@/common/components/charts/ChartLegend';
+import { ChartHoverCard } from '@/common/components/charts/ChartHoverCard';
 import { useChartSize } from '@/common/components/charts/useChartSize';
 import { useChartInteraction } from '@/common/components/charts/useChartInteraction';
 import { buildPlot, seriesExtent } from '@/common/components/charts/chartLayout';
@@ -21,7 +21,7 @@ const DEFAULT_HEIGHT = 260;
 // Every line, area and bar chart in the app. Hand-rolled rather than pulled
 // from a library so the marks answer to the design tokens, the interaction is
 // the same everywhere, and the whole thing costs a few kB instead of ~94.
-const CartesianChart = (props: CartesianChartProps) => {
+export const CartesianChart = (props: CartesianChartProps) => {
   const { ref, width } = useChartSize();
   const height = props.height ?? DEFAULT_HEIGHT;
   const hasBars = props.series.some((series) => series.kind === 'bar');
@@ -48,13 +48,10 @@ const CartesianChart = (props: CartesianChartProps) => {
         containerWidth={width}
         render={props.renderTooltip}
       />
-      <ChartLegend series={props.series} show={props.showLegend} />
+      <ChartLegend series={props.series} show={props.shouldShowLegend} />
     </div>
   );
 };
-
-export default CartesianChart;
-
 // --- Helpers ---
 
 type Layout = ReturnType<typeof buildLayout>;
@@ -65,7 +62,7 @@ const buildLayout = (
   width: number,
   height: number,
 ) => {
-  const extent = seriesExtent(props.data, props.series, props.allowNegative);
+  const extent = seriesExtent(props.data, props.series, props.shouldAllowNegative);
   const top = props.yMax ?? niceMax(extent.max);
   const plot = buildPlot(width, height, props.formatY, top);
   const y = linearScale(extent.min, top, plot.top + plot.height, plot.top);

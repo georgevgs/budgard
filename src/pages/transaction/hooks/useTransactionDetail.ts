@@ -11,7 +11,7 @@ import type { Expense } from '@/types/Expense';
 
 const SIMILAR_LIMIT = 4;
 
-export type TransactionDetail = {
+export type UseTransactionDetailReturn = {
   transaction: Expense | undefined;
   isIncome: boolean;
   currency: string;
@@ -33,7 +33,7 @@ export type TransactionDetail = {
 // Everything the detail screen needs about one transaction, including the
 // context that makes it worth opening: how often this repeats and what it
 // adds up to. A row on its own is just the amount you already saw in the list.
-export const useTransactionDetail = (id: string): TransactionDetail => {
+export const useTransactionDetail = (id: string): UseTransactionDetailReturn => {
   const expenses = useExpensesData();
   const incomes = useIncomesData();
   const { defaultCurrency } = useDataConfig();

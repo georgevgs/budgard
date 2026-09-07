@@ -4,14 +4,14 @@ import {
   useCategoriesData,
   useExpensesData,
 } from '@/common/contexts/DataContext';
-import AnalyticsLoadingState from '@/pages/analytics/components/AnalyticsLoading';
+import { AnalyticsLoading } from '@/pages/analytics/components/AnalyticsLoading';
 import { useDelayedLoading } from '@/common/hooks/useDelayedLoading';
-import PageHeader from '@/common/components/common/PageHeader';
-import AnalyticsEmpty from '@/pages/analytics/components/AnalyticsEmpty';
+import { PageHeader } from '@/common/components/common/PageHeader';
+import { AnalyticsEmpty } from '@/pages/analytics/components/AnalyticsEmpty';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
-import AnalyticsDrillDownDialogs from '@/pages/analytics/components/AnalyticsDrillDownDialogs';
-import TrendsOverview from '@/pages/analytics/components/TrendsOverview';
-import YearPill from '@/pages/analytics/components/YearPill';
+import { AnalyticsDrillDownDialogs } from '@/pages/analytics/components/AnalyticsDrillDownDialogs';
+import { TrendsOverview } from '@/pages/analytics/components/TrendsOverview';
+import { YearPill } from '@/pages/analytics/components/YearPill';
 import { useAnalyticsData } from '@/pages/analytics/hooks/useAnalyticsData';
 import { useAnalyticsDrillDown } from '@/pages/analytics/hooks/useAnalyticsDrillDown';
 import { useMonthlyReview } from '@/pages/analytics/hooks/useMonthlyReview';
@@ -89,5 +89,5 @@ const renderLoading = (showSkeleton: boolean) => {
     return null;
   }
 
-  return <AnalyticsLoadingState />;
+  return <AnalyticsLoading />;
 };

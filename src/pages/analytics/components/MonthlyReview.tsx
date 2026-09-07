@@ -1,15 +1,15 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import type { MonthlyReviewItem } from '@/pages/analytics/hooks/useMonthlyReview';
 
-type Props = {
+type MonthlyReviewProps = {
   label: string;
   items: MonthlyReviewItem[];
 };
 
-const MonthlyReview = ({ label, items }: Props) => {
+export const MonthlyReview = ({ label, items }: MonthlyReviewProps) => {
   const { t } = useTranslation();
 
   return (
@@ -38,5 +38,3 @@ const MonthlyReview = ({ label, items }: Props) => {
     </section>
   );
 };
-
-export default MonthlyReview;

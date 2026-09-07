@@ -1,5 +1,5 @@
 import { supabase } from '@/config/supabase';
-import { done, maybeRow, row, rows } from '@/config/supabaseCrud';
+import { done, maybeRow, row, rows } from '@/common/api/supabaseCrud';
 import type { Budget } from '@/types/Budget';
 import type { CategoryBudget } from '@/types/CategoryBudget';
 

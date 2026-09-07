@@ -12,7 +12,7 @@ import {
 } from '@/common/ui/dialog';
 import { Button } from '@/common/ui/button';
 import { Form } from '@/common/ui/form';
-import GoalFormFields from '@/pages/goals/components/GoalFormFields';
+import { GoalFormFields } from '@/pages/goals/components/GoalFormFields';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { amountToInput } from '@/constants/utils';
 import { goalSchema, type GoalFormData } from '@/pages/goals/validations';
@@ -22,13 +22,13 @@ import { swatch } from '@/design/palette';
 const DEFAULT_GOAL_COLOR = swatch.violet;
 const DEFAULT_GOAL_ICON = 'target';
 
-type Props = {
+type GoalFormProps = {
   goal?: Goal;
   onSubmit: (values: GoalFormData) => Promise<void>;
   onClose: () => void;
 };
 
-const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
+export const GoalForm = ({ goal, onSubmit, onClose }: GoalFormProps) => {
   const { t } = useTranslation();
   const { session } = useAuth();
 
@@ -107,9 +107,6 @@ const GoalForm = ({ goal, onSubmit, onClose }: Props) => {
     </>
   );
 };
-
-export default GoalForm;
-
 // --- Helpers ---
 
 type TranslateFunction = (

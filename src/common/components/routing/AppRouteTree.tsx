@@ -1,13 +1,13 @@
 import { Suspense, useMemo, type ReactNode } from 'react';
 import { useRoutes, type RouteObject } from 'react-router-dom';
-import TrendsDeepDiveLoadingState from '@/pages/analytics/components/TrendsDeepDiveLoading';
-import DebtsLoadingState from '@/pages/debts/components/DebtsLoading';
-import { ExpenseLoadingState } from '@/pages/expenses/components/ExpensesLoading';
-import GoalsLoadingState from '@/pages/goals/components/GoalsLoading';
-import NetWorthLoadingState from '@/pages/networth/components/NetWorthLoading';
-import ProRoute from '@/pages/pro/components/ProRoute';
-import RecurringLoadingState from '@/pages/recurring/components/RecurringLoading';
-import RouteFallback from '@/common/components/routing/RouteFallback';
+import { TrendsDeepDiveLoading } from '@/pages/analytics/components/TrendsDeepDiveLoading';
+import { DebtsLoading } from '@/pages/debts/components/DebtsLoading';
+import { TransactionsLoading } from '@/common/components/common/TransactionsLoading';
+import { GoalsLoading } from '@/pages/goals/components/GoalsLoading';
+import { NetWorthLoading } from '@/pages/networth/components/NetWorthLoading';
+import { ProRoute } from '@/pages/pro/components/ProRoute';
+import { RecurringLoading } from '@/pages/recurring/components/RecurringLoading';
+import { RouteFallback } from '@/common/components/routing/RouteFallback';
 import {
   CatchAllRedirect,
   LegacyRedirect,
@@ -29,16 +29,13 @@ import {
   TransactionDetailView,
   TrendsDeepDiveView,
 } from '@/common/components/routing/lazyRouteModules';
-import SettingsLoadingState from '@/pages/settings/components/SettingsLoading';
+import { SettingsLoading } from '@/pages/settings/components/SettingsLoading';
 
-const AppRouteTree = () => {
+export const AppRouteTree = () => {
   const routes = useMemo(() => buildRoutes(), []);
 
   return useRoutes(routes);
 };
-
-export default AppRouteTree;
-
 // --- Helpers ---
 
 const withFallback = (element: ReactNode, fallback: ReactNode) => (
@@ -87,21 +84,21 @@ const buildRoutes = (): RouteObject[] => [
         path: '/trends/explore',
         element: withFallback(
           <TrendsDeepDiveView />,
-          <TrendsDeepDiveLoadingState />,
+          <TrendsDeepDiveLoading />,
         ),
       },
       {
         path: '/t/:id',
         element: withFallback(
           <TransactionDetailView />,
-          <ExpenseLoadingState />,
+          <TransactionsLoading />,
         ),
       },
       {
         path: '/recurring',
         element: withFallback(
           <RecurringExpensesList />,
-          <RecurringLoadingState />,
+          <RecurringLoading />,
         ),
       },
       {
@@ -112,29 +109,29 @@ const buildRoutes = (): RouteObject[] => [
             titleKey="pro.gate.goalsTitle"
             descriptionKey="pro.gate.goalsBody"
           >
-            {withFallback(<GoalsList />, <GoalsLoadingState />)}
+            {withFallback(<GoalsList />, <GoalsLoading />)}
           </ProRoute>
         ),
       },
       {
         path: '/networth',
-        element: withFallback(<NetWorthView />, <NetWorthLoadingState />),
+        element: withFallback(<NetWorthView />, <NetWorthLoading />),
       },
       {
         path: '/debts',
-        element: withFallback(<DebtsView />, <DebtsLoadingState />),
+        element: withFallback(<DebtsView />, <DebtsLoading />),
       },
       {
         path: '/settings/:section?',
-        element: withFallback(<SettingsView />, <SettingsLoadingState />),
+        element: withFallback(<SettingsView />, <SettingsLoading />),
       },
       {
         path: '/join',
-        element: withFallback(<JoinHouseholdView />, <SettingsLoadingState />),
+        element: withFallback(<JoinHouseholdView />, <SettingsLoading />),
       },
       {
         path: '/review',
-        element: withFallback(<ReviewQueueView />, <ExpenseLoadingState />),
+        element: withFallback(<ReviewQueueView />, <TransactionsLoading />),
       },
     ],
   },

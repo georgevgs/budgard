@@ -1,10 +1,10 @@
 import type { CSSProperties } from 'react';
-import CategoryIcon from '@/common/components/common/CategoryIcon';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { cn } from '@/constants/utils';
 import { getColorTint } from '@/constants/categoryColor';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+type CategoryGlyphProps = {
   transaction: Expense;
   className?: string;
   style?: CSSProperties;
@@ -26,7 +26,7 @@ type Props = {
 // screen: `TransactionHero` draws the same disc at 64px and shares this
 // element's `viewTransitionName`, so tapping a row morphs one into the other.
 // While this was a bare glyph that transition had nothing to morph from.
-const CategoryGlyph = ({ transaction, className, style }: Props) => {
+export const CategoryGlyph = ({ transaction, className, style }: CategoryGlyphProps) => {
   return (
     <span
       aria-hidden="true"
@@ -46,5 +46,3 @@ const CategoryGlyph = ({ transaction, className, style }: Props) => {
     </span>
   );
 };
-
-export default CategoryGlyph;

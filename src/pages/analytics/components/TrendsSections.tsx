@@ -1,14 +1,14 @@
 import { useTranslation } from 'react-i18next';
-import SpendingInsights from '@/pages/analytics/components/SpendingInsights';
-import YearRhythm from '@/pages/analytics/components/YearRhythm';
-import ForecastSection from '@/pages/analytics/components/ForecastSection';
-import CategoryBreakdownSection from '@/pages/analytics/components/CategoryBreakdownSection';
-import ProUpsellCard from '@/pages/pro/components/ProUpsellCard';
+import { SpendingInsights } from '@/pages/analytics/components/SpendingInsights';
+import { YearRhythm } from '@/pages/analytics/components/YearRhythm';
+import { ForecastSection } from '@/pages/analytics/components/ForecastSection';
+import { CategoryBreakdownSection } from '@/pages/analytics/components/CategoryBreakdownSection';
+import { ProUpsellCard } from '@/pages/pro/components/ProUpsellCard';
 import type { useAnalyticsData } from '@/pages/analytics/hooks/useAnalyticsData';
 import type { CategoryRow } from '@/pages/analytics/hooks/useAnalyticsData';
 import type { Category } from '@/types/Category';
 
-type Props = {
+type TrendsSectionsProps = {
   analytics: ReturnType<typeof useAnalyticsData>;
   isPro: boolean;
   categories: Category[];
@@ -19,14 +19,14 @@ type Props = {
 
 // The analysis someone explicitly asked to explore. The overview keeps the
 // everyday answers; this route keeps the power without making it the toll.
-const TrendsSections = ({
+export const TrendsSections = ({
   analytics,
   isPro,
   categories,
   monthlyBudget,
   defaultCurrency,
   onCategoryClick,
-}: Props) => {
+}: TrendsSectionsProps) => {
   const { t } = useTranslation();
 
   return (
@@ -53,9 +53,6 @@ const TrendsSections = ({
     </div>
   );
 };
-
-export default TrendsSections;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

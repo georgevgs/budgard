@@ -15,7 +15,7 @@ import {
 import { Button } from '@/common/ui/button';
 import { Input } from '@/common/ui/input';
 import { cn } from '@/constants/utils';
-import { TagChip } from '@/pages/expenses/components/TagPicker';
+import { TagChip } from '@/pages/expenses/components/TagChip';
 import {
   renderCreateTagOption,
   renderNoTagsMessage,
@@ -27,12 +27,12 @@ import {
 } from '@/pages/expenses/hooks/useTagListboxNav';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
 
-type Props = {
+type ExpenseTagFieldProps = {
   form: UseFormReturn<ExpenseFormData>;
   tagPicker: TagPickerApi;
 };
 
-const ExpenseTagField = ({ form, tagPicker }: Props) => {
+export const ExpenseTagField = ({ form, tagPicker }: ExpenseTagFieldProps) => {
   const { t } = useTranslation();
   const nav = useTagListboxNav(tagPicker);
 
@@ -44,8 +44,8 @@ const ExpenseTagField = ({ form, tagPicker }: Props) => {
         <FormItem>
           {renderSelectedTagChips(tagPicker)}
           <Popover
-            open={tagPicker.tagPopoverOpen}
-            onOpenChange={tagPicker.setTagPopoverOpen}
+            open={tagPicker.isTagPopoverOpen}
+            onOpenChange={tagPicker.setIsTagPopoverOpen}
             modal={false}
           >
             <PopoverTrigger asChild>
@@ -70,7 +70,7 @@ const ExpenseTagField = ({ form, tagPicker }: Props) => {
                   onChange={(e) => tagPicker.setTagSearch(e.target.value)}
                   onKeyDown={nav.handleSearchKeyDown}
                   role="combobox"
-                  aria-expanded={tagPicker.tagPopoverOpen}
+                  aria-expanded={tagPicker.isTagPopoverOpen}
                   aria-controls={nav.listboxId}
                   aria-activedescendant={nav.getActiveDescendant()}
                   aria-autocomplete="list"
@@ -102,9 +102,6 @@ const ExpenseTagField = ({ form, tagPicker }: Props) => {
     />
   );
 };
-
-export default ExpenseTagField;
-
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 const renderSelectedTagChips = (tagPicker: TagPickerApi) => {

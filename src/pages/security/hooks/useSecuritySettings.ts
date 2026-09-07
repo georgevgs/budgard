@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/common/contexts/AuthContext';
-import { signOutEverywhere } from '@/constants/auth';
+import { authApi } from '@/common/api/authApi';
 import {
   clearLock,
   isLockEnabled,
@@ -24,7 +24,7 @@ export const useSecuritySettings = () => {
   );
   const [isDeviceSupported, setIsDeviceSupported] = useState(false);
   const [isSettingPin, setIsSettingPin] = useState(false);
-  const [confirmSignOutAll, setConfirmSignOutAll] = useState(false);
+  const [isConfirmingSignOutAll, setIsConfirmingSignOutAll] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,8 +79,8 @@ export const useSecuritySettings = () => {
     usesDevice,
     isDeviceSupported,
     isSettingPin,
-    confirmSignOutAll,
-    setConfirmSignOutAll,
+    isConfirmingSignOutAll,
+    setIsConfirmingSignOutAll,
     openPinDialog: () => setIsSettingPin(true),
     closePinDialog: () => setIsSettingPin(false),
     handleToggle,
@@ -91,10 +91,10 @@ export const useSecuritySettings = () => {
       toast({ variant: 'success', title: t('security.lockToggle.saved') });
     },
     handleSignOutEverywhere: async () => {
-      setConfirmSignOutAll(false);
+      setIsConfirmingSignOutAll(false);
       clearLock();
       forgetDeviceUnlock();
-      await signOutEverywhere();
+      await authApi.signOutEverywhere();
     },
   };
 };

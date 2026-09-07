@@ -6,12 +6,12 @@ import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { MoneyTimeline, MoneyTimelineEntry } from '@/pages/plan/utils/moneyTimeline';
 
-type Props = {
+type PlanTimelineProps = {
   timeline: MoneyTimeline;
   currency: string;
 };
 
-const PlanTimeline = ({ timeline, currency }: Props) => {
+export const PlanTimeline = ({ timeline, currency }: PlanTimelineProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
 
@@ -37,9 +37,6 @@ const PlanTimeline = ({ timeline, currency }: Props) => {
     </section>
   );
 };
-
-export default PlanTimeline;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

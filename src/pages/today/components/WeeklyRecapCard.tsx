@@ -5,7 +5,7 @@ import CalendarRange from 'lucide-react/dist/esm/icons/calendar-range';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import X from 'lucide-react/dist/esm/icons/x';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Button } from '@/common/ui/button';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
@@ -15,7 +15,7 @@ import type { WeeklyAnomaly } from '@/constants/weeklyAnomalies';
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-const WeeklyRecapCard = () => {
+export const WeeklyRecapCard = () => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();
@@ -47,9 +47,6 @@ const WeeklyRecapCard = () => {
     </SurfaceCard>
   );
 };
-
-export default WeeklyRecapCard;
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const renderHeader = (

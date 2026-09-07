@@ -6,19 +6,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/common/ui/dialog';
-import AmountKeypad from '@/pages/expenses/components/AmountKeypad';
-import QuickAddCategories from '@/pages/expenses/components/QuickAddCategories';
-import QuickAddName from '@/pages/expenses/components/QuickAddName';
+import { AmountKeypad } from '@/pages/expenses/components/AmountKeypad';
+import { QuickAddCategories } from '@/pages/expenses/components/QuickAddCategories';
+import { QuickAddName } from '@/pages/expenses/components/QuickAddName';
 import { useQuickAddDraft } from '@/pages/expenses/hooks/useQuickAddDraft';
 import { cn, formatCurrency } from '@/constants/utils';
 
-type Props = {
+type OnboardingFirstExpenseStepProps = {
   draft: ReturnType<typeof useQuickAddDraft>;
   onBack: () => void;
   onSkip: () => void;
 };
 
-const OnboardingFirstExpenseStep = ({ draft, onBack, onSkip }: Props) => {
+export const OnboardingFirstExpenseStep = ({ draft, onBack, onSkip }: OnboardingFirstExpenseStepProps) => {
   const { t } = useTranslation();
 
   return (
@@ -83,9 +83,6 @@ const OnboardingFirstExpenseStep = ({ draft, onBack, onSkip }: Props) => {
     </div>
   );
 };
-
-export default OnboardingFirstExpenseStep;
-
 // --- Helpers ---
 
 const amountTone = (isEmpty: boolean): string => {

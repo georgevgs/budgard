@@ -76,7 +76,7 @@ export const useHouseholdOps = () => {
         operation: resolveRemoveOperation(isOwner),
         errorMessage: t('settings.household.removeFailed'),
         successMessage: t('settings.household.removed'),
-        retryable: false,
+        isRetryable: false,
         perform: async () => {
           if (isOwner) {
             await space.revokeShare();

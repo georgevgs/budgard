@@ -4,7 +4,7 @@ import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 import ListChecks from 'lucide-react/dist/esm/icons/list-checks';
 import { useExpensesData, useIncomesData } from '@/common/contexts/DataContext';
 
-const ReviewQueueBanner = () => {
+export const ReviewQueueBanner = () => {
   const { t } = useTranslation();
   const expenses = useExpensesData();
   const incomes = useIncomesData();
@@ -34,9 +34,6 @@ const ReviewQueueBanner = () => {
     </Link>
   );
 };
-
-export default ReviewQueueBanner;
-
 // --- Helpers ---
 
 const countPending = (transactions: { review_status?: string }[]): number =>

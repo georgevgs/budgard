@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
-import PageHeader from '@/common/components/common/PageHeader';
-import ProUpsellCard from '@/pages/pro/components/ProUpsellCard';
+import { PageHeader } from '@/common/components/common/PageHeader';
+import { ProUpsellCard } from '@/pages/pro/components/ProUpsellCard';
 
-type Props = {
+type ProRouteProps = {
   /** The screen's own name. The gate replaces the whole screen, so it has to
    *  keep the screen's header — otherwise the one state every free user sees
    *  is the only one in the app with no title and no way back. */
@@ -17,12 +17,12 @@ type Props = {
 // Route-level gate for Pro-only screens. While the subscription is still
 // loading it renders the screen optimistically so Pro users never see a
 // lock flash; free users get the upsell as soon as the state settles.
-const ProRoute = ({
+export const ProRoute = ({
   screenTitleKey,
   titleKey,
   descriptionKey,
   children,
-}: Props) => {
+}: ProRouteProps) => {
   const { t } = useTranslation();
   const { isPro, isLoading } = useSubscription();
 
@@ -39,5 +39,3 @@ const ProRoute = ({
     </div>
   );
 };
-
-export default ProRoute;

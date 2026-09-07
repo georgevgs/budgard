@@ -12,19 +12,19 @@ import { useAuth } from '@/common/contexts/AuthContext';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { usePushNotifications } from '@/pages/settings/hooks/usePushNotifications';
 import { useSettingsHandlers } from '@/pages/settings/hooks/useSettingsHandlers';
-import PageHeader from '@/common/components/common/PageHeader';
-import AboutSection from '@/pages/settings/components/AboutSection';
-import AppearanceSection from '@/pages/settings/components/AppearanceSection';
-import BillingSection from '@/pages/settings/components/BillingSection';
-import CurrencySection from '@/pages/settings/components/CurrencySection';
-import AnnualExportSection from '@/pages/settings/components/AnnualExportSection';
-import DataManagementSection from '@/pages/settings/components/DataManagementSection';
-import LanguageSection from '@/pages/settings/components/LanguageSection';
-import NotificationsSection from '@/pages/settings/components/NotificationsSection';
-import ProfileSection from '@/pages/settings/components/ProfileSection';
-import SecuritySection from '@/pages/settings/components/SecuritySection';
-import HouseholdSection from '@/pages/settings/components/HouseholdSection';
-import ConnectionsSection from '@/pages/settings/components/ConnectionsSection';
+import { PageHeader } from '@/common/components/common/PageHeader';
+import { AboutSection } from '@/pages/settings/components/AboutSection';
+import { AppearanceSection } from '@/pages/settings/components/AppearanceSection';
+import { BillingSection } from '@/pages/settings/components/BillingSection';
+import { CurrencySection } from '@/pages/settings/components/CurrencySection';
+import { AnnualExportSection } from '@/pages/settings/components/AnnualExportSection';
+import { DataManagementSection } from '@/pages/settings/components/DataManagementSection';
+import { LanguageSection } from '@/pages/settings/components/LanguageSection';
+import { NotificationsSection } from '@/pages/settings/components/NotificationsSection';
+import { ProfileSection } from '@/pages/settings/components/ProfileSection';
+import { SecuritySection } from '@/pages/settings/components/SecuritySection';
+import { HouseholdSection } from '@/pages/settings/components/HouseholdSection';
+import { ConnectionsSection } from '@/pages/settings/components/ConnectionsSection';
 
 type SettingsSection =
   | 'account'
@@ -196,7 +196,7 @@ const renderPreferences = (data: SettingsData) => (
       theme={data.handlers.theme}
       accent={data.handlers.accent}
       isHapticsSupported={data.handlers.isHapticsSupported}
-      hapticsEnabled={data.handlers.hapticsEnabled}
+      areHapticsEnabled={data.handlers.areHapticsEnabled}
       onThemeSelect={data.handlers.handleThemeSelect}
       onAccentSelect={data.handlers.handleAccentSelect}
       onHapticsToggle={data.handlers.handleHapticsToggle}

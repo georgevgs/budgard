@@ -20,7 +20,7 @@ import { formatCurrency } from '@/constants/utils';
 // layout so it fires no matter which screen the user is on (a category goal can
 // complete while adding an expense; a debt clears from a payment). Renders
 // nothing.
-const MilestoneWatcher = () => {
+export const MilestoneWatcher = () => {
   const { t } = useTranslation();
   const { isInitialized, isSecondaryLoaded, defaultCurrency } = useDataConfig();
   const { isPro } = useSubscription();
@@ -102,9 +102,6 @@ const MilestoneWatcher = () => {
 
   return null;
 };
-
-export default MilestoneWatcher;
-
 // --- Helpers ---
 
 // One id per milestone crossed, month-scoped so a fresh month can celebrate

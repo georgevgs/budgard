@@ -208,7 +208,7 @@ const buildReceiptOptions = (
 
   return {
     receiptFile,
-    removeExistingReceipt: false,
+    shouldRemoveExistingReceipt: false,
     existingReceiptPath: null,
   };
 };

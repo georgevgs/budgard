@@ -1,51 +1,51 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
-import ScrollSafeDropdownMenuTrigger from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
+import { ScrollSafeDropdownMenuTrigger } from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/common/ui/dropdown-menu';
 import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
-import ConfirmDestructiveDialog from '@/common/components/common/ConfirmDestructiveDialog';
+import { ConfirmDestructiveDialog } from '@/common/components/common/ConfirmDestructiveDialog';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
-type Props = {
+type RecurringExpenseCardActionsProps = {
   expense: RecurringExpense;
   onEdit: (expense: RecurringExpense) => void;
   onDelete: (id: string) => void;
 };
 
-const RecurringExpenseCardActions = ({ expense, onEdit, onDelete }: Props) => {
+export const RecurringExpenseCardActions = ({ expense, onEdit, onDelete }: RecurringExpenseCardActionsProps) => {
   const { t } = useTranslation();
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleEditClick = () => {
     blurActiveElement();
-    setDropdownOpen(false);
+    setIsDropdownOpen(false);
     setTimeout(() => onEdit(expense), 0);
   };
 
   const handleDeleteClick = () => {
     blurActiveElement();
-    setDropdownOpen(false);
-    setTimeout(() => setShowDeleteDialog(true), 0);
+    setIsDropdownOpen(false);
+    setTimeout(() => setIsDeleteDialogOpen(true), 0);
   };
 
   const handleConfirmDelete = () => {
     onDelete(expense.id);
-    setShowDeleteDialog(false);
+    setIsDeleteDialogOpen(false);
   };
 
   return (
     <>
-      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+      <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
         <ScrollSafeDropdownMenuTrigger
           asChild
-          isOpen={dropdownOpen}
-          onOpenChange={setDropdownOpen}
+          isOpen={isDropdownOpen}
+          onOpenChange={setIsDropdownOpen}
         >
           <Button
             variant="ghost"
@@ -70,19 +70,16 @@ const RecurringExpenseCardActions = ({ expense, onEdit, onDelete }: Props) => {
       </DropdownMenu>
 
       <ConfirmDestructiveDialog
-        open={showDeleteDialog}
+        open={isDeleteDialogOpen}
         title={t('recurring.deleteTitle')}
         description={t('recurring.deleteConfirmation')}
         confirmLabel={t('common.delete')}
-        onOpenChange={setShowDeleteDialog}
+        onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleConfirmDelete}
       />
     </>
   );
 };
-
-export default RecurringExpenseCardActions;
-
 // --- Helpers ---
 
 const blurActiveElement = () => {

@@ -15,16 +15,16 @@ import { useAuth } from '@/common/contexts/AuthContext';
 import { useExpenseOps } from '@/common/hooks/dataOps/useExpenseOps';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { amountToInput, parseCurrencyInput } from '@/constants/utils';
-import DebtPaymentFields from '@/pages/debts/components/DebtPaymentFields';
+import { DebtPaymentFields } from '@/pages/debts/components/DebtPaymentFields';
 import { debtPaymentSchema, type DebtPaymentFormData } from '@/pages/debts/validations';
 import type { Debt } from '@/types/Debt';
 
-type Props = {
+type DebtPaymentFormProps = {
   debt: Debt;
   onClose: () => void;
 };
 
-const DebtPaymentForm = ({ debt, onClose }: Props) => {
+export const DebtPaymentForm = ({ debt, onClose }: DebtPaymentFormProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const { session } = useAuth();
@@ -136,5 +136,3 @@ const renderSubmitLabel = (isSubmitting: boolean, t: TranslateFunction) => {
 
   return t('debts.payment.save');
 };
-
-export default DebtPaymentForm;

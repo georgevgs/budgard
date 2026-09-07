@@ -5,7 +5,7 @@ import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { formatCurrency } from '@/constants/utils';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+type TransactionInsightProps = {
   description: string;
   monthTotal: number;
   monthCount: number;
@@ -15,7 +15,7 @@ type Props = {
 
 // The part of the screen a list row cannot give you: how often this repeats
 // and what it comes to. One coffee is a number; twelve coffees is a habit.
-const TransactionInsight = (props: Props) => {
+export const TransactionInsight = (props: TransactionInsightProps) => {
   const { t } = useTranslation();
 
   // A single occurrence is not a pattern, and saying "1 time this month, €4"
@@ -43,12 +43,9 @@ const TransactionInsight = (props: Props) => {
     </section>
   );
 };
-
-export default TransactionInsight;
-
 // --- Helpers ---
 
-const renderSimilar = (props: Props) => {
+const renderSimilar = (props: TransactionInsightProps) => {
   if (props.similar.length === 0) {
     return null;
   }

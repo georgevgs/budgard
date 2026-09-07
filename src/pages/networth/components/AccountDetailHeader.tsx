@@ -6,7 +6,7 @@ import {
   DialogHeader,
 } from '@/common/ui/dialog';
 import { Button } from '@/common/ui/button';
-import ScrollSafeDropdownMenuTrigger from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
+import { ScrollSafeDropdownMenuTrigger } from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,33 +24,33 @@ import {
   renderLiabilitySign,
 } from '@/pages/networth/components/AccountDetailSheet.helpers';
 
-type Props = {
+type AccountDetailHeaderProps = {
   account: Account;
   snapshots: AccountBalance[];
   onEdit: (account: Account) => void;
   onArchiveRequest: () => void;
 };
 
-const AccountDetailHeader = ({
+export const AccountDetailHeader = ({
   account,
   snapshots,
   onEdit,
   onArchiveRequest,
-}: Props) => {
+}: AccountDetailHeaderProps) => {
   const { t } = useTranslation();
   const { isPro } = useSubscription();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const liability = isLiability(account.kind);
   const isInvestment = account.kind === 'investment';
 
   const handleEditClick = () => {
-    setMenuOpen(false);
+    setIsMenuOpen(false);
     setTimeout(() => onEdit(account), 0);
   };
 
   const handleArchiveClick = () => {
-    setMenuOpen(false);
+    setIsMenuOpen(false);
     setTimeout(() => onArchiveRequest(), 0);
   };
 
@@ -63,11 +63,11 @@ const AccountDetailHeader = ({
             {t(`networth.kind.${account.kind}`)}
           </DialogDescription>
         </div>
-        <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+        <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
           <ScrollSafeDropdownMenuTrigger
             asChild
-            isOpen={menuOpen}
-            onOpenChange={setMenuOpen}
+            isOpen={isMenuOpen}
+            onOpenChange={setIsMenuOpen}
           >
             <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0">
               <MoreVertical className="h-4 w-4" />
@@ -107,5 +107,3 @@ const AccountDetailHeader = ({
     </DialogHeader>
   );
 };
-
-export default AccountDetailHeader;

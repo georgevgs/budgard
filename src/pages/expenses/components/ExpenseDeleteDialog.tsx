@@ -11,19 +11,19 @@ import {
 } from '@/common/ui/alert-dialog';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+type ExpenseDeleteDialogProps = {
   expense: Expense;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
 };
 
-const ExpenseDeleteDialog = ({
+export const ExpenseDeleteDialog = ({
   expense,
   open,
   onOpenChange,
   onConfirm,
-}: Props) => {
+}: ExpenseDeleteDialogProps) => {
   const { t } = useTranslation();
 
   return (
@@ -51,9 +51,6 @@ const ExpenseDeleteDialog = ({
     </AlertDialog>
   );
 };
-
-export default ExpenseDeleteDialog;
-
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 type TranslateFunction = (

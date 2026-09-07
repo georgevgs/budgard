@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogTitle } from '@/common/ui/dialog';
 import { Button } from '@/common/ui/button';
-import AmountKeypad from '@/pages/expenses/components/AmountKeypad';
-import QuickAddCategories from '@/pages/expenses/components/QuickAddCategories';
-import QuickAddName from '@/pages/expenses/components/QuickAddName';
-import QuickAddTemplates from '@/pages/expenses/components/QuickAddTemplates';
-import QuickReceiptScanAction from '@/pages/expenses/components/QuickReceiptScanAction';
+import { AmountKeypad } from '@/pages/expenses/components/AmountKeypad';
+import { QuickAddCategories } from '@/pages/expenses/components/QuickAddCategories';
+import { QuickAddName } from '@/pages/expenses/components/QuickAddName';
+import { QuickAddTemplates } from '@/pages/expenses/components/QuickAddTemplates';
+import { QuickReceiptScanAction } from '@/pages/expenses/components/QuickReceiptScanAction';
 import { useQuickAddDraft } from '@/pages/expenses/hooks/useQuickAddDraft';
 import { useQuickReceiptScan } from '@/pages/expenses/hooks/useQuickReceiptScan';
 import { cn, formatCurrency } from '@/constants/utils';
@@ -13,7 +13,7 @@ import type { ReceiptOptions } from '@/common/hooks/dataOps/useExpenseOps';
 import type { ExpenseWritePayload } from '@/common/api/dataService';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 
-type Props = {
+type QuickAddSheetProps = {
   open: boolean;
   onClose: () => void;
   onSubmit: (
@@ -28,13 +28,13 @@ type Props = {
 // An amount, a name and a category. The full form is still there behind "More
 // details" for the expense that needs a date, a tag or a receipt — but it is
 // no longer the toll every coffee has to pay.
-const QuickAddSheet = ({
+export const QuickAddSheet = ({
   open,
   onClose,
   onSubmit,
   onOpenFullForm,
   onUseTemplate,
-}: Props) => {
+}: QuickAddSheetProps) => {
   const { t } = useTranslation();
   const draft = useQuickAddDraft({ isOpen: open, onSubmit, onClose });
   const receiptScan = useQuickReceiptScan({
@@ -119,9 +119,6 @@ const QuickAddSheet = ({
     </Dialog>
   );
 };
-
-export default QuickAddSheet;
-
 // --- Helpers ---
 
 type Draft = ReturnType<typeof useQuickAddDraft>;

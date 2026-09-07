@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Badge } from '@/common/ui/badge';
 import Target from 'lucide-react/dist/esm/icons/target';
 import Calendar from 'lucide-react/dist/esm/icons/calendar';
-import GoalProgressBar from '@/pages/goals/components/GoalProgressBar';
-import GoalCardActions from '@/pages/goals/components/GoalCardActions';
+import { GoalProgressBar } from '@/pages/goals/components/GoalProgressBar';
+import { GoalCardActions } from '@/pages/goals/components/GoalCardActions';
 import { useGoalProgress } from '@/common/hooks/useGoalProgress';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import {
@@ -19,13 +19,13 @@ import type { Locale } from 'date-fns';
 import type { GoalProgress } from '@/common/hooks/useGoalProgress';
 import { getColorTint } from '@/constants/categoryColor';
 
-type Props = {
+type GoalCardProps = {
   goal: Goal;
   onEdit: (goal: Goal) => void;
   onDelete: (id: string) => void;
 };
 
-const GoalCard = ({ goal, onEdit, onDelete }: Props) => {
+export const GoalCard = ({ goal, onEdit, onDelete }: GoalCardProps) => {
   const { t } = useTranslation();
   const { categories } = useCategoriesData();
   const tags = useTagsData();
@@ -62,9 +62,6 @@ const GoalCard = ({ goal, onEdit, onDelete }: Props) => {
     </SurfaceCard>
   );
 };
-
-export default GoalCard;
-
 // --- Helpers ---
 
 type TranslateFunction = (

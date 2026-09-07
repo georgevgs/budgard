@@ -1,4 +1,4 @@
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Button } from '@/common/ui/button';
 import { Switch } from '@/common/ui/switch';
 import Moon from 'lucide-react/dist/esm/icons/moon';
@@ -19,18 +19,18 @@ type AppearanceSectionProps = {
   theme: Theme;
   accent: AccentColorKey;
   isHapticsSupported: boolean;
-  hapticsEnabled: boolean;
+  areHapticsEnabled: boolean;
   onThemeSelect: (theme: Theme) => void;
   onAccentSelect: (key: AccentColorKey) => void;
   onHapticsToggle: (enabled: boolean) => void;
   t: TFunc;
 };
 
-const AppearanceSection = ({
+export const AppearanceSection = ({
   theme,
   accent,
   isHapticsSupported,
-  hapticsEnabled,
+  areHapticsEnabled,
   onThemeSelect,
   onAccentSelect,
   onHapticsToggle,
@@ -55,7 +55,7 @@ const AppearanceSection = ({
           {renderAccentPicker(theme === 'barbie', accent, onAccentSelect, t)}
           {renderHapticsToggle(
             isHapticsSupported,
-            hapticsEnabled,
+            areHapticsEnabled,
             onHapticsToggle,
             t,
           )}
@@ -64,9 +64,6 @@ const AppearanceSection = ({
     </section>
   );
 };
-
-export default AppearanceSection;
-
 // --- Helpers ---
 
 const THEME_ICONS: Record<Theme, typeof Sun> = {

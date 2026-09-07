@@ -8,7 +8,7 @@ const ROWS = [
   { name: 'w-1/3', target: 'w-28', bar: 'w-4/5' },
 ] as const;
 
-const GoalsLoadingState = () => {
+export const GoalsLoading = () => {
   const { t } = useTranslation();
 
   return (
@@ -48,5 +48,3 @@ const GoalsLoadingState = () => {
     </LoadingScreen>
   );
 };
-
-export default GoalsLoadingState;

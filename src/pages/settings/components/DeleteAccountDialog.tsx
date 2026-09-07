@@ -2,10 +2,10 @@ import { useRef, useState, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TurnstileInstance } from '@marsidev/react-turnstile';
 import { AlertDialog, AlertDialogContent } from '@/common/ui/alert-dialog';
-import DeleteConfirmStep from '@/pages/settings/components/DeleteConfirmStep';
-import DeleteVerifyStep from '@/pages/settings/components/DeleteVerifyStep';
+import { DeleteConfirmStep } from '@/pages/settings/components/DeleteConfirmStep';
+import { DeleteVerifyStep } from '@/pages/settings/components/DeleteVerifyStep';
 import { useAuth } from '@/common/contexts/AuthContext';
-import { requestOTP, signInWithOTP } from '@/constants/auth';
+import { authApi } from '@/common/api/authApi';
 
 // Deleting an account is irreversible, so the server requires a session whose
 // last authentication is recent (amr check in the delete-account function).
@@ -13,19 +13,19 @@ import { requestOTP, signInWithOTP } from '@/constants/auth';
 
 type Step = 'confirm' | 'verify';
 
-type Props = {
+type DeleteAccountDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirmDelete: () => Promise<void>;
   isDeleting: boolean;
 };
 
-const DeleteAccountDialog = ({
+export const DeleteAccountDialog = ({
   open,
   onOpenChange,
   onConfirmDelete,
   isDeleting,
-}: Props) => {
+}: DeleteAccountDialogProps) => {
   const { session } = useAuth();
   const { t } = useTranslation();
   const turnstileRef = useRef<TurnstileInstance>(null);
@@ -51,7 +51,7 @@ const DeleteAccountDialog = ({
   const handleSendCode = async () => {
     setIsSending(true);
     setError(null);
-    const { error: sendError } = await requestOTP(
+    const { error: sendError } = await authApi.requestOTP(
       email,
       turnstileToken ?? undefined,
     );
@@ -70,7 +70,7 @@ const DeleteAccountDialog = ({
   const handleVerifyAndDelete = async () => {
     setIsVerifying(true);
     setError(null);
-    const { error: verifyError } = await signInWithOTP(email, otp);
+    const { error: verifyError } = await authApi.signInWithOTP(email, otp);
     if (verifyError) {
       setIsVerifying(false);
       setOtp('');
@@ -108,9 +108,6 @@ const DeleteAccountDialog = ({
     </AlertDialog>
   );
 };
-
-export default DeleteAccountDialog;
-
 // --- Helpers ---
 
 type StepRenderArgs = {

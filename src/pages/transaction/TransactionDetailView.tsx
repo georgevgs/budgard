@@ -4,13 +4,13 @@ import { useDataConfig } from '@/common/contexts/DataContext';
 import { useQuickAdd } from '@/common/contexts/QuickAddContext';
 import { useDelayedLoading } from '@/common/hooks/useDelayedLoading';
 import { useTransactionDetail } from '@/pages/transaction/hooks/useTransactionDetail';
-import { ExpenseLoadingState } from '@/pages/expenses/components/ExpensesLoading';
-import BackButton from '@/common/components/common/BackButton';
-import TransactionHero from '@/pages/transaction/components/TransactionHero';
-import TransactionMeta from '@/pages/transaction/components/TransactionMeta';
-import TransactionNote from '@/pages/transaction/components/TransactionNote';
-import TransactionInsight from '@/pages/transaction/components/TransactionInsight';
-import TransactionActions from '@/pages/transaction/components/TransactionActions';
+import { TransactionsLoading } from '@/common/components/common/TransactionsLoading';
+import { BackButton } from '@/common/components/common/BackButton';
+import { TransactionHero } from '@/pages/transaction/components/TransactionHero';
+import { TransactionMeta } from '@/pages/transaction/components/TransactionMeta';
+import { TransactionNote } from '@/pages/transaction/components/TransactionNote';
+import { TransactionInsight } from '@/pages/transaction/components/TransactionInsight';
+import { TransactionActions } from '@/pages/transaction/components/TransactionActions';
 import type { Expense } from '@/types/Expense';
 
 const TransactionDetailView = () => {
@@ -110,7 +110,7 @@ const renderLoading = (showSkeleton: boolean) => {
     return null;
   }
 
-  return <ExpenseLoadingState />;
+  return <TransactionsLoading />;
 };
 
 // Reachable by deep link and by pressing back onto a row that has since been

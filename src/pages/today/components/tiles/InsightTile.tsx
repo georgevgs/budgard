@@ -1,8 +1,8 @@
-import BentoTile from '@/common/components/bento/BentoTile';
-import InsightIcon from '@/common/components/common/InsightIcon';
+import { InsightIcon } from '@/common/components/common/InsightIcon';
 import type { Insight } from '@/common/hooks/useSpendingInsights';
+import { BentoTile } from '@/common/components/bento';
 
-type Props = {
+type InsightTileProps = {
   insight: Insight | null;
 };
 
@@ -10,7 +10,7 @@ type Props = {
 // observation is not a number, and it should not compete with the ones around
 // it for the eye. A tint, so everything on it is ink and never a fill label.
 //
-const InsightTile = ({ insight }: Props) => {
+export const InsightTile = ({ insight }: InsightTileProps) => {
   if (insight === null) {
     return null;
   }
@@ -29,5 +29,3 @@ const InsightTile = ({ insight }: Props) => {
     </BentoTile>
   );
 };
-
-export default InsightTile;

@@ -3,7 +3,7 @@ import { format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import Landmark from 'lucide-react/dist/esm/icons/landmark';
 import Upload from 'lucide-react/dist/esm/icons/upload';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Badge } from '@/common/ui/badge';
 import { Button } from '@/common/ui/button';
 import { Skeleton } from '@/common/ui/skeleton';
@@ -12,11 +12,13 @@ import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { lazyWithRetry } from '@/constants/lazyWithRetry';
 import type { FinancialConnection } from '@/types/FinancialConnection';
 
-const CsvImportDialog = lazyWithRetry(
-  () => import('@/pages/expenses/components/CsvImportDialog'),
-);
+const CsvImportDialog = lazyWithRetry(async () => {
+  const module = await import('@/pages/expenses/components/CsvImportDialog');
 
-const ConnectionsSection = () => {
+  return { default: module.CsvImportDialog };
+});
+
+export const ConnectionsSection = () => {
   const { t } = useTranslation();
   const locale = useDateLocale();
   const { connections, isLoading, hasError } = useFinancialConnections();
@@ -49,9 +51,6 @@ const ConnectionsSection = () => {
     </section>
   );
 };
-
-export default ConnectionsSection;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

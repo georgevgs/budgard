@@ -19,7 +19,7 @@ import { recurringSuggestionService } from '@/common/api/recurringSuggestionServ
 
 export type ReceiptOptions = {
   receiptFile: File | null;
-  removeExistingReceipt: boolean;
+  shouldRemoveExistingReceipt: boolean;
   existingReceiptPath: string | null;
 };
 
@@ -104,7 +104,7 @@ export const useExpenseOps = () => {
             );
           }
 
-          const { receiptPath, receiptFailed, oldPathToDelete } =
+          const { receiptPath, hasReceiptFailed, oldPathToDelete } =
             await settleReceipt(savedExpense, receiptOptions);
 
           if (oldPathToDelete) {
@@ -113,10 +113,10 @@ export const useExpenseOps = () => {
 
           return {
             finalExpense: { ...savedExpense, receipt_path: receiptPath },
-            receiptFailed,
+            hasReceiptFailed,
           };
         },
-        commit: ({ finalExpense, receiptFailed }) => {
+        commit: ({ finalExpense, hasReceiptFailed }) => {
           const isDebtPayment = finalExpense.type === 'debt_payment';
           setExpenses((prev) => {
             if (expenseId) {
@@ -136,7 +136,7 @@ export const useExpenseOps = () => {
 
           // Not `successMessage`: the expense saved either way, but a failed
           // receipt has to say so rather than claim a clean save.
-          if (receiptFailed) {
+          if (hasReceiptFailed) {
             toast({
               variant: 'destructive',
               description: t('expenses.toasts.receiptUploadFailed'),
@@ -258,7 +258,7 @@ export const useExpenseOps = () => {
         // rather than guessing what landed.
         optimistic: () => () => refreshExpenses(),
         // Retrying could duplicate the parts that already inserted.
-        retryable: false,
+        isRetryable: false,
         perform: async () => {
           const created = await dataService.createExpensesBulk(
             restParts.map((part) => ({
@@ -321,7 +321,7 @@ export const useExpenseOps = () => {
 
 type ReceiptResult = {
   receiptPath: string | null;
-  receiptFailed: boolean;
+  hasReceiptFailed: boolean;
 };
 
 // The generic "Expense added" title says a write landed; this says which one,
@@ -398,10 +398,10 @@ const processReceipt = async (
     oldPathToDelete: string | null;
   }
 > => {
-  const { receiptFile, removeExistingReceipt, existingReceiptPath } =
+  const { receiptFile, shouldRemoveExistingReceipt, existingReceiptPath } =
     receiptOptions;
   let receiptPath = savedExpense.receipt_path ?? null;
-  let receiptFailed = false;
+  let hasReceiptFailed = false;
   let uploadedNewPath: string | null = null;
   let oldPathToDelete: string | null = null;
 
@@ -414,16 +414,16 @@ const processReceipt = async (
       }
     } catch (error) {
       captureException(error, { tags: { operation: 'uploadReceipt' } });
-      receiptFailed = true;
+      hasReceiptFailed = true;
     }
-  } else if (removeExistingReceipt) {
+  } else if (shouldRemoveExistingReceipt) {
     receiptPath = null;
     if (existingReceiptPath) {
       oldPathToDelete = existingReceiptPath;
     }
   }
 
-  return { receiptPath, receiptFailed, uploadedNewPath, oldPathToDelete };
+  return { receiptPath, hasReceiptFailed, uploadedNewPath, oldPathToDelete };
 };
 
 // Fire-and-forget storage cleanup. A failure here leaves an orphaned file,
@@ -446,17 +446,17 @@ const settleReceipt = async (
   if (!receiptOptions) {
     return {
       receiptPath: savedExpense.receipt_path ?? null,
-      receiptFailed: false,
+      hasReceiptFailed: false,
       oldPathToDelete: null,
     };
   }
 
-  const { receiptPath, receiptFailed, uploadedNewPath, oldPathToDelete } =
+  const { receiptPath, hasReceiptFailed, uploadedNewPath, oldPathToDelete } =
     await processReceipt(savedExpense, receiptOptions, savedExpense.user_id);
 
   // Nothing to write back: the upload failed, or the path is unchanged.
-  if (receiptFailed || receiptPath === (savedExpense.receipt_path ?? null)) {
-    return { receiptPath, receiptFailed, oldPathToDelete };
+  if (hasReceiptFailed || receiptPath === (savedExpense.receipt_path ?? null)) {
+    return { receiptPath, hasReceiptFailed, oldPathToDelete };
   }
 
   try {
@@ -467,7 +467,7 @@ const settleReceipt = async (
 
     return {
       receiptPath: updated.receipt_path ?? null,
-      receiptFailed,
+      hasReceiptFailed,
       oldPathToDelete,
     };
   } catch (err) {

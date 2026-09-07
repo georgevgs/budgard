@@ -3,7 +3,7 @@ import { useDataActions } from '@/common/contexts/DataContext';
 import { useIsMobile } from '@/common/hooks/useIsMobile';
 import {
   usePullToRefresh,
-  type PullToRefreshState,
+  type UsePullToRefreshReturn,
 } from '@/common/hooks/usePullToRefresh';
 import { haptics } from '@/constants/haptics';
 
@@ -13,7 +13,7 @@ import { haptics } from '@/constants/haptics';
 //
 // Mounted once in the app shell rather than per view, so exactly one set of
 // document listeners exists no matter how many tabs are alive behind it.
-export const usePageRefresh = (isEnabledRoute: boolean): PullToRefreshState => {
+export const usePageRefresh = (isEnabledRoute: boolean): UsePullToRefreshReturn => {
   const { refreshData } = useDataActions();
   // Pointer-driven layouts have no pull gesture, and enabling it there would
   // put a non-passive touchmove listener on every desktop session for nothing.

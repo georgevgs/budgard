@@ -54,7 +54,7 @@ export const useCsvImportFlow = (onClose: () => void) => {
   const [columnMapping, setColumnMapping] = useState<ColumnMapping>(
     INITIAL_COLUMN_MAPPING,
   );
-  const [skipIncome, setSkipIncome] = useState(true);
+  const [shouldSkipIncome, setShouldSkipIncome] = useState(true);
 
   // Parse results state
   const [validRows, setValidRows] = useState<ParsedExpenseRow[]>([]);
@@ -71,7 +71,7 @@ export const useCsvImportFlow = (onClose: () => void) => {
     setCsvContent('');
     setCsvPreview(null);
     setColumnMapping(INITIAL_COLUMN_MAPPING);
-    setSkipIncome(true);
+    setShouldSkipIncome(true);
     setValidRows([]);
     setErrors([]);
     setUnmatchedCategories([]);
@@ -189,7 +189,7 @@ export const useCsvImportFlow = (onClose: () => void) => {
       csvContent,
       categories,
       columnMapping,
-      skipIncome,
+      shouldSkipIncome,
       signedConvention,
     );
 
@@ -206,7 +206,7 @@ export const useCsvImportFlow = (onClose: () => void) => {
     setCategoryMappings(initialMappings);
 
     setStep('preview');
-  }, [csvContent, categories, columnMapping, skipIncome, csvPreview]);
+  }, [csvContent, categories, columnMapping, shouldSkipIncome, csvPreview]);
 
   const handleCategoryMapping = useCallback(
     (categoryName: string, categoryId: string | null) => {
@@ -279,8 +279,8 @@ export const useCsvImportFlow = (onClose: () => void) => {
     setIsDragging,
     csvPreview,
     columnMapping,
-    skipIncome,
-    setSkipIncome,
+    shouldSkipIncome,
+    setShouldSkipIncome,
     validRows,
     errors,
     unmatchedCategories,

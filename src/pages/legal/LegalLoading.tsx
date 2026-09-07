@@ -11,7 +11,7 @@ const PARAGRAPHS = [
   ['w-full', 'w-5/6'],
 ] as const;
 
-const LegalLoadingState = () => {
+export const LegalLoading = () => {
   const { t } = useTranslation();
 
   return (
@@ -50,5 +50,3 @@ const LegalLoadingState = () => {
     </LoadingScreen>
   );
 };
-
-export default LegalLoadingState;

@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import type { ComponentProps, PointerEvent } from 'react';
 import { DropdownMenuTrigger } from '@/common/ui/dropdown-menu';
 
-type Props = ComponentProps<typeof DropdownMenuTrigger> & {
+type ScrollSafeDropdownMenuTriggerProps = ComponentProps<typeof DropdownMenuTrigger> & {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
 };
@@ -17,7 +17,7 @@ type TouchGesture = {
 // touchscreen it opens the menu before the browser knows whether the finger is
 // tapping or scrolling. Delay touch activation until the finger is released
 // without meaningful travel; mouse and keyboard behavior stays with Radix.
-const ScrollSafeDropdownMenuTrigger = ({
+export const ScrollSafeDropdownMenuTrigger = ({
   isOpen,
   onOpenChange,
   onPointerCancel,
@@ -25,7 +25,7 @@ const ScrollSafeDropdownMenuTrigger = ({
   onPointerMove,
   onPointerUp,
   ...props
-}: Props) => {
+}: ScrollSafeDropdownMenuTriggerProps) => {
   const touchGesture = useRef<TouchGesture | null>(null);
 
   const handlePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
@@ -84,9 +84,6 @@ const ScrollSafeDropdownMenuTrigger = ({
     />
   );
 };
-
-export default ScrollSafeDropdownMenuTrigger;
-
 // --- Helpers ---
 
 const TAP_SLOP_PX = 10;

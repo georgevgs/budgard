@@ -1,13 +1,13 @@
 import type { Series } from '@/common/components/charts/chartTypes';
 
-type Props = {
+type ChartLegendProps = {
   series: Series[];
   show?: boolean;
 };
 
 // Only shown when a chart carries more than one series — a single-series chart
 // with a legend is a label pretending to be a key.
-const ChartLegend = ({ series, show }: Props) => {
+export const ChartLegend = ({ series, show }: ChartLegendProps) => {
   if (show === false) {
     return null;
   }
@@ -33,5 +33,3 @@ const ChartLegend = ({ series, show }: Props) => {
     </ul>
   );
 };
-
-export default ChartLegend;

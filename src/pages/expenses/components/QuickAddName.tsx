@@ -9,7 +9,7 @@ import { Input } from '@/common/ui/input';
 import { renderSuggestionMeta } from '@/pages/expenses/components/ExpensesForm.helpers';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+type QuickAddNameProps = {
   value: string;
   suggestions: Expense[];
   errorKey: string | null;
@@ -21,13 +21,13 @@ type Props = {
 // fine for a coffee and useless for the row you go looking for later. The
 // field is still optional — but the recent names are one tap, so the common
 // case never needs the keyboard at all.
-const QuickAddName = ({
+export const QuickAddName = ({
   value,
   suggestions,
   errorKey,
   onChange,
   onSelect,
-}: Props) => {
+}: QuickAddNameProps) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -90,9 +90,6 @@ const QuickAddName = ({
     </div>
   );
 };
-
-export default QuickAddName;
-
 // --- Helpers ---
 
 // An empty list would open a popover with nothing in it, which on a phone is

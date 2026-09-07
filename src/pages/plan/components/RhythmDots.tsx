@@ -1,14 +1,14 @@
 import { cn } from '@/constants/utils';
 import type { DayOutcome, RhythmDay } from '@/common/hooks/savings/useSavingsRhythm';
 
-type Props = {
+type RhythmDotsProps = {
   days: RhythmDay[];
 };
 
 // aria-hidden, not role="img": the sentence rendered directly beneath these
 // dots already states the same count, and labelling both made a screen reader
 // announce it twice in a row.
-const RhythmDots = ({ days }: Props) => (
+export const RhythmDots = ({ days }: RhythmDotsProps) => (
   <div
     className="grid grid-cols-[repeat(15,minmax(0,1fr))] justify-items-center gap-y-2.5"
     aria-hidden="true"
@@ -16,9 +16,6 @@ const RhythmDots = ({ days }: Props) => (
     {days.map(renderDot)}
   </div>
 );
-
-export default RhythmDots;
-
 // --- Helpers ---
 
 const STAGGER_STEP_MS = 12;

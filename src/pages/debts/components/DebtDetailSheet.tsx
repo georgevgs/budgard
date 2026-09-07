@@ -13,18 +13,18 @@ import { useDebtProgress } from '@/pages/debts/hooks/useDebtProgress';
 import { useDebtPayments } from '@/pages/debts/hooks/useDebtPayments';
 import type { Debt } from '@/types/Debt';
 import type { Expense } from '@/types/Expense';
-import DebtDetailHeader from '@/pages/debts/components/DebtDetailHeader';
-import DebtPaymentForm from '@/pages/debts/components/DebtPaymentForm';
-import ConfirmDestructiveDialog from '@/common/components/common/ConfirmDestructiveDialog';
+import { DebtDetailHeader } from '@/pages/debts/components/DebtDetailHeader';
+import { DebtPaymentForm } from '@/pages/debts/components/DebtPaymentForm';
+import { ConfirmDestructiveDialog } from '@/common/components/common/ConfirmDestructiveDialog';
 
-type Props = {
+type DebtDetailSheetProps = {
   debt: Debt;
   open: boolean;
   onClose: () => void;
   onEdit: (debt: Debt) => void;
 };
 
-const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
+export const DebtDetailSheet = ({ debt, open, onClose, onEdit }: DebtDetailSheetProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const progress = useDebtProgress(debt);
@@ -59,7 +59,7 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
                 debt={debt}
                 progress={progress}
                 onEdit={onEdit}
-                onArchiveRequest={() => actions.setShowArchiveDialog(true)}
+                onArchiveRequest={() => actions.setIsArchiveDialogOpen(true)}
               />
 
               <div
@@ -101,11 +101,11 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
       </Dialog>
 
       <ConfirmDestructiveDialog
-        open={actions.showArchiveDialog}
+        open={actions.isArchiveDialogOpen}
         title={t('debts.archiveTitle')}
         description={t('debts.archiveConfirmation', { name: debt.name })}
         confirmLabel={t('debts.archive')}
-        onOpenChange={actions.setShowArchiveDialog}
+        onOpenChange={actions.setIsArchiveDialogOpen}
         onConfirm={actions.handleArchiveConfirm}
       />
 
@@ -122,9 +122,6 @@ const DebtDetailSheet = ({ debt, open, onClose, onEdit }: Props) => {
     </>
   );
 };
-
-export default DebtDetailSheet;
-
 // --- Helpers ---
 
 const createOpenChangeHandler = (reset: () => void, onClose: () => void) => {

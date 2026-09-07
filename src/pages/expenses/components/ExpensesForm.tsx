@@ -21,12 +21,12 @@ import { expenseSchema, type ExpenseFormData } from '@/pages/expenses/validation
 import type { ExpenseWritePayload } from '@/common/api/dataService';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
-import ExpenseAmountField from '@/pages/expenses/components/ExpenseAmountField';
-import ExpenseDescriptionField from '@/pages/expenses/components/ExpenseDescriptionField';
-import ExpenseCategoryField from '@/pages/expenses/components/ExpenseCategoryField';
-import ExpenseDateField from '@/pages/expenses/components/ExpenseDateField';
-import ExpenseFormDetails from '@/pages/expenses/components/ExpenseFormDetails';
-import ExpenseFormActions from '@/pages/expenses/components/ExpenseFormActions';
+import { ExpenseAmountField } from '@/pages/expenses/components/ExpenseAmountField';
+import { ExpenseDescriptionField } from '@/pages/expenses/components/ExpenseDescriptionField';
+import { ExpenseCategoryField } from '@/pages/expenses/components/ExpenseCategoryField';
+import { ExpenseDateField } from '@/pages/expenses/components/ExpenseDateField';
+import { ExpenseFormDetails } from '@/pages/expenses/components/ExpenseFormDetails';
+import { ExpenseFormActions } from '@/pages/expenses/components/ExpenseFormActions';
 import { CategoryManager } from '@/pages/categories/components/CategoryManager';
 import {
   getInitialAmount,
@@ -50,7 +50,7 @@ type ExpensesFormProps = {
   ) => void;
 };
 
-const ExpensesForm = ({
+export const ExpensesForm = ({
   expense,
   draft,
   draftReceiptFile,
@@ -86,7 +86,7 @@ const ExpensesForm = ({
     expense,
     conversion,
     receiptFile: attachments.receiptFile,
-    removeExistingReceipt: attachments.removeExistingReceipt,
+    shouldRemoveExistingReceipt: attachments.shouldRemoveExistingReceipt,
     onSubmit,
     onClose,
   });
@@ -129,11 +129,11 @@ const ExpensesForm = ({
               <ExpenseFormDetails
                 form={form}
                 tagPicker={tagPicker}
-                showDetails={attachments.showDetails}
+                shouldShowDetails={attachments.shouldShowDetails}
                 onToggleDetails={attachments.toggleDetails}
                 currentReceiptPath={expense?.receipt_path}
                 receiptFile={attachments.receiptFile}
-                isRemovingReceipt={attachments.removeExistingReceipt}
+                isRemovingReceipt={attachments.shouldRemoveExistingReceipt}
                 onReceiptSelect={attachments.setReceiptFile}
                 onRemoveExistingReceipt={attachments.removeReceipt}
               />
@@ -150,9 +150,6 @@ const ExpensesForm = ({
     </div>
   );
 };
-
-export default ExpensesForm;
-
 // --- Helpers ---
 
 const renderDragHandle = () => (

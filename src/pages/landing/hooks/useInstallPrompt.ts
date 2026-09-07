@@ -5,7 +5,7 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 };
 
-type InstallPromptState = {
+type UseInstallPromptReturn = {
   isIosSafari: boolean;
   isAndroidInstallable: boolean;
   isStandalone: boolean;
@@ -29,7 +29,7 @@ const detectStandalone = (): boolean => {
   return mediaQuery || iosProp;
 };
 
-export const useInstallPrompt = (): InstallPromptState => {
+export const useInstallPrompt = (): UseInstallPromptReturn => {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
 

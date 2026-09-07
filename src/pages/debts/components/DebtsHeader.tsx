@@ -1,24 +1,24 @@
 import { useTranslation } from 'react-i18next';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { formatCurrency, formatPercent } from '@/constants/utils';
 import { useAnimatedNumber } from '@/common/hooks/useAnimatedNumber';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import Calendar from 'lucide-react/dist/esm/icons/calendar';
 import type { DebtSummary } from '@/common/hooks/useDebts';
 
-type Props = {
+type DebtsHeaderProps = {
   summary: DebtSummary;
   defaultCurrency: string;
   monthsToDebtFree: number | null;
   payoffDate: string | null;
 };
 
-const DebtsHeader = ({
+export const DebtsHeader = ({
   summary,
   defaultCurrency,
   monthsToDebtFree,
   payoffDate,
-}: Props) => {
+}: DebtsHeaderProps) => {
   const { t } = useTranslation();
   const animatedTotal = useAnimatedNumber(summary.totalBalance);
 
@@ -56,9 +56,6 @@ const DebtsHeader = ({
     </SurfaceCard>
   );
 };
-
-export default DebtsHeader;
-
 // --- Helpers ---
 
 type TranslateFunction = (

@@ -3,12 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { useOfflineQueueCount } from '@/common/hooks/useOfflineQueueCount';
 import { useOnlineStatus } from '@/common/hooks/useOnlineStatus';
 
-const OfflineBanner = () => {
+export const OfflineBanner = () => {
   const { t } = useTranslation();
   const isOnline = useOnlineStatus();
   const pendingCount = useOfflineQueueCount();
   const wentOffline = useRef(false);
-  const [showBackOnline, setShowBackOnline] = useState(false);
+  const [isBackOnlineVisible, setIsBackOnlineVisible] = useState(false);
 
   useEffect(() => {
     if (!isOnline) {
@@ -19,8 +19,8 @@ const OfflineBanner = () => {
   useEffect(() => {
     if (!isOnline || !wentOffline.current) return;
 
-    setShowBackOnline(true);
-    const timer = window.setTimeout(() => setShowBackOnline(false), 2500);
+    setIsBackOnlineVisible(true);
+    const timer = window.setTimeout(() => setIsBackOnlineVisible(false), 2500);
 
     return () => window.clearTimeout(timer);
   }, [isOnline]);
@@ -34,15 +34,12 @@ const OfflineBanner = () => {
       t('offline.pending', { count: pendingCount }),
     );
   }
-  if (showBackOnline) {
+  if (isBackOnlineVisible) {
     return renderStatusPill(ONLINE_PILL, t('common.backOnline'));
   }
 
   return null;
 };
-
-export default OfflineBanner;
-
 // --- Helpers ---
 
 type StatusPillTone = {

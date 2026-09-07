@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { UseFormReturn } from 'react-hook-form';
 import { Input } from '@/common/ui/input';
-import CategoryIcon from '@/common/components/common/CategoryIcon';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { CurrencyInput } from '@/common/ui/currency-input';
 import { Label } from '@/common/ui/label';
 import {
@@ -20,12 +20,12 @@ import {
 import type { RecurringExpenseFormData } from '@/pages/recurring/validations';
 import type { Category } from '@/types/Category';
 
-type Props = {
+type RecurringExpenseFieldsProps = {
   form: UseFormReturn<RecurringExpenseFormData>;
   categories: Category[];
 };
 
-const RecurringExpenseFields = ({ form, categories }: Props) => {
+export const RecurringExpenseFields = ({ form, categories }: RecurringExpenseFieldsProps) => {
   const { t } = useTranslation();
 
   return (
@@ -99,9 +99,6 @@ const RecurringExpenseFields = ({ form, categories }: Props) => {
     </>
   );
 };
-
-export default RecurringExpenseFields;
-
 // --- Helpers ---
 
 const renderCategoryIcon = (category: {

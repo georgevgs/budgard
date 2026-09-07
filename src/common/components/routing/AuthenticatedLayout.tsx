@@ -1,27 +1,27 @@
 import { Suspense, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import MilestoneWatcher from '@/common/components/common/MilestoneWatcher';
-import PullToRefreshIndicator from '@/common/components/common/PullToRefreshIndicator';
-import NavTabs from '@/common/components/layout/NavTabs';
-import TopScrim from '@/common/components/layout/TopScrim';
-import OnboardingGate from '@/pages/onboarding/components/OnboardingGate';
-import MainTabsLayout from '@/common/components/routing/MainTabsLayout';
-import UpgradeDialog from '@/pages/pro/components/UpgradeDialog';
+import { MilestoneWatcher } from '@/common/components/common/MilestoneWatcher';
+import { PullToRefreshIndicator } from '@/common/components/common/PullToRefreshIndicator';
+import { NavTabs } from '@/common/components/layout/NavTabs';
+import { TopScrim } from '@/common/components/layout/TopScrim';
+import { OnboardingGate } from '@/pages/onboarding/components/OnboardingGate';
+import { MainTabsLayout } from '@/common/components/routing/MainTabsLayout';
+import { UpgradeDialog } from '@/pages/pro/components/UpgradeDialog';
 import {
   LockScreen,
   prefetchMainTabModules,
 } from '@/common/components/routing/lazyRouteModules';
-import QuickAddProvider from '@/common/contexts/QuickAddProvider';
+import { QuickAddProvider } from '@/common/contexts/QuickAddProvider';
 import { useAppLock } from '@/common/hooks/useAppLock';
 import { useOfflineSync } from '@/common/hooks/useOfflineSync';
 import { usePageRefresh } from '@/common/hooks/usePageRefresh';
 import { useCheckoutReturn } from '@/pages/pro/hooks/useCheckoutReturn';
 import { useRouteScrollRestoration } from '@/common/hooks/useRouteScrollRestoration';
-import { signOut } from '@/constants/auth';
+import { authApi } from '@/common/api/authApi';
 import { isMainTabPath } from '@/constants/routes';
-import SkipToContentLink from '@/common/components/routing/SkipToContentLink';
+import { SkipToContentLink } from '@/common/components/routing/SkipToContentLink';
 
-const AuthenticatedLayout = () => {
+export const AuthenticatedLayout = () => {
   const { pathname } = useLocation();
   const lock = useAppLock(true);
   useOfflineSync();
@@ -54,9 +54,6 @@ const AuthenticatedLayout = () => {
     </QuickAddProvider>
   );
 };
-
-export default AuthenticatedLayout;
-
 // --- Helpers ---
 
 const renderPrivacyScreen = (isObscured: boolean) => {
@@ -79,7 +76,7 @@ const renderLockScreen = (lock: ReturnType<typeof useAppLock>) => {
 
   return (
     <Suspense fallback={<div className="fixed inset-0 z-200 bg-background" />}>
-      <LockScreen onUnlock={lock.unlock} onSignOut={() => void signOut()} />
+      <LockScreen onUnlock={lock.unlock} onSignOut={() => void authApi.signOut()} />
     </Suspense>
   );
 };

@@ -1,5 +1,5 @@
 import { supabase } from '@/config/supabase';
-import { done, row, rows } from '@/config/supabaseCrud';
+import { done, row, rows } from '@/common/api/supabaseCrud';
 import { SELECT_TEMPLATE, SELECT_WITH_CATEGORY_AND_TAG, SUPABASE_PAGE_SIZE, buildBulkExpense, fetchAllPages, flattenExtraTags, transactionCursorFilter } from '@/common/api/dataAccess';
 import type { ExpenseWritePayload } from '@/common/api/dataAccess';
 import type { Expense } from '@/types/Expense';

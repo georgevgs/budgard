@@ -15,7 +15,7 @@ import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
 import { countsAsSpending } from '@/constants/spending';
 
-type Props = {
+type CategoryDrillDownProps = {
   isOpen: boolean;
   onClose: () => void;
   categoryName: string;
@@ -31,7 +31,7 @@ export const CategoryDrillDown = ({
   categoryColor,
   expenses,
   totalAmount,
-}: Props) => {
+}: CategoryDrillDownProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();

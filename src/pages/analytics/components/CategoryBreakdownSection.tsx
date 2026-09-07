@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import CategorySparkline from '@/pages/analytics/components/CategorySparkline';
-import CategoryIcon from '@/common/components/common/CategoryIcon';
+import { CategorySparkline } from '@/pages/analytics/components/CategorySparkline';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { formatCurrency } from '@/constants/utils';
 import { getColorTint } from '@/constants/categoryColor';
 import type { CategoryRow } from '@/pages/analytics/hooks/useAnalyticsData';
 
-type Props = {
+type CategoryBreakdownSectionProps = {
   breakdown: CategoryRow[];
   totalSpent: number;
   selectedYear: number;
@@ -13,7 +13,7 @@ type Props = {
   onCategoryClick: (category: CategoryRow) => void;
 };
 
-const CategoryBreakdownSection = (props: Props) => {
+export const CategoryBreakdownSection = (props: CategoryBreakdownSectionProps) => {
   const { t } = useTranslation();
 
   return (
@@ -25,14 +25,11 @@ const CategoryBreakdownSection = (props: Props) => {
     </section>
   );
 };
-
-export default CategoryBreakdownSection;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-const renderBreakdown = (props: Props, t: TFunc) => {
+const renderBreakdown = (props: CategoryBreakdownSectionProps, t: TFunc) => {
   if (props.breakdown.length === 0) {
     return (
       <p className="px-4 py-8 text-center text-sm text-muted-foreground">
@@ -52,7 +49,7 @@ const renderBreakdown = (props: Props, t: TFunc) => {
   );
 };
 
-const renderCategoryRow = (category: CategoryRow, props: Props, t: TFunc) => {
+const renderCategoryRow = (category: CategoryRow, props: CategoryBreakdownSectionProps, t: TFunc) => {
   let percentage = 0;
   if (props.totalSpent > 0) {
     percentage = (category.amount / props.totalSpent) * 100;

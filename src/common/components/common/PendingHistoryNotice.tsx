@@ -7,7 +7,7 @@ const ROWS = ['w-2/5', 'w-1/2', 'w-1/3'] as const;
 // history fetch. Rather than a full-screen skeleton or a misleading "nothing
 // here" empty state, this shimmers only the part that is genuinely in flight —
 // everything already loaded stays on screen and usable around it.
-const PendingHistoryNotice = () => {
+export const PendingHistoryNotice = () => {
   const { t } = useTranslation();
 
   return (
@@ -38,5 +38,3 @@ const PendingHistoryNotice = () => {
     </div>
   );
 };
-
-export default PendingHistoryNotice;

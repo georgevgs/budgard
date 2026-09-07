@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import Delete from 'lucide-react/dist/esm/icons/delete';
 import { haptics } from '@/constants/haptics';
-import type { AmountPad } from '@/pages/expenses/hooks/useAmountPad';
+import type { UseAmountPadReturn } from '@/pages/expenses/hooks/useAmountPad';
 
-type Props = {
-  pad: AmountPad;
+type AmountKeypadProps = {
+  pad: UseAmountPadReturn;
 };
 
 const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -16,7 +16,7 @@ const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 // It is named as a keypad rather than as "Amount" — the form's amount field
 // carries that name, and two controls sharing one accessible name is
 // ambiguous to a screen reader as well as to a test.
-const AmountKeypad = ({ pad }: Props) => {
+export const AmountKeypad = ({ pad }: AmountKeypadProps) => {
   const { t } = useTranslation();
 
   const press = (digit: number) => {
@@ -50,9 +50,6 @@ const AmountKeypad = ({ pad }: Props) => {
     </div>
   );
 };
-
-export default AmountKeypad;
-
 // --- Helpers ---
 
 type ButtonProps = {

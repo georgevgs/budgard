@@ -11,11 +11,11 @@ import {
 } from 'date-fns';
 import { Button } from '@/common/ui/button';
 import { Popover, PopoverTrigger } from '@/common/ui/popover';
-import MonthYearPickerContent from '@/pages/expenses/components/MonthYearPickerContent';
+import { MonthYearPickerContent } from '@/pages/expenses/components/MonthYearPickerContent';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { ActivityPeriod } from '@/pages/activity/hooks/useActivityFeed';
 
-type Props = {
+type ActivityMonthStepperProps = {
   period: ActivityPeriod;
   selectedMonth: string;
   onMonthChange: (month: string) => void;
@@ -26,11 +26,11 @@ type Props = {
 // still narrows the range, which it does not. Slimmer than a standalone
 // month picker on purpose — h-9 controls, no outer tile — now that it lives
 // inside the sticky toolbar rather than standing on its own row.
-const ActivityMonthStepper = ({
+export const ActivityMonthStepper = ({
   period,
   selectedMonth,
   onMonthChange,
-}: Props) => {
+}: ActivityMonthStepperProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const selectedDate = parseISO(`${selectedMonth}-01`);
@@ -108,5 +108,3 @@ const ActivityMonthStepper = ({
     </div>
   );
 };
-
-export default ActivityMonthStepper;

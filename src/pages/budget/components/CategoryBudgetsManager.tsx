@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import FolderOpen from 'lucide-react/dist/esm/icons/folder-open';
 import X from 'lucide-react/dist/esm/icons/x';
-import CategoryIcon from '@/common/components/common/CategoryIcon';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { Button } from '@/common/ui/button';
 import { Input } from '@/common/ui/input';
 import {
@@ -21,12 +21,12 @@ import {
 import type { Category } from '@/types/Category';
 import { getColorTint } from '@/constants/categoryColor';
 
-type Props = {
+type CategoryBudgetsManagerProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
-const CategoryBudgetsManager = ({ isOpen, onClose }: Props) => {
+export const CategoryBudgetsManager = ({ isOpen, onClose }: CategoryBudgetsManagerProps) => {
   const { t } = useTranslation();
   const manager = useCategoryBudgetDrafts(isOpen, onClose);
 
@@ -46,9 +46,6 @@ const CategoryBudgetsManager = ({ isOpen, onClose }: Props) => {
     t,
   });
 };
-
-export default CategoryBudgetsManager;
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

@@ -1,5 +1,5 @@
 import { supabase } from '@/config/supabase';
-import { done, row, rows } from '@/config/supabaseCrud';
+import { done, row, rows } from '@/common/api/supabaseCrud';
 
 type Dismissal = {
   user_id: string;

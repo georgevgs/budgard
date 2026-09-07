@@ -6,15 +6,13 @@ import ChartSpline from 'lucide-react/dist/esm/icons/chart-spline';
 import Download from 'lucide-react/dist/esm/icons/download';
 import House from 'lucide-react/dist/esm/icons/house';
 import List from 'lucide-react/dist/esm/icons/list';
-import BentoGrid from '@/common/components/bento/BentoGrid';
-import BentoTile from '@/common/components/bento/BentoTile';
-import TileLabel from '@/common/components/bento/TileLabel';
 import { IosInstallModal } from '@/pages/landing/components/IosInstallModal';
-import Reveal from '@/pages/landing/components/Reveal';
+import { Reveal } from '@/pages/landing/components/Reveal';
 import { Button } from '@/common/ui/button';
 import { useInstallPrompt } from '@/pages/landing/hooks/useInstallPrompt';
+import { BentoGrid, BentoTile, TileLabel } from '@/common/components/bento';
 
-type Props = {
+type HeroProps = {
   onGetStarted: () => void;
 };
 
@@ -24,10 +22,10 @@ type PreviewTab = {
   Icon: ComponentType<{ className?: string }>;
 };
 
-const Hero = ({ onGetStarted }: Props) => {
+export const Hero = ({ onGetStarted }: HeroProps) => {
   const { t } = useTranslation();
   const install = useInstallPrompt();
-  const [showIosModal, setShowIosModal] = useState(false);
+  const [isIosModalOpen, setIsIosModalOpen] = useState(false);
   const showInstall =
     !install.isStandalone &&
     (install.isIosSafari || install.isAndroidInstallable);
@@ -37,7 +35,7 @@ const Hero = ({ onGetStarted }: Props) => {
       document.activeElement.blur();
     }
     if (install.isIosSafari) {
-      setShowIosModal(true);
+      setIsIosModalOpen(true);
 
       return;
     }
@@ -58,13 +56,10 @@ const Hero = ({ onGetStarted }: Props) => {
           {renderTodayPreview(t)}
         </Reveal>
       </div>
-      <IosInstallModal open={showIosModal} onOpenChange={setShowIosModal} />
+      <IosInstallModal open={isIosModalOpen} onOpenChange={setIsIosModalOpen} />
     </section>
   );
 };
-
-export default Hero;
-
 // --- Helpers ---
 
 const renderHeroCopy = (t: Tx) => (

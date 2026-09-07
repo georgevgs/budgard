@@ -32,7 +32,7 @@ const writeDismissed = (windowEnd: string): void => {
   listeners.forEach((l) => l());
 };
 
-export type UseWeeklyRecapResult = {
+export type UseWeeklyRecapReturn = {
   recap: WeeklyRecap | null;
   isDismissed: boolean;
   dismiss: () => void;
@@ -42,7 +42,7 @@ export type UseWeeklyRecapResult = {
 // finished. Off-Monday days return null without computing the recap.
 const MONDAY = 1;
 
-export const useWeeklyRecap = (): UseWeeklyRecapResult => {
+export const useWeeklyRecap = (): UseWeeklyRecapReturn => {
   const expenses = useExpensesData();
   const { expenseCategories } = useCategoriesData();
 

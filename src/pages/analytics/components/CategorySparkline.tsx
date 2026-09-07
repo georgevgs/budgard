@@ -3,7 +3,7 @@ type CategorySparklineProps = {
   color: string;
 };
 
-const CategorySparkline = ({ values, color }: CategorySparklineProps) => {
+export const CategorySparkline = ({ values, color }: CategorySparklineProps) => {
   let lastNonZero = -1;
   for (let i = values.length - 1; i >= 0; i--) {
     if (values[i] > 0) {
@@ -52,9 +52,6 @@ const CategorySparkline = ({ values, color }: CategorySparklineProps) => {
     </svg>
   );
 };
-
-export default CategorySparkline;
-
 // --- Helpers ---
 
 const pointToPathSegment = (p: { x: number; y: number }, i: number): string => {

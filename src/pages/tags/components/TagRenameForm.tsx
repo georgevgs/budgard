@@ -10,12 +10,12 @@ import {
 import { useTagOps } from '@/common/hooks/dataOps/useTagOps';
 import type { Tag } from '@/types/Tag';
 
-type Props = {
+type TagRenameFormProps = {
   tag: Tag;
   onClose: () => void;
 };
 
-const TagRenameForm = ({ tag, onClose }: Props) => {
+export const TagRenameForm = ({ tag, onClose }: TagRenameFormProps) => {
   const { t } = useTranslation();
   const { handleTagUpdate } = useTagOps();
   const [name, setName] = useState(tag.name);
@@ -73,9 +73,6 @@ const TagRenameForm = ({ tag, onClose }: Props) => {
     </div>
   );
 };
-
-export default TagRenameForm;
-
 // --- Helpers ---
 
 const renderSaveLabel = (isSaving: boolean, t: (key: string) => string) => {

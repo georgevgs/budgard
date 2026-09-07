@@ -1,20 +1,20 @@
-import AccountCard from '@/pages/networth/components/AccountCard';
+import { AccountCard } from '@/pages/networth/components/AccountCard';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 
-type Props = {
+type AccountGroupProps = {
   title: string;
   accounts: Account[];
   latestSnapshotByAccount: Map<string, AccountBalance>;
   onAccountClick: (account: Account) => void;
 };
 
-const AccountGroup = ({
+export const AccountGroup = ({
   title,
   accounts,
   latestSnapshotByAccount,
   onAccountClick,
-}: Props) => {
+}: AccountGroupProps) => {
   if (accounts.length === 0) {
     return null;
   }
@@ -37,5 +37,3 @@ const AccountGroup = ({
     </section>
   );
 };
-
-export default AccountGroup;

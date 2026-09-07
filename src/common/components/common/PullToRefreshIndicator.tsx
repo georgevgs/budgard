@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import type { PullToRefreshState } from '@/common/hooks/usePullToRefresh';
+import type { UsePullToRefreshReturn } from '@/common/hooks/usePullToRefresh';
 
-type Props = {
-  state: PullToRefreshState;
+type PullToRefreshIndicatorProps = {
+  state: UsePullToRefreshReturn;
 };
 
 // Rides out from behind the header as the page is pulled and lands clear of it
@@ -13,7 +13,7 @@ type Props = {
 // Everything it does visually is driven by --pull-progress and the data-pull
 // stage that usePullToRefresh writes onto the document element (see the
 // pull-to-refresh block in index.css), so a drag never re-renders this tree.
-const PullToRefreshIndicator = ({ state }: Props) => {
+export const PullToRefreshIndicator = ({ state }: PullToRefreshIndicatorProps) => {
   if (!state.isEnabled) {
     return null;
   }
@@ -34,9 +34,6 @@ const PullToRefreshIndicator = ({ state }: Props) => {
     </>
   );
 };
-
-export default PullToRefreshIndicator;
-
 // --- Helpers ---
 
 // The ring fills as the pull approaches its trigger, then becomes an ordinary

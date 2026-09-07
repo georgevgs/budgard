@@ -13,7 +13,7 @@ import {
   InputOTPSlot,
 } from '@/common/ui/input-otp';
 
-type Props = {
+type DeleteVerifyStepProps = {
   email: string;
   otp: string;
   onOtpChange: (otp: string) => void;
@@ -22,14 +22,14 @@ type Props = {
   onVerifyAndDelete: () => void;
 };
 
-const DeleteVerifyStep = ({
+export const DeleteVerifyStep = ({
   email,
   otp,
   onOtpChange,
   error,
   isDeleting,
   onVerifyAndDelete,
-}: Props) => {
+}: DeleteVerifyStepProps) => {
   const { t } = useTranslation();
 
   return (
@@ -80,9 +80,6 @@ const DeleteVerifyStep = ({
     </>
   );
 };
-
-export default DeleteVerifyStep;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

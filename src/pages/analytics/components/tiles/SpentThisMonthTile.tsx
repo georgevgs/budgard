@@ -1,18 +1,17 @@
 import { useTranslation } from 'react-i18next';
-import BentoTile from '@/common/components/bento/BentoTile';
-import TileLabel from '@/common/components/bento/TileLabel';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useAnimatedNumber } from '@/common/hooks/useAnimatedNumber';
 import { buildSparkline } from '@/pages/analytics/utils/sparkline';
 import { formatCurrency, formatPercent } from '@/constants/utils';
 import type { MonthComparison } from '@/pages/analytics/hooks/useAnalyticsData';
+import { BentoTile, TileLabel } from '@/common/components/bento';
 
 type RhythmMonth = {
   month: string;
   amount: number;
 };
 
-type Props = {
+type SpentThisMonthTileProps = {
   monthComparison: MonthComparison;
   /** Rolling months, oldest first. The last six are charted. */
   rhythmMonths: RhythmMonth[];
@@ -24,7 +23,7 @@ const VIEW = { width: 330, height: 120 };
 // The screen's headline: what this month has cost, how that compares, and the
 // shape of the months behind it. One tile because those are one thought — the
 // figure means nothing without the curve and the curve means nothing unlabelled.
-const SpentThisMonthTile = ({ monthComparison, rhythmMonths }: Props) => {
+export const SpentThisMonthTile = ({ monthComparison, rhythmMonths }: SpentThisMonthTileProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const animated = useAnimatedNumber(monthComparison.thisMonthAmount);
@@ -50,9 +49,6 @@ const SpentThisMonthTile = ({ monthComparison, rhythmMonths }: Props) => {
     </BentoTile>
   );
 };
-
-export default SpentThisMonthTile;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

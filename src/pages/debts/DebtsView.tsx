@@ -9,15 +9,15 @@ import { useDebtPayoffPlan } from '@/pages/debts/hooks/useDebtPayoffPlan';
 import type { Debt } from '@/types/Debt';
 import type { DebtSummary } from '@/common/hooks/useDebts';
 import type { SimResult } from '@/pages/debts/utils/debtPayoff';
-import PageHeader from '@/common/components/common/PageHeader';
-import DebtsHeader from '@/pages/debts/components/DebtsHeader';
-import DebtsEmpty from '@/pages/debts/components/DebtsEmpty';
-import DebtsLoadingState from '@/pages/debts/components/DebtsLoading';
+import { PageHeader } from '@/common/components/common/PageHeader';
+import { DebtsHeader } from '@/pages/debts/components/DebtsHeader';
+import { DebtsEmpty } from '@/pages/debts/components/DebtsEmpty';
+import { DebtsLoading } from '@/pages/debts/components/DebtsLoading';
 import { useDelayedLoading } from '@/common/hooks/useDelayedLoading';
-import DebtCard from '@/pages/debts/components/DebtCard';
-import DebtPayoffPlanner from '@/pages/debts/components/DebtPayoffPlanner';
-import DebtForm from '@/pages/debts/components/DebtForm';
-import DebtDetailSheet from '@/pages/debts/components/DebtDetailSheet';
+import { DebtCard } from '@/pages/debts/components/DebtCard';
+import { DebtPayoffPlanner } from '@/pages/debts/components/DebtPayoffPlanner';
+import { DebtForm } from '@/pages/debts/components/DebtForm';
+import { DebtDetailSheet } from '@/pages/debts/components/DebtDetailSheet';
 
 const DebtsView = () => {
   const { t } = useTranslation();
@@ -106,7 +106,7 @@ const renderLoading = (showSkeleton: boolean) => {
     return null;
   }
 
-  return <DebtsLoadingState />;
+  return <DebtsLoading />;
 };
 
 type TranslateFunction = (

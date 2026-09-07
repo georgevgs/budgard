@@ -9,18 +9,18 @@ import {
   FormItem,
   FormMessage,
 } from '@/common/ui/form';
-import CategoryColorPicker from '@/pages/categories/components/CategoryColorPicker';
-import GoalSourceFields from '@/pages/goals/components/GoalSourceFields';
+import { CategoryColorPicker } from '@/pages/categories/components/CategoryColorPicker';
+import { GoalSourceFields } from '@/pages/goals/components/GoalSourceFields';
 import { formatCurrencyInput } from '@/constants/utils';
 import type { GoalFormData } from '@/pages/goals/validations';
 import type { GoalSourceType } from '@/types/Goal';
 
-type Props = {
+type GoalFormFieldsProps = {
   form: UseFormReturn<GoalFormData>;
   sourceType: GoalSourceType;
 };
 
-const GoalFormFields = ({ form, sourceType }: Props) => {
+export const GoalFormFields = ({ form, sourceType }: GoalFormFieldsProps) => {
   const { t } = useTranslation();
 
   return (
@@ -106,9 +106,6 @@ const GoalFormFields = ({ form, sourceType }: Props) => {
     </div>
   );
 };
-
-export default GoalFormFields;
-
 // --- Helpers ---
 
 const isDeadlineDisabled = (date: Date) => {

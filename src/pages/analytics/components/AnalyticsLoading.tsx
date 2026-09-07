@@ -4,7 +4,7 @@ import LoadingScreen from '@/common/ui/loading-screen';
 
 // Shaped like the calm overview: written review, one chart, composition, then
 // the route into deeper analysis.
-const AnalyticsLoadingState = () => {
+export const AnalyticsLoading = () => {
   const { t } = useTranslation();
 
   return (
@@ -28,9 +28,6 @@ const AnalyticsLoadingState = () => {
     </LoadingScreen>
   );
 };
-
-export default AnalyticsLoadingState;
-
 // --- Helpers ---
 
 const SECTIONS = [

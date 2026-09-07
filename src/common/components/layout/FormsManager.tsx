@@ -3,7 +3,7 @@ import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import type { ExpenseWritePayload } from '@/common/api/dataService';
 import type { ReceiptOptions } from '@/common/hooks/dataOps/useExpenseOps';
-import ExpensesForm from '@/pages/expenses/components/ExpensesForm';
+import { ExpensesForm } from '@/pages/expenses/components/ExpensesForm';
 import { useCategoriesData, useDataConfig } from '@/common/contexts/DataContext';
 import { FORM_TYPES, type FormType } from '@/common/components/layout/formTypes';
 
@@ -20,7 +20,7 @@ type FormsManagerProps = {
   ) => void;
 };
 
-const FormsManager = ({
+export const FormsManager = ({
   formType,
   onClose,
   selectedExpense,
@@ -63,9 +63,6 @@ const FormsManager = ({
     </Dialog>
   );
 };
-
-export default FormsManager;
-
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 const renderExpenseForm = (

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import Plus from 'lucide-react/dist/esm/icons/plus';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Button } from '@/common/ui/button';
 
 type Variant = 'card' | 'page';

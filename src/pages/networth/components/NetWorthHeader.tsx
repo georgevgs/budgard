@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { cn, formatCurrency, formatPercent } from '@/constants/utils';
 import { useAnimatedNumber } from '@/common/hooks/useAnimatedNumber';
 import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right';
@@ -8,12 +8,12 @@ import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import type { NetWorthSummary } from '@/common/hooks/useNetWorth';
 
-type Props = {
+type NetWorthHeaderProps = {
   summary: NetWorthSummary;
   defaultCurrency: string;
 };
 
-const NetWorthHeader = ({ summary, defaultCurrency }: Props) => {
+export const NetWorthHeader = ({ summary, defaultCurrency }: NetWorthHeaderProps) => {
   const { t } = useTranslation();
   const animatedTotal = useAnimatedNumber(summary.total);
   const isPositive = summary.total >= 0;
@@ -59,9 +59,6 @@ const NetWorthHeader = ({ summary, defaultCurrency }: Props) => {
     </SurfaceCard>
   );
 };
-
-export default NetWorthHeader;
-
 // --- Helpers ---
 
 type TranslateFunction = (

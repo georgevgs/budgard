@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import Check from 'lucide-react/dist/esm/icons/check';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
-import CategoryIcon from '@/common/components/common/CategoryIcon';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { Button } from '@/common/ui/button';
 import {
   DialogDescription,
@@ -13,19 +13,19 @@ import {
 import { cn } from '@/constants/utils';
 import { PRESET_CATEGORIES } from '@/pages/onboarding/components/presetCategories';
 
-type Props = {
+type OnboardingCategoriesStepProps = {
   isSubmitting: boolean;
   onBack: () => void;
   onSkip: () => void;
   onNext: (selectedIndices: number[]) => void;
 };
 
-const OnboardingCategoriesStep = ({
+export const OnboardingCategoriesStep = ({
   isSubmitting,
   onBack,
   onSkip,
   onNext,
-}: Props) => {
+}: OnboardingCategoriesStepProps) => {
   const { t } = useTranslation();
   const [selectedCategories, setSelectedCategories] = useState<Set<number>>(
     new Set([0, 1, 2, 3]),
@@ -112,9 +112,6 @@ const OnboardingCategoriesStep = ({
     </div>
   );
 };
-
-export default OnboardingCategoriesStep;
-
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 const renderCheckIcon = (isSelected: boolean) => {

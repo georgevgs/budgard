@@ -5,7 +5,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/common/ui/dialog';
-import OtpForm from '@/pages/auth/components/OtpForm';
+import { OtpForm } from '@/pages/auth/components/OtpForm';
 import { useTranslation } from 'react-i18next';
 
 type LoginModalProps = {
@@ -13,7 +13,7 @@ type LoginModalProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
+export const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
   const { t } = useTranslation();
 
   return (
@@ -41,5 +41,3 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
     </Dialog>
   );
 };
-
-export default LoginModal;

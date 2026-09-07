@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { changeAppLanguage } from '@/config/i18n';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import {
   Select,
   SelectContent,
@@ -14,7 +14,7 @@ const LANGUAGES = [
   { code: 'el', name: 'Ελληνικά' },
 ];
 
-const LanguageSection = () => {
+export const LanguageSection = () => {
   const { t, i18n } = useTranslation();
 
   return (
@@ -46,5 +46,3 @@ const LanguageSection = () => {
     </section>
   );
 };
-
-export default LanguageSection;

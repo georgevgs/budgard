@@ -8,12 +8,12 @@ import { useUpgradeIntent } from '@/pages/pro/hooks/useUpgradeIntent';
 import { shouldShowOnboarding } from '@/pages/onboarding/utils/onboarding';
 import { OnboardingFlow } from '@/common/components/routing/lazyRouteModules';
 
-const OnboardingGate = () => {
+export const OnboardingGate = () => {
   const expenses = useExpensesData();
   const { categories } = useCategoriesData();
   const { isInitialized, monthlyBudget } = useDataConfig();
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [dismissedThisSession, setDismissedThisSession] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [hasDismissedThisSession, setHasDismissedThisSession] = useState(false);
 
   const onboardingDue = shouldShowOnboarding(
     isInitialized,
@@ -21,34 +21,32 @@ const OnboardingGate = () => {
     categories.length,
     monthlyBudget,
   );
-  if (onboardingDue && !showOnboarding && !dismissedThisSession) {
-    setShowOnboarding(true);
+  if (onboardingDue && !isOnboardingOpen && !hasDismissedThisSession) {
+    setIsOnboardingOpen(true);
   }
 
   useUpgradeIntent(
     !isInitialized ||
-      showOnboarding ||
-      (onboardingDue && !dismissedThisSession),
+      isOnboardingOpen ||
+      (onboardingDue && !hasDismissedThisSession),
   );
 
   const handleDismiss = () => {
-    setDismissedThisSession(true);
-    setShowOnboarding(false);
+    setHasDismissedThisSession(true);
+    setIsOnboardingOpen(false);
   };
 
-  if (!showOnboarding) {
+  if (!isOnboardingOpen) {
     return null;
   }
 
   return (
     <Suspense fallback={null}>
       <OnboardingFlow
-        isOpen={showOnboarding}
-        onComplete={() => setShowOnboarding(false)}
+        isOpen={isOnboardingOpen}
+        onComplete={() => setIsOnboardingOpen(false)}
         onDismiss={handleDismiss}
       />
     </Suspense>
   );
 };
-
-export default OnboardingGate;

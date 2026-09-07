@@ -16,7 +16,7 @@ type Tab = {
   icon: ComponentType<{ className?: string }>;
 };
 
-const NavTabs = () => {
+export const NavTabs = () => {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const owningTab = getOwningTab(pathname);
@@ -61,9 +61,6 @@ const NavTabs = () => {
     </nav>
   );
 };
-
-export default NavTabs;
-
 // --- Helpers ---
 
 const renderTab = (tab: Tab, isActive: boolean) => {

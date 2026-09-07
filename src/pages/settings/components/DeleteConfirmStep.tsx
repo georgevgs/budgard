@@ -10,7 +10,7 @@ import {
 } from '@/common/ui/alert-dialog';
 import { Button } from '@/common/ui/button';
 
-type Props = {
+type DeleteConfirmStepProps = {
   email: string;
   turnstileRef: RefObject<TurnstileInstance | null>;
   turnstileToken: string | null;
@@ -20,7 +20,7 @@ type Props = {
   onSendCode: () => void;
 };
 
-const DeleteConfirmStep = ({
+export const DeleteConfirmStep = ({
   email,
   turnstileRef,
   turnstileToken,
@@ -28,7 +28,7 @@ const DeleteConfirmStep = ({
   error,
   isSending,
   onSendCode,
-}: Props) => {
+}: DeleteConfirmStepProps) => {
   const { t } = useTranslation();
 
   return (
@@ -72,9 +72,6 @@ const DeleteConfirmStep = ({
     </>
   );
 };
-
-export default DeleteConfirmStep;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

@@ -1,11 +1,11 @@
 import { Suspense, type ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import AuthenticatedLayout from '@/common/components/routing/AuthenticatedLayout';
-import RouteFallback from '@/common/components/routing/RouteFallback';
+import { AuthenticatedLayout } from '@/common/components/routing/AuthenticatedLayout';
+import { RouteFallback } from '@/common/components/routing/RouteFallback';
 import { LandingPage } from '@/common/components/routing/lazyRouteModules';
-import { AppLoadingSkeleton } from '@/pages/expenses/components/ExpensesLoading';
-import LandingLoadingState from '@/pages/landing/components/LandingLoading';
-import LegalLoadingState from '@/pages/legal/LegalLoading';
+import { AppLoadingSkeleton } from '@/common/components/common/AppLoadingSkeleton';
+import { LandingLoading } from '@/pages/landing/components/LandingLoading';
+import { LegalLoading } from '@/pages/legal/LegalLoading';
 import { useAuth } from '@/common/contexts/AuthContext';
 
 export const PrivateRoute = () => {
@@ -26,7 +26,7 @@ export const PublicRoute = () => {
   const { session, isLoading } = useAuth();
 
   if (isLoading) {
-    return <LandingLoadingState />;
+    return <LandingLoading />;
   }
 
   if (session) {
@@ -38,7 +38,7 @@ export const PublicRoute = () => {
       <Suspense
         fallback={
           <RouteFallback>
-            <LandingLoadingState />
+            <LandingLoading />
           </RouteFallback>
         }
       >
@@ -53,7 +53,7 @@ export const PublicLayout = ({ children }: { children: ReactNode }) => (
     <Suspense
       fallback={
         <RouteFallback>
-          <LegalLoadingState />
+          <LegalLoading />
         </RouteFallback>
       }
     >

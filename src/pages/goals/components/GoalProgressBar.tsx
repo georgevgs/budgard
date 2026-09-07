@@ -3,12 +3,12 @@ import { Progress } from '@/common/ui/progress';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { GoalProgress } from '@/common/hooks/useGoalProgress';
 
-type Props = {
+type GoalProgressBarProps = {
   progress: GoalProgress;
   currency: string;
 };
 
-const GoalProgressBar = ({ progress, currency }: Props) => {
+export const GoalProgressBar = ({ progress, currency }: GoalProgressBarProps) => {
   const { t } = useTranslation();
   const percentLabel = Math.round(progress.percent * 100);
   const indicatorClass = pickIndicatorClass(progress);
@@ -35,9 +35,6 @@ const GoalProgressBar = ({ progress, currency }: Props) => {
     </div>
   );
 };
-
-export default GoalProgressBar;
-
 // --- Helpers ---
 
 type TranslateFunction = (

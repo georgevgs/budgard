@@ -1,5 +1,5 @@
 import { supabase } from '@/config/supabase';
-import { done, row, rows } from '@/config/supabaseCrud';
+import { done, row, rows } from '@/common/api/supabaseCrud';
 import { SUPABASE_PAGE_SIZE, accountBalanceCursorFilter, fetchAllPages } from '@/common/api/dataAccess';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';

@@ -1,8 +1,8 @@
-import BentoGrid from '@/common/components/bento/BentoGrid';
-import AveragePerMonthTile from '@/pages/analytics/components/tiles/AveragePerMonthTile';
-import BiggestMonthTile from '@/pages/analytics/components/tiles/BiggestMonthTile';
-import SpentThisMonthTile from '@/pages/analytics/components/tiles/SpentThisMonthTile';
+import { AveragePerMonthTile } from '@/pages/analytics/components/tiles/AveragePerMonthTile';
+import { BiggestMonthTile } from '@/pages/analytics/components/tiles/BiggestMonthTile';
+import { SpentThisMonthTile } from '@/pages/analytics/components/tiles/SpentThisMonthTile';
 import type { MonthComparison } from '@/pages/analytics/hooks/useAnalyticsData';
+import { BentoGrid } from '@/common/components/bento';
 
 type MonthlyDatum = {
   month: string;
@@ -10,7 +10,7 @@ type MonthlyDatum = {
   amount: number;
 };
 
-type Props = {
+type TrendsBentoProps = {
   monthComparison: MonthComparison;
   rhythmMonths: { month: string; amount: number }[];
   monthlyData: MonthlyDatum[];
@@ -21,7 +21,7 @@ type Props = {
 
 // The quick figures that explain the deeper analysis: this month, the usual
 // month and the outlier. Composition stays in its full, scannable list below.
-const TrendsBento = (props: Props) => {
+export const TrendsBento = (props: TrendsBentoProps) => {
   return (
     <BentoGrid className="mt-4">
       <SpentThisMonthTile
@@ -39,5 +39,3 @@ const TrendsBento = (props: Props) => {
     </BentoGrid>
   );
 };
-
-export default TrendsBento;

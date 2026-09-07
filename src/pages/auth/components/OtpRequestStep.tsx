@@ -6,7 +6,7 @@ import FormSubmitButton from '@/common/ui/form-submit-button';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { cn } from '@/constants/utils';
 
-type Props = {
+type OtpRequestStepProps = {
   formAction: (formData: FormData) => void;
   error: string | null;
   initialEmail: string;
@@ -15,14 +15,14 @@ type Props = {
   turnstileRef: RefObject<TurnstileInstance | null>;
 };
 
-const OtpRequestStep = ({
+export const OtpRequestStep = ({
   formAction,
   error,
   initialEmail,
   turnstileToken,
   onTokenChange,
   turnstileRef,
-}: Props) => {
+}: OtpRequestStepProps) => {
   const { isLoading: isAuthLoading } = useAuth();
   const { t } = useTranslation();
 
@@ -101,9 +101,6 @@ const OtpRequestStep = ({
     </div>
   );
 };
-
-export default OtpRequestStep;
-
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 const getErrorDescribedBy = (error: string | null): string | undefined => {

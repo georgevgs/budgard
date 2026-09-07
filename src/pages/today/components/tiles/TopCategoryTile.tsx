@@ -1,11 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import BentoTile from '@/common/components/bento/BentoTile';
-import TileLabel from '@/common/components/bento/TileLabel';
-import CategoryIcon from '@/common/components/common/CategoryIcon';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { formatCurrency } from '@/constants/utils';
 import type { TopCategory } from '@/pages/today/hooks/useTopCategory';
+import { BentoTile, TileLabel } from '@/common/components/bento';
 
-type Props = {
+type TopCategoryTileProps = {
   category: TopCategory | null;
   currency: string;
 };
@@ -13,7 +12,7 @@ type Props = {
 // The grid's one inverted tile. It is the loudest thing here that costs no
 // colour, which is why there is exactly one — a second would flatten the
 // first, and the slab has to stay the only thing shouting.
-const TopCategoryTile = ({ category, currency }: Props) => {
+export const TopCategoryTile = ({ category, currency }: TopCategoryTileProps) => {
   const { t } = useTranslation();
 
   if (category === null) {
@@ -40,5 +39,3 @@ const TopCategoryTile = ({ category, currency }: Props) => {
     </BentoTile>
   );
 };
-
-export default TopCategoryTile;

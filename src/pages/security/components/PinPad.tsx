@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import Delete from 'lucide-react/dist/esm/icons/delete';
 
-type Props = {
+type PinPadProps = {
   onPress: (digit: number) => void;
   onBackspace: () => void;
   disabled?: boolean;
@@ -13,7 +13,7 @@ const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 // filling from the right and carries currency formatting with it. Sharing them
 // would mean a single component that is sometimes about money and sometimes
 // about a passcode, which is how both end up serving neither well.
-const PinPad = ({ onPress, onBackspace, disabled }: Props) => {
+export const PinPad = ({ onPress, onBackspace, disabled }: PinPadProps) => {
   const { t } = useTranslation();
 
   return (
@@ -41,9 +41,6 @@ const PinPad = ({ onPress, onBackspace, disabled }: Props) => {
     </div>
   );
 };
-
-export default PinPad;
-
 // --- Helpers ---
 
 type ButtonProps = {

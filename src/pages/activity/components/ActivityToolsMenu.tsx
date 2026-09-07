@@ -5,7 +5,7 @@ import MoreHorizontal from 'lucide-react/dist/esm/icons/more-horizontal';
 import TagIcon from 'lucide-react/dist/esm/icons/tag';
 import Upload from 'lucide-react/dist/esm/icons/upload';
 import { Button } from '@/common/ui/button';
-import ScrollSafeDropdownMenuTrigger from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
+import { ScrollSafeDropdownMenuTrigger } from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
 import { Dialog, DialogContent } from '@/common/ui/dialog';
 import {
   DropdownMenu,
@@ -17,11 +17,13 @@ import { lazyWithRetry } from '@/constants/lazyWithRetry';
 
 // Lazy: the CSV import flow (~35 KB min incl. parsing logic) is a rare,
 // user-initiated action — no reason to ship it with the Activity chunk.
-const CsvImportDialog = lazyWithRetry(
-  () => import('@/pages/expenses/components/CsvImportDialog'),
-);
+const CsvImportDialog = lazyWithRetry(async () => {
+  const module = await import('@/pages/expenses/components/CsvImportDialog');
 
-type Props = {
+  return { default: module.CsvImportDialog };
+});
+
+type ActivityToolsMenuProps = {
   isExportDisabled: boolean;
   onExport: () => void;
 };
@@ -29,7 +31,7 @@ type Props = {
 // Import, export and tag management are things you do a handful of times a
 // year. They used to be pinned above a list opened every day; an overflow menu
 // on the page header is the right weight for them.
-const ActivityToolsMenu = ({ isExportDisabled, onExport }: Props) => {
+export const ActivityToolsMenu = ({ isExportDisabled, onExport }: ActivityToolsMenuProps) => {
   const { t } = useTranslation();
   const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
@@ -77,9 +79,6 @@ const ActivityToolsMenu = ({ isExportDisabled, onExport }: Props) => {
     </>
   );
 };
-
-export default ActivityToolsMenu;
-
 // --- Helpers ---
 
 // Mounted only once opened so the parse/mapping chunk is fetched on demand.

@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
-import ActivityFilters from '@/pages/activity/components/ActivityFilters';
-import ActivityMonthStepper from '@/pages/activity/components/ActivityMonthStepper';
+import { ActivityFilters } from '@/pages/activity/components/ActivityFilters';
+import { ActivityMonthStepper } from '@/pages/activity/components/ActivityMonthStepper';
 import type { ActivityPeriod } from '@/pages/activity/hooks/useActivityFeed';
 
-type Props = {
+type ActivityToolbarProps = {
   search: string;
   isSearchingAllTime: boolean;
   onSearchChange: (value: string) => void;
@@ -18,7 +18,7 @@ type Props = {
 // scroll would carry away one at a time. Pinning them together keeps every
 // way to narrow the list reachable without a trip back to the top.
 // `adaptive-material` makes the toolbar opaque when reduced transparency is enabled.
-const ActivityToolbar = ({
+export const ActivityToolbar = ({
   search,
   isSearchingAllTime,
   onSearchChange,
@@ -26,7 +26,7 @@ const ActivityToolbar = ({
   selectedMonth,
   onMonthChange,
   filterPanel,
-}: Props) => {
+}: ActivityToolbarProps) => {
   return (
     <div className="adaptive-material sticky top-[env(safe-area-inset-top)] z-20 mt-3 space-y-2 bg-background/82 py-2 backdrop-blur-md">
       <ActivityFilters
@@ -43,5 +43,3 @@ const ActivityToolbar = ({
     </div>
   );
 };
-
-export default ActivityToolbar;

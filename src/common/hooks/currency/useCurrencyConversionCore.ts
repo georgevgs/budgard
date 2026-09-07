@@ -15,7 +15,7 @@ export const useCurrencyConversionCore = (
   const [selectedCurrency, setSelectedCurrency] = useState(
     initialCurrency ?? defaultCurrency,
   );
-  const [submitRateError, setSubmitRateError] = useState(false);
+  const [hasSubmitRateError, setHasSubmitRateError] = useState(false);
 
   const watchedDateStr = toDateString(watchedDate);
 
@@ -36,16 +36,16 @@ export const useCurrencyConversionCore = (
 
   const handleCurrencyChange = (value: string) => {
     setSelectedCurrency(value);
-    setSubmitRateError(false);
+    setHasSubmitRateError(false);
   };
 
-  const flagRateError = () => setSubmitRateError(true);
+  const flagRateError = () => setHasSubmitRateError(true);
 
   return {
     defaultCurrency,
     selectedCurrency,
     isFetchingRate,
-    hasRateError: fetchRateError || submitRateError,
+    hasRateError: fetchRateError || hasSubmitRateError,
     previewConvertedAmount,
     ensureRate,
     handleCurrencyChange,

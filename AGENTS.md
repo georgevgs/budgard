@@ -33,7 +33,7 @@ is **bun**.
 - **Supabase queries** live at the feature root (`<feature>Api.ts`) and are
   composed into one `dataService` object by `src/common/api/dataService.ts`.
   Service methods end with `rows` / `row` / `maybeRow` / `done` from
-  `src/config/supabaseCrud.ts`. Keep the query chain spelled out — **every
+  `src/common/api/supabaseCrud.ts`. Keep the query chain spelled out — **every
   embed names its FK explicitly, and that is load-bearing.** A bare embed name
   turned ambiguous once already (PGRST201, white screen on months-old bundles).
   Shared embeds and paging helpers are in `src/common/api/dataAccess.ts`.

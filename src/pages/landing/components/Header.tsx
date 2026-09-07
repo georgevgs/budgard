@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import BrandMark from '@/common/components/common/BrandMark';
+import { BrandMark } from '@/common/components/common/BrandMark';
 import { Button } from '@/common/ui/button';
 import { cn } from '@/constants/utils';
 
-type Props = {
+type HeaderProps = {
   onSignIn: () => void;
 };
 
-const Header = ({ onSignIn }: Props) => {
+export const Header = ({ onSignIn }: HeaderProps) => {
   const { t } = useTranslation();
-  const [scrolled, setScrolled] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => setHasScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
 
@@ -21,7 +21,7 @@ const Header = ({ onSignIn }: Props) => {
   }, []);
 
   return (
-    <header className={getHeaderClassName(scrolled)}>
+    <header className={getHeaderClassName(hasScrolled)}>
       <div className="landing-gutter mx-auto flex h-16 max-w-6xl items-center justify-between">
         {renderWordmark()}
         {renderNav(t)}
@@ -30,9 +30,6 @@ const Header = ({ onSignIn }: Props) => {
     </header>
   );
 };
-
-export default Header;
-
 const renderWordmark = () => (
   <a href="#top" className="flex items-center gap-2.5 group">
     <BrandMark className="h-7 w-7 transition-transform group-hover:scale-105" />
@@ -40,8 +37,8 @@ const renderWordmark = () => (
   </a>
 );
 
-const getHeaderClassName = (scrolled: boolean) => {
-  if (scrolled) {
+const getHeaderClassName = (hasScrolled: boolean) => {
+  if (hasScrolled) {
     return cn(
       'landing-header sticky top-0 z-50 transition-colors duration-200',
       'adaptive-material border-b border-border/50 bg-background/85 backdrop-blur-xl',

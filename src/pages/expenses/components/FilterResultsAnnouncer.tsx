@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-type Props = {
+type FilterResultsAnnouncerProps = {
   count: number;
   active: boolean;
 };
@@ -8,7 +8,7 @@ type Props = {
 // Screen-reader-only live region. While filters or search are active it
 // announces how many expenses match, giving non-sighted users the same feedback
 // that the visibly shrinking list gives everyone else.
-const FilterResultsAnnouncer = ({ count, active }: Props) => {
+export const FilterResultsAnnouncer = ({ count, active }: FilterResultsAnnouncerProps) => {
   const { t } = useTranslation();
 
   if (!active) {
@@ -21,5 +21,3 @@ const FilterResultsAnnouncer = ({ count, active }: Props) => {
     </p>
   );
 };
-
-export default FilterResultsAnnouncer;

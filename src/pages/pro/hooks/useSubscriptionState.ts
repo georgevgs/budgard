@@ -8,7 +8,7 @@ import {
 } from '@/pages/pro/utils/subscriptionCache';
 import type { Subscription } from '@/types/Subscription';
 
-export type SubscriptionState = {
+export type UseSubscriptionStateReturn = {
   subscription: Subscription | null;
   isLoading: boolean;
   refresh: () => Promise<void>;
@@ -18,7 +18,7 @@ export type SubscriptionState = {
 // snapshot, the auth transition, the initial fetch, and the refetch when the
 // user comes back from the Stripe checkout tab. SubscriptionProvider is left
 // as the context wiring around it.
-export const useSubscriptionState = (): SubscriptionState => {
+export const useSubscriptionState = (): UseSubscriptionStateReturn => {
   const { session } = useAuth();
   const userId = session?.user?.id ?? null;
   // Hydrate from the local snapshot so a returning Pro user is Pro on the

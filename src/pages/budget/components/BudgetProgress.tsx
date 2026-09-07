@@ -5,9 +5,9 @@ import Plus from 'lucide-react/dist/esm/icons/plus';
 import { Button } from '@/common/ui/button';
 import { Progress } from '@/common/ui/progress';
 import { formatCurrency, cn } from '@/constants/utils';
-import BudgetForm from '@/pages/budget/components/BudgetForm';
-import CategoryBudgetsManager from '@/pages/budget/components/CategoryBudgetsManager';
-import BudgetCategorySection, {
+import { BudgetForm } from '@/pages/budget/components/BudgetForm';
+import { CategoryBudgetsManager } from '@/pages/budget/components/CategoryBudgetsManager';
+import { BudgetCategorySection,
   WARNING_THRESHOLD,
   EXCEEDED_THRESHOLD,
   type BudgetCategoryRow,
@@ -29,7 +29,7 @@ type BudgetProgressProps = {
   currencyCode?: string;
 };
 
-const BudgetProgress = ({
+const BudgetProgressComponent = ({
   monthlyBudget,
   monthlySpent,
   onBudgetUpdate,
@@ -89,8 +89,8 @@ const BudgetProgress = ({
   });
 };
 
-export default memo(BudgetProgress);
-
+// Memoised: the parent re-renders on every data mutation, this subtree does not.
+export const BudgetProgress = memo(BudgetProgressComponent);
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 type TranslateFunction = (

@@ -1,10 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import BentoTile from '@/common/components/bento/BentoTile';
-import TileLabel from '@/common/components/bento/TileLabel';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { formatCurrency } from '@/constants/utils';
+import { BentoTile, TileLabel } from '@/common/components/bento';
 
-type Props = {
+type AveragePerMonthTileProps = {
   monthlyAverage: number;
   monthsElapsed: number;
 };
@@ -17,7 +16,7 @@ type Props = {
 // one drawn from twelve — and it gives this tile the same label / figure /
 // caption shape as the Biggest month tile beside it, which is what puts the
 // two numbers on one line instead of half a caption apart.
-const AveragePerMonthTile = ({ monthlyAverage, monthsElapsed }: Props) => {
+export const AveragePerMonthTile = ({ monthlyAverage, monthsElapsed }: AveragePerMonthTileProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
 
@@ -42,5 +41,3 @@ const AveragePerMonthTile = ({ monthlyAverage, monthsElapsed }: Props) => {
     </BentoTile>
   );
 };
-
-export default AveragePerMonthTile;

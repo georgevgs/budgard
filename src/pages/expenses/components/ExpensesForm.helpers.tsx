@@ -1,7 +1,7 @@
 import type { TFunction } from 'i18next';
 import { parseISO } from 'date-fns';
 import Tag from 'lucide-react/dist/esm/icons/tag';
-import CategoryIcon from '@/common/components/common/CategoryIcon';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { amountToInput } from '@/constants/utils';
 import {
   resolveSourceAmount,
@@ -54,17 +54,17 @@ export const getInitialExtraTagIds = (
   return expense.extra_tags.map((tag) => tag.id);
 };
 
-export const getDetailsRowsClass = (showDetails: boolean): string => {
-  if (showDetails) return 'grid-rows-[1fr]';
+export const getDetailsRowsClass = (shouldShowDetails: boolean): string => {
+  if (shouldShowDetails) return 'grid-rows-[1fr]';
 
   return 'grid-rows-[0fr]';
 };
 
 export const renderDetailsToggleLabel = (
-  showDetails: boolean,
+  shouldShowDetails: boolean,
   t: TranslateFunction,
 ) => {
-  if (showDetails) return t('expenses.lessDetails');
+  if (shouldShowDetails) return t('expenses.lessDetails');
 
   return t('expenses.moreDetails');
 };

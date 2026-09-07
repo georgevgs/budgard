@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import SectionShell from '@/pages/landing/components/SectionShell';
-import EyebrowLabel from '@/pages/landing/components/EyebrowLabel';
-import Reveal from '@/pages/landing/components/Reveal';
+import { SectionShell } from '@/pages/landing/components/SectionShell';
+import { EyebrowLabel } from '@/pages/landing/components/EyebrowLabel';
+import { Reveal } from '@/pages/landing/components/Reveal';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import { cn } from '@/constants/utils';
 
@@ -10,7 +10,7 @@ type Tx = (key: string) => string;
 
 const QUESTION_KEYS = [1, 2, 3, 4, 5, 6, 7] as const;
 
-const Faq = () => {
+export const Faq = () => {
   const { t } = useTranslation();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
@@ -32,9 +32,6 @@ const Faq = () => {
     </SectionShell>
   );
 };
-
-export default Faq;
-
 const renderItem = (
   n: number,
   index: number,

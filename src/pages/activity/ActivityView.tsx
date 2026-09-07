@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next';
-import PageHeader from '@/common/components/common/PageHeader';
-import ActivityFeed from '@/pages/activity/components/ActivityFeed';
-import ActivityToolbar from '@/pages/activity/components/ActivityToolbar';
-import ActivitySummary from '@/pages/activity/components/ActivitySummary';
-import ActivityFilterPanel from '@/pages/activity/components/ActivityFilterPanel';
-import ActivityToolsMenu from '@/pages/activity/components/ActivityToolsMenu';
-import ReviewQueueBanner from '@/pages/activity/components/ReviewQueueBanner';
-import FilterResultsAnnouncer from '@/pages/expenses/components/FilterResultsAnnouncer';
-import { ExpenseLoadingState } from '@/pages/expenses/components/ExpensesLoading';
+import { PageHeader } from '@/common/components/common/PageHeader';
+import { ActivityFeed } from '@/pages/activity/components/ActivityFeed';
+import { ActivityToolbar } from '@/pages/activity/components/ActivityToolbar';
+import { ActivitySummary } from '@/pages/activity/components/ActivitySummary';
+import { ActivityFilterPanel } from '@/pages/activity/components/ActivityFilterPanel';
+import { ActivityToolsMenu } from '@/pages/activity/components/ActivityToolsMenu';
+import { ReviewQueueBanner } from '@/pages/activity/components/ReviewQueueBanner';
+import { FilterResultsAnnouncer } from '@/pages/expenses/components/FilterResultsAnnouncer';
+import { TransactionsLoading } from '@/common/components/common/TransactionsLoading';
 import {
   useCategoriesData,
   useDataConfig,
@@ -146,5 +146,5 @@ const renderLoading = (showSkeleton: boolean) => {
     return null;
   }
 
-  return <ExpenseLoadingState />;
+  return <TransactionsLoading />;
 };

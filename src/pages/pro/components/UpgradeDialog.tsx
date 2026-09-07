@@ -3,16 +3,16 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Button } from '@/common/ui/button';
 import { Dialog, DialogContent } from '@/common/ui/dialog';
-import PaywallHero from '@/pages/pro/components/PaywallHero';
-import PaywallFeatures from '@/pages/pro/components/PaywallFeatures';
-import PaywallPlans from '@/pages/pro/components/PaywallPlans';
+import { PaywallHero } from '@/pages/pro/components/PaywallHero';
+import { PaywallFeatures } from '@/pages/pro/components/PaywallFeatures';
+import { PaywallPlans } from '@/pages/pro/components/PaywallPlans';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
 import { useUpgradeDialog } from '@/common/contexts/UpgradeDialogContext';
 import { useToast } from '@/common/hooks/useToast';
 import { useProPlans } from '@/pages/pro/hooks/useProPlans';
 import type { CheckoutPlan } from '@/common/api/subscriptionService';
 
-const UpgradeDialog = () => {
+export const UpgradeDialog = () => {
   const { t } = useTranslation();
   const { isUpgradeOpen, closeUpgrade, preferredPlan } = useUpgradeDialog();
   const { subscription, startCheckout } = useSubscription();
@@ -86,9 +86,6 @@ const UpgradeDialog = () => {
     </Dialog>
   );
 };
-
-export default UpgradeDialog;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

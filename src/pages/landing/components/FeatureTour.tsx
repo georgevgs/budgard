@@ -4,12 +4,10 @@ import CalendarRange from 'lucide-react/dist/esm/icons/calendar-range';
 import ChartSpline from 'lucide-react/dist/esm/icons/chart-spline';
 import House from 'lucide-react/dist/esm/icons/house';
 import List from 'lucide-react/dist/esm/icons/list';
-import BentoGrid from '@/common/components/bento/BentoGrid';
-import BentoTile from '@/common/components/bento/BentoTile';
-import TileLabel from '@/common/components/bento/TileLabel';
-import EyebrowLabel from '@/pages/landing/components/EyebrowLabel';
-import Reveal from '@/pages/landing/components/Reveal';
-import SectionShell from '@/pages/landing/components/SectionShell';
+import { EyebrowLabel } from '@/pages/landing/components/EyebrowLabel';
+import { Reveal } from '@/pages/landing/components/Reveal';
+import { SectionShell } from '@/pages/landing/components/SectionShell';
+import { BentoGrid, BentoTile, TileLabel } from '@/common/components/bento';
 
 type Tx = (key: string, opts?: Record<string, unknown>) => string;
 type FeatureTab = {
@@ -17,7 +15,7 @@ type FeatureTab = {
   Icon: ComponentType<{ className?: string }>;
 };
 
-const FeatureTour = () => {
+export const FeatureTour = () => {
   const { t } = useTranslation();
 
   return (
@@ -36,9 +34,6 @@ const FeatureTour = () => {
     </SectionShell>
   );
 };
-
-export default FeatureTour;
-
 // --- Helpers ---
 
 const featureTabs = (): FeatureTab[] => [

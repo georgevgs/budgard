@@ -34,13 +34,13 @@ export type SavingsRhythm = {
   windowDays: number;
   goodDays: number;
   tone: RhythmTone;
-  todayClaimed: boolean;
+  isTodayClaimed: boolean;
   canClaimToday: boolean;
   // Everything below is about money that actually moved. `setAside` is the sum
   // of real savings transfers this month — never a hypothetical.
   surplusYesterday: number;
   setAside: number;
-  setAsideToday: boolean;
+  isSetAsideToday: boolean;
   milestone: number;
   milestoneProgress: number;
   milestoneRemaining: number;
@@ -114,7 +114,7 @@ export const useSavingsRhythm = (expenses: Expense[]): SavingsRhythm | null => {
       windowDays: WINDOW_DAYS,
       goodDays,
       tone: resolveTone(goodDays),
-      todayClaimed: claimed.has(todayKey),
+      isTodayClaimed: claimed.has(todayKey),
       // Only offered on a day that genuinely has nothing on it. Once anything
       // is logged the claim would contradict the ledger, so it disappears.
       canClaimToday: !claimed.has(todayKey) && !spendByDay.has(todayKey),
@@ -127,7 +127,7 @@ export const useSavingsRhythm = (expenses: Expense[]): SavingsRhythm | null => {
         allowances,
       ),
       setAside,
-      setAsideToday: hasSetAsideOn(expenses, savingsCategoryIds, todayKey),
+      isSetAsideToday: hasSetAsideOn(expenses, savingsCategoryIds, todayKey),
       ...buildMilestone(setAside),
     };
   }, [

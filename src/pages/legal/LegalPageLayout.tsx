@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import Wallet from 'lucide-react/dist/esm/icons/wallet';
 
-type Props = {
+type LegalPageLayoutProps = {
   title: string;
   children: ReactNode;
 };
@@ -12,7 +12,7 @@ type Props = {
 // Shared shell for the public legal pages (/privacy, /terms, /contact):
 // narrow reading column, a way back home at the top, and cross-links to the
 // sibling pages at the bottom.
-const LegalPageLayout = ({ title, children }: Props) => {
+export const LegalPageLayout = ({ title, children }: LegalPageLayoutProps) => {
   const { t } = useTranslation();
 
   return (
@@ -55,9 +55,6 @@ const LegalPageLayout = ({ title, children }: Props) => {
     </div>
   );
 };
-
-export default LegalPageLayout;
-
 // --- Helpers ---
 
 const renderFooterLink = (to: string, label: string) => (

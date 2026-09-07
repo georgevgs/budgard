@@ -24,7 +24,7 @@ type BudgetFormProps = {
   currencyCode?: string;
 };
 
-const BudgetForm = ({
+export const BudgetForm = ({
   isOpen,
   onClose,
   onSubmit,
@@ -84,9 +84,6 @@ const BudgetForm = ({
     </Dialog>
   );
 };
-
-export default BudgetForm;
-
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 type TranslateFunction = (

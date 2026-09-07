@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { formatCurrency } from '@/constants/utils';
 import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
 import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
@@ -12,15 +12,15 @@ import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import type { LucideIcon } from 'lucide-react';
 import type { Debt, DebtKind } from '@/types/Debt';
 import { useDebtProgress } from '@/pages/debts/hooks/useDebtProgress';
-import DebtProgressBar from '@/pages/debts/components/DebtProgressBar';
+import { DebtProgressBar } from '@/pages/debts/components/DebtProgressBar';
 import { getColorTint } from '@/constants/categoryColor';
 
-type Props = {
+type DebtCardProps = {
   debt: Debt;
   onClick: (debt: Debt) => void;
 };
 
-const DebtCard = ({ debt, onClick }: Props) => {
+export const DebtCard = ({ debt, onClick }: DebtCardProps) => {
   const { t } = useTranslation();
   const progress = useDebtProgress(debt);
   const Icon = ICON_BY_KIND[debt.kind];
@@ -68,9 +68,6 @@ const DebtCard = ({ debt, onClick }: Props) => {
     </SurfaceCard>
   );
 };
-
-export default DebtCard;
-
 // --- Helpers ---
 
 type TranslateFunction = (

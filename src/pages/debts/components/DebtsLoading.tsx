@@ -5,7 +5,7 @@ import LoadingScreen from '@/common/ui/loading-screen';
 
 const ROWS = ['w-2/5', 'w-1/2', 'w-1/3'] as const;
 
-const DebtsLoadingState = () => {
+export const DebtsLoading = () => {
   const { t } = useTranslation();
 
   return (
@@ -34,5 +34,3 @@ const DebtsLoadingState = () => {
     </LoadingScreen>
   );
 };
-
-export default DebtsLoadingState;

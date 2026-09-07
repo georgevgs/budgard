@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { cn, formatCurrency } from '@/constants/utils';
 import { type Account, isLiability } from '@/types/Account';
 import Wallet from 'lucide-react/dist/esm/icons/wallet';
@@ -15,13 +15,13 @@ import type { AccountBalance } from '@/types/AccountBalance';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { getColorTint } from '@/constants/categoryColor';
 
-type Props = {
+type AccountCardProps = {
   account: Account;
   latestSnapshot?: AccountBalance;
   onClick: (account: Account) => void;
 };
 
-const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
+export const AccountCard = ({ account, latestSnapshot, onClick }: AccountCardProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const liability = isLiability(account.kind);
@@ -72,9 +72,6 @@ const AccountCard = ({ account, latestSnapshot, onClick }: Props) => {
     </SurfaceCard>
   );
 };
-
-export default AccountCard;
-
 // --- Helpers ---
 
 type TranslateFunction = (

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
 // Keeps browser history, assistive technology and the visible route in sync.
-const RouteMetadata = () => {
+export const RouteMetadata = () => {
   const { pathname } = useLocation();
   const { t } = useTranslation();
   const pageTitle = resolvePageTitle(pathname, t);
@@ -26,9 +26,6 @@ const RouteMetadata = () => {
     </span>
   );
 };
-
-export default RouteMetadata;
-
 // --- Helpers ---
 
 type TFunc = (key: string) => string;

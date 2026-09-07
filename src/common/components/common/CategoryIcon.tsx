@@ -29,7 +29,7 @@ import Undo2 from 'lucide-react/dist/esm/icons/undo-2';
 import Utensils from 'lucide-react/dist/esm/icons/utensils';
 import { cn } from '@/constants/utils';
 
-type Props = {
+type CategoryIconProps = {
   icon: string | null | undefined;
   className?: string;
 };
@@ -37,16 +37,13 @@ type Props = {
 // Categories are still stored as the user's existing emoji value, but they
 // render through one coherent SVG family. This keeps old data compatible while
 // avoiding platform-dependent emoji weight, alignment and colour.
-const CategoryIcon = ({ icon, className }: Props) => {
+export const CategoryIcon = ({ icon, className }: CategoryIconProps) => {
   return createElement(resolveIcon(icon), {
     'aria-hidden': true,
     className: cn('h-4 w-4 shrink-0', className),
     strokeWidth: 1.8,
   });
 };
-
-export default CategoryIcon;
-
 // --- Helpers ---
 
 const ICONS_BY_VALUE: Record<string, LucideIcon> = {

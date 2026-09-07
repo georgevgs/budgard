@@ -8,7 +8,7 @@ const ROWS = [
   { desc: 'w-1/3', badge1: 'w-18', badge2: 'w-16', amount: 'w-14' },
 ] as const;
 
-const RecurringLoadingState = () => {
+export const RecurringLoading = () => {
   const { t } = useTranslation();
 
   return (
@@ -50,5 +50,3 @@ const RecurringLoadingState = () => {
     </LoadingScreen>
   );
 };
-
-export default RecurringLoadingState;

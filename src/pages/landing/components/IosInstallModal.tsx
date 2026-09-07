@@ -7,7 +7,7 @@ import {
   DialogDescription,
 } from '@/common/ui/dialog';
 
-type Props = {
+type IosInstallModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
@@ -16,7 +16,7 @@ const BOLD_COMPONENTS = {
   strong: <span className="font-semibold text-foreground" />,
 };
 
-export const IosInstallModal = ({ open, onOpenChange }: Props) => {
+export const IosInstallModal = ({ open, onOpenChange }: IosInstallModalProps) => {
   const { t } = useTranslation();
 
   return (

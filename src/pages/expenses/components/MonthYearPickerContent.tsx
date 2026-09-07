@@ -7,19 +7,19 @@ import { Button } from '@/common/ui/button';
 import { PopoverContent } from '@/common/ui/popover';
 import { cn } from '@/constants/utils';
 
-type Props = {
+type MonthYearPickerContentProps = {
   selectedDate: Date;
   dateLocale: Locale | undefined;
   onYearChange: (direction: 'prev' | 'next') => void;
   onMonthSelect: (month: number) => void;
 };
 
-const MonthYearPickerContent = ({
+export const MonthYearPickerContent = ({
   selectedDate,
   dateLocale,
   onYearChange,
   onMonthSelect,
-}: Props) => {
+}: MonthYearPickerContentProps) => {
   const { t } = useTranslation();
   const currentYear = selectedDate.getFullYear();
   const currentMonth = selectedDate.getMonth();
@@ -69,5 +69,3 @@ const MonthYearPickerContent = ({
     </PopoverContent>
   );
 };
-
-export default MonthYearPickerContent;

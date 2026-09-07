@@ -1,9 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import BentoTile from '@/common/components/bento/BentoTile';
-import TileLabel from '@/common/components/bento/TileLabel';
 import { formatCurrency } from '@/constants/utils';
+import { BentoTile, TileLabel } from '@/common/components/bento';
 
-type Props = {
+type BudgetUsedTileProps = {
   spentThisMonth: number;
   monthlyBudget: number | null;
   currency: string;
@@ -21,7 +20,7 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 // display face's cap height — the old `y="47"` guessed low and left the number
 // sitting a few pixels above the middle of the circle. Flex centring a span
 // over the square is exact and stays exact if the face or the size changes.
-const BudgetUsedTile = ({ spentThisMonth, monthlyBudget, currency }: Props) => {
+export const BudgetUsedTile = ({ spentThisMonth, monthlyBudget, currency }: BudgetUsedTileProps) => {
   const { t } = useTranslation();
   const percent = resolvePercent(spentThisMonth, monthlyBudget);
 
@@ -67,9 +66,6 @@ const BudgetUsedTile = ({ spentThisMonth, monthlyBudget, currency }: Props) => {
     </BentoTile>
   );
 };
-
-export default BudgetUsedTile;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

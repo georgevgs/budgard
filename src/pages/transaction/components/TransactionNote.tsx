@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import { Textarea } from '@/common/ui/textarea';
 
-type Props = {
+type TransactionNoteProps = {
   value: string;
   isDirty: boolean;
   onChange: (value: string) => void;
@@ -14,7 +14,7 @@ type Props = {
 // field made the detail screen look unfinished and pushed the useful context
 // below it; the summary keeps that space proportional to what is actually in
 // the transaction.
-const TransactionNote = ({ value, isDirty, onChange, onSave }: Props) => {
+export const TransactionNote = ({ value, isDirty, onChange, onSave }: TransactionNoteProps) => {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
 
@@ -57,9 +57,6 @@ const TransactionNote = ({ value, isDirty, onChange, onSave }: Props) => {
     </section>
   );
 };
-
-export default TransactionNote;
-
 // --- Helpers ---
 
 type TFunc = (key: string) => string;

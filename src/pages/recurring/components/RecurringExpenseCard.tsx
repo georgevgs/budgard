@@ -1,9 +1,9 @@
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Switch } from '@/common/ui/switch';
 import { Badge } from '@/common/ui/badge';
 import Clock from 'lucide-react/dist/esm/icons/clock';
-import RecurringExpenseCardActions from '@/pages/recurring/components/RecurringExpenseCardActions';
-import CategoryBadge from '@/pages/categories/components/CategoryBadge';
+import { RecurringExpenseCardActions } from '@/pages/recurring/components/RecurringExpenseCardActions';
+import { CategoryBadge } from '@/pages/categories/components/CategoryBadge';
 import { format } from 'date-fns';
 import type { Locale } from 'date-fns';
 import { cn, formatCurrency } from '@/constants/utils';
@@ -21,7 +21,7 @@ type RecurringExpenseCardProps = {
   onToggle: (id: string, active: boolean) => void;
 };
 
-const RecurringExpenseCard = ({
+export const RecurringExpenseCard = ({
   expense,
   nextOccurrence,
   isOverdue,
@@ -78,9 +78,6 @@ const RecurringExpenseCard = ({
     </SurfaceCard>
   );
 };
-
-export default RecurringExpenseCard;
-
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 type TranslateFunction = (

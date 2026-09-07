@@ -5,12 +5,12 @@ import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
 import Target from 'lucide-react/dist/esm/icons/target';
 import Wallet from 'lucide-react/dist/esm/icons/wallet';
-import PageHeader from '@/common/components/common/PageHeader';
-import { ExpenseLoadingState } from '@/pages/expenses/components/ExpensesLoading';
-import PlanOverviewCard from '@/pages/plan/components/PlanOverviewCard';
-import MonthlyDecisionCard from '@/pages/plan/components/MonthlyDecisionCard';
-import PlanDetails from '@/pages/plan/components/PlanDetails';
-import PlanTimeline from '@/pages/plan/components/PlanTimeline';
+import { PageHeader } from '@/common/components/common/PageHeader';
+import { TransactionsLoading } from '@/common/components/common/TransactionsLoading';
+import { PlanOverviewCard } from '@/pages/plan/components/PlanOverviewCard';
+import { MonthlyDecisionCard } from '@/pages/plan/components/MonthlyDecisionCard';
+import { PlanDetails } from '@/pages/plan/components/PlanDetails';
+import { PlanTimeline } from '@/pages/plan/components/PlanTimeline';
 import {
   useAccountsData,
   useDataConfig,
@@ -221,5 +221,5 @@ const renderLoading = (showSkeleton: boolean) => {
     return null;
   }
 
-  return <ExpenseLoadingState />;
+  return <TransactionsLoading />;
 };

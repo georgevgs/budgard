@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
-import Reveal from '@/pages/landing/components/Reveal';
+import { Reveal } from '@/pages/landing/components/Reveal';
 
-type Props = {
+type FinalCtaProps = {
   onGetStarted: () => void;
 };
 
-const FinalCta = ({ onGetStarted }: Props) => {
+export const FinalCta = ({ onGetStarted }: FinalCtaProps) => {
   const { t } = useTranslation();
 
   return (
@@ -35,5 +35,3 @@ const FinalCta = ({ onGetStarted }: Props) => {
     </section>
   );
 };
-
-export default FinalCta;

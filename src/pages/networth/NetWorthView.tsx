@@ -12,17 +12,17 @@ import {
 } from '@/pages/networth/hooks/useGroupedAccounts';
 import { type Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
-import PageHeader from '@/common/components/common/PageHeader';
-import NetWorthHeader from '@/pages/networth/components/NetWorthHeader';
-import NetWorthEmpty from '@/pages/networth/components/NetWorthEmpty';
-import NetWorthLoadingState from '@/pages/networth/components/NetWorthLoading';
+import { PageHeader } from '@/common/components/common/PageHeader';
+import { NetWorthHeader } from '@/pages/networth/components/NetWorthHeader';
+import { NetWorthEmpty } from '@/pages/networth/components/NetWorthEmpty';
+import { NetWorthLoading } from '@/pages/networth/components/NetWorthLoading';
 import { useDelayedLoading } from '@/common/hooks/useDelayedLoading';
-import NetWorthChart from '@/pages/networth/components/NetWorthChart';
-import InvestmentAllocationCard from '@/pages/networth/components/InvestmentAllocationCard';
-import AccountGroup from '@/pages/networth/components/AccountGroup';
-import AccountForm from '@/pages/networth/components/AccountForm';
-import AccountDetailSheet from '@/pages/networth/components/AccountDetailSheet';
-import ProUpsellCard from '@/pages/pro/components/ProUpsellCard';
+import { NetWorthChart } from '@/pages/networth/components/NetWorthChart';
+import { InvestmentAllocationCard } from '@/pages/networth/components/InvestmentAllocationCard';
+import { AccountGroup } from '@/pages/networth/components/AccountGroup';
+import { AccountForm } from '@/pages/networth/components/AccountForm';
+import { AccountDetailSheet } from '@/pages/networth/components/AccountDetailSheet';
+import { ProUpsellCard } from '@/pages/pro/components/ProUpsellCard';
 import type { NetWorthSummary, NetWorthPoint } from '@/common/hooks/useNetWorth';
 
 const NetWorthView = () => {
@@ -124,7 +124,7 @@ const renderLoading = (showSkeleton: boolean) => {
     return null;
   }
 
-  return <NetWorthLoadingState />;
+  return <NetWorthLoading />;
 };
 
 type TranslateFunction = (

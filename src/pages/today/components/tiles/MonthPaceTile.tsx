@@ -1,17 +1,16 @@
 import { useTranslation } from 'react-i18next';
-import BentoTile from '@/common/components/bento/BentoTile';
-import TileLabel from '@/common/components/bento/TileLabel';
 import { cn } from '@/constants/utils';
 import type { DailyPace, PaceDay } from '@/pages/today/hooks/useDailyPace';
+import { BentoTile, TileLabel } from '@/common/components/bento';
 
-type Props = {
+type MonthPaceTileProps = {
   pace: DailyPace;
 };
 
 // Seven days, one bar each, the ones that ran hot in the accent. Where the
 // ring next to it answers "how much of the plan is gone", this answers the
 // question that follows: "and was that steady, or was it one bad Saturday".
-const MonthPaceTile = ({ pace }: Props) => {
+export const MonthPaceTile = ({ pace }: MonthPaceTileProps) => {
   const { t } = useTranslation();
 
   return (
@@ -39,9 +38,6 @@ const MonthPaceTile = ({ pace }: Props) => {
     </BentoTile>
   );
 };
-
-export default MonthPaceTile;
-
 // --- Helpers ---
 
 // A day with nothing spent still gets a stub, so seven days always read as

@@ -6,7 +6,7 @@ import { isLockEnabled } from '@/constants/appLock';
 // switching to the banking app to check a figure does not.
 const AUTO_LOCK_MS = 60_000;
 
-export type AppLockState = {
+export type UseAppLockReturn = {
   isLocked: boolean;
   // True while the app is backgrounded, so amounts can be masked before the OS
   // takes its app-switcher screenshot.
@@ -24,7 +24,7 @@ export type AppLockState = {
  * is visible to anyone who double-taps home — before any lock screen would
  * have had a chance to appear.
  */
-export const useAppLock = (isSignedIn: boolean): AppLockState => {
+export const useAppLock = (isSignedIn: boolean): UseAppLockReturn => {
   // Locked from the first frame if a lock is set, so the app is never briefly
   // readable on a cold start while React works out whether it should be.
   const [isLocked, setIsLocked] = useState(() => isSignedIn && isLockEnabled());

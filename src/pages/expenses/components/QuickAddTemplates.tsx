@@ -1,16 +1,16 @@
-import TemplatesBar from '@/pages/expenses/components/TemplatesBar';
+import { TemplatesBar } from '@/pages/expenses/components/TemplatesBar';
 import { useDataConfig, useTemplatesData } from '@/common/contexts/DataContext';
 import { useTemplateOps } from '@/common/hooks/dataOps/useTemplateOps';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 
-type Props = {
+type QuickAddTemplatesProps = {
   onUse: (template: ExpenseTemplate) => void;
   onClose: () => void;
 };
 
 // A saved transaction is an entry shortcut, so it lives where transactions
 // are added. Activity can now stay focused on finding and reading the ledger.
-const QuickAddTemplates = ({ onUse, onClose }: Props) => {
+export const QuickAddTemplates = ({ onUse, onClose }: QuickAddTemplatesProps) => {
   const templates = useTemplatesData();
   const { defaultCurrency } = useDataConfig();
   const { handleTemplateDelete } = useTemplateOps();
@@ -35,5 +35,3 @@ const QuickAddTemplates = ({ onUse, onClose }: Props) => {
     </div>
   );
 };
-
-export default QuickAddTemplates;

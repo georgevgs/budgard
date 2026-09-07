@@ -16,7 +16,7 @@ import type { Expense } from '@/types/Expense';
 import { countsAsSpending, sumSpending } from '@/constants/spending';
 import type { Category } from '@/types/Category';
 
-type Props = {
+type MonthDrillDownProps = {
   isOpen: boolean;
   onClose: () => void;
   monthKey: string;
@@ -30,7 +30,7 @@ export const MonthDrillDown = ({
   monthKey,
   expenses,
   categories,
-}: Props) => {
+}: MonthDrillDownProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();

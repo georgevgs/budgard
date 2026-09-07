@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import Shapes from 'lucide-react/dist/esm/icons/shapes';
-import CategoryIcon from '@/common/components/common/CategoryIcon';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import {
   Select,
   SelectContent,
@@ -12,17 +12,17 @@ import { UNCATEGORIZED_VALUE } from '@/pages/activity/utils/expenseFilters';
 import { getColorTint } from '@/constants/categoryColor';
 import type { Category } from '@/types/Category';
 
-type Props = {
+type ActivityCategorySelectProps = {
   categories: Category[];
   selectedCategoryId: string | null;
   onChange: (categoryId: string | null) => void;
 };
 
-const ActivityCategorySelect = ({
+export const ActivityCategorySelect = ({
   categories,
   selectedCategoryId,
   onChange,
-}: Props) => {
+}: ActivityCategorySelectProps) => {
   const { t } = useTranslation();
 
   const handleChange = (value: string) => {
@@ -61,9 +61,6 @@ const ActivityCategorySelect = ({
     </Select>
   );
 };
-
-export default ActivityCategorySelect;
-
 // --- Helpers ---
 
 const renderCategoryOption = (category: Category) => (

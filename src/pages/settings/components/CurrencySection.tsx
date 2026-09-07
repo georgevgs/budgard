@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
-import ConfirmDestructiveDialog from '@/common/components/common/ConfirmDestructiveDialog';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
+import { ConfirmDestructiveDialog } from '@/common/components/common/ConfirmDestructiveDialog';
 import {
   Select,
   SelectContent,
@@ -17,7 +17,7 @@ import { SUPPORTED_CURRENCIES } from '@/constants/currencies';
 // whole ledger restated by a factor of ~160 in one tap. The numbers are the
 // user's to keep or re-enter, but the consequence has to be stated before it
 // happens rather than discovered afterwards.
-const CurrencySection = () => {
+export const CurrencySection = () => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const currency = useCurrencyChange();
@@ -71,5 +71,3 @@ const CurrencySection = () => {
     </section>
   );
 };
-
-export default CurrencySection;

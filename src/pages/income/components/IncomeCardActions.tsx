@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
-import ScrollSafeDropdownMenuTrigger from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
-import ConfirmDestructiveDialog from '@/common/components/common/ConfirmDestructiveDialog';
+import { ScrollSafeDropdownMenuTrigger } from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
+import { ConfirmDestructiveDialog } from '@/common/components/common/ConfirmDestructiveDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,41 +14,41 @@ import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+type IncomeCardActionsProps = {
   income: Expense;
   onEdit: (income: Expense) => void;
   onDelete: (id: string) => void;
 };
 
-const IncomeCardActions = ({ income, onEdit, onDelete }: Props) => {
+export const IncomeCardActions = ({ income, onEdit, onDelete }: IncomeCardActionsProps) => {
   const { t } = useTranslation();
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleDeleteClick = () => {
     blurActiveElement();
-    setMenuOpen(false);
-    setTimeout(() => setShowDeleteDialog(true), 0);
+    setIsMenuOpen(false);
+    setTimeout(() => setIsDeleteDialogOpen(true), 0);
   };
 
   const handleEditClick = () => {
     blurActiveElement();
-    setMenuOpen(false);
+    setIsMenuOpen(false);
     setTimeout(() => onEdit(income), 0);
   };
 
   const handleConfirmDelete = () => {
     onDelete(income.id);
-    setShowDeleteDialog(false);
+    setIsDeleteDialogOpen(false);
   };
 
   return (
     <>
-      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <ScrollSafeDropdownMenuTrigger
           asChild
-          isOpen={menuOpen}
-          onOpenChange={setMenuOpen}
+          isOpen={isMenuOpen}
+          onOpenChange={setIsMenuOpen}
         >
           <Button
             variant="ghost"
@@ -73,19 +73,16 @@ const IncomeCardActions = ({ income, onEdit, onDelete }: Props) => {
       </DropdownMenu>
 
       <ConfirmDestructiveDialog
-        open={showDeleteDialog}
+        open={isDeleteDialogOpen}
         title={t('income.deleteTitle')}
         description={t('income.deleteConfirmation') + t('common.actionUndone')}
         confirmLabel={t('common.delete')}
-        onOpenChange={setShowDeleteDialog}
+        onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleConfirmDelete}
       />
     </>
   );
 };
-
-export default IncomeCardActions;
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 type TranslateFunction = (

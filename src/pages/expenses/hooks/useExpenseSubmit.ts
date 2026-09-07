@@ -14,7 +14,7 @@ type UseExpenseSubmitArgs = {
   expense: Expense | undefined;
   conversion: CurrencyConversionApi;
   receiptFile: File | null;
-  removeExistingReceipt: boolean;
+  shouldRemoveExistingReceipt: boolean;
   onSubmit: (
     data: ExpenseWritePayload,
     expenseId?: string,
@@ -27,7 +27,7 @@ export const useExpenseSubmit = ({
   expense,
   conversion,
   receiptFile,
-  removeExistingReceipt,
+  shouldRemoveExistingReceipt,
   onSubmit,
   onClose,
 }: UseExpenseSubmitArgs) => {
@@ -66,7 +66,7 @@ export const useExpenseSubmit = ({
 
       onSubmit(expenseData, expense?.id, {
         receiptFile,
-        removeExistingReceipt,
+        shouldRemoveExistingReceipt,
         existingReceiptPath: expense?.receipt_path ?? null,
       });
       onClose();

@@ -1,16 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import BrandMark from '@/common/components/common/BrandMark';
-import TileLabel from '@/common/components/bento/TileLabel';
+import { BrandMark } from '@/common/components/common/BrandMark';
+import { TileLabel } from '@/common/components/bento';
 
-type Props = {
+type FooterProps = {
   currentLang: string;
   onChangeLanguage: (lang: string) => void;
 };
 
 type Tx = (key: string, opts?: Record<string, unknown>) => string;
 
-const Footer = ({ currentLang, onChangeLanguage }: Props) => {
+export const Footer = ({ currentLang, onChangeLanguage }: FooterProps) => {
   const { t } = useTranslation();
 
   return (
@@ -27,9 +27,6 @@ const Footer = ({ currentLang, onChangeLanguage }: Props) => {
     </footer>
   );
 };
-
-export default Footer;
-
 const renderBrandColumn = (t: Tx) => (
   <div>
     <div className="flex items-center gap-2.5">

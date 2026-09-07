@@ -1,12 +1,12 @@
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import CartesianChart from '@/common/components/charts/CartesianChart';
+import { CartesianChart } from '@/common/components/charts/CartesianChart';
 import type { ChartPoint, Series } from '@/common/components/charts/chartTypes';
 import { ChartTooltipRow } from '@/common/components/common/ChartTooltip';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { ProjectionMonth } from '@/constants/forecast';
 
-type Props = {
+type ForecastChartProps = {
   data: ProjectionMonth[];
   currencySymbol: string;
   currency: string;
@@ -16,12 +16,12 @@ type Props = {
   hasBalance: boolean;
 };
 
-const ForecastChart = ({
+const ForecastChartComponent = ({
   data,
   currencySymbol,
   currency,
   hasBalance,
-}: Props) => {
+}: ForecastChartProps) => {
   const { t } = useTranslation();
 
   // The flow lines are dashed: those values are modelled, not measured, and a
@@ -54,8 +54,8 @@ const ForecastChart = ({
       xKey="label"
       series={series}
       height={288}
-      showLegend
-      allowNegative={hasBalance}
+      shouldShowLegend
+      shouldAllowNegative={hasBalance}
       reference={buildZeroLine(hasBalance, t)}
       formatY={(value) => `${Math.round(value)}${currencySymbol}`}
       renderTooltip={(point) => renderTooltip(point, currency, t)}
@@ -64,8 +64,8 @@ const ForecastChart = ({
   );
 };
 
-export default memo(ForecastChart);
-
+// Memoised: the parent re-renders on every data mutation, this subtree does not.
+export const ForecastChart = memo(ForecastChartComponent);
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

@@ -15,14 +15,14 @@ import { Form } from '@/common/ui/form';
 import { useCategorySubmit } from '@/pages/categories/hooks/useCategorySubmit';
 import { categorySchema, type CategoryFormData } from '@/pages/categories/validations';
 import type { Category } from '@/types/Category';
-import CategoryFormFields from '@/pages/categories/components/CategoryFormFields';
+import { CategoryFormFields } from '@/pages/categories/components/CategoryFormFields';
 import { type SelectableCategoryKind } from '@/pages/categories/components/CategoryKindSelector';
 import { swatch } from '@/design/palette';
 
 const DEFAULT_CATEGORY_COLOR = swatch.violet;
 const DEFAULT_INCOME_COLOR = swatch.mint;
 
-type Props = {
+type CategoryFormProps = {
   category?: Category;
   // For new categories: what type to create. Defaults to 'expense'.
   // For existing categories: ignored (we preserve the row's original type).
@@ -31,12 +31,12 @@ type Props = {
   onClose: () => void;
 };
 
-const CategoryForm = ({
+export const CategoryForm = ({
   category,
   categoryType = 'expense',
   onBack,
   onClose,
-}: Props) => {
+}: CategoryFormProps) => {
   const { t } = useTranslation();
 
   const isEditing = Boolean(category);
@@ -117,9 +117,6 @@ const CategoryForm = ({
     </div>
   );
 };
-
-export default CategoryForm;
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 type TranslateFunction = (

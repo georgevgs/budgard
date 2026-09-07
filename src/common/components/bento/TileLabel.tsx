@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/constants/utils';
 
-type Props = {
+type TileLabelProps = {
   children: ReactNode;
   className?: string;
 };
@@ -10,8 +10,6 @@ type Props = {
 // a heading size. The module's number is the heading; this is the caption that
 // says what the number is. The colour flips on its own inside a slab or an ink
 // tile (see `.tile-label` in index.css).
-const TileLabel = ({ children, className }: Props) => {
+export const TileLabel = ({ children, className }: TileLabelProps) => {
   return <p className={cn('tile-label', className)}>{children}</p>;
 };
-
-export default TileLabel;

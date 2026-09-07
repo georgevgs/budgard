@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import { formatCurrency } from '@/constants/utils';
 
-type Props = {
+type ActivitySummaryProps = {
   count: number;
   expenseTotal: number;
   incomeTotal: number;
@@ -12,12 +12,12 @@ type Props = {
 // The transaction list's own heading. Spent and received ride along with the
 // count instead of waiting behind a tap; only the net change — which needs
 // both figures held against each other — stays behind the disclosure.
-const ActivitySummary = ({
+export const ActivitySummary = ({
   count,
   expenseTotal,
   incomeTotal,
   currency,
-}: Props) => {
+}: ActivitySummaryProps) => {
   const { t } = useTranslation();
   const net = incomeTotal - expenseTotal;
 
@@ -53,9 +53,6 @@ const ActivitySummary = ({
     </details>
   );
 };
-
-export default ActivitySummary;
-
 // --- Helpers ---
 
 const getNetPrefix = (net: number): string => {

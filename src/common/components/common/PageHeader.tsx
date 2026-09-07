@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import BackButton from '@/common/components/common/BackButton';
+import { BackButton } from '@/common/components/common/BackButton';
 import { isSecondaryPath } from '@/constants/routes';
 
-type Props = {
+type PageHeaderProps = {
   title: string;
   /** Optional line under the title — context, never a second instruction. */
   subtitle?: string;
@@ -20,7 +20,7 @@ type Props = {
 //
 // The way back is not a slot the caller fills. It is decided from the route,
 // so a screen cannot ship without one by forgetting to pass it.
-const PageHeader = ({ title, subtitle, action }: Props) => {
+export const PageHeader = ({ title, subtitle, action }: PageHeaderProps) => {
   const { pathname } = useLocation();
 
   return (
@@ -34,9 +34,6 @@ const PageHeader = ({ title, subtitle, action }: Props) => {
     </div>
   );
 };
-
-export default PageHeader;
-
 // --- Helpers ---
 
 const renderBack = (pathname: string) => {

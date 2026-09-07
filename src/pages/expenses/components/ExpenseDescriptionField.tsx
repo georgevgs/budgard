@@ -17,12 +17,12 @@ import { renderSuggestionMeta } from '@/pages/expenses/components/ExpensesForm.h
 import type { DescriptionSuggestionsApi } from '@/pages/expenses/hooks/useDescriptionSuggestions';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
 
-type Props = {
+type ExpenseDescriptionFieldProps = {
   form: UseFormReturn<ExpenseFormData>;
   suggestions: DescriptionSuggestionsApi;
 };
 
-const ExpenseDescriptionField = ({ form, suggestions }: Props) => {
+export const ExpenseDescriptionField = ({ form, suggestions }: ExpenseDescriptionFieldProps) => {
   const { t } = useTranslation();
 
   return (
@@ -34,7 +34,7 @@ const ExpenseDescriptionField = ({ form, suggestions }: Props) => {
           <FormLabel>{t('expenses.descriptionLabel')}</FormLabel>
           <Popover
             open={suggestions.isPopoverOpen}
-            onOpenChange={suggestions.setSuggestionsOpen}
+            onOpenChange={suggestions.setAreSuggestionsOpen}
             modal={false}
           >
             <PopoverAnchor asChild>
@@ -44,9 +44,9 @@ const ExpenseDescriptionField = ({ form, suggestions }: Props) => {
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
-                    suggestions.setSuggestionsOpen(true);
+                    suggestions.setAreSuggestionsOpen(true);
                   }}
-                  onFocus={() => suggestions.setSuggestionsOpen(true)}
+                  onFocus={() => suggestions.setAreSuggestionsOpen(true)}
                   autoComplete="off"
                   className="text-ellipsis"
                 />
@@ -56,7 +56,7 @@ const ExpenseDescriptionField = ({ form, suggestions }: Props) => {
               className="w-(--radix-popover-trigger-width) p-0"
               align="start"
               onOpenAutoFocus={(e) => e.preventDefault()}
-              onInteractOutside={() => suggestions.setSuggestionsOpen(false)}
+              onInteractOutside={() => suggestions.setAreSuggestionsOpen(false)}
             >
               <div className="max-h-[200px] overflow-y-auto">
                 {suggestions.filteredSuggestions.map((suggestion) => (
@@ -82,5 +82,3 @@ const ExpenseDescriptionField = ({ form, suggestions }: Props) => {
     />
   );
 };
-
-export default ExpenseDescriptionField;

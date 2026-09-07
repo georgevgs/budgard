@@ -1,0 +1,79 @@
+import { describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+
+vi.mock('@/common/components/layout/SpeedDial', () => ({ SpeedDial: () => <div data-testid="speed-dial" />,
+}));
+
+vi.mock('@/common/components/layout/FormsManager', () => ({ FormsManager: () => null }));
+vi.mock('@/pages/expenses/components/QuickAddSheet', () => ({ QuickAddSheet: () => null }));
+vi.mock('@/pages/income/components/IncomeFormDialog', () => ({ IncomeFormDialog: () => null,
+}));
+
+vi.mock('@/common/contexts/DataContext', () => ({
+  useDataConfig: () => ({ isInitialized: true, defaultCurrency: 'EUR' }),
+  // The quick-add sheet ranks category chips by recent use, so the provider
+  // now pulls both of these through.
+  useCategoriesData: () => ({ expenseCategories: [] }),
+  useExpensesData: () => [],
+}));
+
+vi.mock('@/common/hooks/dataOps/useIncomeOps', () => ({
+  useIncomeOps: () => ({ handleIncomeDelete: vi.fn() }),
+}));
+
+vi.mock('@/pages/expenses/hooks/useOpenFormFromUrl', () => ({
+  useOpenFormFromUrl: () => undefined,
+}));
+
+vi.mock('@/pages/expenses/hooks/useOptimisticExpenseActions', () => ({
+  useOptimisticExpenseActions: () => ({
+    optimisticExpenses: [],
+    handleExpenseDelete: vi.fn(),
+    handleExpenseFormSubmit: vi.fn(),
+    handleSaveAsTemplate: vi.fn(),
+    handleUseTemplate: vi.fn(),
+  }),
+}));
+
+import { QuickAddProvider } from '@/common/contexts/QuickAddProvider';
+
+const renderAt = (path: string) =>
+  render(
+    <MemoryRouter initialEntries={[path]}>
+      <QuickAddProvider>
+        <div />
+      </QuickAddProvider>
+    </MemoryRouter>,
+  );
+
+describe('contexts/QuickAddProvider', () => {
+  it('offers the quick-add button on the transaction screens', () => {
+    for (const path of ['/today', '/activity']) {
+      const view = renderAt(path);
+
+      expect(view.getByTestId('speed-dial')).toBeInTheDocument();
+      view.unmount();
+    }
+  });
+
+  // Being a tab is not the test — owning the action is. Plan is where you set
+  // a budget, Trends is a report, Settings logs nothing, and the last four
+  // each own a different add button that would collide in the same dock slot.
+  it('stays off screens whose primary action is not logging a transaction', () => {
+    for (const path of [
+      '/plan',
+      '/trends',
+      '/settings',
+      '/networth',
+      '/debts',
+      '/goals',
+      '/recurring',
+    ]) {
+      const view = renderAt(path);
+
+      expect(screen.queryByTestId('speed-dial')).toBeNull();
+      view.unmount();
+    }
+  });
+});

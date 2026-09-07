@@ -16,7 +16,7 @@ import { useRefundDialog } from '@/pages/expenses/hooks/useRefundDialog';
 import { formatCurrency } from '@/constants/utils';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+type RefundExpenseDialogProps = {
   expense: Expense;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -26,7 +26,7 @@ type Props = {
 // totals, budgets and analytics all net out without special cases. The row
 // carries refunded_expense_id, which is both the audit trail back to the
 // charge and what makes "how much is still refundable" answerable.
-const RefundExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
+export const RefundExpenseDialog = ({ expense, open, onOpenChange }: RefundExpenseDialogProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();
@@ -97,9 +97,6 @@ const RefundExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
     </Dialog>
   );
 };
-
-export default RefundExpenseDialog;
-
 // --- Helpers ---
 
 type TranslateFunction = (

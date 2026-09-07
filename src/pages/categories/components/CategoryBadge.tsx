@@ -20,7 +20,7 @@ type CategoryBadgeProps = {
 //
 // The emoji comes with it, because that is what identifies a category at a
 // glance everywhere else now — the rows, the breakdown, the hero.
-const CategoryBadge = ({
+export const CategoryBadge = ({
   category,
   className,
 }: CategoryBadgeProps): ReactElement => {
@@ -37,9 +37,6 @@ const CategoryBadge = ({
     </div>
   );
 };
-
-export default CategoryBadge;
-
 // --- Helpers ---
 
 const getBadgeStyle = (color: string): CSSProperties => {

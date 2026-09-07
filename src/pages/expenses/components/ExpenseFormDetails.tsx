@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next';
 import type { UseFormReturn } from 'react-hook-form';
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import { cn } from '@/constants/utils';
-import ExpenseTagField from '@/pages/expenses/components/ExpenseTagField';
-import ReceiptUpload from '@/pages/expenses/components/ReceiptUpload';
+import { ExpenseTagField } from '@/pages/expenses/components/ExpenseTagField';
+import { ReceiptUpload } from '@/pages/expenses/components/ReceiptUpload';
 import {
   getDetailsRowsClass,
   renderDetailsToggleLabel,
@@ -12,10 +12,10 @@ import type { TagPickerApi } from '@/pages/expenses/hooks/useTagPicker';
 import { useReceiptScan } from '@/pages/expenses/hooks/useReceiptScan';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
 
-type Props = {
+type ExpenseFormDetailsProps = {
   form: UseFormReturn<ExpenseFormData>;
   tagPicker: TagPickerApi;
-  showDetails: boolean;
+  shouldShowDetails: boolean;
   onToggleDetails: () => void;
   currentReceiptPath?: string | null;
   receiptFile: File | null;
@@ -24,17 +24,17 @@ type Props = {
   onRemoveExistingReceipt: () => void;
 };
 
-const ExpenseFormDetails = ({
+export const ExpenseFormDetails = ({
   form,
   tagPicker,
-  showDetails,
+  shouldShowDetails,
   onToggleDetails,
   currentReceiptPath,
   receiptFile,
   isRemovingReceipt,
   onReceiptSelect,
   onRemoveExistingReceipt,
-}: Props) => {
+}: ExpenseFormDetailsProps) => {
   const { t } = useTranslation();
   const scan = useReceiptScan({ form, receiptFile });
 
@@ -48,16 +48,16 @@ const ExpenseFormDetails = ({
         <ChevronDown
           className={cn(
             'h-4 w-4 transition-transform duration-200',
-            showDetails && 'rotate-180',
+            shouldShowDetails && 'rotate-180',
           )}
         />
-        {renderDetailsToggleLabel(showDetails, t)}
+        {renderDetailsToggleLabel(shouldShowDetails, t)}
       </button>
 
       <div
         className={cn(
           'grid transition-[grid-template-rows] duration-200',
-          getDetailsRowsClass(showDetails),
+          getDetailsRowsClass(shouldShowDetails),
         )}
       >
         <div className="overflow-hidden space-y-4">
@@ -76,5 +76,3 @@ const ExpenseFormDetails = ({
     </>
   );
 };
-
-export default ExpenseFormDetails;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Button } from '@/common/ui/button';
 import { Dialog, DialogContent } from '@/common/ui/dialog';
 import Plus from 'lucide-react/dist/esm/icons/plus';
@@ -9,10 +9,10 @@ import { useGoalsData, useDataConfig } from '@/common/contexts/DataContext';
 import { useGoalOps } from '@/common/hooks/dataOps/useGoalOps';
 import { useGoalSubmit } from '@/pages/goals/hooks/useGoalSubmit';
 import type { Goal } from '@/types/Goal';
-import GoalCard from '@/pages/goals/components/GoalCard';
-import GoalForm from '@/pages/goals/components/GoalForm';
-import PageHeader from '@/common/components/common/PageHeader';
-import GoalsLoadingState from '@/pages/goals/components/GoalsLoading';
+import { GoalCard } from '@/pages/goals/components/GoalCard';
+import { GoalForm } from '@/pages/goals/components/GoalForm';
+import { PageHeader } from '@/common/components/common/PageHeader';
+import { GoalsLoading } from '@/pages/goals/components/GoalsLoading';
 import { useDelayedLoading } from '@/common/hooks/useDelayedLoading';
 
 const GoalsList = () => {
@@ -102,7 +102,7 @@ const renderLoading = (showSkeleton: boolean) => {
     return null;
   }
 
-  return <GoalsLoadingState />;
+  return <GoalsLoading />;
 };
 
 type TranslateFunction = (

@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useExpensesData, useIncomesData } from '@/common/contexts/DataContext';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
-import YearPill from '@/pages/analytics/components/YearPill';
-import AnnualExportCard from '@/pages/analytics/components/AnnualExportCard';
-import ProUpsellCard from '@/pages/pro/components/ProUpsellCard';
+import { YearPill } from '@/pages/analytics/components/YearPill';
+import { AnnualExportCard } from '@/pages/analytics/components/AnnualExportCard';
+import { ProUpsellCard } from '@/pages/pro/components/ProUpsellCard';
 import { useOnDemandHistory } from '@/common/hooks/data/useOnDemandHistory';
 
 // An export utility, not a trend — it used to sit at the bottom of the
@@ -14,7 +14,7 @@ import { useOnDemandHistory } from '@/common/hooks/data/useOnDemandHistory';
 // Pro-only: useExpensesData/useIncomesData return full history regardless of
 // tier (the free-tier 3-month window is applied per-consumer, not in
 // DataContext), so this card must gate itself rather than inherit a limit.
-const AnnualExportSection = () => {
+export const AnnualExportSection = () => {
   const { t } = useTranslation();
   const { isPro } = useSubscription();
   const expenses = useExpensesData();
@@ -56,9 +56,6 @@ const AnnualExportSection = () => {
     />
   );
 };
-
-export default AnnualExportSection;
-
 // --- Helpers ---
 
 type YearedRow = { date: string };

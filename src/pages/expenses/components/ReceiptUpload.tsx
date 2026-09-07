@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import Camera from 'lucide-react/dist/esm/icons/camera';
 import X from 'lucide-react/dist/esm/icons/x';
 import { Button } from '@/common/ui/button';
-import ReceiptScanButton from '@/pages/expenses/components/ReceiptScanButton';
+import { ReceiptScanButton } from '@/pages/expenses/components/ReceiptScanButton';
 import { useReceiptUpload } from '@/pages/expenses/hooks/useReceiptUpload';
 import type { ReceiptScanApi } from '@/pages/expenses/hooks/useReceiptScan';
 
@@ -15,7 +15,7 @@ type ReceiptUploadProps = {
   scan: ReceiptScanApi;
 };
 
-const ReceiptUpload = ({
+export const ReceiptUpload = ({
   currentReceiptPath,
   selectedFile,
   isRemoving,
@@ -104,9 +104,6 @@ const ReceiptUpload = ({
     </div>
   );
 };
-
-export default ReceiptUpload;
-
 // --- Helpers ---
 
 type TranslateFunction = (key: string) => string;

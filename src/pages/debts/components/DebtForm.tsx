@@ -17,8 +17,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/common/ui/form';
-import DebtIdentityFields from '@/pages/debts/components/DebtIdentityFields';
-import DebtNumbersFields from '@/pages/debts/components/DebtNumbersFields';
+import { DebtIdentityFields } from '@/pages/debts/components/DebtIdentityFields';
+import { DebtNumbersFields } from '@/pages/debts/components/DebtNumbersFields';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useDebtSubmit } from '@/pages/debts/hooks/useDebtSubmit';
 import { getCurrencySymbol } from '@/constants/currencies';
@@ -30,12 +30,12 @@ import { swatch } from '@/design/palette';
 const DEFAULT_COLOR = swatch.rose;
 const DEFAULT_ICON = 'credit-card';
 
-type Props = {
+type DebtFormProps = {
   debt?: Debt;
   onClose: () => void;
 };
 
-const DebtForm = ({ debt, onClose }: Props) => {
+export const DebtForm = ({ debt, onClose }: DebtFormProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const isEditing = Boolean(debt);
@@ -118,9 +118,6 @@ const DebtForm = ({ debt, onClose }: Props) => {
     </>
   );
 };
-
-export default DebtForm;
-
 // --- Helpers ---
 
 type TranslateFunction = (

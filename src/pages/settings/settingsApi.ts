@@ -1,6 +1,28 @@
 import { supabase } from '@/config/supabase';
-import { maybeRow, row } from '@/config/supabaseCrud';
+import { done, maybeRow, row, rows } from '@/common/api/supabaseCrud';
 import type { Budget, NotificationPreferences, NotificationSettings } from '@/types/Budget';
+import type { FinancialConnection } from '@/types/FinancialConnection';
+
+export type PushSubscriptionPayload = {
+  userId: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+};
+
+// The connection row carries provider credentials the client must never read.
+// Naming the safe columns is what keeps a `select('*')` from leaking them.
+const SAFE_CONNECTION_COLUMNS = [
+  'id',
+  'user_id',
+  'provider',
+  'institution_name',
+  'status',
+  'last_synced_at',
+  'last_error_code',
+  'created_at',
+  'updated_at',
+].join(',');
 
 // Supabase queries for settings, at the feature root so an audit of what
 // this feature reads and writes is one file.
@@ -88,5 +110,41 @@ export const settingsApi = {
     if (signal) query = query.abortSignal(signal);
 
     return maybeRow<NotificationSettings>(query.maybeSingle());
+  },
+
+  async savePushSubscription({
+    userId,
+    endpoint,
+    p256dh,
+    auth,
+  }: PushSubscriptionPayload): Promise<void> {
+    await done(
+      supabase.from('push_subscriptions').upsert(
+        {
+          user_id: userId,
+          endpoint,
+          p256dh,
+          auth,
+        },
+        { onConflict: 'endpoint' },
+      ),
+    );
+  },
+
+  async removePushSubscription(endpoint: string): Promise<void> {
+    await done(
+      supabase.from('push_subscriptions').delete().eq('endpoint', endpoint),
+    );
+  },
+
+  async getFinancialConnections(ownerId: string, signal?: AbortSignal) {
+    let query = supabase
+      .from('financial_connections')
+      .select(SAFE_CONNECTION_COLUMNS)
+      .eq('user_id', ownerId)
+      .order('created_at');
+    if (signal) query = query.abortSignal(signal);
+
+    return rows<FinancialConnection>(query);
   },
 };

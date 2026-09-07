@@ -28,7 +28,7 @@ const FEATURES: Feature[] = [
   { key: 'f6', Icon: Sparkles },
 ];
 
-const PaywallFeatures = () => {
+export const PaywallFeatures = () => {
   const { t } = useTranslation();
 
   return (
@@ -39,9 +39,6 @@ const PaywallFeatures = () => {
     </ul>
   );
 };
-
-export default PaywallFeatures;
-
 // --- Helpers ---
 
 const renderFeature = ({ key, Icon }: Feature, label: string) => (

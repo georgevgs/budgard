@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useSettingsOps } from '@/common/hooks/dataOps/useSettingsOps';
 import { useTheme, type Theme } from '@/common/hooks/useTheme';
 import { useAccentColor, type AccentColorKey } from '@/pages/settings/hooks/useAccentColor';
-import { signOut } from '@/constants/auth';
+import { authApi } from '@/common/api/authApi';
 import { useToast } from '@/common/hooks/useToast';
 import { haptics, hapticsSettings } from '@/constants/haptics';
 import type { NotificationPreferenceKey } from '@/types/Budget';
@@ -20,14 +20,14 @@ export const useSettingsHandlers = () => {
   const { accent, setAccent } = useAccentColor();
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
-  const [hapticsEnabled, setHapticsEnabled] = useState<boolean>(() =>
+  const [areHapticsEnabled, setAreHapticsEnabled] = useState<boolean>(() =>
     hapticsSettings.isEnabled(),
   );
   const isHapticsSupported = hapticsSettings.isSupported();
 
   const handleHapticsToggle = (enabled: boolean) => {
     hapticsSettings.setEnabled(enabled);
-    setHapticsEnabled(enabled);
+    setAreHapticsEnabled(enabled);
     if (enabled) {
       haptics.success();
     }
@@ -94,7 +94,7 @@ export const useSettingsHandlers = () => {
 
   const handleSignOut = async () => {
     try {
-      await signOut();
+      await authApi.signOut();
     } catch {
       // Supabase clears local session even on network failure
     }
@@ -119,7 +119,7 @@ export const useSettingsHandlers = () => {
     theme,
     accent,
     isHapticsSupported,
-    hapticsEnabled,
+    areHapticsEnabled,
     isDeleting,
     handleHapticsToggle,
     handleThemeSelect,

@@ -27,11 +27,11 @@ const KINDS: ReadonlyArray<AccountKind> = [
   'other',
 ];
 
-type Props = {
+type AccountIdentityFieldsProps = {
   form: UseFormReturn<AccountFormData>;
 };
 
-const AccountIdentityFields = ({ form }: Props) => {
+export const AccountIdentityFields = ({ form }: AccountIdentityFieldsProps) => {
   const { t } = useTranslation();
 
   return (
@@ -104,5 +104,3 @@ const AccountIdentityFields = ({ form }: Props) => {
     </>
   );
 };
-
-export default AccountIdentityFields;

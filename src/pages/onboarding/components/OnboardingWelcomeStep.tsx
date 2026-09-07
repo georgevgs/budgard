@@ -8,11 +8,11 @@ import {
   DialogTitle,
 } from '@/common/ui/dialog';
 
-type Props = {
+type OnboardingWelcomeStepProps = {
   onNext: () => void;
 };
 
-const OnboardingWelcomeStep = ({ onNext }: Props) => {
+export const OnboardingWelcomeStep = ({ onNext }: OnboardingWelcomeStepProps) => {
   const { t } = useTranslation();
 
   return (
@@ -37,5 +37,3 @@ const OnboardingWelcomeStep = ({ onNext }: Props) => {
     </div>
   );
 };
-
-export default OnboardingWelcomeStep;

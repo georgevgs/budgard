@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-const SkipToContentLink = () => {
+export const SkipToContentLink = () => {
   const { t } = useTranslation();
 
   return (
@@ -12,5 +12,3 @@ const SkipToContentLink = () => {
     </a>
   );
 };
-
-export default SkipToContentLink;

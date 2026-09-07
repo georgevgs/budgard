@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Button } from '@/common/ui/button';
 import { cn } from '@/constants/utils';
 
-type Props = {
+type SpeedDialActionProps = {
   isOpen: boolean;
   label: string;
   icon: ReactNode;
@@ -10,13 +10,13 @@ type Props = {
   labelDelayClass?: string;
 };
 
-const SpeedDialAction = ({
+export const SpeedDialAction = ({
   isOpen,
   label,
   icon,
   onClick,
   labelDelayClass,
-}: Props) => {
+}: SpeedDialActionProps) => {
   return (
     <div className="flex items-center gap-2">
       <div className={getLabelClass(isOpen, labelDelayClass)}>
@@ -34,9 +34,6 @@ const SpeedDialAction = ({
     </div>
   );
 };
-
-export default SpeedDialAction;
-
 // --- Helpers ---
 
 const getTabIndex = (isOpen: boolean): number => {

@@ -11,12 +11,12 @@ import {
 import { DatePickerField } from '@/common/ui/date-picker-field';
 import type { IncomeFormData } from '@/pages/income/validations';
 
-type Props = {
+type IncomeDateFieldProps = {
   form: UseFormReturn<IncomeFormData>;
   dateLocale: Locale | undefined;
 };
 
-const IncomeDateField = ({ form, dateLocale }: Props) => {
+export const IncomeDateField = ({ form, dateLocale }: IncomeDateFieldProps) => {
   const { t } = useTranslation();
 
   return (
@@ -40,5 +40,3 @@ const IncomeDateField = ({ form, dateLocale }: Props) => {
     />
   );
 };
-
-export default IncomeDateField;

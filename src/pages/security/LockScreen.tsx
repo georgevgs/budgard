@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import Fingerprint from 'lucide-react/dist/esm/icons/fingerprint-pattern';
 import { Button } from '@/common/ui/button';
-import BrandMark from '@/common/components/common/BrandMark';
-import PinPad from '@/pages/security/components/PinPad';
+import { BrandMark } from '@/common/components/common/BrandMark';
+import { PinPad } from '@/pages/security/components/PinPad';
 import { useLockScreen } from '@/pages/security/hooks/useLockScreen';
 import { PIN_LENGTH } from '@/constants/appLock';
 import { cn } from '@/constants/utils';
 
-type Props = {
+type LockScreenProps = {
   onUnlock: () => void;
   onSignOut: () => void;
 };
@@ -15,7 +15,7 @@ type Props = {
 // Covers the whole app, above everything including dialogs. Deliberately not a
 // route: locking must not touch history, or the back button would walk out of
 // the lock and into whatever screen was underneath it.
-const LockScreen = ({ onUnlock, onSignOut }: Props) => {
+const LockScreen = ({ onUnlock, onSignOut }: LockScreenProps) => {
   const { t } = useTranslation();
   const lock = useLockScreen(onUnlock);
 

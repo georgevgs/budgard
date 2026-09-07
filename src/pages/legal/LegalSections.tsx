@@ -3,19 +3,16 @@ export type LegalSection = {
   paragraphs: string[];
 };
 
-type Props = {
+type LegalSectionsProps = {
   sections: LegalSection[];
 };
 
 // Renders the i18n-driven body of a legal page: numbered-free, scannable
 // sections with generous spacing between them (larger than within, so each
 // topic reads as its own group).
-const LegalSections = ({ sections }: Props) => (
+export const LegalSections = ({ sections }: LegalSectionsProps) => (
   <div className="mt-10 space-y-10">{sections.map(renderSection)}</div>
 );
-
-export default LegalSections;
-
 // --- Helpers ---
 
 const renderSection = (section: LegalSection) => (

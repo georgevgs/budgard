@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
-import ScrollSafeDropdownMenuTrigger from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
+import { ScrollSafeDropdownMenuTrigger } from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,64 +15,64 @@ import Receipt from 'lucide-react/dist/esm/icons/receipt';
 import Split from 'lucide-react/dist/esm/icons/split';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import Undo2 from 'lucide-react/dist/esm/icons/undo-2';
-import ExpenseDeleteDialog from '@/pages/expenses/components/ExpenseDeleteDialog';
-import ReceiptViewer from '@/pages/expenses/components/ReceiptViewer';
-import SplitExpenseDialog from '@/pages/expenses/components/SplitExpenseDialog';
-import RefundExpenseDialog from '@/pages/expenses/components/RefundExpenseDialog';
+import { ExpenseDeleteDialog } from '@/pages/expenses/components/ExpenseDeleteDialog';
+import { ReceiptViewer } from '@/pages/expenses/components/ReceiptViewer';
+import { SplitExpenseDialog } from '@/pages/expenses/components/SplitExpenseDialog';
+import { RefundExpenseDialog } from '@/pages/expenses/components/RefundExpenseDialog';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+type ExpensesCardActionsProps = {
   expense: Expense;
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
   onSaveAsTemplate?: (expense: Expense) => void;
 };
 
-const ExpensesCardActions = ({
+export const ExpensesCardActions = ({
   expense,
   onEdit,
   onDelete,
   onSaveAsTemplate,
-}: Props) => {
+}: ExpensesCardActionsProps) => {
   const { t } = useTranslation();
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [showReceipt, setShowReceipt] = useState(false);
-  const [showSplit, setShowSplit] = useState(false);
-  const [showRefund, setShowRefund] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isReceiptVisible, setIsReceiptVisible] = useState(false);
+  const [isSplitVisible, setIsSplitVisible] = useState(false);
+  const [isRefundVisible, setIsRefundVisible] = useState(false);
 
   const handleDeleteClick = () => {
     blurActiveElement();
-    setMenuOpen(false);
-    setTimeout(() => setShowDeleteDialog(true), 0);
+    setIsMenuOpen(false);
+    setTimeout(() => setIsDeleteDialogOpen(true), 0);
   };
 
   const handleSplitClick = () => {
     blurActiveElement();
-    setMenuOpen(false);
-    setTimeout(() => setShowSplit(true), 0);
+    setIsMenuOpen(false);
+    setTimeout(() => setIsSplitVisible(true), 0);
   };
 
   const handleRefundClick = () => {
     blurActiveElement();
-    setMenuOpen(false);
-    setTimeout(() => setShowRefund(true), 0);
+    setIsMenuOpen(false);
+    setTimeout(() => setIsRefundVisible(true), 0);
   };
 
   const handleEditClick = () => {
     blurActiveElement();
-    setMenuOpen(false);
+    setIsMenuOpen(false);
     setTimeout(() => onEdit(expense), 0);
   };
 
   const handleConfirmDelete = () => {
     onDelete(expense.id);
-    setShowDeleteDialog(false);
+    setIsDeleteDialogOpen(false);
   };
 
   const handleSaveAsTemplate = () => {
     blurActiveElement();
-    setMenuOpen(false);
+    setIsMenuOpen(false);
     if (onSaveAsTemplate) {
       setTimeout(() => onSaveAsTemplate(expense), 0);
     }
@@ -80,11 +80,11 @@ const ExpensesCardActions = ({
 
   return (
     <>
-      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <ScrollSafeDropdownMenuTrigger
           asChild
-          isOpen={menuOpen}
-          onOpenChange={setMenuOpen}
+          isOpen={isMenuOpen}
+          onOpenChange={setIsMenuOpen}
         >
           <Button
             variant="ghost"
@@ -100,7 +100,7 @@ const ExpensesCardActions = ({
           {renderTemplateMenuItem(onSaveAsTemplate, t, handleSaveAsTemplate)}
           {renderSplitMenuItem(expense, t, handleSplitClick)}
           {renderRefundMenuItem(expense, t, handleRefundClick)}
-          {renderReceiptMenuItem(expense, t, () => setShowReceipt(true))}
+          {renderReceiptMenuItem(expense, t, () => setIsReceiptVisible(true))}
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={handleDeleteClick}
@@ -114,20 +114,17 @@ const ExpensesCardActions = ({
 
       <ExpenseDeleteDialog
         expense={expense}
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleConfirmDelete}
       />
 
-      {renderReceiptViewer(expense, showReceipt, () => setShowReceipt(false))}
-      {renderSplitDialog(expense, showSplit, setShowSplit)}
-      {renderRefundDialog(expense, showRefund, setShowRefund)}
+      {renderReceiptViewer(expense, isReceiptVisible, () => setIsReceiptVisible(false))}
+      {renderSplitDialog(expense, isSplitVisible, setIsSplitVisible)}
+      {renderRefundDialog(expense, isRefundVisible, setIsRefundVisible)}
     </>
   );
 };
-
-export default ExpensesCardActions;
-
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 type TranslateFunction = (

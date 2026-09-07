@@ -6,11 +6,13 @@ import { formatCurrency, cn } from '@/constants/utils';
 import { getCurrencySymbol } from '@/constants/currencies';
 import { lazyWithRetry } from '@/constants/lazyWithRetry';
 
-const ForecastChart = lazyWithRetry(
-  () => import('@/pages/analytics/components/ForecastChart'),
-);
+const ForecastChart = lazyWithRetry(async () => {
+  const module = await import('@/pages/analytics/components/ForecastChart');
 
-const ForecastSection = () => {
+  return { default: module.ForecastChart };
+});
+
+export const ForecastSection = () => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const currencySymbol = getCurrencySymbol(defaultCurrency);
@@ -50,9 +52,6 @@ const ForecastSection = () => {
     </div>
   );
 };
-
-export default ForecastSection;
-
 // --- Helpers ---
 
 type TranslateFunction = (

@@ -1,9 +1,9 @@
 import { Suspense, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import AnalyticsLoadingState from '@/pages/analytics/components/AnalyticsLoading';
-import { ExpenseLoadingState } from '@/pages/expenses/components/ExpensesLoading';
-import RecurringLoadingState from '@/pages/recurring/components/RecurringLoading';
-import RouteFallback from '@/common/components/routing/RouteFallback';
+import { AnalyticsLoading } from '@/pages/analytics/components/AnalyticsLoading';
+import { TransactionsLoading } from '@/common/components/common/TransactionsLoading';
+import { RecurringLoading } from '@/pages/recurring/components/RecurringLoading';
+import { RouteFallback } from '@/common/components/routing/RouteFallback';
 import {
   ActivityView,
   AnalyticsView,
@@ -12,7 +12,7 @@ import {
 } from '@/common/components/routing/lazyRouteModules';
 import { isMainTabPath, type MainTabPath } from '@/constants/routes';
 
-const MainTabsLayout = () => {
+export const MainTabsLayout = () => {
   const { pathname } = useLocation();
   const [visited, setVisited] = useState<ReadonlySet<MainTabPath>>(
     () => new Set(),
@@ -27,36 +27,33 @@ const MainTabsLayout = () => {
         '/today',
         pathname,
         visited,
-        <ExpenseLoadingState />,
+        <TransactionsLoading />,
         <TodayView />,
       )}
       {renderTab(
         '/activity',
         pathname,
         visited,
-        <ExpenseLoadingState />,
+        <TransactionsLoading />,
         <ActivityView />,
       )}
       {renderTab(
         '/plan',
         pathname,
         visited,
-        <RecurringLoadingState />,
+        <RecurringLoading />,
         <PlanView />,
       )}
       {renderTab(
         '/trends',
         pathname,
         visited,
-        <AnalyticsLoadingState />,
+        <AnalyticsLoading />,
         <AnalyticsView />,
       )}
     </>
   );
 };
-
-export default MainTabsLayout;
-
 // --- Helpers ---
 
 const renderTab = (

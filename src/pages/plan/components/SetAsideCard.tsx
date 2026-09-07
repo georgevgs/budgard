@@ -7,13 +7,13 @@ import { formatCurrency } from '@/constants/utils';
 import type { SavingsRhythm } from '@/common/hooks/savings/useSavingsRhythm';
 import type { Goal } from '@/types/Goal';
 
-type Props = {
+type SetAsideCardProps = {
   rhythm: SavingsRhythm;
   goal: Goal;
   currency: string;
 };
 
-const SetAsideCard = ({ rhythm, goal, currency }: Props) => {
+export const SetAsideCard = ({ rhythm, goal, currency }: SetAsideCardProps) => {
   const { t } = useTranslation();
   const setAside = useSetAside();
   const [isSaving, setIsSaving] = useState(false);
@@ -32,9 +32,6 @@ const SetAsideCard = ({ rhythm, goal, currency }: Props) => {
     </div>
   );
 };
-
-export default SetAsideCard;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
@@ -50,7 +47,7 @@ const renderOffer = (
   onMove: () => void,
   t: TFunc,
 ) => {
-  if (rhythm.setAsideToday) {
+  if (rhythm.isSetAsideToday) {
     return (
       <p className="mb-3 text-sm font-semibold text-primary-ink">
         {t('today.rhythm.setAside.done')}

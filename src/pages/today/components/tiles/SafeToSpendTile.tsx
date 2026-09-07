@@ -1,11 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
-import BentoTile from '@/common/components/bento/BentoTile';
-import TileLabel from '@/common/components/bento/TileLabel';
 import { formatCurrency } from '@/constants/utils';
 import type { TodayStatus } from '@/pages/today/hooks/useTodayGuidance';
+import { BentoTile, TileLabel } from '@/common/components/bento';
 
-type Props = {
+type SafeToSpendTileProps = {
   status: TodayStatus;
   safeToSpend: number | null;
   spentThisMonth: number;
@@ -19,7 +18,7 @@ type Props = {
 
 // The one number the screen exists to answer, on the one slab of colour in the
 // app. Everything else in the grid is a supporting fact about this figure.
-const SafeToSpendTile = (props: Props) => {
+export const SafeToSpendTile = (props: SafeToSpendTileProps) => {
   const { t } = useTranslation();
   const { whole, fraction } = splitAmount(resolveAmount(props), props.currency);
 
@@ -43,9 +42,6 @@ const SafeToSpendTile = (props: Props) => {
     </BentoTile>
   );
 };
-
-export default SafeToSpendTile;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
@@ -59,7 +55,7 @@ type TFunc = (key: string, options?: Record<string, unknown>) => string;
 // it is one glyph ahead of a number three characters wide — the easiest thing
 // on the screen to miss. The label says which way round it is instead, in
 // words, which cannot be missed at a glance the way a hyphen can.
-const resolveAmount = (props: Props): number => {
+const resolveAmount = (props: SafeToSpendTileProps): number => {
   if (props.safeToSpend === null) {
     return props.spentThisMonth;
   }
@@ -70,7 +66,7 @@ const resolveAmount = (props: Props): number => {
 // Over budget the label is not describing the figure, it IS the reading — so
 // it is drawn as a badge rather than as an eyebrow. Everywhere else it stays
 // the quiet caption every other tile in the grid uses.
-const renderLabel = (props: Props, t: TFunc) => {
+const renderLabel = (props: SafeToSpendTileProps, t: TFunc) => {
   if (isOverBudget(props)) {
     return <span className="tile-badge">{t('today.tiles.overBudget')}</span>;
   }
@@ -78,10 +74,10 @@ const renderLabel = (props: Props, t: TFunc) => {
   return <TileLabel>{resolveLabel(props, t)}</TileLabel>;
 };
 
-const isOverBudget = (props: Props): boolean =>
+const isOverBudget = (props: SafeToSpendTileProps): boolean =>
   props.safeToSpend !== null && props.safeToSpend < 0;
 
-const resolveLabel = (props: Props, t: TFunc): string => {
+const resolveLabel = (props: SafeToSpendTileProps, t: TFunc): string => {
   if (props.safeToSpend === null) {
     return t('today.spentSoFar');
   }
@@ -93,7 +89,7 @@ const resolveLabel = (props: Props, t: TFunc): string => {
 // which is the one state whose badge already says so, louder. A chip beside it
 // would be the same fact twice, and the quieter of the two would win the
 // corner — so in that state the badge keeps it and the chip stands down.
-const renderChip = (props: Props, t: TFunc) => {
+const renderChip = (props: SafeToSpendTileProps, t: TFunc) => {
   if (props.status === 'tight') {
     return null;
   }
@@ -108,7 +104,7 @@ const renderChip = (props: Props, t: TFunc) => {
 // Only the no-budget slab is a doorway. Everywhere else the number IS the
 // answer, and a tap that navigated away from it would be a tap that took the
 // screen's whole point off screen.
-const resolveDestination = (props: Props): string | undefined => {
+const resolveDestination = (props: SafeToSpendTileProps): string | undefined => {
   if (props.safeToSpend === null) {
     return '/plan';
   }
@@ -118,7 +114,7 @@ const resolveDestination = (props: Props): string | undefined => {
 
 // Only the no-budget state is a link, so it is the only one with a name to
 // give. Everywhere else the slab is a div and a label would be dropped.
-const resolveAriaLabel = (props: Props, t: TFunc): string | undefined => {
+const resolveAriaLabel = (props: SafeToSpendTileProps, t: TFunc): string | undefined => {
   if (props.safeToSpend === null) {
     return t('today.setBudget');
   }
@@ -132,7 +128,7 @@ const resolveAriaLabel = (props: Props, t: TFunc): string | undefined => {
 //   no budget  — there is one thing to do, so say it
 //   over plan  — the month cannot be undone, but the days left are still
 //                theirs, so quote what an ordinary one of them costs
-const renderCaption = (props: Props, t: TFunc) => {
+const renderCaption = (props: SafeToSpendTileProps, t: TFunc) => {
   if (props.safeToSpend === null) {
     return renderCaptionAction(t('today.setBudget'));
   }
@@ -148,7 +144,7 @@ const renderCaption = (props: Props, t: TFunc) => {
   );
 };
 
-const renderRecovery = (props: Props, t: TFunc) => {
+const renderRecovery = (props: SafeToSpendTileProps, t: TFunc) => {
   if (props.typicalDay === null || props.daysRemaining <= 0) {
     return renderCaptionText(t('today.overPlan'));
   }

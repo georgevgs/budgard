@@ -38,7 +38,7 @@ export const buildPlot = (
 export const seriesExtent = (
   data: ChartPoint[],
   series: Series[],
-  allowNegative: boolean | undefined,
+  shouldAllowNegative: boolean | undefined,
 ): { min: number; max: number } => {
   const values = series.flatMap((item) =>
     data
@@ -51,7 +51,7 @@ export const seriesExtent = (
   }
 
   const max = Math.max(...values, 0);
-  if (!allowNegative) {
+  if (!shouldAllowNegative) {
     return { min: 0, max: Math.max(max, 1) };
   }
 

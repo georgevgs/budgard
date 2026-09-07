@@ -8,17 +8,17 @@ import {
   FormLabel,
   FormMessage,
 } from '@/common/ui/form';
-import CategoryColorPicker from '@/pages/categories/components/CategoryColorPicker';
+import { CategoryColorPicker } from '@/pages/categories/components/CategoryColorPicker';
 import { getCurrencySymbol } from '@/constants/currencies';
 import { formatCurrencyInput } from '@/constants/utils';
 import type { DebtFormData } from '@/pages/debts/validations';
 
-type Props = {
+type DebtNumbersFieldsProps = {
   form: UseFormReturn<DebtFormData>;
   selectedCurrency: string;
 };
 
-const DebtNumbersFields = ({ form, selectedCurrency }: Props) => {
+export const DebtNumbersFields = ({ form, selectedCurrency }: DebtNumbersFieldsProps) => {
   const { t } = useTranslation();
 
   return (
@@ -102,5 +102,3 @@ const DebtNumbersFields = ({ form, selectedCurrency }: Props) => {
     </>
   );
 };
-
-export default DebtNumbersFields;

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useToast } from '@/common/hooks/useToast';
-import { pushSubscriptionService } from '@/pages/settings/pushSubscriptionService';
+import { settingsApi } from '@/pages/settings/settingsApi';
 
 type PushState =
   'loading' | 'unsupported' | 'denied' | 'subscribed' | 'unsubscribed';
@@ -126,7 +126,7 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
       const p256dh = json.keys?.p256dh ?? '';
       const auth = json.keys?.auth ?? '';
 
-      await pushSubscriptionService.save({
+      await settingsApi.savePushSubscription({
         userId: session.user.id,
         endpoint: createdSubscription.endpoint,
         p256dh,
@@ -161,7 +161,7 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
         return;
       }
 
-      await pushSubscriptionService.remove(subscription.endpoint);
+      await settingsApi.removePushSubscription(subscription.endpoint);
       await unsubscribeQuietly(subscription);
 
       setState('unsubscribed');

@@ -8,7 +8,7 @@ import {
 } from '@/common/ui/select';
 import type { ActivityPeriod } from '@/pages/activity/hooks/useActivityFeed';
 
-type Props = {
+type ActivityPeriodSelectorProps = {
   period: ActivityPeriod;
   onPeriodChange: (period: ActivityPeriod) => void;
 };
@@ -26,7 +26,7 @@ const PERIODS: ActivityPeriod[] = [
 // The window the whole screen is showing. It lives with the other refinements
 // so the feed has one obvious filter entry point instead of overlapping time
 // controls above it.
-const ActivityPeriodSelector = (props: Props) => {
+export const ActivityPeriodSelector = (props: ActivityPeriodSelectorProps) => {
   const { t } = useTranslation();
 
   return (
@@ -50,5 +50,3 @@ const ActivityPeriodSelector = (props: Props) => {
     </Select>
   );
 };
-
-export default ActivityPeriodSelector;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import ScrollSafeDropdownMenuTrigger from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
+import { ScrollSafeDropdownMenuTrigger } from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +25,7 @@ import type { FinancialSpace } from '@/types/Household';
 // looked the same and did different things. Those three destinations now live
 // on Plan, which is where you go to think ahead; what is left here is the
 // account itself.
-const ProfileMenu = () => {
+export const ProfileMenu = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const navigate = useNavigate();
@@ -69,9 +69,6 @@ const ProfileMenu = () => {
     </DropdownMenu>
   );
 };
-
-export default ProfileMenu;
-
 // --- Helpers ---
 
 type TranslateFunction = (

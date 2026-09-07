@@ -5,12 +5,12 @@ import { Button } from '@/common/ui/button';
 import { Progress } from '@/common/ui/progress';
 import type { ReceiptScanApi } from '@/pages/expenses/hooks/useReceiptScan';
 
-type Props = {
+type ReceiptScanButtonProps = {
   scan: ReceiptScanApi;
   visible: boolean;
 };
 
-const ReceiptScanButton = ({ scan, visible }: Props) => {
+export const ReceiptScanButton = ({ scan, visible }: ReceiptScanButtonProps) => {
   const { t } = useTranslation();
 
   if (!visible) {
@@ -53,5 +53,3 @@ const ReceiptScanButton = ({ scan, visible }: Props) => {
     </Button>
   );
 };
-
-export default ReceiptScanButton;

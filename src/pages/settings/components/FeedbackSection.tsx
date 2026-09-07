@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next';
 import Bug from 'lucide-react/dist/esm/icons/bug';
 import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
 import { Button } from '@/common/ui/button';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
-import FeedbackDialog from '@/pages/settings/components/FeedbackDialog';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
+import { FeedbackDialog } from '@/pages/settings/components/FeedbackDialog';
 import type { FeedbackKind } from '@/common/api/feedbackService';
 
-const FeedbackSection = () => {
+export const FeedbackSection = () => {
   const { t } = useTranslation();
   const [kind, setKind] = useState<FeedbackKind | null>(null);
 
@@ -45,9 +45,6 @@ const FeedbackSection = () => {
     </section>
   );
 };
-
-export default FeedbackSection;
-
 // --- Helpers ---
 
 const renderDialog = (kind: FeedbackKind | null, onClose: () => void) => {

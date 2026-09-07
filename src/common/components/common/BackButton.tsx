@@ -6,7 +6,7 @@ import { getOwningTab } from '@/constants/routes';
 // The way out of a screen you arrived at from somewhere. Lived in the app bar
 // until the bar itself went; it is now part of the screen's own header, which
 // is where the design puts every other round chrome control too.
-const BackButton = () => {
+export const BackButton = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -34,9 +34,6 @@ const BackButton = () => {
     </button>
   );
 };
-
-export default BackButton;
-
 // --- Helpers ---
 
 const resolveFallback = (pathname: string): string => {

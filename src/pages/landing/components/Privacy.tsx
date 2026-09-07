@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import SectionShell from '@/pages/landing/components/SectionShell';
-import EyebrowLabel from '@/pages/landing/components/EyebrowLabel';
-import Reveal from '@/pages/landing/components/Reveal';
+import { SectionShell } from '@/pages/landing/components/SectionShell';
+import { EyebrowLabel } from '@/pages/landing/components/EyebrowLabel';
+import { Reveal } from '@/pages/landing/components/Reveal';
 import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
 import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
 import Server from 'lucide-react/dist/esm/icons/server';
@@ -10,7 +10,7 @@ import type { LucideIcon } from 'lucide-react';
 type Tx = (key: string) => string;
 type Pillar = { Icon: LucideIcon; titleKey: string; bodyKey: string };
 
-const Privacy = () => {
+export const Privacy = () => {
   const { t } = useTranslation();
 
   return (
@@ -36,9 +36,6 @@ const Privacy = () => {
     </SectionShell>
   );
 };
-
-export default Privacy;
-
 const pillars = (): Pillar[] => [
   {
     Icon: Server,

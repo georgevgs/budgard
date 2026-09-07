@@ -2,11 +2,11 @@ import { useTranslation } from 'react-i18next';
 import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
 import { EmptyStateCard } from '@/common/ui/empty-state-card';
 
-type Props = {
+type DebtsEmptyProps = {
   onAddClick: () => void;
 };
 
-const DebtsEmpty = ({ onAddClick }: Props) => {
+export const DebtsEmpty = ({ onAddClick }: DebtsEmptyProps) => {
   const { t } = useTranslation();
 
   return (
@@ -19,5 +19,3 @@ const DebtsEmpty = ({ onAddClick }: Props) => {
     />
   );
 };
-
-export default DebtsEmpty;

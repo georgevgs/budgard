@@ -18,8 +18,8 @@ export type CategoryBudgetAlertInput = {
 type AlertState = {
   prevSpent: number | null;
   prevCap: number;
-  shownWarning: boolean;
-  shownExceeded: boolean;
+  hasShownWarning: boolean;
+  hasShownExceeded: boolean;
 };
 
 type UseCategoryBudgetAlertsProps = {
@@ -89,8 +89,8 @@ const recordSpending = (
     entry = {
       prevSpent: null,
       prevCap: alert.cap,
-      shownWarning: false,
-      shownExceeded: false,
+      hasShownWarning: false,
+      hasShownExceeded: false,
     };
     state.set(alert.categoryId, entry);
   }
@@ -115,9 +115,9 @@ const recordSpending = (
   if (
     percent >= EXCEEDED_THRESHOLD &&
     prevPercent < EXCEEDED_THRESHOLD &&
-    !entry.shownExceeded
+    !entry.hasShownExceeded
   ) {
-    entry.shownExceeded = true;
+    entry.hasShownExceeded = true;
 
     return { level: 'exceeded', percent };
   }
@@ -125,9 +125,9 @@ const recordSpending = (
   if (
     percent >= WARNING_THRESHOLD &&
     prevPercent < WARNING_THRESHOLD &&
-    !entry.shownWarning
+    !entry.hasShownWarning
   ) {
-    entry.shownWarning = true;
+    entry.hasShownWarning = true;
 
     return { level: 'warning', percent };
   }

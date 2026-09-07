@@ -12,9 +12,9 @@ import {
   type TodayLayout,
   type TodayTileId,
 } from '@/pages/today/utils/bentoLayout';
-import { uiPreferencesService } from '@/pages/today/uiPreferencesService';
+import { todayApi } from '@/pages/today/todayApi';
 
-export type TodayLayoutControls = TodayLayout & {
+export type UseTodayLayoutReturn = TodayLayout & {
   isArranging: boolean;
   isDefault: boolean;
   isPersisted: boolean;
@@ -29,7 +29,7 @@ export type TodayLayoutControls = TodayLayout & {
  * The Today grid's arrangement. Local storage keeps the first frame instant;
  * the owner-scoped server copy then brings the same layout to every device.
  */
-export const useTodayLayout = (): TodayLayoutControls => {
+export const useTodayLayout = (): UseTodayLayoutReturn => {
   const [layout, setLayout] = useState<TodayLayout>(readStoredLayout);
   const layoutRef = useRef(layout);
   const [isArranging, setArranging] = useState(false);
@@ -43,8 +43,8 @@ export const useTodayLayout = (): TodayLayoutControls => {
     setIsPersisted(writeStoredLayout(next));
     markTodayLayoutSyncPending();
 
-    void uiPreferencesService
-      .saveTodayLayout(next)
+    void todayApi
+      .saveLayout(next)
       .then(() => {
         if (persistVersionRef.current !== version) {
           return;
@@ -185,7 +185,7 @@ const hydrateFromServer = async (
   { persist, layoutRef, hasCommittedRef, setLayout, setIsPersisted }: HydrateDeps,
 ): Promise<void> => {
   try {
-    const remote = await uiPreferencesService.getTodayLayout();
+    const remote = await todayApi.getLayout();
     if (!run.active || hasCommittedRef.current) {
       return;
     }

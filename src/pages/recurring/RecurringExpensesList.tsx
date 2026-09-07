@@ -4,16 +4,16 @@ import Plus from 'lucide-react/dist/esm/icons/plus';
 import Repeat from 'lucide-react/dist/esm/icons/repeat';
 import { Dialog, DialogContent } from '@/common/ui/dialog';
 import type { RecurringExpense } from '@/types/RecurringExpense';
-import RecurringExpenseForm from '@/pages/recurring/components/RecurringExpenseForm';
-import RecurringExpenseCard from '@/pages/recurring/components/RecurringExpenseCard';
+import { RecurringExpenseForm } from '@/pages/recurring/components/RecurringExpenseForm';
+import { RecurringExpenseCard } from '@/pages/recurring/components/RecurringExpenseCard';
 import { useRecurringList } from '@/pages/recurring/hooks/useRecurringList';
 import type { RecurringMode } from '@/pages/recurring/hooks/useRecurringActions';
 import { formatCurrency } from '@/constants/utils';
 import { calculateNextOccurrence } from '@/constants/recurring';
-import PageHeader from '@/common/components/common/PageHeader';
-import RecurringLoadingState from '@/pages/recurring/components/RecurringLoading';
+import { PageHeader } from '@/common/components/common/PageHeader';
+import { RecurringLoading } from '@/pages/recurring/components/RecurringLoading';
 import { useTranslation } from 'react-i18next';
-import RecurringSuggestions from '@/pages/recurring/components/RecurringSuggestions';
+import { RecurringSuggestions } from '@/pages/recurring/components/RecurringSuggestions';
 
 const RecurringExpensesList = () => {
   const { t } = useTranslation();
@@ -85,7 +85,7 @@ const renderLoading = (showSkeleton: boolean) => {
     return null;
   }
 
-  return <RecurringLoadingState />;
+  return <RecurringLoading />;
 };
 
 type TranslateFunction = (

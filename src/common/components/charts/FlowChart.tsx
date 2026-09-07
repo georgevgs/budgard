@@ -15,7 +15,7 @@ export type FlowNode = {
   color: string;
 };
 
-type Props = {
+type FlowChartProps = {
   sourceLabel: string;
   sourceSublabel: string;
   sourceValue: number;
@@ -37,13 +37,13 @@ const EXTRA_HEIGHT_BUDGET = 220;
 const LEFT_MARGIN = 4;
 const LABEL_COLUMN_RATIO = 0.46;
 
-const FlowChart = ({
+export const FlowChart = ({
   sourceLabel,
   sourceSublabel,
   sourceValue,
   nodes,
   ariaLabel,
-}: Props) => {
+}: FlowChartProps) => {
   const { ref, width } = useChartSize();
   const height =
     nodes.length * MIN_ROW_HEIGHT +
@@ -89,9 +89,6 @@ const FlowChart = ({
     </div>
   );
 };
-
-export default FlowChart;
-
 // --- Helpers ---
 
 type LaidOutNode = FlowNode & { top: number; bottom: number };

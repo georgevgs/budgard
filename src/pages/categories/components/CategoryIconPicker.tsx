@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import CategoryIcon from '@/common/components/common/CategoryIcon';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { Button } from '@/common/ui/button';
 import { cn } from '@/constants/utils';
 
@@ -36,7 +36,7 @@ type CategoryIconPickerProps = {
   disabled?: boolean;
 };
 
-const CategoryIconPicker = ({
+export const CategoryIconPicker = ({
   value,
   onChange,
   disabled,
@@ -75,9 +75,6 @@ const CategoryIconPicker = ({
     </>
   );
 };
-
-export default CategoryIconPicker;
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 type TranslateFunction = (

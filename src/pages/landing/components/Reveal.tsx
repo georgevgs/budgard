@@ -2,13 +2,13 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { prefersReducedMotion } from '@/constants/motion';
 import { cn } from '@/constants/utils';
 
-type Props = {
+type RevealProps = {
   children: ReactNode;
   delay?: number;
   className?: string;
 };
 
-const Reveal = ({ children, delay = 0, className }: Props) => {
+export const Reveal = ({ children, delay = 0, className }: RevealProps) => {
   const ref = useRef<HTMLDivElement | null>(null);
   const [visible, setVisible] = useState(() => prefersReducedMotion());
 
@@ -48,9 +48,6 @@ const Reveal = ({ children, delay = 0, className }: Props) => {
     </div>
   );
 };
-
-export default Reveal;
-
 // --- Helpers ---
 
 const getVisibilityClass = (visible: boolean): string => {

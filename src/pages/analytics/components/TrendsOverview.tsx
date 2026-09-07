@@ -2,14 +2,14 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import ChartSpline from 'lucide-react/dist/esm/icons/chart-spline';
-import BentoGrid from '@/common/components/bento/BentoGrid';
-import CashFlowSection from '@/pages/analytics/components/CashFlowSection';
-import MonthlyReview from '@/pages/analytics/components/MonthlyReview';
-import WhereItWentTile from '@/pages/analytics/components/tiles/WhereItWentTile';
+import { CashFlowSection } from '@/pages/analytics/components/CashFlowSection';
+import { MonthlyReview } from '@/pages/analytics/components/MonthlyReview';
+import { WhereItWentTile } from '@/pages/analytics/components/tiles/WhereItWentTile';
 import type { useAnalyticsData } from '@/pages/analytics/hooks/useAnalyticsData';
 import type { useMonthlyReview } from '@/pages/analytics/hooks/useMonthlyReview';
+import { BentoGrid } from '@/common/components/bento';
 
-type Props = {
+type TrendsOverviewProps = {
   analytics: ReturnType<typeof useAnalyticsData>;
   review: ReturnType<typeof useMonthlyReview>;
   isPro: boolean;
@@ -23,7 +23,7 @@ type Props = {
 
 // Trends opens with a conclusion, one movement chart and one composition
 // answer. Everything analytical beyond those three jobs lives one level down.
-const TrendsOverview = (props: Props) => {
+export const TrendsOverview = (props: TrendsOverviewProps) => {
   const { t } = useTranslation();
   const stats = props.analytics.yearlyStats;
 
@@ -71,5 +71,3 @@ const TrendsOverview = (props: Props) => {
     </div>
   );
 };
-
-export default TrendsOverview;

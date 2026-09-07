@@ -1,5 +1,5 @@
 import { supabase } from '@/config/supabase';
-import { done, row, rows } from '@/config/supabaseCrud';
+import { done, row, rows } from '@/common/api/supabaseCrud';
 import type { Category } from '@/types/Category';
 
 // Supabase queries for categories, at the feature root so an audit of what

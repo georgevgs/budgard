@@ -7,7 +7,7 @@ import { cn } from '@/constants/utils.ts';
 import { useSwipeToClose } from '@/common/hooks/useSwipeToClose';
 import { useIsMobile } from '@/common/hooks/useIsMobile';
 import { DialogDirtyContext } from '@/common/hooks/useDialogDirty';
-import ConfirmDestructiveDialog from '@/common/components/common/ConfirmDestructiveDialog';
+import { ConfirmDestructiveDialog } from '@/common/components/common/ConfirmDestructiveDialog';
 
 const Dialog = ({
   modal = true,

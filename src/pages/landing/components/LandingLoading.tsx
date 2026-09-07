@@ -6,7 +6,7 @@ import LoadingScreen from '@/common/ui/loading-screen';
 // marketing page and a redirect to /expenses, so neither can be painted yet.
 // Mirrors the landing header + hero so whichever way it resolves, the frame
 // the visitor is already looking at stays put.
-const LandingLoadingState = () => {
+export const LandingLoading = () => {
   const { t } = useTranslation();
 
   return (
@@ -43,5 +43,3 @@ const LandingLoadingState = () => {
     </LoadingScreen>
   );
 };
-
-export default LandingLoadingState;

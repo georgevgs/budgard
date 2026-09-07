@@ -1,8 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import BentoTile from '@/common/components/bento/BentoTile';
-import TileLabel from '@/common/components/bento/TileLabel';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { formatCurrency } from '@/constants/utils';
+import { BentoTile, TileLabel } from '@/common/components/bento';
 
 type MonthlyDatum = {
   month: string;
@@ -10,7 +9,7 @@ type MonthlyDatum = {
   amount: number;
 };
 
-type Props = {
+type BiggestMonthTileProps = {
   monthlyData: MonthlyDatum[];
   onMonthClick: (index: number) => void;
 };
@@ -18,7 +17,7 @@ type Props = {
 // The year's high-water mark, and a doorway into the month that set it —
 // "which month was that" is the immediate next question, and the tile is the
 // shortest possible route to the answer.
-const BiggestMonthTile = ({ monthlyData, onMonthClick }: Props) => {
+export const BiggestMonthTile = ({ monthlyData, onMonthClick }: BiggestMonthTileProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const peak = findPeak(monthlyData);
@@ -45,9 +44,6 @@ const BiggestMonthTile = ({ monthlyData, onMonthClick }: Props) => {
     </BentoTile>
   );
 };
-
-export default BiggestMonthTile;
-
 // --- Helpers ---
 
 type Peak = {

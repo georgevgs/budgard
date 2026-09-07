@@ -4,19 +4,19 @@ import { Button } from '@/common/ui/button';
 import { formatCurrency } from '@/constants/utils';
 import type { RecurringSuggestion } from '@/types/RecurringSuggestion';
 
-type Props = {
+type RecurringSuggestionsProps = {
   suggestions: RecurringSuggestion[];
   currency: string;
   onAccept: (suggestion: RecurringSuggestion) => Promise<void>;
   onDismiss: (suggestion: RecurringSuggestion) => Promise<void>;
 };
 
-const RecurringSuggestions = ({
+export const RecurringSuggestions = ({
   suggestions,
   currency,
   onAccept,
   onDismiss,
-}: Props) => {
+}: RecurringSuggestionsProps) => {
   const { t } = useTranslation();
   if (suggestions.length === 0) {
     return null;
@@ -45,9 +45,6 @@ const RecurringSuggestions = ({
     </section>
   );
 };
-
-export default RecurringSuggestions;
-
 // --- Helpers ---
 
 type TFunc = ReturnType<typeof useTranslation>['t'];
@@ -55,8 +52,8 @@ type TFunc = ReturnType<typeof useTranslation>['t'];
 const renderSuggestion = (
   suggestion: RecurringSuggestion,
   currency: string,
-  onAccept: Props['onAccept'],
-  onDismiss: Props['onDismiss'],
+  onAccept: RecurringSuggestionsProps['onAccept'],
+  onDismiss: RecurringSuggestionsProps['onDismiss'],
   t: TFunc,
 ) => (
   <div key={suggestion.fingerprint} className="py-3 first:pt-3 last:pb-0">

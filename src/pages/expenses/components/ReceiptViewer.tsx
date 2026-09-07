@@ -16,11 +16,11 @@ type ReceiptViewerProps = {
   onClose: () => void;
 };
 
-const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
+export const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
   const { t } = useTranslation();
   const { url, isLoading, error } = useReceiptUrl(receiptPath, open);
-  const [imageFailed, setImageFailed] = useState(false);
-  const hasError = error || imageFailed;
+  const [hasImageFailed, setHasImageFailed] = useState(false);
+  const hasError = error || hasImageFailed;
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -47,16 +47,13 @@ const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
           <div className="flex items-center justify-center min-h-[200px] mt-4">
             {renderLoadingState(isLoading, t)}
             {renderErrorState(hasError, t)}
-            {renderReceiptImage(url, hasError, () => setImageFailed(true), t)}
+            {renderReceiptImage(url, hasError, () => setHasImageFailed(true), t)}
           </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 };
-
-export default ReceiptViewer;
-
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 type TranslateFunction = (key: string) => string;

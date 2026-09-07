@@ -10,7 +10,7 @@ import {
   AlertDialogTitle,
 } from '@/common/ui/alert-dialog';
 
-type Props = {
+type ConfirmDestructiveDialogProps = {
   open: boolean;
   title: string;
   description: string;
@@ -19,14 +19,14 @@ type Props = {
   onConfirm: () => void;
 };
 
-const ConfirmDestructiveDialog = ({
+export const ConfirmDestructiveDialog = ({
   open,
   title,
   description,
   confirmLabel,
   onOpenChange,
   onConfirm,
-}: Props) => {
+}: ConfirmDestructiveDialogProps) => {
   const { t } = useTranslation();
 
   return (
@@ -52,5 +52,3 @@ const ConfirmDestructiveDialog = ({
     </AlertDialog>
   );
 };
-
-export default ConfirmDestructiveDialog;

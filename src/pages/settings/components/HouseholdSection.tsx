@@ -17,7 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/common/ui/alert-dialog';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useHouseholdOps } from '@/common/hooks/dataOps/useHouseholdOps';
 import type { HouseholdShare } from '@/types/Household';
@@ -28,7 +28,7 @@ type Removal = {
   label: string;
 };
 
-const HouseholdSection = () => {
+export const HouseholdSection = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const userId = session?.user.id ?? '';
@@ -54,9 +54,6 @@ const HouseholdSection = () => {
     </section>
   );
 };
-
-export default HouseholdSection;
-
 // --- Helpers ---
 
 type Ops = ReturnType<typeof useHouseholdOps>;

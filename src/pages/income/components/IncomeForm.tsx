@@ -17,10 +17,10 @@ import { useIncomeCategoryPicker } from '@/pages/income/hooks/useIncomeCategoryP
 import { useIncomeSubmit } from '@/pages/income/hooks/useIncomeSubmit';
 import { incomeSchema, type IncomeFormData } from '@/pages/income/validations';
 import type { Expense } from '@/types/Expense';
-import IncomeAmountField from '@/pages/income/components/IncomeAmountField';
-import IncomeDescriptionField from '@/pages/income/components/IncomeDescriptionField';
-import IncomeCategoryField from '@/pages/income/components/IncomeCategoryField';
-import IncomeDateField from '@/pages/income/components/IncomeDateField';
+import { IncomeAmountField } from '@/pages/income/components/IncomeAmountField';
+import { IncomeDescriptionField } from '@/pages/income/components/IncomeDescriptionField';
+import { IncomeCategoryField } from '@/pages/income/components/IncomeCategoryField';
+import { IncomeDateField } from '@/pages/income/components/IncomeDateField';
 import {
   getInitialAmount,
   getInitialDate,
@@ -33,7 +33,7 @@ type IncomeFormProps = {
   onClose: (savedIncome?: Expense) => void;
 };
 
-const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
+export const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();
@@ -107,9 +107,6 @@ const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
     </div>
   );
 };
-
-export default IncomeForm;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

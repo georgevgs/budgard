@@ -13,7 +13,7 @@ export type DebtProgress = {
   paidToDate: number;
   // True when current balance > original principal. paidToDate is 0 in this
   // case; balanceOverOriginal carries the overage so the UI can show it.
-  balanceIncreased: boolean;
+  hasBalanceIncreased: boolean;
   balanceOverOriginal: number;
   monthsRemaining: number;
   projectedPayoffDate: string;
@@ -34,9 +34,9 @@ const computeProgress = (debt: Debt): DebtProgress => {
   const balance = Number(debt.current_balance ?? 0);
   const delta = principal - balance;
   const paidToDate = Math.max(delta, 0);
-  const balanceIncreased = delta < 0;
+  const hasBalanceIncreased = delta < 0;
   let balanceOverOriginal = 0;
-  if (balanceIncreased) {
+  if (hasBalanceIncreased) {
     balanceOverOriginal = -delta;
   }
   let percentPaid = 0;
@@ -56,11 +56,11 @@ const computeProgress = (debt: Debt): DebtProgress => {
     currentBalance: balance,
     originalPrincipal: principal,
     paidToDate,
-    balanceIncreased,
+    hasBalanceIncreased,
     balanceOverOriginal,
     monthsRemaining: projection.monthsToPayoff,
     projectedPayoffDate: projection.payoffDate,
     projectedTotalInterest: projection.totalInterestPaid,
-    isUnpayable: projection.unpayable || !minimumCoversInterest(debt),
+    isUnpayable: projection.isUnpayable || !minimumCoversInterest(debt),
   };
 };

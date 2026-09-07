@@ -3,8 +3,8 @@ import type { Expense } from '@/types/Expense';
 
 export type ExpenseAttachmentsApi = {
   receiptFile: File | null;
-  removeExistingReceipt: boolean;
-  showDetails: boolean;
+  shouldRemoveExistingReceipt: boolean;
+  shouldShowDetails: boolean;
   setReceiptFile: (file: File | null) => void;
   removeReceipt: () => void;
   toggleDetails: () => void;
@@ -20,19 +20,19 @@ export const useExpenseAttachments = (
   const [receiptFile, setReceiptFile] = useState<File | null>(
     draftReceiptFile ?? null,
   );
-  const [removeExistingReceipt, setRemoveExistingReceipt] = useState(false);
+  const [shouldRemoveExistingReceipt, setShouldRemoveExistingReceipt] = useState(false);
   // An expense that already carries a tag or a receipt opens with the drawer
   // down, so the thing the user came back to edit is on screen.
-  const [showDetails, setShowDetails] = useState(() =>
+  const [shouldShowDetails, setShouldShowDetails] = useState(() =>
     Boolean(expense?.tag_id || expense?.receipt_path || draftReceiptFile),
   );
 
   return {
     receiptFile,
-    removeExistingReceipt,
-    showDetails,
+    shouldRemoveExistingReceipt,
+    shouldShowDetails,
     setReceiptFile,
-    removeReceipt: () => setRemoveExistingReceipt(true),
-    toggleDetails: () => setShowDetails((prev) => !prev),
+    removeReceipt: () => setShouldRemoveExistingReceipt(true),
+    toggleDetails: () => setShouldShowDetails((prev) => !prev),
   };
 };

@@ -1,5 +1,5 @@
 import { supabase } from '@/config/supabase';
-import { row } from '@/config/supabaseCrud';
+import { row } from '@/common/api/supabaseCrud';
 import type { Expense } from '@/types/Expense';
 
 export const goalFundingService = {

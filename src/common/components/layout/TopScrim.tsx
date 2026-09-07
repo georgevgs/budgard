@@ -3,7 +3,7 @@
 // notch and unreadable on one with a clock sitting in that strip — so the
 // strip itself keeps a blurred ground while the bar it used to belong to is
 // gone. Exactly the safe-area inset tall: zero height in a browser tab.
-const TopScrim = () => {
+export const TopScrim = () => {
   return (
     <div
       aria-hidden="true"
@@ -11,5 +11,3 @@ const TopScrim = () => {
     />
   );
 };
-
-export default TopScrim;

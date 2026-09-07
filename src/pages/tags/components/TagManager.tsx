@@ -9,11 +9,11 @@ import {
   DialogHeader,
   DialogDescription,
 } from '@/common/ui/dialog';
-import ConfirmDestructiveDialog from '@/common/components/common/ConfirmDestructiveDialog';
+import { ConfirmDestructiveDialog } from '@/common/components/common/ConfirmDestructiveDialog';
 import { useTagsData } from '@/common/contexts/DataContext';
 import { useTagOps } from '@/common/hooks/dataOps/useTagOps';
 import type { Tag } from '@/types/Tag';
-import TagRenameForm from '@/pages/tags/components/TagRenameForm';
+import { TagRenameForm } from '@/pages/tags/components/TagRenameForm';
 
 type View = { type: 'list' } | { type: 'form'; tag: Tag };
 

@@ -17,8 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/common/ui/select';
-import ActivityCategorySelect from '@/pages/activity/components/ActivityCategorySelect';
-import ActivityPeriodSelector from '@/pages/activity/components/ActivityPeriodSelector';
+import { ActivityCategorySelect } from '@/pages/activity/components/ActivityCategorySelect';
+import { ActivityPeriodSelector } from '@/pages/activity/components/ActivityPeriodSelector';
 import type {
   ActivityKind,
   ActivityPeriod,
@@ -26,7 +26,7 @@ import type {
 import type { Category } from '@/types/Category';
 import type { Tag } from '@/types/Tag';
 
-type Props = {
+type ActivityFilterPanelProps = {
   categories: Category[];
   tags: Tag[];
   kind: ActivityKind;
@@ -41,7 +41,7 @@ type Props = {
 
 // Every refinement lives behind one button, which carries a count so an active
 // choice remains visible without making every visit scan a control dashboard.
-const ActivityFilterPanel = (props: Props) => {
+export const ActivityFilterPanel = (props: ActivityFilterPanelProps) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const activeCount = countActive(
@@ -84,9 +84,6 @@ const ActivityFilterPanel = (props: Props) => {
     </>
   );
 };
-
-export default ActivityFilterPanel;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
@@ -106,7 +103,7 @@ const renderTrigger = (activeCount: number, onOpen: () => void, t: TFunc) => (
 );
 
 const renderPanel = (
-  props: Props,
+  props: ActivityFilterPanelProps,
   activeCount: number,
   onClear: () => void,
   onTagChange: (value: string) => void,
@@ -144,7 +141,7 @@ const renderPanel = (
   </DialogContent>
 );
 
-const renderKindControl = (props: Props, t: TFunc) => (
+const renderKindControl = (props: ActivityFilterPanelProps, t: TFunc) => (
   <section aria-labelledby="activity-kind-label">
     <p
       id="activity-kind-label"
@@ -164,7 +161,7 @@ const renderKindControl = (props: Props, t: TFunc) => (
   </section>
 );
 
-const renderPeriodControl = (props: Props, t: TFunc) => (
+const renderPeriodControl = (props: ActivityFilterPanelProps, t: TFunc) => (
   <section aria-labelledby="activity-period-label">
     <p
       id="activity-period-label"
@@ -180,7 +177,7 @@ const renderPeriodControl = (props: Props, t: TFunc) => (
 );
 
 const renderTagControl = (
-  props: Props,
+  props: ActivityFilterPanelProps,
   onTagChange: (value: string) => void,
   t: TFunc,
 ) => (
@@ -226,7 +223,7 @@ const countActive = (
   return count;
 };
 
-const renderKindButton = (value: ActivityKind, props: Props, t: TFunc) => {
+const renderKindButton = (value: ActivityKind, props: ActivityFilterPanelProps, t: TFunc) => {
   const isActive = props.kind === value;
 
   return (

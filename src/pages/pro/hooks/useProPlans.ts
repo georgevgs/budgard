@@ -12,7 +12,7 @@ import {
 } from '@/pages/pro/utils/proPlansCache';
 import { proPlansService } from '@/pages/pro/proPlansService';
 
-export type ProPlansDisplay = {
+export type UseProPlansReturn = {
   prices: ProPlanPrices;
   // Ready-to-render labels, e.g. "€1.99".
   monthlyLabel: string;
@@ -26,7 +26,7 @@ let inFlight: Promise<ProPlanPrices> | null = null;
 
 // Live Pro prices with cache-then-network semantics: compiled-in fallback on
 // first paint, localStorage snapshot when fresh, network refresh otherwise.
-export const useProPlans = (): ProPlansDisplay => {
+export const useProPlans = (): UseProPlansReturn => {
   const { i18n } = useTranslation();
   const [prices, setPrices] = useState<ProPlanPrices>(() => {
     const snapshot = loadPlanPricesSnapshot();
@@ -82,7 +82,7 @@ export const useProPlans = (): ProPlansDisplay => {
 const buildDisplay = (
   prices: ProPlanPrices,
   locale: string,
-): ProPlansDisplay => ({
+): UseProPlansReturn => ({
   prices,
   monthlyLabel: formatPlanAmount(
     prices.monthly.amount,

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import InsightIcon from '@/common/components/common/InsightIcon';
+import { InsightIcon } from '@/common/components/common/InsightIcon';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import { useSpendingInsights, type Insight } from '@/common/hooks/useSpendingInsights';
@@ -12,7 +12,7 @@ type SpendingInsightsProps = {
   defaultCurrency: string;
 };
 
-const SpendingInsights = (props: SpendingInsightsProps) => {
+export const SpendingInsights = (props: SpendingInsightsProps) => {
   const { t } = useTranslation();
   const insights = useSpendingInsights(props);
 
@@ -27,9 +27,6 @@ const SpendingInsights = (props: SpendingInsightsProps) => {
     </div>
   );
 };
-
-export default SpendingInsights;
-
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 // Insights are one reading task, so they share one common region instead of

@@ -47,7 +47,7 @@ export type SimResult = {
   perDebtPayoffMonth: Record<string, number>;
   perDebtTotalInterest: Record<string, number>;
   schedule: ScheduleEntry[];
-  unpayable: boolean;
+  isUnpayable: boolean;
 };
 
 export type SimInput = {
@@ -76,7 +76,7 @@ const emptyResult = (now: Date): SimResult => ({
   perDebtPayoffMonth: {},
   perDebtTotalInterest: {},
   schedule: [],
-  unpayable: false,
+  isUnpayable: false,
 });
 
 export const simulatePayoff = (input: SimInput): SimResult => {
@@ -297,9 +297,9 @@ const summarise = (
   schedule: ScheduleEntry[],
   now: Date,
 ): SimResult => {
-  const unpayable = !states.every((s) => s.remaining <= 0);
+  const isUnpayable = !states.every((s) => s.remaining <= 0);
   let monthsToPayoff = MAX_MONTHS;
-  if (!unpayable) {
+  if (!isUnpayable) {
     monthsToPayoff = Math.max(...states.map((s) => s.payoffMonth ?? 0));
   }
 
@@ -318,6 +318,6 @@ const summarise = (
     perDebtPayoffMonth,
     perDebtTotalInterest,
     schedule,
-    unpayable,
+    isUnpayable,
   };
 };

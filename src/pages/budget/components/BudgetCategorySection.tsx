@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
-import CategoryIcon from '@/common/components/common/CategoryIcon';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { Button } from '@/common/ui/button';
 import { formatCurrency, cn } from '@/constants/utils';
 import { getColorTint } from '@/constants/categoryColor';
@@ -21,19 +21,19 @@ export type BudgetCategoryRow = {
   isWarning: boolean;
 };
 
-type Props = {
+type BudgetCategorySectionProps = {
   totalCategoryCount: number;
   rows: BudgetCategoryRow[];
   currency: string;
   onManage: () => void;
 };
 
-const BudgetCategorySection = ({
+export const BudgetCategorySection = ({
   totalCategoryCount,
   rows,
   currency,
   onManage,
-}: Props) => {
+}: BudgetCategorySectionProps) => {
   const { t } = useTranslation();
 
   if (totalCategoryCount === 0) return null;
@@ -59,9 +59,6 @@ const BudgetCategorySection = ({
     </div>
   );
 };
-
-export default BudgetCategorySection;
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

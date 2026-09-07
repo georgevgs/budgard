@@ -19,13 +19,13 @@ import {
 } from '@/constants/csvExport';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+type AnnualExportCardProps = {
   selectedYear: number;
   /** A trailing control next to the heading — Settings' year picker. */
   action?: ReactNode;
 };
 
-const AnnualExportCard = ({ selectedYear, action }: Props) => {
+export const AnnualExportCard = ({ selectedYear, action }: AnnualExportCardProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const expenses = useExpensesData();
@@ -121,9 +121,6 @@ const AnnualExportCard = ({ selectedYear, action }: Props) => {
     </div>
   );
 };
-
-export default AnnualExportCard;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

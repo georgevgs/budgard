@@ -5,11 +5,11 @@ import { usePwaUpdate } from '@/common/hooks/usePwaUpdate';
 import { useTheme } from '@/common/hooks/useTheme';
 import { lazyWithRetry } from '@/constants/lazyWithRetry';
 import { ErrorBoundary } from '@/common/ui/error-boundary';
-import { AppLoadingSkeleton } from '@/pages/expenses/components/ExpensesLoading';
-import LandingLoadingState from '@/pages/landing/components/LandingLoading';
-import LegalLoadingState from '@/pages/legal/LegalLoading';
-import RouteMetadata from '@/common/components/common/RouteMetadata';
-import OfflineBanner from '@/common/components/common/OfflineBanner';
+import { AppLoadingSkeleton } from '@/common/components/common/AppLoadingSkeleton';
+import { LandingLoading } from '@/pages/landing/components/LandingLoading';
+import { LegalLoading } from '@/pages/legal/LegalLoading';
+import { RouteMetadata } from '@/common/components/common/RouteMetadata';
+import { OfflineBanner } from '@/common/components/common/OfflineBanner';
 
 // On a cache-repair launch every JavaScript chunk has to come from the network.
 // Load the authenticated shell and the initial tab together so the user sees
@@ -25,7 +25,7 @@ const PrivacyPage = lazyWithRetry(() => import('@/pages/legal/PrivacyPage'));
 const TermsPage = lazyWithRetry(() => import('@/pages/legal/TermsPage'));
 const ContactPage = lazyWithRetry(() => import('@/pages/legal/ContactPage'));
 
-const App = () => {
+export const App = () => {
   usePwaUpdate();
   useTheme();
   const { session, isLoading } = useAuth();
@@ -43,9 +43,6 @@ const App = () => {
 
   return <PublicApp />;
 };
-
-export default App;
-
 // --- Public application ---
 
 const PublicApp = () => {
@@ -58,7 +55,7 @@ const PublicApp = () => {
             <Route
               path="/"
               element={
-                <Suspense fallback={<LandingLoadingState />}>
+                <Suspense fallback={<LandingLoading />}>
                   <LandingPage />
                 </Suspense>
               }
@@ -69,7 +66,7 @@ const PublicApp = () => {
             <Route
               path="/join"
               element={
-                <Suspense fallback={<LandingLoadingState />}>
+                <Suspense fallback={<LandingLoading />}>
                   <LandingPage />
                 </Suspense>
               }
@@ -99,14 +96,14 @@ const loadAuthenticatedApp = async () => {
 const renderLegalPage = (page: ReactNode) => {
   return (
     <main className="flex-1">
-      <Suspense fallback={<LegalLoadingState />}>{page}</Suspense>
+      <Suspense fallback={<LegalLoading />}>{page}</Suspense>
     </main>
   );
 };
 
 const renderAuthLoading = (pathname: string) => {
-  if (pathname === '/') return <LandingLoadingState />;
-  if (isLegalPath(pathname)) return <LegalLoadingState />;
+  if (pathname === '/') return <LandingLoading />;
+  if (isLegalPath(pathname)) return <LegalLoading />;
 
   return <AppLoadingSkeleton />;
 };

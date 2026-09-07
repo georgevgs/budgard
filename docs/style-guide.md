@@ -33,22 +33,38 @@
 - **Queries at the feature root.** A feature's Supabase queries live in
   `<feature>/<feature>Api.ts`, so an audit of what it reads and writes is one
   file. (The guide says this about GraphQL; Supabase is our equivalent.)
-- **Barrel files.** Use judiciously — they invite circular dependencies.
+- **Barrel files.** The guide recommends them for grouping related exports.
+  Here there is exactly one, `common/components/bento/index.ts`, and the rest
+  are deliberately absent — see *Where this repo is narrower* below.
+- **Tests live in a `__tests__/` folder** beside the code they cover:
+  `pages/expenses/components/__tests__/ExpensesForm.test.tsx`. Mocks go in
+  `__tests__/__mocks__/` named `{name}Mock.ts`. The cross-cutting invariant
+  suite is the exception and stays in `src/test/invariants/`, because it
+  belongs to no feature.
 - **Named imports.** Never a wildcard import; it defeats tree-shaking.
   **[enforced]** — `zod` is exempt, `z` is a schema builder.
 
 ## Component structure
 
 - **Functional components only**, arrow syntax.
-- **File name matches the folder** it defines.
+- **File name matches the component name.** `ExpensesForm.tsx` exports
+  `ExpensesForm`. A module that deliberately groups several small related
+  components is the exception — `ChartAxes.tsx` (`XAxis` / `YAxis` /
+  `ReferenceLine`) and `RouteGuards.tsx` — which the guide permits as grouped
+  related exports.
+- **Named exports for components.** `export const Foo = () => {}`, no
+  `export default`. The exception is a module loaded through `React.lazy`,
+  which needs a default export — the guide allows default for page/route
+  components, and `lazyRouteModules.ts` is where they are.
 - **Single responsibility.** One component, one job.
 - **Avoid deep nesting.** Break JSX up before it pyramids.
 - **150-line limit.** **[enforced]** — `componentSize.test.ts`. The cap is on
-  the component function, not the file: helpers below `export default` do not
-  count. The same cap applies to hooks and utilities via
-  `functionSize.test.ts`.
+  the component function, not the file: the helpers below it do not count.
+  The same cap applies to hooks and utilities via `functionSize.test.ts`.
 - **Early returns** for loading and error states.
-- **Consistent order:** hooks → derived values → handlers → return.
+- **Consistent order:** hooks → variables that are not functions →
+  `useEffect` → functions (handlers, derived `useMemo` / `useCallback`) →
+  return.
 - **Blank line before `return`.** **[enforced]**
 - **Single-line early returns** stay inline, without braces.
 - **PascalCase** components, **camelCase** functions.
@@ -66,8 +82,28 @@
 - **`type` for everything, props included.** This is the one place Budgard
   departs from the guide, which asks for `interface` on component props — see
   *Where this repo differs* below.
-- `Pick<>` to select, `Omit<>` to remove, `&` to merge.
+- **Props type is named `{ComponentName}Props`** — `ExpensesFormProps`, not a
+  bare `Props`.
+- **A hook's return type is named `Use{HookName}Return`** when the hook
+  declares one. A hook returning a primitive (`boolean`, `void`, `Date`) needs
+  no named type, and a shared domain model keeps its own name — `SavingsRhythm`
+  and `GoalProgress` are models the app passes around, not hook plumbing.
+- `Pick<>` to select, `Omit<>` to remove, `Extract<>` to narrow, `&` to merge.
 - Do not reach for `interface` on a utility or a hook return type.
+
+## Naming
+
+- **PascalCase** components, **camelCase** functions, variables and handlers.
+- **Booleans read as a question:** `is` / `has` / `should` / `are` prefix —
+  `isSubmitting`, `hasError`, `shouldSkipIncome`, `areHapticsEnabled`.
+  Three kinds of name are exempt because they are not ours to choose: a DOM or
+  Radix prop (`disabled`, `open`, `asChild`), a field on an external payload
+  (Stripe's `livemode`), and a name that is a database column or a persisted
+  localStorage key (`active` on a recurring row, `biometrics` on the app-lock
+  record, `secondaryLoaded` in the snapshot cache) — renaming one of those
+  silently changes a wire format or orphans data users already have.
+- **Hook files match the hook:** `useTodayLayout.ts` exports `useTodayLayout`.
+- **Test files** mirror the source name with `.test.tsx`.
 
 ## Comments and documentation
 
@@ -83,9 +119,12 @@
 ## Where this repo differs
 
 **Props are `type`, not `interface`.** The guide asks for `interface` on
-component props. Budgard uses `type Props = { … }` everywhere instead, for one
-consistent way to declare a shape rather than two. `src/common/ui/` is vendored
-shadcn and keeps whatever upstream ships.
+component props. Budgard uses `type ExpensesFormProps = { … }` instead, for one
+consistent way to declare a shape rather than two. The guide's *naming* is kept
+— `{ComponentName}Props` — only the keyword differs. `src/common/ui/` is
+vendored shadcn and keeps whatever upstream ships.
+
+This is the only rule on the site the repo knowingly does not follow.
 
 ## Where this repo is stricter
 
@@ -97,6 +136,24 @@ The guide is silent on these; both are **[enforced]** in `eslint.config.js` for
   return. Boolean props (`disabled={isSubmitting || !isValid}`) and fallback
   values (`{name || '-'}`) are fine — the rule is about hiding a branch inside
   the markup.
+
+## Where this repo is narrower
+
+**Barrel files, but only one.** The guide recommends barrels for grouping
+related exports; it also says to avoid them for large or frequently-updated
+sets, and warns they cost tree-shaking. Both cautions bite here, so
+`common/components/bento/index.ts` is the only one:
+
+- `common/hooks/dataOps/` is twenty modules that change most weeks — the
+  guide's "frequently updated" case exactly.
+- `common/components/charts/` and the dialog folders hold components that are
+  deliberately `React.lazy`-loaded. A barrel over either would pull the whole
+  folder into every chunk that imported one file, undoing the code splitting
+  that `npm run budget` exists to protect.
+- A feature's `components/` folder is a large, constantly-growing export set.
+
+The bento trio qualifies on every count: three exports, stable, tiny, and
+always reached for together.
 
 ## Not applicable
 

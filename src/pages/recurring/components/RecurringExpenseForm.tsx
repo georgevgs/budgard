@@ -11,8 +11,8 @@ import {
 } from '@/common/ui/dialog';
 import { Button } from '@/common/ui/button';
 import { Form } from '@/common/ui/form';
-import RecurringExpenseFields from '@/pages/recurring/components/RecurringExpenseFields';
-import RecurringScheduleFields from '@/pages/recurring/components/RecurringScheduleFields';
+import { RecurringExpenseFields } from '@/pages/recurring/components/RecurringExpenseFields';
+import { RecurringScheduleFields } from '@/pages/recurring/components/RecurringScheduleFields';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { amountToInput } from '@/constants/utils';
 import { recurringExpenseSchema, type RecurringExpenseFormData } from '@/pages/recurring/validations';
@@ -30,7 +30,7 @@ type RecurringExpenseFormProps = {
   onClose: () => void;
 };
 
-const RecurringExpenseForm = ({
+export const RecurringExpenseForm = ({
   expense,
   categories,
   investmentAccounts = [],
@@ -58,7 +58,7 @@ const RecurringExpenseForm = ({
   useDialogDirty(form.formState.isDirty);
 
   const isExpense = type === 'expense';
-  const showLinkedAccount = isExpense && investmentAccounts.length > 0;
+  const shouldShowLinkedAccount = isExpense && investmentAccounts.length > 0;
 
   const handleSubmit = async (values: RecurringExpenseFormData) => {
     if (!session?.user?.id) return;
@@ -97,7 +97,7 @@ const RecurringExpenseForm = ({
               <RecurringScheduleFields
                 form={form}
                 isEditing={Boolean(expense)}
-                showLinkedAccount={showLinkedAccount}
+                shouldShowLinkedAccount={shouldShowLinkedAccount}
                 investmentAccounts={investmentAccounts}
               />
             </div>
@@ -115,9 +115,6 @@ const RecurringExpenseForm = ({
     </div>
   );
 };
-
-export default RecurringExpenseForm;
-
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 type TranslateFunction = (

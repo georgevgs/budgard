@@ -20,7 +20,7 @@ import {
 } from '@/common/ui/select';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useCsvImportFlow } from '@/pages/expenses/hooks/useCsvImportFlow';
-import CsvMappingStep from '@/pages/expenses/components/CsvMappingStep';
+import { CsvMappingStep } from '@/pages/expenses/components/CsvMappingStep';
 import type { Category } from '@/types/Category';
 import { cn, formatCurrency } from '@/constants/utils';
 import type {
@@ -33,7 +33,7 @@ type CsvImportDialogProps = {
   onClose: () => void;
 };
 
-const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
+export const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const flow = useCsvImportFlow(onClose);
@@ -92,9 +92,6 @@ const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
     </Dialog>
   );
 };
-
-export default CsvImportDialog;
-
 // --- Helpers ---
 
 type CsvFlow = ReturnType<typeof useCsvImportFlow>;
@@ -111,9 +108,9 @@ const renderMappingStep = (flow: CsvFlow, t: TranslateFunction) => {
     <CsvMappingStep
       csvPreview={flow.csvPreview}
       columnMapping={flow.columnMapping}
-      skipIncome={flow.skipIncome}
+      shouldSkipIncome={flow.shouldSkipIncome}
       updateColumnMapping={flow.updateColumnMapping}
-      setSkipIncome={flow.setSkipIncome}
+      setShouldSkipIncome={flow.setShouldSkipIncome}
       onBack={flow.resetState}
       onContinue={flow.handleProceedToPreview}
       t={t}

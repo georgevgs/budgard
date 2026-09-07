@@ -12,13 +12,13 @@ import { CurrencyInput } from '@/common/ui/currency-input';
 import { DatePickerField } from '@/common/ui/date-picker-field';
 import type { DebtPaymentFormData } from '@/pages/debts/validations';
 
-type Props = {
+type DebtPaymentFieldsProps = {
   form: UseFormReturn<DebtPaymentFormData>;
   currency: string;
   dateLocale: Locale | undefined;
 };
 
-const DebtPaymentFields = ({ form, currency, dateLocale }: Props) => {
+export const DebtPaymentFields = ({ form, currency, dateLocale }: DebtPaymentFieldsProps) => {
   const { t } = useTranslation();
 
   return (
@@ -78,5 +78,3 @@ const DebtPaymentFields = ({ form, currency, dateLocale }: Props) => {
     </div>
   );
 };
-
-export default DebtPaymentFields;

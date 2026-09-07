@@ -1,11 +1,9 @@
-import TileLabel from '@/common/components/bento/TileLabel';
+import { TileLabel } from '@/common/components/bento';
 
-type Props = {
+type EyebrowLabelProps = {
   children: string;
 };
 
-const EyebrowLabel = ({ children }: Props) => (
+export const EyebrowLabel = ({ children }: EyebrowLabelProps) => (
   <TileLabel className="text-primary-ink">{children}</TileLabel>
 );
-
-export default EyebrowLabel;

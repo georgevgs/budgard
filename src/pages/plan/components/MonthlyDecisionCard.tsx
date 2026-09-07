@@ -1,17 +1,17 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
-import TileLabel from '@/common/components/bento/TileLabel';
 import { formatCurrency } from '@/constants/utils';
 import type { MonthlyDecision } from '@/pages/plan/utils/monthlyDecision';
+import { TileLabel } from '@/common/components/bento';
 
-type Props = {
+type MonthlyDecisionCardProps = {
   decision: MonthlyDecision;
   currency: string;
   onOpenDetails: () => void;
 };
 
-const MonthlyDecisionCard = ({ decision, currency, onOpenDetails }: Props) => {
+export const MonthlyDecisionCard = ({ decision, currency, onOpenDetails }: MonthlyDecisionCardProps) => {
   const { t } = useTranslation();
 
   return (
@@ -30,9 +30,6 @@ const MonthlyDecisionCard = ({ decision, currency, onOpenDetails }: Props) => {
     </section>
   );
 };
-
-export default MonthlyDecisionCard;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import Mail from 'lucide-react/dist/esm/icons/mail';
 import { Button } from '@/common/ui/button';
-import LegalPageLayout from '@/pages/legal/LegalPageLayout';
+import { LegalPageLayout } from '@/pages/legal/LegalPageLayout';
 import { SUPPORT_EMAIL } from '@/pages/legal/utils/legal';
 
 const ContactPage = () => {

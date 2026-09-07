@@ -1,12 +1,12 @@
 import { cn } from '@/constants/utils';
 
-type Props = {
+type BrandMarkProps = {
   className?: string;
 };
 
 const BRAND_MARK_SRC = `/brand/budgard-mark.svg?v=${__BRAND_ASSET_REVISION__}`;
 
-const BrandMark = ({ className }: Props) => {
+export const BrandMark = ({ className }: BrandMarkProps) => {
   return (
     <img
       src={BRAND_MARK_SRC}
@@ -16,5 +16,3 @@ const BrandMark = ({ className }: Props) => {
     />
   );
 };
-
-export default BrandMark;

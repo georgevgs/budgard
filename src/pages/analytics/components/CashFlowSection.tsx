@@ -12,19 +12,23 @@ import { formatCurrency, cn } from '@/constants/utils';
 import { getCurrencySymbol } from '@/constants/currencies';
 import { lazyWithRetry } from '@/constants/lazyWithRetry';
 
-const MonthlyTrendChart = lazyWithRetry(
-  () => import('@/pages/analytics/components/MonthlyTrendChart'),
-);
-const MoneyFlowPanel = lazyWithRetry(
-  () => import('@/pages/analytics/components/MoneyFlowPanel'),
-);
+const MonthlyTrendChart = lazyWithRetry(async () => {
+  const module = await import('@/pages/analytics/components/MonthlyTrendChart');
+
+  return { default: module.MonthlyTrendChart };
+});
+const MoneyFlowPanel = lazyWithRetry(async () => {
+  const module = await import('@/pages/analytics/components/MoneyFlowPanel');
+
+  return { default: module.MoneyFlowPanel };
+});
 
 type MonthlyDatum = { month: string; fullMonth: string; amount: number };
 type YearTotals = ReturnType<typeof useCashFlowData>['yearTotals'];
 type View = 'trend' | 'flow';
 type TFunc = ReturnType<typeof useTranslation>['t'];
 
-type Props = {
+type CashFlowSectionProps = {
   selectedYear: number;
   isPro: boolean;
   monthlyData: MonthlyDatum[];
@@ -40,7 +44,7 @@ type Props = {
 // exact chart it always has. Pro sees the same chart carrying income and net
 // too, plus a second tab for one month's flow by category, rather than a
 // separate "Year overview" and a separate "Cash flow" repeating each other.
-const CashFlowSection = ({
+export const CashFlowSection = ({
   selectedYear,
   isPro,
   monthlyData,
@@ -49,7 +53,7 @@ const CashFlowSection = ({
   monthlyAverage,
   monthsElapsed,
   onMonthClick,
-}: Props) => {
+}: CashFlowSectionProps) => {
   const { t } = useTranslation();
   const { monthlyBudget, defaultCurrency } = useDataConfig();
   const currencySymbol = getCurrencySymbol(defaultCurrency);
@@ -99,9 +103,6 @@ const CashFlowSection = ({
     </div>
   );
 };
-
-export default CashFlowSection;
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 // yAxisMax is sized for the expense-only free chart (budget vs biggest
@@ -377,7 +378,7 @@ const renderTrend = (
               currencySymbol={currencySymbol}
               yAxisMax={yAxisMax}
               onMonthClick={onMonthClick}
-              showCashFlow={isPro}
+              shouldShowCashFlow={isPro}
             />
           </Suspense>
           {renderMonthDetailSelect(data, onMonthClick, currency, t)}

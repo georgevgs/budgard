@@ -1,4 +1,4 @@
-import { buildKeysetFilter } from '@/config/keysetPagination';
+import { buildKeysetFilter } from '@/common/api/keysetPagination';
 import type { AccountBalance } from '@/types/AccountBalance';
 import type { Expense } from '@/types/Expense';
 import type { EmbeddedTag } from '@/types/Tag';

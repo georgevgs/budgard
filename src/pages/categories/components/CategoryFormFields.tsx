@@ -8,20 +8,20 @@ import {
   FormLabel,
   FormMessage,
 } from '@/common/ui/form';
-import CategoryColorPicker from '@/pages/categories/components/CategoryColorPicker';
-import CategoryIconPicker from '@/pages/categories/components/CategoryIconPicker';
-import CategoryKindSelector, {
+import { CategoryColorPicker } from '@/pages/categories/components/CategoryColorPicker';
+import { CategoryIconPicker } from '@/pages/categories/components/CategoryIconPicker';
+import { CategoryKindSelector,
   type SelectableCategoryKind,
 } from '@/pages/categories/components/CategoryKindSelector';
 import type { CategoryFormData } from '@/pages/categories/validations';
 
-type Props = {
+type CategoryFormFieldsProps = {
   form: UseFormReturn<CategoryFormData>;
   isIncomeCategory: boolean;
   isDisabled: boolean;
 };
 
-const CategoryFormFields = ({ form, isIncomeCategory, isDisabled }: Props) => {
+export const CategoryFormFields = ({ form, isIncomeCategory, isDisabled }: CategoryFormFieldsProps) => {
   const { t } = useTranslation();
 
   return (
@@ -88,9 +88,6 @@ const CategoryFormFields = ({ form, isIncomeCategory, isDisabled }: Props) => {
     </>
   );
 };
-
-export default CategoryFormFields;
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 type TranslateFunction = (

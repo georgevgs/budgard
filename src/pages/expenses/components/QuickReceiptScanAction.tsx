@@ -8,11 +8,11 @@ import { Progress } from '@/common/ui/progress';
 import type { QuickReceiptScanApi } from '@/pages/expenses/hooks/useQuickReceiptScan';
 import { RECEIPT_ALLOWED_TYPES } from '@/constants/validations';
 
-type Props = {
+type QuickReceiptScanActionProps = {
   scan: QuickReceiptScanApi;
 };
 
-const QuickReceiptScanAction = ({ scan }: Props) => {
+export const QuickReceiptScanAction = ({ scan }: QuickReceiptScanActionProps) => {
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -31,9 +31,6 @@ const QuickReceiptScanAction = ({ scan }: Props) => {
     </>
   );
 };
-
-export default QuickReceiptScanAction;
-
 // --- Helpers ---
 
 type TFunc = (key: string) => string;

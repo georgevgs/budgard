@@ -1,15 +1,15 @@
 import { useTranslation } from 'react-i18next';
-import SectionShell from '@/pages/landing/components/SectionShell';
-import EyebrowLabel from '@/pages/landing/components/EyebrowLabel';
-import Reveal from '@/pages/landing/components/Reveal';
-import TileLabel from '@/common/components/bento/TileLabel';
+import { SectionShell } from '@/pages/landing/components/SectionShell';
+import { EyebrowLabel } from '@/pages/landing/components/EyebrowLabel';
+import { Reveal } from '@/pages/landing/components/Reveal';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import { TileLabel } from '@/common/components/bento';
 
 type Tx = (key: string) => string;
 
 // The one feature that demonstrates itself in a single frame: receipt on the
 // left, the expense it becomes on the right.
-const Scan = () => {
+export const Scan = () => {
   const { t } = useTranslation();
 
   return (
@@ -23,9 +23,6 @@ const Scan = () => {
     </SectionShell>
   );
 };
-
-export default Scan;
-
 const renderCopy = (t: Tx) => (
   <div>
     <EyebrowLabel>{t('landing.scan.eyebrow')}</EyebrowLabel>

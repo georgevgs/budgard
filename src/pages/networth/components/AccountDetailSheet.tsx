@@ -6,23 +6,23 @@ import { useAccountDetailActions } from '@/pages/networth/hooks/useAccountDetail
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { type Account } from '@/types/Account';
 import { type SnapshotMode } from '@/pages/networth/components/BalanceSnapshotForm';
-import AccountDetailHeader from '@/pages/networth/components/AccountDetailHeader';
-import AccountHistoryChart from '@/pages/networth/components/AccountHistoryChart';
-import ConfirmDestructiveDialog from '@/common/components/common/ConfirmDestructiveDialog';
+import { AccountDetailHeader } from '@/pages/networth/components/AccountDetailHeader';
+import { AccountHistoryChart } from '@/pages/networth/components/AccountHistoryChart';
+import { ConfirmDestructiveDialog } from '@/common/components/common/ConfirmDestructiveDialog';
 import {
   renderActionBar,
   renderSnapshotForm,
   renderHistoryList,
 } from '@/pages/networth/components/AccountDetailSheet.helpers';
 
-type Props = {
+type AccountDetailSheetProps = {
   account: Account;
   open: boolean;
   onClose: () => void;
   onEdit: (account: Account) => void;
 };
 
-const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
+export const AccountDetailSheet = ({ account, open, onClose, onEdit }: AccountDetailSheetProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const { snapshots, isLoading, hasError, retry, removeSnapshot } =
@@ -58,7 +58,7 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
                 account={account}
                 snapshots={snapshots}
                 onEdit={onEdit}
-                onArchiveRequest={() => actions.setShowArchiveDialog(true)}
+                onArchiveRequest={() => actions.setIsArchiveDialogOpen(true)}
               />
 
               <div
@@ -99,11 +99,11 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
       </Dialog>
 
       <ConfirmDestructiveDialog
-        open={actions.showArchiveDialog}
+        open={actions.isArchiveDialogOpen}
         title={t('networth.archiveTitle')}
         description={t('networth.archiveConfirmation', { name: account.name })}
         confirmLabel={t('networth.archive')}
-        onOpenChange={actions.setShowArchiveDialog}
+        onOpenChange={actions.setIsArchiveDialogOpen}
         onConfirm={actions.handleArchiveConfirm}
       />
 
@@ -120,9 +120,6 @@ const AccountDetailSheet = ({ account, open, onClose, onEdit }: Props) => {
     </>
   );
 };
-
-export default AccountDetailSheet;
-
 // --- Helpers ---
 
 const createOpenChangeHandler = (reset: () => void, onClose: () => void) => {

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Input } from '@/common/ui/input';
-import ProUpsellCard from '@/pages/pro/components/ProUpsellCard';
+import { ProUpsellCard } from '@/pages/pro/components/ProUpsellCard';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { useDebtPayoffPlan } from '@/pages/debts/hooks/useDebtPayoffPlan';
@@ -13,11 +13,11 @@ import type { Locale } from 'date-fns';
 import type { SimResult } from '@/pages/debts/utils/debtPayoff';
 import type { Debt, PayoffStrategy } from '@/types/Debt';
 
-type Props = {
+type DebtPayoffPlannerProps = {
   debts: Debt[];
 };
 
-const DebtPayoffPlanner = ({ debts }: Props) => {
+export const DebtPayoffPlanner = ({ debts }: DebtPayoffPlannerProps) => {
   const { t } = useTranslation();
   const { isPro } = useSubscription();
   const { defaultCurrency } = useDataConfig();
@@ -72,9 +72,6 @@ const DebtPayoffPlanner = ({ debts }: Props) => {
     </SurfaceCard>
   );
 };
-
-export default DebtPayoffPlanner;
-
 // --- Helpers ---
 
 type TranslateFunction = (
@@ -149,7 +146,7 @@ const renderResults = (
 ) => {
   const selected = plan[strategy];
 
-  if (selected.unpayable) {
+  if (selected.isUnpayable) {
     return (
       <p className="text-xs text-destructive-ink pt-3 border-t border-border/40">
         {t('debts.planner.unpayable')}
@@ -192,7 +189,7 @@ const renderComparison = (
   currency: string,
   t: TranslateFunction,
 ) => {
-  if (plan.snowball.unpayable || plan.avalanche.unpayable) {
+  if (plan.snowball.isUnpayable || plan.avalanche.isUnpayable) {
     return null;
   }
 

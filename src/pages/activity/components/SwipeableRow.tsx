@@ -4,7 +4,7 @@ import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import { useSwipeActions, SWIPE_ACTION_WIDTH } from '@/pages/activity/hooks/useSwipeActions';
 import { prefersReducedMotion } from '@/constants/motion';
 
-type Props = {
+type SwipeableRowProps = {
   children: ReactNode;
   onDelete: () => void;
   deleteLabel: string;
@@ -20,7 +20,7 @@ type Props = {
 // stacking context, though — each row's Delete reveal is positioned against
 // ITS wrapper, not the shared surface, or every row in the group would
 // uncover the same one spot.
-const SwipeableRow = ({ children, onDelete, deleteLabel }: Props) => {
+export const SwipeableRow = ({ children, onDelete, deleteLabel }: SwipeableRowProps) => {
   const { t } = useTranslation();
   const swipe = useSwipeActions();
 
@@ -67,9 +67,6 @@ const SwipeableRow = ({ children, onDelete, deleteLabel }: Props) => {
     </div>
   );
 };
-
-export default SwipeableRow;
-
 // --- Helpers ---
 
 const ariaHidden = (isOpen: boolean): boolean => !isOpen;

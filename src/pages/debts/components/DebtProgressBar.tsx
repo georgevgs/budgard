@@ -3,12 +3,12 @@ import { Progress } from '@/common/ui/progress';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { DebtProgress } from '@/pages/debts/hooks/useDebtProgress';
 
-type Props = {
+type DebtProgressBarProps = {
   progress: DebtProgress;
   currency: string;
 };
 
-const DebtProgressBar = ({ progress, currency }: Props) => {
+export const DebtProgressBar = ({ progress, currency }: DebtProgressBarProps) => {
   const { t } = useTranslation();
   // Bar fills 0..100 only — negative progress (balance grew) reads as empty.
   const barValue = Math.max(0, Math.round(progress.percentPaid * 100));
@@ -39,9 +39,6 @@ const DebtProgressBar = ({ progress, currency }: Props) => {
     </div>
   );
 };
-
-export default DebtProgressBar;
-
 // --- Helpers ---
 
 type TranslateFunction = (
@@ -51,7 +48,7 @@ type TranslateFunction = (
 
 const pickIndicatorClass = (progress: DebtProgress, isCleared: boolean) => {
   if (isCleared) return 'bg-income';
-  if (progress.isUnpayable || progress.balanceIncreased)
+  if (progress.isUnpayable || progress.hasBalanceIncreased)
     return 'bg-destructive';
 
   return 'bg-primary';
@@ -59,7 +56,7 @@ const pickIndicatorClass = (progress: DebtProgress, isCleared: boolean) => {
 
 const getPercentClass = (progress: DebtProgress, isCleared: boolean) => {
   if (isCleared) return 'text-income-ink font-semibold';
-  if (progress.isUnpayable || progress.balanceIncreased) {
+  if (progress.isUnpayable || progress.hasBalanceIncreased) {
     return 'text-destructive-ink font-medium';
   }
 
@@ -73,7 +70,7 @@ const renderPercentLabel = (
   t: TranslateFunction,
 ) => {
   if (isCleared) return t('debts.cleared');
-  if (progress.balanceIncreased) {
+  if (progress.hasBalanceIncreased) {
     return t('debts.balanceOverOriginal', {
       amount: formatCurrency(progress.balanceOverOriginal, currency),
     });

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDataActions, useDataConfig } from '@/common/contexts/DataContext';
 import { dataService } from '@/common/api/dataService';
-import { signOut } from '@/constants/auth';
+import { authApi } from '@/common/api/authApi';
 import type { NotificationPreferenceKey } from '@/types/Budget';
 import { setScalarOptimistic } from '@/common/hooks/dataOps/helpers';
 import { useMutationRunner } from '@/common/hooks/dataOps/useMutationRunner';
@@ -86,10 +86,10 @@ export const useSettingsOps = () => {
         operation: 'deleteAccount',
         errorMessage: t('settings.data.deleteAccountFailed'),
         successHaptic: 'none',
-        retryable: false,
+        isRetryable: false,
         perform: async () => {
           await dataService.deleteAccount();
-          await signOut();
+          await authApi.signOut();
         },
       });
 

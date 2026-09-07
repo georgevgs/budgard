@@ -12,7 +12,7 @@ import { countsAsSpending, countsInTotals } from '@/constants/spending';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
-type Props = {
+type FiftyThirtyTwentyRingProps = {
   selectedMonth: string;
 };
 
@@ -58,7 +58,7 @@ const BUCKETS: BucketConfig[] = [
   },
 ];
 
-const FiftyThirtyTwentyRing = ({ selectedMonth }: Props) => {
+export const FiftyThirtyTwentyRing = ({ selectedMonth }: FiftyThirtyTwentyRingProps) => {
   const { t } = useTranslation();
   const expenses = useExpensesData();
   const incomes = useIncomesData();
@@ -152,9 +152,6 @@ const FiftyThirtyTwentyRing = ({ selectedMonth }: Props) => {
     </div>
   );
 };
-
-export default FiftyThirtyTwentyRing;
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 type TranslateFunction = (

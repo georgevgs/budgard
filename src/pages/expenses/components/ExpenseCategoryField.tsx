@@ -22,17 +22,17 @@ import type { ExpenseFormData } from '@/pages/expenses/validations';
 // Sentinel option value. Not a category id, so it can never collide with one.
 const MANAGE_VALUE = '__manage__';
 
-type Props = {
+type ExpenseCategoryFieldProps = {
   form: UseFormReturn<ExpenseFormData>;
   categories: Category[];
   onManageCategories: () => void;
 };
 
-const ExpenseCategoryField = ({
+export const ExpenseCategoryField = ({
   form,
   categories,
   onManageCategories,
-}: Props) => {
+}: ExpenseCategoryFieldProps) => {
   const { t } = useTranslation();
 
   // Categories used to be created from the floating action button, ranked
@@ -93,5 +93,3 @@ const ExpenseCategoryField = ({
     />
   );
 };
-
-export default ExpenseCategoryField;

@@ -47,7 +47,7 @@ type CategoryKindSelectorProps = {
   disabled?: boolean;
 };
 
-const CategoryKindSelector = ({
+export const CategoryKindSelector = ({
   value,
   onChange,
   disabled,
@@ -89,9 +89,6 @@ const CategoryKindSelector = ({
     </div>
   );
 };
-
-export default CategoryKindSelector;
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const toggleKind = (

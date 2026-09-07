@@ -12,19 +12,19 @@ import { SUPPORTED_CURRENCIES } from '@/constants/currencies';
 import { formatCurrency } from '@/constants/utils';
 import type { CurrencyConversionApi } from '@/common/hooks/currency/useCurrencyConversionCore';
 
-type Props = {
+type TransactionAmountControlProps = {
   amountLabel: string;
   conversion: CurrencyConversionApi;
   value: string;
   onChange: (value: string) => void;
 };
 
-const TransactionAmountControl = ({
+export const TransactionAmountControl = ({
   amountLabel,
   conversion,
   value,
   onChange,
-}: Props) => {
+}: TransactionAmountControlProps) => {
   const { t } = useTranslation();
 
   return (
@@ -63,9 +63,6 @@ const TransactionAmountControl = ({
     </>
   );
 };
-
-export default TransactionAmountControl;
-
 // --- Helpers ---
 
 type TranslateFunction = (

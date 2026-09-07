@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from 'react';
 import { cn } from '@/constants/utils';
 
-type Props = HTMLAttributes<HTMLDivElement> & {
+type SurfaceCardProps = HTMLAttributes<HTMLDivElement> & {
   /** Clips children to the radius — use for grouped lists and charts. */
   flush?: boolean;
 };
@@ -10,12 +10,9 @@ type Props = HTMLAttributes<HTMLDivElement> & {
 // primitive carries its own `rounded-2xl bg-card shadow-sm` utilities, which
 // outrank anything the .surface-card component class can say, so the tint and
 // radius would silently never apply.
-const SurfaceCard = ({ flush = false, className, ...props }: Props) => {
+export const SurfaceCard = ({ flush = false, className, ...props }: SurfaceCardProps) => {
   return <div className={cn(getSurfaceClass(flush), className)} {...props} />;
 };
-
-export default SurfaceCard;
-
 // --- Helpers ---
 
 const getSurfaceClass = (flush: boolean): string => {

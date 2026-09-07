@@ -18,19 +18,19 @@ import type { Expense } from '@/types/Expense';
 import type { TransactionRuleDraft } from '@/types/TransactionRule';
 
 type Values = z.infer<typeof transactionRuleSchema>;
-type Props = {
+type TransactionRuleDialogProps = {
   transaction: Expense;
   categories: Category[];
   onSave: (draft: TransactionRuleDraft) => Promise<boolean>;
   onClose: () => void;
 };
 
-const TransactionRuleDialog = ({
+export const TransactionRuleDialog = ({
   transaction,
   categories,
   onSave,
   onClose,
-}: Props) => {
+}: TransactionRuleDialogProps) => {
   const { t } = useTranslation();
   const form = useForm<Values>({
     resolver: zodResolver(transactionRuleSchema),
@@ -71,9 +71,6 @@ const TransactionRuleDialog = ({
     </Dialog>
   );
 };
-
-export default TransactionRuleDialog;
-
 // --- Helpers ---
 
 type Form = ReturnType<typeof useForm<Values>>;

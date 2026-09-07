@@ -1,12 +1,12 @@
 import { format, parseISO } from 'date-fns';
-import CategoryIcon from '@/common/components/common/CategoryIcon';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { cn } from '@/constants/utils';
 import { describeAmount } from '@/constants/transactionAmount';
 import { getColorTint } from '@/constants/categoryColor';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+type TransactionHeroProps = {
   transaction: Expense;
   currency: string;
   isIncome: boolean;
@@ -15,7 +15,7 @@ type Props = {
 // The top of the detail screen: what it was, and how much. Carries the
 // view-transition name that pairs it with the row it was opened from, so the
 // mark and the amount travel between the two screens instead of cross-fading.
-const TransactionHero = ({ transaction, currency, isIncome }: Props) => {
+export const TransactionHero = ({ transaction, currency, isIncome }: TransactionHeroProps) => {
   const dateLocale = useDateLocale();
   const amount = describeAmount(
     transaction.amount,
@@ -53,9 +53,6 @@ const TransactionHero = ({ transaction, currency, isIncome }: Props) => {
     </header>
   );
 };
-
-export default TransactionHero;
-
 // --- Helpers ---
 
 const resolveKind = (isIncome: boolean): 'expense' | 'income' => {

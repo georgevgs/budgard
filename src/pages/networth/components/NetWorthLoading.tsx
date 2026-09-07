@@ -5,7 +5,7 @@ import LoadingScreen from '@/common/ui/loading-screen';
 
 const ROWS = ['w-2/5', 'w-1/2', 'w-1/3'] as const;
 
-const NetWorthLoadingState = () => {
+export const NetWorthLoading = () => {
   const { t } = useTranslation();
 
   return (
@@ -34,5 +34,3 @@ const NetWorthLoadingState = () => {
     </LoadingScreen>
   );
 };
-
-export default NetWorthLoadingState;

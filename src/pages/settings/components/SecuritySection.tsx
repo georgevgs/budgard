@@ -2,12 +2,12 @@ import { useTranslation } from 'react-i18next';
 import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
 import { Button } from '@/common/ui/button';
 import { Switch } from '@/common/ui/switch';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
-import SetPinDialog from '@/pages/security/components/SetPinDialog';
-import ConfirmDestructiveDialog from '@/common/components/common/ConfirmDestructiveDialog';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
+import { SetPinDialog } from '@/pages/security/components/SetPinDialog';
+import { ConfirmDestructiveDialog } from '@/common/components/common/ConfirmDestructiveDialog';
 import { useSecuritySettings } from '@/pages/security/hooks/useSecuritySettings';
 
-const SecuritySection = () => {
+export const SecuritySection = () => {
   const { t } = useTranslation();
   const security = useSecuritySettings();
 
@@ -55,7 +55,7 @@ const SecuritySection = () => {
             type="button"
             variant="outline"
             className="w-full rounded-full"
-            onClick={() => security.setConfirmSignOutAll(true)}
+            onClick={() => security.setIsConfirmingSignOutAll(true)}
           >
             {t('security.sessions.signOutEverywhere')}
           </Button>
@@ -74,13 +74,13 @@ const SecuritySection = () => {
         onSaved={security.handlePinSaved}
       />
       <ConfirmDestructiveDialog
-        open={security.confirmSignOutAll}
+        open={security.isConfirmingSignOutAll}
         title={t('security.sessions.signOutEverywhere')}
         description={t('security.sessions.signOutConfirm')}
         confirmLabel={t('security.sessions.signOutEverywhere')}
         onOpenChange={(open) => {
           if (!open) {
-            security.setConfirmSignOutAll(false);
+            security.setIsConfirmingSignOutAll(false);
           }
         }}
         onConfirm={security.handleSignOutEverywhere}
@@ -88,9 +88,6 @@ const SecuritySection = () => {
     </section>
   );
 };
-
-export default SecuritySection;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

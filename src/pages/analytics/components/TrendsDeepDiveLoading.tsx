@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/common/ui/skeleton';
 import LoadingScreen from '@/common/ui/loading-screen';
 
-const TrendsDeepDiveLoadingState = () => {
+export const TrendsDeepDiveLoading = () => {
   const { t } = useTranslation();
 
   return (
@@ -28,5 +28,3 @@ const TrendsDeepDiveLoadingState = () => {
     </LoadingScreen>
   );
 };
-
-export default TrendsDeepDiveLoadingState;

@@ -2,7 +2,7 @@ import { useActionState, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TurnstileInstance } from '@marsidev/react-turnstile';
 import { useToast } from '@/common/hooks/useToast';
-import { signInWithOTP, requestOTP } from '@/constants/auth';
+import { authApi } from '@/common/api/authApi';
 import { emailSchema } from '@/constants/validations';
 
 export type OtpState = {
@@ -48,7 +48,7 @@ export const useOtpAction = (onSuccess?: () => void) => {
           return { ...prev, error: t('auth.securityCheck') };
         }
 
-        const { error } = await requestOTP(prev.email, captchaToken);
+        const { error } = await authApi.requestOTP(prev.email, captchaToken);
         turnstileRef.current?.reset();
         setTurnstileToken(null);
         if (error) {
@@ -94,7 +94,7 @@ export const useOtpAction = (onSuccess?: () => void) => {
         }
 
         const captchaToken = formData.get('turnstile_token') as string;
-        const { error } = await requestOTP(email, captchaToken || undefined);
+        const { error } = await authApi.requestOTP(email, captchaToken || undefined);
         if (error) {
           turnstileRef.current?.reset();
           setTurnstileToken(null);
@@ -123,7 +123,7 @@ export const useOtpAction = (onSuccess?: () => void) => {
       const email = formData.get('email') as string;
       const otpValue = formData.get('otp') as string;
 
-      const { error } = await signInWithOTP(email, otpValue);
+      const { error } = await authApi.signInWithOTP(email, otpValue);
       if (error) {
         // Clear the stale code so the user can type the next attempt directly
         setOtp('');

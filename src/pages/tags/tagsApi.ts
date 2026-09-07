@@ -1,5 +1,5 @@
 import { supabase } from '@/config/supabase';
-import { done, row, rows } from '@/config/supabaseCrud';
+import { done, row, rows } from '@/common/api/supabaseCrud';
 import type { Tag } from '@/types/Tag';
 
 // Supabase queries for tags, at the feature root so an audit of what

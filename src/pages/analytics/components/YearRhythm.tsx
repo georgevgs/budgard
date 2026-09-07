@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import CartesianChart from '@/common/components/charts/CartesianChart';
+import { CartesianChart } from '@/common/components/charts/CartesianChart';
 import type { ChartPoint, Series } from '@/common/components/charts/chartTypes';
 import { buildBaseline } from '@/constants/baseline';
 import { formatCurrency, formatCurrencyCompact } from '@/constants/utils';
@@ -11,7 +11,7 @@ type MonthPoint = {
   amount: number;
 };
 
-type Props = {
+type YearRhythmProps = {
   months: MonthPoint[];
   currency: string;
 };
@@ -28,7 +28,7 @@ const SERIES: Series[] = [
 // This is the chart the app is recognisable by, which is why it plots a
 // personal baseline: a bar chart against a budget number is what every other
 // budgeting app already looks like.
-const YearRhythm = ({ months, currency }: Props) => {
+export const YearRhythm = ({ months, currency }: YearRhythmProps) => {
   const { t } = useTranslation();
 
   const model = useMemo(() => buildRhythm(months), [months]);
@@ -56,7 +56,7 @@ const YearRhythm = ({ months, currency }: Props) => {
           xKey="month"
           series={SERIES}
           height={200}
-          allowNegative
+          shouldAllowNegative
           formatY={(value) => formatCurrencyCompact(value, currency)}
           reference={{
             value: 0,
@@ -74,9 +74,6 @@ const YearRhythm = ({ months, currency }: Props) => {
     </section>
   );
 };
-
-export default YearRhythm;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

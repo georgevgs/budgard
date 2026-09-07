@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import CategoryGlyph from '@/common/components/common/CategoryGlyph';
-import ExpensesCardActions from '@/pages/expenses/components/ExpensesCardActions';
-import IncomeCardActions from '@/pages/income/components/IncomeCardActions';
+import { CategoryGlyph } from '@/common/components/common/CategoryGlyph';
+import { ExpensesCardActions } from '@/pages/expenses/components/ExpensesCardActions';
+import { IncomeCardActions } from '@/pages/income/components/IncomeCardActions';
 import { cn } from '@/constants/utils';
 import { describeAmount } from '@/constants/transactionAmount';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+type ActivityTransactionRowProps = {
   transaction: Expense;
   currency: string;
   onExpenseEdit: (expense: Expense) => void;
@@ -17,7 +17,7 @@ type Props = {
   onIncomeDelete: (id: string) => void;
 };
 
-const ActivityTransactionRow = (props: Props) => {
+export const ActivityTransactionRow = (props: ActivityTransactionRowProps) => {
   const { t } = useTranslation();
   const { transaction } = props;
   const isIncome = transaction.type === 'income';
@@ -65,9 +65,6 @@ const ActivityTransactionRow = (props: Props) => {
     </div>
   );
 };
-
-export default ActivityTransactionRow;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
@@ -91,7 +88,7 @@ const renderCategoryName = (transaction: Expense, t: TFunc) => {
   return t('activity.uncategorized');
 };
 
-const renderActions = (props: Props, isIncome: boolean) => {
+const renderActions = (props: ActivityTransactionRowProps, isIncome: boolean) => {
   if (isIncome) {
     return (
       <IncomeCardActions

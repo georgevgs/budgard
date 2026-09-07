@@ -6,12 +6,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/common/ui/dialog';
-import PinPad from '@/pages/security/components/PinPad';
+import { PinPad } from '@/pages/security/components/PinPad';
 import { useSetPin } from '@/pages/security/hooks/useSetPin';
 import { PIN_LENGTH } from '@/constants/appLock';
 import { cn } from '@/constants/utils';
 
-type Props = {
+type SetPinDialogProps = {
   open: boolean;
   onClose: () => void;
   onSaved: () => void;
@@ -19,7 +19,7 @@ type Props = {
 
 // Two passes: choose, then repeat. A single-entry PIN is one slip away from
 // locking someone out of their own app with no way to discover the typo.
-const SetPinDialog = ({ open, onClose, onSaved }: Props) => {
+export const SetPinDialog = ({ open, onClose, onSaved }: SetPinDialogProps) => {
   const { t } = useTranslation();
   const form = useSetPin({ isOpen: open, onSaved });
 
@@ -59,9 +59,6 @@ const SetPinDialog = ({ open, onClose, onSaved }: Props) => {
     </Dialog>
   );
 };
-
-export default SetPinDialog;
-
 // --- Helpers ---
 
 const dotTone = (filled: boolean, hasError: boolean): string => {

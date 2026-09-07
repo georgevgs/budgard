@@ -1,8 +1,8 @@
 import { format } from 'date-fns';
-import TodayArrange from '@/pages/today/components/TodayArrange';
-import TodayGrid from '@/pages/today/components/TodayGrid';
-import TodayHeader from '@/pages/today/components/TodayHeader';
-import { ExpenseLoadingState } from '@/pages/expenses/components/ExpensesLoading';
+import { TodayArrange } from '@/pages/today/components/TodayArrange';
+import { TodayGrid } from '@/pages/today/components/TodayGrid';
+import { TodayHeader } from '@/pages/today/components/TodayHeader';
+import { TransactionsLoading } from '@/common/components/common/TransactionsLoading';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useQuickAdd } from '@/common/contexts/QuickAddContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
@@ -84,5 +84,5 @@ const renderLoading = (showSkeleton: boolean) => {
     return null;
   }
 
-  return <ExpenseLoadingState />;
+  return <TransactionsLoading />;
 };

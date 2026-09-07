@@ -1,19 +1,19 @@
 import { useTranslation } from 'react-i18next';
-import type { ProPlansDisplay } from '@/pages/pro/hooks/useProPlans';
+import type { UseProPlansReturn } from '@/pages/pro/hooks/useProPlans';
 import { yearlySavingsPercent } from '@/constants/proPlans';
 import type { CheckoutPlan } from '@/common/api/subscriptionService';
 import { cn } from '@/constants/utils';
 
-type Props = {
+type PaywallPlansProps = {
   plan: CheckoutPlan;
   onSelect: (plan: CheckoutPlan) => void;
-  plans: ProPlansDisplay;
+  plans: UseProPlansReturn;
 };
 
 // Stacked selectable plan cards, yearly first with its savings badge —
 // the price a card shows is always the per-month figure so the two plans
 // stay directly comparable.
-const PaywallPlans = ({ plan, onSelect, plans }: Props) => {
+export const PaywallPlans = ({ plan, onSelect, plans }: PaywallPlansProps) => {
   const { t } = useTranslation();
 
   return (
@@ -45,9 +45,6 @@ const PaywallPlans = ({ plan, onSelect, plans }: Props) => {
     </div>
   );
 };
-
-export default PaywallPlans;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
@@ -63,7 +60,7 @@ type PlanCard = {
   subLine: string | null;
 };
 
-const buildSavingsBadge = (plans: ProPlansDisplay, t: TFunc): string | null => {
+const buildSavingsBadge = (plans: UseProPlansReturn, t: TFunc): string | null => {
   const percent = yearlySavingsPercent(plans.prices);
   if (percent <= 0) return null;
 

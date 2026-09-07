@@ -1,5 +1,5 @@
 import { supabase } from '@/config/supabase';
-import { done, row, rows } from '@/config/supabaseCrud';
+import { done, row, rows } from '@/common/api/supabaseCrud';
 import { SELECT_WITH_CATEGORY } from '@/common/api/dataAccess';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 

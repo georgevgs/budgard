@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/constants/utils';
 
-type Props = {
+type SectionShellProps = {
   id?: string;
   tone?: 'default' | 'muted' | 'inverted';
   children: ReactNode;
   className?: string;
 };
 
-const SectionShell = ({ id, tone = 'default', children, className }: Props) => {
+export const SectionShell = ({ id, tone = 'default', children, className }: SectionShellProps) => {
   return (
     <section id={id} className={cn(toneClass(tone), className)}>
       <div className="landing-gutter mx-auto max-w-6xl py-20 sm:py-28">
@@ -17,9 +17,6 @@ const SectionShell = ({ id, tone = 'default', children, className }: Props) => {
     </section>
   );
 };
-
-export default SectionShell;
-
 const toneClass = (tone: 'default' | 'muted' | 'inverted') => {
   // The app's rule is its separation. A full-width grey band made the landing
   // page alternate surfaces even though the product deliberately keeps page

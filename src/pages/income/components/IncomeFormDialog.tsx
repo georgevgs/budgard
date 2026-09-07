@@ -1,15 +1,15 @@
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent } from '@/common/ui/dialog';
-import IncomeForm from '@/pages/income/components/IncomeForm';
+import { IncomeForm } from '@/pages/income/components/IncomeForm';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+type IncomeFormDialogProps = {
   open: boolean;
   income: Expense | undefined;
   onClose: () => void;
 };
 
-const IncomeFormDialog = ({ open, income, onClose }: Props) => {
+export const IncomeFormDialog = ({ open, income, onClose }: IncomeFormDialogProps) => {
   const { t } = useTranslation();
 
   return (
@@ -28,5 +28,3 @@ const IncomeFormDialog = ({ open, income, onClose }: Props) => {
     </Dialog>
   );
 };
-
-export default IncomeFormDialog;

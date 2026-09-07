@@ -1,9 +1,9 @@
 import { useMemo, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import FormsManager from '@/common/components/layout/FormsManager';
-import QuickAddSheet from '@/pages/expenses/components/QuickAddSheet';
-import SpeedDial from '@/common/components/layout/SpeedDial';
-import IncomeFormDialog from '@/pages/income/components/IncomeFormDialog';
+import { FormsManager } from '@/common/components/layout/FormsManager';
+import { QuickAddSheet } from '@/pages/expenses/components/QuickAddSheet';
+import { SpeedDial } from '@/common/components/layout/SpeedDial';
+import { IncomeFormDialog } from '@/pages/income/components/IncomeFormDialog';
 import {
   QuickAddContext,
   type QuickAddValue,
@@ -17,11 +17,11 @@ import { useIncomeFormState } from '@/pages/income/hooks/useIncomeFormState';
 import { isTransactionEntryPath } from '@/constants/routes';
 import { FORM_TYPES } from '@/common/components/layout/formTypes';
 
-type Props = {
+type QuickAddProviderProps = {
   children: ReactNode;
 };
 
-const QuickAddProvider = ({ children }: Props) => {
+export const QuickAddProvider = ({ children }: QuickAddProviderProps) => {
   const { pathname } = useLocation();
   const { isInitialized } = useDataConfig();
   const expenseForm = useExpenseFormState();
@@ -85,9 +85,6 @@ const QuickAddProvider = ({ children }: Props) => {
     </QuickAddContext.Provider>
   );
 };
-
-export default QuickAddProvider;
-
 // --- Helpers ---
 
 // Only the screens where adding a transaction IS the primary action — see

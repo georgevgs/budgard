@@ -12,15 +12,15 @@ import {
   setYear,
 } from 'date-fns';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
-import MonthYearPickerContent from '@/pages/expenses/components/MonthYearPickerContent';
+import { MonthYearPickerContent } from '@/pages/expenses/components/MonthYearPickerContent';
 
-type Props = {
+type ExpensesMonthlySelectorProps = {
   /** Format: "yyyy-MM". */
   selectedMonth: string;
   onMonthChange: (month: string) => void;
 };
 
-const ExpensesMonthlySelector = ({ selectedMonth, onMonthChange }: Props) => {
+export const ExpensesMonthlySelector = ({ selectedMonth, onMonthChange }: ExpensesMonthlySelectorProps) => {
   const { t } = useTranslation();
   const selectedDate = parseISO(`${selectedMonth}-01`);
   const dateLocale = useDateLocale();
@@ -91,5 +91,3 @@ const ExpensesMonthlySelector = ({ selectedMonth, onMonthChange }: Props) => {
     </div>
   );
 };
-
-export default ExpensesMonthlySelector;

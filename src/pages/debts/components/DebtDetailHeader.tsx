@@ -6,7 +6,7 @@ import {
   DialogHeader,
 } from '@/common/ui/dialog';
 import { Button } from '@/common/ui/button';
-import ScrollSafeDropdownMenuTrigger from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
+import { ScrollSafeDropdownMenuTrigger } from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,31 +17,31 @@ import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import { formatCurrency } from '@/constants/utils';
 import type { DebtProgress } from '@/pages/debts/hooks/useDebtProgress';
 import type { Debt } from '@/types/Debt';
-import DebtProgressBar from '@/pages/debts/components/DebtProgressBar';
+import { DebtProgressBar } from '@/pages/debts/components/DebtProgressBar';
 
-type Props = {
+type DebtDetailHeaderProps = {
   debt: Debt;
   progress: DebtProgress;
   onEdit: (debt: Debt) => void;
   onArchiveRequest: () => void;
 };
 
-const DebtDetailHeader = ({
+export const DebtDetailHeader = ({
   debt,
   progress,
   onEdit,
   onArchiveRequest,
-}: Props) => {
+}: DebtDetailHeaderProps) => {
   const { t } = useTranslation();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleEditClick = () => {
-    setMenuOpen(false);
+    setIsMenuOpen(false);
     setTimeout(() => onEdit(debt), 0);
   };
 
   const handleArchiveClick = () => {
-    setMenuOpen(false);
+    setIsMenuOpen(false);
     setTimeout(() => onArchiveRequest(), 0);
   };
 
@@ -55,11 +55,11 @@ const DebtDetailHeader = ({
             {t('debts.aprSuffix', { apr: debt.apr.toFixed(2) })}
           </DialogDescription>
         </div>
-        <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+        <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
           <ScrollSafeDropdownMenuTrigger
             asChild
-            isOpen={menuOpen}
-            onOpenChange={setMenuOpen}
+            isOpen={isMenuOpen}
+            onOpenChange={setIsMenuOpen}
           >
             <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0">
               <MoreVertical className="h-4 w-4" />
@@ -122,9 +122,6 @@ const DebtDetailHeader = ({
     </DialogHeader>
   );
 };
-
-export default DebtDetailHeader;
-
 // --- Helpers ---
 
 type TranslateFunction = (

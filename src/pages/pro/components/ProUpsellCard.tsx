@@ -1,10 +1,10 @@
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import { useTranslation } from 'react-i18next';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Button } from '@/common/ui/button';
 import { useUpgradeDialog } from '@/common/contexts/UpgradeDialogContext';
 
-type Props = {
+type ProUpsellCardProps = {
   title: string;
   description: string;
 };
@@ -14,7 +14,7 @@ type Props = {
 // above a button captioned "+ Upgrade to Pro" — the plus belongs to "add a
 // thing", and the padlock frames the whole product as withheld. Same
 // information, stated as what you get.
-const ProUpsellCard = ({ title, description }: Props) => {
+export const ProUpsellCard = ({ title, description }: ProUpsellCardProps) => {
   const { t } = useTranslation();
   const { openUpgrade } = useUpgradeDialog();
 
@@ -39,5 +39,3 @@ const ProUpsellCard = ({ title, description }: Props) => {
     </SurfaceCard>
   );
 };
-
-export default ProUpsellCard;

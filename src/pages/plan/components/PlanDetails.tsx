@@ -1,11 +1,11 @@
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import { useTranslation } from 'react-i18next';
-import BudgetProgress from '@/pages/budget/components/BudgetProgress';
-import FiftyThirtyTwentyRing from '@/pages/income/components/FiftyThirtyTwentyRing';
-import SavingsRhythm from '@/pages/plan/components/SavingsRhythm';
+import { BudgetProgress } from '@/pages/budget/components/BudgetProgress';
+import { FiftyThirtyTwentyRing } from '@/pages/income/components/FiftyThirtyTwentyRing';
+import { SavingsRhythm } from '@/pages/plan/components/SavingsRhythm';
 import type { useSavingsRhythm } from '@/common/hooks/savings/useSavingsRhythm';
 
-type Props = {
+type PlanDetailsProps = {
   isOpen: boolean;
   monthKey: string;
   monthlyBudget: number | null;
@@ -19,7 +19,7 @@ type Props = {
 // Budget controls and explanatory analysis are useful, but they are not the
 // plan's first answer. One disclosure keeps both available without stacking
 // two more dashboards into every visit.
-const PlanDetails = (props: Props) => {
+export const PlanDetails = (props: PlanDetailsProps) => {
   const { t } = useTranslation();
 
   return (
@@ -62,5 +62,3 @@ const PlanDetails = (props: Props) => {
     </details>
   );
 };
-
-export default PlanDetails;

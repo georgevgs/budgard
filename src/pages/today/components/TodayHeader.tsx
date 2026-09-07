@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import LayoutGrid from 'lucide-react/dist/esm/icons/layout-grid';
-import ProfileMenu from '@/common/components/layout/ProfileMenu';
+import { ProfileMenu } from '@/common/components/layout/ProfileMenu';
 
-type Props = {
+type TodayHeaderProps = {
   greeting: 'morning' | 'afternoon' | 'evening';
   dateLabel: string;
   isArranging: boolean;
@@ -14,7 +14,7 @@ type Props = {
 // Today's own header. There is no app bar behind it any more, so this is also
 // where the account lives — the avatar is the way into Settings from the tab
 // people land on.
-const TodayHeader = (props: Props) => {
+export const TodayHeader = (props: TodayHeaderProps) => {
   const { t } = useTranslation();
   const arrangeHeadingRef = useRef<HTMLHeadingElement>(null);
 
@@ -71,9 +71,6 @@ const TodayHeader = (props: Props) => {
     </div>
   );
 };
-
-export default TodayHeader;
-
 // --- Helpers ---
 
 const finishArranging = (onDone: () => void): void => {

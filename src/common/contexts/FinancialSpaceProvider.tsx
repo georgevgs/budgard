@@ -13,11 +13,11 @@ import {
 import { householdService } from '@/common/api/householdService';
 import type { FinancialSpace, HouseholdShare } from '@/types/Household';
 
-type Props = {
+type FinancialSpaceProviderProps = {
   children: ReactNode;
 };
 
-const FinancialSpaceProvider = ({ children }: Props) => {
+export const FinancialSpaceProvider = ({ children }: FinancialSpaceProviderProps) => {
   const { session } = useAuth();
   const userId = session?.user.id ?? '';
   const email = session?.user.email ?? '';
@@ -46,9 +46,6 @@ const FinancialSpaceProvider = ({ children }: Props) => {
     </FinancialSpaceContext.Provider>
   );
 };
-
-export default FinancialSpaceProvider;
-
 // --- Helpers ---
 
 const STORAGE_PREFIX = 'budgard-active-financial-space';

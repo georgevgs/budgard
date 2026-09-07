@@ -14,11 +14,11 @@ export const useAccountDetailActions = ({
   removeSnapshot,
 }: UseAccountDetailActionsArgs) => {
   const { handleAccountArchive, handleSnapshotDelete } = useAccountOps();
-  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
   const [snapshotToDelete, setSnapshotToDelete] = useState<string | null>(null);
 
   const handleArchiveConfirm = async () => {
-    setShowArchiveDialog(false);
+    setIsArchiveDialogOpen(false);
     try {
       await handleAccountArchive(account.id);
       onClose();
@@ -43,8 +43,8 @@ export const useAccountDetailActions = ({
   };
 
   return {
-    showArchiveDialog,
-    setShowArchiveDialog,
+    isArchiveDialogOpen,
+    setIsArchiveDialogOpen,
     snapshotToDelete,
     setSnapshotToDelete,
     handleArchiveConfirm,

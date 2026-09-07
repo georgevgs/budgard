@@ -19,7 +19,7 @@ import {
 } from '@/common/ui/form';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { useSnapshotSubmit } from '@/pages/networth/hooks/useSnapshotSubmit';
-import SnapshotMetaFields from '@/pages/networth/components/SnapshotMetaFields';
+import { SnapshotMetaFields } from '@/pages/networth/components/SnapshotMetaFields';
 import { amountToInput } from '@/constants/utils';
 import { getCurrencySymbol } from '@/constants/currencies';
 import { accountBalanceSchema, type AccountBalanceFormData } from '@/pages/networth/validations';
@@ -27,13 +27,13 @@ import type { Account } from '@/types/Account';
 
 export type SnapshotMode = 'value' | 'contribution' | 'withdrawal';
 
-type Props = {
+type BalanceSnapshotFormProps = {
   account: Account;
   onClose: () => void;
   mode?: SnapshotMode;
 };
 
-const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
+export const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: BalanceSnapshotFormProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const isInvestment = account.kind === 'investment';
@@ -131,9 +131,6 @@ const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: Props) => {
     </>
   );
 };
-
-export default BalanceSnapshotForm;
-
 // --- Helpers ---
 
 type TranslateFunction = (

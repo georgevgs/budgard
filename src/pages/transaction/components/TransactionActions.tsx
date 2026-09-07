@@ -4,18 +4,18 @@ import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import { Button } from '@/common/ui/button';
 import { Switch } from '@/common/ui/switch';
-import ConfirmDestructiveDialog from '@/common/components/common/ConfirmDestructiveDialog';
+import { ConfirmDestructiveDialog } from '@/common/components/common/ConfirmDestructiveDialog';
 
-type Props = {
+type TransactionActionsProps = {
   isExcluded: boolean;
   onToggleExcluded: () => void;
   onEdit: () => void;
   onDelete: () => void;
 };
 
-const TransactionActions = (props: Props) => {
+export const TransactionActions = (props: TransactionActionsProps) => {
   const { t } = useTranslation();
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   return (
     <section className="space-y-4">
@@ -49,7 +49,7 @@ const TransactionActions = (props: Props) => {
           type="button"
           variant="outline"
           className="rounded-full text-destructive-ink"
-          onClick={() => setConfirmDelete(true)}
+          onClick={() => setIsConfirmingDelete(true)}
           aria-label={t('common.delete')}
         >
           <Trash2 className="h-4 w-4" />
@@ -57,13 +57,13 @@ const TransactionActions = (props: Props) => {
       </div>
 
       <ConfirmDestructiveDialog
-        open={confirmDelete}
+        open={isConfirmingDelete}
         title={t('transaction.delete')}
         description={t('transaction.deleteConfirmation')}
         confirmLabel={t('common.delete')}
         onOpenChange={(open) => {
           if (!open) {
-            setConfirmDelete(false);
+            setIsConfirmingDelete(false);
           }
         }}
         onConfirm={props.onDelete}
@@ -71,5 +71,3 @@ const TransactionActions = (props: Props) => {
     </section>
   );
 };
-
-export default TransactionActions;

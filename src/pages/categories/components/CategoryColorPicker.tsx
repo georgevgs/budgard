@@ -12,7 +12,7 @@ type CategoryColorPickerProps = {
   disabled?: boolean;
 };
 
-const CategoryColorPicker = ({
+export const CategoryColorPicker = ({
   value,
   onChange,
   disabled,
@@ -64,9 +64,6 @@ const CategoryColorPicker = ({
     </>
   );
 };
-
-export default CategoryColorPicker;
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const renderColorButtonState = (isSelected: boolean) => {

@@ -1,12 +1,11 @@
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import BentoTile from '@/common/components/bento/BentoTile';
-import TileLabel from '@/common/components/bento/TileLabel';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { formatCurrency } from '@/constants/utils';
 import type { UpcomingBills, UpcomingEntry } from '@/pages/today/utils/upcomingBills';
+import { BentoTile, TileLabel } from '@/common/components/bento';
 
-type Props = {
+type UpcomingTileProps = {
   upcoming: UpcomingBills;
   currency: string;
 };
@@ -16,7 +15,7 @@ type Locale = ReturnType<typeof useDateLocale>;
 // What is about to leave the account, at a glance. The day abbreviation is the
 // column that matters — "Mon" answers "is this before or after payday" faster
 // than a date does, which is the only question a seven-day window raises.
-const UpcomingTile = ({ upcoming, currency }: Props) => {
+export const UpcomingTile = ({ upcoming, currency }: UpcomingTileProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
 
@@ -48,9 +47,6 @@ const UpcomingTile = ({ upcoming, currency }: Props) => {
     </BentoTile>
   );
 };
-
-export default UpcomingTile;
-
 // --- Helpers ---
 
 const renderEntry = (

@@ -2,13 +2,12 @@ import { format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import { Link } from 'react-router-dom';
-import BentoTile from '@/common/components/bento/BentoTile';
-import TileLabel from '@/common/components/bento/TileLabel';
-import TransactionPill from '@/common/components/common/TransactionPill';
+import { TransactionPill } from '@/common/components/common/TransactionPill';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { RecentActivityItem } from '@/pages/today/hooks/useTodayGuidance';
+import { BentoTile, TileLabel } from '@/common/components/bento';
 
-type Props = {
+type RecentActivityTileProps = {
   items: RecentActivityItem[];
   currency: string;
 };
@@ -17,7 +16,7 @@ type Locale = ReturnType<typeof useDateLocale>;
 
 // What already happened, as its own group of pills rather than one card. The
 // module has no ground of its own — see the `bare` tone in BentoTile.
-const RecentActivityTile = ({ items, currency }: Props) => {
+export const RecentActivityTile = ({ items, currency }: RecentActivityTileProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
 
@@ -44,9 +43,6 @@ const RecentActivityTile = ({ items, currency }: Props) => {
     </BentoTile>
   );
 };
-
-export default RecentActivityTile;
-
 // --- Helpers ---
 
 const renderPill = (

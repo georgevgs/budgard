@@ -6,7 +6,7 @@ import { DialogTitle, DialogDescription } from '@/common/ui/dialog';
 // pitch. There was an accent haze blurred behind the tile; it was the last
 // coloured wash left inside the app, and on a white sheet it read as a stain
 // rather than as light. The solid tile carries the brand on its own.
-const PaywallHero = () => {
+export const PaywallHero = () => {
   const { t } = useTranslation();
 
   return (
@@ -25,5 +25,3 @@ const PaywallHero = () => {
     </div>
   );
 };
-
-export default PaywallHero;

@@ -16,8 +16,8 @@ import {
   FormItem,
   FormMessage,
 } from '@/common/ui/form';
-import CategoryColorPicker from '@/pages/categories/components/CategoryColorPicker';
-import AccountIdentityFields from '@/pages/networth/components/AccountIdentityFields';
+import { CategoryColorPicker } from '@/pages/categories/components/CategoryColorPicker';
+import { AccountIdentityFields } from '@/pages/networth/components/AccountIdentityFields';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useAccountSubmit } from '@/pages/networth/hooks/useAccountSubmit';
 import { getCurrencySymbol } from '@/constants/currencies';
@@ -28,12 +28,12 @@ import { swatch } from '@/design/palette';
 
 const DEFAULT_COLOR = swatch.sky;
 
-type Props = {
+type AccountFormProps = {
   account?: Account;
   onClose: () => void;
 };
 
-const AccountForm = ({ account, onClose }: Props) => {
+export const AccountForm = ({ account, onClose }: AccountFormProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const isEditing = Boolean(account);
@@ -131,9 +131,6 @@ const AccountForm = ({ account, onClose }: Props) => {
     </>
   );
 };
-
-export default AccountForm;
-
 // --- Helpers ---
 
 type TranslateFunction = (

@@ -1,7 +1,7 @@
 import { cn } from '@/constants/utils';
 import type { Insight } from '@/common/hooks/useSpendingInsights';
 
-type Props = {
+type InsightIconProps = {
   icon: Insight['icon'];
   className?: string;
 };
@@ -9,7 +9,7 @@ type Props = {
 // Every insight uses the same foreground SVG treatment. The sentence carries
 // the meaning; changing glyph colour by variant made the same insight look
 // different between Today and Trends.
-const InsightIcon = ({ icon: Icon, className }: Props) => {
+export const InsightIcon = ({ icon: Icon, className }: InsightIconProps) => {
   return (
     <Icon
       className={cn('shrink-0 text-foreground', className)}
@@ -17,5 +17,3 @@ const InsightIcon = ({ icon: Icon, className }: Props) => {
     />
   );
 };
-
-export default InsightIcon;

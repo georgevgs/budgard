@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import UsersRound from 'lucide-react/dist/esm/icons/users-round';
 import { Button } from '@/common/ui/button';
-import PageHeader from '@/common/components/common/PageHeader';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { PageHeader } from '@/common/components/common/PageHeader';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { useHouseholdOps } from '@/common/hooks/dataOps/useHouseholdOps';
 import type { HouseholdShare } from '@/types/Household';
 

@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RootProvider } from '@/common/contexts/RootProvider';
-import App from '@/App';
+import { App } from '@/App';
 import { i18nReady } from '@/config/i18n';
 import { captureException, loadSentry } from '@/config/sentry';
 // Imported through the module graph rather than @import-ed from index.css:

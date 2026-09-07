@@ -1,20 +1,20 @@
 import { useTranslation } from 'react-i18next';
-import BentoGrid from '@/common/components/bento/BentoGrid';
-import BudgetUsedTile from '@/pages/today/components/tiles/BudgetUsedTile';
-import DebtsTile from '@/pages/today/components/tiles/DebtsTile';
-import InsightTile from '@/pages/today/components/tiles/InsightTile';
-import MonthPaceTile from '@/pages/today/components/tiles/MonthPaceTile';
-import NetWorthTile from '@/pages/today/components/tiles/NetWorthTile';
-import RecentActivityTile from '@/pages/today/components/tiles/RecentActivityTile';
-import SafeToSpendTile from '@/pages/today/components/tiles/SafeToSpendTile';
-import TopCategoryTile from '@/pages/today/components/tiles/TopCategoryTile';
-import UpcomingTile from '@/pages/today/components/tiles/UpcomingTile';
-import WeeklyRecapTile from '@/pages/today/components/tiles/WeeklyRecapTile';
+import { BudgetUsedTile } from '@/pages/today/components/tiles/BudgetUsedTile';
+import { DebtsTile } from '@/pages/today/components/tiles/DebtsTile';
+import { InsightTile } from '@/pages/today/components/tiles/InsightTile';
+import { MonthPaceTile } from '@/pages/today/components/tiles/MonthPaceTile';
+import { NetWorthTile } from '@/pages/today/components/tiles/NetWorthTile';
+import { RecentActivityTile } from '@/pages/today/components/tiles/RecentActivityTile';
+import { SafeToSpendTile } from '@/pages/today/components/tiles/SafeToSpendTile';
+import { TopCategoryTile } from '@/pages/today/components/tiles/TopCategoryTile';
+import { UpcomingTile } from '@/pages/today/components/tiles/UpcomingTile';
+import { WeeklyRecapTile } from '@/pages/today/components/tiles/WeeklyRecapTile';
 import type { DailyPace } from '@/pages/today/hooks/useDailyPace';
 import type { TopCategory } from '@/pages/today/hooks/useTopCategory';
 import type { useTodayGuidance } from '@/pages/today/hooks/useTodayGuidance';
 import type { Insight } from '@/common/hooks/useSpendingInsights';
 import type { TodayTileId } from '@/pages/today/utils/bentoLayout';
+import { BentoGrid } from '@/common/components/bento';
 
 type TodayGridProps = {
   visible: TodayTileId[];
@@ -28,7 +28,7 @@ type TodayGridProps = {
 // The user's own arrangement, drawn. Order is theirs; which tiles exist at all
 // is still ours, and a tile that has nothing to say returns null and gives its
 // cell back rather than sitting there empty.
-const TodayGrid = (props: TodayGridProps) => {
+export const TodayGrid = (props: TodayGridProps) => {
   if (props.visible.length === 0) {
     return <EmptyGrid onArrange={props.onArrange} />;
   }
@@ -39,9 +39,6 @@ const TodayGrid = (props: TodayGridProps) => {
     </BentoGrid>
   );
 };
-
-export default TodayGrid;
-
 // --- Helpers ---
 
 // Every module can be hidden, which means all of them can be — ten taps in

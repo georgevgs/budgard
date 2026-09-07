@@ -4,7 +4,7 @@ import { getColorTint } from '@/constants/categoryColor';
 import { haptics } from '@/constants/haptics';
 import type { Category } from '@/types/Category';
 
-type Props = {
+type QuickAddCategoriesProps = {
   categories: Category[];
   selectedId: string | null;
   onSelect: (id: string | null) => void;
@@ -18,7 +18,7 @@ type Props = {
 // the browser waits to see whether a drag is horizontal or vertical, and the
 // vertical reading dismisses the sheet — so a slightly diagonal flick pulled
 // the whole sheet down instead of moving the strip.
-const QuickAddCategories = ({ categories, selectedId, onSelect }: Props) => {
+export const QuickAddCategories = ({ categories, selectedId, onSelect }: QuickAddCategoriesProps) => {
   const { t } = useTranslation();
 
   if (categories.length === 0) {
@@ -55,9 +55,6 @@ const QuickAddCategories = ({ categories, selectedId, onSelect }: Props) => {
     </div>
   );
 };
-
-export default QuickAddCategories;
-
 // --- Helpers ---
 
 // Tapping the selected chip again clears it, so a mis-tap does not force the

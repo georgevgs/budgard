@@ -1,16 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormField, FormItem, FormMessage } from '@/common/ui/form';
-import TransactionAmountControl from '@/common/components/common/TransactionAmountControl';
+import { TransactionAmountControl } from '@/common/components/common/TransactionAmountControl';
 import type { CurrencyConversionApi } from '@/common/hooks/currency/useCurrencyConversionCore';
 import type { IncomeFormData } from '@/pages/income/validations';
 
-type Props = {
+type IncomeAmountFieldProps = {
   form: UseFormReturn<IncomeFormData>;
   conversion: CurrencyConversionApi;
 };
 
-const IncomeAmountField = ({ form, conversion }: Props) => {
+export const IncomeAmountField = ({ form, conversion }: IncomeAmountFieldProps) => {
   const { t } = useTranslation();
 
   return (
@@ -31,5 +31,3 @@ const IncomeAmountField = ({ form, conversion }: Props) => {
     />
   );
 };
-
-export default IncomeAmountField;

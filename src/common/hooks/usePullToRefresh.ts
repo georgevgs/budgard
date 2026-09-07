@@ -7,7 +7,7 @@ type Options = {
   enabled?: boolean;
 };
 
-export type PullToRefreshState = {
+export type UsePullToRefreshReturn = {
   // Whether the gesture is wired up at all. A pointer-driven layout has no
   // pull, so the indicator has no reason to be in the DOM there either.
   isEnabled: boolean;
@@ -58,7 +58,7 @@ type Stage = 'idle' | 'pulling' | 'armed' | 'refreshing' | 'settling';
 export const usePullToRefresh = ({
   onRefresh,
   enabled = true,
-}: Options): PullToRefreshState => {
+}: Options): UsePullToRefreshReturn => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   // Read inside native listeners that are registered once, so they always see
   // the current callback without being torn down and re-added on every render.

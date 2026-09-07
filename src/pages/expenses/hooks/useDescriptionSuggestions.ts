@@ -8,7 +8,7 @@ export const useDescriptionSuggestions = (
   form: UseFormReturn<ExpenseFormData>,
 ) => {
   const allExpenses = useExpensesData();
-  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [areSuggestionsOpen, setAreSuggestionsOpen] = useState(false);
   const descriptionValue = form.watch('description');
 
   const suggestions = useMemo(() => {
@@ -53,14 +53,14 @@ export const useDescriptionSuggestions = (
       shouldValidate: true,
       shouldDirty: true,
     });
-    setSuggestionsOpen(false);
+    setAreSuggestionsOpen(false);
   };
 
-  const isPopoverOpen = suggestionsOpen && filteredSuggestions.length > 0;
+  const isPopoverOpen = areSuggestionsOpen && filteredSuggestions.length > 0;
 
   return {
     isPopoverOpen,
-    setSuggestionsOpen,
+    setAreSuggestionsOpen,
     filteredSuggestions,
     handleSuggestionSelect,
   };

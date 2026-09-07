@@ -1,15 +1,15 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import ChartSpline from 'lucide-react/dist/esm/icons/chart-spline';
-import PageHeader from '@/common/components/common/PageHeader';
+import { PageHeader } from '@/common/components/common/PageHeader';
 import { EmptyStateCard } from '@/common/ui/empty-state-card';
 
-type Props = {
+type AnalyticsEmptyProps = {
   title?: string;
   subtitle?: string;
 };
 
-const AnalyticsEmpty = ({ title: titleOverride, subtitle }: Props) => {
+export const AnalyticsEmpty = ({ title: titleOverride, subtitle }: AnalyticsEmptyProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   let title = t('navigation.trends');
@@ -33,5 +33,3 @@ const AnalyticsEmpty = ({ title: titleOverride, subtitle }: Props) => {
     </div>
   );
 };
-
-export default AnalyticsEmpty;

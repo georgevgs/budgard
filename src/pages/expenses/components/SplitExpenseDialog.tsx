@@ -28,13 +28,13 @@ import { cn, formatCurrency } from '@/constants/utils';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+type SplitExpenseDialogProps = {
   expense: Expense;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-const SplitExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
+export const SplitExpenseDialog = ({ expense, open, onOpenChange }: SplitExpenseDialogProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const { expenseCategories } = useCategoriesData();
@@ -93,9 +93,6 @@ const SplitExpenseDialog = ({ expense, open, onOpenChange }: Props) => {
     </Dialog>
   );
 };
-
-export default SplitExpenseDialog;
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

@@ -1,8 +1,8 @@
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
-import CategoryIcon from '@/common/components/common/CategoryIcon';
-import TemplateDeleteDialog from '@/pages/expenses/components/TemplateDeleteDialog';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
+import { TemplateDeleteDialog } from '@/pages/expenses/components/TemplateDeleteDialog';
 import X from 'lucide-react/dist/esm/icons/x';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
@@ -14,7 +14,7 @@ type TemplatesBarProps = {
   onDelete: (templateId: string) => void;
 };
 
-const TemplatesBar = ({
+const TemplatesBarComponent = ({
   templates,
   defaultCurrency,
   onUse,
@@ -110,8 +110,8 @@ const TemplatesBar = ({
   );
 };
 
-export default memo(TemplatesBar);
-
+// Memoised: the parent re-renders on every data mutation, this subtree does not.
+export const TemplatesBar = memo(TemplatesBarComponent);
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 const renderManageLabel = (

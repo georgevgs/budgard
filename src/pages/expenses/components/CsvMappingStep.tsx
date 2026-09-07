@@ -15,15 +15,15 @@ import type {
   CsvPreviewData,
 } from '@/pages/expenses/utils/csvTypes';
 
-type Props = {
+type CsvMappingStepProps = {
   csvPreview: CsvPreviewData;
   columnMapping: ColumnMapping;
-  skipIncome: boolean;
+  shouldSkipIncome: boolean;
   updateColumnMapping: (
     field: keyof ColumnMapping,
     value: number | null,
   ) => void;
-  setSkipIncome: (value: boolean) => void;
+  setShouldSkipIncome: (value: boolean) => void;
   onBack: () => void;
   onContinue: () => void;
   t: TranslateFunction;
@@ -32,16 +32,16 @@ type Props = {
 // Which column of the file is the date, the description, the amount and
 // (optionally) the category, with a live sample of the file underneath so the
 // answer can be checked rather than guessed.
-const CsvMappingStep = ({
+export const CsvMappingStep = ({
   csvPreview,
   columnMapping,
-  skipIncome,
+  shouldSkipIncome,
   updateColumnMapping,
-  setSkipIncome,
+  setShouldSkipIncome,
   onBack,
   onContinue,
   t,
-}: Props) => {
+}: CsvMappingStepProps) => {
   const headers = csvPreview.headers;
 
   return (
@@ -99,7 +99,7 @@ const CsvMappingStep = ({
             {t('import.skipIncomeDescription')}
           </p>
         </div>
-        <Switch checked={skipIncome} onCheckedChange={setSkipIncome} />
+        <Switch checked={shouldSkipIncome} onCheckedChange={setShouldSkipIncome} />
       </div>
 
       <SampleTable csvPreview={csvPreview} columnMapping={columnMapping} t={t} />
@@ -116,9 +116,6 @@ const CsvMappingStep = ({
     </div>
   );
 };
-
-export default CsvMappingStep;
-
 // --- Helpers ---
 
 type TranslateFunction = (

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO, subMonths, subYears, type Locale } from 'date-fns';
-import CartesianChart from '@/common/components/charts/CartesianChart';
+import { CartesianChart } from '@/common/components/charts/CartesianChart';
 import type { ChartPoint, Series } from '@/common/components/charts/chartTypes';
 import { cn, formatCurrency, formatCurrencyCompact } from '@/constants/utils';
 import { ChartTooltipRow } from '@/common/components/common/ChartTooltip';
@@ -12,7 +12,7 @@ import { useSubscription } from '@/common/contexts/SubscriptionContext';
 
 type RangeKey = '1m' | '3m' | '1y' | 'all';
 
-type Props = {
+type AccountHistoryChartProps = {
   account: Account;
   snapshots: AccountBalance[];
 };
@@ -25,7 +25,7 @@ type Point = {
   costBasis: number | null;
 };
 
-const AccountHistoryChart = ({ account, snapshots }: Props) => {
+export const AccountHistoryChart = ({ account, snapshots }: AccountHistoryChartProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const { isPro } = useSubscription();
@@ -54,7 +54,7 @@ const AccountHistoryChart = ({ account, snapshots }: Props) => {
         xKey="label"
         series={buildSeries(showBasis, t)}
         height={180}
-        allowNegative
+        shouldAllowNegative
         formatY={(value) =>
           formatCurrencyCompact(Math.abs(value), account.default_currency)
         }
@@ -66,9 +66,6 @@ const AccountHistoryChart = ({ account, snapshots }: Props) => {
     </div>
   );
 };
-
-export default AccountHistoryChart;
-
 // --- Helpers ---
 
 type TranslateFunction = (

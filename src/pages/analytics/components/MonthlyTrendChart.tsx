@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import CartesianChart from '@/common/components/charts/CartesianChart';
+import { CartesianChart } from '@/common/components/charts/CartesianChart';
 import type { ChartPoint, Series } from '@/common/components/charts/chartTypes';
 import { formatCurrency } from '@/constants/utils';
 
@@ -14,27 +14,27 @@ type MonthlyDataPoint = {
   net?: number;
 };
 
-type Props = {
+type MonthlyTrendChartProps = {
   data: MonthlyDataPoint[];
   monthlyBudget: number | null;
   defaultCurrency: string;
   currencySymbol: string;
   yAxisMax: number | undefined;
   onMonthClick: (monthIndex: number) => void;
-  showCashFlow: boolean;
+  shouldShowCashFlow: boolean;
 };
 
-const MonthlyTrendChart = ({
+const MonthlyTrendChartComponent = ({
   data,
   monthlyBudget,
   defaultCurrency,
   currencySymbol,
   yAxisMax,
   onMonthClick,
-  showCashFlow,
-}: Props) => {
+  shouldShowCashFlow,
+}: MonthlyTrendChartProps) => {
   const { t } = useTranslation();
-  const series = useMemo(() => buildSeries(showCashFlow, t), [showCashFlow, t]);
+  const series = useMemo(() => buildSeries(shouldShowCashFlow, t), [shouldShowCashFlow, t]);
 
   return (
     <CartesianChart
@@ -43,7 +43,7 @@ const MonthlyTrendChart = ({
       series={series}
       height={280}
       yMax={yAxisMax}
-      allowNegative={showCashFlow}
+      shouldAllowNegative={shouldShowCashFlow}
       formatY={(value) => `${Math.round(value)}${currencySymbol}`}
       reference={buildBudgetReference(monthlyBudget, defaultCurrency, t)}
       renderTooltip={(point) => renderTooltip(point, defaultCurrency, t)}
@@ -53,13 +53,13 @@ const MonthlyTrendChart = ({
   );
 };
 
-export default memo(MonthlyTrendChart);
-
+// Memoised: the parent re-renders on every data mutation, this subtree does not.
+export const MonthlyTrendChart = memo(MonthlyTrendChartComponent);
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-const buildSeries = (showCashFlow: boolean, t: TFunc): Series[] => {
+const buildSeries = (shouldShowCashFlow: boolean, t: TFunc): Series[] => {
   const series: Series[] = [
     {
       kind: 'area',
@@ -68,7 +68,7 @@ const buildSeries = (showCashFlow: boolean, t: TFunc): Series[] => {
       color: '--primary',
     },
   ];
-  if (!showCashFlow) {
+  if (!shouldShowCashFlow) {
     return series;
   }
 

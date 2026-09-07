@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
-import FeedbackSection from '@/pages/settings/components/FeedbackSection';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
+import { FeedbackSection } from '@/pages/settings/components/FeedbackSection';
 
-const AboutSection = () => {
+export const AboutSection = () => {
   const { t } = useTranslation();
 
   return (
@@ -29,5 +29,3 @@ const AboutSection = () => {
     </div>
   );
 };
-
-export default AboutSection;

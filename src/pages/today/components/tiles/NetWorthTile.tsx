@@ -1,14 +1,13 @@
 import { useTranslation } from 'react-i18next';
-import BentoTile from '@/common/components/bento/BentoTile';
-import TileLabel from '@/common/components/bento/TileLabel';
 import { useNetWorth } from '@/common/hooks/useNetWorth';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { formatCurrency } from '@/constants/utils';
+import { BentoTile, TileLabel } from '@/common/components/bento';
 
 // Off by default: it is the slowest-moving number in the app, and a home
 // screen about this month should not lead with one that changes quarterly.
 // Available to anyone who wants it in the grid, which is what Arrange is for.
-const NetWorthTile = () => {
+export const NetWorthTile = () => {
   const { t } = useTranslation();
   const { summary, isComputing } = useNetWorth();
   const { defaultCurrency } = useDataConfig();
@@ -26,9 +25,6 @@ const NetWorthTile = () => {
     </BentoTile>
   );
 };
-
-export default NetWorthTile;
-
 // --- Helpers ---
 
 // Rates are still in flight on first paint. An em dash says "not yet" without

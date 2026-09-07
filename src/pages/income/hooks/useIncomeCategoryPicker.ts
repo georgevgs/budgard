@@ -12,7 +12,7 @@ export const useIncomeCategoryPicker = (
   const { session } = useAuth();
   const { incomeCategories } = useCategoriesData();
   const { handleCategoryAdd } = useCategoryOps();
-  const [categoryPopoverOpen, setCategoryPopoverOpen] = useState(false);
+  const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
   const [isCreatingCategory, startCategoryCreation] = useTransition();
   const [isManagerOpen, setIsManagerOpen] = useState(false);
@@ -42,7 +42,7 @@ export const useIncomeCategoryPicker = (
       shouldValidate: true,
       shouldDirty: true,
     });
-    setCategoryPopoverOpen(false);
+    setIsCategoryPopoverOpen(false);
     setCategorySearch('');
   };
 
@@ -61,7 +61,7 @@ export const useIncomeCategoryPicker = (
           type: 'income',
           kind: 'income',
         });
-        setCategoryPopoverOpen(false);
+        setIsCategoryPopoverOpen(false);
         setCategorySearch('');
       } catch {
         // toast already shown
@@ -70,13 +70,13 @@ export const useIncomeCategoryPicker = (
   };
 
   const handleOpenManager = () => {
-    setCategoryPopoverOpen(false);
+    setIsCategoryPopoverOpen(false);
     setIsManagerOpen(true);
   };
 
   return {
-    categoryPopoverOpen,
-    setCategoryPopoverOpen,
+    isCategoryPopoverOpen,
+    setIsCategoryPopoverOpen,
     categorySearch,
     setCategorySearch,
     isCreatingCategory,

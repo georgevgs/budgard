@@ -5,7 +5,7 @@ import { cn } from '@/constants/utils';
 /** How loud the module is allowed to be. See `.tile-*` in index.css. */
 type BentoTone = 'plain' | 'slab' | 'ink' | 'accent' | 'ghost' | 'bare';
 
-type Props = {
+type BentoTileProps = {
   children: ReactNode;
   tone?: BentoTone;
   /** Full width of the grid rather than half. */
@@ -22,7 +22,7 @@ type Props = {
 // One module of the bento grid. A tile is a thing you can tap, reorder and
 // hide, so most of them are doorways — but the shell is the same object either
 // way, which is what keeps a tapped tile and a static one visually identical.
-const BentoTile = ({
+export const BentoTile = ({
   children,
   tone = 'plain',
   wide = false,
@@ -30,7 +30,7 @@ const BentoTile = ({
   onClick,
   ariaLabel,
   className,
-}: Props) => {
+}: BentoTileProps) => {
   // The caller's className comes LAST on purpose. tailwind-merge resolves
   // conflicts by document order, so folding INTERACTIVE in afterwards would
   // let its `block` beat a tile that asked for `flex` — which is exactly what
@@ -47,9 +47,6 @@ const BentoTile = ({
 
   return <div className={shell('')}>{children}</div>;
 };
-
-export default BentoTile;
-
 // --- Helpers ---
 
 // Interactive tiles keep the shell's own radius on the focus ring, so a

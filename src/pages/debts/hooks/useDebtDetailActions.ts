@@ -16,11 +16,11 @@ export const useDebtDetailActions = ({
 }: UseDebtDetailActionsArgs) => {
   const { handleDebtArchive } = useDebtOps();
   const { handleExpenseDelete } = useExpenseOps();
-  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
   const [paymentToDelete, setPaymentToDelete] = useState<string | null>(null);
 
   const handleArchiveConfirm = async () => {
-    setShowArchiveDialog(false);
+    setIsArchiveDialogOpen(false);
     try {
       await handleDebtArchive(debt.id);
       onClose();
@@ -50,8 +50,8 @@ export const useDebtDetailActions = ({
   };
 
   return {
-    showArchiveDialog,
-    setShowArchiveDialog,
+    isArchiveDialogOpen,
+    setIsArchiveDialogOpen,
     paymentToDelete,
     setPaymentToDelete,
     handleArchiveConfirm,

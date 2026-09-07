@@ -1,5 +1,5 @@
 import { supabase } from '@/config/supabase';
-import { done, maybeRow, rows } from '@/config/supabaseCrud';
+import { done, maybeRow, rows } from '@/common/api/supabaseCrud';
 import type { NoSpendDay } from '@/types/NoSpendDay';
 
 // Supabase queries for plan, at the feature root so an audit of what

@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import type { Locale } from 'date-fns';
 import ExternalLink from 'lucide-react/dist/esm/icons/external-link';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Button } from '@/common/ui/button';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
 import { useUpgradeDialog } from '@/common/contexts/UpgradeDialogContext';
@@ -15,7 +15,7 @@ import { planIdForPriceId, type ProPlanPrices } from '@/constants/proPlans';
 import { hasStripeBillingManagement } from '@/constants/subscription';
 import type { Subscription } from '@/types/Subscription';
 
-const BillingSection = () => {
+export const BillingSection = () => {
   const { t } = useTranslation();
   const { subscription, isPro, startPortal } = useSubscription();
   const { openUpgrade } = useUpgradeDialog();
@@ -60,9 +60,6 @@ const BillingSection = () => {
     </section>
   );
 };
-
-export default BillingSection;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

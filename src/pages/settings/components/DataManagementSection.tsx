@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Button } from '@/common/ui/button';
-import DeleteAccountDialog from '@/pages/settings/components/DeleteAccountDialog';
+import { DeleteAccountDialog } from '@/pages/settings/components/DeleteAccountDialog';
 import { useDataExport } from '@/pages/settings/hooks/useDataExport';
 import Download from 'lucide-react/dist/esm/icons/download';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
@@ -14,12 +14,12 @@ type DataManagementSectionProps = {
   t: TFunc;
 };
 
-const DataManagementSection = ({
+export const DataManagementSection = ({
   onConfirmDelete,
   isDeleting,
   t,
 }: DataManagementSectionProps) => {
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { isExporting, handleExport } = useDataExport();
 
   return (
@@ -51,7 +51,7 @@ const DataManagementSection = ({
             <Button
               variant="destructive"
               className="w-full"
-              onClick={() => setShowDeleteDialog(true)}
+              onClick={() => setIsDeleteDialogOpen(true)}
             >
               <Trash2 className="h-4 w-4 mr-2" />
               {t('settings.data.deleteAccount')}
@@ -61,17 +61,14 @@ const DataManagementSection = ({
       </SurfaceCard>
 
       <DeleteAccountDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
         onConfirmDelete={onConfirmDelete}
         isDeleting={isDeleting}
       />
     </section>
   );
 };
-
-export default DataManagementSection;
-
 // --- Helpers ---
 
 const renderExportLabel = (isExporting: boolean, t: TFunc) => {

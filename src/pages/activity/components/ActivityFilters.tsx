@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Search from 'lucide-react/dist/esm/icons/search';
 import { Input } from '@/common/ui/input';
 
-type Props = {
+type ActivityFiltersProps = {
   search: string;
   isSearchingAllTime: boolean;
   onSearchChange: (value: string) => void;
@@ -11,12 +11,12 @@ type Props = {
   trailing?: ReactNode;
 };
 
-const ActivityFilters = ({
+export const ActivityFilters = ({
   search,
   isSearchingAllTime,
   onSearchChange,
   trailing,
-}: Props) => {
+}: ActivityFiltersProps) => {
   const { t } = useTranslation();
 
   return (
@@ -41,9 +41,6 @@ const ActivityFilters = ({
     </div>
   );
 };
-
-export default ActivityFilters;
-
 // --- Helpers ---
 
 const renderSearchScope = (

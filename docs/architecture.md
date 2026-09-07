@@ -258,26 +258,37 @@ All external communication is centralized.
 
 ### Files
 
-- `services/dataService.ts` — core finance-table reads and writes
-- `services/receiptService.ts` — receipt upload/removal in Supabase Storage
-- `services/ocrService.ts` — Tesseract receipt scanning (Pro)
-- `services/uiPreferencesService.ts` — owner-scoped Today layout sync
-- `services/feedbackService.ts` — append-only feedback/problem reports
-- `services/subscriptionService.ts` — Stripe checkout/portal via edge functions
-- `services/pushSubscriptionService.ts` — push subscription persistence
-- `services/proPlansService.ts` — live Pro prices
-- `services/exchangeRateService.ts` — Frankfurter FX rates
-- `services/householdService.ts` — secure invite/accept/revoke RPCs
-- `services/transactionRuleService.ts` — merchant rules and review state
-- `services/recurringSuggestionService.ts` — dismissals and import reconciliation
-- `services/goalFundingService.ts` — atomic surplus-to-investment transfers
-- `services/financialConnectionService.ts` — non-secret connection status only
-- `services/supabaseCrud.ts` — `rows` / `row` / `maybeRow` / `done`
+Sitewide, in `src/common/api/`:
+
+- `dataService.ts` — the composed surface over every `<feature>Api.ts`
+- `authApi.ts` — OTP request/verify and sign-out (sitewide: routing, settings,
+  security and the login flow all call it)
+- `receiptService.ts` — receipt upload/removal in Supabase Storage
+- `feedbackService.ts` — append-only feedback/problem reports
+- `subscriptionService.ts` — Stripe checkout/portal via edge functions
+- `exchangeRateService.ts` — Frankfurter FX rates
+- `householdService.ts` — secure invite/accept/revoke RPCs
+- `transactionRuleService.ts` — merchant rules and review state
+- `recurringSuggestionService.ts` — dismissals and import reconciliation
+- `goalFundingService.ts` — atomic surplus-to-investment transfers
+- `supabaseCrud.ts` — `rows` / `row` / `maybeRow` / `done`
+- `keysetPagination.ts` — cursor paging for the transaction reads
+
+At a feature root, one file per feature so an audit of what it reads and
+writes is one file:
+
+- `pages/<feature>/<feature>Api.ts` — budget, categories, debts, expenses,
+  goals, income, networth, plan, recurring, settings, tags, today
+- `pages/settings/settingsApi.ts` also owns push-subscription persistence and
+  the non-secret financial-connection status read
+- `pages/today/todayApi.ts` — owner-scoped Today layout sync
+- `pages/expenses/ocrService.ts` — Tesseract receipt scanning (Pro)
+- `pages/pro/proPlansService.ts` — live Pro prices
 
 ### Rules
 
-- No direct Supabase calls outside services
-- Services return typed data
+- No direct Supabase calls outside a `<feature>Api.ts` or `common/api/` module
+- These modules return typed data
 - Errors must be propagated (not swallowed)
 
 `supabaseCrud` owns only the tail every query shares: unwrap `{ data, error }`,

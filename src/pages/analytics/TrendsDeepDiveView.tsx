@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import AnalyticsDrillDownDialogs from '@/pages/analytics/components/AnalyticsDrillDownDialogs';
-import AnalyticsEmpty from '@/pages/analytics/components/AnalyticsEmpty';
-import TrendsBento from '@/pages/analytics/components/TrendsBento';
-import TrendsDeepDiveLoadingState from '@/pages/analytics/components/TrendsDeepDiveLoading';
-import TrendsSections from '@/pages/analytics/components/TrendsSections';
-import YearPill from '@/pages/analytics/components/YearPill';
-import PageHeader from '@/common/components/common/PageHeader';
+import { AnalyticsDrillDownDialogs } from '@/pages/analytics/components/AnalyticsDrillDownDialogs';
+import { AnalyticsEmpty } from '@/pages/analytics/components/AnalyticsEmpty';
+import { TrendsBento } from '@/pages/analytics/components/TrendsBento';
+import { TrendsDeepDiveLoading } from '@/pages/analytics/components/TrendsDeepDiveLoading';
+import { TrendsSections } from '@/pages/analytics/components/TrendsSections';
+import { YearPill } from '@/pages/analytics/components/YearPill';
+import { PageHeader } from '@/common/components/common/PageHeader';
 import {
   useCategoriesData,
   useDataConfig,
@@ -90,5 +90,5 @@ const renderLoading = (showSkeleton: boolean) => {
     return null;
   }
 
-  return <TrendsDeepDiveLoadingState />;
+  return <TrendsDeepDiveLoading />;
 };

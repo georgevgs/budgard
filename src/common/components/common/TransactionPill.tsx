@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import CategoryGlyph from '@/common/components/common/CategoryGlyph';
+import { CategoryGlyph } from '@/common/components/common/CategoryGlyph';
 import { cn } from '@/constants/utils';
 import { describeAmount } from '@/constants/transactionAmount';
 import type { Expense } from '@/types/Expense';
 
-type Props = {
+type TransactionPillProps = {
   transaction: Expense;
   kind: 'expense' | 'income';
   currency: string;
@@ -18,7 +18,7 @@ type Props = {
 // card. The bento redesign makes every list a stack of these: a row that is
 // its own shape can be tapped, swiped and reordered without the divider above
 // it having to mean something.
-const TransactionPill = ({ transaction, kind, currency, meta, to }: Props) => {
+export const TransactionPill = ({ transaction, kind, currency, meta, to }: TransactionPillProps) => {
   const { t } = useTranslation();
   const amount = describeAmount(transaction.amount, kind, currency);
 
@@ -51,5 +51,3 @@ const TransactionPill = ({ transaction, kind, currency, meta, to }: Props) => {
     </Link>
   );
 };
-
-export default TransactionPill;

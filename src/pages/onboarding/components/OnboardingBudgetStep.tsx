@@ -11,7 +11,7 @@ import {
 } from '@/common/ui/dialog';
 import { formatCurrencyInput } from '@/constants/utils';
 
-type Props = {
+type OnboardingBudgetStepProps = {
   isSubmitting: boolean;
   currencySymbol: string;
   onBack: () => void;
@@ -19,13 +19,13 @@ type Props = {
   onNext: (budgetInput: string) => void;
 };
 
-const OnboardingBudgetStep = ({
+export const OnboardingBudgetStep = ({
   isSubmitting,
   currencySymbol,
   onBack,
   onSkip,
   onNext,
-}: Props) => {
+}: OnboardingBudgetStepProps) => {
   const { t } = useTranslation();
   const [budgetInput, setBudgetInput] = useState('');
 
@@ -95,5 +95,3 @@ const OnboardingBudgetStep = ({
     </div>
   );
 };
-
-export default OnboardingBudgetStep;

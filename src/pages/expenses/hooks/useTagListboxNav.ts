@@ -10,17 +10,17 @@ export const useTagListboxNav = (tagPicker: TagPickerApi) => {
   const [activeIndex, setActiveIndex] = useState(-1);
   const [prevInputs, setPrevInputs] = useState({
     tagSearch: tagPicker.tagSearch,
-    tagPopoverOpen: tagPicker.tagPopoverOpen,
+    isTagPopoverOpen: tagPicker.isTagPopoverOpen,
   });
 
   // A changed filter or a reopened popover invalidates the highlighted option
   const inputsChanged =
     prevInputs.tagSearch !== tagPicker.tagSearch ||
-    prevInputs.tagPopoverOpen !== tagPicker.tagPopoverOpen;
+    prevInputs.isTagPopoverOpen !== tagPicker.isTagPopoverOpen;
   if (inputsChanged) {
     setPrevInputs({
       tagSearch: tagPicker.tagSearch,
-      tagPopoverOpen: tagPicker.tagPopoverOpen,
+      isTagPopoverOpen: tagPicker.isTagPopoverOpen,
     });
     setActiveIndex(-1);
   }

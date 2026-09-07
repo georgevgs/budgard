@@ -7,7 +7,7 @@ import LoadingScreen from '@/common/ui/loading-screen';
 // layout jump without recreating every group's exact controls here.
 const SECTIONS = [4, 2] as const;
 
-const SettingsLoadingState = () => {
+export const SettingsLoading = () => {
   const { t } = useTranslation();
 
   return (
@@ -28,9 +28,6 @@ const SettingsLoadingState = () => {
     </LoadingScreen>
   );
 };
-
-export default SettingsLoadingState;
-
 // --- Helpers ---
 
 const ROW_WIDTHS = ['w-2/5', 'w-1/2', 'w-1/3', 'w-2/5'] as const;

@@ -7,27 +7,26 @@ import ChevronUp from 'lucide-react/dist/esm/icons/chevron-up';
 import GripVertical from 'lucide-react/dist/esm/icons/grip-vertical';
 import Minus from 'lucide-react/dist/esm/icons/minus';
 import Plus from 'lucide-react/dist/esm/icons/plus';
-import BentoGrid from '@/common/components/bento/BentoGrid';
-import TileLabel from '@/common/components/bento/TileLabel';
 import {
   useTodayArrangeDrag,
   type TodayArrangeDrag,
 } from '@/pages/today/hooks/useTodayArrangeDrag';
+import { BentoGrid, TileLabel } from '@/common/components/bento';
 import { haptics } from '@/constants/haptics';
 import { prefersReducedMotion } from '@/constants/motion';
 import { cn } from '@/constants/utils';
-import type { TodayLayoutControls } from '@/pages/today/hooks/useTodayLayout';
+import type { UseTodayLayoutReturn } from '@/pages/today/hooks/useTodayLayout';
 import { isWideTodayTile, type TodayTileId } from '@/pages/today/utils/bentoLayout';
 
-type Props = {
-  layout: TodayLayoutControls;
+type TodayArrangeProps = {
+  layout: UseTodayLayoutReturn;
 };
 
 // The grid, stood down to its labels so it can be rearranged. Real tiles are
 // not shown here on purpose: arranging is about which module goes where, and
 // six live charts competing for attention is the wrong screen for that
 // decision — as well as six re-renders per tap.
-const TodayArrange = ({ layout }: Props) => {
+export const TodayArrange = ({ layout }: TodayArrangeProps) => {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   useArrangeMode(pathname, layout.setArranging);
@@ -65,9 +64,6 @@ const TodayArrange = ({ layout }: Props) => {
     </div>
   );
 };
-
-export default TodayArrange;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
@@ -82,7 +78,7 @@ type ArrangeActions = {
 };
 
 const useArrangeActions = (
-  layout: TodayLayoutControls,
+  layout: UseTodayLayoutReturn,
   t: TFunc,
 ): ArrangeActions => {
   const [announcement, setAnnouncement] = useState('');
@@ -198,7 +194,7 @@ const renderPersistenceHint = (isPersisted: boolean, t: TFunc) => {
 const renderVisible = (
   id: TodayTileId,
   index: number,
-  layout: TodayLayoutControls,
+  layout: UseTodayLayoutReturn,
   actions: ArrangeActions,
   drag: TodayArrangeDrag,
   t: TFunc,
@@ -370,7 +366,7 @@ const renderMove = (
 };
 
 const renderHidden = (
-  layout: TodayLayoutControls,
+  layout: UseTodayLayoutReturn,
   actions: ArrangeActions,
   t: TFunc,
 ) => {

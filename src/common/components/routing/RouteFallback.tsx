@@ -1,12 +1,10 @@
 import type { ReactNode } from 'react';
 import DelayedFallback from '@/common/ui/delayed-fallback';
 
-type Props = {
+type RouteFallbackProps = {
   children: ReactNode;
 };
 
-const RouteFallback = ({ children }: Props) => (
+export const RouteFallback = ({ children }: RouteFallbackProps) => (
   <DelayedFallback>{children}</DelayedFallback>
 );
-
-export default RouteFallback;

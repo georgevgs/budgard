@@ -1,11 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import BentoTile from '@/common/components/bento/BentoTile';
-import TileLabel from '@/common/components/bento/TileLabel';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { formatCurrency } from '@/constants/utils';
 import type { CategoryRow } from '@/pages/analytics/hooks/useAnalyticsData';
+import { BentoTile, TileLabel } from '@/common/components/bento';
 
-type Props = {
+type WhereItWentTileProps = {
   breakdown: CategoryRow[];
   totalSpent: number;
   onCategoryClick: (category: CategoryRow) => void;
@@ -15,7 +14,7 @@ const TOP = 3;
 
 // The year's spending as one bar and its three biggest names. The full list is
 // one level deeper — this is the answer most people came for.
-const WhereItWentTile = ({ breakdown, totalSpent, onCategoryClick }: Props) => {
+export const WhereItWentTile = ({ breakdown, totalSpent, onCategoryClick }: WhereItWentTileProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const leaders = breakdown.slice(0, TOP);
@@ -39,9 +38,6 @@ const WhereItWentTile = ({ breakdown, totalSpent, onCategoryClick }: Props) => {
     </BentoTile>
   );
 };
-
-export default WhereItWentTile;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

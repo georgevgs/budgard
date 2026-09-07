@@ -12,7 +12,7 @@ import FormSubmitButton from '@/common/ui/form-submit-button';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useResendCooldown } from '@/pages/auth/hooks/useResendCooldown';
 
-type Props = {
+type OtpVerifyStepProps = {
   formAction: (formData: FormData) => void;
   email: string;
   error: string | null;
@@ -24,7 +24,7 @@ type Props = {
   turnstileRef: RefObject<TurnstileInstance | null>;
 };
 
-const OtpVerifyStep = ({
+export const OtpVerifyStep = ({
   formAction,
   email,
   error,
@@ -34,7 +34,7 @@ const OtpVerifyStep = ({
   turnstileToken,
   onTokenChange,
   turnstileRef,
-}: Props) => {
+}: OtpVerifyStepProps) => {
   const { isLoading: isAuthLoading } = useAuth();
   const { t } = useTranslation();
   const cooldownSeconds = useResendCooldown(lastSentAt);
@@ -122,9 +122,6 @@ const OtpVerifyStep = ({
     </div>
   );
 };
-
-export default OtpVerifyStep;
-
 // ─── Helper render functions ──────────────────────────────────────────────────
 
 type TranslateFunction = (

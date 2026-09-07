@@ -4,13 +4,13 @@ import { getColorTint } from '@/constants/categoryColor';
 import type { Expense } from '@/types/Expense';
 import type { EmbeddedTag } from '@/types/Tag';
 
-type Props = {
+type TransactionMetaProps = {
   transaction: Expense;
   isExcluded: boolean;
 };
 
 // The chips under the amount: what it was filed as, and whether it counts.
-const TransactionMeta = ({ transaction, isExcluded }: Props) => {
+export const TransactionMeta = ({ transaction, isExcluded }: TransactionMetaProps) => {
   const { t } = useTranslation();
 
   return (
@@ -29,9 +29,6 @@ const TransactionMeta = ({ transaction, isExcluded }: Props) => {
     </div>
   );
 };
-
-export default TransactionMeta;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;

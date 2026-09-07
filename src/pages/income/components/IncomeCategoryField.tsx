@@ -23,12 +23,12 @@ import {
 import type { IncomeCategoryPickerApi } from '@/pages/income/hooks/useIncomeCategoryPicker';
 import type { IncomeFormData } from '@/pages/income/validations';
 
-type Props = {
+type IncomeCategoryFieldProps = {
   form: UseFormReturn<IncomeFormData>;
   picker: IncomeCategoryPickerApi;
 };
 
-const IncomeCategoryField = ({ form, picker }: Props) => {
+export const IncomeCategoryField = ({ form, picker }: IncomeCategoryFieldProps) => {
   const { t } = useTranslation();
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -50,8 +50,8 @@ const IncomeCategoryField = ({ form, picker }: Props) => {
         <FormItem>
           <FormLabel>{t('income.categoryLabel')}</FormLabel>
           <Popover
-            open={picker.categoryPopoverOpen}
-            onOpenChange={picker.setCategoryPopoverOpen}
+            open={picker.isCategoryPopoverOpen}
+            onOpenChange={picker.setIsCategoryPopoverOpen}
             modal={false}
           >
             <PopoverTrigger asChild>
@@ -127,5 +127,3 @@ const IncomeCategoryField = ({ form, picker }: Props) => {
     />
   );
 };
-
-export default IncomeCategoryField;

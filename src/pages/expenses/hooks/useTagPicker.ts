@@ -12,7 +12,7 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
   const tags = useTagsData();
   const { handleTagCreate } = useTagOps();
   const { allow } = useProGate();
-  const [tagPopoverOpen, setTagPopoverOpen] = useState(false);
+  const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
   const [tagSearch, setTagSearch] = useState('');
   const [isCreatingTag, startTagCreation] = useTransition();
 
@@ -58,7 +58,7 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
   const guardTagLimit = (): boolean =>
     allow('tagsPerExpense', selectedTagIds.length, {
       // Close the picker first, or it sits on top of the upgrade dialog.
-      onBlock: () => setTagPopoverOpen(false),
+      onBlock: () => setIsTagPopoverOpen(false),
     });
 
   const handleTagSelect = (tagId: string) => {
@@ -66,7 +66,7 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
     if (!guardTagLimit()) return;
 
     applySelection([...selectedTagIds, tagId]);
-    setTagPopoverOpen(false);
+    setIsTagPopoverOpen(false);
     setTagSearch('');
   };
 
@@ -83,7 +83,7 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
         const color = dataColors[tags.length % dataColors.length];
         const newTag = await handleTagCreate(tagSearch.trim(), color);
         applySelection([...selectedTagIds, newTag.id]);
-        setTagPopoverOpen(false);
+        setIsTagPopoverOpen(false);
         setTagSearch('');
       } catch {
         // error already shown via toast
@@ -92,8 +92,8 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
   };
 
   return {
-    tagPopoverOpen,
-    setTagPopoverOpen,
+    isTagPopoverOpen,
+    setIsTagPopoverOpen,
     tagSearch,
     setTagSearch,
     selectedTags,

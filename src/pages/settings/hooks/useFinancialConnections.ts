@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
-import { financialConnectionService } from '@/pages/settings/financialConnectionService';
+import { settingsApi } from '@/pages/settings/settingsApi';
 import type { FinancialConnection } from '@/types/FinancialConnection';
 
 export const useFinancialConnections = () => {
@@ -12,8 +12,8 @@ export const useFinancialConnections = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-    void financialConnectionService
-      .getConnections(activeOwnerId, controller.signal)
+    void settingsApi
+      .getFinancialConnections(activeOwnerId, controller.signal)
       .then((connections) => {
         if (controller.signal.aborted) {
           return;

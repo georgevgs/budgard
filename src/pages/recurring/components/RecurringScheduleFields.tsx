@@ -26,19 +26,19 @@ const frequencyValues = [
   'yearly',
 ] as const;
 
-type Props = {
+type RecurringScheduleFieldsProps = {
   form: UseFormReturn<RecurringExpenseFormData>;
   isEditing: boolean;
-  showLinkedAccount: boolean;
+  shouldShowLinkedAccount: boolean;
   investmentAccounts: Account[];
 };
 
-const RecurringScheduleFields = ({
+export const RecurringScheduleFields = ({
   form,
   isEditing,
-  showLinkedAccount,
+  shouldShowLinkedAccount,
   investmentAccounts,
-}: Props) => {
+}: RecurringScheduleFieldsProps) => {
   const { t } = useTranslation();
 
   const isStartDateDisabled = (date: Date) => {
@@ -83,7 +83,7 @@ const RecurringScheduleFields = ({
         )}
       />
 
-      {renderLinkedAccountField(form, showLinkedAccount, investmentAccounts, t)}
+      {renderLinkedAccountField(form, shouldShowLinkedAccount, investmentAccounts, t)}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField
@@ -123,9 +123,6 @@ const RecurringScheduleFields = ({
     </>
   );
 };
-
-export default RecurringScheduleFields;
-
 // --- Helpers ---
 
 type TranslateFunction = (

@@ -11,12 +11,12 @@ import {
 import { DatePickerField } from '@/common/ui/date-picker-field';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
 
-type Props = {
+type ExpenseDateFieldProps = {
   form: UseFormReturn<ExpenseFormData>;
   dateLocale: Locale | undefined;
 };
 
-const ExpenseDateField = ({ form, dateLocale }: Props) => {
+export const ExpenseDateField = ({ form, dateLocale }: ExpenseDateFieldProps) => {
   const { t } = useTranslation();
 
   return (
@@ -40,5 +40,3 @@ const ExpenseDateField = ({ form, dateLocale }: Props) => {
     />
   );
 };
-
-export default ExpenseDateField;

@@ -19,15 +19,15 @@ export const useBudgetAlerts = ({
   defaultCurrency,
 }: UseBudgetAlertsProps): void => {
   const { t } = useTranslation();
-  const shownWarning = useRef(false);
-  const shownExceeded = useRef(false);
+  const hasShownWarning = useRef(false);
+  const hasShownExceeded = useRef(false);
   // Start as null to distinguish "haven't seen real data yet" from "0 spent"
   const prevSpent = useRef<number | null>(null);
 
   // Reset when budget amount changes
   useEffect(() => {
-    shownWarning.current = false;
-    shownExceeded.current = false;
+    hasShownWarning.current = false;
+    hasShownExceeded.current = false;
     prevSpent.current = null;
   }, [monthlyBudget]);
 
@@ -58,9 +58,9 @@ export const useBudgetAlerts = ({
     if (
       percentage >= BUDGET_EXCEEDED_THRESHOLD &&
       prevPercentage < BUDGET_EXCEEDED_THRESHOLD &&
-      !shownExceeded.current
+      !hasShownExceeded.current
     ) {
-      shownExceeded.current = true;
+      hasShownExceeded.current = true;
       haptics.warning();
       toast({
         variant: 'destructive',
@@ -78,9 +78,9 @@ export const useBudgetAlerts = ({
     if (
       percentage >= BUDGET_WARNING_THRESHOLD &&
       prevPercentage < BUDGET_WARNING_THRESHOLD &&
-      !shownWarning.current
+      !hasShownWarning.current
     ) {
-      shownWarning.current = true;
+      hasShownWarning.current = true;
       haptics.warning();
       const remaining = monthlyBudget - monthlySpent;
       toast({

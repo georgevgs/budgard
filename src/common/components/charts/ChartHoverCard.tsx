@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { ChartPoint } from '@/common/components/charts/chartTypes';
 
-type Props = {
+type ChartHoverCardProps = {
   activeIndex: number | null;
   data: ChartPoint[];
   // Pixel position of the active point, so the card can follow it.
@@ -16,13 +16,13 @@ const EDGE_GUTTER = 4;
 // Rendered as HTML above the SVG rather than as <foreignObject> inside it:
 // text stays crisp, the shared surface tokens apply unchanged, and the card
 // can overflow the plot without being clipped by the viewBox.
-const ChartHoverCard = ({
+export const ChartHoverCard = ({
   activeIndex,
   data,
   x,
   containerWidth,
   render,
-}: Props) => {
+}: ChartHoverCardProps) => {
   if (activeIndex === null || !render) {
     return null;
   }
@@ -43,9 +43,6 @@ const ChartHoverCard = ({
     </div>
   );
 };
-
-export default ChartHoverCard;
-
 // --- Helpers ---
 
 // Centres the card on the point, then pulls it back inside the chart so it

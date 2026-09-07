@@ -2,18 +2,18 @@ import { useTranslation } from 'react-i18next';
 import { useNoSpendOps } from '@/common/hooks/dataOps/useNoSpendOps';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
 import { useSetAsideGoal } from '@/common/hooks/savings/useSavingsRhythm';
-import RhythmDots from '@/pages/plan/components/RhythmDots';
-import SetAsideCard from '@/pages/plan/components/SetAsideCard';
+import { RhythmDots } from '@/pages/plan/components/RhythmDots';
+import { SetAsideCard } from '@/pages/plan/components/SetAsideCard';
 import { Button } from '@/common/ui/button';
 import type { SavingsRhythm as Rhythm } from '@/common/hooks/savings/useSavingsRhythm';
 import type { Goal } from '@/types/Goal';
 
-type Props = {
+type SavingsRhythmProps = {
   rhythm: Rhythm | null;
   currency: string;
 };
 
-const SavingsRhythm = ({ rhythm, currency }: Props) => {
+export const SavingsRhythm = ({ rhythm, currency }: SavingsRhythmProps) => {
   const { t } = useTranslation();
   const { handleNoSpendClaim, handleNoSpendUndo } = useNoSpendOps();
   const { isPro } = useSubscription();
@@ -54,9 +54,6 @@ const SavingsRhythm = ({ rhythm, currency }: Props) => {
     </section>
   );
 };
-
-export default SavingsRhythm;
-
 // --- Helpers ---
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
@@ -97,7 +94,7 @@ const renderClaim = (
   onUndo: () => void,
   t: TFunc,
 ) => {
-  if (rhythm.todayClaimed) {
+  if (rhythm.isTodayClaimed) {
     return (
       <div className="mt-3 flex items-center justify-between gap-3">
         <p className="text-sm font-semibold text-primary-ink">

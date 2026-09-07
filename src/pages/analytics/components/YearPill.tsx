@@ -7,7 +7,7 @@ import {
   SelectValue,
 } from '@/common/ui/select';
 
-type Props = {
+type YearPillProps = {
   selectedYear: number;
   availableYears: number[];
   onYearChange: (year: number) => void;
@@ -17,7 +17,7 @@ type Props = {
 // to sit halfway down beside the chart, which made it look like the chart's
 // control rather than the screen's — every figure on Trends moves when this
 // changes, so it belongs where the screen names itself.
-const YearPill = ({ selectedYear, availableYears, onYearChange }: Props) => {
+export const YearPill = ({ selectedYear, availableYears, onYearChange }: YearPillProps) => {
   const { t } = useTranslation();
 
   return (
@@ -41,5 +41,3 @@ const YearPill = ({ selectedYear, availableYears, onYearChange }: Props) => {
     </Select>
   );
 };
-
-export default YearPill;

@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
-import SectionShell from '@/pages/landing/components/SectionShell';
-import EyebrowLabel from '@/pages/landing/components/EyebrowLabel';
-import Reveal from '@/pages/landing/components/Reveal';
+import { SectionShell } from '@/pages/landing/components/SectionShell';
+import { EyebrowLabel } from '@/pages/landing/components/EyebrowLabel';
+import { Reveal } from '@/pages/landing/components/Reveal';
 import Check from 'lucide-react/dist/esm/icons/check';
-import { useProPlans, type ProPlansDisplay } from '@/pages/pro/hooks/useProPlans';
+import { useProPlans, type UseProPlansReturn } from '@/pages/pro/hooks/useProPlans';
 import { yearlySavingsPercent, type ProPlanId } from '@/constants/proPlans';
 
-type Props = {
+type PricingProps = {
   onGetStarted: () => void;
   onGetPro: (plan: Cycle) => void;
 };
@@ -16,7 +16,7 @@ type Props = {
 type Tx = (key: string, opts?: Record<string, unknown>) => string;
 type Cycle = ProPlanId;
 
-const Pricing = ({ onGetStarted, onGetPro }: Props) => {
+export const Pricing = ({ onGetStarted, onGetPro }: PricingProps) => {
   const { t } = useTranslation();
   const plans = useProPlans();
   const [cycle, setCycle] = useState<Cycle>('yearly');
@@ -32,9 +32,6 @@ const Pricing = ({ onGetStarted, onGetPro }: Props) => {
     </SectionShell>
   );
 };
-
-export default Pricing;
-
 const renderHeader = (t: Tx) => (
   <div className="text-center max-w-2xl mx-auto">
     <EyebrowLabel>{t('landing.pricing.eyebrow')}</EyebrowLabel>
@@ -51,7 +48,7 @@ const renderToggle = (
   t: Tx,
   cycle: Cycle,
   setCycle: (c: Cycle) => void,
-  plans: ProPlansDisplay,
+  plans: UseProPlansReturn,
 ) => (
   <div className="mt-8 flex justify-center">
     <div className="segmented">
@@ -66,7 +63,7 @@ const renderToggleButton = (
   value: Cycle,
   current: Cycle,
   setCycle: (c: Cycle) => void,
-  plans: ProPlansDisplay,
+  plans: UseProPlansReturn,
 ) => {
   const isActive = current === value;
   const labelKey = getLabelKey(value);
@@ -94,7 +91,7 @@ const getLabelKey = (value: Cycle): string => {
 
 // Computed from the live prices so the badge can never drift from what
 // checkout actually charges — same basis as the paywall's savings badge.
-const renderSaveBadge = (t: Tx, value: Cycle, plans: ProPlansDisplay) => {
+const renderSaveBadge = (t: Tx, value: Cycle, plans: UseProPlansReturn) => {
   if (value !== 'yearly') return null;
 
   const percent = yearlySavingsPercent(plans.prices);
@@ -137,7 +134,7 @@ const renderFreeCard = (t: Tx, onGetStarted: () => void) => (
 const renderProCard = (
   t: Tx,
   cycle: Cycle,
-  plans: ProPlansDisplay,
+  plans: UseProPlansReturn,
   onGetPro: (plan: Cycle) => void,
 ) => (
   <div className="surface-card relative flex flex-col border-2 border-primary/60 p-8 lift-soft">
@@ -163,7 +160,7 @@ const renderProCard = (
   </div>
 );
 
-const renderProPrice = (t: Tx, cycle: Cycle, plans: ProPlansDisplay) => {
+const renderProPrice = (t: Tx, cycle: Cycle, plans: UseProPlansReturn) => {
   if (cycle === 'monthly') {
     return (
       <div className="mt-6 flex items-baseline gap-1.5">

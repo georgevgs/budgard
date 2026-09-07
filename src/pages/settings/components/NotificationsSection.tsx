@@ -1,4 +1,4 @@
-import SurfaceCard from '@/common/components/common/SurfaceCard';
+import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Switch } from '@/common/ui/switch';
 import {
   Select,
@@ -33,7 +33,7 @@ type NotificationsSectionProps = {
   t: TFunc;
 };
 
-const NotificationsSection = ({
+export const NotificationsSection = ({
   pushState,
   dailyReminderHour,
   notificationPreferences,
@@ -75,9 +75,6 @@ const NotificationsSection = ({
     </section>
   );
 };
-
-export default NotificationsSection;
-
 // --- Helpers ---
 
 const REMINDER_HOURS = Array.from({ length: 24 }, (_, i) => i);
