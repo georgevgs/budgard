@@ -177,6 +177,14 @@ constrain new work:
   new one, break the line it covers and watch it fail — a test that passes
   against broken code is worse than no test.
 - Run `npm run lint`, `npm run test` and `npm run build`.
+- `npm run knip` finds dead code, and its config is what makes it
+  readable: ten live files (the service worker, the recovery page, the
+  Deno edge functions, the realtime stub behind a vite alias) are
+  entry points knip cannot infer, and five dependencies are declared in
+  `netlify.toml` or CSS rather than imported. Every ignore in
+  `knip.jsonc` says why it is there — add the reason with the entry, or
+  the report goes back to being noise nobody reads. knip itself is not a
+  declared dependency; the script runs it through `npx`.
 - `npm run typecheck` runs `tsc -b`, and it has to stay that way. The root
   `tsconfig.json` is `"files": []` plus project references, so a plain
   `tsc --noEmit` compiles **nothing** and exits 0 on a codebase full of

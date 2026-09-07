@@ -13,9 +13,7 @@ vi.mock('@/common/contexts/AuthContext', () => ({
   useAuth: () => ({ session: mockSession }),
 }));
 
-// Mock useData
 vi.mock('@/common/contexts/DataContext', () => ({
-  useData: () => ({ defaultCurrency: 'EUR' }),
   useCategoriesData: () => ({ expenseCategories: [] }),
   useExpensesData: () => [],
   useDataConfig: () => ({

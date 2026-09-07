@@ -1,0 +1,50 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+
+  // Entry points knip cannot infer. Without these it reports ten "unused
+  // files" that are all live, and a report nobody can read is a report nobody
+  // reads — real dead code hid in that noise until Sep 2026.
+  "entry": [
+    "index.html",
+    // Registered by workbox at build time, never imported.
+    "public/push-sw.js",
+    // The recovery page behind the /reset Netlify redirect. See bootGuard.ts.
+    "public/reset.js",
+    // Reached only through the vite.config.ts alias, which knip does not follow.
+    "src/config/realtimeStub.ts",
+    // Deployed to Deno by the Supabase CLI, not bundled by vite.
+    "supabase/functions/*/index.ts",
+    "scripts/**/*.mjs",
+    "e2e/**/*.spec.ts",
+    "*.config.{ts,js}"
+  ],
+
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "supabase/functions/**/*.ts",
+    "scripts/**/*.mjs"
+  ],
+
+  // The stub deliberately mirrors the real package surface, named export and
+  // default both, so an incidental import of either still resolves. That is a
+  // duplicate export on purpose; the reasoning is at the top of the file.
+  "ignore": ["src/config/realtimeStub.ts"],
+
+  "ignoreDependencies": [
+    // Declared in netlify.toml as a build plugin, never imported.
+    "netlify-purge-cloudflare-on-deploy",
+    // Tailwind 4 is CSS-first: `@import`/`@plugin` in index.css, no JS import.
+    "tailwindcss",
+    "tailwindcss-animate",
+    // Aliased away by vite.config.ts; only the stub's own test names it.
+    "@supabase/realtime-js",
+    // Deno's `npm:web-push` specifier in an edge function, which knip's Node
+    // resolver reads as a package called "npm".
+    "npm"
+  ],
+
+  // An export used inside its own file is a scoping choice, not dead code.
+  // src/types/* exports a domain vocabulary on purpose, and a shadcn primitive
+  // keeps whatever upstream ships.
+  "ignoreExportsUsedInFile": true
+}

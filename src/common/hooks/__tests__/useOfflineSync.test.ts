@@ -6,10 +6,6 @@ import { useOfflineSync } from '@/common/hooks/useOfflineSync';
 const mockRefreshExpenses = vi.fn().mockResolvedValue(undefined);
 const mockRefreshIncomes = vi.fn().mockResolvedValue(undefined);
 vi.mock('@/common/contexts/DataContext', () => ({
-  useData: () => ({
-    refreshExpenses: mockRefreshExpenses,
-    refreshIncomes: mockRefreshIncomes,
-  }),
   useDataActions: () => ({
     refreshExpenses: mockRefreshExpenses,
     refreshIncomes: mockRefreshIncomes,
