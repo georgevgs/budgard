@@ -6,7 +6,7 @@ import {
   PopoverContent,
 } from '@/common/ui/popover';
 import { Input } from '@/common/ui/input';
-import { renderSuggestionMeta } from '@/pages/expenses/components/ExpensesForm.helpers';
+import { renderSuggestionMeta } from '@/pages/expenses/utils/expensesFormHelpers';
 import type { Expense } from '@/types/Expense';
 
 type QuickAddNameProps = {
@@ -90,7 +90,6 @@ export const QuickAddName = ({
     </div>
   );
 };
-// --- Helpers ---
 
 // An empty list would open a popover with nothing in it, which on a phone is
 // a flash of chrome over the keypad for no reason.

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   mergeUniqueById,
   replaceRecentWindow,
-} from '@/common/contexts/DataContext.helpers';
+} from '@/common/contexts/dataContextHelpers';
 
 const row = (id: string, date: string) => ({ id, date });
 

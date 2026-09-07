@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/common/ui/select';
-import { renderCategoryIndicator } from '@/pages/expenses/components/ExpensesForm.helpers';
+import { renderCategoryIndicator } from '@/pages/expenses/utils/expensesFormHelpers';
 import type { Category } from '@/types/Category';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
 

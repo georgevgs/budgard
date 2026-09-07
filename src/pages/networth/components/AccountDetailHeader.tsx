@@ -22,7 +22,7 @@ import {
   renderInvestmentDetail,
   getBalanceClass,
   renderLiabilitySign,
-} from '@/pages/networth/components/AccountDetailSheet.helpers';
+} from '@/pages/networth/utils/accountDetailSheetHelpers';
 
 type AccountDetailHeaderProps = {
   account: Account;

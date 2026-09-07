@@ -10,7 +10,7 @@ import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
 import { useRecurringExpenseOps } from '@/common/hooks/dataOps/useRecurringExpenseOps';
 import { useRecurringIncomeOps } from '@/common/hooks/dataOps/useRecurringIncomeOps';
 import { useMutationRunner } from '@/common/hooks/dataOps/useMutationRunner';
-import { useProGate } from '@/pages/pro/hooks/useProGate';
+import { useProGate } from '@/common/hooks/useProGate';
 import { recurringSuggestionService } from '@/common/api/recurringSuggestionService';
 import { detectRecurringSuggestions } from '@/pages/recurring/utils/recurringDetection';
 import type { RecurringMode } from '@/pages/recurring/hooks/useRecurringActions';

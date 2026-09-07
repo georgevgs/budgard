@@ -32,7 +32,7 @@ import {
   replaceRecentWindow,
   isAbortError,
   isExpiredJwtError,
-} from '@/common/contexts/DataContext.helpers';
+} from '@/common/contexts/dataContextHelpers';
 import {
   loadDataSnapshot,
   hasDataSnapshot,
@@ -671,8 +671,6 @@ export const useDataLayer = () => {
     noSpendDays,
   };
 };
-
-// --- Helpers ---
 
 // The budget row is a single nullable row carrying five settings, each with
 // its own fallback. Kept together so the defaults live in one place.

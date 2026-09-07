@@ -8,7 +8,7 @@ import { offlineQueue, createTempId } from '@/constants/offlineQueue';
 import { isOfflineError } from '@/constants/offlineError';
 import type { Expense } from '@/types/Expense';
 import { replaceById, patchById, pickByEdit } from '@/common/hooks/dataOps/helpers';
-import { mergeUniqueById } from '@/common/contexts/DataContext.helpers';
+import { mergeUniqueById } from '@/common/contexts/dataContextHelpers';
 import { useMutationRunner } from '@/common/hooks/dataOps/useMutationRunner';
 import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
 import { recurringSuggestionService } from '@/common/api/recurringSuggestionService';
@@ -137,8 +137,6 @@ export const useIncomeOps = () => {
     t,
   ]);
 };
-
-// --- Helpers ---
 
 type OfflineDeps = {
   ownerId: string;

@@ -3,17 +3,13 @@ import Plus from 'lucide-react/dist/esm/icons/plus';
 import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { amountToInput } from '@/constants/utils';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   resolveSourceAmount,
   resolveSourceCurrency,
 } from '@/constants/transactionAmount';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
-
-export type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 export const getInitialAmount = (
   income: Expense | undefined,

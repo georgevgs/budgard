@@ -3,7 +3,7 @@ import {
   mapOcrProgress,
   resolveOcrLanguages,
   runReceiptOcr,
-} from '@/pages/expenses/ocrService';
+} from '@/pages/expenses/utils/ocr';
 
 const mockRecognize = vi.fn();
 const mockTerminate = vi.fn();

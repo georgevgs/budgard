@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCategoriesData, useTagsData } from '@/common/contexts/DataContext';
-import { useProGate } from '@/pages/pro/hooks/useProGate';
+import { useProGate } from '@/common/hooks/useProGate';
 import { useToast } from '@/common/hooks/useToast';
 import { buildTransactionsCsv, downloadCsv } from '@/constants/csvExport';
 import type { Expense } from '@/types/Expense';

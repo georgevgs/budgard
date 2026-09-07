@@ -33,7 +33,7 @@ import {
   getInitialDate,
   getInitialExtraTagIds,
   renderFormTitle,
-} from '@/pages/expenses/components/ExpensesForm.helpers';
+} from '@/pages/expenses/utils/expensesFormHelpers';
 
 type ExpensesFormProps = {
   expense?: Expense;
@@ -150,7 +150,6 @@ export const ExpensesForm = ({
     </div>
   );
 };
-// --- Helpers ---
 
 const renderDragHandle = () => (
   <div className="flex justify-center pt-3 pb-2 sm:hidden" data-drag-handle>

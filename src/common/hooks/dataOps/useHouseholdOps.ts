@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import * as z from 'zod';
 import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
-import { useProGate } from '@/pages/pro/hooks/useProGate';
+import { useProGate } from '@/common/hooks/useProGate';
 import { useMutationRunner } from '@/common/hooks/dataOps/useMutationRunner';
 import { useToast } from '@/common/hooks/useToast';
 import { householdInviteSchema } from '@/constants/validations';
@@ -117,8 +117,6 @@ export const useHouseholdOps = () => {
     copyInvite,
   };
 };
-
-// --- Helpers ---
 
 const resolveRemoveOperation = (isOwner: boolean): string => {
   if (isOwner) {

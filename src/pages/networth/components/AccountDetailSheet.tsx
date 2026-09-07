@@ -13,7 +13,7 @@ import {
   renderActionBar,
   renderSnapshotForm,
   renderHistoryList,
-} from '@/pages/networth/components/AccountDetailSheet.helpers';
+} from '@/pages/networth/utils/accountDetailSheetHelpers';
 
 type AccountDetailSheetProps = {
   account: Account;
@@ -120,7 +120,6 @@ export const AccountDetailSheet = ({ account, open, onClose, onEdit }: AccountDe
     </>
   );
 };
-// --- Helpers ---
 
 const createOpenChangeHandler = (reset: () => void, onClose: () => void) => {
   return (nextOpen: boolean) => {

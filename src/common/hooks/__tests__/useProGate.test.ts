@@ -19,8 +19,8 @@ vi.mock('@/common/contexts/SubscriptionContext', () => ({
   useSubscription: () => ({ isPro: plan.isPro }),
 }));
 
-import { useProGate } from '@/pages/pro/hooks/useProGate';
-import { PRO_GATES } from '@/pages/pro/utils/proGates';
+import { useProGate } from '@/common/hooks/useProGate';
+import { PRO_GATES } from '@/constants/proGates';
 
 const renderGate = () => renderHook(() => useProGate()).result;
 

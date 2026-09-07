@@ -5,7 +5,7 @@ import {
   useIncomesData,
 } from '@/common/contexts/DataContext';
 import { useCategoryOps } from '@/common/hooks/dataOps/useCategoryOps';
-import { useProGate } from '@/pages/pro/hooks/useProGate';
+import { useProGate } from '@/common/hooks/useProGate';
 import { getCategoryImpact } from '@/pages/categories/utils/categoryDeleteImpact';
 import type { Category, CategoryType } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
@@ -102,8 +102,6 @@ export const useCategoryManager = (categoryType: CategoryType) => {
     handleConfirmDelete,
   };
 };
-
-// --- Helpers ---
 
 const pickCategories = (
   type: CategoryType,

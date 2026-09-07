@@ -7,7 +7,7 @@ import {
   useRecurringData,
 } from '@/common/contexts/DataContext';
 import { useDelayedLoading } from '@/common/hooks/useDelayedLoading';
-import { useProGate } from '@/pages/pro/hooks/useProGate';
+import { useProGate } from '@/common/hooks/useProGate';
 import {
   useRecurringActions,
   type RecurringMode,
@@ -108,8 +108,6 @@ export const useRecurringList = () => {
     handleSuggestionDismiss: suggestions.dismiss,
   };
 };
-
-// --- Helpers ---
 
 const pick = <T>(isIncome: boolean, income: T, expense: T): T => {
   if (isIncome) {

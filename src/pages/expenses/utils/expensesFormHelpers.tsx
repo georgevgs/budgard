@@ -3,17 +3,13 @@ import { parseISO } from 'date-fns';
 import Tag from 'lucide-react/dist/esm/icons/tag';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { amountToInput } from '@/constants/utils';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   resolveSourceAmount,
   resolveSourceCurrency,
 } from '@/constants/transactionAmount';
 import type { Expense } from '@/types/Expense';
 import type { Category, EmbeddedCategory } from '@/types/Category';
-
-export type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 export const getInitialAmount = (
   expense: Expense | undefined,
@@ -85,13 +81,13 @@ export const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {
 };
 
 export const renderCreateTagOption = (
-  showCreateOption: boolean,
+  shouldShowCreateOption: boolean,
   isCreatingTag: boolean,
   tagSearch: string,
   onCreate: () => void,
   t: TFunction,
 ) => {
-  if (!showCreateOption) return null;
+  if (!shouldShowCreateOption) return null;
 
   let label: string;
   if (isCreatingTag) {
@@ -153,10 +149,10 @@ export const renderCategoryIndicator = (category: Category) => {
 
 export const renderNoTagsMessage = (
   filteredCount: number,
-  showCreateOption: boolean,
+  shouldShowCreateOption: boolean,
   t: TFunction,
 ) => {
-  if (filteredCount > 0 || showCreateOption) return null;
+  if (filteredCount > 0 || shouldShowCreateOption) return null;
 
   return (
     <p className="px-3 py-2 text-sm text-muted-foreground">

@@ -12,14 +12,11 @@ import { computeAccountXirr } from '@/pages/networth/utils/xirr';
 import { computeAccountYtd, type YtdResult } from '@/pages/networth/utils/ytd';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
-import { BalanceSnapshotForm,
+import type { TranslateFunction } from '@/constants/translate';
+import {
+  BalanceSnapshotForm,
   type SnapshotMode,
 } from '@/pages/networth/components/BalanceSnapshotForm';
-
-export type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 export const renderActionBar = (
   isInvestment: boolean,

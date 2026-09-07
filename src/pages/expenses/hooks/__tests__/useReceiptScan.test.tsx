@@ -10,7 +10,7 @@ const mockToast = vi.fn();
 const mockOpenUpgrade = vi.fn();
 let mockIsPro = true;
 
-vi.mock('@/pages/expenses/ocrService', () => ({
+vi.mock('@/pages/expenses/utils/ocr', () => ({
   runReceiptOcr: (...args: unknown[]) => mockRunReceiptOcr(...args),
   resolveOcrLanguages: () => 'eng',
 }));

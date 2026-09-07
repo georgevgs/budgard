@@ -45,7 +45,7 @@ vi.mock('@/common/hooks/dataOps/useCategoryOps', () => ({
   }),
 }));
 
-vi.mock('@/pages/pro/hooks/useProGate', () => ({
+vi.mock('@/common/hooks/useProGate', () => ({
   useProGate: () => ({ allow: () => true }),
 }));
 

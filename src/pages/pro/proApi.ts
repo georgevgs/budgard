@@ -3,7 +3,7 @@ import { type ProPlanPrice, type ProPlanPrices } from '@/constants/proPlans';
 // Fetches the live Pro prices from the public stripe-prices Edge Function.
 // Throws on any malformed payload so callers can fall back to the compiled-in
 // prices instead of rendering garbage.
-export const proPlansService = {
+export const proApi = {
   async getPlanPrices(): Promise<ProPlanPrices> {
     const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-prices`,
@@ -21,8 +21,6 @@ export const proPlansService = {
     };
   },
 };
-
-// --- Helpers ---
 
 const parsePlanPrice = (value: unknown): ProPlanPrice => {
   if (typeof value !== 'object' || value === null) {

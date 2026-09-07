@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from '@/common/hooks/useToast';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
 import { useUpgradeDialog } from '@/common/contexts/UpgradeDialogContext';
-import { PRO_GATES, isCapGate, type ProGateName } from '@/pages/pro/utils/proGates';
+import { PRO_GATES, isCapGate, type ProGateName } from '@/constants/proGates';
 
 type AllowOptions = {
   // Runs just before the upsell when the action is blocked — closing a popover

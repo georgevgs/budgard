@@ -121,8 +121,6 @@ export const runReceiptOcr = (
   return { promise, cancel };
 };
 
-// --- Helpers ---
-
 // Re-encodes the image to a bounded JPEG before recognition: Leptonica inside
 // the wasm core cannot decode WebP/HEIC, and a full-resolution phone photo
 // (~50 MB decoded) can exhaust the wasm heap on low-end devices. Any failure
