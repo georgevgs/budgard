@@ -71,7 +71,6 @@ export const TodayHeader = (props: TodayHeaderProps) => {
     </div>
   );
 };
-// --- Helpers ---
 
 const finishArranging = (onDone: () => void): void => {
   onDone();

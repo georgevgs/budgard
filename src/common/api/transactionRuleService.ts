@@ -63,7 +63,5 @@ export const transactionRuleService = {
   },
 };
 
-// --- Helpers ---
-
 const normalizeMatch = (value: string): string =>
   value.trim().replace(/\s+/g, ' ').toLocaleLowerCase();

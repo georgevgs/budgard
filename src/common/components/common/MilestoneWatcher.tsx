@@ -102,7 +102,6 @@ export const MilestoneWatcher = () => {
 
   return null;
 };
-// --- Helpers ---
 
 // One id per milestone crossed, month-scoped so a fresh month can celebrate
 // the same rungs again. Crossing several at once (a large transfer) fires once

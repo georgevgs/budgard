@@ -95,8 +95,6 @@ export const useMoneyFlowData = (now: Date = new Date()): MoneyFlowData => {
   }, [expenses, incomes, categories, monthKey, now, dateLocale]);
 };
 
-// --- Helpers ---
-
 const buildCategoryRows = (
   categories: Category[],
   byCategory: Map<string, number>,

@@ -79,8 +79,6 @@ export const useSetPin = ({ isOpen, onSaved }: Params) => {
   };
 };
 
-// --- Helpers ---
-
 const stepFor = (first: string): 'choose' | 'confirm' => {
   if (first === '') {
     return 'choose';

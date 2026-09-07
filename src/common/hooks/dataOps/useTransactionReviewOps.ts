@@ -93,8 +93,6 @@ export const useTransactionReviewOps = () => {
   };
 };
 
-// --- Helpers ---
-
 type ExpenseSetter = (
   value: Expense[] | ((current: Expense[]) => Expense[]),
 ) => void;

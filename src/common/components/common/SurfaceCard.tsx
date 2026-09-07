@@ -13,7 +13,6 @@ type SurfaceCardProps = HTMLAttributes<HTMLDivElement> & {
 export const SurfaceCard = ({ flush = false, className, ...props }: SurfaceCardProps) => {
   return <div className={cn(getSurfaceClass(flush), className)} {...props} />;
 };
-// --- Helpers ---
 
 const getSurfaceClass = (flush: boolean): string => {
   if (flush) {

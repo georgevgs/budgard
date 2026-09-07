@@ -83,8 +83,6 @@ const TrendsDeepDiveView = () => {
 
 export default TrendsDeepDiveView;
 
-// --- Helpers ---
-
 const renderLoading = (showSkeleton: boolean) => {
   if (!showSkeleton) {
     return null;

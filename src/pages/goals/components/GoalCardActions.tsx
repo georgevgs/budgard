@@ -80,7 +80,6 @@ export const GoalCardActions = ({ goal, onEdit, onDelete }: GoalCardActionsProps
     </>
   );
 };
-// --- Helpers ---
 
 const blurActiveElement = () => {
   if (document.activeElement instanceof HTMLElement) {

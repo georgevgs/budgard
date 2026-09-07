@@ -34,7 +34,6 @@ export const SpeedDialAction = ({
     </div>
   );
 };
-// --- Helpers ---
 
 const getTabIndex = (isOpen: boolean): number => {
   if (isOpen) {

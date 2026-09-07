@@ -101,8 +101,6 @@ export const requestDeviceUnlock = async (): Promise<boolean> => {
   }
 };
 
-// --- Helpers ---
-
 // Typed with its real backing buffer: WebAuthn's BufferSource excludes a
 // SharedArrayBuffer, which the bare Uint8Array type still admits.
 const randomBytes = (length: number): Uint8Array<ArrayBuffer> =>

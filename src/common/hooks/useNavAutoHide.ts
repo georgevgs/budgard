@@ -82,8 +82,6 @@ export const useNavAutoHide = (pathname: string): void => {
   }, [pathname]);
 };
 
-// --- Helpers ---
-
 // Scroll fires many times a second at both ends of a page, so only touch the
 // DOM when the state actually flips — an attribute write invalidates the
 // :has() rules that drive the dock.

@@ -57,8 +57,6 @@ export const isOfflineError = (error: unknown): boolean => {
   return false;
 };
 
-// --- Helpers ---
-
 const extractError = (error: unknown): ExtractedError => {
   if (typeof error === 'string') {
     return { name: '', message: error };

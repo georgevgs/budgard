@@ -76,8 +76,6 @@ describe('buildMoneyTimeline', () => {
   });
 });
 
-// --- Helpers ---
-
 const schedule = (overrides: Partial<RecurringExpense>): RecurringExpense => ({
   id: 'schedule',
   user_id: 'user-1',

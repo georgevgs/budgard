@@ -92,8 +92,6 @@ export const loadSentry = async (): Promise<boolean> => {
   }
 };
 
-// --- Helpers ---
-
 const enqueue = (call: QueuedCall): void => {
   if (queuedCalls.length >= QUEUE_LIMIT) {
     return;

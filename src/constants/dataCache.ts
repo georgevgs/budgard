@@ -164,8 +164,6 @@ export const clearDataSnapshot = (): void => {
   }
 };
 
-// --- Helpers ---
-
 // YYYY-MM-DD dates sort lexicographically, so string comparison is safe.
 const trimToRecent = (transactions: Expense[], cutoff: string): Expense[] => {
   return transactions.filter((transaction) => transaction.date >= cutoff);

@@ -34,7 +34,6 @@ export const ReviewQueueBanner = () => {
     </Link>
   );
 };
-// --- Helpers ---
 
 const countPending = (transactions: { review_status?: string }[]): number =>
   transactions.filter((transaction) => transaction.review_status === 'pending')

@@ -82,8 +82,6 @@ const AnalyticsView = () => {
 
 export default AnalyticsView;
 
-// --- Helpers ---
-
 const renderLoading = (showSkeleton: boolean) => {
   if (!showSkeleton) {
     return null;

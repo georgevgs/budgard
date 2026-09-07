@@ -39,8 +39,6 @@ describe('offlineQueue v1 → v2 upgrade', () => {
   });
 });
 
-// --- Helpers ---
-
 // Builds the pre-v2 shape: same store, entries with no userId field.
 const seedLegacyDatabase = (): Promise<void> => {
   return new Promise((resolve, reject) => {

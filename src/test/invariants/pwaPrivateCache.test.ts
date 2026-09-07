@@ -51,8 +51,6 @@ describe('PWA private cache policy', () => {
   });
 });
 
-// --- Helpers ---
-
 type WorkerListener = (event: unknown) => void;
 
 const buildWorkerScope = (listeners: Map<string, WorkerListener[]>) => ({

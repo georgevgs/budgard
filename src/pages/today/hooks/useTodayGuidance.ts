@@ -152,8 +152,6 @@ export const useTodayGuidance = (
   };
 };
 
-// --- Helpers ---
-
 const sumTransactions = (transactions: Expense[]): number =>
   sumSpending(transactions);
 

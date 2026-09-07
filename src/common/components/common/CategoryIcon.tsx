@@ -44,7 +44,6 @@ export const CategoryIcon = ({ icon, className }: CategoryIconProps) => {
     strokeWidth: 1.8,
   });
 };
-// --- Helpers ---
 
 const ICONS_BY_VALUE: Record<string, LucideIcon> = {
   '🍔': Utensils,

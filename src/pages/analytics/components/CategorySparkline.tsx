@@ -52,7 +52,6 @@ export const CategorySparkline = ({ values, color }: CategorySparklineProps) => 
     </svg>
   );
 };
-// --- Helpers ---
 
 const pointToPathSegment = (p: { x: number; y: number }, i: number): string => {
   let command = 'L';

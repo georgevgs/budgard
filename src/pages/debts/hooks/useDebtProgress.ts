@@ -27,8 +27,6 @@ export const useDebtProgress = (debt: Debt): DebtProgress => {
   return useMemo(() => computeProgress(debt), [debt]);
 };
 
-// --- Helpers ---
-
 const computeProgress = (debt: Debt): DebtProgress => {
   const principal = Number(debt.original_principal ?? 0);
   const balance = Number(debt.current_balance ?? 0);

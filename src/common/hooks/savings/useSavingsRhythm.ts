@@ -185,8 +185,6 @@ export const useSetAsideGoal = (): Goal | null => {
   }, [goals, expenseCategories, accounts]);
 };
 
-// --- Helpers ---
-
 const isGoodDay = (outcome: DayOutcome): boolean =>
   outcome === 'noSpend' || outcome === 'under';
 

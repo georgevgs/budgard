@@ -160,8 +160,6 @@ export const moveTile = (
   return next;
 };
 
-// --- Helpers ---
-
 const isDefaultVisible = (tile: TodayTileId): boolean =>
   DEFAULT_VISIBLE.includes(tile);
 

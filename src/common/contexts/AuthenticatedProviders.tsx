@@ -23,7 +23,6 @@ export const AuthenticatedProviders = ({ children }: AuthenticatedProvidersProps
     </SubscriptionProvider>
   );
 };
-// --- Helpers ---
 
 const SpaceDataProvider = ({ children }: AuthenticatedProvidersProps) => {
   const { activeOwnerId } = useFinancialSpace();

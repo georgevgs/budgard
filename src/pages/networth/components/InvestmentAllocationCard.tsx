@@ -85,7 +85,6 @@ export const InvestmentAllocationCard = ({ accounts }: InvestmentAllocationCardP
     </SurfaceCard>
   );
 };
-// --- Helpers ---
 
 const renderSliceTooltip = (slice: DonutSlice, slices: Slice[]) => {
   const detail = slices.find((item) => item.id === slice.id);

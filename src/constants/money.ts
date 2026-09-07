@@ -115,8 +115,6 @@ export const isUsableRate = (rate: unknown): rate is number => {
   return rate > 0 && rate < MAX_PLAUSIBLE_RATE;
 };
 
-// --- Helpers ---
-
 /**
  * Collapses -0 to 0.
  *

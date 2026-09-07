@@ -65,8 +65,6 @@ export const DatePickerField = React.forwardRef<HTMLButtonElement, Props>(
 );
 DatePickerField.displayName = 'DatePickerField';
 
-// --- Helpers ---
-
 const renderLabel = (
   value: Date | undefined,
   placeholder: string,

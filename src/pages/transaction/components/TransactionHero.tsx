@@ -53,7 +53,6 @@ export const TransactionHero = ({ transaction, currency, isIncome }: Transaction
     </header>
   );
 };
-// --- Helpers ---
 
 const resolveKind = (isIncome: boolean): 'expense' | 'income' => {
   if (isIncome) {

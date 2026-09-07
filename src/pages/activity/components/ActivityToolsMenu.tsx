@@ -79,7 +79,6 @@ export const ActivityToolsMenu = ({ isExportDisabled, onExport }: ActivityToolsM
     </>
   );
 };
-// --- Helpers ---
 
 // Mounted only once opened so the parse/mapping chunk is fetched on demand.
 const renderImportDialog = (isOpen: boolean, onClose: () => void) => {

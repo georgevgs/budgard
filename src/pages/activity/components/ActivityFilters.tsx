@@ -41,7 +41,6 @@ export const ActivityFilters = ({
     </div>
   );
 };
-// --- Helpers ---
 
 const renderSearchScope = (
   isSearchingAllTime: boolean,

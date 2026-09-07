@@ -103,8 +103,6 @@ export const useTagOps = () => {
   }, [activeOwnerId, setTags, setExpenses, refreshExpenses, runMutation, t]);
 };
 
-// --- Helpers ---
-
 const sortByName = (tags: Tag[]): Tag[] =>
   [...tags].sort((a, b) => a.name.localeCompare(b.name));
 

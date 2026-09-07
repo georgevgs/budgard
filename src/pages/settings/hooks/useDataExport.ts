@@ -86,8 +86,6 @@ export const useDataExport = () => {
   return { isExporting, handleExport };
 };
 
-// --- Helpers ---
-
 const buildFileName = (): string => {
   const stamp = new Date().toISOString().slice(0, 10);
 

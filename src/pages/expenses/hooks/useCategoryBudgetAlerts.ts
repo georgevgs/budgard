@@ -70,8 +70,6 @@ export const useCategoryBudgetAlerts = ({
   }, [alerts, defaultCurrency, enabled, t]);
 };
 
-// --- Helpers ---
-
 // Which threshold, if any, this reading crosses upward. Mutates the category's
 // entry: this is where prevSpent advances and the shown-once flags are set.
 type Crossing = { level: 'warning' | 'exceeded'; percent: number };

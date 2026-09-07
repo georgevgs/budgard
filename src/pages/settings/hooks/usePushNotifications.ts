@@ -177,8 +177,6 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
   return { state, subscribe, unsubscribe };
 };
 
-// --- Helpers ---
-
 // Environment support and permission denial are known synchronously, so they
 // resolve during the first render; the mount effect only handles the async
 // subscription lookup.

@@ -61,7 +61,6 @@ export const ActivityCategorySelect = ({
     </Select>
   );
 };
-// --- Helpers ---
 
 const renderCategoryOption = (category: Category) => (
   <SelectItem key={category.id} value={category.id}>

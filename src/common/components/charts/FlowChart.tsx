@@ -89,7 +89,6 @@ export const FlowChart = ({
     </div>
   );
 };
-// --- Helpers ---
 
 type LaidOutNode = FlowNode & { top: number; bottom: number };
 

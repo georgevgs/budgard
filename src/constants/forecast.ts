@@ -204,8 +204,6 @@ type SpendableAccount = {
 
 const SPENDABLE_KINDS: readonly string[] = ['cash', 'bank'];
 
-// --- Helpers ---
-
 const defaultMonthLabel = (monthStart: Date): string => {
   return format(monthStart, 'LLL yyyy');
 };

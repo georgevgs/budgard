@@ -59,7 +59,6 @@ export const SetPinDialog = ({ open, onClose, onSaved }: SetPinDialogProps) => {
     </Dialog>
   );
 };
-// --- Helpers ---
 
 const dotTone = (filled: boolean, hasError: boolean): string => {
   if (hasError) {

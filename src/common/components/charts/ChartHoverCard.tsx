@@ -43,7 +43,6 @@ export const ChartHoverCard = ({
     </div>
   );
 };
-// --- Helpers ---
 
 // Centres the card on the point, then pulls it back inside the chart so it
 // never hangs off the screen edge on a phone.

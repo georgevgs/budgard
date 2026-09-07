@@ -48,8 +48,6 @@ export const detectRecurringSuggestions = (
   return suggestions.sort((a, b) => b.occurrences - a.occurrences).slice(0, 5);
 };
 
-// --- Helpers ---
-
 const normalizeMerchantPattern = (value: string): string =>
   value.trim().replace(/\s+/g, ' ').toLocaleLowerCase();
 

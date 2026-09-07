@@ -95,8 +95,6 @@ export const useActivityFeed = (
   };
 };
 
-// --- Helpers ---
-
 const resolveExportScope = (
   period: ActivityPeriod,
   selectedMonth: string,

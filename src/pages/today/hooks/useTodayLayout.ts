@@ -162,12 +162,7 @@ export const useTodayLayout = (): UseTodayLayoutReturn => {
   };
 };
 
-// --- Helpers ---
-
 type LayoutUpdate = (current: TodayLayout) => TodayLayout;
-
-
-// --- Helpers ---
 
 type HydrateDeps = {
   persist: (next: TodayLayout) => void;

@@ -54,8 +54,6 @@ describe('reset recovery page', () => {
   });
 });
 
-// --- Helpers ---
-
 type ResetOptions = {
   registrations: Promise<ServiceWorkerRegistration[]>;
   cacheKeys: Promise<string[]>;

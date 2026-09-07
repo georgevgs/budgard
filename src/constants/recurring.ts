@@ -89,8 +89,6 @@ export const getMonthlyAmount = (expense: RecurringExpense): number => {
   }
 };
 
-// --- Helpers ---
-
 const advanceByFrequency = (
   fromDate: Date,
   frequency: RecurringExpense['frequency'],

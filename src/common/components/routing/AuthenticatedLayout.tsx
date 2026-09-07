@@ -54,7 +54,6 @@ export const AuthenticatedLayout = () => {
     </QuickAddProvider>
   );
 };
-// --- Helpers ---
 
 const renderPrivacyScreen = (isObscured: boolean) => {
   if (!isObscured) {

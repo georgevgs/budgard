@@ -104,8 +104,6 @@ export const resolveSourceAmount = (
   return transaction.amount;
 };
 
-// --- Helpers ---
-
 const isMoneyIn = (amount: number, kind: TransactionKind): boolean => {
   if (kind === 'income') {
     return true;

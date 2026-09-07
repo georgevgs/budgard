@@ -48,7 +48,6 @@ export const Reveal = ({ children, delay = 0, className }: RevealProps) => {
     </div>
   );
 };
-// --- Helpers ---
 
 const getVisibilityClass = (visible: boolean): string => {
   if (visible) return 'opacity-100 translate-y-0';

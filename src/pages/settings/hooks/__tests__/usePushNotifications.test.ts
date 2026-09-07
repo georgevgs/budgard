@@ -106,8 +106,6 @@ describe('usePushNotifications', () => {
   });
 });
 
-// --- Helpers ---
-
 type InstallPushMocksOptions = {
   isInitiallySubscribed?: boolean;
 };

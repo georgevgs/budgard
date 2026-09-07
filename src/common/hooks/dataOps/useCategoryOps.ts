@@ -235,8 +235,6 @@ export const useCategoryOps = () => {
   ]);
 };
 
-// --- Helpers ---
-
 const sortByName = <T extends { name: string }>(items: T[]): T[] =>
   [...items].sort((a, b) => a.name.localeCompare(b.name));
 

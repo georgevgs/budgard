@@ -13,7 +13,6 @@ type LegalSectionsProps = {
 export const LegalSections = ({ sections }: LegalSectionsProps) => (
   <div className="mt-10 space-y-10">{sections.map(renderSection)}</div>
 );
-// --- Helpers ---
 
 const renderSection = (section: LegalSection) => (
   <section key={section.heading} className="space-y-3">

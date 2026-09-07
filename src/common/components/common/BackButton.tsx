@@ -34,7 +34,6 @@ export const BackButton = () => {
     </button>
   );
 };
-// --- Helpers ---
 
 const resolveFallback = (pathname: string): string => {
   if (pathname.startsWith('/settings/')) {

@@ -31,8 +31,6 @@ export const measureFunctions = (roots: string[]): ComponentSize[] => {
     .flatMap((file) => measureFile(file, FUNCTION));
 };
 
-// --- Helpers ---
-
 const collectFiles = (dir: string, extensions = ['.tsx']): string[] => {
   if (!isDirectory(dir)) {
     return [];

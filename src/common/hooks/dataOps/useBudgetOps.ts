@@ -108,8 +108,6 @@ export const useBudgetOps = () => {
   ]);
 };
 
-// --- Helpers ---
-
 const bumpBudgetAmount = (
   budget: CategoryBudget,
   categoryId: string,

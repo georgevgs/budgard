@@ -67,8 +67,6 @@ describe('crawler files', () => {
   });
 });
 
-// --- Helpers ---
-
 // Both route definitions keep literal paths in source, so they can be read
 // without importing a second list that could drift from the router itself.
 const collectRoutes = (): string[] => {

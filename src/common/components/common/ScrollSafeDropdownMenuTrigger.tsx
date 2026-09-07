@@ -84,7 +84,6 @@ export const ScrollSafeDropdownMenuTrigger = ({
     />
   );
 };
-// --- Helpers ---
 
 const TAP_SLOP_PX = 10;
 

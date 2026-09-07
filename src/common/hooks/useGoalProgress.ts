@@ -59,8 +59,6 @@ export const useAllGoalProgress = (): Record<string, GoalProgress> => {
   }, [goals, expenses, incomes, accounts]);
 };
 
-// --- Helpers ---
-
 const computeProgress = (
   goal: Goal,
   expenses: Expense[],

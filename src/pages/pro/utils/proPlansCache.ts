@@ -57,8 +57,6 @@ export const savePlanPricesSnapshot = (prices: ProPlanPrices): void => {
   }
 };
 
-// --- Helpers ---
-
 const isStructurallyValid = (value: unknown): value is ProPlanPrices => {
   if (typeof value !== 'object' || value === null) {
     return false;

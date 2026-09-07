@@ -234,8 +234,6 @@ export const useAnalyticsData = (now: Date = new Date()) => {
   };
 };
 
-// --- Helpers ---
-
 const ROLLING_MONTHS = 12;
 
 // Callers pass the already-filtered `expenses` population, so this no longer

@@ -28,7 +28,6 @@ export const SettingsLoading = () => {
     </LoadingScreen>
   );
 };
-// --- Helpers ---
 
 const ROW_WIDTHS = ['w-2/5', 'w-1/2', 'w-1/3', 'w-2/5'] as const;
 

@@ -96,8 +96,6 @@ export const buildAnnualReportDocDefinition = (
   };
 };
 
-// --- Helpers ---
-
 type PdfMakeStatic = typeof import('pdfmake/build/pdfmake');
 
 type PdfVirtualFs = Record<string, string>;

@@ -99,8 +99,6 @@ describe('boot guard', () => {
   });
 });
 
-// --- Helpers ---
-
 const mount = (): void => {
   document.getElementById('root')!.appendChild(document.createElement('span'));
 };

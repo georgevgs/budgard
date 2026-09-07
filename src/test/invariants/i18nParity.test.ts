@@ -52,8 +52,6 @@ describe('translation parity', () => {
   });
 });
 
-// --- Helpers ---
-
 const flatten = (node: Node, prefix = ''): Map<string, string> => {
   const entries = new Map<string, string>();
   if (typeof node === 'string') {

@@ -80,7 +80,6 @@ export const RecurringExpenseCardActions = ({ expense, onEdit, onDelete }: Recur
     </>
   );
 };
-// --- Helpers ---
 
 const blurActiveElement = () => {
   if (document.activeElement instanceof HTMLElement) {

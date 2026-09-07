@@ -45,7 +45,6 @@ export const FeedbackSection = () => {
     </section>
   );
 };
-// --- Helpers ---
 
 const renderDialog = (kind: FeedbackKind | null, onClose: () => void) => {
   if (!kind) {

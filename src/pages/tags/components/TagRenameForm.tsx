@@ -73,7 +73,6 @@ export const TagRenameForm = ({ tag, onClose }: TagRenameFormProps) => {
     </div>
   );
 };
-// --- Helpers ---
 
 const renderSaveLabel = (isSaving: boolean, t: (key: string) => string) => {
   if (isSaving) {

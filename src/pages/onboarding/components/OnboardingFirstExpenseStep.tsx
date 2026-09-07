@@ -83,7 +83,6 @@ export const OnboardingFirstExpenseStep = ({ draft, onBack, onSkip }: Onboarding
     </div>
   );
 };
-// --- Helpers ---
 
 const amountTone = (isEmpty: boolean): string => {
   if (isEmpty) {

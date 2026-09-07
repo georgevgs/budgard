@@ -27,8 +27,6 @@ describe('mobile input sizing', () => {
   });
 });
 
-// --- Helpers ---
-
 const componentSources = (dir: string): string[] => {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const fullPath = path.join(dir, entry.name);

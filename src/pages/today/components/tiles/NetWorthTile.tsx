@@ -25,7 +25,6 @@ export const NetWorthTile = () => {
     </BentoTile>
   );
 };
-// --- Helpers ---
 
 // Rates are still in flight on first paint. An em dash says "not yet" without
 // flashing a number that is about to change under the user.

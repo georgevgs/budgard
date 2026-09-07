@@ -241,8 +241,6 @@ export const offlineQueue = {
   },
 };
 
-// --- Helpers ---
-
 // Reconciling is a read-modify-write spread across several IndexedDB
 // transactions, and IndexedDB gives no atomicity across them. Two edits to the
 // same pending create that overlap at an await both read the pre-merge state,

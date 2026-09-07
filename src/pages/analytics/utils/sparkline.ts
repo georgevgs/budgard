@@ -45,8 +45,6 @@ export const buildSparkline = (
   };
 };
 
-// --- Helpers ---
-
 type Point = { x: number; y: number };
 
 const round = (value: number): number => Math.round(value * 100) / 100;

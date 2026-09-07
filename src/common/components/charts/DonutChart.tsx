@@ -67,7 +67,6 @@ export const DonutChart = ({
     </div>
   );
 };
-// --- Helpers ---
 
 type Arc = {
   slice: DonutSlice;

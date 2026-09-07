@@ -74,8 +74,6 @@ export const compareToBaseline = (
   return { deviations, verdict: verdictFor(deviations) };
 };
 
-// --- Helpers ---
-
 const verdictFor = (deviations: number): Comparison['verdict'] => {
   if (deviations >= NOTABLE_DEVIATIONS) {
     return 'higher';

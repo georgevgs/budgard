@@ -152,8 +152,6 @@ export const dataReducer = (
   return { ...state, [key]: next };
 };
 
-// --- Helpers ---
-
 const resolve = <T>(value: Updater<T>, previous: T): T => {
   if (typeof value === 'function') {
     return (value as (previous: T) => T)(previous);

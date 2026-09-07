@@ -192,8 +192,6 @@ describe('TodayArrange', () => {
   });
 });
 
-// --- Helpers ---
-
 const storeLayout = (visible: TodayTileId[]) => {
   const visibleSet = new Set(visible);
   const hidden = TODAY_TILES.filter((tile) => !visibleSet.has(tile));

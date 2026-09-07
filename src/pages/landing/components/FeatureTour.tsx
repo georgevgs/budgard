@@ -34,7 +34,6 @@ export const FeatureTour = () => {
     </SectionShell>
   );
 };
-// --- Helpers ---
 
 const featureTabs = (): FeatureTab[] => [
   { key: 'today', Icon: House },

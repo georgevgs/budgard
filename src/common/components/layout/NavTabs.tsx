@@ -61,7 +61,6 @@ export const NavTabs = () => {
     </nav>
   );
 };
-// --- Helpers ---
 
 const renderTab = (tab: Tab, isActive: boolean) => {
   const Icon = tab.icon;

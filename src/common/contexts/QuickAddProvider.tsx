@@ -85,7 +85,6 @@ export const QuickAddProvider = ({ children }: QuickAddProviderProps) => {
     </QuickAddContext.Provider>
   );
 };
-// --- Helpers ---
 
 // Only the screens where adding a transaction IS the primary action — see
 // TRANSACTION_ENTRY_PATHS. Everywhere else either owns a different add button

@@ -43,7 +43,6 @@ export const TransactionInsight = (props: TransactionInsightProps) => {
     </section>
   );
 };
-// --- Helpers ---
 
 const renderSimilar = (props: TransactionInsightProps) => {
   if (props.similar.length === 0) {

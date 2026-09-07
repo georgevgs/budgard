@@ -29,8 +29,6 @@ export const EmptyStateCard = ({
   return renderCard({ media, title, description, actionLabel, onAction });
 };
 
-// --- Helpers ---
-
 type RenderArgs = Omit<Props, 'variant'>;
 
 const renderCard = ({

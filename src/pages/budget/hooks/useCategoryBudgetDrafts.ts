@@ -145,8 +145,6 @@ export const useCategoryBudgetDrafts = (
   };
 };
 
-// --- Helpers ---
-
 type Diff = {
   upserts: { categoryId: string; amount: number }[];
   deletes: string[];

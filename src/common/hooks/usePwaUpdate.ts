@@ -233,8 +233,6 @@ export const usePwaUpdate = (): void => {
   }, []);
 };
 
-// --- Helpers ---
-
 const CONTROL_TRANSFER_POLL_MS = 250;
 const CONTROL_TRANSFER_HARD_CAP_MS = 10000;
 

@@ -67,7 +67,6 @@ export const SwipeableRow = ({ children, onDelete, deleteLabel }: SwipeableRowPr
     </div>
   );
 };
-// --- Helpers ---
 
 const ariaHidden = (isOpen: boolean): boolean => !isOpen;
 

@@ -112,8 +112,6 @@ export const useMutationRunner = () => {
   );
 };
 
-// --- Helpers ---
-
 const fireSuccessHaptic = (
   kind: MutationSpec<unknown>['successHaptic'],
 ): void => {

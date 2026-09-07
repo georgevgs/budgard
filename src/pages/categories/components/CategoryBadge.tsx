@@ -37,7 +37,6 @@ export const CategoryBadge = ({
     </div>
   );
 };
-// --- Helpers ---
 
 const getBadgeStyle = (color: string): CSSProperties => {
   return { backgroundColor: getColorTint(color) };

@@ -85,8 +85,6 @@ export const useRefundDialog = ({
   };
 };
 
-// --- Helpers ---
-
 // Refunds are stored negative, so their magnitudes are what has come back.
 const sumRefundsFor = (expenses: Expense[], expenseId: string): number => {
   const refunds = expenses

@@ -62,8 +62,6 @@ export const useGoalOps = () => {
   }, [activeOwnerId, isInitialized, setGoals, runMutation, t]);
 };
 
-// --- Helpers ---
-
 const buildOptimisticGoal = (goalData: Partial<Goal>): Goal =>
   ({
     ...goalData,

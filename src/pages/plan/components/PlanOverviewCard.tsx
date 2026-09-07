@@ -46,7 +46,6 @@ export const PlanOverviewCard = ({
     </Link>
   );
 };
-// --- Helpers ---
 
 const renderValue = (value: string | null, setupLabel: string) => {
   if (!value) {

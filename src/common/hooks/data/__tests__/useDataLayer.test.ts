@@ -80,8 +80,6 @@ vi.mock('@/common/api/dataService', () => ({ dataService: svc }));
 
 import { useDataLayer } from '@/common/hooks/data/useDataLayer';
 
-// --- Helpers ---
-
 // getExpenses/getIncomes take the owner id first, then (signal, sinceDate,
 // beforeDate). Boot asks for the recent window (a `sinceDate`); loadHistory
 // asks for the tail before it (a `beforeDate` in the fourth argument).

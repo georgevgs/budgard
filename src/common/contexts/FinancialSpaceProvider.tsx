@@ -46,7 +46,6 @@ export const FinancialSpaceProvider = ({ children }: FinancialSpaceProviderProps
     </FinancialSpaceContext.Provider>
   );
 };
-// --- Helpers ---
 
 const STORAGE_PREFIX = 'budgard-active-financial-space';
 

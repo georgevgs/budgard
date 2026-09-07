@@ -53,7 +53,6 @@ export const ActivitySummary = ({
     </details>
   );
 };
-// --- Helpers ---
 
 const getNetPrefix = (net: number): string => {
   if (net > 0) {

@@ -44,7 +44,6 @@ export const BiggestMonthTile = ({ monthlyData, onMonthClick }: BiggestMonthTile
     </BentoTile>
   );
 };
-// --- Helpers ---
 
 type Peak = {
   index: number;

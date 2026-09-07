@@ -151,8 +151,6 @@ export const minimumCoversInterest = (
   return debt.minimum_payment >= monthlyInterest;
 };
 
-// --- Helpers ---
-
 // The calendar month `offset` months after `now`, used for its length.
 const monthDate = (now: Date, offset: number): Date => {
   return new Date(now.getFullYear(), now.getMonth() + offset, 1);

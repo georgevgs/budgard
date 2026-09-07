@@ -106,7 +106,6 @@ export const GoalFormFields = ({ form, sourceType }: GoalFormFieldsProps) => {
     </div>
   );
 };
-// --- Helpers ---
 
 const isDeadlineDisabled = (date: Date) => {
   const today = new Date();

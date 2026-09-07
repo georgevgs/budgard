@@ -45,8 +45,6 @@ export const useCategorySubmit = ({
   return { handleSubmit, isInitialized };
 };
 
-// --- Helpers ---
-
 type CategoryAddPayload = {
   name: string;
   color: string;

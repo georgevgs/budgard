@@ -31,8 +31,6 @@ export const subscriptionService = {
   },
 };
 
-// --- Helpers ---
-
 type StripeFunctionOptions = {
   body?: string;
   fallbackError: string;

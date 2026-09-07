@@ -162,8 +162,6 @@ export const useOptimisticExpenseActions = () => {
   };
 };
 
-// --- Helpers ---
-
 // Operation hooks already report recoverable failures with a retry toast.
 // Letting that same error escape a transition replaces the authenticated app
 // with the route error boundary instead of simply rolling back the optimistic

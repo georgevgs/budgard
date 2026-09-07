@@ -106,8 +106,6 @@ export const clearSubscriptionSnapshot = (): void => {
   }
 };
 
-// --- Helpers ---
-
 const isStructurallyValid = (value: unknown): value is Subscription => {
   if (typeof value !== 'object' || value === null) {
     return false;

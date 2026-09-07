@@ -100,8 +100,6 @@ export const useTransactionDetail = (id: string): UseTransactionDetailReturn => 
   };
 };
 
-// --- Helpers ---
-
 const buildStats = (
   transaction: Expense | undefined,
   expenses: Expense[],

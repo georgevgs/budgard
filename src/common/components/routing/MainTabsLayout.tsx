@@ -54,7 +54,6 @@ export const MainTabsLayout = () => {
     </>
   );
 };
-// --- Helpers ---
 
 const renderTab = (
   tabPath: MainTabPath,

@@ -55,7 +55,6 @@ export const LegalPageLayout = ({ title, children }: LegalPageLayoutProps) => {
     </div>
   );
 };
-// --- Helpers ---
 
 const renderFooterLink = (to: string, label: string) => (
   <Link to={to} className="hover:text-foreground transition-colors">

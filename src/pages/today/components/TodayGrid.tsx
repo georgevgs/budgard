@@ -39,7 +39,6 @@ export const TodayGrid = (props: TodayGridProps) => {
     </BentoGrid>
   );
 };
-// --- Helpers ---
 
 // Every module can be hidden, which means all of them can be — ten taps in
 // Arrange and this is the screen. The way back has to be on it: the header's

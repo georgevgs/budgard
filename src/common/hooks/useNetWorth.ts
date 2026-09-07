@@ -347,8 +347,6 @@ export const useNetWorth = () => {
   return { summary, series, isComputing };
 };
 
-// --- Helpers ---
-
 const deriveRates = (
   required: Set<string>,
   computation: RateComputation | null,

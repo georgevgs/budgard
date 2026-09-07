@@ -34,7 +34,6 @@ export const PageHeader = ({ title, subtitle, action }: PageHeaderProps) => {
     </div>
   );
 };
-// --- Helpers ---
 
 const renderBack = (pathname: string) => {
   if (!isSecondaryPath(pathname)) {

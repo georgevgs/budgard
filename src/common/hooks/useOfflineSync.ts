@@ -115,8 +115,6 @@ export const useOfflineSync = (): void => {
   }, [syncQueue]);
 };
 
-// --- Helpers ---
-
 const applyMutation = async (mutation: QueuedMutation): Promise<void> => {
   // __tempId is local-only metadata used to coalesce offline create+edit/delete
   // chains; the server doesn't know about it.

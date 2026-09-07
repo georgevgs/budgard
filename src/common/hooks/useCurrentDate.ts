@@ -32,8 +32,6 @@ export const useCurrentDate = (): Date => {
   return currentDate;
 };
 
-// --- Helpers ---
-
 export const getNextRefreshDelay = (currentDate: Date): number => {
   const boundary = new Date(currentDate);
   const hour = currentDate.getHours();

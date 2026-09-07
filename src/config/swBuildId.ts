@@ -81,8 +81,6 @@ export const isSameBuildAsPage = async (
   return compareBuildIds(pageBuildId, workerBuildId);
 };
 
-// --- Helpers ---
-
 // 'dev' is the fallback id of builds made without git; two unrelated dev
 // builds would match each other and wrongly suppress real updates while
 // testing service-worker flows locally.

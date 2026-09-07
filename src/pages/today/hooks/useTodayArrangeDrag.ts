@@ -143,8 +143,6 @@ export const useTodayArrangeDrag = ({
   return { draggingId, start, move, end, cancel };
 };
 
-// --- Helpers ---
-
 const capturePointer = (event: ReactPointerEvent<HTMLElement>): void => {
   if (typeof event.currentTarget.setPointerCapture !== 'function') {
     return;

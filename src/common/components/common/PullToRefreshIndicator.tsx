@@ -34,7 +34,6 @@ export const PullToRefreshIndicator = ({ state }: PullToRefreshIndicatorProps) =
     </>
   );
 };
-// --- Helpers ---
 
 // The ring fills as the pull approaches its trigger, then becomes an ordinary
 // indeterminate spinner once released — the same two-part read as iOS and

@@ -57,8 +57,6 @@ export const hasStripeBillingManagement = (
   return false;
 };
 
-// --- Helpers ---
-
 // The latest date the subscription is known to be paid (or trialing) through.
 // Null when the webhook payload carried none of the period fields; status
 // alone decides then, exactly as before the safety net existed.

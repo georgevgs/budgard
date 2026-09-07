@@ -16,7 +16,6 @@ export const RhythmDots = ({ days }: RhythmDotsProps) => (
     {days.map(renderDot)}
   </div>
 );
-// --- Helpers ---
 
 const STAGGER_STEP_MS = 12;
 const STAGGER_CAP = 20;

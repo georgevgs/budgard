@@ -101,8 +101,6 @@ export const useAnimatedNumber = (target: number): number => {
   return display;
 };
 
-// --- Helpers ---
-
 const isAtRest = (value: number, target: number, velocity: number): boolean => {
   return (
     Math.abs(value - target) < REST_DISTANCE &&

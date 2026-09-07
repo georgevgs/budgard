@@ -59,8 +59,6 @@ export const buildMoneyTimeline = (
   };
 };
 
-// --- Helpers ---
-
 const expandSchedules = (
   schedules: RecurringExpense[],
   kind: MoneyTimelineKind,

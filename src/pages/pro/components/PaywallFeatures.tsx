@@ -39,7 +39,6 @@ export const PaywallFeatures = () => {
     </ul>
   );
 };
-// --- Helpers ---
 
 const renderFeature = ({ key, Icon }: Feature, label: string) => (
   <li key={key} className="flex items-center gap-3">

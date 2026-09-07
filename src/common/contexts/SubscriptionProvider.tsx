@@ -29,8 +29,6 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// --- Helpers ---
-
 // Neither call reads any provider state, so they are module-level constants
 // rather than useCallback identities that have to be threaded through the memo.
 const startCheckout = (plan: CheckoutPlan) =>

@@ -55,7 +55,6 @@ export const QuickAddCategories = ({ categories, selectedId, onSelect }: QuickAd
     </div>
   );
 };
-// --- Helpers ---
 
 // Tapping the selected chip again clears it, so a mis-tap does not force the
 // user to hunt for an "uncategorised" option that does not exist here.

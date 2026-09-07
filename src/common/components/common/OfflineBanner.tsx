@@ -40,7 +40,6 @@ export const OfflineBanner = () => {
 
   return null;
 };
-// --- Helpers ---
 
 type StatusPillTone = {
   pill: string;

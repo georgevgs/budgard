@@ -38,7 +38,6 @@ export const MonthPaceTile = ({ pace }: MonthPaceTileProps) => {
     </BentoTile>
   );
 };
-// --- Helpers ---
 
 // A day with nothing spent still gets a stub, so seven days always read as
 // seven days rather than as a gap in the data.

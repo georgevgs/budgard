@@ -47,8 +47,6 @@ export const buildMonthlyDecision = (input: Input): MonthlyDecision => {
   return decision('ready', flexible, input, savingsReserve);
 };
 
-// --- Helpers ---
-
 const targetAmount = (budget: number, percentage: number | null): number => {
   if (percentage === null || percentage <= 0) {
     return 0;

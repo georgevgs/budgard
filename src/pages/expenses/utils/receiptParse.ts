@@ -24,8 +24,6 @@ export const parseReceiptText = (text: string): ParsedReceipt => {
   };
 };
 
-// --- Helpers ---
-
 // Ordered by trustworthiness: a grand total beats a plain total, which beats
 // amount-due phrasing, which beats the payment-method lines (cash tendered
 // can exceed the actual total, so ΜΕΤΡΗΤΑ/CASH is the last resort).

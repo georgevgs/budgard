@@ -136,8 +136,6 @@ export const useSwipeActions = ({
   };
 };
 
-// --- Helpers ---
-
 // Left travel stops at the width of the action. Rightward drag past the
 // closed position does nothing — there is nothing revealed on that side.
 const clampOffset = (value: number): number => {

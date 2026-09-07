@@ -63,8 +63,6 @@ export const useExpenseAlerts = ({
   });
 };
 
-// --- Helpers ---
-
 const getBudgetSpent = (
   selectedMonth: string,
   currentMonth: string,

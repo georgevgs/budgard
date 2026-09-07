@@ -119,8 +119,6 @@ const ActivityView = () => {
 
 export default ActivityView;
 
-// --- Helpers ---
-
 // Stage 1 fetches the last 12 months; everything older streams in afterwards.
 // Only the periods that can actually reach past that horizon care.
 const isPendingHistory = (

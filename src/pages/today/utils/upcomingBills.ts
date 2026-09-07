@@ -56,8 +56,6 @@ export const buildUpcomingBills = (
   };
 };
 
-// --- Helpers ---
-
 const buildEntry = (
   item: RecurringExpense,
   now: Date,

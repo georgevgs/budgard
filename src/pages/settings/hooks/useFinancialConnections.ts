@@ -47,8 +47,6 @@ export const useFinancialConnections = () => {
   };
 };
 
-// --- Helpers ---
-
 type ConnectionState = {
   ownerId: string;
   connections: FinancialConnection[];

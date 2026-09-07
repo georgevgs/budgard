@@ -68,8 +68,6 @@ export const celebrate = (): void => {
   requestAnimationFrame(frame);
 };
 
-// --- Helpers ---
-
 const createParticles = (width: number, height: number): Particle[] => {
   const particles: Particle[] = [];
   const originX = width / 2;

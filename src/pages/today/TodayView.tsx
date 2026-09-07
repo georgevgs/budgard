@@ -66,8 +66,6 @@ const TodayView = () => {
 
 export default TodayView;
 
-// --- Helpers ---
-
 const renderBody = (
   layout: ReturnType<typeof useTodayLayout>,
   grid: React.ComponentProps<typeof TodayGrid>,

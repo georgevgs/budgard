@@ -99,7 +99,6 @@ export const RecurringExpenseFields = ({ form, categories }: RecurringExpenseFie
     </>
   );
 };
-// --- Helpers ---
 
 const renderCategoryIcon = (category: {
   icon?: string | null;

@@ -56,7 +56,6 @@ export const AnnualExportSection = () => {
     />
   );
 };
-// --- Helpers ---
 
 type YearedRow = { date: string };
 

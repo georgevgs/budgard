@@ -88,8 +88,6 @@ export const fetchExchangeRate = async (
   return entry.rate;
 };
 
-// --- Helpers ---
-
 const isCacheEntryFresh = (entry: CachedRate, today: string): boolean => {
   // No fetchedOn means a historic date — immutable, valid forever.
   if (entry.fetchedOn === undefined) return true;

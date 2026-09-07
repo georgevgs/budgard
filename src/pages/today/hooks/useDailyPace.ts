@@ -59,8 +59,6 @@ export const useDailyPace = (
   }, [expenses, dailyAllowance, now]);
 };
 
-// --- Helpers ---
-
 const buildWindow = (now: Date): string[] => {
   const dates: string[] = [];
   for (let offset = WINDOW - 1; offset >= 0; offset -= 1) {

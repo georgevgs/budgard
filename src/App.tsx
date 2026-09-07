@@ -83,8 +83,6 @@ const PublicApp = () => {
   );
 };
 
-// --- Helpers ---
-
 const loadAuthenticatedApp = async () => {
   const app = import('@/AuthenticatedApp');
   const initialTab = loadInitialTab(window.location.pathname);

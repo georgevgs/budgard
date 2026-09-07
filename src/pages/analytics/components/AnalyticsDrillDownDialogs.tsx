@@ -22,7 +22,6 @@ export const AnalyticsDrillDownDialogs = ({
     </>
   );
 };
-// --- Helpers ---
 
 type DrillDown = ReturnType<typeof useAnalyticsDrillDown>;
 

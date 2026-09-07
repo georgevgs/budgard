@@ -69,8 +69,6 @@ export const useBudgetForm = ({
   };
 };
 
-// --- Helpers ---
-
 const getInitialAmount = (currentBudget: number | null): string => {
   if (!currentBudget) {
     return '';

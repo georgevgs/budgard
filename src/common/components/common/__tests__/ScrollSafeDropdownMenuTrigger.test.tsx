@@ -75,8 +75,6 @@ describe('ScrollSafeDropdownMenuTrigger', () => {
   });
 });
 
-// --- Helpers ---
-
 type PointerCoordinates = {
   clientX: number;
   clientY: number;

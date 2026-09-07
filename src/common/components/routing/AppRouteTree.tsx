@@ -36,7 +36,6 @@ export const AppRouteTree = () => {
 
   return useRoutes(routes);
 };
-// --- Helpers ---
 
 const withFallback = (element: ReactNode, fallback: ReactNode) => (
   <Suspense fallback={<RouteFallback>{fallback}</RouteFallback>}>

@@ -108,7 +108,6 @@ export const DeleteAccountDialog = ({
     </AlertDialog>
   );
 };
-// --- Helpers ---
 
 type StepRenderArgs = {
   step: Step;

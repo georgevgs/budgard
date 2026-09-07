@@ -28,7 +28,6 @@ export const AnalyticsLoading = () => {
     </LoadingScreen>
   );
 };
-// --- Helpers ---
 
 const SECTIONS = [
   { key: 'review', body: 'h-28 w-full rounded-xl' },

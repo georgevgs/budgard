@@ -65,8 +65,6 @@ describe('useSwipeActions', () => {
   });
 });
 
-// --- Helpers ---
-
 const touchAt = (clientX: number, clientY: number, count = 1) => {
   return {
     touches: Array.from({ length: count }, () => ({ clientX, clientY })),

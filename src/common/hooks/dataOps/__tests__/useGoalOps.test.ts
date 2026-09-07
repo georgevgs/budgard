@@ -53,8 +53,6 @@ vi.mock('@/common/contexts/DataContext', () => ({
 
 import { useGoalOps } from '@/common/hooks/dataOps/useGoalOps';
 
-// --- Helpers ---
-
 const goal = (over: Partial<Goal> = {}): Goal =>
   ({ id: 'g1', name: 'Trip', is_completed: false, ...over }) as Goal;
 

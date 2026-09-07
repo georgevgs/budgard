@@ -76,8 +76,6 @@ export const useGoalSubmit = ({ selectedGoal, onDone }: UseGoalSubmitArgs) => {
   return { handleSubmit };
 };
 
-// --- Helpers ---
-
 const resolveGoalCurrency = (
   linkedAccountId: string | null,
   selectedGoal: Goal | undefined,

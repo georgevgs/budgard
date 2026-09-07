@@ -34,8 +34,6 @@ export const useSetAside = () => {
   );
 };
 
-// --- Helpers ---
-
 // The surplus is an allowance division, so it arrives with a long tail of
 // decimals. Money in the ledger has two.
 const roundToCents = (amount: number): number => Math.round(amount * 100) / 100;

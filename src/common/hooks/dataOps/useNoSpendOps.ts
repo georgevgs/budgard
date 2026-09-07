@@ -73,8 +73,6 @@ export const useNoSpendOps = () => {
   }, [activeOwnerId, setNoSpendDays, runMutation, t]);
 };
 
-// --- Helpers ---
-
 // user_id is filled by the column default server-side; the optimistic row only
 // has to satisfy the shape the rhythm hook reads, which is `day`.
 const buildOptimisticDay = (day: string): NoSpendDay => ({
