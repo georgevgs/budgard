@@ -1,7 +1,6 @@
 import * as z from 'zod';
 import { HEX_COLOR, SAFE_STRING } from '@/constants/validations';
 
-// Category validation schema
 export const categorySchema = z.object({
   name: z
     .string()

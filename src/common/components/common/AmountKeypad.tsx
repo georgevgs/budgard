@@ -57,16 +57,18 @@ type KeypadButtonProps = {
   hasIcon?: boolean;
 };
 
-const KeypadButton = ({ label, onPress, hasIcon }: KeypadButtonProps) => (
-  <button
-    type="button"
-    onClick={onPress}
-    aria-label={label}
-    className="flex h-14 items-center justify-center rounded-2xl bg-muted/60 type-figure transition-colors active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-  >
-    {renderFace(label, hasIcon)}
-  </button>
-);
+const KeypadButton = ({ label, onPress, hasIcon }: KeypadButtonProps) => {
+  return (
+    <button
+      type="button"
+      onClick={onPress}
+      aria-label={label}
+      className="flex h-14 items-center justify-center rounded-2xl bg-muted/60 type-figure transition-colors active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      {renderFace(label, hasIcon)}
+    </button>
+  );
+};
 
 const renderFace = (label: string, hasIcon: boolean | undefined) => {
   if (hasIcon) {

@@ -42,21 +42,17 @@ export const useCsvImportFlow = (onClose: () => void) => {
   const { handleBulkExpenseImport } = useExpenseOps();
   const { handleBulkIncomeImport } = useIncomeOps();
 
-  // Step state
   const [step, setStep] = useState<ImportStep>('upload');
   const [isDragging, setIsDragging] = useState(false);
 
-  // CSV content state
   const [csvContent, setCsvContent] = useState<string>('');
   const [csvPreview, setCsvPreview] = useState<CsvPreviewData | null>(null);
 
-  // Column mapping state
   const [columnMapping, setColumnMapping] = useState<ColumnMapping>(
     INITIAL_COLUMN_MAPPING,
   );
   const [shouldSkipIncome, setShouldSkipIncome] = useState(true);
 
-  // Parse results state
   const [validRows, setValidRows] = useState<ParsedExpenseRow[]>([]);
   const [errors, setErrors] = useState<CsvParseError[]>([]);
   const [unmatchedCategories, setUnmatchedCategories] = useState<string[]>([]);
@@ -134,7 +130,6 @@ export const useCsvImportFlow = (onClose: () => void) => {
         const preview = getCsvPreviewData(content);
         setCsvPreview(preview);
 
-        // Auto-suggest column mapping
         const suggested = suggestColumnMapping(preview);
         setColumnMapping(suggested);
 
@@ -198,7 +193,9 @@ export const useCsvImportFlow = (onClose: () => void) => {
     setUnmatchedCategories(result.unmatchedCategories);
     setSkippedIncomeCount(result.skippedIncomeCount);
 
-    // Initialize category mappings with null (skip)
+    // null is the sentinel for "skip this category" — every unmatched name
+    // starts there, so an import the user never maps drops those rows rather
+    // than inventing a category for them.
     const initialMappings = new Map<string, string | null>();
     result.unmatchedCategories.forEach((cat) => {
       initialMappings.set(cat, null);

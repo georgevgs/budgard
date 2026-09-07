@@ -18,36 +18,38 @@ type YAxisProps = {
 // Horizontal gridlines with their value on the left. The lines are the axis —
 // there is no drawn spine, because a rule at every labelled value already tells
 // you where you are and one more vertical line is just ink.
-export const YAxis = ({ ticks, y, plot, format }: YAxisProps) => (
-  <g aria-hidden="true">
-    {ticks.map((tick) => {
-      const position = y.to(tick);
+export const YAxis = ({ ticks, y, plot, format }: YAxisProps) => {
+  return (
+    <g aria-hidden="true">
+      {ticks.map((tick) => {
+        const position = y.to(tick);
 
-      return (
-        <g key={tick}>
-          <line
-            x1={plot.left}
-            x2={plot.left + plot.width}
-            y1={position}
-            y2={position}
-            stroke="hsl(var(--border))"
-            strokeWidth={1}
-            opacity={gridOpacity(tick)}
-          />
-          <text
-            x={plot.left - 8}
-            y={position}
-            textAnchor="end"
-            dominantBaseline="middle"
-            className="fill-muted-foreground text-[11px] tabular-nums"
-          >
-            {format(tick)}
-          </text>
-        </g>
-      );
-    })}
-  </g>
-);
+        return (
+          <g key={tick}>
+            <line
+              x1={plot.left}
+              x2={plot.left + plot.width}
+              y1={position}
+              y2={position}
+              stroke="hsl(var(--border))"
+              strokeWidth={1}
+              opacity={gridOpacity(tick)}
+            />
+            <text
+              x={plot.left - 8}
+              y={position}
+              textAnchor="end"
+              dominantBaseline="middle"
+              className="fill-muted-foreground text-[11px] tabular-nums"
+            >
+              {format(tick)}
+            </text>
+          </g>
+        );
+      })}
+    </g>
+  );
+};
 
 type XAxisProps = {
   data: ChartPoint[];

@@ -5,6 +5,6 @@ type RouteFallbackProps = {
   children: ReactNode;
 };
 
-export const RouteFallback = ({ children }: RouteFallbackProps) => (
-  <DelayedFallback>{children}</DelayedFallback>
-);
+export const RouteFallback = ({ children }: RouteFallbackProps) => {
+  return <DelayedFallback>{children}</DelayedFallback>;
+};

@@ -88,7 +88,8 @@
   `if (isLoading) return <Loading />`; this repo writes the block.
   **[enforced]** — `curly`. See *Where this repo differs* below.
 - **A component body keeps its `return`**, even with no logic — not the guide's
-  implicit `() => <section>…`. See *Where this repo differs* below.
+  implicit `() => <section>…`. **[enforced]** — `componentReturn.test.ts`.
+  See *Where this repo differs* below.
 - **PascalCase** components, **camelCase** functions.
 - **Loading components mirror** the structure of what they stand in for.
 - **Move to `common/` only when genuinely reused.**
@@ -199,8 +200,15 @@ export const TileLabel = ({ children, className }: TileLabelProps) => {
 ```
 
 Same reason as the guard clause: one shape for every function in the file, so
-adding a line of logic later is not also a reformat. Eleven components are
-written this way on purpose.
+adding a line of logic later is not also a reformat.
+
+**[enforced]** — `componentReturn.test.ts`. This was the last house rule that
+was only written down, and it had drifted the same way `curly` did: sixteen
+components had taken the implicit form, nine of them not exported and so
+invisible to a grep anchored on `export const`. The sweep to the braced form
+ran on 7 Sep 2026 and the test now holds the line. The rule is about
+*components* — a lowercase render helper passed to `.map()` keeps the implicit
+form, which is why `renderSection` and `renderDot` are untouched.
 
 **`dataOps/` stays whole.** Ten of the twenty operation hooks in
 `common/hooks/dataOps/` are called by exactly one feature, and the guide would

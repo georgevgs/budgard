@@ -59,26 +59,19 @@ export const formatCurrencyInput = (value: string): string => {
   // stripping anything — see resolveDecimalSeparator. Without this a pasted
   // "1,234.56" loses its dot as punctuation and reads as 1,23.
   const normalized = normalizeAmountSeparators(value);
-
-  // Remove everything except digits and comma
   const cleaned = normalized.replace(/[^\d,]/g, '');
-
-  // Split into whole and decimal parts
   const parts = cleaned.split(',');
   let whole = parts[0] || '';
   let decimal = parts[1] || '';
 
-  // Limit decimal to 2 digits
   if (decimal.length > 2) {
     decimal = decimal.slice(0, 2);
   }
 
-  // Add thousand separators to whole number
   if (whole.length > 3) {
     whole = whole.replace(/(\d)(?=(\d{3})+$)/g, '$1.');
   }
 
-  // Combine parts
   if (parts.length > 1) {
     return whole + ',' + decimal;
   }
@@ -87,7 +80,8 @@ export const formatCurrencyInput = (value: string): string => {
 };
 
 export const parseCurrencyInput = (value: string): number => {
-  // Convert from European format (1.234,56) to number
+  // The masked input is always European (1.234,56) whatever the display
+  // locale, because that is the shape formatCurrencyInput writes.
   const cleaned = normalizeAmountSeparators(value)
     .replace(/[^\d,-]/g, '') // Drop thousand separators and stray characters
     .replace(',', '.'); // Convert decimal comma to dot

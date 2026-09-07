@@ -28,8 +28,7 @@ export const useOtpAction = (onSuccess?: () => void) => {
 
   const [state, formAction] = useActionState(
     async (prev: OtpState, formData: FormData): Promise<OtpState> => {
-      // Handle go-back action — keep the email so the user edits it
-      // instead of retyping from scratch
+      // Keep the email so the user edits it instead of retyping from scratch.
       if (formData.get('_action') === 'back') {
         setOtp('');
 
@@ -41,7 +40,6 @@ export const useOtpAction = (onSuccess?: () => void) => {
         };
       }
 
-      // Handle re-send action from the verify step
       if (formData.get('_action') === 'resend') {
         const captchaToken = formData.get('turnstile_token') as string;
         if (!captchaToken) {
@@ -64,15 +62,14 @@ export const useOtpAction = (onSuccess?: () => void) => {
         return { ...prev, error: null, lastSentAt: Date.now() };
       }
 
-      // Step: request OTP
       if (prev.step === 'request') {
         // Honeypot check — silently fail to avoid revealing detection
         if (formData.get('phone_number')) {
           return { ...initialState };
         }
 
-        const token = formData.get('turnstile_token') as string;
-        if (!token) {
+        const captchaToken = formData.get('turnstile_token') as string;
+        if (!captchaToken) {
           return {
             step: 'request',
             email: '',
@@ -93,8 +90,7 @@ export const useOtpAction = (onSuccess?: () => void) => {
           };
         }
 
-        const captchaToken = formData.get('turnstile_token') as string;
-        const { error } = await authApi.requestOTP(email, captchaToken || undefined);
+        const { error } = await authApi.requestOTP(email, captchaToken);
         if (error) {
           turnstileRef.current?.reset();
           setTurnstileToken(null);
@@ -119,7 +115,6 @@ export const useOtpAction = (onSuccess?: () => void) => {
         return { step: 'verify', email, error: null, lastSentAt: Date.now() };
       }
 
-      // Step: verify OTP
       const email = formData.get('email') as string;
       const otpValue = formData.get('otp') as string;
 

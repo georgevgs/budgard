@@ -20,16 +20,18 @@ const ChartTooltipRow = ({
   labelClassName,
   valueClassName,
   isSeparated = false,
-}: ChartTooltipRowProps) => (
-  <div
-    className={cn(
-      'flex items-center justify-between gap-3',
-      isSeparated && 'border-t border-border/40 pt-1.5 mt-1.5',
-    )}
-  >
-    <span className={labelClassName}>{label}</span>
-    <span className={cn('tabular-nums', valueClassName)}>{value}</span>
-  </div>
-);
+}: ChartTooltipRowProps) => {
+  return (
+    <div
+      className={cn(
+        'flex items-center justify-between gap-3',
+        isSeparated && 'border-t border-border/40 pt-1.5 mt-1.5',
+      )}
+    >
+      <span className={labelClassName}>{label}</span>
+      <span className={cn('tabular-nums', valueClassName)}>{value}</span>
+    </div>
+  );
+};
 
 export { ChartTooltipRow };

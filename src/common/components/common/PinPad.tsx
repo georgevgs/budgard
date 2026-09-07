@@ -49,17 +49,19 @@ type PadButtonProps = {
   hasIcon?: boolean;
 };
 
-const PadButton = ({ label, onPress, disabled, hasIcon }: PadButtonProps) => (
-  <button
-    type="button"
-    onClick={onPress}
-    disabled={disabled}
-    aria-label={label}
-    className="flex h-16 items-center justify-center rounded-full bg-muted/60 type-figure transition-colors active:bg-muted disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-  >
-    {renderFace(label, hasIcon)}
-  </button>
-);
+const PadButton = ({ label, onPress, disabled, hasIcon }: PadButtonProps) => {
+  return (
+    <button
+      type="button"
+      onClick={onPress}
+      disabled={disabled}
+      aria-label={label}
+      className="flex h-16 items-center justify-center rounded-full bg-muted/60 type-figure transition-colors active:bg-muted disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      {renderFace(label, hasIcon)}
+    </button>
+  );
+};
 
 const renderFace = (label: string, hasIcon: boolean | undefined) => {
   if (hasIcon) {

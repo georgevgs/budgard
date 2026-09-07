@@ -4,6 +4,6 @@ type EyebrowLabelProps = {
   children: string;
 };
 
-export const EyebrowLabel = ({ children }: EyebrowLabelProps) => (
-  <TileLabel className="text-primary-ink">{children}</TileLabel>
-);
+export const EyebrowLabel = ({ children }: EyebrowLabelProps) => {
+  return <TileLabel className="text-primary-ink">{children}</TileLabel>;
+};

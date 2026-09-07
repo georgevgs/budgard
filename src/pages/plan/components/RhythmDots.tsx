@@ -8,14 +8,16 @@ type RhythmDotsProps = {
 // aria-hidden, not role="img": the sentence rendered directly beneath these
 // dots already states the same count, and labelling both made a screen reader
 // announce it twice in a row.
-export const RhythmDots = ({ days }: RhythmDotsProps) => (
-  <div
-    className="grid grid-cols-[repeat(15,minmax(0,1fr))] justify-items-center gap-y-2.5"
-    aria-hidden="true"
-  >
-    {days.map(renderDot)}
-  </div>
-);
+export const RhythmDots = ({ days }: RhythmDotsProps) => {
+  return (
+    <div
+      className="grid grid-cols-[repeat(15,minmax(0,1fr))] justify-items-center gap-y-2.5"
+      aria-hidden="true"
+    >
+      {days.map(renderDot)}
+    </div>
+  );
+};
 
 const STAGGER_STEP_MS = 12;
 const STAGGER_CAP = 20;

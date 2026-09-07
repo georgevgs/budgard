@@ -28,13 +28,11 @@ export const getCsvPreviewData = (csvContent: string): CsvPreviewData => {
     .filter((line) => line.trim())
     .map((line) => parseCsvLine(line, delimiter));
 
-  // First row is headers
   const headers = allRows[0] || [];
-
-  // Get sample data rows (skip header, take up to 5)
   const sampleRows = allRows.slice(1, 6);
 
-  // Count total data rows (excluding header and empty rows at end)
+  // Quotes are stripped before the emptiness test because a trailing `"",""`
+  // line is a spreadsheet artefact, not a row the user meant to import.
   const dataRows = allRows
     .slice(1)
     .filter((row) =>
@@ -80,12 +78,8 @@ export const readFileAsText = (file: File): Promise<string> => {
   });
 };
 
-/**
- * Checks if a line looks like a header row
- */
 export const isHeaderRow = (line: string): boolean => {
   const lower = line.toLowerCase();
-  // English headers
   const hasEnglishHeaders =
     lower.includes('date') &&
     lower.includes('description') &&
@@ -99,9 +93,6 @@ export const isHeaderRow = (line: string): boolean => {
   return hasEnglishHeaders || hasGreekHeaders;
 };
 
-/**
- * Parses a CSV line, handling quoted fields
- */
 export const parseCsvLine = (line: string, delimiter: string = ','): string[] => {
   const fields: string[] = [];
   let current = '';
@@ -136,7 +127,7 @@ export const parseCsvLine = (line: string, delimiter: string = ','): string[] =>
     }
   }
 
-  // Add the last field
+  // The final field has no delimiter after it to trigger the push above.
   fields.push(current);
 
   return fields;

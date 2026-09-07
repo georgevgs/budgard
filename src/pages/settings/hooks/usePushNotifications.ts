@@ -60,7 +60,6 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
       return;
     }
 
-    // Check if already subscribed
     getRegistration().then((reg) => {
       if (!reg) {
         setState('unsubscribed');

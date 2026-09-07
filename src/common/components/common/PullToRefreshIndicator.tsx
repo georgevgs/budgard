@@ -43,26 +43,28 @@ export const PullToRefreshIndicator = ({ state }: PullToRefreshIndicatorProps) =
 // pathLength normalises the circle to 100 units so the dash offset in index.css
 // is a plain percentage of the ring rather than a magic number derived from the
 // radius, which would silently desync the moment the ring was resized.
-const ProgressRing = () => (
-  <svg className="pull-ring size-5" viewBox="0 0 24 24" fill="none">
-    <circle
-      className="pull-ring-track"
-      cx="12"
-      cy="12"
-      r="10"
-      strokeWidth="2.5"
-    />
-    <circle
-      className="pull-ring-arc"
-      cx="12"
-      cy="12"
-      r="10"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      pathLength="100"
-    />
-  </svg>
-);
+const ProgressRing = () => {
+  return (
+    <svg className="pull-ring size-5" viewBox="0 0 24 24" fill="none">
+      <circle
+        className="pull-ring-track"
+        cx="12"
+        cy="12"
+        r="10"
+        strokeWidth="2.5"
+      />
+      <circle
+        className="pull-ring-arc"
+        cx="12"
+        cy="12"
+        r="10"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        pathLength="100"
+      />
+    </svg>
+  );
+};
 
 // The indicator itself is decorative; this is the part a screen reader gets.
 const RefreshAnnouncement = ({ isRefreshing }: { isRefreshing: boolean }) => {

@@ -1,6 +1,5 @@
 import * as z from 'zod';
 
-// Receipt validation constants
 export const RECEIPT_ALLOWED_TYPES = [
   'image/jpeg',
   'image/png',
@@ -10,7 +9,6 @@ export const RECEIPT_ALLOWED_TYPES = [
 ];
 export const RECEIPT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-// Shared regex patterns
 export const SAFE_STRING = /^[\p{L}\p{N}\s.,!?'"\-/()@#&%+:;]*$/u; // Unicode letters, numbers, common punctuation
 export const AMOUNT_PATTERN = /^\d{1,3}(?:\.\d{3})*(?:,\d{0,2})?$|^\d+(?:,\d{0,2})?$/;
 export const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
@@ -34,7 +32,6 @@ export const isNotFutureDated = (date: Date): boolean => {
 
 // Disposable/temporary email providers blocked to prevent spam signups
 export const BLOCKED_DOMAINS = [
-  // Popular disposable email services
   '10minutemail.com',
   '10minutemail.net',
   'tempmail.com',

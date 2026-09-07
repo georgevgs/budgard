@@ -9,27 +9,29 @@ import { ErrorBoundary } from '@/common/ui/error-boundary';
 import { Toaster } from '@/common/ui/toaster';
 import { AuthenticatedProviders } from '@/common/contexts/AuthenticatedProviders';
 
-const AuthenticatedApp = () => (
-  <BrowserRouter>
-    <AuthenticatedProviders>
-      <RouteMetadata />
-      <div className="min-h-dvh bg-background flex flex-col">
-        <ErrorBoundary>
-          <Suspense
-            fallback={
-              <RouteFallback>
-                <AppLoadingSkeleton />
-              </RouteFallback>
-            }
-          >
-            <AppRouteTree />
-          </Suspense>
-        </ErrorBoundary>
-        <OfflineBanner />
-        <Toaster />
-      </div>
-    </AuthenticatedProviders>
-  </BrowserRouter>
-);
+const AuthenticatedApp = () => {
+  return (
+    <BrowserRouter>
+      <AuthenticatedProviders>
+        <RouteMetadata />
+        <div className="min-h-dvh bg-background flex flex-col">
+          <ErrorBoundary>
+            <Suspense
+              fallback={
+                <RouteFallback>
+                  <AppLoadingSkeleton />
+                </RouteFallback>
+              }
+            >
+              <AppRouteTree />
+            </Suspense>
+          </ErrorBoundary>
+          <OfflineBanner />
+          <Toaster />
+        </div>
+      </AuthenticatedProviders>
+    </BrowserRouter>
+  );
+};
 
 export default AuthenticatedApp;

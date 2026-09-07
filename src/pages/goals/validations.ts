@@ -2,7 +2,6 @@ import * as z from 'zod';
 import { parseCurrencyInput } from '@/constants/utils';
 import { AMOUNT_PATTERN, HEX_COLOR, SAFE_STRING } from '@/constants/validations';
 
-// Goal validation schema
 export const goalSchema = z
   .object({
     name: z

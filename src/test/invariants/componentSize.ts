@@ -31,6 +31,16 @@ export const measureFunctions = (roots: string[]): ComponentSize[] => {
     .flatMap((file) => measureFile(file, FUNCTION));
 };
 
+// The same walk, for an invariant that reads the source rather than measuring
+// it. Sharing it keeps one definition of "a source file we hold to our rules" —
+// vendored `ui/` and the tests themselves are excluded in exactly one place.
+export const collectSourceFiles = (
+  roots: string[],
+  extensions = ['.tsx'],
+): string[] => {
+  return roots.flatMap((root) => collectFiles(root, extensions));
+};
+
 const collectFiles = (dir: string, extensions = ['.tsx']): string[] => {
   if (!isDirectory(dir)) {
     return [];

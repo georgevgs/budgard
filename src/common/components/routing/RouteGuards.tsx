@@ -48,19 +48,21 @@ export const PublicRoute = () => {
   );
 };
 
-export const PublicLayout = ({ children }: { children: ReactNode }) => (
-  <main className="flex-1">
-    <Suspense
-      fallback={
-        <RouteFallback>
-          <LegalLoading />
-        </RouteFallback>
-      }
-    >
-      {children}
-    </Suspense>
-  </main>
-);
+export const PublicLayout = ({ children }: { children: ReactNode }) => {
+  return (
+    <main className="flex-1">
+      <Suspense
+        fallback={
+          <RouteFallback>
+            <LegalLoading />
+          </RouteFallback>
+        }
+      >
+        {children}
+      </Suspense>
+    </main>
+  );
+};
 
 export const LegacyRedirect = ({ to }: { to: string }) => {
   const { search } = useLocation();
