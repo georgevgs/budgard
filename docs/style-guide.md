@@ -50,8 +50,11 @@
 - **File name matches the component name.** `ExpensesForm.tsx` exports
   `ExpensesForm`. A module that deliberately groups several small related
   components is the exception — `ChartAxes.tsx` (`XAxis` / `YAxis` /
-  `ReferenceLine`) and `RouteGuards.tsx` — which the guide permits as grouped
-  related exports.
+  `ReferenceLine`), `ChartSeries.tsx`, `ChartTooltip.tsx`, `AppToaster.tsx`,
+  `DataContext.tsx` and `RouteGuards.tsx` — which the guide permits as grouped
+  related exports. A module of *helpers* is not that exception: it goes in the
+  feature's `utils/` under a camelCase name (`utils/expensesFormHelpers.tsx`),
+  never beside the component under a dotted name.
 - **Named exports for components.** `export const Foo = () => {}`, no
   `export default`. The exception is a module loaded through `React.lazy`,
   which needs a default export — the guide allows default for page/route
@@ -66,7 +69,9 @@
   `useEffect` → functions (handlers, derived `useMemo` / `useCallback`) →
   return.
 - **Blank line before `return`.** **[enforced]**
-- **Single-line early returns** stay inline, without braces.
+- **A guard clause keeps its braces.** The guide asks for the brace-less
+  `if (isLoading) return <Loading />`; this repo writes the block. See
+  *Where this repo differs* below.
 - **PascalCase** components, **camelCase** functions.
 - **Loading components mirror** the structure of what they stand in for.
 - **Move to `common/` only when genuinely reused.**
@@ -85,9 +90,16 @@
 - **Props type is named `{ComponentName}Props`** — `ExpensesFormProps`, not a
   bare `Props`.
 - **A hook's return type is named `Use{HookName}Return`** when the hook
-  declares one. A hook returning a primitive (`boolean`, `void`, `Date`) needs
-  no named type, and a shared domain model keeps its own name — `SavingsRhythm`
-  and `GoalProgress` are models the app passes around, not hook plumbing.
+  declares one — including when it is an alias, so
+  `export type UseTagPickerReturn = ReturnType<typeof useTagPicker>`, never
+  `TagPickerApi`. A hook returning a primitive (`boolean`, `void`, `Date`)
+  needs no named type, and a shared domain model keeps its own name —
+  `SavingsRhythm` and `GoalProgress` are models the app passes around, not
+  hook plumbing. An *internal* state shape is not a return type: `OtpState`
+  and `AlertState` are named for what they hold.
+- **`t` is typed once.** A helper that renders a string takes
+  `t: TranslateFunction` from `@/constants/translate`. Do not re-declare the
+  shape locally — 112 files each had their own, in three different widths.
 - `Pick<>` to select, `Omit<>` to remove, `Extract<>` to narrow, `&` to merge.
 - Do not reach for `interface` on a utility or a hook return type.
 
@@ -113,10 +125,18 @@
 - `//` comments for browser quirks and genuine technical limitations.
 - Pull complex `useEffect` bodies into named functions instead of explaining
   them inline.
+- **No section dividers.** `// --- Helpers ---` used to sit above the helper
+  block in 264 files and said nothing the blank line below the component did
+  not. A divider earns its place only when it names something the code cannot —
+  `// --- OFX ---` over one of two parsers in the same file, or
+  `// --- handleExpenseSplit ---` over the block of tests covering it. All 265
+  generic ones were removed Sep 2026; the ~27 that name a section stayed.
 
 ---
 
 ## Where this repo differs
+
+Two rules on the site the repo knowingly does not follow.
 
 **Props are `type`, not `interface`.** The guide asks for `interface` on
 component props. Budgard uses `type ExpensesFormProps = { … }` instead, for one
@@ -124,7 +144,21 @@ consistent way to declare a shape rather than two. The guide's *naming* is kept
 — `{ComponentName}Props` — only the keyword differs. `src/common/ui/` is
 vendored shadcn and keeps whatever upstream ships.
 
-This is the only rule on the site the repo knowingly does not follow.
+**A guard clause keeps its braces.** The guide's ❌ is the braced single-line
+return; here it is the house style:
+
+```ts
+if (transactionIds.length === 0) {
+  return [];
+}
+```
+
+not `if (transactionIds.length === 0) return [];`. The block gives the guard a
+shape the eye catches while scanning a column of code, which is the same reason
+this repo bans ternaries and `&&` in JSX. A sweep of the 686 call sites to the
+guide's form was written and rejected on 7 Sep 2026 — do not propose it again.
+Both forms are currently present (337 brace-less predate the decision); new code
+takes the braces, and neither is worth a churn commit on its own.
 
 ## Where this repo is stricter
 

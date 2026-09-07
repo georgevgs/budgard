@@ -282,8 +282,8 @@ writes is one file:
 - `pages/settings/settingsApi.ts` also owns push-subscription persistence and
   the non-secret financial-connection status read
 - `pages/today/todayApi.ts` — owner-scoped Today layout sync
-- `pages/expenses/ocrService.ts` — Tesseract receipt scanning (Pro)
-- `pages/pro/proPlansService.ts` — live Pro prices
+- `pages/expenses/utils/ocr.ts` — Tesseract receipt scanning (Pro)
+- `pages/pro/proApi.ts` — live Pro prices
 
 ### Rules
 
@@ -457,7 +457,7 @@ other.
 
 ## Pro Gating
 
-Everything the free plan limits is declared in one place: `lib/proGates.ts`.
+Everything the free plan limits is declared in one place: `constants/proGates.ts`.
 Before it existed, the only way to answer "what exactly is gated?" was to grep
 for `openUpgrade()`.
 
@@ -553,7 +553,7 @@ Handled via `receiptService.ts`
 3. Read back through short-lived signed URLs (`useReceiptUrl`)
 
 Pro users can also capture and scan a receipt from Quick Add or the full form
-through `services/ocrService.ts` (Tesseract, self-hosted under `/ocr/`) to
+through `pages/expenses/utils/ocr.ts` (Tesseract, self-hosted under `/ocr/`) to
 prefill the amount, date and merchant.
 
 ### Storage Bucket

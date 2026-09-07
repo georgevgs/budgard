@@ -38,7 +38,7 @@ is **bun**.
   turned ambiguous once already (PGRST201, white screen on months-old bundles).
   Shared embeds and paging helpers are in `src/common/api/dataAccess.ts`.
 - **Pro gating**: every free-tier limit is declared in
-  `src/pages/pro/utils/proGates.ts` and asked through `useProGate().allow(...)`.
+  `src/constants/proGates.ts` and asked through `useProGate().allow(...)`.
   Do not read `isPro` and hand-roll a toast + `openUpgrade()` at a new call site.
 - **Routes** are lazy-loaded in `src/App.tsx`.
 
