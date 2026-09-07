@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, type Dispatch, type SetStateAction } from 'react';
 import { captureException } from '@/config/sentry';
 import { useTranslation } from 'react-i18next';
-import { useToast } from '@/common/hooks/useToast';
+import { useToast, type ToastParams } from '@/common/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/common/contexts/DataContext';
 import { dataService } from '@/common/api/dataService';
 import type { ExpenseWritePayload } from '@/common/api/dataService';
@@ -12,7 +12,11 @@ import { isOfflineError } from '@/constants/offlineError';
 import { describeAmount } from '@/constants/transactionAmount';
 import type { TranslateFunction } from '@/constants/translate';
 import type { Expense } from '@/types/Expense';
-import { replaceById, patchById, pickByEdit } from '@/common/hooks/dataOps/helpers';
+import {
+  replaceById,
+  patchById,
+  pickByEdit,
+} from '@/common/hooks/dataOps/helpers';
 import { mergeUniqueById } from '@/common/contexts/dataContextHelpers';
 import { useMutationRunner } from '@/common/hooks/dataOps/useMutationRunner';
 import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
@@ -47,13 +51,13 @@ export const useExpenseOps = () => {
 
   return useMemo(() => {
     const shouldSkip = !isInitialized;
-
-    const refreshDebtsQuietly = () => {
-      refreshDebts().catch((err) => {
-        captureException(err, {
-          tags: { context: 'afterExpenseSubmitDebt' },
-        });
-      });
+    const deps: ExpenseOpDeps = {
+      t,
+      toast,
+      setExpenses,
+      activeOwnerId,
+      defaultCurrency,
+      refreshDebts,
     };
 
     // Server-first: an expense row carries server-derived columns and a
@@ -78,92 +82,25 @@ export const useExpenseOps = () => {
             return false;
           }
 
-          await queueExpenseOffline(
-            expenseData,
-            expenseId,
-            activeOwnerId,
-            setExpenses,
-          );
-          haptics.success();
-          toast({
-            variant: 'success',
-            title: t('offline.savedOffline'),
-            description: t('offline.willSync'),
-          });
+          await saveExpenseOffline(deps, expenseData, expenseId);
 
           return true;
         },
-        perform: async () => {
-          let savedExpense: Expense;
-          if (expenseId) {
-            savedExpense = await dataService.updateExpense(
-              expenseData,
-              expenseId,
-            );
-          } else {
-            savedExpense = await dataService.createExpense(
-              expenseData,
-              activeOwnerId,
-            );
-          }
-
-          const { receiptPath, hasReceiptFailed, oldPathToDelete } =
-            await settleReceipt(savedExpense, receiptOptions);
-
-          if (oldPathToDelete) {
-            deleteReceiptQuietly(oldPathToDelete, 'afterReceiptUpdateSuccess');
-          }
-
-          return {
-            finalExpense: { ...savedExpense, receipt_path: receiptPath },
-            hasReceiptFailed,
-          };
-        },
-        commit: ({ finalExpense, hasReceiptFailed }) => {
-          const isDebtPayment = finalExpense.type === 'debt_payment';
-          setExpenses((prev) => {
-            if (expenseId) {
-              if (isDebtPayment) {
-                return prev.filter((e) => e.id !== expenseId);
-              }
-
-              return replaceById(prev, expenseId, finalExpense);
-            }
-
-            if (isDebtPayment) {
-              return prev;
-            }
-
-            return [finalExpense, ...prev];
-          });
-
-          if (finalExpense.debt_id || previousDebtId) {
-            refreshDebtsQuietly();
-          }
-
-          // Not `successMessage`: the expense saved either way, but a failed
-          // receipt has to say so rather than claim a clean save.
-          if (hasReceiptFailed) {
-            toast({
-              variant: 'destructive',
-              description: t('expenses.toasts.receiptUploadFailed'),
-            });
-
-            return;
-          }
-
-          toast({
-            variant: 'success',
-            title: resolveSuccessTitle(expenseId, isDebtPayment, t),
-            description: describeSavedExpense(finalExpense, defaultCurrency),
-            action: buildUndoAction(
-              expenseId,
-              finalExpense,
-              handleExpenseDelete,
-              t,
-            ),
-          });
-        },
+        perform: () =>
+          performExpenseSave(
+            expenseData,
+            expenseId,
+            receiptOptions,
+            activeOwnerId,
+          ),
+        commit: (saved) =>
+          commitExpenseSave(
+            deps,
+            saved,
+            expenseId,
+            previousDebtId,
+            handleExpenseDelete,
+          ),
       });
     };
 
@@ -193,72 +130,28 @@ export const useExpenseOps = () => {
             return false;
           }
 
-          await offlineQueue.enqueueWithReconcile('deleteExpense', {
-            id: expenseId,
-          });
-          setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
-          haptics.success();
-          toast({
-            variant: 'success',
-            title: t('offline.deleteSavedOffline'),
-            description: t('offline.willSync'),
-          });
+          await deleteExpenseOffline(deps, expenseId);
 
           return true;
         },
         perform: () => dataService.deleteExpense(expenseId),
-        commit: () => {
-          setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
-
-          if (deletedDebtId) {
-            refreshDebts().catch((err) => {
-              captureException(err, {
-                tags: { context: 'afterExpenseDeleteDebt' },
-              });
-            });
-          }
-
-          if (receiptPath) {
-            deleteReceiptQuietly(receiptPath, 'afterExpenseDelete');
-          }
-        },
+        commit: () =>
+          commitExpenseDelete(deps, expenseId, deletedDebtId, receiptPath),
       });
     };
 
-    // The insert returns the created rows with their embeds, so merging them
-    // into state replaces a full-history re-download. Consumers sort before
-    // display, so append order doesn't matter.
     const handleBulkExpenseImport = async (expensesData: BulkExpenseRow[]) => {
       if (shouldSkip) {
         return;
       }
 
-      const created = await dataService.createExpensesBulk(
-        expensesData,
-        activeOwnerId,
-        'import',
-      );
-      setExpenses((prev) => mergeUniqueById(prev, created));
-      const reconciled =
-        await recurringSuggestionService.reconcile(activeOwnerId);
-      if (reconciled > 0) {
-        await refreshExpenses();
-      }
+      await importExpenseRows(expensesData, deps, refreshExpenses);
     };
 
     // Splits one expense into several: the original row keeps its receipt and
     // recurring link and takes the first part; the rest are new rows with the
     // same date, description, tag, note and exclusion state.
-    //
-    // The new rows are written FIRST and the original is shrunk last. The
-    // other order shrinks the original and then, if the insert fails, leaves
-    // the remainder existing nowhere — €120 split three ways became a single
-    // €40 row with an error toast. Written this way the worst case is a
-    // duplicate set of parts alongside an intact original, which is visible
-    // and correctable, rather than money that is simply gone.
     const handleExpenseSplit = (expense: Expense, parts: SplitPart[]) => {
-      const [firstPart, ...restParts] = parts;
-
       return runMutation({
         operation: 'splitExpense',
         shouldSkip: shouldSkip || parts.length < 2,
@@ -270,37 +163,7 @@ export const useExpenseOps = () => {
         optimistic: () => () => refreshExpenses(),
         // Retrying could duplicate the parts that already inserted.
         isRetryable: false,
-        perform: async () => {
-          const created = await dataService.createExpensesBulk(
-            restParts.map((part) => ({
-              date: expense.date,
-              description: expense.description,
-              amount: part.amount,
-              category_id: part.category_id,
-              tag_id: expense.tag_id ?? null,
-              note: expense.note ?? null,
-              is_excluded: expense.is_excluded ?? false,
-            })),
-            activeOwnerId,
-          );
-          const updated = await dataService.updateExpense(
-            {
-              amount: firstPart.amount,
-              category_id: firstPart.category_id,
-              // The parts are amounts in the default currency. Leaving the
-              // original's foreign pairing on the row made the detail screen
-              // claim the full foreign figure, and re-opening the edit form
-              // pre-filled it and re-converted — restoring the whole original
-              // amount over the split part.
-              original_amount: null,
-              original_currency: null,
-              exchange_rate: null,
-            },
-            expense.id,
-          );
-
-          return { created, updated };
-        },
+        perform: () => performSplit(expense, parts, activeOwnerId),
         commit: ({ created, updated }) =>
           setExpenses((prev) =>
             mergeUniqueById(replaceById(prev, expense.id, updated), created),
@@ -326,6 +189,236 @@ export const useExpenseOps = () => {
     toast,
     t,
   ]);
+};
+
+// What the write paths below need from the hook. Passing it as one object is
+// what lets each of them be a named function rather than another closure
+// inside an already long useMemo.
+type ExpenseOpDeps = {
+  t: TranslateFunction;
+  toast: (params: ToastParams) => void;
+  setExpenses: Dispatch<SetStateAction<Expense[]>>;
+  activeOwnerId: string;
+  defaultCurrency: string;
+  refreshDebts: () => Promise<void>;
+};
+
+type SavedExpense = {
+  finalExpense: Expense;
+  hasReceiptFailed: boolean;
+};
+
+const refreshDebtsQuietly = (
+  refreshDebts: () => Promise<void>,
+  context: string,
+): void => {
+  refreshDebts().catch((error) => {
+    captureException(error, { tags: { context } });
+  });
+};
+
+const saveExpenseOffline = async (
+  deps: ExpenseOpDeps,
+  expenseData: ExpenseWritePayload,
+  expenseId: string | undefined,
+): Promise<void> => {
+  await queueExpenseOffline(
+    expenseData,
+    expenseId,
+    deps.activeOwnerId,
+    deps.setExpenses,
+  );
+  haptics.success();
+  deps.toast({
+    variant: 'success',
+    title: deps.t('offline.savedOffline'),
+    description: deps.t('offline.willSync'),
+  });
+};
+
+const performExpenseSave = async (
+  expenseData: ExpenseWritePayload,
+  expenseId: string | undefined,
+  receiptOptions: ReceiptOptions | undefined,
+  activeOwnerId: string,
+): Promise<SavedExpense> => {
+  let savedExpense: Expense;
+  if (expenseId) {
+    savedExpense = await dataService.updateExpense(expenseData, expenseId);
+  } else {
+    savedExpense = await dataService.createExpense(expenseData, activeOwnerId);
+  }
+
+  const { receiptPath, hasReceiptFailed, oldPathToDelete } =
+    await settleReceipt(savedExpense, receiptOptions);
+
+  if (oldPathToDelete) {
+    deleteReceiptQuietly(oldPathToDelete, 'afterReceiptUpdateSuccess');
+  }
+
+  return {
+    finalExpense: { ...savedExpense, receipt_path: receiptPath },
+    hasReceiptFailed,
+  };
+};
+
+const commitExpenseSave = (
+  deps: ExpenseOpDeps,
+  { finalExpense, hasReceiptFailed }: SavedExpense,
+  expenseId: string | undefined,
+  previousDebtId: string | null,
+  onUndoDelete: (expenseId: string, knownDebtId?: string | null) => void,
+): void => {
+  const isDebtPayment = finalExpense.type === 'debt_payment';
+
+  deps.setExpenses((prev) =>
+    applySavedExpense(prev, finalExpense, expenseId, isDebtPayment),
+  );
+
+  if (finalExpense.debt_id || previousDebtId) {
+    refreshDebtsQuietly(deps.refreshDebts, 'afterExpenseSubmitDebt');
+  }
+
+  // Not `successMessage`: the expense saved either way, but a failed receipt
+  // has to say so rather than claim a clean save.
+  if (hasReceiptFailed) {
+    deps.toast({
+      variant: 'destructive',
+      description: deps.t('expenses.toasts.receiptUploadFailed'),
+    });
+
+    return;
+  }
+
+  deps.toast({
+    variant: 'success',
+    title: resolveSuccessTitle(expenseId, isDebtPayment, deps.t),
+    description: describeSavedExpense(finalExpense, deps.defaultCurrency),
+    action: buildUndoAction(expenseId, finalExpense, onUndoDelete, deps.t),
+  });
+};
+
+// A debt payment lives on the debt, and is deliberately absent from
+// `expenses` — so saving one removes the row rather than adding it.
+const applySavedExpense = (
+  prev: Expense[],
+  finalExpense: Expense,
+  expenseId: string | undefined,
+  isDebtPayment: boolean,
+): Expense[] => {
+  if (expenseId) {
+    if (isDebtPayment) {
+      return prev.filter((e) => e.id !== expenseId);
+    }
+
+    return replaceById(prev, expenseId, finalExpense);
+  }
+
+  if (isDebtPayment) {
+    return prev;
+  }
+
+  return [finalExpense, ...prev];
+};
+
+// The insert returns the created rows with their embeds, so merging them into
+// state replaces a full-history re-download. Consumers sort before display, so
+// append order does not matter.
+const importExpenseRows = async (
+  rows: BulkExpenseRow[],
+  deps: ExpenseOpDeps,
+  refreshExpenses: () => Promise<void>,
+): Promise<void> => {
+  const created = await dataService.createExpensesBulk(
+    rows,
+    deps.activeOwnerId,
+    'import',
+  );
+  deps.setExpenses((prev) => mergeUniqueById(prev, created));
+
+  const reconciled = await recurringSuggestionService.reconcile(
+    deps.activeOwnerId,
+  );
+  if (reconciled > 0) {
+    await refreshExpenses();
+  }
+};
+
+const deleteExpenseOffline = async (
+  deps: ExpenseOpDeps,
+  expenseId: string,
+): Promise<void> => {
+  await offlineQueue.enqueueWithReconcile('deleteExpense', { id: expenseId });
+  deps.setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
+  haptics.success();
+  deps.toast({
+    variant: 'success',
+    title: deps.t('offline.deleteSavedOffline'),
+    description: deps.t('offline.willSync'),
+  });
+};
+
+const commitExpenseDelete = (
+  deps: ExpenseOpDeps,
+  expenseId: string,
+  deletedDebtId: string | null,
+  receiptPath: string | null,
+): void => {
+  deps.setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
+
+  if (deletedDebtId) {
+    refreshDebtsQuietly(deps.refreshDebts, 'afterExpenseDeleteDebt');
+  }
+
+  if (receiptPath) {
+    deleteReceiptQuietly(receiptPath, 'afterExpenseDelete');
+  }
+};
+
+/**
+ * The new rows are written FIRST and the original is shrunk last.
+ *
+ * The other order shrinks the original and then, if the insert fails, leaves
+ * the remainder existing nowhere — €120 split three ways became a single €40
+ * row with an error toast. Written this way the worst case is a duplicate set
+ * of parts alongside an intact original, which is visible and correctable,
+ * rather than money that is simply gone.
+ */
+const performSplit = async (
+  expense: Expense,
+  parts: SplitPart[],
+  activeOwnerId: string,
+) => {
+  const [firstPart, ...restParts] = parts;
+
+  const created = await dataService.createExpensesBulk(
+    restParts.map((part) => ({
+      date: expense.date,
+      description: expense.description,
+      amount: part.amount,
+      category_id: part.category_id,
+      tag_id: expense.tag_id ?? null,
+      note: expense.note ?? null,
+      is_excluded: expense.is_excluded ?? false,
+    })),
+    activeOwnerId,
+  );
+  const updated = await dataService.updateExpense(
+    {
+      amount: firstPart.amount,
+      category_id: firstPart.category_id,
+      // The parts are amounts in the default currency. Leaving the original's
+      // foreign pairing on the row made the detail screen claim the full
+      // foreign figure, and re-opening the edit form pre-filled it and
+      // re-converted — restoring the whole original amount over the split part.
+      original_amount: null,
+      original_currency: null,
+      exchange_rate: null,
+    },
+    expense.id,
+  );
+
+  return { created, updated };
 };
 
 type ReceiptResult = {

@@ -26,28 +26,7 @@ export const usePwaUpdate = (): void => {
       if (!registration) {
         return;
       }
-      swRegistration.set(registration);
-
-      // Check for an update immediately on registration.
-      // visibilitychange doesn't fire on a fresh iOS PWA open (page starts
-      // already visible), and the periodic interval hasn't fired yet —
-      // so without this call nothing would trigger a SW update check on open.
-      lastUpdateCheckRef.current = Date.now();
-      registration.update().catch(() => {});
-
-      // Periodic update check — registration.update() fetches the SW file
-      // and does a byte-for-byte comparison. Chrome 68+ bypasses HTTP cache
-      // for SW files automatically; no manual fetch needed.
-      setInterval(() => {
-        if (registration.installing || !navigator) {
-          return;
-        }
-        if ('connection' in navigator && !navigator.onLine) {
-          return;
-        }
-
-        registration.update().catch(() => {});
-      }, UPDATE_CHECK_INTERVAL_MS);
+      startUpdateChecks(registration, lastUpdateCheckRef);
     },
     onRegisterError() {
       // Registration failures are non-critical — the app works without SW
@@ -148,64 +127,11 @@ export const usePwaUpdate = (): void => {
       return;
     }
 
-    let cancelled = false;
-
-    // A waiting worker alone doesn't prove there's anything new: iOS can
-    // re-install the SAME bytes after killing the PWA process, parking an
-    // identical worker in the waiting slot. Ask the worker for its build id
-    // first — our own build re-installed is suppressed silently (it activates
-    // harmlessly on the next full app close); anything unverifiable is
-    // offered as before.
-    const offerIfActuallyNewer = (worker: ServiceWorker): void => {
-      void isSameBuildAsPage(worker).then((sameBuild) => {
-        if (cancelled) {
-          return;
-        }
-
-        if (sameBuild) {
-          setNeedRefresh(false);
-
-          return;
-        }
-
-        if (toastDismissedRef.current) {
-          return;
-        }
-        showUpdateToast();
-      });
-    };
-
-    // Fast path: a waiting worker is already observable.
-    const reg = swRegistration.get();
-    if (reg?.waiting) {
-      offerIfActuallyNewer(reg.waiting);
-
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    // Slow path: needRefresh fired but registration.waiting hasn't been
-    // populated yet. This happens via vite-plugin-pwa's `installed` +
-    // `isExternal` path (fires before the 200ms-confirmed `waiting` event),
-    // and on iOS PWA same-content reinstalls where the worker never reaches
-    // a true waiting state. Wait briefly, then re-check; if still no waiting
-    // worker, treat as a phantom and clear the flag.
-    const timer = setTimeout(() => {
-      const latest = swRegistration.get();
-      if (!latest?.waiting) {
-        setNeedRefresh(false);
-
-        return;
-      }
-
-      offerIfActuallyNewer(latest.waiting);
-    }, 1500);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
+    return watchForRealUpdate({
+      setNeedRefresh,
+      showUpdateToast,
+      wasDismissed: () => toastDismissedRef.current,
+    });
   }, [needRefresh, showUpdateToast, showStuckToast, setNeedRefresh]);
 
   // Check for SW updates when the app returns to foreground.
@@ -214,31 +140,7 @@ export const usePwaUpdate = (): void => {
   // event that fires when a standalone PWA is foregrounded.
   useEffect(() => {
     const handleVisibilityChange = (): void => {
-      if (document.visibilityState !== 'visible') {
-        return;
-      }
-
-      // If an update is already pending, don't re-check or re-show toast.
-      if (needRefreshRef.current) {
-        return;
-      }
-
-      const reg = swRegistration.get();
-      if (!reg) {
-        return;
-      }
-
-      // Rate-limit update checks on visibility change to avoid iOS triggering
-      // spurious SW re-installs on every app focus event.
-      const now = Date.now();
-      if (now - lastUpdateCheckRef.current < MIN_VISIBILITY_CHECK_INTERVAL_MS) {
-        return;
-      }
-      lastUpdateCheckRef.current = now;
-
-      reg.update().catch(() => {
-        // SW script fetch can fail (offline, server error) — non-critical
-      });
+      checkOnForeground(needRefreshRef, lastUpdateCheckRef);
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -247,6 +149,141 @@ export const usePwaUpdate = (): void => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
+};
+
+// needRefresh can fire before registration.waiting is populated, so a missing
+// waiting worker is not yet proof of a phantom. Re-check once after this.
+const PHANTOM_WAIT_MS = 1500;
+
+// Registration is the only place the hourly check can be installed, and it
+// primes the first one too: visibilitychange does not fire on a fresh iOS PWA
+// open (the page starts already visible) and the interval has not come round
+// yet, so without this nothing would trigger a check on open.
+const startUpdateChecks = (
+  registration: ServiceWorkerRegistration,
+  lastCheckedAt: { current: number },
+): void => {
+  swRegistration.set(registration);
+  lastCheckedAt.current = Date.now();
+  registration.update().catch(() => {});
+
+  // registration.update() fetches the SW file and does a byte-for-byte
+  // comparison. Chrome 68+ bypasses the HTTP cache for SW files automatically;
+  // no manual fetch needed.
+  setInterval(() => {
+    if (registration.installing || !navigator) {
+      return;
+    }
+    if ('connection' in navigator && !navigator.onLine) {
+      return;
+    }
+
+    registration.update().catch(() => {});
+  }, UPDATE_CHECK_INTERVAL_MS);
+};
+
+type UpdateOfferDeps = {
+  setNeedRefresh: (value: boolean) => void;
+  showUpdateToast: () => void;
+  wasDismissed: () => boolean;
+};
+
+/**
+ * Decides whether a waiting worker is worth telling the user about, and
+ * returns the effect cleanup.
+ *
+ * A waiting worker alone does not prove there is anything new: iOS can
+ * re-install the SAME bytes after killing the PWA process, parking an
+ * identical worker in the waiting slot. So the worker is asked for its build
+ * id first — our own build re-installed is suppressed silently (it activates
+ * harmlessly on the next full app close); anything unverifiable is offered as
+ * before.
+ */
+const watchForRealUpdate = (deps: UpdateOfferDeps): (() => void) => {
+  let cancelled = false;
+
+  const offerIfActuallyNewer = (worker: ServiceWorker): void => {
+    void isSameBuildAsPage(worker).then((sameBuild) => {
+      if (cancelled) {
+        return;
+      }
+
+      if (sameBuild) {
+        deps.setNeedRefresh(false);
+
+        return;
+      }
+
+      if (deps.wasDismissed()) {
+        return;
+      }
+      deps.showUpdateToast();
+    });
+  };
+
+  // Fast path: a waiting worker is already observable.
+  const reg = swRegistration.get();
+  if (reg?.waiting) {
+    offerIfActuallyNewer(reg.waiting);
+
+    return () => {
+      cancelled = true;
+    };
+  }
+
+  // Slow path: needRefresh fired but registration.waiting has not been
+  // populated yet. This happens via vite-plugin-pwa's `installed` + `isExternal`
+  // path (which fires before the 200ms-confirmed `waiting` event), and on iOS
+  // PWA same-content reinstalls where the worker never reaches a true waiting
+  // state. Wait briefly, then re-check; still nothing waiting means a phantom.
+  const timer = setTimeout(() => {
+    const latest = swRegistration.get();
+    if (!latest?.waiting) {
+      deps.setNeedRefresh(false);
+
+      return;
+    }
+
+    offerIfActuallyNewer(latest.waiting);
+  }, PHANTOM_WAIT_MS);
+
+  return () => {
+    cancelled = true;
+    clearTimeout(timer);
+  };
+};
+
+// iOS freezes the web view when backgrounded and does not check for SW updates
+// on resume. visibilitychange is the most reliable event that fires when a
+// standalone PWA is foregrounded.
+const checkOnForeground = (
+  needRefreshRef: { current: boolean },
+  lastCheckedAt: { current: number },
+): void => {
+  if (document.visibilityState !== 'visible') {
+    return;
+  }
+
+  // An update is already pending — do not re-check or re-show the toast.
+  if (needRefreshRef.current) {
+    return;
+  }
+
+  const reg = swRegistration.get();
+  if (!reg) {
+    return;
+  }
+
+  // Rate-limited, or iOS triggers spurious SW re-installs on every app focus.
+  const now = Date.now();
+  if (now - lastCheckedAt.current < MIN_VISIBILITY_CHECK_INTERVAL_MS) {
+    return;
+  }
+  lastCheckedAt.current = now;
+
+  reg.update().catch(() => {
+    // SW script fetch can fail (offline, server error) — non-critical.
+  });
 };
 
 const CONTROL_TRANSFER_POLL_MS = 250;

@@ -24,9 +24,6 @@ const GRANDFATHERED = new Map<string, number>([
   // boundaries is what the React compiler rejects. The reasoning is written at
   // the top of useDataLayer.ts — read it before trying to shrink this one.
   ['useDataLayer', 619],
-  ['useExpenseOps', 291],
-  ['useCsvImportFlow', 263],
-  ['usePwaUpdate', 240],
 ]);
 
 const ROOTS = [
