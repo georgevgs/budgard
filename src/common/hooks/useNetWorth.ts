@@ -7,7 +7,7 @@ import {
   useDebtsData,
 } from '@/common/contexts/DataContext';
 import { fetchExchangeRate } from '@/common/api/exchangeRateService';
-import { type AccountKind, isLiability } from '@/types/Account';
+import { type Account, type AccountKind, isLiability } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import type { Debt } from '@/types/Debt';
 
@@ -103,35 +103,12 @@ export const useNetWorth = () => {
   const [rateComputation, setRateComputation] =
     useState<RateComputation | null>(null);
 
-  // Collect every (currency, date) pair we'll need a rate for.
-  const required = useMemo(() => {
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const pairs = new Set<string>();
-    accounts.forEach((a) => {
-      if (a.default_currency !== defaultCurrency) {
-        pairs.add(RATE_KEY(a.default_currency, today));
-      }
-    });
-    accountBalances.forEach((b) => {
-      const acc = accounts.find((a) => a.id === b.account_id);
-      if (!acc) {
-        return;
-      }
-      if (acc.default_currency !== defaultCurrency) {
-        pairs.add(RATE_KEY(acc.default_currency, b.recorded_at));
-      }
-    });
-    debts.forEach((d) => {
-      if (!isLiveDebt(d)) {
-        return;
-      }
-      if (d.currency !== defaultCurrency) {
-        pairs.add(RATE_KEY(d.currency, today));
-      }
-    });
-
-    return pairs;
-  }, [accounts, accountBalances, debts, defaultCurrency]);
+  // Every (currency, date) pair a rate is needed for.
+  const required = useMemo(
+    () =>
+      collectRequiredRates(accounts, accountBalances, debts, defaultCurrency),
+    [accounts, accountBalances, debts, defaultCurrency],
+  );
 
   const requiredKey = useMemo(
     () => Array.from(required).sort().join(','),
@@ -144,38 +121,14 @@ export const useNetWorth = () => {
     }
 
     let cancelled = false;
-    (async () => {
-      type RateResult = { key: string; rate: number; hasFailed: boolean };
-      const results = await Promise.all(
-        Array.from(required).map(async (key): Promise<RateResult> => {
-          const [ccy, date] = key.split('|');
-          try {
-            const rate = await fetchExchangeRate(
-              ccy,
-              date,
-              undefined,
-              defaultCurrency,
-            );
-
-            return { key, rate, hasFailed: false };
-          } catch (error) {
-            captureException(error, {
-              tags: { context: 'useNetWorth.fetchExchangeRate' },
-            });
-
-            return { key, rate: 1, hasFailed: true };
-          }
-        }),
-      );
-      if (cancelled) {
-        return;
-      }
-      setRateComputation({
-        key: requiredKey,
-        rates: new Map(results.map((r) => [r.key, r.rate])),
-        failedKeys: new Set(results.filter((r) => r.hasFailed).map((r) => r.key)),
-      });
-    })();
+    void fetchRates(required, requiredKey, defaultCurrency).then(
+      (computation) => {
+        if (cancelled) {
+          return;
+        }
+        setRateComputation(computation);
+      },
+    );
 
     return () => {
       cancelled = true;
@@ -190,161 +143,301 @@ export const useNetWorth = () => {
   const failedKeys = deriveFailedKeys(required, rateComputation);
   const isComputing = required.size > 0 && rateComputation?.key !== requiredKey;
 
-  const summary = useMemo<NetWorthSummary>(() => {
-    const today = format(new Date(), 'yyyy-MM-dd');
-    let assets = 0;
-    let liabilities = 0;
-    let debtsTotal = 0;
-    let investmentValue = 0;
-    let investmentCostBasis = 0;
-    const byKind: Partial<Record<AccountKind, number>> = {};
-    const staleCurrencies = new Set<string>();
+  const summary = useMemo<NetWorthSummary>(
+    () => buildSummary(accounts, debts, rates, failedKeys, defaultCurrency),
+    [accounts, debts, rates, failedKeys, defaultCurrency],
+  );
 
-    accounts.forEach((a) => {
-      const rate = resolveRate({
-        currency: a.default_currency,
-        defaultCurrency,
-        date: today,
-        rates,
-        failedKeys,
-        staleCurrencies,
-      });
-      const balance = a.current_balance * rate;
-
-      if (isLiability(a.kind)) {
-        liabilities += balance;
-      } else {
-        assets += balance;
-      }
-      byKind[a.kind] = (byKind[a.kind] ?? 0) + balance;
-
-      if (a.kind === 'investment') {
-        investmentValue += balance;
-        investmentCostBasis += a.cost_basis * rate;
-      }
-    });
-
-    debts.forEach((d) => {
-      if (!isLiveDebt(d)) {
-        return;
-      }
-      const rate = resolveRate({
-        currency: d.currency,
-        defaultCurrency,
-        date: today,
-        rates,
-        failedKeys,
-        staleCurrencies,
-      });
-      debtsTotal += Number(d.current_balance) * rate;
-    });
-
-    liabilities += debtsTotal;
-
-    return {
-      total: assets - liabilities,
-      assets,
-      liabilities,
-      debts: debtsTotal,
-      byKind,
-      investmentValue,
-      investmentCostBasis,
-      investmentGain: investmentValue - investmentCostBasis,
-      staleCurrencies: Array.from(staleCurrencies).sort(),
-    };
-  }, [accounts, debts, rates, failedKeys, defaultCurrency]);
-
-  const series = useMemo<NetWorthPoint[]>(() => {
-    if (accounts.length === 0 || accountBalances.length === 0) {
-      return [];
-    }
-
-    // We don't track per-day debt history, so subtract today's debt total
-    // uniformly across every historical point. This keeps the latest series
-    // value aligned with the header summary at the cost of understating past
-    // net worth (debt was likely higher then).
-    const today = format(new Date(), 'yyyy-MM-dd');
-    let debtConstant = 0;
-    debts.forEach((d) => {
-      if (!isLiveDebt(d)) {
-        return;
-      }
-      let rate = 1;
-      if (d.currency !== defaultCurrency) {
-        rate = rates.get(RATE_KEY(d.currency, today)) ?? 1;
-      }
-
-      debtConstant += Number(d.current_balance) * rate;
-    });
-
-    const byAccount = new Map<string, AccountBalance[]>();
-    accountBalances.forEach((b) => {
-      const arr = byAccount.get(b.account_id);
-      if (arr) {
-        arr.push(b);
-
-        return;
-      }
-      byAccount.set(b.account_id, [b]);
-    });
-    byAccount.forEach((arr) =>
-      arr.sort((a, b) => a.recorded_at.localeCompare(b.recorded_at)),
-    );
-
-    const allDates = Array.from(
-      new Set(accountBalances.map((b) => b.recorded_at)),
-    ).sort();
-
-    return allDates.map((date) => {
-      let assets = 0;
-      let liabilities = 0;
-
-      accounts.forEach((a) => {
-        const history = byAccount.get(a.id);
-        if (!history) {
-          return;
-        }
-        // Forward-fill: the most recent snapshot at or before `date`.
-        let latest: AccountBalance | undefined;
-        for (const snap of history) {
-          if (snap.recorded_at <= date) {
-            latest = snap;
-            continue;
-          }
-          break;
-        }
-        if (!latest) {
-          return;
-        }
-
-        let rate = 1;
-        if (a.default_currency !== defaultCurrency) {
-          rate =
-            rates.get(RATE_KEY(a.default_currency, latest.recorded_at)) ?? 1;
-        }
-
-        const balance = latest.balance * rate;
-
-        if (isLiability(a.kind)) {
-          liabilities += balance;
-
-          return;
-        }
-        assets += balance;
-      });
-
-      const liabilitiesWithDebt = liabilities + debtConstant;
-
-      return {
-        date,
-        total: assets - liabilitiesWithDebt,
-        assets,
-        liabilities: liabilitiesWithDebt,
-      };
-    });
-  }, [accounts, accountBalances, debts, rates, defaultCurrency]);
+  const series = useMemo<NetWorthPoint[]>(
+    () => buildSeries(accounts, accountBalances, debts, rates, defaultCurrency),
+    [accounts, accountBalances, debts, rates, defaultCurrency],
+  );
 
   return { summary, series, isComputing };
+};
+
+const collectRequiredRates = (
+  accounts: Account[],
+  accountBalances: AccountBalance[],
+  debts: Debt[],
+  defaultCurrency: string,
+): Set<string> => {
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const pairs = new Set<string>();
+
+  accounts.forEach((account) => {
+    if (account.default_currency !== defaultCurrency) {
+      pairs.add(RATE_KEY(account.default_currency, today));
+    }
+  });
+  accountBalances.forEach((balance) => {
+    const account = accounts.find((a) => a.id === balance.account_id);
+    if (!account) {
+      return;
+    }
+    if (account.default_currency !== defaultCurrency) {
+      pairs.add(RATE_KEY(account.default_currency, balance.recorded_at));
+    }
+  });
+  debts.forEach((debt) => {
+    if (!isLiveDebt(debt)) {
+      return;
+    }
+    if (debt.currency !== defaultCurrency) {
+      pairs.add(RATE_KEY(debt.currency, today));
+    }
+  });
+
+  return pairs;
+};
+
+type RateResult = { key: string; rate: number; hasFailed: boolean };
+
+// A rate that cannot be fetched falls back to 1 and is recorded as failed, so
+// resolveRate can name the currency in staleCurrencies rather than let the
+// headline quietly mix currencies.
+const fetchOneRate = async (
+  key: string,
+  defaultCurrency: string,
+): Promise<RateResult> => {
+  const [currency, date] = key.split('|');
+  try {
+    const rate = await fetchExchangeRate(
+      currency,
+      date,
+      undefined,
+      defaultCurrency,
+    );
+
+    return { key, rate, hasFailed: false };
+  } catch (error) {
+    captureException(error, {
+      tags: { context: 'useNetWorth.fetchExchangeRate' },
+    });
+
+    return { key, rate: 1, hasFailed: true };
+  }
+};
+
+const fetchRates = async (
+  required: Set<string>,
+  requiredKey: string,
+  defaultCurrency: string,
+): Promise<RateComputation> => {
+  const results = await Promise.all(
+    Array.from(required).map((key) => fetchOneRate(key, defaultCurrency)),
+  );
+
+  return {
+    key: requiredKey,
+    rates: new Map(results.map((result) => [result.key, result.rate])),
+    failedKeys: new Set(
+      results.filter((result) => result.hasFailed).map((result) => result.key),
+    ),
+  };
+};
+
+const buildSummary = (
+  accounts: Account[],
+  debts: Debt[],
+  rates: Map<string, number>,
+  failedKeys: Set<string>,
+  defaultCurrency: string,
+): NetWorthSummary => {
+  const today = format(new Date(), 'yyyy-MM-dd');
+  let assets = 0;
+  let liabilities = 0;
+  let debtsTotal = 0;
+  let investmentValue = 0;
+  let investmentCostBasis = 0;
+  const byKind: Partial<Record<AccountKind, number>> = {};
+  const staleCurrencies = new Set<string>();
+
+  accounts.forEach((account) => {
+    const rate = resolveRate({
+      currency: account.default_currency,
+      defaultCurrency,
+      date: today,
+      rates,
+      failedKeys,
+      staleCurrencies,
+    });
+    const balance = account.current_balance * rate;
+
+    if (isLiability(account.kind)) {
+      liabilities += balance;
+    } else {
+      assets += balance;
+    }
+    byKind[account.kind] = (byKind[account.kind] ?? 0) + balance;
+
+    if (account.kind === 'investment') {
+      investmentValue += balance;
+      investmentCostBasis += account.cost_basis * rate;
+    }
+  });
+
+  debts.forEach((debt) => {
+    if (!isLiveDebt(debt)) {
+      return;
+    }
+    const rate = resolveRate({
+      currency: debt.currency,
+      defaultCurrency,
+      date: today,
+      rates,
+      failedKeys,
+      staleCurrencies,
+    });
+    debtsTotal += Number(debt.current_balance) * rate;
+  });
+
+  liabilities += debtsTotal;
+
+  return {
+    total: assets - liabilities,
+    assets,
+    liabilities,
+    debts: debtsTotal,
+    byKind,
+    investmentValue,
+    investmentCostBasis,
+    investmentGain: investmentValue - investmentCostBasis,
+    staleCurrencies: Array.from(staleCurrencies).sort(),
+  };
+};
+
+// We do not track per-day debt history, so today's debt total is subtracted
+// uniformly across every historical point. That keeps the latest series value
+// aligned with the header summary, at the cost of understating past net worth
+// (debt was likely higher then).
+const todaysDebtTotal = (
+  debts: Debt[],
+  rates: Map<string, number>,
+  defaultCurrency: string,
+): number => {
+  const today = format(new Date(), 'yyyy-MM-dd');
+  let total = 0;
+
+  debts.forEach((debt) => {
+    if (!isLiveDebt(debt)) {
+      return;
+    }
+    let rate = 1;
+    if (debt.currency !== defaultCurrency) {
+      rate = rates.get(RATE_KEY(debt.currency, today)) ?? 1;
+    }
+    total += Number(debt.current_balance) * rate;
+  });
+
+  return total;
+};
+
+const groupBalancesByAccount = (
+  accountBalances: AccountBalance[],
+): Map<string, AccountBalance[]> => {
+  const byAccount = new Map<string, AccountBalance[]>();
+
+  accountBalances.forEach((balance) => {
+    const existing = byAccount.get(balance.account_id);
+    if (existing) {
+      existing.push(balance);
+
+      return;
+    }
+    byAccount.set(balance.account_id, [balance]);
+  });
+  byAccount.forEach((list) =>
+    list.sort((a, b) => a.recorded_at.localeCompare(b.recorded_at)),
+  );
+
+  return byAccount;
+};
+
+// Forward-fill: the most recent snapshot at or before `date`.
+const snapshotAt = (
+  history: AccountBalance[],
+  date: string,
+): AccountBalance | undefined => {
+  let latest: AccountBalance | undefined;
+
+  for (const snapshot of history) {
+    if (snapshot.recorded_at <= date) {
+      latest = snapshot;
+      continue;
+    }
+    break;
+  }
+
+  return latest;
+};
+
+const pointAt = (
+  date: string,
+  accounts: Account[],
+  byAccount: Map<string, AccountBalance[]>,
+  rates: Map<string, number>,
+  defaultCurrency: string,
+  debtConstant: number,
+): NetWorthPoint => {
+  let assets = 0;
+  let liabilities = 0;
+
+  accounts.forEach((account) => {
+    const history = byAccount.get(account.id);
+    if (!history) {
+      return;
+    }
+    const latest = snapshotAt(history, date);
+    if (!latest) {
+      return;
+    }
+
+    let rate = 1;
+    if (account.default_currency !== defaultCurrency) {
+      rate =
+        rates.get(RATE_KEY(account.default_currency, latest.recorded_at)) ?? 1;
+    }
+    const balance = latest.balance * rate;
+
+    if (isLiability(account.kind)) {
+      liabilities += balance;
+
+      return;
+    }
+    assets += balance;
+  });
+
+  const liabilitiesWithDebt = liabilities + debtConstant;
+
+  return {
+    date,
+    total: assets - liabilitiesWithDebt,
+    assets,
+    liabilities: liabilitiesWithDebt,
+  };
+};
+
+const buildSeries = (
+  accounts: Account[],
+  accountBalances: AccountBalance[],
+  debts: Debt[],
+  rates: Map<string, number>,
+  defaultCurrency: string,
+): NetWorthPoint[] => {
+  if (accounts.length === 0 || accountBalances.length === 0) {
+    return [];
+  }
+
+  const debtConstant = todaysDebtTotal(debts, rates, defaultCurrency);
+  const byAccount = groupBalancesByAccount(accountBalances);
+  const allDates = Array.from(
+    new Set(accountBalances.map((balance) => balance.recorded_at)),
+  ).sort();
+
+  return allDates.map((date) =>
+    pointAt(date, accounts, byAccount, rates, defaultCurrency, debtConstant),
+  );
 };
 
 const deriveRates = (

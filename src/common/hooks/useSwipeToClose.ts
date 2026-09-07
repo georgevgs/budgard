@@ -6,6 +6,7 @@ import {
   type CSSProperties,
 } from 'react';
 import { prefersReducedMotion } from '@/constants/motion';
+import { useSheetDismissal } from '@/common/hooks/useSheetDismissal';
 
 type UseSwipeToCloseOptions = {
   onClose: () => void;
@@ -29,14 +30,6 @@ const FLICK_VELOCITY_PX_PER_MS = 0.5;
 const FLICK_MIN_DISTANCE_RATIO = 0.25;
 const MAX_FLICK_PAUSE_MS = 100;
 
-// Once a dismissal commits, finish it at a speed that feels connected to the
-// release without letting a slow drag crawl or a fast flick disappear.
-const MIN_DISMISS_DURATION_MS = 180;
-const MAX_DISMISS_DURATION_MS = 320;
-const MIN_DISMISS_VELOCITY_PX_PER_MS = 1;
-const DISMISS_EASING = 'cubic-bezier(0.32, 0.72, 0, 1)';
-const DISMISS_RESET_GRACE_MS = 50;
-
 type DragStyle = CSSProperties & {
   '--tw-exit-opacity'?: string;
 };
@@ -47,6 +40,9 @@ type DragStyle = CSSProperties & {
  * sheet fighting back. Upward movement is resisted instead of ignored: a sheet
  * that does not move at all when pulled feels broken, and a sheet that follows
  * freely implies it can go somewhere it cannot.
+ *
+ * This half owns the finger and the transform. Everything after the release is
+ * committed belongs to useSheetDismissal.
  */
 export const useSwipeToClose = ({
   onClose,
@@ -54,41 +50,18 @@ export const useSwipeToClose = ({
   isEnabled = true,
 }: UseSwipeToCloseOptions) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [isDismissing, setIsDismissing] = useState(false);
   const [translateY, setTranslateY] = useState(0);
-  const [dismissDurationMs, setDismissDurationMs] = useState(
-    MAX_DISMISS_DURATION_MS,
-  );
   const startY = useRef(0);
   const lastY = useRef(0);
   const lastMoveAt = useRef(0);
   const velocity = useRef(0);
-  const rejectedDismissTimer = useRef<number | null>(null);
-  const dismissalResetTimer = useRef<number | null>(null);
-  const dismissingSheet = useRef<HTMLElement | null>(null);
-  const dismissAnimationEnd = useRef<((event: AnimationEvent) => void) | null>(
-    null,
-  );
 
-  const clearDismissalReset = useCallback(() => {
-    clearTimer(dismissalResetTimer);
-
-    if (dismissingSheet.current && dismissAnimationEnd.current) {
-      dismissingSheet.current.removeEventListener(
-        'animationend',
-        dismissAnimationEnd.current,
-      );
-    }
-
-    dismissingSheet.current = null;
-    dismissAnimationEnd.current = null;
-  }, []);
-
-  const resetDismissal = useCallback(() => {
-    clearDismissalReset();
-    setIsDismissing(false);
-    setTranslateY(0);
-  }, [clearDismissalReset]);
+  const settle = useCallback(() => setTranslateY(0), []);
+  const {
+    isDismissing,
+    commit: commitDismissal,
+    animation,
+  } = useSheetDismissal({ onClose, onSettled: settle });
 
   const cancelDrag = useCallback(() => {
     velocity.current = 0;
@@ -106,20 +79,7 @@ export const useSwipeToClose = ({
 
         return;
       }
-
-      // Only the handle and the header start a drag; the body has to stay
-      // scrollable, and a form field must not become a dismissal target.
-      const target = event.target as HTMLElement;
-      const interactive = target.closest(
-        'button, a, input, textarea, select, [role="button"], [role="menuitem"]',
-      );
-      if (interactive) {
-        return;
-      }
-
-      const onHandle = target.closest('[data-drag-handle]');
-      const onHeader = target.closest('[data-draggable-area]');
-      if (!onHandle && !onHeader) {
+      if (!isDragTarget(event.target as HTMLElement)) {
         return;
       }
 
@@ -179,67 +139,9 @@ export const useSwipeToClose = ({
         return;
       }
 
-      // Keep the exact release transform in place while Radix changes the
-      // content to `data-state="closed"`. Its exit keyframe then interpolates
-      // from this position to 100%, instead of snapping back to rest first.
-      const sheet = event.currentTarget;
-      const sheetHeight = sheet.getBoundingClientRect().height;
-      const duration = dismissDuration(sheetHeight, dragged, velocity.current);
-      const handleDismissAnimationEnd = (animationEvent: AnimationEvent) => {
-        if (
-          animationEvent.target !== sheet ||
-          sheet.dataset.state !== 'closed'
-        ) {
-          return;
-        }
-
-        resetDismissal();
-      };
-
-      clearDismissalReset();
-      dismissingSheet.current = sheet;
-      dismissAnimationEnd.current = handleDismissAnimationEnd;
-      sheet.addEventListener('animationend', handleDismissAnimationEnd);
-      setDismissDurationMs(duration);
-      setIsDismissing(true);
-      onClose();
-
-      // A dirty-form guard can reject the close. Wait until React has flushed
-      // the requested state change, then settle back only if the sheet stayed
-      // open. A successful close keeps the release transform through unmount.
-      clearTimer(rejectedDismissTimer);
-      rejectedDismissTimer.current = window.setTimeout(() => {
-        rejectedDismissTimer.current = null;
-
-        if (!dismissingSheet.current) {
-          return;
-        }
-
-        if (!sheet.isConnected || sheet.dataset.state === 'closed') {
-          // DialogContent owns this hook while Radix mounts and unmounts the
-          // portal content. Clear the release transform after the exit so a
-          // later open starts at the sheet's resting position. animationend
-          // is the exact path; the timer covers disabled or interrupted CSS.
-          dismissalResetTimer.current = window.setTimeout(
-            resetDismissal,
-            duration + DISMISS_RESET_GRACE_MS,
-          );
-
-          return;
-        }
-
-        resetDismissal();
-      }, 0);
+      commitDismissal(event.currentTarget, dragged, velocity.current);
     },
-    [
-      isDragging,
-      isEnabled,
-      translateY,
-      threshold,
-      onClose,
-      clearDismissalReset,
-      resetDismissal,
-    ],
+    [isDragging, isEnabled, translateY, threshold, commitDismissal],
   );
 
   // React's content handlers only receive the normal touch end. If the browser
@@ -257,28 +159,13 @@ export const useSwipeToClose = ({
     return () => document.removeEventListener('touchcancel', cancelDrag);
   }, [isDragging, cancelDrag]);
 
-  // Do not leave the guarded-close check alive after the sheet unmounts.
-  useEffect(() => {
-    return () => {
-      clearTimer(rejectedDismissTimer);
-      clearDismissalReset();
-    };
-  }, [clearDismissalReset]);
-
   const isInteractionActive = isDragging || isDismissing;
-  const settle = settleTransition(isInteractionActive);
+  const settleStyle = settleTransition(isInteractionActive);
   const dragStyle: DragStyle = {
     transform: `translateY(${translateY}px)`,
-    transition: settle.transform,
-    animationDuration: dismissAnimationDuration(
-      isDismissing,
-      dismissDurationMs,
-    ),
-    animationTimingFunction: dismissAnimationEasing(isDismissing),
-    // The sheet itself stays solid while leaving; the separate overlay owns
-    // the fade. This inline Tailwind animation variable only applies to a
-    // gesture dismissal, so button/backdrop closes retain their normal fade.
-    '--tw-exit-opacity': dismissExitOpacity(isDismissing),
+    transition: settleStyle.transform,
+    ...animation,
+    '--tw-exit-opacity': exitOpacity(isDismissing),
   };
 
   return {
@@ -293,14 +180,26 @@ export const useSwipeToClose = ({
     // back gradually rather than all at once when the sheet finally closes.
     overlayStyle: {
       opacity: overlayOpacity(isInteractionActive, translateY, threshold),
-      transition: settle.opacity,
-      animationDuration: dismissAnimationDuration(
-        isDismissing,
-        dismissDurationMs,
-      ),
-      animationTimingFunction: dismissAnimationEasing(isDismissing),
+      transition: settleStyle.opacity,
+      ...animation,
     },
   };
+};
+
+// Only the handle and the header start a drag; the body has to stay scrollable,
+// and a form field must not become a dismissal target.
+const isDragTarget = (target: HTMLElement): boolean => {
+  const interactive = target.closest(
+    'button, a, input, textarea, select, [role="button"], [role="menuitem"]',
+  );
+  if (interactive) {
+    return false;
+  }
+
+  return Boolean(
+    target.closest('[data-drag-handle]') ||
+    target.closest('[data-draggable-area]'),
+  );
 };
 
 /**
@@ -354,60 +253,13 @@ const settleTransition = (isInteractionActive: boolean) => {
   };
 };
 
-const dismissDuration = (
-  sheetHeight: number,
-  translateY: number,
-  releaseVelocity: number,
-): number => {
-  if (prefersReducedMotion()) {
-    return 0.01;
-  }
-
-  const remainingDistance = Math.max(sheetHeight - Math.max(translateY, 0), 0);
-  const finishVelocity = Math.max(
-    releaseVelocity,
-    MIN_DISMISS_VELOCITY_PX_PER_MS,
-  );
-  const projectedDuration = Math.round(remainingDistance / finishVelocity);
-
-  return Math.min(
-    MAX_DISMISS_DURATION_MS,
-    Math.max(MIN_DISMISS_DURATION_MS, projectedDuration),
-  );
-};
-
-const dismissAnimationDuration = (
-  isDismissing: boolean,
-  durationMs: number,
-): string | undefined => {
-  if (!isDismissing) {
-    return undefined;
-  }
-
-  return `${durationMs}ms`;
-};
-
-const dismissAnimationEasing = (isDismissing: boolean): string | undefined => {
-  if (!isDismissing) {
-    return undefined;
-  }
-
-  return DISMISS_EASING;
-};
-
-const dismissExitOpacity = (isDismissing: boolean): string | undefined => {
+// The sheet itself stays solid while leaving; the separate overlay owns the
+// fade. This inline Tailwind animation variable only applies to a gesture
+// dismissal, so button and backdrop closes retain their normal fade.
+const exitOpacity = (isDismissing: boolean): string | undefined => {
   if (!isDismissing) {
     return undefined;
   }
 
   return '1';
-};
-
-const clearTimer = (timer: React.MutableRefObject<number | null>) => {
-  if (timer.current === null) {
-    return;
-  }
-
-  window.clearTimeout(timer.current);
-  timer.current = null;
 };
