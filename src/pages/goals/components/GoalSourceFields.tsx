@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { UseFormReturn } from 'react-hook-form';
 import { Label } from '@/common/ui/label';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   FormControl,
   FormField,
@@ -93,12 +94,6 @@ export const GoalSourceFields = ({ form, sourceType }: GoalSourceFieldsProps) =>
     </>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderCategoryField = (
   sourceType: GoalSourceType,

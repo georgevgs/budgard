@@ -1,5 +1,6 @@
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import { Button } from '@/common/ui/button';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   Select,
   SelectContent,
@@ -116,12 +117,6 @@ export const CsvMappingStep = ({
     </div>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 // Radix Select cannot hold an empty string as a value, so "no column" needs a
 // sentinel of its own.

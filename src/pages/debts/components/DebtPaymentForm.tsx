@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDialogDirty } from '@/common/hooks/useDialogDirty';
 import { format } from 'date-fns';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   DialogTitle,
   DialogHeader,
@@ -123,13 +124,6 @@ export const DebtPaymentForm = ({ debt, onClose }: DebtPaymentFormProps) => {
     </>
   );
 };
-
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderSubmitLabel = (isSubmitting: boolean, t: TranslateFunction) => {
   if (isSubmitting) return t('common.saving');

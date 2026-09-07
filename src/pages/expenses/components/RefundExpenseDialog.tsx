@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   Dialog,
   DialogContent,
@@ -97,12 +98,6 @@ export const RefundExpenseDialog = ({ expense, open, onOpenChange }: RefundExpen
     </Dialog>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 // Only shown once part of the charge has already come back — otherwise the
 // refundable amount is just the charge, and saying so is noise.

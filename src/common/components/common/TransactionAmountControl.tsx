@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { FormControl, FormLabel } from '@/common/ui/form';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   Select,
   SelectContent,
@@ -10,11 +11,11 @@ import {
 import { CurrencyInput } from '@/common/ui/currency-input';
 import { SUPPORTED_CURRENCIES } from '@/constants/currencies';
 import { formatCurrency } from '@/constants/utils';
-import type { CurrencyConversionApi } from '@/common/hooks/currency/useCurrencyConversionCore';
+import type { UseCurrencyConversionCoreReturn } from '@/common/hooks/currency/useCurrencyConversionCore';
 
 type TransactionAmountControlProps = {
   amountLabel: string;
-  conversion: CurrencyConversionApi;
+  conversion: UseCurrencyConversionCoreReturn;
   value: string;
   onChange: (value: string) => void;
 };
@@ -63,15 +64,9 @@ export const TransactionAmountControl = ({
     </>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderConversionPreview = (
-  conversion: CurrencyConversionApi,
+  conversion: UseCurrencyConversionCoreReturn,
   t: TranslateFunction,
 ) => {
   if (conversion.selectedCurrency === conversion.defaultCurrency) return null;

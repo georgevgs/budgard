@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   DialogTitle,
   DialogDescription,
@@ -122,12 +123,6 @@ export const DebtDetailHeader = ({
     </DialogHeader>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderPayoffMonths = (progress: DebtProgress, t: TranslateFunction) => {
   if (progress.isUnpayable || progress.monthsRemaining <= 0) {

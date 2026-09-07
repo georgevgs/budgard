@@ -10,6 +10,7 @@ import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { formatCurrency } from '@/constants/utils';
 import { sumSpending } from '@/constants/spending';
 import type { Expense } from '@/types/Expense';
+import type { TranslateFunction } from '@/constants/translate';
 
 type ActivityFeedProps = {
   transactions: Expense[];
@@ -79,7 +80,6 @@ export const ActivityFeed = (props: ActivityFeedProps) => {
     </div>
   );
 };
-// --- Helpers ---
 
 // Rows already on screen stay usable while the rest streams in underneath.
 const renderPendingHistory = (isHistoryPending: boolean) => {
@@ -91,9 +91,12 @@ const renderPendingHistory = (isHistoryPending: boolean) => {
 };
 
 type DateGroup = ReturnType<typeof groupExpensesByDate>[number];
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-const renderGroup = (group: DateGroup, props: ActivityFeedProps, t: TFunc) => (
+const renderGroup = (
+  group: DateGroup,
+  props: ActivityFeedProps,
+  t: TranslateFunction,
+) => (
   <section
     key={group.date}
     aria-labelledby={`activity-${group.date}`}
@@ -165,7 +168,11 @@ const renderDayTotal = (group: DateGroup, currency: string) => {
 // Kept as a fallback for anyone whose browser has no IntersectionObserver,
 // and as a keyboard affordance — tabbing to the end of a list that only ever
 // extends on scroll would otherwise be a dead end.
-const renderLoadMore = (hasMore: boolean, onLoadMore: () => void, t: TFunc) => {
+const renderLoadMore = (
+  hasMore: boolean,
+  onLoadMore: () => void,
+  t: TranslateFunction,
+) => {
   if (!hasMore) {
     return null;
   }

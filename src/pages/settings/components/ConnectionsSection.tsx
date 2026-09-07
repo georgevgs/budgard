@@ -11,6 +11,7 @@ import { useFinancialConnections } from '@/pages/settings/hooks/useFinancialConn
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { lazyWithRetry } from '@/constants/lazyWithRetry';
 import type { FinancialConnection } from '@/types/FinancialConnection';
+import type { TranslateFunction } from '@/constants/translate';
 
 const CsvImportDialog = lazyWithRetry(async () => {
   const module = await import('@/pages/expenses/components/CsvImportDialog');
@@ -51,9 +52,7 @@ export const ConnectionsSection = () => {
     </section>
   );
 };
-// --- Helpers ---
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 type DateLocale = ReturnType<typeof useDateLocale>;
 
 const renderConnections = (
@@ -61,7 +60,7 @@ const renderConnections = (
   isLoading: boolean,
   hasError: boolean,
   locale: DateLocale,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (isLoading) {
     return <Skeleton className="h-16 w-full" />;
@@ -101,7 +100,7 @@ const renderConnections = (
 const renderConnection = (
   connection: FinancialConnection,
   locale: DateLocale,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   return (
     <div
@@ -125,7 +124,7 @@ const renderConnection = (
 const renderLastSync = (
   lastSyncedAt: string | null,
   locale: DateLocale,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (!lastSyncedAt) {
     return null;

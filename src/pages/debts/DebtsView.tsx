@@ -18,6 +18,7 @@ import { DebtCard } from '@/pages/debts/components/DebtCard';
 import { DebtPayoffPlanner } from '@/pages/debts/components/DebtPayoffPlanner';
 import { DebtForm } from '@/pages/debts/components/DebtForm';
 import { DebtDetailSheet } from '@/pages/debts/components/DebtDetailSheet';
+import type { TranslateFunction } from '@/constants/translate';
 
 const DebtsView = () => {
   const { t } = useTranslation();
@@ -99,8 +100,6 @@ const DebtsView = () => {
 
 export default DebtsView;
 
-// --- Helpers ---
-
 const renderLoading = (showSkeleton: boolean) => {
   if (!showSkeleton) {
     return null;
@@ -108,11 +107,6 @@ const renderLoading = (showSkeleton: boolean) => {
 
   return <DebtsLoading />;
 };
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const sortDebts = (debts: Debt[]): Debt[] => {
   const live = debts.filter((d) => !d.is_completed);

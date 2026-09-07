@@ -8,6 +8,7 @@ import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import { Button } from '@/common/ui/button';
 import { Input } from '@/common/ui/input';
 import { Label } from '@/common/ui/label';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   Dialog,
   DialogContent,
@@ -85,11 +86,6 @@ export const BudgetForm = ({
   );
 };
 // ─── Helper render functions ──────────────────────────────────────────────────
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 type BudgetFormApi = {
   register: UseFormRegister<BudgetFormData>;

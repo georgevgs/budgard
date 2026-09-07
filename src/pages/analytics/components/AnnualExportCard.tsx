@@ -4,6 +4,7 @@ import { parseISO, getYear } from 'date-fns';
 import Download from 'lucide-react/dist/esm/icons/download';
 import FileText from 'lucide-react/dist/esm/icons/file-text';
 import { Button } from '@/common/ui/button';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   useExpensesData,
   useIncomesData,
@@ -121,13 +122,10 @@ export const AnnualExportCard = ({ selectedYear, action }: AnnualExportCardProps
     </div>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 // The pdfmake chunk (~1 MB with its Greek-capable Roboto vfs) loads on the
 // first click — the button says so instead of silently stalling.
-const renderPdfButtonLabel = (isGenerating: boolean, t: TFunc): string => {
+const renderPdfButtonLabel = (isGenerating: boolean, t: TranslateFunction): string => {
   if (isGenerating) return t('annualExport.generatingPdf');
 
   return t('annualExport.exportPdf');

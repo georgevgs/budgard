@@ -6,6 +6,7 @@ import { PinPad } from '@/pages/security/components/PinPad';
 import { useLockScreen } from '@/pages/security/hooks/useLockScreen';
 import { PIN_LENGTH } from '@/constants/appLock';
 import { cn } from '@/constants/utils';
+import type { TranslateFunction } from '@/constants/translate';
 
 type LockScreenProps = {
   onUnlock: () => void;
@@ -73,9 +74,6 @@ const LockScreen = ({ onUnlock, onSignOut }: LockScreenProps) => {
 
 export default LockScreen;
 
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 type Lock = ReturnType<typeof useLockScreen>;
 
 const dotTone = (filled: boolean, hasError: boolean): string => {
@@ -89,7 +87,7 @@ const dotTone = (filled: boolean, hasError: boolean): string => {
   return 'bg-muted-foreground/25';
 };
 
-const renderBiometricButton = (lock: Lock, t: TFunc) => {
+const renderBiometricButton = (lock: Lock, t: TranslateFunction) => {
   if (!lock.canUseDevice) {
     return null;
   }

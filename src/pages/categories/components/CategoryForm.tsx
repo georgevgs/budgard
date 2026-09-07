@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useDialogDirty } from '@/common/hooks/useDialogDirty';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   DialogTitle,
   DialogHeader,
@@ -118,11 +119,6 @@ export const CategoryForm = ({
   );
 };
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const getIsIncomeCategory = (
   category: Category | undefined,

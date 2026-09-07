@@ -5,11 +5,12 @@ import ScanText from 'lucide-react/dist/esm/icons/scan-text';
 import X from 'lucide-react/dist/esm/icons/x';
 import { Button } from '@/common/ui/button';
 import { Progress } from '@/common/ui/progress';
-import type { QuickReceiptScanApi } from '@/pages/expenses/hooks/useQuickReceiptScan';
+import type { UseQuickReceiptScanReturn } from '@/pages/expenses/hooks/useQuickReceiptScan';
 import { RECEIPT_ALLOWED_TYPES } from '@/constants/validations';
+import type { TranslateFunction } from '@/constants/translate';
 
 type QuickReceiptScanActionProps = {
-  scan: QuickReceiptScanApi;
+  scan: UseQuickReceiptScanReturn;
 };
 
 export const QuickReceiptScanAction = ({ scan }: QuickReceiptScanActionProps) => {
@@ -31,15 +32,13 @@ export const QuickReceiptScanAction = ({ scan }: QuickReceiptScanActionProps) =>
     </>
   );
 };
-// --- Helpers ---
 
-type TFunc = (key: string) => string;
 type InputRef = RefObject<HTMLInputElement | null>;
 
 const renderControl = (
-  scan: QuickReceiptScanApi,
+  scan: UseQuickReceiptScanReturn,
   inputRef: InputRef,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (scan.isScanning) {
     return (
@@ -90,7 +89,7 @@ const renderControl = (
   );
 };
 
-const getButtonLabel = (file: File | null, t: TFunc): string => {
+const getButtonLabel = (file: File | null, t: TranslateFunction): string => {
   if (file) {
     return t('receipt.changeReceipt');
   }

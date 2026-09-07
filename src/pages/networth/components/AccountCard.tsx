@@ -14,6 +14,7 @@ import type { AccountKind } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { getColorTint } from '@/constants/categoryColor';
+import type { TranslateFunction } from '@/constants/translate';
 
 type AccountCardProps = {
   account: Account;
@@ -72,12 +73,6 @@ export const AccountCard = ({ account, latestSnapshot, onClick }: AccountCardPro
     </SurfaceCard>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const getLastUpdatedLabel = (
   latestSnapshot: AccountBalance | undefined,

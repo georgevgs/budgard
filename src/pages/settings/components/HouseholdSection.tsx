@@ -7,6 +7,7 @@ import UsersRound from 'lucide-react/dist/esm/icons/users-round';
 import { Button } from '@/common/ui/button';
 import { Input } from '@/common/ui/input';
 import { Label } from '@/common/ui/label';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,12 +55,10 @@ export const HouseholdSection = () => {
     </section>
   );
 };
-// --- Helpers ---
 
 type Ops = ReturnType<typeof useHouseholdOps>;
-type TFunc = ReturnType<typeof useTranslation>['t'];
 
-const renderIntro = (t: TFunc) => (
+const renderIntro = (t: TranslateFunction) => (
   <div className="flex gap-3">
     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary-ink">
       <UsersRound className="h-4 w-4" />
@@ -103,7 +102,7 @@ const renderOwnedState = (
   share: HouseholdShare | null,
   ops: Ops,
   setRemoval: (removal: Removal) => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (!share) {
     return null;
@@ -136,7 +135,7 @@ const renderOwnedState = (
 const renderJoinedState = (
   share: HouseholdShare | null,
   setRemoval: (removal: Removal) => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (!share) {
     return null;
@@ -164,7 +163,11 @@ const renderJoinedState = (
   );
 };
 
-const renderInviteForm = (share: HouseholdShare | null, ops: Ops, t: TFunc) => {
+const renderInviteForm = (
+  share: HouseholdShare | null,
+  ops: Ops,
+  t: TranslateFunction,
+) => {
   if (share) {
     return null;
   }
@@ -197,7 +200,11 @@ const renderInviteForm = (share: HouseholdShare | null, ops: Ops, t: TFunc) => {
   );
 };
 
-const renderInviteLink = (share: HouseholdShare, ops: Ops, t: TFunc) => {
+const renderInviteLink = (
+  share: HouseholdShare,
+  ops: Ops,
+  t: TranslateFunction,
+) => {
   if (share.status !== 'pending') {
     return null;
   }
@@ -216,7 +223,7 @@ const renderInviteLink = (share: HouseholdShare, ops: Ops, t: TFunc) => {
   );
 };
 
-const renderFormError = (error: string | undefined, t: TFunc) => {
+const renderFormError = (error: string | undefined, t: TranslateFunction) => {
   if (!error) {
     return null;
   }
@@ -228,7 +235,7 @@ const renderRemovalDialog = (
   removal: Removal | null,
   setRemoval: (removal: Removal | null) => void,
   ops: Ops,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (!removal) {
     return null;
@@ -262,7 +269,10 @@ const renderRemovalDialog = (
   );
 };
 
-const getShareStatus = (share: HouseholdShare, t: TFunc): string => {
+const getShareStatus = (
+  share: HouseholdShare,
+  t: TranslateFunction,
+): string => {
   if (share.status === 'accepted') {
     return t('settings.household.memberActive');
   }
@@ -270,7 +280,7 @@ const getShareStatus = (share: HouseholdShare, t: TFunc): string => {
   return t('settings.household.waiting');
 };
 
-const getInviteAction = (ops: Ops, t: TFunc): string => {
+const getInviteAction = (ops: Ops, t: TranslateFunction): string => {
   if (ops.pendingAction === 'invite') {
     return t('settings.household.inviting');
   }
@@ -286,7 +296,7 @@ const buildRemoval = (share: HouseholdShare, isOwner: boolean): Removal => {
   return { ownerId: share.owner_id, isOwner, label: share.owner_email };
 };
 
-const getRemoveTitle = (isOwner: boolean, t: TFunc): string => {
+const getRemoveTitle = (isOwner: boolean, t: TranslateFunction): string => {
   if (isOwner) {
     return t('settings.household.removeTitle');
   }
@@ -294,7 +304,10 @@ const getRemoveTitle = (isOwner: boolean, t: TFunc): string => {
   return t('settings.household.leaveTitle');
 };
 
-const getRemoveDescription = (removal: Removal, t: TFunc): string => {
+const getRemoveDescription = (
+  removal: Removal,
+  t: TranslateFunction,
+): string => {
   if (removal.isOwner) {
     return t('settings.household.removeDescription', { email: removal.label });
   }

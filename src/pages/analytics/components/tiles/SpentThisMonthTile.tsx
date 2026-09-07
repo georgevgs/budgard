@@ -5,6 +5,7 @@ import { buildSparkline } from '@/pages/analytics/utils/sparkline';
 import { formatCurrency, formatPercent } from '@/constants/utils';
 import type { MonthComparison } from '@/pages/analytics/hooks/useAnalyticsData';
 import { BentoTile, TileLabel } from '@/common/components/bento';
+import type { TranslateFunction } from '@/constants/translate';
 
 type RhythmMonth = {
   month: string;
@@ -34,7 +35,7 @@ export const SpentThisMonthTile = ({ monthComparison, rhythmMonths }: SpentThisM
   );
 
   return (
-    <BentoTile wide className="rounded-[1.875rem] px-4.5 pt-5 pb-3.5">
+    <BentoTile isWide className="rounded-[1.875rem] px-4.5 pt-5 pb-3.5">
       <div className="flex flex-wrap items-end justify-between gap-x-3 gap-y-2.5">
         <div className="min-w-0 flex-1 basis-40">
           <TileLabel>{monthComparison.thisMonthLabel}</TileLabel>
@@ -49,9 +50,6 @@ export const SpentThisMonthTile = ({ monthComparison, rhythmMonths }: SpentThisM
     </BentoTile>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 // Proportional, not stretched. `preserveAspectRatio="none"` would fit the
 // curve to any width for free, but it scales x and y independently — the end
@@ -127,7 +125,7 @@ const getAxisToneClassName = (index: number, total: number): string => {
   return '';
 };
 
-const renderMonthComparison = (comparison: MonthComparison, t: TFunc) => {
+const renderMonthComparison = (comparison: MonthComparison, t: TranslateFunction) => {
   if (comparison.percentChange === null) {
     return null;
   }
@@ -174,7 +172,7 @@ const getVisibleChangeValue = (delta: number, percent: string): string => {
 const getAccessibleChangeLabel = (
   delta: number,
   percent: string,
-  t: TFunc,
+  t: TranslateFunction,
 ): string => {
   if (delta > 0) {
     return t('analytics.tile.moreSpendingThanLastMonth', { percent });

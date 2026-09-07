@@ -7,6 +7,7 @@ import ArrowDownLeft from 'lucide-react/dist/esm/icons/arrow-down-left';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import type { NetWorthSummary } from '@/common/hooks/useNetWorth';
+import type { TranslateFunction } from '@/constants/translate';
 
 type NetWorthHeaderProps = {
   summary: NetWorthSummary;
@@ -59,12 +60,6 @@ export const NetWorthHeader = ({ summary, defaultCurrency }: NetWorthHeaderProps
     </SurfaceCard>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderSignPrefix = (isPositive: boolean) => {
   if (isPositive) {

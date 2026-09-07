@@ -12,6 +12,7 @@ import { OnboardingWelcomeStep } from '@/pages/onboarding/components/OnboardingW
 import { OnboardingBudgetStep } from '@/pages/onboarding/components/OnboardingBudgetStep';
 import { OnboardingCategoriesStep } from '@/pages/onboarding/components/OnboardingCategoriesStep';
 import { OnboardingFirstExpenseStep } from '@/pages/onboarding/components/OnboardingFirstExpenseStep';
+import type { TranslateFunction } from '@/constants/translate';
 
 const STEP_COUNT = 4;
 
@@ -117,9 +118,7 @@ export default OnboardingFlow;
 
 // ─── Helper render functions ──────────────────────────────────────────────────
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
-const renderStepIndicator = (step: number, t: TFunc) => (
+const renderStepIndicator = (step: number, t: TranslateFunction) => (
   <div
     role="progressbar"
     aria-valuemin={1}

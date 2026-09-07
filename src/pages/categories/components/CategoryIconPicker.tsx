@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { Button } from '@/common/ui/button';
 import { cn } from '@/constants/utils';
+import type { TranslateFunction } from '@/constants/translate';
 
 const CATEGORY_ICONS = [
   '🍔',
@@ -76,11 +77,6 @@ export const CategoryIconPicker = ({
   );
 };
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const toggleIcon = (current: string | undefined, next: string) => {
   if (current === next) return undefined;

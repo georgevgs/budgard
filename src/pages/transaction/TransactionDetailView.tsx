@@ -12,6 +12,7 @@ import { TransactionNote } from '@/pages/transaction/components/TransactionNote'
 import { TransactionInsight } from '@/pages/transaction/components/TransactionInsight';
 import { TransactionActions } from '@/pages/transaction/components/TransactionActions';
 import type { Expense } from '@/types/Expense';
+import type { TranslateFunction } from '@/constants/translate';
 
 const TransactionDetailView = () => {
   const { t } = useTranslation();
@@ -79,10 +80,6 @@ const TransactionDetailView = () => {
 
 export default TransactionDetailView;
 
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
 type Editors = {
   handleExpenseEdit: (transaction: Expense) => void;
   handleIncomeEdit: (transaction: Expense) => void;
@@ -115,7 +112,7 @@ const renderLoading = (showSkeleton: boolean) => {
 
 // Reachable by deep link and by pressing back onto a row that has since been
 // deleted, so it needs a real answer rather than an empty screen.
-const renderNotFound = (t: TFunc) => (
+const renderNotFound = (t: TranslateFunction) => (
   <div className="page-shell">
     <div
       className="mt-10 rounded-2xl border border-dashed border-border/50 px-5 py-12 text-center"

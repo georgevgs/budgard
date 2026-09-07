@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { MoneyTimeline, MoneyTimelineEntry } from '@/pages/plan/utils/moneyTimeline';
+import type { TranslateFunction } from '@/constants/translate';
 
 type PlanTimelineProps = {
   timeline: MoneyTimeline;
@@ -37,12 +38,10 @@ export const PlanTimeline = ({ timeline, currency }: PlanTimelineProps) => {
     </section>
   );
 };
-// --- Helpers ---
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 type DateLocale = ReturnType<typeof useDateLocale>;
 
-const renderSummary = (timeline: MoneyTimeline, currency: string, t: TFunc) => {
+const renderSummary = (timeline: MoneyTimeline, currency: string, t: TranslateFunction) => {
   if (timeline.count === 0) {
     return null;
   }
@@ -69,7 +68,7 @@ const renderBody = (
   timeline: MoneyTimeline,
   currency: string,
   dateLocale: DateLocale,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (timeline.count === 0) {
     return renderEmpty(t);
@@ -100,7 +99,7 @@ const buildManageLink = (timeline: MoneyTimeline): string => {
   return '/recurring';
 };
 
-const renderEmpty = (t: TFunc) => (
+const renderEmpty = (t: TranslateFunction) => (
   <div className="surface-card mt-3 px-5 py-7">
     <p className="type-heading">{t('plan.timeline.emptyTitle')}</p>
     <p className="mt-1 max-w-md text-sm leading-relaxed text-muted-foreground">
@@ -121,7 +120,7 @@ const renderEntry = (
   entry: MoneyTimelineEntry,
   currency: string,
   dateLocale: DateLocale,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   const isIncome = entry.kind === 'income';
   let dotClass = 'bg-foreground';
@@ -171,7 +170,7 @@ const renderEntry = (
   );
 };
 
-const renderRemaining = (timeline: MoneyTimeline, t: TFunc) => {
+const renderRemaining = (timeline: MoneyTimeline, t: TranslateFunction) => {
   if (timeline.remainingCount === 0) {
     return null;
   }

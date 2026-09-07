@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import type { UseFormReturn } from 'react-hook-form';
 import { DatePickerField } from '@/common/ui/date-picker-field';
 import { Label } from '@/common/ui/label';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   FormControl,
   FormField,
@@ -123,22 +124,16 @@ export const RecurringScheduleFields = ({
     </>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const NO_LINKED_ACCOUNT = 'none';
 
 const renderLinkedAccountField = (
   form: UseFormReturn<RecurringExpenseFormData>,
-  show: boolean,
+  shouldShow: boolean,
   accounts: Account[],
   t: TranslateFunction,
 ) => {
-  if (!show) return null;
+  if (!shouldShow) return null;
 
   return (
     <FormField

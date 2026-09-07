@@ -4,6 +4,7 @@ import { CartesianChart } from '@/common/components/charts/CartesianChart';
 import type { ChartPoint, Series } from '@/common/components/charts/chartTypes';
 import { buildBaseline } from '@/constants/baseline';
 import { formatCurrency, formatCurrencyCompact } from '@/constants/utils';
+import type { TranslateFunction } from '@/constants/translate';
 
 type MonthPoint = {
   month: string;
@@ -74,9 +75,6 @@ export const YearRhythm = ({ months, currency }: YearRhythmProps) => {
     </section>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 const MIN_ACTIVE_MONTHS = 4;
 
@@ -104,7 +102,11 @@ const buildRhythm = (months: MonthPoint[]) => {
   };
 };
 
-const renderTooltip = (point: ChartPoint, currency: string, t: TFunc) => {
+const renderTooltip = (
+  point: ChartPoint,
+  currency: string,
+  t: TranslateFunction,
+) => {
   const deviation = Number(point.deviation ?? 0);
 
   return (

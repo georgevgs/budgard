@@ -7,6 +7,7 @@ import { ProUpsellCard } from '@/pages/pro/components/ProUpsellCard';
 import type { useAnalyticsData } from '@/pages/analytics/hooks/useAnalyticsData';
 import type { CategoryRow } from '@/pages/analytics/hooks/useAnalyticsData';
 import type { Category } from '@/types/Category';
+import type { TranslateFunction } from '@/constants/translate';
 
 type TrendsSectionsProps = {
   analytics: ReturnType<typeof useAnalyticsData>;
@@ -53,13 +54,10 @@ export const TrendsSections = ({
     </div>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 // The forecast needs more than the free plan's short window to project from,
 // so free users get an upsell card in its place.
-const renderForecast = (isPro: boolean, t: TFunc) => {
+const renderForecast = (isPro: boolean, t: TranslateFunction) => {
   if (!isPro) {
     return (
       <ProUpsellCard

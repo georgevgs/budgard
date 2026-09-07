@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   useExpensesData,
   useIncomesData,
@@ -153,11 +154,6 @@ export const FiftyThirtyTwentyRing = ({ selectedMonth }: FiftyThirtyTwentyRingPr
   );
 };
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 type BucketRowProps = {
   bucket: BucketConfig;

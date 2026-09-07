@@ -12,6 +12,7 @@ import { useCategoriesData, useDataConfig } from '@/common/contexts/DataContext'
 import { useTransactionReviewOps } from '@/common/hooks/dataOps/useTransactionReviewOps';
 import { formatCurrency } from '@/constants/utils';
 import type { Expense } from '@/types/Expense';
+import type { TranslateFunction } from '@/constants/translate';
 
 const ReviewQueueView = () => {
   const { t } = useTranslation();
@@ -43,14 +44,11 @@ const ReviewQueueView = () => {
 
 export default ReviewQueueView;
 
-// --- Helpers ---
-
 type Review = ReturnType<typeof useTransactionReviewOps>;
-type TFunc = ReturnType<typeof useTranslation>['t'];
 type Navigate = ReturnType<typeof useNavigate>;
 type CategoryList = ReturnType<typeof useCategoriesData>['categories'];
 
-const renderQueueActions = (review: Review, t: TFunc) => {
+const renderQueueActions = (review: Review, t: TranslateFunction) => {
   if (review.pending.length === 0) {
     return null;
   }
@@ -84,7 +82,7 @@ const renderQueue = (
   currency: string,
   setRuleTransaction: (transaction: Expense) => void,
   navigate: Navigate,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (review.pending.length === 0) {
     return (
@@ -130,7 +128,7 @@ const renderTransactionRow = (
   currency: string,
   review: Review,
   setRuleTransaction: (transaction: Expense) => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   const checked = review.selectedIds.has(transaction.id);
 
@@ -184,7 +182,7 @@ const renderTransactionRow = (
   );
 };
 
-const renderRawDescription = (transaction: Expense, t: TFunc) => {
+const renderRawDescription = (transaction: Expense, t: TranslateFunction) => {
   if (!transaction.merchant_name) {
     return null;
   }
@@ -222,7 +220,7 @@ const renderRuleDialog = (
 const getMerchant = (transaction: Expense): string =>
   transaction.merchant_name ?? transaction.description;
 
-const getRowMetadata = (transaction: Expense, t: TFunc): string => {
+const getRowMetadata = (transaction: Expense, t: TranslateFunction): string => {
   const typeKey = getTypeKey(transaction);
   const category = transaction.category?.name ?? t('review.uncategorized');
 

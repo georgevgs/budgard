@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
 import { ScrollSafeDropdownMenuTrigger } from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -126,11 +127,6 @@ export const ExpensesCardActions = ({
   );
 };
 // ─── Helper render functions ──────────────────────────────────────────────────
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const blurActiveElement = () => {
   if (document.activeElement instanceof HTMLElement) {

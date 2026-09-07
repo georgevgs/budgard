@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ScrollSafeDropdownMenuTrigger } from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,12 +70,6 @@ export const ProfileMenu = () => {
     </DropdownMenu>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const getInitial = (email: string | undefined): string => {
   if (!email) return '?';

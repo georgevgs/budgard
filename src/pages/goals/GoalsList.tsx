@@ -14,6 +14,7 @@ import { GoalForm } from '@/pages/goals/components/GoalForm';
 import { PageHeader } from '@/common/components/common/PageHeader';
 import { GoalsLoading } from '@/pages/goals/components/GoalsLoading';
 import { useDelayedLoading } from '@/common/hooks/useDelayedLoading';
+import type { TranslateFunction } from '@/constants/translate';
 
 const GoalsList = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -95,8 +96,6 @@ const GoalsList = () => {
 
 export default GoalsList;
 
-// --- Helpers ---
-
 const renderLoading = (showSkeleton: boolean) => {
   if (!showSkeleton) {
     return null;
@@ -104,11 +103,6 @@ const renderLoading = (showSkeleton: boolean) => {
 
   return <GoalsLoading />;
 };
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderSubtitle = (
   count: number,

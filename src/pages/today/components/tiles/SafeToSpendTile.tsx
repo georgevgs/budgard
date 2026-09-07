@@ -3,6 +3,7 @@ import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import { formatCurrency } from '@/constants/utils';
 import type { TodayStatus } from '@/pages/today/hooks/useTodayGuidance';
 import { BentoTile, TileLabel } from '@/common/components/bento';
+import type { TranslateFunction } from '@/constants/translate';
 
 type SafeToSpendTileProps = {
   status: TodayStatus;
@@ -25,7 +26,7 @@ export const SafeToSpendTile = (props: SafeToSpendTileProps) => {
   return (
     <BentoTile
       tone="slab"
-      wide
+      isWide
       to={resolveDestination(props)}
       ariaLabel={resolveAriaLabel(props, t)}
       className="px-5.5 pt-5.5 pb-5"
@@ -42,9 +43,6 @@ export const SafeToSpendTile = (props: SafeToSpendTileProps) => {
     </BentoTile>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 // Without a budget there is no "safe to spend", but "what have I spent" is
 // still a real answer — and it is the one figure that never needs setting up.
@@ -66,7 +64,7 @@ const resolveAmount = (props: SafeToSpendTileProps): number => {
 // Over budget the label is not describing the figure, it IS the reading — so
 // it is drawn as a badge rather than as an eyebrow. Everywhere else it stays
 // the quiet caption every other tile in the grid uses.
-const renderLabel = (props: SafeToSpendTileProps, t: TFunc) => {
+const renderLabel = (props: SafeToSpendTileProps, t: TranslateFunction) => {
   if (isOverBudget(props)) {
     return <span className="tile-badge">{t('today.tiles.overBudget')}</span>;
   }
@@ -77,7 +75,7 @@ const renderLabel = (props: SafeToSpendTileProps, t: TFunc) => {
 const isOverBudget = (props: SafeToSpendTileProps): boolean =>
   props.safeToSpend !== null && props.safeToSpend < 0;
 
-const resolveLabel = (props: SafeToSpendTileProps, t: TFunc): string => {
+const resolveLabel = (props: SafeToSpendTileProps, t: TranslateFunction): string => {
   if (props.safeToSpend === null) {
     return t('today.spentSoFar');
   }
@@ -89,7 +87,7 @@ const resolveLabel = (props: SafeToSpendTileProps, t: TFunc): string => {
 // which is the one state whose badge already says so, louder. A chip beside it
 // would be the same fact twice, and the quieter of the two would win the
 // corner — so in that state the badge keeps it and the chip stands down.
-const renderChip = (props: SafeToSpendTileProps, t: TFunc) => {
+const renderChip = (props: SafeToSpendTileProps, t: TranslateFunction) => {
   if (props.status === 'tight') {
     return null;
   }
@@ -114,7 +112,7 @@ const resolveDestination = (props: SafeToSpendTileProps): string | undefined => 
 
 // Only the no-budget state is a link, so it is the only one with a name to
 // give. Everywhere else the slab is a div and a label would be dropped.
-const resolveAriaLabel = (props: SafeToSpendTileProps, t: TFunc): string | undefined => {
+const resolveAriaLabel = (props: SafeToSpendTileProps, t: TranslateFunction): string | undefined => {
   if (props.safeToSpend === null) {
     return t('today.setBudget');
   }
@@ -128,7 +126,7 @@ const resolveAriaLabel = (props: SafeToSpendTileProps, t: TFunc): string | undef
 //   no budget  — there is one thing to do, so say it
 //   over plan  — the month cannot be undone, but the days left are still
 //                theirs, so quote what an ordinary one of them costs
-const renderCaption = (props: SafeToSpendTileProps, t: TFunc) => {
+const renderCaption = (props: SafeToSpendTileProps, t: TranslateFunction) => {
   if (props.safeToSpend === null) {
     return renderCaptionAction(t('today.setBudget'));
   }
@@ -144,7 +142,7 @@ const renderCaption = (props: SafeToSpendTileProps, t: TFunc) => {
   );
 };
 
-const renderRecovery = (props: SafeToSpendTileProps, t: TFunc) => {
+const renderRecovery = (props: SafeToSpendTileProps, t: TranslateFunction) => {
   if (props.typicalDay === null || props.daysRemaining <= 0) {
     return renderCaptionText(t('today.overPlan'));
   }

@@ -9,6 +9,7 @@ import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
+import type { TranslateFunction } from '@/constants/translate';
 
 type RangeKey = '1m' | '3m' | '1y' | 'all';
 
@@ -66,12 +67,6 @@ export const AccountHistoryChart = ({ account, snapshots }: AccountHistoryChartP
     </div>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const buildPoints = (
   snapshots: AccountBalance[],
@@ -193,7 +188,7 @@ const buildSeries = (showBasis: boolean, t: TranslateFunction): Series[] => {
       key: 'costBasis',
       label: t('networth.detail.costBasis'),
       color: '--muted-foreground',
-      dashed: true,
+      isDashed: true,
     },
   ];
 };

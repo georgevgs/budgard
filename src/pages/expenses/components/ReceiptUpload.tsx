@@ -4,7 +4,8 @@ import X from 'lucide-react/dist/esm/icons/x';
 import { Button } from '@/common/ui/button';
 import { ReceiptScanButton } from '@/pages/expenses/components/ReceiptScanButton';
 import { useReceiptUpload } from '@/pages/expenses/hooks/useReceiptUpload';
-import type { ReceiptScanApi } from '@/pages/expenses/hooks/useReceiptScan';
+import type { UseReceiptScanReturn } from '@/pages/expenses/hooks/useReceiptScan';
+import type { TranslateFunction } from '@/constants/translate';
 
 type ReceiptUploadProps = {
   currentReceiptPath?: string | null;
@@ -12,7 +13,7 @@ type ReceiptUploadProps = {
   isRemoving: boolean;
   onFileSelect: (file: File | null) => void;
   onRemoveExisting: () => void;
-  scan: ReceiptScanApi;
+  scan: UseReceiptScanReturn;
 };
 
 export const ReceiptUpload = ({
@@ -75,7 +76,7 @@ export const ReceiptUpload = ({
             className="hidden"
           />
         </div>
-        <ReceiptScanButton scan={scan} visible={Boolean(selectedFile)} />
+        <ReceiptScanButton scan={scan} isVisible={Boolean(selectedFile)} />
       </div>
     );
   }
@@ -104,9 +105,6 @@ export const ReceiptUpload = ({
     </div>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (key: string) => string;
 
 const renderThumbnail = (previewUrl: string | null, t: TranslateFunction) => {
   if (previewUrl) {

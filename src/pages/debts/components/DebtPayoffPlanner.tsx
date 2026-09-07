@@ -12,6 +12,7 @@ import { cn, formatCurrency } from '@/constants/utils';
 import type { Locale } from 'date-fns';
 import type { SimResult } from '@/pages/debts/utils/debtPayoff';
 import type { Debt, PayoffStrategy } from '@/types/Debt';
+import type { TranslateFunction } from '@/constants/translate';
 
 type DebtPayoffPlannerProps = {
   debts: Debt[];
@@ -72,12 +73,6 @@ export const DebtPayoffPlanner = ({ debts }: DebtPayoffPlannerProps) => {
     </SurfaceCard>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 type PlanComparison = {
   snowball: SimResult;

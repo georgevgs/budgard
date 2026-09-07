@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import X from 'lucide-react/dist/esm/icons/x';
 import { Button } from '@/common/ui/button';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   Dialog,
   DialogContent,
@@ -95,15 +96,13 @@ export const SplitExpenseDialog = ({ expense, open, onOpenChange }: SplitExpense
 };
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
 const renderPartRow = (
   part: SplitPart,
   index: number,
   partCount: number,
   categories: Category[],
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
   onUpdate: (index: number, patch: Partial<SplitPart>) => void,
   onRemove: (index: number) => void,
 ) => {
@@ -143,7 +142,7 @@ const renderPartRow = (
 const renderRemoveButton = (
   index: number,
   partCount: number,
-  t: TFunc,
+  t: TranslateFunction,
   onRemove: (index: number) => void,
 ) => {
   if (partCount <= 2) {
@@ -166,7 +165,7 @@ const renderRemoveButton = (
 
 const renderAddPartButton = (
   partCount: number,
-  t: TFunc,
+  t: TranslateFunction,
   onAdd: () => void,
 ) => {
   if (partCount >= MAX_SPLIT_PARTS) {
@@ -187,7 +186,7 @@ const renderAddPartButton = (
   );
 };
 
-const renderRemaining = (remaining: number, currency: string, t: TFunc) => {
+const renderRemaining = (remaining: number, currency: string, t: TranslateFunction) => {
   const settled = isSettled(remaining);
 
   return (

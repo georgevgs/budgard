@@ -3,6 +3,7 @@ import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import { Button } from '@/common/ui/button';
 import { formatCurrency } from '@/constants/utils';
 import type { RecurringSuggestion } from '@/types/RecurringSuggestion';
+import type { TranslateFunction } from '@/constants/translate';
 
 type RecurringSuggestionsProps = {
   suggestions: RecurringSuggestion[];
@@ -45,16 +46,13 @@ export const RecurringSuggestions = ({
     </section>
   );
 };
-// --- Helpers ---
-
-type TFunc = ReturnType<typeof useTranslation>['t'];
 
 const renderSuggestion = (
   suggestion: RecurringSuggestion,
   currency: string,
   onAccept: RecurringSuggestionsProps['onAccept'],
   onDismiss: RecurringSuggestionsProps['onDismiss'],
-  t: TFunc,
+  t: TranslateFunction,
 ) => (
   <div key={suggestion.fingerprint} className="py-3 first:pt-3 last:pb-0">
     <div className="flex items-baseline justify-between gap-3">

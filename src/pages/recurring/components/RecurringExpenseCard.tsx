@@ -11,6 +11,7 @@ import { useDataConfig } from '@/common/contexts/DataContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import { useTranslation } from 'react-i18next';
+import type { TranslateFunction } from '@/constants/translate';
 
 type RecurringExpenseCardProps = {
   expense: RecurringExpense;
@@ -79,11 +80,6 @@ export const RecurringExpenseCard = ({
   );
 };
 // ─── Helper render functions ──────────────────────────────────────────────────
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderCategoryBadge = (expense: RecurringExpense) => {
   if (!expense.category) return null;

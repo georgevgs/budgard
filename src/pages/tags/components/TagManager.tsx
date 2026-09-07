@@ -4,6 +4,7 @@ import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import TagIcon from 'lucide-react/dist/esm/icons/tag';
 import { Button } from '@/common/ui/button';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   DialogTitle,
   DialogHeader,
@@ -80,11 +81,9 @@ export const TagManager = () => {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
 const renderTagList = (
   tags: Tag[],
-  t: TFunc,
+  t: TranslateFunction,
   setView: (view: View) => void,
   setDeleteTarget: (tag: Tag) => void,
 ) => {
@@ -128,7 +127,7 @@ const renderTagList = (
   );
 };
 
-const renderEmptyState = (t: TFunc) => {
+const renderEmptyState = (t: TranslateFunction) => {
   return (
     <div className="flex flex-col items-center text-center py-12 px-4">
       <TagIcon

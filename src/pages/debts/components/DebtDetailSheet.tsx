@@ -16,6 +16,7 @@ import type { Expense } from '@/types/Expense';
 import { DebtDetailHeader } from '@/pages/debts/components/DebtDetailHeader';
 import { DebtPaymentForm } from '@/pages/debts/components/DebtPaymentForm';
 import { ConfirmDestructiveDialog } from '@/common/components/common/ConfirmDestructiveDialog';
+import type { TranslateFunction } from '@/constants/translate';
 
 type DebtDetailSheetProps = {
   debt: Debt;
@@ -122,7 +123,6 @@ export const DebtDetailSheet = ({ debt, open, onClose, onEdit }: DebtDetailSheet
     </>
   );
 };
-// --- Helpers ---
 
 const createOpenChangeHandler = (reset: () => void, onClose: () => void) => {
   return (nextOpen: boolean) => {
@@ -154,11 +154,6 @@ const renderPaymentForm = (
 
   return <DebtPaymentForm debt={debt} onClose={onClose} />;
 };
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderHistoryList = (
   isLoading: boolean,

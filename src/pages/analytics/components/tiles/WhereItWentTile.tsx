@@ -3,6 +3,7 @@ import { useDataConfig } from '@/common/contexts/DataContext';
 import { formatCurrency } from '@/constants/utils';
 import type { CategoryRow } from '@/pages/analytics/hooks/useAnalyticsData';
 import { BentoTile, TileLabel } from '@/common/components/bento';
+import type { TranslateFunction } from '@/constants/translate';
 
 type WhereItWentTileProps = {
   breakdown: CategoryRow[];
@@ -24,7 +25,7 @@ export const WhereItWentTile = ({ breakdown, totalSpent, onCategoryClick }: Wher
   }
 
   return (
-    <BentoTile wide className="px-4.5 py-4">
+    <BentoTile isWide className="px-4.5 py-4">
       <TileLabel>{t('analytics.tile.whereItWent')}</TileLabel>
       <div className="mt-3 flex h-2.5 gap-0.5" aria-hidden="true">
         {leaders.map((row) => renderSegment(row, totalSpent))}
@@ -38,9 +39,6 @@ export const WhereItWentTile = ({ breakdown, totalSpent, onCategoryClick }: Wher
     </BentoTile>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 const toShare = (amount: number, total: number): number => {
   if (total <= 0) {
@@ -67,7 +65,7 @@ const renderRow = (
   row: CategoryRow,
   currency: string,
   onCategoryClick: (category: CategoryRow) => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   return (
     <button

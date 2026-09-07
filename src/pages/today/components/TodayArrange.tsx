@@ -7,6 +7,7 @@ import ChevronUp from 'lucide-react/dist/esm/icons/chevron-up';
 import GripVertical from 'lucide-react/dist/esm/icons/grip-vertical';
 import Minus from 'lucide-react/dist/esm/icons/minus';
 import Plus from 'lucide-react/dist/esm/icons/plus';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   useTodayArrangeDrag,
   type TodayArrangeDrag,
@@ -64,9 +65,6 @@ export const TodayArrange = ({ layout }: TodayArrangeProps) => {
     </div>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 type ArrangeActions = {
   announcement: string;
@@ -79,7 +77,7 @@ type ArrangeActions = {
 
 const useArrangeActions = (
   layout: UseTodayLayoutReturn,
-  t: TFunc,
+  t: TranslateFunction,
 ): ArrangeActions => {
   const [announcement, setAnnouncement] = useState('');
   const pendingFocus = useRef<string | null>(null);
@@ -172,7 +170,7 @@ const useArrangeMode = (
   }, [pathname, setArranging]);
 };
 
-const renderPersistenceHint = (isPersisted: boolean, t: TFunc) => {
+const renderPersistenceHint = (isPersisted: boolean, t: TranslateFunction) => {
   if (!isPersisted) {
     return (
       <p
@@ -197,7 +195,7 @@ const renderVisible = (
   layout: UseTodayLayoutReturn,
   actions: ArrangeActions,
   drag: TodayArrangeDrag,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   const name = t(`today.tiles.${id}`);
 
@@ -253,7 +251,7 @@ const renderDragHandle = (id: TodayTileId, drag: TodayArrangeDrag) => {
   );
 };
 
-const renderDragOverlay = (id: TodayTileId | null, t: TFunc) => {
+const renderDragOverlay = (id: TodayTileId | null, t: TranslateFunction) => {
   if (!id) {
     return null;
   }
@@ -297,7 +295,7 @@ const renderHide = (
   id: TodayTileId,
   name: string,
   actions: ArrangeActions,
-  t: TFunc,
+  t: TranslateFunction,
 ) => (
   <button
     type="button"
@@ -342,7 +340,7 @@ const renderMove = (
   offset: number,
   isDisabled: boolean,
   actions: ArrangeActions,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   const name = t(`today.tiles.${id}`);
   let label = t('today.arrange.moveDown', { name });
@@ -368,7 +366,7 @@ const renderMove = (
 const renderHidden = (
   layout: UseTodayLayoutReturn,
   actions: ArrangeActions,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (layout.hidden.length === 0) {
     return (

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, type Locale } from 'date-fns';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -112,11 +113,8 @@ export const CategoryDeleteDialog = ({
     </AlertDialog>
   );
 };
-// --- Helpers ---
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
-const getConfirmLabel = (destination: string, t: TFunc): string => {
+const getConfirmLabel = (destination: string, t: TranslateFunction): string => {
   if (destination === NONE) {
     return t('common.delete');
   }
@@ -129,7 +127,7 @@ const renderImpactSummary = (
   impact: CategoryImpact | null,
   currency: string,
   dateLocale: Locale,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (!impact || impact.count === 0 || !impact.earliestDate) {
     return t('categories.deleteConfirmation', { name: category?.name });

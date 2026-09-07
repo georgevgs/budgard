@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import SlidersHorizontal from 'lucide-react/dist/esm/icons/sliders-horizontal';
 import TagIcon from 'lucide-react/dist/esm/icons/tag';
 import { Button } from '@/common/ui/button';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   Dialog,
   DialogContent,
@@ -84,11 +85,8 @@ export const ActivityFilterPanel = (props: ActivityFilterPanelProps) => {
     </>
   );
 };
-// --- Helpers ---
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
-const renderTrigger = (activeCount: number, onOpen: () => void, t: TFunc) => (
+const renderTrigger = (activeCount: number, onOpen: () => void, t: TranslateFunction) => (
   <Button
     type="button"
     variant="outline"
@@ -108,7 +106,7 @@ const renderPanel = (
   onClear: () => void,
   onTagChange: (value: string) => void,
   onClose: () => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => (
   <DialogContent className="sm:max-w-[440px]" onOpenChange={onClose}>
     <DialogHeader className="pr-10" data-draggable-area>
@@ -141,7 +139,7 @@ const renderPanel = (
   </DialogContent>
 );
 
-const renderKindControl = (props: ActivityFilterPanelProps, t: TFunc) => (
+const renderKindControl = (props: ActivityFilterPanelProps, t: TranslateFunction) => (
   <section aria-labelledby="activity-kind-label">
     <p
       id="activity-kind-label"
@@ -161,7 +159,7 @@ const renderKindControl = (props: ActivityFilterPanelProps, t: TFunc) => (
   </section>
 );
 
-const renderPeriodControl = (props: ActivityFilterPanelProps, t: TFunc) => (
+const renderPeriodControl = (props: ActivityFilterPanelProps, t: TranslateFunction) => (
   <section aria-labelledby="activity-period-label">
     <p
       id="activity-period-label"
@@ -179,7 +177,7 @@ const renderPeriodControl = (props: ActivityFilterPanelProps, t: TFunc) => (
 const renderTagControl = (
   props: ActivityFilterPanelProps,
   onTagChange: (value: string) => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => (
   <Select
     value={props.selectedTagId ?? 'all'}
@@ -223,7 +221,7 @@ const countActive = (
   return count;
 };
 
-const renderKindButton = (value: ActivityKind, props: ActivityFilterPanelProps, t: TFunc) => {
+const renderKindButton = (value: ActivityKind, props: ActivityFilterPanelProps, t: TranslateFunction) => {
   const isActive = props.kind === value;
 
   return (
@@ -240,7 +238,7 @@ const renderKindButton = (value: ActivityKind, props: ActivityFilterPanelProps, 
   );
 };
 
-const getTriggerLabel = (activeCount: number, t: TFunc): string => {
+const getTriggerLabel = (activeCount: number, t: TranslateFunction): string => {
   if (activeCount === 0) {
     return t('activity.refine.trigger');
   }

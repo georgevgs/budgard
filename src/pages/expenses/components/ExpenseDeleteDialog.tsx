@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,11 +53,6 @@ export const ExpenseDeleteDialog = ({
   );
 };
 // ─── Helper render functions ──────────────────────────────────────────────────
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderDeleteDescription = (expense: Expense, t: TranslateFunction) => {
   const confirmation = t('expenses.deleteConfirmation');

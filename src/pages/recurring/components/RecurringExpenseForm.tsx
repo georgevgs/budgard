@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useDialogDirty } from '@/common/hooks/useDialogDirty';
 import { parseISO } from 'date-fns';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   DialogTitle,
   DialogHeader,
@@ -116,11 +117,6 @@ export const RecurringExpenseForm = ({
   );
 };
 // ─── Helper render functions ──────────────────────────────────────────────────
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderActions = (
   isSubmitting: boolean,

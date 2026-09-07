@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Progress } from '@/common/ui/progress';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { DebtProgress } from '@/pages/debts/hooks/useDebtProgress';
+import type { TranslateFunction } from '@/constants/translate';
 
 type DebtProgressBarProps = {
   progress: DebtProgress;
@@ -39,12 +40,6 @@ export const DebtProgressBar = ({ progress, currency }: DebtProgressBarProps) =>
     </div>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const pickIndicatorClass = (progress: DebtProgress, isCleared: boolean) => {
   if (isCleared) return 'bg-income';

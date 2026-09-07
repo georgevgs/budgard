@@ -6,6 +6,7 @@ import { useCategoriesData, useDataConfig } from '@/common/contexts/DataContext'
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { useToast } from '@/common/hooks/useToast';
 import { generateAnnualPdfReport } from '@/pages/analytics/utils/pdfReport';
+import type { TranslateFunction } from '@/constants/translate';
 import type {
   AnnualPdfReportInput,
   PdfCategoryRow,
@@ -16,8 +17,6 @@ import { formatCurrency, monthsElapsedInYear } from '@/constants/utils';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import { countsAsSpending, sumSpending } from '@/constants/spending';
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 export const useAnnualPdfExport = (
   yearTransactions: Expense[],
@@ -66,15 +65,13 @@ export const useAnnualPdfExport = (
   return { isGenerating, exportPdf };
 };
 
-// --- Helpers ---
-
 const buildReportInput = (
   yearTransactions: Expense[],
   categories: Category[],
   year: number,
   currency: string,
   dateLocale: Locale,
-  t: TFunc,
+  t: TranslateFunction,
 ): AnnualPdfReportInput => {
   const yearExpenses = yearTransactions.filter(isExpenseTransaction);
   const yearIncomes = yearTransactions.filter(isIncomeTransaction);
@@ -104,7 +101,7 @@ const buildReportInput = (
   };
 };
 
-const buildLabels = (t: TFunc, dateLocale: Locale): PdfReportLabels => {
+const buildLabels = (t: TranslateFunction, dateLocale: Locale): PdfReportLabels => {
   const generatedDate = format(new Date(), 'PPP', { locale: dateLocale });
 
   return {
@@ -166,7 +163,7 @@ const buildCategoryRows = (
   categories: Category[],
   totalSpent: number,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ): PdfCategoryRow[] => {
   const nameById = new Map(
     categories.map((category) => [category.id, category.name]),

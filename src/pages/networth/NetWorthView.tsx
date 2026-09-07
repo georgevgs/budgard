@@ -4,8 +4,9 @@ import { Button } from '@/common/ui/button';
 import { Dialog, DialogContent } from '@/common/ui/dialog';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import { useDataConfig } from '@/common/contexts/DataContext';
-import { useProGate } from '@/pages/pro/hooks/useProGate';
+import { useProGate } from '@/common/hooks/useProGate';
 import { useNetWorth } from '@/common/hooks/useNetWorth';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   useGroupedAccounts,
   type GroupedAccounts,
@@ -117,8 +118,6 @@ const NetWorthView = () => {
 
 export default NetWorthView;
 
-// --- Helpers ---
-
 const renderLoading = (showSkeleton: boolean) => {
   if (!showSkeleton) {
     return null;
@@ -126,11 +125,6 @@ const renderLoading = (showSkeleton: boolean) => {
 
   return <NetWorthLoading />;
 };
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderBody = (
   accountCount: number,

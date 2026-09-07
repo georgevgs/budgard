@@ -14,6 +14,7 @@ import { PageHeader } from '@/common/components/common/PageHeader';
 import { RecurringLoading } from '@/pages/recurring/components/RecurringLoading';
 import { useTranslation } from 'react-i18next';
 import { RecurringSuggestions } from '@/pages/recurring/components/RecurringSuggestions';
+import type { TranslateFunction } from '@/constants/translate';
 
 const RecurringExpensesList = () => {
   const { t } = useTranslation();
@@ -87,11 +88,6 @@ const renderLoading = (showSkeleton: boolean) => {
 
   return <RecurringLoading />;
 };
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderHeader = (
   mode: RecurringMode,

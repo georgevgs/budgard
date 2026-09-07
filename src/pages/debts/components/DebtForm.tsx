@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useForm, useWatch, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDialogDirty } from '@/common/hooks/useDialogDirty';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   DialogTitle,
   DialogHeader,
@@ -118,12 +119,6 @@ export const DebtForm = ({ debt, onClose }: DebtFormProps) => {
     </>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const resolveCurrencyDefault = (value: number | undefined): string => {
   if (value === undefined) {

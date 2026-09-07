@@ -3,6 +3,7 @@ import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
 import { getColorTint } from '@/constants/categoryColor';
 import type { Expense } from '@/types/Expense';
 import type { EmbeddedTag } from '@/types/Tag';
+import type { TranslateFunction } from '@/constants/translate';
 
 type TransactionMetaProps = {
   transaction: Expense;
@@ -29,9 +30,6 @@ export const TransactionMeta = ({ transaction, isExcluded }: TransactionMetaProp
     </div>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 // Primary tag first, then the Pro-only extras, matching the ordering rule in
 // lib/expenseTags. Extras arrive flattened from the expense_tags join and can
@@ -50,7 +48,7 @@ const collectTags = (transaction: Expense): EmbeddedTag[] => {
   return tags;
 };
 
-const renderCategory = (transaction: Expense, t: TFunc) => {
+const renderCategory = (transaction: Expense, t: TranslateFunction) => {
   const name = transaction.category?.name;
   if (!name) {
     return (
@@ -73,7 +71,7 @@ const renderCategory = (transaction: Expense, t: TFunc) => {
 // The one piece of state on this screen that changes what every other screen
 // reports, so it is stated on the transaction itself rather than only living
 // as a switch further down the page.
-const renderExcludedBadge = (isExcluded: boolean, t: TFunc) => {
+const renderExcludedBadge = (isExcluded: boolean, t: TranslateFunction) => {
   if (!isExcluded) {
     return null;
   }

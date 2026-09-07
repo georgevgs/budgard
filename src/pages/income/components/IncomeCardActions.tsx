@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
 import { ScrollSafeDropdownMenuTrigger } from '@/common/components/common/ScrollSafeDropdownMenuTrigger';
 import { ConfirmDestructiveDialog } from '@/common/components/common/ConfirmDestructiveDialog';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,11 +85,6 @@ export const IncomeCardActions = ({ income, onEdit, onDelete }: IncomeCardAction
   );
 };
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const blurActiveElement = () => {
   if (document.activeElement instanceof HTMLElement) {

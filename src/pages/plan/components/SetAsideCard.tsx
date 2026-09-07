@@ -6,6 +6,7 @@ import { Button } from '@/common/ui/button';
 import { formatCurrency } from '@/constants/utils';
 import type { SavingsRhythm } from '@/common/hooks/savings/useSavingsRhythm';
 import type { Goal } from '@/types/Goal';
+import type { TranslateFunction } from '@/constants/translate';
 
 type SetAsideCardProps = {
   rhythm: SavingsRhythm;
@@ -32,9 +33,6 @@ export const SetAsideCard = ({ rhythm, goal, currency }: SetAsideCardProps) => {
     </div>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 // The offer names yesterday's real surplus and the goal it would land in.
 // Hidden once the day's transfer is made, so it can never read as a demand for
@@ -45,7 +43,7 @@ const renderOffer = (
   currency: string,
   isSaving: boolean,
   onMove: () => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (rhythm.isSetAsideToday) {
     return (
@@ -73,7 +71,11 @@ const renderOffer = (
   );
 };
 
-const renderTotal = (rhythm: SavingsRhythm, currency: string, t: TFunc) => {
+const renderTotal = (
+  rhythm: SavingsRhythm,
+  currency: string,
+  t: TranslateFunction,
+) => {
   if (rhythm.setAside <= 0) {
     return null;
   }

@@ -1,20 +1,21 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useProGate } from '@/pages/pro/hooks/useProGate';
+import { useProGate } from '@/common/hooks/useProGate';
 import { useToast } from '@/common/hooks/useToast';
 import type { ReceiptOptions } from '@/common/hooks/dataOps/useExpenseOps';
 import { toIsoDate, todayIso } from '@/constants/dates';
 import { parseReceiptText } from '@/pages/expenses/utils/receiptParse';
 import { RECEIPT_ALLOWED_TYPES, RECEIPT_MAX_FILE_SIZE } from '@/constants/validations';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   resolveOcrLanguages,
   runReceiptOcr,
   type OcrRunHandle,
-} from '@/pages/expenses/ocrService';
+} from '@/pages/expenses/utils/ocr';
 
 type Params = {
   isOpen: boolean;
-  amountIsEmpty: boolean;
+  isAmountEmpty: boolean;
   date: string;
   name: string;
   setAmount: (amount: number) => void;
@@ -24,7 +25,7 @@ type Params = {
 
 export const useQuickReceiptScan = ({
   isOpen,
-  amountIsEmpty,
+  isAmountEmpty,
   date,
   name,
   setAmount,
@@ -36,7 +37,7 @@ export const useQuickReceiptScan = ({
   const { allow } = useProGate();
   const handleRef = useRef<OcrRunHandle | null>(null);
   const targetRef = useRef<PrefillTarget>({
-    amountIsEmpty,
+    isAmountEmpty,
     date,
     name,
     setAmount,
@@ -58,14 +59,14 @@ export const useQuickReceiptScan = ({
 
   useEffect(() => {
     targetRef.current = {
-      amountIsEmpty,
+      isAmountEmpty,
       date,
       name,
       setAmount,
       setDate,
       setName,
     };
-  }, [amountIsEmpty, date, name, setAmount, setDate, setName]);
+  }, [isAmountEmpty, date, name, setAmount, setDate, setName]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -150,15 +151,12 @@ export const useQuickReceiptScan = ({
   };
 };
 
-export type QuickReceiptScanApi = ReturnType<typeof useQuickReceiptScan>;
-
-// --- Helpers ---
+export type UseQuickReceiptScanReturn = ReturnType<typeof useQuickReceiptScan>;
 
 type PrefillTarget = Omit<Params, 'isOpen'>;
 type Toast = ReturnType<typeof useToast>['toast'];
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-const validate = (file: File, toast: Toast, t: TFunc): boolean => {
+const validate = (file: File, toast: Toast, t: TranslateFunction): boolean => {
   if (!RECEIPT_ALLOWED_TYPES.includes(file.type)) {
     toast({ variant: 'destructive', description: t('receipt.invalidType') });
 
@@ -180,7 +178,7 @@ const prefill = (text: string, target: PrefillTarget): number => {
   const parsed = parseReceiptText(text);
   let count = 0;
 
-  if (parsed.amount !== null && target.amountIsEmpty) {
+  if (parsed.amount !== null && target.isAmountEmpty) {
     target.setAmount(parsed.amount);
     count += 1;
   }

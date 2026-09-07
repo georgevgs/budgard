@@ -11,6 +11,7 @@ import { PlanOverviewCard } from '@/pages/plan/components/PlanOverviewCard';
 import { MonthlyDecisionCard } from '@/pages/plan/components/MonthlyDecisionCard';
 import { PlanDetails } from '@/pages/plan/components/PlanDetails';
 import { PlanTimeline } from '@/pages/plan/components/PlanTimeline';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   useAccountsData,
   useDataConfig,
@@ -107,10 +108,6 @@ const PlanView = () => {
 
 export default PlanView;
 
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
 type OverviewCounts = {
   goals: number;
   debts: number;
@@ -123,7 +120,7 @@ const renderPlanningTools = (
   model: ReturnType<typeof buildPlanModel>,
   currency: string,
   counts: OverviewCounts,
-  t: TFunc,
+  t: TranslateFunction,
 ) => (
   <section className="mt-8" aria-labelledby="planning-tools-title">
     <h2 id="planning-tools-title" className="mb-3 type-heading">

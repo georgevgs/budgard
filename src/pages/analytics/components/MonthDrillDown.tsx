@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
 import type { Locale } from 'date-fns';
 import { useTranslation } from 'react-i18next';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   Dialog,
   DialogContent,
@@ -117,8 +118,6 @@ export const MonthDrillDown = ({
 
 // ─── Helper render functions ──────────────────────────────────────────────────
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
 const renderCategoryBreakdown = (
   breakdown: {
     id: string;
@@ -128,7 +127,7 @@ const renderCategoryBreakdown = (
     count: number;
   }[],
   totalAmount: number,
-  t: TFunc,
+  t: TranslateFunction,
   currency: string,
 ) => {
   if (breakdown.length === 0) return null;
@@ -169,7 +168,7 @@ const renderCategoryBreakdown = (
 const renderTopExpenses = (
   expenses: Expense[],
   dateLocale: Locale,
-  t: TFunc,
+  t: TranslateFunction,
   currency: string,
 ) => {
   if (expenses.length === 0) return null;

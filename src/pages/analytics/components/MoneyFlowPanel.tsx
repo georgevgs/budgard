@@ -4,6 +4,7 @@ import { EmptyStateCard } from '@/common/ui/empty-state-card';
 import Waves from 'lucide-react/dist/esm/icons/waves';
 import { FlowChart } from '@/common/components/charts/FlowChart';
 import type { FlowNode } from '@/common/components/charts/FlowChart';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   UNCATEGORIZED_ID,
   OTHER_ID,
@@ -48,11 +49,11 @@ export const MoneyFlowPanel = ({ flow, currency }: MoneyFlowPanelProps) => {
     />
   );
 };
-// --- Helpers ---
 
-type TFunc = ReturnType<typeof useTranslation>['t'];
-
-const categoryLabel = (category: MoneyFlowCategory, t: TFunc): string => {
+const categoryLabel = (
+  category: MoneyFlowCategory,
+  t: TranslateFunction,
+): string => {
   if (category.id === UNCATEGORIZED_ID) {
     return t('moneyFlow.uncategorized');
   }
@@ -63,7 +64,7 @@ const categoryLabel = (category: MoneyFlowCategory, t: TFunc): string => {
   return category.name;
 };
 
-const buildNodes = (flow: MoneyFlowData, t: TFunc): FlowNode[] => {
+const buildNodes = (flow: MoneyFlowData, t: TranslateFunction): FlowNode[] => {
   const colors = resolveCategoryColors(flow.categories);
   const nodes: FlowNode[] = [];
 
@@ -176,7 +177,7 @@ const formatPercent = (part: number, whole: number): string => {
 const buildAriaLabel = (
   flow: MoneyFlowData,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ): string => {
   const categoryList = flow.categories
     .map(

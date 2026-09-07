@@ -1,5 +1,6 @@
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Switch } from '@/common/ui/switch';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   Select,
   SelectContent,
@@ -16,8 +17,6 @@ import type {
 type PushState =
   'loading' | 'unsupported' | 'denied' | 'subscribed' | 'unsubscribed';
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
 type NotificationsSectionProps = {
   pushState: PushState;
   dailyReminderHour: number | null;
@@ -30,7 +29,7 @@ type NotificationsSectionProps = {
     key: NotificationPreferenceKey,
     enabled: boolean,
   ) => void;
-  t: TFunc;
+  t: TranslateFunction;
 };
 
 export const NotificationsSection = ({
@@ -75,7 +74,6 @@ export const NotificationsSection = ({
     </section>
   );
 };
-// --- Helpers ---
 
 const REMINDER_HOURS = Array.from({ length: 24 }, (_, i) => i);
 
@@ -134,7 +132,7 @@ const renderNotificationToggle = (
   state: PushState,
   subscribe: () => Promise<void>,
   unsubscribe: () => Promise<void>,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (state === 'unsupported') {
     return (
@@ -195,7 +193,7 @@ const renderDailyReminder = (
   reminderHour: number | null,
   onToggle: (enabled: boolean) => void,
   onTimeChange: (localHour: number) => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   // Only show daily reminder if push notifications are enabled
   if (pushState !== 'subscribed') return null;
@@ -232,7 +230,7 @@ const renderReminderTimePicker = (
   isEnabled: boolean,
   localHour: number,
   onTimeChange: (localHour: number) => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (!isEnabled) return null;
 
@@ -267,7 +265,7 @@ const renderPreferences = (
   pushState: PushState,
   prefs: NotificationPreferences,
   onToggle: (key: NotificationPreferenceKey, enabled: boolean) => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (pushState !== 'subscribed') return null;
 
@@ -294,7 +292,7 @@ const renderPreferenceRow = (
   key: NotificationPreferenceKey,
   prefs: NotificationPreferences,
   onToggle: (key: NotificationPreferenceKey, enabled: boolean) => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   const labels = PREFERENCE_LABELS[key];
   const checked = isPrefEnabled(prefs, key);

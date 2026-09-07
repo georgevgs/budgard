@@ -1,11 +1,7 @@
 import { format, parseISO, isToday, isYesterday } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import type { Expense } from '@/types/Expense';
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
+import type { TranslateFunction } from '@/constants/translate';
 
 type Locale = typeof enUS;
 
@@ -19,11 +15,11 @@ export const getDateLabel = (
   dateString: string,
   dateLocale: Locale,
   t: TranslateFunction,
-  showFullDate?: boolean,
+  shouldShowFullDate?: boolean,
 ): string => {
   const parsed = parseISO(dateString);
 
-  if (!showFullDate) {
+  if (!shouldShowFullDate) {
     if (isToday(parsed)) return t('dateGroup.today');
     if (isYesterday(parsed)) return t('dateGroup.yesterday');
   }
@@ -35,7 +31,7 @@ export const groupExpensesByDate = (
   expenses: Expense[],
   dateLocale: Locale,
   t: TranslateFunction,
-  showFullDate?: boolean,
+  shouldShowFullDate?: boolean,
 ): DateGroup[] => {
   const groups = new Map<string, Expense[]>();
 
@@ -50,7 +46,7 @@ export const groupExpensesByDate = (
   }
 
   return Array.from(groups.entries()).map(([date, groupExpenses]) => ({
-    label: getDateLabel(date, dateLocale, t, showFullDate),
+    label: getDateLabel(date, dateLocale, t, shouldShowFullDate),
     date,
     expenses: groupExpenses,
   }));

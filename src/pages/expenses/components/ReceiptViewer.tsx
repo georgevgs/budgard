@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   Dialog,
   DialogContent,
@@ -55,8 +56,6 @@ export const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps
   );
 };
 // ─── Helper render functions ──────────────────────────────────────────────────
-
-type TranslateFunction = (key: string) => string;
 
 // An image arriving is content loading, not a system operation, so it gets a
 // placeholder in the receipt's own shape rather than a spinner. Portrait

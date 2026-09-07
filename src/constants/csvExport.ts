@@ -2,12 +2,11 @@ import { format, parseISO } from 'date-fns';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import type { Tag } from '@/types/Tag';
+import type { TranslateFunction } from '@/constants/translate';
 
 type CsvCell = string | number | null | undefined;
 
 export type CsvRow = CsvCell[];
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 export const buildCsv = (headers: string[], rows: CsvRow[]): string => {
   const lines = [headers.map(escapeCsvField).join(',')];
@@ -36,7 +35,7 @@ export const buildTransactionsCsv = (
   transactions: Expense[],
   categories: Category[],
   tags: Tag[],
-  t: TFunc,
+  t: TranslateFunction,
 ): string => {
   const categoryById = new Map(categories.map((c) => [c.id, c.name]));
   const tagById = new Map(tags.map((tag) => [tag.id, tag.name]));
@@ -67,7 +66,7 @@ export const buildTransactionsCsv = (
 export const buildCategorySummaryCsv = (
   transactions: Expense[],
   categories: Category[],
-  t: TFunc,
+  t: TranslateFunction,
 ): string => {
   type Bucket = {
     category: string;
@@ -117,8 +116,6 @@ export const buildCategorySummaryCsv = (
   return buildCsv(headers, rows);
 };
 
-// --- Helpers ---
-
 // Defuse Excel/Numbers/LibreOffice formula evaluation when a cell starts with
 // =, +, -, @, tab, or CR. The leading apostrophe is the standard mitigation
 // for OWASP CSV Injection. Plain numbers (e.g. negative amounts like -3.50)
@@ -152,11 +149,14 @@ const transactionType = (tx: Expense): 'income' | 'expense' => {
   return 'expense';
 };
 
-const transactionTypeLabel = (tx: Expense, t: TFunc): string => {
+const transactionTypeLabel = (tx: Expense, t: TranslateFunction): string => {
   return typeLabel(transactionType(tx), t);
 };
 
-const typeLabel = (type: 'income' | 'expense', t: TFunc): string => {
+const typeLabel = (
+  type: 'income' | 'expense',
+  t: TranslateFunction,
+): string => {
   if (type === 'income') return t('annualExport.csv.income');
 
   return t('annualExport.csv.expense');

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
-import { renderSaveButtonLabel } from '@/pages/expenses/components/ExpensesForm.helpers';
+import { renderSaveButtonLabel } from '@/pages/expenses/utils/expensesFormHelpers';
+import type { TranslateFunction } from '@/constants/translate';
 
 type ExpenseFormActionsProps = {
   isValid: boolean;
@@ -25,9 +26,6 @@ export const ExpenseFormActions = ({ isValid, isSubmitting, onClose }: ExpenseFo
     </div>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (key: string) => string;
 
 // A Save button that is disabled from the moment the form opens is a dead end
 // unless something says why. Keep this hint separate from the button row so

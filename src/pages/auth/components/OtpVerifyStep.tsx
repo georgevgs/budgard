@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { Button } from '@/common/ui/button';
 import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   InputOTP,
   InputOTPGroup,
@@ -123,11 +124,6 @@ export const OtpVerifyStep = ({
   );
 };
 // ─── Helper render functions ──────────────────────────────────────────────────
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderOtpError = (error: string | null) => {
   if (!error) return null;

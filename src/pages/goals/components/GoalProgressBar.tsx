@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Progress } from '@/common/ui/progress';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { GoalProgress } from '@/common/hooks/useGoalProgress';
+import type { TranslateFunction } from '@/constants/translate';
 
 type GoalProgressBarProps = {
   progress: GoalProgress;
@@ -35,12 +36,6 @@ export const GoalProgressBar = ({ progress, currency }: GoalProgressBarProps) =>
     </div>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const pickIndicatorClass = (progress: GoalProgress) => {
   if (progress.isOverachieved || progress.percent >= 1) {

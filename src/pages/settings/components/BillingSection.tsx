@@ -14,6 +14,7 @@ import { useToast } from '@/common/hooks/useToast';
 import { planIdForPriceId, type ProPlanPrices } from '@/constants/proPlans';
 import { hasStripeBillingManagement } from '@/constants/subscription';
 import type { Subscription } from '@/types/Subscription';
+import type { TranslateFunction } from '@/constants/translate';
 
 export const BillingSection = () => {
   const { t } = useTranslation();
@@ -60,9 +61,6 @@ export const BillingSection = () => {
     </section>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 const renderContent = (
   isPro: boolean,
@@ -72,7 +70,7 @@ const renderContent = (
   isOpeningPortal: boolean,
   onManage: () => void,
   onUpgrade: () => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (!isPro || !subscription) {
     return renderFreeContent(onUpgrade, t);
@@ -88,7 +86,7 @@ const renderContent = (
   );
 };
 
-const renderFreeContent = (onUpgrade: () => void, t: TFunc) => (
+const renderFreeContent = (onUpgrade: () => void, t: TranslateFunction) => (
   <>
     {renderRow(t('settings.billing.planLabel'), t('settings.billing.freePlan'))}
     <p className="text-xs text-muted-foreground">
@@ -107,7 +105,7 @@ const renderProContent = (
   dateLocale: Locale,
   isOpeningPortal: boolean,
   onManage: () => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => (
   <>
     {renderRow(
@@ -125,7 +123,7 @@ const renderBillingManagement = (
   subscription: Subscription,
   isOpeningPortal: boolean,
   onManage: () => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (!hasStripeBillingManagement(subscription)) {
     return (
@@ -166,7 +164,7 @@ const renderRow = (label: string, value: string) => (
 const renderPeriodRow = (
   subscription: Subscription,
   dateLocale: Locale,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   const periodEnd = getPeriodEnd(subscription);
   if (!periodEnd) return null;
@@ -192,7 +190,7 @@ const renderPeriodRow = (
 const renderTrialNotice = (
   subscription: Subscription,
   dateLocale: Locale,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (subscription.status !== 'trialing') return null;
   if (!subscription.trial_ends_at) return null;
@@ -209,7 +207,10 @@ const renderTrialNotice = (
   );
 };
 
-const renderPastDueNotice = (subscription: Subscription, t: TFunc) => {
+const renderPastDueNotice = (
+  subscription: Subscription,
+  t: TranslateFunction,
+) => {
   if (subscription.status !== 'past_due') return null;
 
   return (
@@ -222,7 +223,7 @@ const renderPastDueNotice = (subscription: Subscription, t: TFunc) => {
 const getPlanName = (
   subscription: Subscription,
   prices: ProPlanPrices,
-  t: TFunc,
+  t: TranslateFunction,
 ): string => {
   const planId = planIdForPriceId(prices, subscription.stripe_price_id);
   if (planId === 'monthly') return t('settings.billing.proMonthly');
@@ -241,7 +242,10 @@ const getPeriodEnd = (subscription: Subscription): Date | null => {
   return parsed;
 };
 
-const getManageLabel = (isOpeningPortal: boolean, t: TFunc): string => {
+const getManageLabel = (
+  isOpeningPortal: boolean,
+  t: TranslateFunction,
+): string => {
   if (isOpeningPortal) return t('settings.billing.opening');
 
   return t('settings.billing.manage');

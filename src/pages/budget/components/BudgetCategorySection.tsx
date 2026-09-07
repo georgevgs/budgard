@@ -4,6 +4,7 @@ import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { Button } from '@/common/ui/button';
 import { formatCurrency, cn } from '@/constants/utils';
 import { getColorTint } from '@/constants/categoryColor';
+import type { TranslateFunction } from '@/constants/translate';
 
 const WARNING_THRESHOLD = 80;
 const EXCEEDED_THRESHOLD = 100;
@@ -61,9 +62,7 @@ export const BudgetCategorySection = ({
 };
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
-const pickManageLabel = (rowCount: number, t: TFunc) => {
+const pickManageLabel = (rowCount: number, t: TranslateFunction) => {
   if (rowCount === 0) return t('budget.categoryBudgets.add');
 
   return t('budget.categoryBudgets.manage');
@@ -80,7 +79,7 @@ const renderRowsOrEmpty = (
   rows: BudgetCategoryRow[],
   currency: string,
   onManage: () => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (rows.length === 0) {
     return (
@@ -101,7 +100,11 @@ const renderRowsOrEmpty = (
   );
 };
 
-const renderRow = (row: BudgetCategoryRow, currency: string, t: TFunc) => {
+const renderRow = (
+  row: BudgetCategoryRow,
+  currency: string,
+  t: TranslateFunction,
+) => {
   const barWidth = Math.min(row.percent, 100);
   const barColor = pickBarColor(row.isOver, row.isWarning);
 

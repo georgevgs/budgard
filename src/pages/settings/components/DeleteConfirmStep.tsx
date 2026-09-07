@@ -1,6 +1,7 @@
 import type { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   AlertDialogCancel,
   AlertDialogDescription,
@@ -72,11 +73,11 @@ export const DeleteConfirmStep = ({
     </>
   );
 };
-// --- Helpers ---
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
-const resolveConfirmLabel = (isSending: boolean, t: TFunc): string => {
+const resolveConfirmLabel = (
+  isSending: boolean,
+  t: TranslateFunction,
+): string => {
   if (isSending) {
     return t('auth.sending');
   }

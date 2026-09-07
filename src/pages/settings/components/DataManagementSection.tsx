@@ -5,13 +5,12 @@ import { DeleteAccountDialog } from '@/pages/settings/components/DeleteAccountDi
 import { useDataExport } from '@/pages/settings/hooks/useDataExport';
 import Download from 'lucide-react/dist/esm/icons/download';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
+import type { TranslateFunction } from '@/constants/translate';
 
 type DataManagementSectionProps = {
   onConfirmDelete: () => Promise<void>;
   isDeleting: boolean;
-  t: TFunc;
+  t: TranslateFunction;
 };
 
 export const DataManagementSection = ({
@@ -69,9 +68,8 @@ export const DataManagementSection = ({
     </section>
   );
 };
-// --- Helpers ---
 
-const renderExportLabel = (isExporting: boolean, t: TFunc) => {
+const renderExportLabel = (isExporting: boolean, t: TranslateFunction) => {
   if (isExporting) {
     return t('settings.data.exporting');
   }

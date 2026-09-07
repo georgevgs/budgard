@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
 import type { Locale } from 'date-fns';
 import { useTranslation } from 'react-i18next';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   Dialog,
   DialogContent,
@@ -105,12 +106,10 @@ export const CategoryDrillDown = ({
 
 // ─── Helper render functions ──────────────────────────────────────────────────
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
 const renderMonthlyBreakdown = (
   months: { label: string; amount: number }[],
   color: string,
-  t: TFunc,
+  t: TranslateFunction,
   currency: string,
 ) => {
   if (months.length <= 1) return null;

@@ -4,6 +4,7 @@ import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { formatCurrency } from '@/constants/utils';
 import { getColorTint } from '@/constants/categoryColor';
 import type { CategoryRow } from '@/pages/analytics/hooks/useAnalyticsData';
+import type { TranslateFunction } from '@/constants/translate';
 
 type CategoryBreakdownSectionProps = {
   breakdown: CategoryRow[];
@@ -25,11 +26,8 @@ export const CategoryBreakdownSection = (props: CategoryBreakdownSectionProps) =
     </section>
   );
 };
-// --- Helpers ---
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
-const renderBreakdown = (props: CategoryBreakdownSectionProps, t: TFunc) => {
+const renderBreakdown = (props: CategoryBreakdownSectionProps, t: TranslateFunction) => {
   if (props.breakdown.length === 0) {
     return (
       <p className="px-4 py-8 text-center text-sm text-muted-foreground">
@@ -49,7 +47,7 @@ const renderBreakdown = (props: CategoryBreakdownSectionProps, t: TFunc) => {
   );
 };
 
-const renderCategoryRow = (category: CategoryRow, props: CategoryBreakdownSectionProps, t: TFunc) => {
+const renderCategoryRow = (category: CategoryRow, props: CategoryBreakdownSectionProps, t: TranslateFunction) => {
   let percentage = 0;
   if (props.totalSpent > 0) {
     percentage = (category.amount / props.totalSpent) * 100;

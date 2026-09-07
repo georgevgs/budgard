@@ -10,7 +10,7 @@ import {
   loadPlanPricesSnapshot,
   savePlanPricesSnapshot,
 } from '@/pages/pro/utils/proPlansCache';
-import { proPlansService } from '@/pages/pro/proPlansService';
+import { proApi } from '@/pages/pro/proApi';
 
 export type UseProPlansReturn = {
   prices: ProPlanPrices;
@@ -44,7 +44,7 @@ export const useProPlans = (): UseProPlansReturn => {
     if (!inFlight) {
       // Save once here (not per consumer) and always release the slot so a
       // later stale-cache mount fetches again instead of reusing old data.
-      inFlight = proPlansService
+      inFlight = proApi
         .getPlanPrices()
         .then((fresh) => {
           savePlanPricesSnapshot(fresh);
@@ -76,8 +76,6 @@ export const useProPlans = (): UseProPlansReturn => {
 
   return useMemo(() => buildDisplay(prices, locale), [prices, locale]);
 };
-
-// --- Helpers ---
 
 const buildDisplay = (
   prices: ProPlanPrices,

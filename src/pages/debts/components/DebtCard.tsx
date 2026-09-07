@@ -14,6 +14,7 @@ import type { Debt, DebtKind } from '@/types/Debt';
 import { useDebtProgress } from '@/pages/debts/hooks/useDebtProgress';
 import { DebtProgressBar } from '@/pages/debts/components/DebtProgressBar';
 import { getColorTint } from '@/constants/categoryColor';
+import type { TranslateFunction } from '@/constants/translate';
 
 type DebtCardProps = {
   debt: Debt;
@@ -68,12 +69,6 @@ export const DebtCard = ({ debt, onClick }: DebtCardProps) => {
     </SurfaceCard>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const ICON_BY_KIND: Record<DebtKind, LucideIcon> = {
   credit_card: CreditCard,

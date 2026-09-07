@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { haptics } from '@/constants/haptics';
 import { loadLock, verifyPin, PIN_LENGTH } from '@/constants/appLock';
 import { hasEnrolledCredential, requestDeviceUnlock } from '@/pages/security/utils/deviceUnlock';
+import type { TranslateFunction } from '@/constants/translate';
 
 // How long the wrong-pin state stays on screen before the dots clear. Long
 // enough to read the message, short enough not to be a punishment.
@@ -100,10 +101,6 @@ export const useLockScreen = (onUnlock: () => void) => {
   };
 };
 
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
 const isCoolingDown = (until: number | null): boolean => {
   if (until === null) {
     return false;
@@ -115,7 +112,7 @@ const isCoolingDown = (until: number | null): boolean => {
 const messageFor = (
   attemptsLeft: number,
   lockedUntil: number | null,
-  t: TFunc,
+  t: TranslateFunction,
 ): string => {
   if (lockedUntil !== null) {
     return t('security.lock.cooldown', {

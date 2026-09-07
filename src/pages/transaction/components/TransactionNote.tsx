@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import { Textarea } from '@/common/ui/textarea';
+import type { TranslateFunction } from '@/constants/translate';
 
 type TransactionNoteProps = {
   value: string;
@@ -57,11 +58,8 @@ export const TransactionNote = ({ value, isDirty, onChange, onSave }: Transactio
     </section>
   );
 };
-// --- Helpers ---
 
-type TFunc = (key: string) => string;
-
-const renderSummary = (value: string, onEdit: () => void, t: TFunc) => {
+const renderSummary = (value: string, onEdit: () => void, t: TranslateFunction) => {
   return (
     <section className="space-y-2">
       <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
@@ -84,7 +82,7 @@ const renderSummary = (value: string, onEdit: () => void, t: TFunc) => {
   );
 };
 
-const resolveSummary = (value: string, t: TFunc): string => {
+const resolveSummary = (value: string, t: TranslateFunction): string => {
   if (value.trim().length === 0) {
     return t('transaction.note.add');
   }
@@ -100,7 +98,7 @@ const resolveSummaryClass = (value: string): string => {
   return 'line-clamp-2 text-sm leading-relaxed';
 };
 
-const renderHint = (isDirty: boolean, t: TFunc) => {
+const renderHint = (isDirty: boolean, t: TranslateFunction) => {
   if (!isDirty) {
     return null;
   }

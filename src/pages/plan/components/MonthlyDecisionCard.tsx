@@ -4,6 +4,7 @@ import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import { formatCurrency } from '@/constants/utils';
 import type { MonthlyDecision } from '@/pages/plan/utils/monthlyDecision';
 import { TileLabel } from '@/common/components/bento';
+import type { TranslateFunction } from '@/constants/translate';
 
 type MonthlyDecisionCardProps = {
   decision: MonthlyDecision;
@@ -30,14 +31,11 @@ export const MonthlyDecisionCard = ({ decision, currency, onOpenDetails }: Month
     </section>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 const renderFigure = (
   decision: MonthlyDecision,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (decision.amount === null) {
     return <p className="mt-3 type-figure-lg">{t('plan.decision.start')}</p>;
@@ -53,7 +51,7 @@ const renderFigure = (
 const decisionBody = (
   decision: MonthlyDecision,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ): string => {
   return t(`plan.decision.body.${decision.state}`, {
     savings: formatCurrency(decision.savingsReserve, currency),
@@ -63,7 +61,7 @@ const decisionBody = (
 const renderAllocation = (
   decision: MonthlyDecision,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (decision.state === 'noBudget') {
     return null;
@@ -96,7 +94,7 @@ const allocation = (label: string, amount: number, currency: string) => (
 const renderAction = (
   state: MonthlyDecision['state'],
   onOpenDetails: () => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   const className =
     'mt-4 inline-flex min-h-10 items-center gap-1.5 rounded-full bg-primary/10 px-3 text-[0.8rem] font-semibold leading-none text-primary-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';

@@ -7,6 +7,7 @@ import { Progress } from '@/common/ui/progress';
 import { formatCurrency, cn } from '@/constants/utils';
 import { BudgetForm } from '@/pages/budget/components/BudgetForm';
 import { CategoryBudgetsManager } from '@/pages/budget/components/CategoryBudgetsManager';
+import type { TranslateFunction } from '@/constants/translate';
 import { BudgetCategorySection,
   WARNING_THRESHOLD,
   EXCEEDED_THRESHOLD,
@@ -18,7 +19,7 @@ import {
   useCategoryBudgetsData,
 } from '@/common/contexts/DataContext';
 import { useCurrentMonthSpendingByCategory } from '@/common/hooks/useCurrentMonthSpendingByCategory';
-import { useProGate } from '@/pages/pro/hooks/useProGate';
+import { useProGate } from '@/common/hooks/useProGate';
 import type { Category } from '@/types/Category';
 import type { CategoryBudget } from '@/types/CategoryBudget';
 
@@ -92,11 +93,6 @@ const BudgetProgressComponent = ({
 // Memoised: the parent re-renders on every data mutation, this subtree does not.
 export const BudgetProgress = memo(BudgetProgressComponent);
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 type NoBudgetProps = {
   isFormOpen: boolean;

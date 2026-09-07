@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useAnimatedNumber } from '@/common/hooks/useAnimatedNumber';
 import { useCashFlowData } from '@/pages/analytics/hooks/useCashFlowData';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   useMoneyFlowData,
   type MoneyFlowData,
@@ -26,7 +27,6 @@ const MoneyFlowPanel = lazyWithRetry(async () => {
 type MonthlyDatum = { month: string; fullMonth: string; amount: number };
 type YearTotals = ReturnType<typeof useCashFlowData>['yearTotals'];
 type View = 'trend' | 'flow';
-type TFunc = ReturnType<typeof useTranslation>['t'];
 
 type CashFlowSectionProps = {
   selectedYear: number;
@@ -181,7 +181,7 @@ const renderStats = (
   flow: MoneyFlowData,
   selectedYear: number,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (!isPro) {
     return renderFreeStats(
@@ -207,7 +207,7 @@ const renderFreeStats = (
   monthlyAverage: number,
   monthsElapsed: number,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (monthsElapsed === 0 || totalSpent === 0) {
     return null;
@@ -232,7 +232,7 @@ const renderYearStats = (
   yearTotals: YearTotals,
   selectedYear: number,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ) => (
   <div className="space-y-3">
     <div>
@@ -267,7 +267,11 @@ const renderYearStats = (
   </div>
 );
 
-const renderAvgNet = (avgNet: number, currency: string, t: TFunc) => {
+const renderAvgNet = (
+  avgNet: number,
+  currency: string,
+  t: TranslateFunction,
+) => {
   if (avgNet === 0) return null;
 
   return (
@@ -277,7 +281,11 @@ const renderAvgNet = (avgNet: number, currency: string, t: TFunc) => {
   );
 };
 
-const renderFlowStats = (flow: MoneyFlowData, currency: string, t: TFunc) => (
+const renderFlowStats = (
+  flow: MoneyFlowData,
+  currency: string,
+  t: TranslateFunction,
+) => (
   <div className="space-y-3">
     <div>
       <p className="text-sm text-muted-foreground">
@@ -316,7 +324,7 @@ const renderTabs = (
   isPro: boolean,
   view: View,
   setView: (view: View) => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (!isPro) {
     return null;
@@ -360,7 +368,7 @@ const renderTrend = (
   isPro: boolean,
   onMonthClick: (index: number) => void,
   yAxisMax: number | undefined,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (view === 'flow') {
     return null;
@@ -392,7 +400,7 @@ const renderMonthDetailSelect = (
   data: MonthlyDatum[],
   onMonthClick: (index: number) => void,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const monthIndex = Number(event.target.value);

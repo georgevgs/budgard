@@ -6,6 +6,7 @@ import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import FolderOpen from 'lucide-react/dist/esm/icons/folder-open';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { Button } from '@/common/ui/button';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   DialogTitle,
   DialogHeader,
@@ -98,9 +99,10 @@ export const CategoryManager = ({
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
-const renderBackButton = (onBack: (() => void) | undefined, t: TFunc) => {
+const renderBackButton = (
+  onBack: (() => void) | undefined,
+  t: TranslateFunction,
+) => {
   if (!onBack) {
     return null;
   }
@@ -125,7 +127,7 @@ const renderBackButton = (onBack: (() => void) | undefined, t: TFunc) => {
 const renderDeleteDialogs = (
   manager: ReturnType<typeof useCategoryManager>,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   const hasImpact =
     manager.deleteImpact !== null && manager.deleteImpact.count > 0;
@@ -161,7 +163,7 @@ const renderDeleteDialogs = (
   );
 };
 
-const renderManagerTitle = (type: CategoryType, t: TFunc) => {
+const renderManagerTitle = (type: CategoryType, t: TranslateFunction) => {
   if (type === 'income') {
     return t('income.manageSources');
   }
@@ -169,7 +171,7 @@ const renderManagerTitle = (type: CategoryType, t: TFunc) => {
   return t('categories.title');
 };
 
-const renderManagerDescription = (type: CategoryType, t: TFunc) => {
+const renderManagerDescription = (type: CategoryType, t: TranslateFunction) => {
   if (type === 'income') {
     return t('income.manageDescription');
   }
@@ -177,7 +179,7 @@ const renderManagerDescription = (type: CategoryType, t: TFunc) => {
   return t('categories.manageDescription');
 };
 
-const renderAddButtonLabel = (type: CategoryType, t: TFunc) => {
+const renderAddButtonLabel = (type: CategoryType, t: TranslateFunction) => {
   if (type === 'income') {
     return t('income.addSource');
   }
@@ -188,7 +190,7 @@ const renderAddButtonLabel = (type: CategoryType, t: TFunc) => {
 const renderCategoryList = (
   categories: Category[],
   type: CategoryType,
-  t: TFunc,
+  t: TranslateFunction,
   onEdit: (category: Category) => void,
   onDelete: (category: Category) => void,
 ) => {
@@ -228,7 +230,7 @@ const renderCategoryList = (
   );
 };
 
-const renderEmptyState = (type: CategoryType, t: TFunc) => {
+const renderEmptyState = (type: CategoryType, t: TranslateFunction) => {
   return (
     <div className="flex flex-col items-center text-center py-12 px-4">
       <FolderOpen
@@ -243,7 +245,7 @@ const renderEmptyState = (type: CategoryType, t: TFunc) => {
   );
 };
 
-const renderEmptyTitle = (type: CategoryType, t: TFunc) => {
+const renderEmptyTitle = (type: CategoryType, t: TranslateFunction) => {
   if (type === 'income') {
     return t('income.noSources');
   }
@@ -251,7 +253,7 @@ const renderEmptyTitle = (type: CategoryType, t: TFunc) => {
   return t('categories.noCategories');
 };
 
-const renderEmptyHelp = (type: CategoryType, t: TFunc) => {
+const renderEmptyHelp = (type: CategoryType, t: TranslateFunction) => {
   if (type === 'income') {
     return t('income.emptySourcesHelp');
   }

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useForm, useWatch, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDialogDirty } from '@/common/hooks/useDialogDirty';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   DialogTitle,
   DialogHeader,
@@ -131,12 +132,6 @@ export const AccountForm = ({ account, onClose }: AccountFormProps) => {
     </>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const resolveInitialBalance = (account: Account | undefined): string => {
   if (!account) {

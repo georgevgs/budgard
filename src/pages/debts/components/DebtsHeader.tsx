@@ -5,6 +5,7 @@ import { useAnimatedNumber } from '@/common/hooks/useAnimatedNumber';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import Calendar from 'lucide-react/dist/esm/icons/calendar';
 import type { DebtSummary } from '@/common/hooks/useDebts';
+import type { TranslateFunction } from '@/constants/translate';
 
 type DebtsHeaderProps = {
   summary: DebtSummary;
@@ -56,12 +57,6 @@ export const DebtsHeader = ({
     </SurfaceCard>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderPayoffRow = (
   monthsToDebtFree: number | null,

@@ -7,6 +7,7 @@ import { SetAsideCard } from '@/pages/plan/components/SetAsideCard';
 import { Button } from '@/common/ui/button';
 import type { SavingsRhythm as Rhythm } from '@/common/hooks/savings/useSavingsRhythm';
 import type { Goal } from '@/types/Goal';
+import type { TranslateFunction } from '@/constants/translate';
 
 type SavingsRhythmProps = {
   rhythm: Rhythm | null;
@@ -54,9 +55,6 @@ export const SavingsRhythm = ({ rhythm, currency }: SavingsRhythmProps) => {
     </section>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 const todayKey = (): string => {
   const now = new Date();
@@ -92,7 +90,7 @@ const renderClaim = (
   rhythm: Rhythm,
   onClaim: () => void,
   onUndo: () => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (rhythm.isTodayClaimed) {
     return (

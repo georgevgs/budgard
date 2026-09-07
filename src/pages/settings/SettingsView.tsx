@@ -25,6 +25,7 @@ import { ProfileSection } from '@/pages/settings/components/ProfileSection';
 import { SecuritySection } from '@/pages/settings/components/SecuritySection';
 import { HouseholdSection } from '@/pages/settings/components/HouseholdSection';
 import { ConnectionsSection } from '@/pages/settings/components/ConnectionsSection';
+import type { TranslateFunction } from '@/constants/translate';
 
 type SettingsSection =
   | 'account'
@@ -67,15 +68,12 @@ const SettingsView = () => {
 
 export default SettingsView;
 
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 type SettingsData = {
   auth: ReturnType<typeof useAuth>;
   config: ReturnType<typeof useDataConfig>;
   push: ReturnType<typeof usePushNotifications>;
   handlers: ReturnType<typeof useSettingsHandlers>;
-  t: TFunc;
+  t: TranslateFunction;
 };
 
 type Group = {
@@ -101,7 +99,10 @@ const resolveSection = (value: string): SettingsSection | null => {
   return match.section;
 };
 
-const resolveHeader = (section: SettingsSection | null, t: TFunc) => {
+const resolveHeader = (
+  section: SettingsSection | null,
+  t: TranslateFunction,
+) => {
   if (!section) {
     return {
       title: t('settings.title'),
@@ -138,7 +139,7 @@ const renderContent = (section: SettingsSection | null, data: SettingsData) => {
   return renderData(data);
 };
 
-const renderIndex = (t: TFunc) => (
+const renderIndex = (t: TranslateFunction) => (
   <div className="space-y-8">
     <nav
       className="surface-card-flush divide-y divide-border/40"
@@ -150,7 +151,7 @@ const renderIndex = (t: TFunc) => (
   </div>
 );
 
-const renderGroupLink = (group: Group, t: TFunc) => {
+const renderGroupLink = (group: Group, t: TranslateFunction) => {
   const Icon = group.icon;
 
   return (

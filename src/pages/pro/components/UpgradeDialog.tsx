@@ -11,6 +11,7 @@ import { useUpgradeDialog } from '@/common/contexts/UpgradeDialogContext';
 import { useToast } from '@/common/hooks/useToast';
 import { useProPlans } from '@/pages/pro/hooks/useProPlans';
 import type { CheckoutPlan } from '@/common/api/subscriptionService';
+import type { TranslateFunction } from '@/constants/translate';
 
 export const UpgradeDialog = () => {
   const { t } = useTranslation();
@@ -86,14 +87,11 @@ export const UpgradeDialog = () => {
     </Dialog>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 const renderCtaLabel = (
   isRedirecting: boolean,
   isTrialEligible: boolean,
-  t: TFunc,
+  t: TranslateFunction,
 ): string => {
   if (isRedirecting) return t('pro.redirecting');
   if (isTrialEligible) return t('pro.trialCta');
@@ -103,7 +101,7 @@ const renderCtaLabel = (
 
 // "Cancel anytime · Terms · Privacy" — the reassurance line every good
 // paywall closes on. Links close the dialog so the page behind is visible.
-const renderFootnote = (t: TFunc, onNavigate: () => void) => (
+const renderFootnote = (t: TranslateFunction, onNavigate: () => void) => (
   <p className="text-center text-[11px] text-muted-foreground">
     {t('pro.cancelAnytime')}
     <span aria-hidden className="mx-1.5">

@@ -6,14 +6,13 @@ import Monitor from 'lucide-react/dist/esm/icons/monitor';
 import Sun from 'lucide-react/dist/esm/icons/sun';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import Check from 'lucide-react/dist/esm/icons/check';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   ACCENT_COLORS,
   accentSwatch,
   type AccentColorKey,
 } from '@/pages/settings/hooks/useAccentColor';
 import type { Theme } from '@/common/hooks/useTheme';
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 type AppearanceSectionProps = {
   theme: Theme;
@@ -22,8 +21,8 @@ type AppearanceSectionProps = {
   areHapticsEnabled: boolean;
   onThemeSelect: (theme: Theme) => void;
   onAccentSelect: (key: AccentColorKey) => void;
-  onHapticsToggle: (enabled: boolean) => void;
-  t: TFunc;
+  onHapticsToggle: (isEnabled: boolean) => void;
+  t: TranslateFunction;
 };
 
 export const AppearanceSection = ({
@@ -64,7 +63,6 @@ export const AppearanceSection = ({
     </section>
   );
 };
-// --- Helpers ---
 
 const THEME_ICONS: Record<Theme, typeof Sun> = {
   system: Monitor,
@@ -77,7 +75,7 @@ const renderThemeButton = (
   themeName: Theme,
   currentTheme: string,
   setTheme: (theme: Theme) => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   const Icon = THEME_ICONS[themeName];
   const isActive = currentTheme === themeName;
@@ -118,7 +116,7 @@ const renderAccentPicker = (
   isBarbie: boolean,
   accent: AccentColorKey,
   setAccent: (key: AccentColorKey) => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (isBarbie) return null;
 
@@ -162,9 +160,9 @@ const renderAccentCheck = (isSelected: boolean) => {
 
 const renderHapticsToggle = (
   isSupported: boolean,
-  enabled: boolean,
-  onToggle: (enabled: boolean) => void,
-  t: TFunc,
+  isEnabled: boolean,
+  onToggle: (isEnabled: boolean) => void,
+  t: TranslateFunction,
 ) => {
   if (!isSupported) return null;
 
@@ -177,7 +175,7 @@ const renderHapticsToggle = (
         </p>
       </div>
       <Switch
-        checked={enabled}
+        checked={isEnabled}
         onCheckedChange={onToggle}
         aria-label={t('settings.appearance.haptics')}
       />

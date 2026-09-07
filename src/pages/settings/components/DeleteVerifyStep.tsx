@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   AlertDialogCancel,
   AlertDialogDescription,
@@ -80,11 +81,8 @@ export const DeleteVerifyStep = ({
     </>
   );
 };
-// --- Helpers ---
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
-const resolveVerifyLabel = (isDeleting: boolean, t: TFunc): string => {
+const resolveVerifyLabel = (isDeleting: boolean, t: TranslateFunction): string => {
   if (isDeleting) {
     return t('auth.verifying');
   }

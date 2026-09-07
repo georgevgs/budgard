@@ -9,6 +9,7 @@ import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { ExpenseWritePayload } from '@/common/api/dataService';
 import type { ReceiptOptions } from '@/common/hooks/dataOps/useExpenseOps';
+import type { TranslateFunction } from '@/constants/translate';
 
 const RECENT_WINDOW = 60;
 const CHIP_LIMIT = 8;
@@ -124,10 +125,6 @@ export const useQuickAddDraft = ({ isOpen, onSubmit, onClose }: Params) => {
   };
 };
 
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
 // A typed name always wins. It stays optional because asking for one is the
 // step that makes logging a coffee feel like paperwork — but a row needs a
 // label to be readable in a list, so the category stands in when it is blank.
@@ -135,7 +132,7 @@ const describe = (
   name: string,
   categoryId: string | null,
   categories: Category[],
-  t: TFunc,
+  t: TranslateFunction,
 ): string => {
   const typed = name.trim();
   if (typed) {

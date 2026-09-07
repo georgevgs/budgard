@@ -6,6 +6,7 @@ import { formatCurrency } from '@/constants/utils';
 import type { MonthComparison } from '@/pages/analytics/hooks/useAnalyticsData';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
+import type { TranslateFunction } from '@/constants/translate';
 
 export type MonthlyReviewItem = {
   id: 'comparison' | 'category' | 'budget' | 'count';
@@ -77,14 +78,10 @@ export const useMonthlyReview = ({
   ]);
 };
 
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
 const buildComparison = (
   comparison: MonthComparison,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ): MonthlyReviewItem => {
   if (comparison.thisMonthAmount === 0) {
     return { id: 'comparison', text: t('analytics.review.noSpending') };
@@ -121,7 +118,7 @@ const buildBudget = (
   spent: number,
   budget: number,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ): MonthlyReviewItem => {
   const remaining = budget - spent;
   if (remaining >= 0) {
@@ -144,7 +141,7 @@ const buildBudget = (
 const findTopCategory = (
   expenses: Expense[],
   categories: Category[],
-  t: TFunc,
+  t: TranslateFunction,
 ): { name: string; amount: number } | null => {
   if (expenses.length === 0) {
     return null;

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { UseFormReturn } from 'react-hook-form';
 import { Input } from '@/common/ui/input';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   FormControl,
   FormField,
@@ -89,11 +90,6 @@ export const CategoryFormFields = ({ form, isIncomeCategory, isDisabled }: Categ
   );
 };
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderNamePlaceholder = (
   isIncomeCategory: boolean,

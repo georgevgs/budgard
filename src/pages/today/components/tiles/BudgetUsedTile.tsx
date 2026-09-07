@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '@/constants/utils';
 import { BentoTile, TileLabel } from '@/common/components/bento';
+import type { TranslateFunction } from '@/constants/translate';
 
 type BudgetUsedTileProps = {
   spentThisMonth: number;
@@ -66,9 +67,6 @@ export const BudgetUsedTile = ({ spentThisMonth, monthlyBudget, currency }: Budg
     </BentoTile>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 // Past 100% the ring stops growing — it has run out of circle, and a second
 // lap would read as a smaller number than the first. The caption still tells
@@ -90,7 +88,7 @@ const resolvePercent = (spent: number, budget: number | null): number => {
 const resolveAriaLabel = (
   spent: number,
   budget: number | null,
-  t: TFunc,
+  t: TranslateFunction,
 ): string => {
   if (budget === null || budget <= 0) {
     return t('today.tile.noBudgetYet');
@@ -105,7 +103,7 @@ const renderCaption = (
   spent: number,
   budget: number | null,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ): string => {
   if (budget === null || budget <= 0) {
     return t('today.tile.noBudgetYet');

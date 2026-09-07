@@ -3,6 +3,7 @@ import type { UseProPlansReturn } from '@/pages/pro/hooks/useProPlans';
 import { yearlySavingsPercent } from '@/constants/proPlans';
 import type { CheckoutPlan } from '@/common/api/subscriptionService';
 import { cn } from '@/constants/utils';
+import type { TranslateFunction } from '@/constants/translate';
 
 type PaywallPlansProps = {
   plan: CheckoutPlan;
@@ -45,9 +46,6 @@ export const PaywallPlans = ({ plan, onSelect, plans }: PaywallPlansProps) => {
     </div>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 type PlanCard = {
   value: CheckoutPlan;
@@ -60,7 +58,7 @@ type PlanCard = {
   subLine: string | null;
 };
 
-const buildSavingsBadge = (plans: UseProPlansReturn, t: TFunc): string | null => {
+const buildSavingsBadge = (plans: UseProPlansReturn, t: TranslateFunction): string | null => {
   const percent = yearlySavingsPercent(plans.prices);
   if (percent <= 0) return null;
 

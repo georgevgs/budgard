@@ -10,6 +10,7 @@ import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import { formatCurrency } from '@/constants/utils';
 import { buildWeeklyRecap, type WeeklyAnomaly } from '@/constants/weeklyAnomalies';
+import type { TranslateFunction } from '@/constants/translate';
 
 export type Insight = {
   id: string;
@@ -86,11 +87,9 @@ export const useSpendingInsights = (
 
 // ─── Insight builders ───────────────────────────────────────────────────────
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
 type WeeklyAnomalyArgs = {
   anomaly: WeeklyAnomaly | null;
-  t: TFunc;
+  t: TranslateFunction;
 };
 
 const weeklyAnomalyInsight = (args: WeeklyAnomalyArgs): Insight | null => {
@@ -128,7 +127,7 @@ type DailyArgs = {
   dayOfMonth: number;
   daysInMonth: number;
   defaultCurrency: string;
-  t: TFunc;
+  t: TranslateFunction;
 };
 
 const dailyBudgetRemainingInsight = (args: DailyArgs): Insight | null => {
@@ -181,7 +180,7 @@ type PaceArgs = {
   thisMonthAmount: number;
   dayOfMonth: number;
   daysInMonth: number;
-  t: TFunc;
+  t: TranslateFunction;
 };
 
 const spendingPaceInsight = (args: PaceArgs): Insight | null => {
@@ -224,7 +223,7 @@ type ProjectionArgs = {
   dayOfMonth: number;
   daysInMonth: number;
   defaultCurrency: string;
-  t: TFunc;
+  t: TranslateFunction;
 };
 
 const monthProjectionInsight = (args: ProjectionArgs): Insight | null => {

@@ -5,6 +5,7 @@ import type { ChartPoint, Series } from '@/common/components/charts/chartTypes';
 import { ChartTooltipRow } from '@/common/components/common/ChartTooltip';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { ProjectionMonth } from '@/constants/forecast';
+import type { TranslateFunction } from '@/constants/translate';
 
 type ForecastChartProps = {
   data: ProjectionMonth[];
@@ -34,14 +35,14 @@ const ForecastChartComponent = ({
         key: 'projectedIncome',
         label: t('analytics.forecast.projectedIncome'),
         color: '--income',
-        dashed: true,
+        isDashed: true,
       },
       {
         kind: 'line',
         key: 'projectedExpenses',
         label: t('analytics.forecast.projectedSpending'),
         color: '--primary',
-        dashed: true,
+        isDashed: true,
       },
       ...balanceSeries(hasBalance, t),
     ],
@@ -66,11 +67,8 @@ const ForecastChartComponent = ({
 
 // Memoised: the parent re-renders on every data mutation, this subtree does not.
 export const ForecastChart = memo(ForecastChartComponent);
-// --- Helpers ---
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
-const balanceSeries = (hasBalance: boolean, t: TFunc): Series[] => {
+const balanceSeries = (hasBalance: boolean, t: TranslateFunction): Series[] => {
   if (!hasBalance) {
     return [];
   }
@@ -87,7 +85,7 @@ const balanceSeries = (hasBalance: boolean, t: TFunc): Series[] => {
 
 // Only worth drawing when there is a balance that could cross it. Zero on a
 // chart of pure flows is just the bottom of the axis.
-const buildZeroLine = (hasBalance: boolean, t: TFunc) => {
+const buildZeroLine = (hasBalance: boolean, t: TranslateFunction) => {
   if (!hasBalance) {
     return undefined;
   }
@@ -99,7 +97,11 @@ const buildZeroLine = (hasBalance: boolean, t: TFunc) => {
   };
 };
 
-const renderTooltip = (point: ChartPoint, currency: string, t: TFunc) => {
+const renderTooltip = (
+  point: ChartPoint,
+  currency: string,
+  t: TranslateFunction,
+) => {
   const net = Number(point.projectedNet ?? 0);
 
   return (
@@ -121,13 +123,17 @@ const renderTooltip = (point: ChartPoint, currency: string, t: TFunc) => {
         labelClassName="font-medium"
         value={`${netSign(net)}${formatCurrency(net, currency)}`}
         valueClassName={cn('font-semibold', netClass(net))}
-        separated
+        isSeparated
       />
     </div>
   );
 };
 
-const renderBalanceRow = (point: ChartPoint, currency: string, t: TFunc) => {
+const renderBalanceRow = (
+  point: ChartPoint,
+  currency: string,
+  t: TranslateFunction,
+) => {
   if (typeof point.projectedBalance !== 'number') {
     return null;
   }
@@ -161,7 +167,7 @@ const netSign = (net: number): string => {
 const buildAriaLabel = (
   data: ProjectionMonth[],
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ): string => {
   if (data.length === 0) {
     return t('analytics.forecast.title');

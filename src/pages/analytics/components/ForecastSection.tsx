@@ -5,6 +5,7 @@ import { useForecastData } from '@/pages/analytics/hooks/useForecastData';
 import { formatCurrency, cn } from '@/constants/utils';
 import { getCurrencySymbol } from '@/constants/currencies';
 import { lazyWithRetry } from '@/constants/lazyWithRetry';
+import type { TranslateFunction } from '@/constants/translate';
 
 const ForecastChart = lazyWithRetry(async () => {
   const module = await import('@/pages/analytics/components/ForecastChart');
@@ -52,12 +53,6 @@ export const ForecastSection = () => {
     </div>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 // The whole reason the balance is projected at all. A chart of monthly nets
 // tells you the rate; this tells you the month it stops being survivable,

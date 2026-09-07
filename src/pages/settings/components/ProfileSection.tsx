@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Button } from '@/common/ui/button';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,12 +14,10 @@ import {
 } from '@/common/ui/alert-dialog';
 import LogOut from 'lucide-react/dist/esm/icons/log-out';
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
 type ProfileSectionProps = {
   email: string | undefined;
   onSignOut: () => Promise<void>;
-  t: TFunc;
+  t: TranslateFunction;
 };
 
 export const ProfileSection = ({ email, onSignOut, t }: ProfileSectionProps) => {

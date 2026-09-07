@@ -12,8 +12,7 @@ import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { useWeeklyRecap } from '@/common/hooks/useWeeklyRecap';
 import { formatCurrency } from '@/constants/utils';
 import type { WeeklyAnomaly } from '@/constants/weeklyAnomalies';
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
+import type { TranslateFunction } from '@/constants/translate';
 
 export const WeeklyRecapCard = () => {
   const { t } = useTranslation();
@@ -54,7 +53,7 @@ const renderHeader = (
   endStr: string,
   onDismiss: () => void,
   dateLocale: Locale,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   const startLabel = format(parseISO(startStr), 'd LLL', {
     locale: dateLocale,
@@ -85,7 +84,7 @@ const renderHeader = (
   );
 };
 
-const renderTotalComparison = (ratio: number | null, t: TFunc) => {
+const renderTotalComparison = (ratio: number | null, t: TranslateFunction) => {
   if (ratio === null) return null;
 
   const percent = Math.round((ratio - 1) * 100);
@@ -115,7 +114,7 @@ const renderTotalComparison = (ratio: number | null, t: TFunc) => {
 const renderAnomalies = (
   anomalies: WeeklyAnomaly[],
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (anomalies.length === 0) return null;
 
@@ -129,7 +128,7 @@ const renderAnomalies = (
 const renderAnomalyRow = (
   anomaly: WeeklyAnomaly,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   const multiple = anomaly.ratio.toFixed(1).replace(/\.0$/, '');
 
@@ -169,7 +168,7 @@ const renderAnomalyRow = (
 const renderAnomalyText = (
   direction: WeeklyAnomaly['direction'],
   multiple: string,
-  t: TFunc,
+  t: TranslateFunction,
 ): string => {
   if (direction === 'up') return t('weeklyRecap.upMultiple', { multiple });
 

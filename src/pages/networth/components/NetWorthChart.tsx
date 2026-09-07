@@ -8,6 +8,7 @@ import { ChartTooltipRow } from '@/common/components/common/ChartTooltip';
 import { cn, formatCurrency, formatCurrencyCompact } from '@/constants/utils';
 import type { NetWorthPoint } from '@/common/hooks/useNetWorth';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
+import type { TranslateFunction } from '@/constants/translate';
 
 type NetWorthChartProps = {
   series: NetWorthPoint[];
@@ -65,16 +66,13 @@ export const NetWorthChart = ({
     </SurfaceCard>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 // Per-day debt history is not tracked, so today's debt total is subtracted
 // from every historical point to keep the last point aligned with the header.
 // That makes the liability component a constant, which means the shape of the
 // line is the shape of the assets — worth saying rather than leaving the
 // reader to infer a debt trend that was never drawn.
-const renderDebtCaveat = (hasDebtConstant: boolean, t: TFunc) => {
+const renderDebtCaveat = (hasDebtConstant: boolean, t: TranslateFunction) => {
   if (!hasDebtConstant) return null;
 
   return (
@@ -84,7 +82,11 @@ const renderDebtCaveat = (hasDebtConstant: boolean, t: TFunc) => {
   );
 };
 
-const renderTooltip = (point: ChartPoint, currency: string, t: TFunc) => {
+const renderTooltip = (
+  point: ChartPoint,
+  currency: string,
+  t: TranslateFunction,
+) => {
   const total = Number(point.total ?? 0);
 
   return (
@@ -120,7 +122,7 @@ const negativeClass = (total: number): string => {
 const buildAriaLabel = (
   data: { fullDate: string; total: number }[],
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ): string => {
   const first = data[0];
   const last = data[data.length - 1];

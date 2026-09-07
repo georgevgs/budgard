@@ -5,6 +5,7 @@ import { useDialogDirty } from '@/common/hooks/useDialogDirty';
 import { parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   DialogTitle,
   DialogHeader,
@@ -107,12 +108,6 @@ export const GoalForm = ({ goal, onSubmit, onClose }: GoalFormProps) => {
     </>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const resolveTargetAmount = (goal: Goal | undefined): string => {
   if (!goal) {

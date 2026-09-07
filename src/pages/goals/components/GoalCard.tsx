@@ -7,6 +7,7 @@ import { GoalProgressBar } from '@/pages/goals/components/GoalProgressBar';
 import { GoalCardActions } from '@/pages/goals/components/GoalCardActions';
 import { useGoalProgress } from '@/common/hooks/useGoalProgress';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   useAccountsData,
   useCategoriesData,
@@ -62,12 +63,6 @@ export const GoalCard = ({ goal, onEdit, onDelete }: GoalCardProps) => {
     </SurfaceCard>
   );
 };
-// --- Helpers ---
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const renderSourceLabel = (
   goal: Goal,

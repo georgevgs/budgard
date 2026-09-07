@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import * as z from 'zod';
 import { Button } from '@/common/ui/button';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   Dialog,
   DialogContent,
@@ -71,10 +72,8 @@ export const TransactionRuleDialog = ({
     </Dialog>
   );
 };
-// --- Helpers ---
 
 type Form = ReturnType<typeof useForm<Values>>;
-type TFunc = ReturnType<typeof useTranslation>['t'];
 
 const buildDefaults = (transaction: Expense): Values => ({
   match_type: 'exact',
@@ -93,7 +92,7 @@ const getTransactionType = (transaction: Expense): 'expense' | 'income' => {
   return 'expense';
 };
 
-const renderMatchFields = (form: Form, t: TFunc) => (
+const renderMatchFields = (form: Form, t: TranslateFunction) => (
   <div className="grid gap-3 sm:grid-cols-[9rem_1fr]">
     <div className="space-y-1.5">
       <Label htmlFor="rule-match-type">{t('review.rule.matchType')}</Label>
@@ -114,7 +113,11 @@ const renderMatchFields = (form: Form, t: TFunc) => (
   </div>
 );
 
-const renderActionFields = (form: Form, categories: Category[], t: TFunc) => (
+const renderActionFields = (
+  form: Form,
+  categories: Category[],
+  t: TranslateFunction,
+) => (
   <div className="space-y-3 rounded-lg border border-border/50 p-3">
     <p className="text-xs font-semibold text-muted-foreground">
       {t('review.rule.then')}
@@ -141,7 +144,7 @@ const renderActionFields = (form: Form, categories: Category[], t: TFunc) => (
   </div>
 );
 
-const renderFormError = (message: string | undefined, t: TFunc) => {
+const renderFormError = (message: string | undefined, t: TranslateFunction) => {
   if (!message) {
     return null;
   }
@@ -166,7 +169,10 @@ const emptyToNull = (value: string): string | null => {
   return value;
 };
 
-const getSubmitLabel = (isSubmitting: boolean, t: TFunc): string => {
+const getSubmitLabel = (
+  isSubmitting: boolean,
+  t: TranslateFunction,
+): string => {
   if (isSubmitting) {
     return t('review.rule.saving');
   }

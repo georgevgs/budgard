@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDialogDirty } from '@/common/hooks/useDialogDirty';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   DialogTitle,
   DialogDescription,
@@ -26,7 +27,7 @@ import {
   getInitialDate,
   renderFormTitle,
   renderSaveButtonLabel,
-} from '@/pages/income/components/IncomeForm.helpers';
+} from '@/pages/income/utils/incomeFormHelpers';
 
 type IncomeFormProps = {
   income?: Expense;
@@ -107,15 +108,12 @@ export const IncomeForm = ({ income, onClose }: IncomeFormProps) => {
     </div>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 const renderActions = (
   isSubmitting: boolean,
   isValid: boolean,
   onClose: () => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => (
   <div className="flex shrink-0 justify-end gap-3 border-t border-border/50 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-3">
     <Button type="button" variant="outline" onClick={onClose}>

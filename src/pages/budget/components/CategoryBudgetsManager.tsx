@@ -5,6 +5,7 @@ import X from 'lucide-react/dist/esm/icons/x';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { Button } from '@/common/ui/button';
 import { Input } from '@/common/ui/input';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   Dialog,
   DialogContent,
@@ -48,8 +49,6 @@ export const CategoryBudgetsManager = ({ isOpen, onClose }: CategoryBudgetsManag
 };
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
 type DialogRenderProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -63,7 +62,7 @@ type DialogRenderProps = {
   onUpdateDraft: (categoryId: string, raw: string) => void;
   onClearDraft: (categoryId: string) => void;
   onSave: () => void;
-  t: TFunc;
+  t: TranslateFunction;
 };
 
 const renderDialog = ({
@@ -144,7 +143,7 @@ const renderTotalsBar = (
   totals: CategoryBudgetTotals,
   monthlyBudget: number | null,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (totals.total === 0) {
     return null;
@@ -182,7 +181,7 @@ const renderGlobalRef = (monthlyBudget: number | null, currency: string) => {
   );
 };
 
-const renderOverWarning = (overGlobal: boolean, t: TFunc) => {
+const renderOverWarning = (overGlobal: boolean, t: TranslateFunction) => {
   if (!overGlobal) return null;
 
   return (
@@ -199,7 +198,7 @@ const renderCategoryRows = (
   isSaving: boolean,
   updateDraft: (categoryId: string, raw: string) => void,
   clearDraft: (categoryId: string) => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (categories.length === 0) {
     return renderEmptyState(t);
@@ -229,7 +228,7 @@ const renderCategoryRow = (
   isSaving: boolean,
   updateDraft: (categoryId: string, raw: string) => void,
   clearDraft: (categoryId: string) => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   const hasDraft = draft.length > 0;
 
@@ -266,7 +265,7 @@ const renderClearButton = (
   isSaving: boolean,
   category: Category,
   clearDraft: (categoryId: string) => void,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (!hasDraft) return null;
 
@@ -291,7 +290,7 @@ const pickAllocatedClass = (overGlobal: boolean) => {
   return '';
 };
 
-const renderEmptyState = (t: TFunc) => {
+const renderEmptyState = (t: TranslateFunction) => {
   return (
     <div className="flex flex-col items-center text-center py-12 px-4">
       <FolderOpen
@@ -338,7 +337,7 @@ const renderError = (error: string | null) => {
   );
 };
 
-const renderSaveContent = (isSaving: boolean, t: TFunc) => {
+const renderSaveContent = (isSaving: boolean, t: TranslateFunction) => {
   if (isSaving) {
     return (
       <>

@@ -6,6 +6,7 @@ import { PageHeader } from '@/common/components/common/PageHeader';
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { useHouseholdOps } from '@/common/hooks/dataOps/useHouseholdOps';
 import type { HouseholdShare } from '@/types/Household';
+import type { TranslateFunction } from '@/constants/translate';
 
 const JoinHouseholdView = () => {
   const { t } = useTranslation();
@@ -32,10 +33,7 @@ const JoinHouseholdView = () => {
 
 export default JoinHouseholdView;
 
-// --- Helpers ---
-
 type Ops = ReturnType<typeof useHouseholdOps>;
-type TFunc = ReturnType<typeof useTranslation>['t'];
 type Navigate = ReturnType<typeof useNavigate>;
 
 const findInvite = (
@@ -52,7 +50,7 @@ const renderInviteState = (
   token: string,
   ops: Ops,
   navigate: Navigate,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (ops.isLoading) {
     return (
@@ -118,7 +116,7 @@ const renderInviteState = (
   );
 };
 
-const getAcceptLabel = (ops: Ops, t: TFunc): string => {
+const getAcceptLabel = (ops: Ops, t: TranslateFunction): string => {
   if (ops.pendingAction === 'accept') {
     return t('householdJoin.joining');
   }

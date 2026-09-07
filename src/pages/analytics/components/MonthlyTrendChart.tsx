@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CartesianChart } from '@/common/components/charts/CartesianChart';
 import type { ChartPoint, Series } from '@/common/components/charts/chartTypes';
 import { formatCurrency } from '@/constants/utils';
+import type { TranslateFunction } from '@/constants/translate';
 
 type MonthlyDataPoint = {
   month: string;
@@ -55,11 +56,8 @@ const MonthlyTrendChartComponent = ({
 
 // Memoised: the parent re-renders on every data mutation, this subtree does not.
 export const MonthlyTrendChart = memo(MonthlyTrendChartComponent);
-// --- Helpers ---
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
-
-const buildSeries = (shouldShowCashFlow: boolean, t: TFunc): Series[] => {
+const buildSeries = (shouldShowCashFlow: boolean, t: TranslateFunction): Series[] => {
   const series: Series[] = [
     {
       kind: 'area',
@@ -84,7 +82,7 @@ const buildSeries = (shouldShowCashFlow: boolean, t: TFunc): Series[] => {
   ];
 };
 
-const renderTooltip = (point: ChartPoint, currency: string, t: TFunc) => {
+const renderTooltip = (point: ChartPoint, currency: string, t: TranslateFunction) => {
   if (point.income === undefined) {
     return (
       <>
@@ -102,7 +100,7 @@ const renderTooltip = (point: ChartPoint, currency: string, t: TFunc) => {
 const renderCashFlowTooltip = (
   point: ChartPoint,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   const income = Number(point.income ?? 0);
   const expense = Number(point.amount ?? 0);
@@ -132,7 +130,7 @@ const renderCashFlowTooltip = (
 const buildBudgetReference = (
   monthlyBudget: number | null,
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ) => {
   if (!monthlyBudget) {
     return undefined;
@@ -153,7 +151,7 @@ const buildBudgetReference = (
 const buildAriaLabel = (
   data: MonthlyDataPoint[],
   currency: string,
-  t: TFunc,
+  t: TranslateFunction,
 ): string => {
   if (data.length === 0) {
     return t('analytics.monthlyTrend');

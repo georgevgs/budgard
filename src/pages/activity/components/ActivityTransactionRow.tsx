@@ -6,6 +6,7 @@ import { IncomeCardActions } from '@/pages/income/components/IncomeCardActions';
 import { cn } from '@/constants/utils';
 import { describeAmount } from '@/constants/transactionAmount';
 import type { Expense } from '@/types/Expense';
+import type { TranslateFunction } from '@/constants/translate';
 
 type ActivityTransactionRowProps = {
   transaction: Expense;
@@ -65,9 +66,6 @@ export const ActivityTransactionRow = (props: ActivityTransactionRowProps) => {
     </div>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 // The category mark is shared with the pills Today draws, so the same
 // transaction is headed by the same SVG wherever it is listed.
@@ -80,7 +78,7 @@ const renderCategoryMark = (transaction: Expense) => {
   );
 };
 
-const renderCategoryName = (transaction: Expense, t: TFunc) => {
+const renderCategoryName = (transaction: Expense, t: TranslateFunction) => {
   if (transaction.category?.name) {
     return transaction.category.name;
   }

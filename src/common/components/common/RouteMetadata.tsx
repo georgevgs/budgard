@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
+import type { TranslateFunction } from '@/constants/translate';
 
 // Keeps browser history, assistive technology and the visible route in sync.
 export const RouteMetadata = () => {
@@ -26,9 +27,6 @@ export const RouteMetadata = () => {
     </span>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string) => string;
 
 const PAGE_TITLE_KEYS: Record<string, string> = {
   '/today': 'navigation.today',
@@ -53,7 +51,7 @@ const PAGE_TITLE_KEYS: Record<string, string> = {
   '/contact': 'legal.contact.title',
 };
 
-const resolvePageTitle = (pathname: string, t: TFunc): string => {
+const resolvePageTitle = (pathname: string, t: TranslateFunction): string => {
   const titleKey = PAGE_TITLE_KEYS[pathname];
   if (!titleKey) {
     return 'Budgard';

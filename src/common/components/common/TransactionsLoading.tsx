@@ -1,17 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { TransactionsSkeletonBody } from '@/common/components/common/TransactionsSkeletonBody';
 import LoadingScreen from '@/common/ui/loading-screen';
+import type { TranslateFunction } from '@/constants/translate';
 
 type Section = 'expenses' | 'income';
 
 type TransactionsLoadingProps = {
   section?: Section;
 };
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 // Mirrors the structure of the screen it is about to become so the transition
 // from skeleton → real content feels seamless rather than jarring. Today, Plan,
@@ -33,8 +29,6 @@ export const TransactionsLoading = ({
     </LoadingScreen>
   );
 };
-
-// --- Helpers ---
 
 const resolveSectionName = (section: Section, t: TranslateFunction): string => {
   if (section === 'income') {

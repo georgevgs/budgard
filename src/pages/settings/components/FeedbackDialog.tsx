@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   Dialog,
   DialogContent,
@@ -78,9 +79,6 @@ export const FeedbackDialog = ({ open, kind, onClose }: FeedbackDialogProps) => 
     </Dialog>
   );
 };
-// --- Helpers ---
-
-type TFunc = (key: string) => string;
 
 const closeWhenNeeded = (open: boolean, onClose: () => void) => {
   if (!open) {
@@ -88,7 +86,7 @@ const closeWhenNeeded = (open: boolean, onClose: () => void) => {
   }
 };
 
-const getSubmitLabel = (isSubmitting: boolean, t: TFunc): string => {
+const getSubmitLabel = (isSubmitting: boolean, t: TranslateFunction): string => {
   if (isSubmitting) {
     return t('settings.feedback.sending');
   }

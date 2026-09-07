@@ -4,6 +4,7 @@ import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
 import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 import X from 'lucide-react/dist/esm/icons/x';
+import type { TranslateFunction } from '@/constants/translate';
 import {
   Dialog,
   DialogContent,
@@ -92,7 +93,6 @@ export const CsvImportDialog = ({ open, onClose }: CsvImportDialogProps) => {
     </Dialog>
   );
 };
-// --- Helpers ---
 
 type CsvFlow = ReturnType<typeof useCsvImportFlow>;
 
@@ -119,11 +119,6 @@ const renderMappingStep = (flow: CsvFlow, t: TranslateFunction) => {
 };
 
 // ─── Helper render functions ──────────────────────────────────────────────────
-
-type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
 
 const parseCategoryMapValue = (value: string): string | null => {
   if (value === '_skip') {

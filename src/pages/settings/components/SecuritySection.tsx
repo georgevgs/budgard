@@ -6,6 +6,7 @@ import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { SetPinDialog } from '@/pages/security/components/SetPinDialog';
 import { ConfirmDestructiveDialog } from '@/common/components/common/ConfirmDestructiveDialog';
 import { useSecuritySettings } from '@/pages/security/hooks/useSecuritySettings';
+import type { TranslateFunction } from '@/constants/translate';
 
 export const SecuritySection = () => {
   const { t } = useTranslation();
@@ -88,14 +89,12 @@ export const SecuritySection = () => {
     </section>
   );
 };
-// --- Helpers ---
 
-type TFunc = (key: string, options?: Record<string, unknown>) => string;
 type Security = ReturnType<typeof useSecuritySettings>;
 
 // Only offered where the device actually has a biometric or passcode to check
 // against — an unavailable toggle that always fails is worse than no toggle.
-const renderDeviceUnlock = (security: Security, t: TFunc) => {
+const renderDeviceUnlock = (security: Security, t: TranslateFunction) => {
   if (!security.isEnabled || !security.isDeviceSupported) {
     return null;
   }
@@ -119,7 +118,7 @@ const renderDeviceUnlock = (security: Security, t: TFunc) => {
   );
 };
 
-const renderChangePin = (security: Security, t: TFunc) => {
+const renderChangePin = (security: Security, t: TranslateFunction) => {
   if (!security.isEnabled) {
     return null;
   }
