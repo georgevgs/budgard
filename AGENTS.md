@@ -163,8 +163,12 @@ constrain new work:
 - **Tests**: a test asserts behaviour or pins a regression. Before committing a
   new one, break the line it covers and watch it fail — a test that passes
   against broken code is worse than no test.
-- Run `npm run lint`, `npm run test` and `npm run build` (`tsc -b` is stricter
-  than `tsc --noEmit` and catches what the editor misses).
+- Run `npm run lint`, `npm run test` and `npm run build`.
+- `npm run typecheck` runs `tsc -b`, and it has to stay that way. The root
+  `tsconfig.json` is `"files": []` plus project references, so a plain
+  `tsc --noEmit` compiles **nothing** and exits 0 on a codebase full of
+  errors — it read clean for a long time while it was checking no files at
+  all. Build mode is what actually walks the two projects.
 
 ## 📖 Reference docs
 
