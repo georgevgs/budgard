@@ -45,7 +45,7 @@ export const AmountKeypad = ({ pad }: AmountKeypadProps) => {
           haptics.light();
           pad.backspace();
         }}
-        icon
+        hasIcon
       />
     </div>
   );
@@ -54,22 +54,22 @@ export const AmountKeypad = ({ pad }: AmountKeypadProps) => {
 type KeypadButtonProps = {
   label: string;
   onPress: () => void;
-  icon?: boolean;
+  hasIcon?: boolean;
 };
 
-const KeypadButton = ({ label, onPress, icon }: KeypadButtonProps) => (
+const KeypadButton = ({ label, onPress, hasIcon }: KeypadButtonProps) => (
   <button
     type="button"
     onClick={onPress}
     aria-label={label}
     className="flex h-14 items-center justify-center rounded-2xl bg-muted/60 type-figure transition-colors active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
   >
-    {renderFace(label, icon)}
+    {renderFace(label, hasIcon)}
   </button>
 );
 
-const renderFace = (label: string, icon: boolean | undefined) => {
-  if (icon) {
+const renderFace = (label: string, hasIcon: boolean | undefined) => {
+  if (hasIcon) {
     return <Delete className="h-6 w-6" aria-hidden="true" />;
   }
 

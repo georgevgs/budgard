@@ -59,7 +59,7 @@ export const useExpenseAlerts = ({
   useCategoryBudgetAlerts({
     alerts: categoryAlertInputs,
     defaultCurrency,
-    enabled: selectedMonth === currentMonth && isPro,
+    isEnabled: selectedMonth === currentMonth && isPro,
   });
 };
 

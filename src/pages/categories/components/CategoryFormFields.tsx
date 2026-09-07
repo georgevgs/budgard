@@ -89,8 +89,6 @@ export const CategoryFormFields = ({ form, isIncomeCategory, isDisabled }: Categ
     </>
   );
 };
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const renderNamePlaceholder = (
   isIncomeCategory: boolean,
   t: TranslateFunction,

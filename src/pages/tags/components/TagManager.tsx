@@ -79,8 +79,6 @@ export const TagManager = () => {
   );
 };
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const renderTagList = (
   tags: Tag[],
   t: TranslateFunction,

@@ -63,8 +63,6 @@ export const FormsManager = ({
     </Dialog>
   );
 };
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 const renderExpenseForm = (
   isOpen: boolean,
   expense: Expense | undefined,

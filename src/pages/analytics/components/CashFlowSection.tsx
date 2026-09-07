@@ -103,8 +103,6 @@ export const CashFlowSection = ({
     </div>
   );
 };
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 // yAxisMax is sized for the expense-only free chart (budget vs biggest
 // month). Income bars on the Pro chart can run well past that — a paycheck
 // is usually bigger than a month of spending — so Pro auto-fits instead of

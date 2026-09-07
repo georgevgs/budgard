@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect } from 'react';
 
-type SetDialogDirty = (dirty: boolean) => void;
+type SetDialogDirty = (isDirty: boolean) => void;
 
 // Provided by DialogContent; forms report their dirty state through it so the
 // dialog can ask for confirmation before an implicit dismissal (swipe, Esc,

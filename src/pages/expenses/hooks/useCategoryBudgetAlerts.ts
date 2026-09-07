@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
-import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/common/hooks/useToast';
 import { formatCurrency } from '@/constants/utils';
 import { haptics } from '@/constants/haptics';
+import type { TranslateFunction } from '@/constants/translate';
 
 const WARNING_THRESHOLD = 80;
 const EXCEEDED_THRESHOLD = 100;
@@ -27,7 +27,7 @@ type UseCategoryBudgetAlertsProps = {
   defaultCurrency: string;
   // Disables alerts when the dashboard is showing a non-current month —
   // alerts should only fire on real-time spending.
-  enabled: boolean;
+  isEnabled: boolean;
 };
 
 // Mirrors `useBudgetAlerts` but keyed per category. Each category gets its
@@ -37,13 +37,13 @@ type UseCategoryBudgetAlertsProps = {
 export const useCategoryBudgetAlerts = ({
   alerts,
   defaultCurrency,
-  enabled,
+  isEnabled,
 }: UseCategoryBudgetAlertsProps): void => {
   const { t } = useTranslation();
   const stateRef = useRef<Map<string, AlertState>>(new Map());
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!isEnabled) return;
 
     const state = stateRef.current;
     const seenIds = new Set<string>();
@@ -67,7 +67,7 @@ export const useCategoryBudgetAlerts = ({
     for (const id of state.keys()) {
       if (!seenIds.has(id)) state.delete(id);
     }
-  }, [alerts, defaultCurrency, enabled, t]);
+  }, [alerts, defaultCurrency, isEnabled, t]);
 };
 
 // Which threshold, if any, this reading crosses upward. Mutates the category's
@@ -134,7 +134,7 @@ const recordSpending = (
 };
 
 const exceededToast = (
-  t: TFunction,
+  t: TranslateFunction,
   alert: CategoryBudgetAlertInput,
   defaultCurrency: string,
 ) => ({
@@ -150,7 +150,7 @@ const exceededToast = (
 });
 
 const warningToast = (
-  t: TFunction,
+  t: TranslateFunction,
   alert: CategoryBudgetAlertInput,
   defaultCurrency: string,
   percent: number,

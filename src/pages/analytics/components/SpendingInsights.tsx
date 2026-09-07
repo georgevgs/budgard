@@ -27,8 +27,6 @@ export const SpendingInsights = (props: SpendingInsightsProps) => {
     </div>
   );
 };
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 // Insights are one reading task, so they share one common region instead of
 // repeating the same large capsule for every sentence. Ordering carries
 // priority; ink and weight stay equal throughout the list.

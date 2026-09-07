@@ -11,8 +11,8 @@ import { XAxis, YAxis, ReferenceLine } from '@/common/components/charts/ChartAxe
 import { renderSeries } from '@/common/components/charts/ChartSeries';
 import { ChartLegend } from '@/common/components/charts/ChartLegend';
 import { ChartHoverCard } from '@/common/components/charts/ChartHoverCard';
-import { useChartSize } from '@/common/components/charts/useChartSize';
-import { useChartInteraction } from '@/common/components/charts/useChartInteraction';
+import { useChartSize } from '@/common/components/charts/hooks/useChartSize';
+import { useChartInteraction } from '@/common/components/charts/hooks/useChartInteraction';
 import { buildPlot, seriesExtent } from '@/common/components/charts/chartLayout';
 import type { CartesianChartProps } from '@/common/components/charts/chartTypes';
 

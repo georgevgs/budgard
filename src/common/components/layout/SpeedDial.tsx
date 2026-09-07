@@ -13,6 +13,7 @@ import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import X from 'lucide-react/dist/esm/icons/x';
 import { cn } from '@/constants/utils';
 import { haptics } from '@/constants/haptics';
+import type { TranslateFunction } from '@/constants/translate';
 import { SpeedDialAction } from '@/common/components/layout/SpeedDialAction';
 
 // The two things a money app is for. Both are always present: this used to
@@ -102,8 +103,6 @@ export const SpeedDial = ({ onAddExpense, onAddIncome }: SpeedDialProps) => {
     </>
   );
 };
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 const useSpeedDialFocus = (
   isOpen: boolean,
   actionsRef: RefObject<HTMLDivElement | null>,
@@ -173,7 +172,7 @@ const renderToggleIcon = (isOpen: boolean) => {
 
 const getToggleLabel = (
   isOpen: boolean,
-  t: (key: string) => string,
+  t: TranslateFunction,
 ): string => {
   if (isOpen) {
     return t('speedDial.close');

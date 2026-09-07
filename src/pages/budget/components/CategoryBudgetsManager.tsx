@@ -47,8 +47,6 @@ export const CategoryBudgetsManager = ({ isOpen, onClose }: CategoryBudgetsManag
     t,
   });
 };
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 type DialogRenderProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -149,7 +147,7 @@ const renderTotalsBar = (
     return null;
   }
 
-  const overGlobal = monthlyBudget !== null && totals.allocated > monthlyBudget;
+  const isOverGlobal = monthlyBudget !== null && totals.allocated > monthlyBudget;
 
   return (
     <div className="px-6 pb-2 shrink-0">
@@ -160,12 +158,12 @@ const renderTotalsBar = (
             total: totals.total,
           })}
         </span>
-        <span className={pickAllocatedClass(overGlobal)}>
+        <span className={pickAllocatedClass(isOverGlobal)}>
           {formatCurrency(totals.allocated, currency)}
           {renderGlobalRef(monthlyBudget, currency)}
         </span>
       </div>
-      {renderOverWarning(overGlobal, t)}
+      {renderOverWarning(isOverGlobal, t)}
     </div>
   );
 };
@@ -181,8 +179,8 @@ const renderGlobalRef = (monthlyBudget: number | null, currency: string) => {
   );
 };
 
-const renderOverWarning = (overGlobal: boolean, t: TranslateFunction) => {
-  if (!overGlobal) return null;
+const renderOverWarning = (isOverGlobal: boolean, t: TranslateFunction) => {
+  if (!isOverGlobal) return null;
 
   return (
     <p className="text-xs text-destructive-ink mt-1">
@@ -284,8 +282,8 @@ const renderClearButton = (
   );
 };
 
-const pickAllocatedClass = (overGlobal: boolean) => {
-  if (overGlobal) return 'text-destructive-ink font-medium';
+const pickAllocatedClass = (isOverGlobal: boolean) => {
+  if (isOverGlobal) return 'text-destructive-ink font-medium';
 
   return '';
 };

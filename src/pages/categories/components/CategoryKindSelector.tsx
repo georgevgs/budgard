@@ -89,8 +89,6 @@ export const CategoryKindSelector = ({
     </div>
   );
 };
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const toggleKind = (
   current: SelectableCategoryKind | undefined,
   next: SelectableCategoryKind,

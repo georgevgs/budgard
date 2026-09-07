@@ -9,6 +9,7 @@ import { QuickReceiptScanAction } from '@/pages/expenses/components/QuickReceipt
 import { useQuickAddDraft } from '@/pages/expenses/hooks/useQuickAddDraft';
 import { useQuickReceiptScan } from '@/pages/expenses/hooks/useQuickReceiptScan';
 import { cn, formatCurrency } from '@/constants/utils';
+import type { TranslateFunction } from '@/constants/translate';
 import type { ReceiptOptions } from '@/common/hooks/dataOps/useExpenseOps';
 import type { ExpenseWritePayload } from '@/common/api/dataService';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
@@ -138,7 +139,7 @@ const renderActions = (
   draft: Draft,
   onMoreDetails: () => void,
   receiptOptions: ReceiptOptions | undefined,
-  t: (key: string) => string,
+  t: TranslateFunction,
 ) => (
   <div className="mt-4 flex items-center gap-3">
     <Button

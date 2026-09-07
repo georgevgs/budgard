@@ -23,11 +23,11 @@ type NotificationsSectionProps = {
   notificationPreferences: NotificationPreferences;
   onPushSubscribe: () => Promise<void>;
   onPushUnsubscribe: () => Promise<void>;
-  onDailyReminderToggle: (enabled: boolean) => void;
+  onDailyReminderToggle: (isEnabled: boolean) => void;
   onDailyReminderTimeChange: (localHour: number) => void;
   onPreferenceToggle: (
     key: NotificationPreferenceKey,
-    enabled: boolean,
+    isEnabled: boolean,
   ) => void;
   t: TranslateFunction;
 };
@@ -191,7 +191,7 @@ const renderNotificationToggle = (
 const renderDailyReminder = (
   pushState: PushState,
   reminderHour: number | null,
-  onToggle: (enabled: boolean) => void,
+  onToggle: (isEnabled: boolean) => void,
   onTimeChange: (localHour: number) => void,
   t: TranslateFunction,
 ) => {
@@ -264,7 +264,7 @@ const renderReminderTimePicker = (
 const renderPreferences = (
   pushState: PushState,
   prefs: NotificationPreferences,
-  onToggle: (key: NotificationPreferenceKey, enabled: boolean) => void,
+  onToggle: (key: NotificationPreferenceKey, isEnabled: boolean) => void,
   t: TranslateFunction,
 ) => {
   if (pushState !== 'subscribed') return null;
@@ -291,7 +291,7 @@ const renderPreferences = (
 const renderPreferenceRow = (
   key: NotificationPreferenceKey,
   prefs: NotificationPreferences,
-  onToggle: (key: NotificationPreferenceKey, enabled: boolean) => void,
+  onToggle: (key: NotificationPreferenceKey, isEnabled: boolean) => void,
   t: TranslateFunction,
 ) => {
   const labels = PREFERENCE_LABELS[key];

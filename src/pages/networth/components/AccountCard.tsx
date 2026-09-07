@@ -25,7 +25,7 @@ type AccountCardProps = {
 export const AccountCard = ({ account, latestSnapshot, onClick }: AccountCardProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
-  const liability = isLiability(account.kind);
+  const isLiabilityAccount = isLiability(account.kind);
   const Icon = ICON_BY_KIND[account.kind];
 
   const lastUpdatedLabel = getLastUpdatedLabel(latestSnapshot, dateLocale, t);
@@ -62,11 +62,11 @@ export const AccountCard = ({ account, latestSnapshot, onClick }: AccountCardPro
         <p
           className={cn(
             'text-base font-semibold tabular-nums shrink-0',
-            liability && 'text-destructive-ink',
-            !liability && 'text-foreground',
+            isLiabilityAccount && 'text-destructive-ink',
+            !isLiabilityAccount && 'text-foreground',
           )}
         >
-          {renderLiabilityPrefix(liability)}
+          {renderLiabilityPrefix(isLiabilityAccount)}
           {formatCurrency(account.current_balance, account.default_currency)}
         </p>
       </div>
@@ -90,8 +90,8 @@ const getLastUpdatedLabel = (
   });
 };
 
-const renderLiabilityPrefix = (liability: boolean) => {
-  if (liability) {
+const renderLiabilityPrefix = (isLiabilityAccount: boolean) => {
+  if (isLiabilityAccount) {
     return '−';
   }
 

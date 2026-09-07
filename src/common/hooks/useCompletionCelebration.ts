@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 // Fires `onComplete(id)` once for each id that newly enters the completed set,
-// but only while `enabled` is true. Whatever is already complete when tracking
+// but only while `isEnabled` is true. Whatever is already complete when tracking
 // first arms is remembered silently (no replay on load / cache hydration), and
 // each id celebrates at most once even if it later drops out and returns (e.g.
 // an oscillating net-delta goal).

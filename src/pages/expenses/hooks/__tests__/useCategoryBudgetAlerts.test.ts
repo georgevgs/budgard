@@ -25,7 +25,7 @@ describe('useCategoryBudgetAlerts', () => {
       useCategoryBudgetAlerts({
         alerts: make(150, 100),
         defaultCurrency: 'EUR',
-        enabled: false,
+        isEnabled: false,
       }),
     );
 
@@ -37,7 +37,7 @@ describe('useCategoryBudgetAlerts', () => {
       useCategoryBudgetAlerts({
         alerts: make(95, 100),
         defaultCurrency: 'EUR',
-        enabled: true,
+        isEnabled: true,
       }),
     );
 
@@ -50,7 +50,7 @@ describe('useCategoryBudgetAlerts', () => {
         useCategoryBudgetAlerts({
           alerts: make(spent, 100),
           defaultCurrency: 'EUR',
-          enabled: true,
+          isEnabled: true,
         }),
       { initialProps: { spent: 50 } },
     );
@@ -67,7 +67,7 @@ describe('useCategoryBudgetAlerts', () => {
         useCategoryBudgetAlerts({
           alerts: make(spent, 100),
           defaultCurrency: 'EUR',
-          enabled: true,
+          isEnabled: true,
         }),
       { initialProps: { spent: 90 } },
     );
@@ -86,7 +86,7 @@ describe('useCategoryBudgetAlerts', () => {
         useCategoryBudgetAlerts({
           alerts: make(spent, 100),
           defaultCurrency: 'EUR',
-          enabled: true,
+          isEnabled: true,
         }),
       { initialProps: { spent: 70 } },
     );
@@ -104,7 +104,7 @@ describe('useCategoryBudgetAlerts', () => {
         useCategoryBudgetAlerts({
           alerts,
           defaultCurrency: 'EUR',
-          enabled: true,
+          isEnabled: true,
         }),
       { initialProps: { alerts: make(50, 100) } },
     );
@@ -122,7 +122,7 @@ describe('useCategoryBudgetAlerts', () => {
         useCategoryBudgetAlerts({
           alerts: make(spent, cap),
           defaultCurrency: 'EUR',
-          enabled: true,
+          isEnabled: true,
         }),
       { initialProps: { spent: 50, cap: 100 } },
     );

@@ -22,7 +22,7 @@ export const useAccountOps = () => {
   const runMutation = useMutationRunner();
 
   return useMemo(() => {
-    const skip = !isInitialized;
+    const shouldSkip = !isInitialized;
 
     // Server-first: an account's balance is derived, so there is nothing safe
     // to show before the write lands. New accounts append — the list reads
@@ -33,7 +33,7 @@ export const useAccountOps = () => {
     ): Promise<Account | null> => {
       const saved = await runMutation<Account>({
         operation: pickByEdit(accountId, 'updateAccount', 'createAccount'),
-        skip,
+        shouldSkip,
         errorMessage: pickByEdit(
           accountId,
           t('networth.toasts.accountUpdateFailed'),
@@ -75,7 +75,7 @@ export const useAccountOps = () => {
     const handleAccountArchive = (accountId: string) =>
       runMutation({
         operation: 'archiveAccount',
-        skip,
+        shouldSkip,
         errorMessage: t('networth.toasts.archiveFailed'),
         onStart: () => haptics.warning(),
         optimistic: () => removeOptimistic(setAccounts, accountId),
@@ -87,7 +87,7 @@ export const useAccountOps = () => {
     const handleSnapshotCreate = (snapshot: Partial<AccountBalance>) =>
       runMutation({
         operation: 'createAccountBalance',
-        skip,
+        shouldSkip,
         errorMessage: t('networth.toasts.balanceUpdateFailed'),
         successMessage: t('networth.toasts.balanceUpdated'),
         perform: () => dataService.upsertAccountBalance(snapshot),
@@ -113,7 +113,7 @@ export const useAccountOps = () => {
     const handleSnapshotDelete = (snapshotId: string, accountId: string) =>
       runMutation({
         operation: 'deleteAccountBalance',
-        skip,
+        shouldSkip,
         errorMessage: t('networth.toasts.snapshotDeleteFailed'),
         onStart: () => haptics.warning(),
         optimistic: () => removeOptimistic(setAccountBalances, snapshotId),

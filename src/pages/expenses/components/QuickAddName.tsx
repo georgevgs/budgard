@@ -8,6 +8,7 @@ import {
 import { Input } from '@/common/ui/input';
 import { renderSuggestionMeta } from '@/pages/expenses/utils/expensesFormHelpers';
 import type { Expense } from '@/types/Expense';
+import type { TranslateFunction } from '@/constants/translate';
 
 type QuickAddNameProps = {
   value: string;
@@ -109,7 +110,7 @@ const describedBy = (errorKey: string | null): string | undefined => {
   return 'quick-add-name-error';
 };
 
-const renderError = (errorKey: string | null, t: (key: string) => string) => {
+const renderError = (errorKey: string | null, t: TranslateFunction) => {
   if (!errorKey) {
     return null;
   }

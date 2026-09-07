@@ -60,8 +60,6 @@ export const BudgetCategorySection = ({
     </div>
   );
 };
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const pickManageLabel = (rowCount: number, t: TranslateFunction) => {
   if (rowCount === 0) return t('budget.categoryBudgets.add');
 

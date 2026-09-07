@@ -9,6 +9,7 @@ import {
 } from '@/common/ui/dialog';
 import { useTagOps } from '@/common/hooks/dataOps/useTagOps';
 import type { Tag } from '@/types/Tag';
+import type { TranslateFunction } from '@/constants/translate';
 
 type TagRenameFormProps = {
   tag: Tag;
@@ -74,7 +75,7 @@ export const TagRenameForm = ({ tag, onClose }: TagRenameFormProps) => {
   );
 };
 
-const renderSaveLabel = (isSaving: boolean, t: (key: string) => string) => {
+const renderSaveLabel = (isSaving: boolean, t: TranslateFunction) => {
   if (isSaving) {
     return t('common.saving');
   }

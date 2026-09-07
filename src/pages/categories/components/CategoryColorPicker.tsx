@@ -64,8 +64,6 @@ export const CategoryColorPicker = ({
     </>
   );
 };
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const renderColorButtonState = (isSelected: boolean) => {
   if (isSelected) return 'ring-2 ring-offset-2 ring-foreground scale-110';
 

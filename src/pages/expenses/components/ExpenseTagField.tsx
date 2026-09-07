@@ -102,8 +102,6 @@ export const ExpenseTagField = ({ form, tagPicker }: ExpenseTagFieldProps) => {
     />
   );
 };
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 const renderSelectedTagChips = (tagPicker: UseTagPickerReturn) => {
   if (tagPicker.selectedTags.length === 0) return null;
 

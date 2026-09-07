@@ -91,11 +91,11 @@ const measureFile = (file: string, declaration: RegExp): ComponentSize[] => {
 // inside a string, template literal or comment. The declaration ends on the
 // line where depth first returns to zero.
 const findDeclarationEnd = (lines: string[], start: number): number | null => {
-  const state: ScanState = { depth: 0, isInBlockComment: false, opened: false };
+  const state: ScanState = { depth: 0, isInBlockComment: false, isOpened: false };
 
   for (let index = start; index < lines.length; index += 1) {
     scanLine(lines[index], state);
-    if (state.opened && state.depth <= 0) {
+    if (state.isOpened && state.depth <= 0) {
       return index;
     }
   }
@@ -106,7 +106,7 @@ const findDeclarationEnd = (lines: string[], start: number): number | null => {
 type ScanState = {
   depth: number;
   isInBlockComment: boolean;
-  opened: boolean;
+  isOpened: boolean;
 };
 
 const OPENERS = '{([';
@@ -141,7 +141,7 @@ const scanLine = (line: string, state: ScanState): void => {
     }
     if (OPENERS.includes(char)) {
       state.depth += 1;
-      state.opened = true;
+      state.isOpened = true;
     }
     if (CLOSERS.includes(char)) {
       state.depth -= 1;

@@ -19,6 +19,7 @@ import {
 } from '@/common/hooks/data/dataReducer';
 import type { DataSetters } from '@/common/hooks/data/dataReducer';
 import type { Expense } from '@/types/Expense';
+import type { TranslateFunction } from '@/constants/translate';
 import { useToast } from '@/common/hooks/useToast';
 import type {
   DataActions,
@@ -778,7 +779,7 @@ type FetchErrorContext = {
   wasAbortedRef: { current: boolean };
   hydratedFromCacheRef: { current: boolean };
   toastRef: { current: ReturnType<typeof useToast>['toast'] };
-  tRef: { current: ReturnType<typeof useTranslation>['t'] };
+  tRef: { current: TranslateFunction };
   onRetry: () => void;
 };
 

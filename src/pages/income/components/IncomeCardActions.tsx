@@ -84,8 +84,6 @@ export const IncomeCardActions = ({ income, onEdit, onDelete }: IncomeCardAction
     </>
   );
 };
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const blurActiveElement = () => {
   if (document.activeElement instanceof HTMLElement) {
     document.activeElement.blur();

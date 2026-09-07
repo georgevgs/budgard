@@ -97,8 +97,6 @@ export const CategoryManager = ({
   );
 };
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const renderBackButton = (
   onBack: (() => void) | undefined,
   t: TranslateFunction,

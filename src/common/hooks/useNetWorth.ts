@@ -145,7 +145,7 @@ export const useNetWorth = () => {
 
     let cancelled = false;
     (async () => {
-      type RateResult = { key: string; rate: number; failed: boolean };
+      type RateResult = { key: string; rate: number; hasFailed: boolean };
       const results = await Promise.all(
         Array.from(required).map(async (key): Promise<RateResult> => {
           const [ccy, date] = key.split('|');
@@ -157,13 +157,13 @@ export const useNetWorth = () => {
               defaultCurrency,
             );
 
-            return { key, rate, failed: false };
+            return { key, rate, hasFailed: false };
           } catch (error) {
             captureException(error, {
               tags: { context: 'useNetWorth.fetchExchangeRate' },
             });
 
-            return { key, rate: 1, failed: true };
+            return { key, rate: 1, hasFailed: true };
           }
         }),
       );
@@ -173,7 +173,7 @@ export const useNetWorth = () => {
       setRateComputation({
         key: requiredKey,
         rates: new Map(results.map((r) => [r.key, r.rate])),
-        failedKeys: new Set(results.filter((r) => r.failed).map((r) => r.key)),
+        failedKeys: new Set(results.filter((r) => r.hasFailed).map((r) => r.key)),
       });
     })();
 

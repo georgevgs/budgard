@@ -94,8 +94,6 @@ export const SplitExpenseDialog = ({ expense, open, onOpenChange }: SplitExpense
     </Dialog>
   );
 };
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const renderPartRow = (
   part: SplitPart,
   index: number,

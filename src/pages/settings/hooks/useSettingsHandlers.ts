@@ -25,10 +25,10 @@ export const useSettingsHandlers = () => {
   );
   const isHapticsSupported = hapticsSettings.isSupported();
 
-  const handleHapticsToggle = (enabled: boolean) => {
-    hapticsSettings.setEnabled(enabled);
-    setAreHapticsEnabled(enabled);
-    if (enabled) {
+  const handleHapticsToggle = (isEnabled: boolean) => {
+    hapticsSettings.setEnabled(isEnabled);
+    setAreHapticsEnabled(isEnabled);
+    if (isEnabled) {
       haptics.success();
     }
   };
@@ -44,9 +44,9 @@ export const useSettingsHandlers = () => {
   };
 
   const handleDailyReminderToggle = useCallback(
-    async (enabled: boolean) => {
+    async (isEnabled: boolean) => {
       let utcHour: number | null = null;
-      if (enabled) {
+      if (isEnabled) {
         utcHour = localToUtcHour(9);
       }
 
@@ -79,9 +79,9 @@ export const useSettingsHandlers = () => {
   );
 
   const handlePreferenceToggle = useCallback(
-    async (key: NotificationPreferenceKey, enabled: boolean) => {
+    async (key: NotificationPreferenceKey, isEnabled: boolean) => {
       try {
-        await handleNotificationPreferenceUpdate(key, enabled);
+        await handleNotificationPreferenceUpdate(key, isEnabled);
       } catch {
         toast({
           variant: 'destructive',

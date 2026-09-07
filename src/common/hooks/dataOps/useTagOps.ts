@@ -50,7 +50,7 @@ export const useTagOps = () => {
           ),
       });
 
-      // This mutation has no `skip`, so the runner always resolves with the
+      // This mutation has no `shouldSkip`, so the runner always resolves with the
       // saved tag; the caller needs its id to select the tag it just made.
       return saved as Tag;
     };

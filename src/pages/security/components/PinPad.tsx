@@ -36,7 +36,7 @@ export const PinPad = ({ onPress, onBackspace, disabled }: PinPadProps) => {
         label={t('security.lock.backspace')}
         disabled={disabled}
         onPress={onBackspace}
-        icon
+        hasIcon
       />
     </div>
   );
@@ -46,10 +46,10 @@ type PadButtonProps = {
   label: string;
   onPress: () => void;
   disabled?: boolean;
-  icon?: boolean;
+  hasIcon?: boolean;
 };
 
-const PadButton = ({ label, onPress, disabled, icon }: PadButtonProps) => (
+const PadButton = ({ label, onPress, disabled, hasIcon }: PadButtonProps) => (
   <button
     type="button"
     onClick={onPress}
@@ -57,12 +57,12 @@ const PadButton = ({ label, onPress, disabled, icon }: PadButtonProps) => (
     aria-label={label}
     className="flex h-16 items-center justify-center rounded-full bg-muted/60 type-figure transition-colors active:bg-muted disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
   >
-    {renderFace(label, icon)}
+    {renderFace(label, hasIcon)}
   </button>
 );
 
-const renderFace = (label: string, icon: boolean | undefined) => {
-  if (icon) {
+const renderFace = (label: string, hasIcon: boolean | undefined) => {
+  if (hasIcon) {
     return <Delete className="h-6 w-6" aria-hidden="true" />;
   }
 

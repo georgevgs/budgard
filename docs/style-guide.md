@@ -24,7 +24,10 @@
 ## Folder structure
 
 - **Feature-based.** Each feature owns a folder under `src/pages/`.
-- **Hooks placement.** A feature's hooks live in `<feature>/hooks/`.
+- **Hooks placement.** A feature's hooks live in `<feature>/hooks/`. A shared
+  module under `common/components/` does the same with its own private hooks —
+  `charts/hooks/useChartSize.ts`. `common/hooks/` is for hooks that genuinely
+  cross features; a hook only its own module calls does not belong there.
 - **Common folder.** Shared components, hooks and utilities go in `src/common/`.
 - **Config folder.** External integrations only (Supabase, Sentry, i18n, the
   service worker).
@@ -80,7 +83,12 @@
 
 - Feature-specific helpers stay in the feature; shared ones go to `constants/`.
 - Keep the structure flat; return early instead of nesting.
-- No blank line before a `return` that is the function's first statement.
+- **A blank line before every `return`.** **[enforced]** —
+  `padding-line-between-statements`. This is the guide's own ✅ example, which
+  puts a blank line between the guard clause and the final return. Its "do not
+  add an extra blank line before the final return" bans a *second* one, not the
+  first. A `return` that is the function's only statement has nothing above it
+  to separate, so the rule does not fire.
 
 ## Types and interfaces
 
@@ -129,8 +137,10 @@
   block in 264 files and said nothing the blank line below the component did
   not. A divider earns its place only when it names something the code cannot —
   `// --- OFX ---` over one of two parsers in the same file, or
-  `// --- handleExpenseSplit ---` over the block of tests covering it. All 265
-  generic ones were removed Sep 2026; the ~27 that name a section stayed.
+  `// --- handleExpenseSplit ---` over the block of tests covering it. All 300
+  generic ones were removed Sep 2026; the 69 that name a section stayed.
+  **The sweep runs twice:** the first pass matched only ASCII `// --- x ---`
+  and left 35 box-drawing `// ─── Helpers ───` behind. Grep both dash forms.
 
 ---
 

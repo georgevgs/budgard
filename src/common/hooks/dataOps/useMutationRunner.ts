@@ -27,7 +27,7 @@ export type MutationSpec<TSaved> = {
   // an edit that visibly updates the row does not need a toast on top.
   successMessage?: string;
   // Skip the write entirely. The `isInitialized` guard, mostly.
-  skip?: boolean;
+  shouldSkip?: boolean;
   // Runs before the optimistic pass — `haptics.warning()` for destructive ops.
   onStart?: () => void;
   // Defaults to 'success'. 'none' for writes the user did not explicitly
@@ -61,7 +61,7 @@ export const useMutationRunner = () => {
       // Returns whatever the write returned, so callers that need the saved
       // row (a new tag's id, say) can await it. `undefined` only when skipped.
       const run = async (): Promise<TSaved | undefined> => {
-        if (spec.skip) {
+        if (spec.shouldSkip) {
           return undefined;
         }
 

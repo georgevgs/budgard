@@ -79,8 +79,6 @@ export const RecurringExpenseCard = ({
     </SurfaceCard>
   );
 };
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 const renderCategoryBadge = (expense: RecurringExpense) => {
   if (!expense.category) return null;
 

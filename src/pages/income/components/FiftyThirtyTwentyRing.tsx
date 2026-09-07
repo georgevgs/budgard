@@ -153,8 +153,6 @@ export const FiftyThirtyTwentyRing = ({ selectedMonth }: FiftyThirtyTwentyRingPr
     </div>
   );
 };
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 type BucketRowProps = {
   bucket: BucketConfig;
   actual: number;

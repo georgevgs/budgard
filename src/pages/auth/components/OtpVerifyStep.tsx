@@ -123,8 +123,6 @@ export const OtpVerifyStep = ({
     </div>
   );
 };
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 const renderOtpError = (error: string | null) => {
   if (!error) return null;
 

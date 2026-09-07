@@ -92,8 +92,6 @@ const BudgetProgressComponent = ({
 
 // Memoised: the parent re-renders on every data mutation, this subtree does not.
 export const BudgetProgress = memo(BudgetProgressComponent);
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 type NoBudgetProps = {
   isFormOpen: boolean;
   onOpen: () => void;

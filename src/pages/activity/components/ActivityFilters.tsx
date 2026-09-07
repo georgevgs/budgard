@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import Search from 'lucide-react/dist/esm/icons/search';
 import { Input } from '@/common/ui/input';
+import type { TranslateFunction } from '@/constants/translate';
 
 type ActivityFiltersProps = {
   search: string;
@@ -44,7 +45,7 @@ export const ActivityFilters = ({
 
 const renderSearchScope = (
   isSearchingAllTime: boolean,
-  t: (key: string) => string,
+  t: TranslateFunction,
 ) => {
   if (!isSearchingAllTime) {
     return null;

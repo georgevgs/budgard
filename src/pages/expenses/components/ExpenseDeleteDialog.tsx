@@ -52,8 +52,6 @@ export const ExpenseDeleteDialog = ({
     </AlertDialog>
   );
 };
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 const renderDeleteDescription = (expense: Expense, t: TranslateFunction) => {
   const confirmation = t('expenses.deleteConfirmation');
   const actionUndone = t('common.actionUndone');

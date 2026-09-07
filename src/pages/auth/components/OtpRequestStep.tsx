@@ -101,8 +101,6 @@ export const OtpRequestStep = ({
     </div>
   );
 };
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 const getErrorDescribedBy = (error: string | null): string | undefined => {
   if (error) {
     return 'email-error';

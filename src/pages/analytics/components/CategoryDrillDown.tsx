@@ -104,8 +104,6 @@ export const CategoryDrillDown = ({
   );
 };
 
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 const renderMonthlyBreakdown = (
   months: { label: string; amount: number }[],
   color: string,

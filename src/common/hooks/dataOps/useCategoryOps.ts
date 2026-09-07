@@ -27,7 +27,7 @@ export const useCategoryOps = () => {
   const runMutation = useMutationRunner();
 
   return useMemo(() => {
-    const skip = !isInitialized;
+    const shouldSkip = !isInitialized;
 
     const handleCategoryAdd = (categoryData: Partial<Category>) => {
       const optimistic = {
@@ -38,7 +38,7 @@ export const useCategoryOps = () => {
 
       return runMutation({
         operation: 'createCategory',
-        skip,
+        shouldSkip,
         errorMessage: t('categories.toasts.addFailed'),
         optimistic: () => {
           setCategories((prev) => [...prev, optimistic]);
@@ -60,7 +60,7 @@ export const useCategoryOps = () => {
     ) =>
       runMutation({
         operation: 'updateCategory',
-        skip,
+        shouldSkip,
         errorMessage: t('categories.toasts.updateFailed'),
         optimistic: () => {
           let previousCategories: Category[] = [];
@@ -110,7 +110,7 @@ export const useCategoryOps = () => {
     const handleCategoryDelete = (categoryId: string) =>
       runMutation({
         operation: 'deleteCategory',
-        skip,
+        shouldSkip,
         errorMessage: t('categories.toasts.deleteFailed'),
         optimistic: () => {
           let previousCategories: Category[] = [];
@@ -154,7 +154,7 @@ export const useCategoryOps = () => {
     ) =>
       runMutation({
         operation: 'mergeCategory',
-        skip,
+        shouldSkip,
         errorMessage: t('categories.toasts.mergeFailed'),
         optimistic: () => {
           let previousCategories: Category[] = [];
@@ -202,7 +202,7 @@ export const useCategoryOps = () => {
     const handleCategoriesAddBulk = (categoriesData: Partial<Category>[]) =>
       runMutation({
         operation: 'createCategoriesBulk',
-        skip,
+        shouldSkip,
         errorMessage: t('categories.toasts.bulkCreateFailed'),
         perform: () =>
           Promise.all(

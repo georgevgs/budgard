@@ -17,7 +17,7 @@ export const useSurplusInvestmentOps = () => {
   ): Promise<Expense | null> => {
     const saved = await runMutation<Expense>({
       operation: 'investGoalSurplus',
-      skip: !isInitialized,
+      shouldSkip: !isInitialized,
       errorMessage: t('today.rhythm.setAside.investFailed'),
       successMessage: t('today.rhythm.setAside.invested'),
       perform: () =>

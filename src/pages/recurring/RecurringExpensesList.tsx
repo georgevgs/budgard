@@ -79,8 +79,6 @@ const RecurringExpensesList = () => {
 
 export default RecurringExpensesList;
 
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 const renderLoading = (showSkeleton: boolean) => {
   if (!showSkeleton) {
     return null;

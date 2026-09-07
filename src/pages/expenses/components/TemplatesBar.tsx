@@ -5,6 +5,7 @@ import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { TemplateDeleteDialog } from '@/pages/expenses/components/TemplateDeleteDialog';
 import X from 'lucide-react/dist/esm/icons/x';
 import { cn, formatCurrency } from '@/constants/utils';
+import type { TranslateFunction } from '@/constants/translate';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 
 type TemplatesBarProps = {
@@ -112,11 +113,9 @@ const TemplatesBarComponent = ({
 
 // Memoised: the parent re-renders on every data mutation, this subtree does not.
 export const TemplatesBar = memo(TemplatesBarComponent);
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 const renderManageLabel = (
   isManaging: boolean,
-  t: (key: string) => string,
+  t: TranslateFunction,
 ): string => {
   if (isManaging) {
     return t('templates.done');
@@ -157,7 +156,7 @@ const renderDeleteButton = (
   isManaging: boolean,
   template: ExpenseTemplate,
   onClick: (e: React.MouseEvent, template: ExpenseTemplate) => void,
-  t: (key: string, options?: Record<string, unknown>) => string,
+  t: TranslateFunction,
 ) => {
   if (!isManaging) {
     return null;

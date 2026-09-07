@@ -113,8 +113,6 @@ export const buildWeeklyRecap = ({
   };
 };
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 // Was `type !== 'debt_payment'` — now the same decision the rest of the app
 // makes in one place, including rows the user marked as not spending.
 const isSpendable = (e: Expense): boolean => countsAsSpending(e);

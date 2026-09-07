@@ -118,8 +118,6 @@ const renderMappingStep = (flow: CsvFlow, t: TranslateFunction) => {
   );
 };
 
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 const parseCategoryMapValue = (value: string): string | null => {
   if (value === '_skip') {
     return null;

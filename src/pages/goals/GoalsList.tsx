@@ -141,7 +141,7 @@ const renderEmptyState = (
   onOpenForm: (open: boolean) => void,
   t: TranslateFunction,
 ) => (
-  <SurfaceCard flush className="p-8 text-center">
+  <SurfaceCard isFlush className="p-8 text-center">
     <div className="flex flex-col items-center gap-3">
       <Target className="h-12 w-12 text-muted-foreground/50" />
       <div className="max-w-[280px]">

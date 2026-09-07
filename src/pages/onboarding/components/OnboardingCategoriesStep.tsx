@@ -112,8 +112,6 @@ export const OnboardingCategoriesStep = ({
     </div>
   );
 };
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 const renderCheckIcon = (isSelected: boolean) => {
   if (!isSelected) return null;
 

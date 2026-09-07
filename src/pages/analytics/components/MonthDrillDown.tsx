@@ -116,8 +116,6 @@ export const MonthDrillDown = ({
   );
 };
 
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 const renderCategoryBreakdown = (
   breakdown: {
     id: string;

@@ -4,7 +4,7 @@ import { haptics } from '@/constants/haptics';
 type Params = {
   // Revealed by dragging the row leftwards.
   onReveal?: () => void;
-  enabled?: boolean;
+  isEnabled?: boolean;
 };
 
 // How far the row slides to expose the action behind it.
@@ -35,7 +35,7 @@ export type SwipeActions = {
  * something you meant to scroll past.
  */
 export const useSwipeActions = ({
-  enabled = true,
+  isEnabled = true,
 }: Params = {}): SwipeActions => {
   const [offset, setOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -56,7 +56,7 @@ export const useSwipeActions = ({
 
   const handlers = {
     onTouchStart: (event: React.TouchEvent) => {
-      if (!enabled) {
+      if (!isEnabled) {
         return;
       }
       if (event.touches.length !== 1) {
@@ -72,7 +72,7 @@ export const useSwipeActions = ({
     },
 
     onTouchMove: (event: React.TouchEvent) => {
-      if (!enabled || !isTracking.current) {
+      if (!isEnabled || !isTracking.current) {
         return;
       }
       if (event.touches.length !== 1) {

@@ -118,8 +118,6 @@ export const CategoryForm = ({
     </div>
   );
 };
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const getIsIncomeCategory = (
   category: Category | undefined,
   categoryType: 'expense' | 'income',

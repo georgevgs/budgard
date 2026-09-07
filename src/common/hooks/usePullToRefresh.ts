@@ -75,13 +75,13 @@ export const usePullToRefresh = ({
     }
 
     const root = document.documentElement;
-    // A refetch can outlive the effect — a tab switch flips `enabled` off
+    // A refetch can outlive the effect — a tab switch flips `isEnabled` off
     // while it is still in flight — and its `finally` must not write the
     // gesture back onto a document the cleanup has just tidied.
     let disposed = false;
     let phase: Phase = 'idle';
     let stage: Stage = 'idle';
-    let armed = false;
+    let isArmed = false;
     let startY = 0;
     let startX = 0;
     let settleTimer: ReturnType<typeof setTimeout> | undefined;
@@ -131,7 +131,7 @@ export const usePullToRefresh = ({
       startY = event.touches[0].clientY;
       startX = event.touches[0].clientX;
       phase = 'deciding';
-      armed = false;
+      isArmed = false;
     };
 
     const handleMove = (event: TouchEvent) => {
@@ -160,7 +160,7 @@ export const usePullToRefresh = ({
         // The finger went back up past the origin — this is a scroll, not a
         // pull. Hand it back rather than half-holding the gesture.
         phase = 'idle';
-        armed = false;
+        isArmed = false;
         settleBack();
 
         return;
@@ -175,14 +175,14 @@ export const usePullToRefresh = ({
 
       // One tick the moment it would fire, so the pull can be released by
       // feel without watching the indicator.
-      if (pulled >= TRIGGER_PX && !armed) {
-        armed = true;
+      if (pulled >= TRIGGER_PX && !isArmed) {
+        isArmed = true;
         haptics.selection();
       }
       if (pulled < TRIGGER_PX) {
-        armed = false;
+        isArmed = false;
       }
-      setStage(armToStage(armed));
+      setStage(armToStage(isArmed));
     };
 
     const finish = () => {
@@ -199,13 +199,13 @@ export const usePullToRefresh = ({
       }
       phase = 'idle';
 
-      if (!armed) {
+      if (!isArmed) {
         settleBack();
 
         return;
       }
 
-      armed = false;
+      isArmed = false;
       refreshingRef.current = true;
       setIsRefreshing(true);
       setStage('refreshing');
@@ -235,7 +235,7 @@ export const usePullToRefresh = ({
     const handleCancel = () => {
       const wasPulling = phase === 'pulling';
       phase = 'idle';
-      armed = false;
+      isArmed = false;
       if (wasPulling) {
         settleBack();
       }
@@ -287,8 +287,8 @@ const readDirection = (
   return 'pull';
 };
 
-const armToStage = (armed: boolean): Stage => {
-  if (armed) {
+const armToStage = (isArmed: boolean): Stage => {
+  if (isArmed) {
     return 'armed';
   }
 

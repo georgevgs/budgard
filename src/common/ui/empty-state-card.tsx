@@ -39,7 +39,7 @@ const renderCard = ({
   onAction,
 }: RenderArgs) => {
   return (
-    <SurfaceCard flush className="p-8 text-center">
+    <SurfaceCard isFlush className="p-8 text-center">
       <div className="flex flex-col items-center gap-3">
         {media}
         <div className="max-w-[280px]">

@@ -10,7 +10,7 @@ type RevealProps = {
 
 export const Reveal = ({ children, delay = 0, className }: RevealProps) => {
   const ref = useRef<HTMLDivElement | null>(null);
-  const [visible, setVisible] = useState(() => prefersReducedMotion());
+  const [isVisible, setVisible] = useState(() => prefersReducedMotion());
 
   useEffect(() => {
     const node = ref.current;
@@ -40,7 +40,7 @@ export const Reveal = ({ children, delay = 0, className }: RevealProps) => {
       style={{ transitionDelay: `${delay}ms` }}
       className={cn(
         'transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
-        getVisibilityClass(visible),
+        getVisibilityClass(isVisible),
         className,
       )}
     >
@@ -49,8 +49,8 @@ export const Reveal = ({ children, delay = 0, className }: RevealProps) => {
   );
 };
 
-const getVisibilityClass = (visible: boolean): string => {
-  if (visible) return 'opacity-100 translate-y-0';
+const getVisibilityClass = (isVisible: boolean): string => {
+  if (isVisible) return 'opacity-100 translate-y-0';
 
   return 'opacity-0 translate-y-3';
 };

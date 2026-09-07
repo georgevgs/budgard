@@ -19,9 +19,9 @@ type ReceiptViewerProps = {
 
 export const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
   const { t } = useTranslation();
-  const { url, isLoading, error } = useReceiptUrl(receiptPath, open);
+  const { url, isLoading, hasError: hasUrlError } = useReceiptUrl(receiptPath, open);
   const [hasImageFailed, setHasImageFailed] = useState(false);
-  const hasError = error || hasImageFailed;
+  const hasError = hasUrlError || hasImageFailed;
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -55,13 +55,11 @@ export const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps
     </Dialog>
   );
 };
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 // An image arriving is content loading, not a system operation, so it gets a
 // placeholder in the receipt's own shape rather than a spinner. Portrait
 // aspect, because that is what a photographed till receipt looks like.
-const renderLoadingState = (loading: boolean, t: TranslateFunction) => {
-  if (!loading) return null;
+const renderLoadingState = (isLoading: boolean, t: TranslateFunction) => {
+  if (!isLoading) return null;
 
   return (
     <>
@@ -73,8 +71,8 @@ const renderLoadingState = (loading: boolean, t: TranslateFunction) => {
   );
 };
 
-const renderErrorState = (error: boolean, t: TranslateFunction) => {
-  if (!error) return null;
+const renderErrorState = (hasError: boolean, t: TranslateFunction) => {
+  if (!hasError) return null;
 
   return (
     <p className="text-sm text-destructive-ink">{t('receipt.loadError')}</p>
@@ -83,11 +81,11 @@ const renderErrorState = (error: boolean, t: TranslateFunction) => {
 
 const renderReceiptImage = (
   url: string | null,
-  error: boolean,
+  hasError: boolean,
   onError: () => void,
   t: TranslateFunction,
 ) => {
-  if (!url || error) return null;
+  if (!url || hasError) return null;
 
   return (
     <img

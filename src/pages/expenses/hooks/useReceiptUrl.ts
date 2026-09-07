@@ -2,17 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import { captureException } from '@/config/sentry';
 import { getReceiptUrl } from '@/common/api/receiptService';
 
-// Loads a signed receipt URL when `enabled` is true. Keeps service access
+// Loads a signed receipt URL when `isEnabled` is true. Keeps service access
 // out of the view layer per the architecture rule.
 export type UseReceiptUrlReturn = {
   url: string | null;
   isLoading: boolean;
-  error: boolean;
+  hasError: boolean;
 };
 
 export const useReceiptUrl = (
   receiptPath: string,
-  enabled: boolean,
+  isEnabled: boolean,
 ): UseReceiptUrlReturn => {
   const [loaded, setLoaded] = useState<LoadedReceipt | null>(null);
   // Keep the current URL out of the effect deps — re-running on every URL
@@ -23,7 +23,7 @@ export const useReceiptUrl = (
 
   // The object URL is revoked on disable, so the settled result is invalid
   // once the viewer closes — drop it or a reopen would render a dead URL.
-  if (!enabled && loaded !== null) {
+  if (!isEnabled && loaded !== null) {
     setLoaded(null);
   }
 
@@ -32,7 +32,7 @@ export const useReceiptUrl = (
   }, [loaded]);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!isEnabled) {
       if (urlRef.current) {
         URL.revokeObjectURL(urlRef.current);
       }
@@ -47,14 +47,14 @@ export const useReceiptUrl = (
         if (cancelled) {
           return;
         }
-        setLoaded({ key: receiptPath, url: next, error: false });
+        setLoaded({ key: receiptPath, url: next, hasError: false });
       })
       .catch((err) => {
         captureException(err, { tags: { operation: 'getReceiptUrl' } });
         if (cancelled) {
           return;
         }
-        setLoaded({ key: receiptPath, url: null, error: true });
+        setLoaded({ key: receiptPath, url: null, hasError: true });
       });
 
     return () => {
@@ -63,27 +63,27 @@ export const useReceiptUrl = (
         URL.revokeObjectURL(urlRef.current);
       }
     };
-  }, [enabled, receiptPath]);
+  }, [isEnabled, receiptPath]);
 
-  const url = resolveUrl(enabled, loaded, requestKey);
-  const error = resolveError(enabled, loaded, requestKey);
-  const isLoading = enabled && (loaded === null || loaded.key !== requestKey);
+  const url = resolveUrl(isEnabled, loaded, requestKey);
+  const hasError = resolveError(isEnabled, loaded, requestKey);
+  const isLoading = isEnabled && (loaded === null || loaded.key !== requestKey);
 
-  return { url, isLoading, error };
+  return { url, isLoading, hasError };
 };
 
 type LoadedReceipt = {
   key: string;
   url: string | null;
-  error: boolean;
+  hasError: boolean;
 };
 
 const resolveUrl = (
-  enabled: boolean,
+  isEnabled: boolean,
   loaded: LoadedReceipt | null,
   requestKey: string,
 ): string | null => {
-  if (!enabled || loaded === null || loaded.key !== requestKey) {
+  if (!isEnabled || loaded === null || loaded.key !== requestKey) {
     return null;
   }
 
@@ -91,13 +91,13 @@ const resolveUrl = (
 };
 
 const resolveError = (
-  enabled: boolean,
+  isEnabled: boolean,
   loaded: LoadedReceipt | null,
   requestKey: string,
 ): boolean => {
-  if (!enabled || loaded === null || loaded.key !== requestKey) {
+  if (!isEnabled || loaded === null || loaded.key !== requestKey) {
     return false;
   }
 
-  return loaded.error;
+  return loaded.hasError;
 };

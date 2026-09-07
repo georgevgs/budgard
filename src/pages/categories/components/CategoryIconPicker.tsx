@@ -76,8 +76,6 @@ export const CategoryIconPicker = ({
     </>
   );
 };
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const toggleIcon = (current: string | undefined, next: string) => {
   if (current === next) return undefined;
 

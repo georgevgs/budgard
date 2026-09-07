@@ -116,8 +116,6 @@ const OnboardingFlow = ({ isOpen, onComplete, onDismiss }: OnboardingFlowProps) 
 
 export default OnboardingFlow;
 
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 const renderStepIndicator = (step: number, t: TranslateFunction) => (
   <div
     role="progressbar"

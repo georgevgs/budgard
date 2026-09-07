@@ -252,16 +252,16 @@ const renderAnnualized = (annualized: number | null, t: TranslateFunction) => {
   );
 };
 
-export const getBalanceClass = (liability: boolean): string => {
-  if (liability) {
+export const getBalanceClass = (isLiability: boolean): string => {
+  if (isLiability) {
     return 'text-destructive-ink';
   }
 
   return 'text-foreground';
 };
 
-export const renderLiabilitySign = (liability: boolean): string => {
-  if (liability) {
+export const renderLiabilitySign = (isLiability: boolean): string => {
+  if (isLiability) {
     return '−';
   }
 

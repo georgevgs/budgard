@@ -15,7 +15,7 @@ export const useBudgetOps = () => {
   const runMutation = useMutationRunner();
 
   return useMemo(() => {
-    const skip = !isInitialized;
+    const shouldSkip = !isInitialized;
 
     // The headline budget is a scalar and does not buzz — the figure changing
     // on screen is the confirmation.
@@ -44,7 +44,7 @@ export const useBudgetOps = () => {
 
       return runMutation({
         operation: 'upsertCategoryBudget',
-        skip,
+        shouldSkip,
         errorMessage: t('budget.toasts.categoryUpdateFailed'),
         optimistic: () => {
           let previousBudgets: CategoryBudget[] = [];
@@ -76,7 +76,7 @@ export const useBudgetOps = () => {
     const handleCategoryBudgetDelete = (categoryId: string) =>
       runMutation({
         operation: 'deleteCategoryBudget',
-        skip,
+        shouldSkip,
         errorMessage: t('budget.toasts.categoryRemoveFailed'),
         optimistic: () => {
           let previousBudgets: CategoryBudget[] = [];

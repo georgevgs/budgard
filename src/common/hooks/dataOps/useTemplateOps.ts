@@ -20,7 +20,7 @@ export const useTemplateOps = () => {
   const runMutation = useMutationRunner();
 
   return useMemo(() => {
-    const skip = !isInitialized;
+    const shouldSkip = !isInitialized;
 
     const handleTemplateCreate = (templateData: Partial<ExpenseTemplate>) => {
       const optimistic = {
@@ -31,7 +31,7 @@ export const useTemplateOps = () => {
 
       return runMutation({
         operation: 'createTemplate',
-        skip,
+        shouldSkip,
         errorMessage: t('templates.saveFailed'),
         successMessage: t('templates.saved'),
         optimistic: () => prependOptimistic(setTemplates, optimistic),
@@ -44,7 +44,7 @@ export const useTemplateOps = () => {
     const handleTemplateDelete = (templateId: string) =>
       runMutation({
         operation: 'deleteTemplate',
-        skip,
+        shouldSkip,
         errorMessage: t('templates.deleteFailed'),
         onStart: () => haptics.warning(),
         optimistic: () => removeOptimistic(setTemplates, templateId),

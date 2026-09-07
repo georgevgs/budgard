@@ -1,4 +1,3 @@
-import type { TFunction } from 'i18next';
 import { parseISO } from 'date-fns';
 import Tag from 'lucide-react/dist/esm/icons/tag';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
@@ -85,7 +84,7 @@ export const renderCreateTagOption = (
   isCreatingTag: boolean,
   tagSearch: string,
   onCreate: () => void,
-  t: TFunction,
+  t: TranslateFunction,
 ) => {
   if (!shouldShowCreateOption) return null;
 
@@ -150,7 +149,7 @@ export const renderCategoryIndicator = (category: Category) => {
 export const renderNoTagsMessage = (
   filteredCount: number,
   shouldShowCreateOption: boolean,
-  t: TFunction,
+  t: TranslateFunction,
 ) => {
   if (filteredCount > 0 || shouldShowCreateOption) return null;
 

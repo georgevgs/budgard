@@ -6,6 +6,7 @@ import { dataService } from '@/common/api/dataService';
 import { haptics } from '@/constants/haptics';
 import { offlineQueue, createTempId } from '@/constants/offlineQueue';
 import { isOfflineError } from '@/constants/offlineError';
+import type { TranslateFunction } from '@/constants/translate';
 import type { Expense } from '@/types/Expense';
 import { replaceById, patchById, pickByEdit } from '@/common/hooks/dataOps/helpers';
 import { mergeUniqueById } from '@/common/contexts/dataContextHelpers';
@@ -29,7 +30,7 @@ export const useIncomeOps = () => {
   const runMutation = useMutationRunner();
 
   return useMemo(() => {
-    const skip = !isInitialized;
+    const shouldSkip = !isInitialized;
 
     const queueOffline = (
       incomeData: Partial<Expense>,
@@ -51,7 +52,7 @@ export const useIncomeOps = () => {
     ): Promise<Expense | null> => {
       const saved = await runMutation<Expense>({
         operation: pickByEdit(incomeId, 'updateIncome', 'createIncome'),
-        skip,
+        shouldSkip,
         errorMessage: pickByEdit(
           incomeId,
           t('income.toasts.updateFailed'),
@@ -84,7 +85,7 @@ export const useIncomeOps = () => {
     const handleIncomeDelete = (incomeId: string) =>
       runMutation({
         operation: 'deleteIncome',
-        skip,
+        shouldSkip,
         errorMessage: t('income.toasts.deleteFailed'),
         onStart: () => haptics.warning(),
         successHaptic: 'none',
@@ -112,7 +113,7 @@ export const useIncomeOps = () => {
     // The insert returns the created rows with their embeds, so merging them
     // into state replaces a full-history re-download.
     const handleBulkIncomeImport = async (incomesData: BulkIncomeRow[]) => {
-      if (skip) return;
+      if (shouldSkip) return;
 
       const created = await dataService.createIncomesBulk(
         incomesData,
@@ -142,7 +143,7 @@ type OfflineDeps = {
   ownerId: string;
   setIncomes: (updater: (prev: Expense[]) => Expense[]) => void;
   toast: ReturnType<typeof useToast>['toast'];
-  t: (key: string) => string;
+  t: TranslateFunction;
 };
 
 // Queues the write and applies it locally, so the row looks saved while the

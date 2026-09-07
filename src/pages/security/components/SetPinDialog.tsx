@@ -60,11 +60,11 @@ export const SetPinDialog = ({ open, onClose, onSaved }: SetPinDialogProps) => {
   );
 };
 
-const dotTone = (filled: boolean, hasError: boolean): string => {
+const dotTone = (isFilled: boolean, hasError: boolean): string => {
   if (hasError) {
     return 'bg-destructive';
   }
-  if (filled) {
+  if (isFilled) {
     return 'bg-foreground';
   }
 

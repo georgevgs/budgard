@@ -21,14 +21,14 @@ export const useGoalOps = () => {
   const runMutation = useMutationRunner();
 
   return useMemo(() => {
-    const skip = !isInitialized;
+    const shouldSkip = !isInitialized;
 
     const handleGoalCreate = (goalData: Partial<Goal>) => {
       const optimistic = buildOptimisticGoal(goalData);
 
       return runMutation({
         operation: 'createGoal',
-        skip,
+        shouldSkip,
         errorMessage: t('goals.toasts.createFailed'),
         successMessage: t('goals.toasts.created'),
         optimistic: () => prependOptimistic(setGoals, optimistic),
@@ -41,7 +41,7 @@ export const useGoalOps = () => {
     const handleGoalUpdate = (goalId: string, goalData: Partial<Goal>) =>
       runMutation({
         operation: 'updateGoal',
-        skip,
+        shouldSkip,
         errorMessage: t('goals.toasts.updateFailed'),
         optimistic: () => patchOptimistic(setGoals, goalId, goalData),
         perform: () => dataService.updateGoal(goalId, goalData),
@@ -51,7 +51,7 @@ export const useGoalOps = () => {
     const handleGoalDelete = (goalId: string) =>
       runMutation({
         operation: 'deleteGoal',
-        skip,
+        shouldSkip,
         errorMessage: t('goals.toasts.deleteFailed'),
         onStart: () => haptics.warning(),
         optimistic: () => removeOptimistic(setGoals, goalId),

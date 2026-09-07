@@ -186,7 +186,7 @@ describe('useMutationRunner', () => {
     expect(unhandled).not.toHaveBeenCalled();
   });
 
-  it('skips everything when skip is set', async () => {
+  it('skips everything when shouldSkip is set', async () => {
     const perform = vi.fn();
     const optimistic = vi.fn();
     const onStart = vi.fn();
@@ -196,7 +196,7 @@ describe('useMutationRunner', () => {
       await runner.current({
         operation: 'op',
         errorMessage: 'e',
-        skip: true,
+        shouldSkip: true,
         onStart,
         optimistic,
         perform,

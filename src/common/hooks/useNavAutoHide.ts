@@ -85,10 +85,10 @@ export const useNavAutoHide = (pathname: string): void => {
 // Scroll fires many times a second at both ends of a page, so only touch the
 // DOM when the state actually flips — an attribute write invalidates the
 // :has() rules that drive the dock.
-const setHidden = (next: boolean): void => {
-  if (next === document.body.hasAttribute(HIDDEN_ATTRIBUTE)) return;
+const setHidden = (isHidden: boolean): void => {
+  if (isHidden === document.body.hasAttribute(HIDDEN_ATTRIBUTE)) return;
 
-  if (next) {
+  if (isHidden) {
     document.body.setAttribute(HIDDEN_ATTRIBUTE, 'true');
 
     return;

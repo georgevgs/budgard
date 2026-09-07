@@ -10,6 +10,7 @@ import { haptics } from '@/constants/haptics';
 import { offlineQueue, createTempId } from '@/constants/offlineQueue';
 import { isOfflineError } from '@/constants/offlineError';
 import { describeAmount } from '@/constants/transactionAmount';
+import type { TranslateFunction } from '@/constants/translate';
 import type { Expense } from '@/types/Expense';
 import { replaceById, patchById, pickByEdit } from '@/common/hooks/dataOps/helpers';
 import { mergeUniqueById } from '@/common/contexts/dataContextHelpers';
@@ -45,7 +46,7 @@ export const useExpenseOps = () => {
   const runMutation = useMutationRunner();
 
   return useMemo(() => {
-    const skip = !isInitialized;
+    const shouldSkip = !isInitialized;
 
     const refreshDebtsQuietly = () => {
       refreshDebts().catch((err) => {
@@ -66,7 +67,7 @@ export const useExpenseOps = () => {
 
       await runMutation({
         operation: pickByEdit(expenseId, 'updateExpense', 'createExpense'),
-        skip,
+        shouldSkip,
         errorMessage: pickByEdit(
           expenseId,
           t('expenses.toasts.updateFailed'),
@@ -177,7 +178,7 @@ export const useExpenseOps = () => {
 
       return runMutation({
         operation: 'deleteExpense',
-        skip,
+        shouldSkip,
         errorMessage: t('expenses.toasts.deleteFailed'),
         onStart: () => haptics.warning(),
         successHaptic: 'none',
@@ -220,7 +221,7 @@ export const useExpenseOps = () => {
     // into state replaces a full-history re-download. Consumers sort before
     // display, so append order doesn't matter.
     const handleBulkExpenseImport = async (expensesData: BulkExpenseRow[]) => {
-      if (skip) return;
+      if (shouldSkip) return;
 
       const created = await dataService.createExpensesBulk(
         expensesData,
@@ -250,7 +251,7 @@ export const useExpenseOps = () => {
 
       return runMutation({
         operation: 'splitExpense',
-        skip: skip || parts.length < 2,
+        shouldSkip: shouldSkip || parts.length < 2,
         errorMessage: t('expenses.split.failed'),
         successMessage: t('expenses.split.success', { count: parts.length }),
         // Nothing is shown early, so there is no local undo — but a partial
@@ -336,7 +337,7 @@ const describeSavedExpense = (expense: Expense, currency: string): string => {
 const resolveSuccessTitle = (
   expenseId: string | undefined,
   isDebtPayment: boolean,
-  t: (key: string) => string,
+  t: TranslateFunction,
 ): string => {
   if (isDebtPayment) {
     return pickByEdit(
@@ -365,7 +366,7 @@ const buildUndoAction = (
   expenseId: string | undefined,
   finalExpense: Expense,
   onUndo: (id: string, knownDebtId?: string | null) => void,
-  t: (key: string) => string,
+  t: TranslateFunction,
 ): ToastAction | undefined => {
   if (expenseId) {
     return undefined;

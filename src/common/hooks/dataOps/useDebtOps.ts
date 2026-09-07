@@ -20,7 +20,7 @@ export const useDebtOps = () => {
   const runMutation = useMutationRunner();
 
   return useMemo(() => {
-    const skip = !isInitialized;
+    const shouldSkip = !isInitialized;
 
     // Server-first: a debt carries a balance the DB maintains, so there is
     // nothing safe to show optimistically. New debts append rather than
@@ -31,7 +31,7 @@ export const useDebtOps = () => {
     ): Promise<Debt | null> => {
       const saved = await runMutation<Debt>({
         operation: pickByEdit(debtId, 'updateDebt', 'createDebt'),
-        skip,
+        shouldSkip,
         errorMessage: pickByEdit(
           debtId,
           t('debts.toasts.updateFailed'),
@@ -61,7 +61,7 @@ export const useDebtOps = () => {
     const handleDebtArchive = (debtId: string) =>
       runMutation({
         operation: 'archiveDebt',
-        skip,
+        shouldSkip,
         errorMessage: t('debts.toasts.archiveFailed'),
         onStart: () => haptics.warning(),
         optimistic: () => removeOptimistic(setDebts, debtId),

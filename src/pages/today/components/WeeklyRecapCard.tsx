@@ -25,7 +25,7 @@ export const WeeklyRecapCard = () => {
   if (recap.anomalies.length === 0) return null;
 
   return (
-    <SurfaceCard flush>
+    <SurfaceCard isFlush>
       <div className="p-4 sm:p-5">
         {renderHeader(
           recap.windowStart,
@@ -46,8 +46,6 @@ export const WeeklyRecapCard = () => {
     </SurfaceCard>
   );
 };
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const renderHeader = (
   startStr: string,
   endStr: string,

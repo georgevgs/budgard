@@ -116,8 +116,6 @@ export const RecurringExpenseForm = ({
     </div>
   );
 };
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 const renderActions = (
   isSubmitting: boolean,
   isValid: boolean,

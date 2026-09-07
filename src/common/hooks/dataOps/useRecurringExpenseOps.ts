@@ -22,7 +22,7 @@ export const useRecurringExpenseOps = () => {
   const runMutation = useMutationRunner();
 
   return useMemo(() => {
-    const skip = !isInitialized;
+    const shouldSkip = !isInitialized;
 
     const handleRecurringExpenseSubmit = (
       expenseData: Partial<RecurringExpense>,
@@ -34,7 +34,7 @@ export const useRecurringExpenseOps = () => {
           'updateRecurringExpense',
           'createRecurringExpense',
         ),
-        skip,
+        shouldSkip,
         errorMessage: pickByEdit(
           expenseId,
           t('recurring.toasts.expenseUpdateFailed'),
@@ -63,7 +63,7 @@ export const useRecurringExpenseOps = () => {
     const handleRecurringExpenseDelete = (expenseId: string) =>
       runMutation({
         operation: 'deleteRecurringExpense',
-        skip,
+        shouldSkip,
         errorMessage: t('recurring.toasts.expenseDeleteFailed'),
         onStart: () => haptics.warning(),
         optimistic: () => removeOptimistic(setRecurringExpenses, expenseId),
@@ -84,7 +84,7 @@ export const useRecurringExpenseOps = () => {
     const handleRecurringExpenseToggle = (expenseId: string, active: boolean) =>
       runMutation({
         operation: 'toggleRecurringExpense',
-        skip,
+        shouldSkip,
         errorMessage: t('recurring.toasts.expenseToggleFailed'),
         optimistic: () => {
           setRecurringExpenses((prev) =>

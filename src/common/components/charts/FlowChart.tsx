@@ -1,4 +1,4 @@
-import { useChartSize } from '@/common/components/charts/useChartSize';
+import { useChartSize } from '@/common/components/charts/hooks/useChartSize';
 
 // A two-stage flow diagram: one source bar splits into several destination
 // bars, connected by ribbons whose width is proportional to each node's

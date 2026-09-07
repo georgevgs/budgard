@@ -22,7 +22,7 @@ export const useRecurringIncomeOps = () => {
   const runMutation = useMutationRunner();
 
   return useMemo(() => {
-    const skip = !isInitialized;
+    const shouldSkip = !isInitialized;
 
     const handleRecurringIncomeSubmit = (
       incomeData: Partial<RecurringExpense>,
@@ -34,7 +34,7 @@ export const useRecurringIncomeOps = () => {
           'updateRecurringIncome',
           'createRecurringIncome',
         ),
-        skip,
+        shouldSkip,
         errorMessage: pickByEdit(
           incomeId,
           t('recurring.toasts.incomeUpdateFailed'),
@@ -63,7 +63,7 @@ export const useRecurringIncomeOps = () => {
     const handleRecurringIncomeDelete = (incomeId: string) =>
       runMutation({
         operation: 'deleteRecurringIncome',
-        skip,
+        shouldSkip,
         errorMessage: t('recurring.toasts.incomeDeleteFailed'),
         onStart: () => haptics.warning(),
         optimistic: () => removeOptimistic(setRecurringIncomes, incomeId),
@@ -84,7 +84,7 @@ export const useRecurringIncomeOps = () => {
     const handleRecurringIncomeToggle = (incomeId: string, active: boolean) =>
       runMutation({
         operation: 'toggleRecurringIncome',
-        skip,
+        shouldSkip,
         errorMessage: t('recurring.toasts.incomeToggleFailed'),
         optimistic: () => {
           setRecurringIncomes((prev) => patchById(prev, incomeId, { active }));

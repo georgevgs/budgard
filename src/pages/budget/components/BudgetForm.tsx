@@ -85,8 +85,6 @@ export const BudgetForm = ({
     </Dialog>
   );
 };
-// ─── Helper render functions ──────────────────────────────────────────────────
-
 type BudgetFormApi = {
   register: UseFormRegister<BudgetFormData>;
   handleAmountChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
