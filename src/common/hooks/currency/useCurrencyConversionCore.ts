@@ -22,7 +22,7 @@ export const useCurrencyConversionCore = (
   const {
     rate: exchangeRate,
     isFetching: isFetchingRate,
-    error: fetchRateError,
+    hasError: fetchRateError,
     ensureRate,
   } = useExchangeRate(selectedCurrency, watchedDateStr, defaultCurrency);
 
@@ -53,11 +53,9 @@ export const useCurrencyConversionCore = (
   };
 };
 
-export type CurrencyConversionApi = ReturnType<
+export type UseCurrencyConversionCoreReturn = ReturnType<
   typeof useCurrencyConversionCore
 >;
-
-// --- Helpers ---
 
 const toDateString = (date: Date | undefined): string => {
   if (!date) return '';

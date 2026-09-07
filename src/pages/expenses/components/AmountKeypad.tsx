@@ -50,15 +50,14 @@ export const AmountKeypad = ({ pad }: AmountKeypadProps) => {
     </div>
   );
 };
-// --- Helpers ---
 
-type ButtonProps = {
+type KeypadButtonProps = {
   label: string;
   onPress: () => void;
   icon?: boolean;
 };
 
-const KeypadButton = ({ label, onPress, icon }: ButtonProps) => (
+const KeypadButton = ({ label, onPress, icon }: KeypadButtonProps) => (
   <button
     type="button"
     onClick={onPress}

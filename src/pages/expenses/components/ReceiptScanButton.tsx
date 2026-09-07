@@ -3,17 +3,17 @@ import ScanText from 'lucide-react/dist/esm/icons/scan-text';
 import X from 'lucide-react/dist/esm/icons/x';
 import { Button } from '@/common/ui/button';
 import { Progress } from '@/common/ui/progress';
-import type { ReceiptScanApi } from '@/pages/expenses/hooks/useReceiptScan';
+import type { UseReceiptScanReturn } from '@/pages/expenses/hooks/useReceiptScan';
 
 type ReceiptScanButtonProps = {
-  scan: ReceiptScanApi;
-  visible: boolean;
+  scan: UseReceiptScanReturn;
+  isVisible: boolean;
 };
 
-export const ReceiptScanButton = ({ scan, visible }: ReceiptScanButtonProps) => {
+export const ReceiptScanButton = ({ scan, isVisible }: ReceiptScanButtonProps) => {
   const { t } = useTranslation();
 
-  if (!visible) {
+  if (!isVisible) {
     return null;
   }
 

@@ -39,7 +39,7 @@ export const QuickAddSheet = ({
   const draft = useQuickAddDraft({ isOpen: open, onSubmit, onClose });
   const receiptScan = useQuickReceiptScan({
     isOpen: open,
-    amountIsEmpty: draft.pad.isEmpty,
+    isAmountEmpty: draft.pad.isEmpty,
     date: draft.date,
     name: draft.name,
     setAmount: draft.pad.setAmount,
@@ -119,7 +119,6 @@ export const QuickAddSheet = ({
     </Dialog>
   );
 };
-// --- Helpers ---
 
 type Draft = ReturnType<typeof useQuickAddDraft>;
 

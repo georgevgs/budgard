@@ -9,7 +9,7 @@ type BentoTileProps = {
   children: ReactNode;
   tone?: BentoTone;
   /** Full width of the grid rather than half. */
-  wide?: boolean;
+  isWide?: boolean;
   /** Makes the module a doorway into its own screen. */
   to?: string;
   onClick?: () => void;
@@ -25,7 +25,7 @@ type BentoTileProps = {
 export const BentoTile = ({
   children,
   tone = 'plain',
-  wide = false,
+  isWide = false,
   to,
   onClick,
   ariaLabel,
@@ -36,7 +36,12 @@ export const BentoTile = ({
   // let its `block` beat a tile that asked for `flex` — which is exactly what
   // it did, silently, on every tappable module in the grid.
   const shell = (interactive: string) =>
-    cn(getToneClassName(tone), getSpanClassName(wide), interactive, className);
+    cn(
+      getToneClassName(tone),
+      getSpanClassName(isWide),
+      interactive,
+      className,
+    );
 
   if (to) {
     return renderLink(to, shell(INTERACTIVE), ariaLabel, children);
@@ -47,7 +52,6 @@ export const BentoTile = ({
 
   return <div className={shell('')}>{children}</div>;
 };
-// --- Helpers ---
 
 // Interactive tiles keep the shell's own radius on the focus ring, so a
 // keyboard user sees the module light up rather than a rectangle behind it.
@@ -85,8 +89,8 @@ const renderButton = (
   );
 };
 
-const getSpanClassName = (wide: boolean): string => {
-  if (wide) {
+const getSpanClassName = (isWide: boolean): string => {
+  if (isWide) {
     return 'bento-wide';
   }
 

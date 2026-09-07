@@ -10,7 +10,7 @@ const mockToast = vi.fn();
 const mockOpenUpgrade = vi.fn();
 let mockIsPro = true;
 
-vi.mock('@/pages/expenses/ocrService', () => ({
+vi.mock('@/pages/expenses/utils/ocr', () => ({
   runReceiptOcr: (...args: unknown[]) => mockRunReceiptOcr(...args),
   resolveOcrLanguages: () => 'eng',
 }));
@@ -33,7 +33,7 @@ vi.mock('@/common/hooks/useToast', () => ({
 
 type ScanHarnessProps = {
   isOpen: boolean;
-  amountIsEmpty: boolean;
+  isAmountEmpty: boolean;
   date: string;
   name: string;
 };
@@ -46,7 +46,7 @@ const receipt = new File(['receipt'], 'receipt.jpg', { type: 'image/jpeg' });
 const renderScan = (initial?: Partial<ScanHarnessProps>) => {
   const props: ScanHarnessProps = {
     isOpen: true,
-    amountIsEmpty: true,
+    isAmountEmpty: true,
     date: todayIso(),
     name: '',
     ...initial,
@@ -122,7 +122,7 @@ describe('useQuickReceiptScan', () => {
     act(() => selectFile(result.current.handleChange));
     rerender({
       isOpen: true,
-      amountIsEmpty: false,
+      isAmountEmpty: false,
       date: todayIso(),
       name: 'Already typed',
     });
@@ -161,7 +161,7 @@ describe('useQuickReceiptScan', () => {
     act(() => selectFile(result.current.handleChange));
     rerender({
       isOpen: false,
-      amountIsEmpty: true,
+      isAmountEmpty: true,
       date: todayIso(),
       name: '',
     });

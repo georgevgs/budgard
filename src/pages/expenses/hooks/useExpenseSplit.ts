@@ -11,7 +11,7 @@ export type SplitPart = {
   category_id: string;
 };
 
-export type ExpenseSplitApi = {
+export type UseExpenseSplitReturn = {
   parts: SplitPart[];
   remaining: number;
   canConfirm: boolean;
@@ -29,7 +29,7 @@ export const useExpenseSplit = (
   expense: Expense,
   open: boolean,
   onDone: () => void,
-): ExpenseSplitApi => {
+): UseExpenseSplitReturn => {
   const { handleExpenseSplit } = useExpenseOps();
   const [parts, setParts] = useState<SplitPart[]>(() =>
     buildInitialParts(expense),
@@ -144,8 +144,6 @@ export const buildBalancedParts = (
 
   return rows;
 };
-
-// --- Helpers ---
 
 const buildInitialParts = (expense: Expense): SplitPart[] => {
   return [

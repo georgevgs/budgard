@@ -7,14 +7,14 @@ import { ReceiptUpload } from '@/pages/expenses/components/ReceiptUpload';
 import {
   getDetailsRowsClass,
   renderDetailsToggleLabel,
-} from '@/pages/expenses/components/ExpensesForm.helpers';
-import type { TagPickerApi } from '@/pages/expenses/hooks/useTagPicker';
+} from '@/pages/expenses/utils/expensesFormHelpers';
+import type { UseTagPickerReturn } from '@/pages/expenses/hooks/useTagPicker';
 import { useReceiptScan } from '@/pages/expenses/hooks/useReceiptScan';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
 
 type ExpenseFormDetailsProps = {
   form: UseFormReturn<ExpenseFormData>;
-  tagPicker: TagPickerApi;
+  tagPicker: UseTagPickerReturn;
   shouldShowDetails: boolean;
   onToggleDetails: () => void;
   currentReceiptPath?: string | null;

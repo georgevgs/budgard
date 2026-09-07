@@ -1,9 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ReceiptScanButton } from '@/pages/expenses/components/ReceiptScanButton';
-import type { ReceiptScanApi } from '@/pages/expenses/hooks/useReceiptScan';
+import type { UseReceiptScanReturn } from '@/pages/expenses/hooks/useReceiptScan';
 
-const makeScan = (overrides?: Partial<ReceiptScanApi>): ReceiptScanApi => ({
+const makeScan = (
+  overrides?: Partial<UseReceiptScanReturn>,
+): UseReceiptScanReturn => ({
   isScanning: false,
   progress: 0,
   handleScan: vi.fn(),
@@ -16,9 +18,9 @@ beforeEach(() => {
 });
 
 describe('ReceiptScanButton', () => {
-  it('renders nothing when not visible', () => {
+  it('renders nothing when not isVisible', () => {
     const { container } = render(
-      <ReceiptScanButton scan={makeScan()} visible={false} />,
+      <ReceiptScanButton scan={makeScan()} isVisible={false} />,
     );
 
     expect(container).toBeEmptyDOMElement();
@@ -26,7 +28,7 @@ describe('ReceiptScanButton', () => {
 
   it('fires handleScan on click when idle', () => {
     const scan = makeScan();
-    render(<ReceiptScanButton scan={scan} visible={true} />);
+    render(<ReceiptScanButton scan={scan} isVisible={true} />);
 
     fireEvent.click(
       screen.getByRole('button', { name: /receipt\.scanReceipt/ }),
@@ -37,7 +39,7 @@ describe('ReceiptScanButton', () => {
 
   it('shows progress and a working cancel button while scanning', () => {
     const scan = makeScan({ isScanning: true, progress: 42 });
-    render(<ReceiptScanButton scan={scan} visible={true} />);
+    render(<ReceiptScanButton scan={scan} isVisible={true} />);
 
     expect(screen.getByText(/42%/)).toBeInTheDocument();
 

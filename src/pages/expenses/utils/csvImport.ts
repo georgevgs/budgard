@@ -17,8 +17,8 @@ export const parseExpensesCsv = (
   csvContent: string,
   categories: Category[],
   columnMapping: ColumnMapping,
-  skipIncomeTransactions: boolean = true,
-  signedConvention: boolean = false,
+  shouldSkipIncomeTransactions: boolean = true,
+  hasSignedConvention: boolean = false,
 ): CsvParseResult => {
   const lines = csvContent.trim().split(/\r?\n/);
   const validRows: ParsedExpenseRow[] = [];
@@ -57,8 +57,8 @@ export const parseExpensesCsv = (
       columnMapping,
       minColumns,
       categoryMap,
-      signedConvention,
-      skipIncomeTransactions,
+      hasSignedConvention,
+      shouldSkipIncomeTransactions,
     );
 
     if (outcome.kind === 'income') {
@@ -158,8 +158,8 @@ const processRow = (
   columnMapping: ColumnMapping,
   minColumns: number,
   categoryMap: Map<string, Category>,
-  signedConvention: boolean,
-  skipIncomeTransactions: boolean,
+  hasSignedConvention: boolean,
+  shouldSkipIncomeTransactions: boolean,
 ): RowOutcome => {
   const { dateColumn, descriptionColumn, amountColumn, categoryColumn } =
     columnMapping;
@@ -206,9 +206,9 @@ const processRow = (
   if (descriptionError) return { kind: 'error', error: descriptionError };
   const trimmedDescription = description.trim();
 
-  const { amount, isIncome } = parseAmount(amountStr.trim(), signedConvention);
+  const { amount, isIncome } = parseAmount(amountStr.trim(), hasSignedConvention);
 
-  if (skipIncomeTransactions && isIncome) return { kind: 'income' };
+  if (shouldSkipIncomeTransactions && isIncome) return { kind: 'income' };
 
   // Zero is not a transaction; a negative expense is a refund and is legal.
   if (amount === null || amount === 0) {

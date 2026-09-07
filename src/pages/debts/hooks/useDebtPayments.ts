@@ -3,7 +3,7 @@ import { captureException } from '@/config/sentry';
 import { dataService } from '@/common/api/dataService';
 import type { Expense } from '@/types/Expense';
 
-type UseDebtPaymentsResult = {
+type UseDebtPaymentsReturn = {
   payments: Expense[];
   isLoading: boolean;
   hasError: boolean;
@@ -18,12 +18,12 @@ export const useDebtPayments = (
   debtId: string,
   isActive: boolean,
   updatedAt: string,
-): UseDebtPaymentsResult => {
+): UseDebtPaymentsReturn => {
   const [payments, setPayments] = useState<Expense[]>([]);
   const [retryCount, setRetryCount] = useState(0);
   const [settled, setSettled] = useState<{
     key: string;
-    failed: boolean;
+    hasFailed: boolean;
   } | null>(null);
 
   const requestKey = `${debtId}|${updatedAt}|${retryCount}`;
@@ -49,13 +49,13 @@ export const useDebtPayments = (
           return;
         }
         setPayments(data);
-        setSettled({ key, failed: false });
+        setSettled({ key, hasFailed: false });
       } catch (error) {
         captureException(error, {
           tags: { context: 'useDebtPayments.load' },
         });
         if (!cancelled) {
-          setSettled({ key, failed: true });
+          setSettled({ key, hasFailed: true });
         }
       }
     })();
@@ -67,7 +67,7 @@ export const useDebtPayments = (
 
   const isLoading = settled === null || settled.key !== requestKey;
   const hasError =
-    settled !== null && settled.key === requestKey && settled.failed;
+    settled !== null && settled.key === requestKey && settled.hasFailed;
 
   const retry = () => {
     setRetryCount((count) => count + 1);

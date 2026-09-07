@@ -66,6 +66,6 @@ export const useDescriptionSuggestions = (
   };
 };
 
-export type DescriptionSuggestionsApi = ReturnType<
+export type UseDescriptionSuggestionsReturn = ReturnType<
   typeof useDescriptionSuggestions
 >;

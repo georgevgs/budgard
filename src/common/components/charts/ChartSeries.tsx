@@ -33,8 +33,6 @@ export const renderSeries = (
   return renderCurve(series, context);
 };
 
-// --- Helpers ---
-
 const stroke = (color: string) => `hsl(var(${color}))`;
 
 const valuesOf = (data: ChartPoint[], key: string): (number | null)[] =>
@@ -81,7 +79,7 @@ const renderCurve = (series: Series, context: Context) => {
   const xAt = (index: number) => scale.at(index);
   const values = valuesOf(data, series.key);
   const runs = runsOf(values, xAt, y);
-  const smooth = series.smooth !== false;
+  const isSmooth = series.isSmooth !== false;
   // The fill meets zero, not the floor of the plot. On a chart that runs below
   // zero — a deviation from a personal baseline, a net cash flow — filling to
   // the bottom would shade the area under a negative month as though it were
@@ -90,21 +88,21 @@ const renderCurve = (series: Series, context: Context) => {
   // anyway, so nothing else changes.
   const baseline = clampToPlot(y.to(0), plot);
   const color = stroke(series.color);
-  const showFill = series.kind === 'area' && series.fill !== false;
+  const shouldShowFill = series.kind === 'area' && series.shouldFill !== false;
 
   return (
     <g key={series.key}>
-      {renderFills(showFill, runs, smooth, baseline, series.key)}
+      {renderFills(shouldShowFill, runs, isSmooth, baseline, series.key)}
       {runs.map((run, runIndex) => (
         <path
           key={`line-${runIndex}`}
-          d={linePath(run, smooth)}
+          d={linePath(run, isSmooth)}
           fill="none"
           stroke={color}
           strokeWidth={2}
           strokeLinecap="round"
           strokeLinejoin="round"
-          strokeDasharray={dashFor(series.dashed)}
+          strokeDasharray={dashFor(series.isDashed)}
         />
       ))}
       {renderActiveDot(values, activeIndex, xAt, y, color)}
@@ -113,20 +111,20 @@ const renderCurve = (series: Series, context: Context) => {
 };
 
 const renderFills = (
-  showFill: boolean,
+  shouldShowFill: boolean,
   runs: [number, number][][],
-  smooth: boolean,
+  isSmooth: boolean,
   baseline: number,
   key: string,
 ) => {
-  if (!showFill) {
+  if (!shouldShowFill) {
     return null;
   }
 
   return runs.map((run, runIndex) => (
     <path
       key={`fill-${runIndex}`}
-      d={areaPath(run, smooth, baseline)}
+      d={areaPath(run, isSmooth, baseline)}
       fill={`url(#chart-fill-${key})`}
       stroke="none"
     />
@@ -137,8 +135,8 @@ const clampToPlot = (value: number, plot: Plot): number => {
   return Math.min(Math.max(value, plot.top), plot.top + plot.height);
 };
 
-const dashFor = (dashed: boolean | undefined): string | undefined => {
-  if (!dashed) {
+const dashFor = (isDashed: boolean | undefined): string | undefined => {
+  if (!isDashed) {
     return undefined;
   }
 

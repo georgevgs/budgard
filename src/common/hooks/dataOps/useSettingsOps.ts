@@ -52,9 +52,9 @@ export const useSettingsOps = () => {
 
     const handleNotificationPreferenceUpdate = (
       key: NotificationPreferenceKey,
-      enabled: boolean,
+      isEnabled: boolean,
     ) => {
-      const next = { ...notificationPreferences, [key]: enabled };
+      const next = { ...notificationPreferences, [key]: isEnabled };
 
       return runMutation({
         operation: 'updateNotificationPreferences',

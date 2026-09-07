@@ -4,13 +4,13 @@ import { parseCurrencyInput } from '@/constants/utils';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useIncomeOps } from '@/common/hooks/dataOps/useIncomeOps';
 import { prepareStoredTransactionAmount } from '@/constants/transactionAmount';
-import type { CurrencyConversionApi } from '@/common/hooks/currency/useCurrencyConversionCore';
+import type { UseCurrencyConversionCoreReturn } from '@/common/hooks/currency/useCurrencyConversionCore';
 import type { IncomeFormData } from '@/pages/income/validations';
 import type { Expense } from '@/types/Expense';
 
 type UseIncomeSubmitArgs = {
   income: Expense | undefined;
-  conversion: CurrencyConversionApi;
+  conversion: UseCurrencyConversionCoreReturn;
   onClose: (savedIncome?: Expense) => void;
 };
 
@@ -54,8 +54,6 @@ export const useIncomeSubmit = ({
 
   return { isSubmitting, handleSubmit };
 };
-
-// --- Helpers ---
 
 const normalizeCategoryId = (categoryId: string): string | null => {
   if (categoryId === 'none') return null;

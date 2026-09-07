@@ -4,7 +4,7 @@ import { getReceiptUrl } from '@/common/api/receiptService';
 
 // Loads a signed receipt URL when `enabled` is true. Keeps service access
 // out of the view layer per the architecture rule.
-export type UseReceiptUrlResult = {
+export type UseReceiptUrlReturn = {
   url: string | null;
   isLoading: boolean;
   error: boolean;
@@ -13,7 +13,7 @@ export type UseReceiptUrlResult = {
 export const useReceiptUrl = (
   receiptPath: string,
   enabled: boolean,
-): UseReceiptUrlResult => {
+): UseReceiptUrlReturn => {
   const [loaded, setLoaded] = useState<LoadedReceipt | null>(null);
   // Keep the current URL out of the effect deps — re-running on every URL
   // change would tear down the very URL we just created.
@@ -71,8 +71,6 @@ export const useReceiptUrl = (
 
   return { url, isLoading, error };
 };
-
-// --- Helpers ---
 
 type LoadedReceipt = {
   key: string;

@@ -24,5 +24,5 @@ export const usePageRefresh = (isEnabledRoute: boolean): UsePullToRefreshReturn 
     haptics.success();
   }, [refreshData]);
 
-  return usePullToRefresh({ onRefresh, enabled: isMobile && isEnabledRoute });
+  return usePullToRefresh({ onRefresh, isEnabled: isMobile && isEnabledRoute });
 };

@@ -116,7 +116,7 @@ type AmountParseResult = {
  */
 export const parseAmount = (
   amountStr: string,
-  signedConvention: boolean,
+  hasSignedConvention: boolean,
 ): AmountParseResult => {
   // Currency symbols, spaces, quotes and thin/non-breaking spaces used as
   // grouping separators in some locales.
@@ -156,7 +156,7 @@ export const parseAmount = (
 
   // Bank statement: the sign is the direction, so store the magnitude and
   // record which side it fell on.
-  if (signedConvention) {
+  if (hasSignedConvention) {
     return { amount: rounded, isIncome: !hasMinusSign };
   }
 

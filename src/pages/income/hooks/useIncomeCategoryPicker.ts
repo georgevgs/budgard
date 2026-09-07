@@ -35,7 +35,7 @@ export const useIncomeCategoryPicker = (
   );
   // When the user is typing a unique new name, the bottom row becomes a quick
   // "+ Create" action. Otherwise it's "Manage sources" (combined add + edit + delete).
-  const showCreateOption = trimmedSearch.length > 0 && !hasExactMatch;
+  const shouldShowCreateOption = trimmedSearch.length > 0 && !hasExactMatch;
 
   const handleCategorySelect = (id: string) => {
     form.setValue('category_id', id, {
@@ -85,13 +85,13 @@ export const useIncomeCategoryPicker = (
     selectedCategory,
     filteredCategories,
     trimmedSearch,
-    showCreateOption,
+    shouldShowCreateOption,
     handleCategorySelect,
     handleCategoryCreateInline,
     handleOpenManager,
   };
 };
 
-export type IncomeCategoryPickerApi = ReturnType<
+export type UseIncomeCategoryPickerReturn = ReturnType<
   typeof useIncomeCategoryPicker
 >;

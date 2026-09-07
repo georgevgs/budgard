@@ -4,7 +4,7 @@ import { haptics } from '@/constants/haptics';
 type Options = {
   onRefresh: () => Promise<void>;
   // Off on desktop, and off while the app has nothing to refresh into.
-  enabled?: boolean;
+  isEnabled?: boolean;
 };
 
 export type UsePullToRefreshReturn = {
@@ -57,7 +57,7 @@ type Stage = 'idle' | 'pulling' | 'armed' | 'refreshing' | 'settling';
  */
 export const usePullToRefresh = ({
   onRefresh,
-  enabled = true,
+  isEnabled = true,
 }: Options): UsePullToRefreshReturn => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   // Read inside native listeners that are registered once, so they always see
@@ -70,7 +70,7 @@ export const usePullToRefresh = ({
   });
 
   useEffect(() => {
-    if (!enabled) {
+    if (!isEnabled) {
       return;
     }
 
@@ -256,12 +256,10 @@ export const usePullToRefresh = ({
       clearTimeout(holdTimer);
       clearStage();
     };
-  }, [enabled]);
+  }, [isEnabled]);
 
-  return { isEnabled: enabled, isRefreshing };
+  return { isEnabled: isEnabled, isRefreshing };
 };
-
-// --- Helpers ---
 
 // Slope 1 at the origin, asymptotic to MAX_PULL_PX. The hyperbolic curve this
 // replaced resisted from the very first pixel, so a 140px drag yielded 40px of

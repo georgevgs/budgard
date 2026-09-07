@@ -70,13 +70,13 @@ export const clearLock = (): void => {
   }
 };
 
-export const setBiometrics = (enabled: boolean): void => {
+export const setBiometrics = (isEnabled: boolean): void => {
   const lock = loadLock();
   if (!lock) {
     return;
   }
 
-  save({ ...lock, biometrics: enabled });
+  save({ ...lock, biometrics: isEnabled });
 };
 
 export type VerifyResult =
@@ -111,8 +111,6 @@ export const verifyPin = async (pin: string): Promise<VerifyResult> => {
 };
 
 export { PIN_LENGTH, MAX_ATTEMPTS };
-
-// --- Helpers ---
 
 const save = (record: AppLockRecord): void => {
   try {

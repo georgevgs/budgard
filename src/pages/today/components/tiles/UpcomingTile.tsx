@@ -25,7 +25,7 @@ export const UpcomingTile = ({ upcoming, currency }: UpcomingTileProps) => {
 
   return (
     <BentoTile
-      wide
+      isWide
       to="/recurring"
       ariaLabel={t('today.upcoming.title')}
       className="px-4.5 py-4"
@@ -47,7 +47,6 @@ export const UpcomingTile = ({ upcoming, currency }: UpcomingTileProps) => {
     </BentoTile>
   );
 };
-// --- Helpers ---
 
 const renderEntry = (
   entry: UpcomingEntry,

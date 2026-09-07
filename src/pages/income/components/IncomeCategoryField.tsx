@@ -19,13 +19,13 @@ import {
   renderCategoryButtonContent,
   renderCategoryDot,
   renderBottomAction,
-} from '@/pages/income/components/IncomeForm.helpers';
-import type { IncomeCategoryPickerApi } from '@/pages/income/hooks/useIncomeCategoryPicker';
+} from '@/pages/income/utils/incomeFormHelpers';
+import type { UseIncomeCategoryPickerReturn } from '@/pages/income/hooks/useIncomeCategoryPicker';
 import type { IncomeFormData } from '@/pages/income/validations';
 
 type IncomeCategoryFieldProps = {
   form: UseFormReturn<IncomeFormData>;
-  picker: IncomeCategoryPickerApi;
+  picker: UseIncomeCategoryPickerReturn;
 };
 
 export const IncomeCategoryField = ({ form, picker }: IncomeCategoryFieldProps) => {
@@ -35,9 +35,9 @@ export const IncomeCategoryField = ({ form, picker }: IncomeCategoryFieldProps) 
     if (e.key !== 'Enter') return;
 
     e.preventDefault();
-    if (picker.filteredCategories.length === 1 && !picker.showCreateOption) {
+    if (picker.filteredCategories.length === 1 && !picker.shouldShowCreateOption) {
       picker.handleCategorySelect(picker.filteredCategories[0].id);
-    } else if (picker.showCreateOption) {
+    } else if (picker.shouldShowCreateOption) {
       picker.handleCategoryCreateInline();
     }
   };
@@ -111,7 +111,7 @@ export const IncomeCategoryField = ({ form, picker }: IncomeCategoryFieldProps) 
               {/* Sticky footer — always visible regardless of list scroll */}
               <div className="shrink-0">
                 {renderBottomAction(
-                  picker.showCreateOption,
+                  picker.shouldShowCreateOption,
                   picker.isCreatingCategory,
                   picker.trimmedSearch,
                   picker.handleCategoryCreateInline,

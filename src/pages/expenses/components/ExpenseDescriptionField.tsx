@@ -13,13 +13,13 @@ import {
   PopoverContent,
 } from '@/common/ui/popover';
 import { Input } from '@/common/ui/input';
-import { renderSuggestionMeta } from '@/pages/expenses/components/ExpensesForm.helpers';
-import type { DescriptionSuggestionsApi } from '@/pages/expenses/hooks/useDescriptionSuggestions';
+import { renderSuggestionMeta } from '@/pages/expenses/utils/expensesFormHelpers';
+import type { UseDescriptionSuggestionsReturn } from '@/pages/expenses/hooks/useDescriptionSuggestions';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
 
 type ExpenseDescriptionFieldProps = {
   form: UseFormReturn<ExpenseFormData>;
-  suggestions: DescriptionSuggestionsApi;
+  suggestions: UseDescriptionSuggestionsReturn;
 };
 
 export const ExpenseDescriptionField = ({ form, suggestions }: ExpenseDescriptionFieldProps) => {

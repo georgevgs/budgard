@@ -104,7 +104,7 @@ const DialogContent = React.forwardRef<
   } = useSwipeToClose({
     onClose: guardedClose,
     threshold: 100,
-    enabled: isMobile,
+    isEnabled: isMobile,
   });
 
   return (

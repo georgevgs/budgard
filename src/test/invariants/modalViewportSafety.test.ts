@@ -92,7 +92,7 @@ describe('modal viewport safety', () => {
     expect(css).toMatch(
       /@media \(max-width: 639px\) \{\s+\[role='dialog'\]\[data-state\] > button:last-child \{\s+display: none;\s+\}\s+\}/,
     );
-    expect(dialog).toContain('enabled: isMobile');
+    expect(dialog).toContain('isEnabled: isMobile');
     expect(dialog).toContain('inline-flex h-10 w-10');
   });
 

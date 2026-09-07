@@ -25,7 +25,7 @@ export const RecentActivityTile = ({ items, currency }: RecentActivityTileProps)
   }
 
   return (
-    <BentoTile tone="bare" wide className="mt-1">
+    <BentoTile tone="bare" isWide className="mt-1">
       <div className="mb-2.5 flex items-baseline justify-between gap-3 px-1">
         <TileLabel>{t('today.recent.title')}</TileLabel>
         <Link
@@ -43,7 +43,6 @@ export const RecentActivityTile = ({ items, currency }: RecentActivityTileProps)
     </BentoTile>
   );
 };
-// --- Helpers ---
 
 const renderPill = (
   item: RecentActivityItem,

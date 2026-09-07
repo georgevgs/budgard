@@ -56,7 +56,7 @@ const AlertDialogContent = React.forwardRef<
   } = useSwipeToClose({
     onClose: () => onOpenChange?.(false),
     threshold: 100,
-    enabled: isMobile,
+    isEnabled: isMobile,
   });
 
   return (

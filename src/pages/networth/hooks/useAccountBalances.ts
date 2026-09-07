@@ -3,7 +3,7 @@ import { captureException } from '@/config/sentry';
 import { dataService } from '@/common/api/dataService';
 import type { AccountBalance } from '@/types/AccountBalance';
 
-type UseAccountBalancesResult = {
+type UseAccountBalancesReturn = {
   snapshots: AccountBalance[];
   isLoading: boolean;
   hasError: boolean;
@@ -18,12 +18,12 @@ export const useAccountBalances = (
   accountId: string,
   isActive: boolean,
   updatedAt: string,
-): UseAccountBalancesResult => {
+): UseAccountBalancesReturn => {
   const [snapshots, setSnapshots] = useState<AccountBalance[]>([]);
   const [retryCount, setRetryCount] = useState(0);
   const [settled, setSettled] = useState<{
     key: string;
-    failed: boolean;
+    hasFailed: boolean;
   } | null>(null);
 
   const requestKey = `${accountId}|${updatedAt}|${retryCount}`;
@@ -49,13 +49,13 @@ export const useAccountBalances = (
           return;
         }
         setSnapshots(data);
-        setSettled({ key, failed: false });
+        setSettled({ key, hasFailed: false });
       } catch (error) {
         captureException(error, {
           tags: { context: 'useAccountBalances.load' },
         });
         if (!cancelled) {
-          setSettled({ key, failed: true });
+          setSettled({ key, hasFailed: true });
         }
       }
     })();
@@ -67,7 +67,7 @@ export const useAccountBalances = (
 
   const isLoading = settled === null || settled.key !== requestKey;
   const hasError =
-    settled !== null && settled.key === requestKey && settled.failed;
+    settled !== null && settled.key === requestKey && settled.hasFailed;
 
   const retry = () => {
     setRetryCount((count) => count + 1);

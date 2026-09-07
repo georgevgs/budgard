@@ -8,7 +8,7 @@ import type {
   ReferenceMarker,
 } from '@/common/components/charts/chartTypes';
 
-type YProps = {
+type YAxisProps = {
   ticks: number[];
   y: Scale;
   plot: Plot;
@@ -18,7 +18,7 @@ type YProps = {
 // Horizontal gridlines with their value on the left. The lines are the axis —
 // there is no drawn spine, because a rule at every labelled value already tells
 // you where you are and one more vertical line is just ink.
-export const YAxis = ({ ticks, y, plot, format }: YProps) => (
+export const YAxis = ({ ticks, y, plot, format }: YAxisProps) => (
   <g aria-hidden="true">
     {ticks.map((tick) => {
       const position = y.to(tick);
@@ -49,7 +49,7 @@ export const YAxis = ({ ticks, y, plot, format }: YProps) => (
   </g>
 );
 
-type XProps = {
+type XAxisProps = {
   data: ChartPoint[];
   xKey: string;
   plot: Plot;
@@ -57,7 +57,7 @@ type XProps = {
   format?: (value: string, index: number) => string;
 };
 
-export const XAxis = ({ data, xKey, plot, hasBars, format }: XProps) => {
+export const XAxis = ({ data, xKey, plot, hasBars, format }: XAxisProps) => {
   const scale = scaleFor(hasBars, data.length, plot);
   const visible = visibleTickIndices(data.length, plot.width);
 
@@ -85,13 +85,13 @@ export const XAxis = ({ data, xKey, plot, hasBars, format }: XProps) => {
   );
 };
 
-type ReferenceProps = {
+type ReferenceLineProps = {
   marker: ReferenceMarker;
   y: Scale;
   plot: Plot;
 };
 
-export const ReferenceLine = ({ marker, y, plot }: ReferenceProps) => {
+export const ReferenceLine = ({ marker, y, plot }: ReferenceLineProps) => {
   const position = y.to(marker.value);
   const color = `hsl(var(${marker.color ?? '--warning'}))`;
 
@@ -110,8 +110,6 @@ export const ReferenceLine = ({ marker, y, plot }: ReferenceProps) => {
     </g>
   );
 };
-
-// --- Helpers ---
 
 const LABEL_WIDTH = 58;
 

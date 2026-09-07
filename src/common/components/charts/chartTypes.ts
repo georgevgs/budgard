@@ -18,12 +18,12 @@ export type Series = {
   color: TokenName;
   // Lines only: draws dashed, for a projection or a cost basis — something
   // that is modelled rather than measured.
-  dashed?: boolean;
+  isDashed?: boolean;
   // Areas and lines only. Off for a step-like series where a curve would
   // invent motion between two readings that never happened.
-  smooth?: boolean;
+  isSmooth?: boolean;
   // Areas only: skip the gradient and draw the stroke alone.
-  fill?: boolean;
+  shouldFill?: boolean;
 };
 
 export type ReferenceMarker = {

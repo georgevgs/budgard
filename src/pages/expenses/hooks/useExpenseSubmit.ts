@@ -5,14 +5,14 @@ import { useAuth } from '@/common/contexts/AuthContext';
 import { collectExpenseTagIds } from '@/constants/expenseTags';
 import { prepareStoredTransactionAmount } from '@/constants/transactionAmount';
 import type { ReceiptOptions } from '@/common/hooks/dataOps/useExpenseOps';
-import type { CurrencyConversionApi } from '@/pages/expenses/hooks/useCurrencyConversion';
+import type { UseCurrencyConversionCoreReturn } from '@/pages/expenses/hooks/useCurrencyConversion';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
 import type { ExpenseWritePayload } from '@/common/api/dataService';
 import type { Expense } from '@/types/Expense';
 
 type UseExpenseSubmitArgs = {
   expense: Expense | undefined;
-  conversion: CurrencyConversionApi;
+  conversion: UseCurrencyConversionCoreReturn;
   receiptFile: File | null;
   shouldRemoveExistingReceipt: boolean;
   onSubmit: (
@@ -79,8 +79,6 @@ export const useExpenseSubmit = ({
 
   return { isSubmitting, handleSubmit };
 };
-
-// --- Helpers ---
 
 const normalizeCategoryId = (categoryId: string): string | null => {
   if (categoryId === 'none') return null;

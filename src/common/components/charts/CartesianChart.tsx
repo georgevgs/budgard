@@ -48,11 +48,10 @@ export const CartesianChart = (props: CartesianChartProps) => {
         containerWidth={width}
         render={props.renderTooltip}
       />
-      <ChartLegend series={props.series} show={props.shouldShowLegend} />
+      <ChartLegend series={props.series} shouldShow={props.shouldShowLegend} />
     </div>
   );
 };
-// --- Helpers ---
 
 type Layout = ReturnType<typeof buildLayout>;
 type Interaction = ReturnType<typeof useChartInteraction>;

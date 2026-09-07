@@ -144,12 +144,12 @@ const useSpeedDialFocus = (
   }, [isOpen, closeMenuAndRestoreFocus]);
 };
 
-type OverlayProps = {
+type SpeedDialOverlayProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
-const SpeedDialOverlay = ({ isOpen, onClose }: OverlayProps) => {
+const SpeedDialOverlay = ({ isOpen, onClose }: SpeedDialOverlayProps) => {
   if (!isOpen) {
     return null;
   }

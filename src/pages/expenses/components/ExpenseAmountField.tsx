@@ -2,12 +2,12 @@ import { useTranslation } from 'react-i18next';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormField, FormItem, FormMessage } from '@/common/ui/form';
 import { TransactionAmountControl } from '@/common/components/common/TransactionAmountControl';
-import type { CurrencyConversionApi } from '@/pages/expenses/hooks/useCurrencyConversion';
+import type { UseCurrencyConversionCoreReturn } from '@/pages/expenses/hooks/useCurrencyConversion';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
 
 type ExpenseAmountFieldProps = {
   form: UseFormReturn<ExpenseFormData>;
-  conversion: CurrencyConversionApi;
+  conversion: UseCurrencyConversionCoreReturn;
 };
 
 export const ExpenseAmountField = ({ form, conversion }: ExpenseAmountFieldProps) => {

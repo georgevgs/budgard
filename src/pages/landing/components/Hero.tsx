@@ -26,7 +26,7 @@ export const Hero = ({ onGetStarted }: HeroProps) => {
   const { t } = useTranslation();
   const install = useInstallPrompt();
   const [isIosModalOpen, setIsIosModalOpen] = useState(false);
-  const showInstall =
+  const shouldShowInstall =
     !install.isStandalone &&
     (install.isIosSafari || install.isAndroidInstallable);
 
@@ -48,7 +48,7 @@ export const Hero = ({ onGetStarted }: HeroProps) => {
         <div className="max-w-xl">
           <Reveal>{renderHeroCopy(t)}</Reveal>
           <Reveal delay={100}>
-            {renderCtas(t, onGetStarted, showInstall, handleInstall)}
+            {renderCtas(t, onGetStarted, shouldShowInstall, handleInstall)}
           </Reveal>
           <Reveal delay={180}>{renderTrustLine(t)}</Reveal>
         </div>
@@ -60,7 +60,6 @@ export const Hero = ({ onGetStarted }: HeroProps) => {
     </section>
   );
 };
-// --- Helpers ---
 
 const renderHeroCopy = (t: Tx) => (
   <div>
@@ -81,7 +80,7 @@ const renderHeroCopy = (t: Tx) => (
 const renderCtas = (
   t: Tx,
   onGetStarted: () => void,
-  showInstall: boolean,
+  shouldShowInstall: boolean,
   handleInstall: () => void,
 ) => (
   <div className="mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
@@ -93,16 +92,16 @@ const renderCtas = (
       {t('landing.hero.primaryCta')}
       <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
     </Button>
-    {renderInstallButton(t, showInstall, handleInstall)}
+    {renderInstallButton(t, shouldShowInstall, handleInstall)}
   </div>
 );
 
 const renderInstallButton = (
   t: Tx,
-  showInstall: boolean,
+  shouldShowInstall: boolean,
   handleInstall: () => void,
 ) => {
-  if (!showInstall) {
+  if (!shouldShowInstall) {
     return null;
   }
 
@@ -149,7 +148,7 @@ const renderTodayPreview = (t: Tx) => (
 );
 
 const renderSafeToSpend = (t: Tx) => (
-  <BentoTile tone="slab" wide className="p-5 sm:p-6">
+  <BentoTile tone="slab" isWide className="p-5 sm:p-6">
     <div className="flex items-start justify-between gap-3">
       <TileLabel>{t('today.tiles.safeToSpend')}</TileLabel>
       <span className="tile-badge">{t('today.chip.comfortable')}</span>
@@ -213,7 +212,7 @@ const renderMonthPace = (t: Tx) => (
 );
 
 const renderUpcoming = (t: Tx) => (
-  <BentoTile wide className="px-4.5 py-4">
+  <BentoTile isWide className="px-4.5 py-4">
     <div className="flex items-center justify-between gap-4">
       <TileLabel>{t('today.upcoming.title')}</TileLabel>
       <span className="text-xs font-medium text-primary-ink">

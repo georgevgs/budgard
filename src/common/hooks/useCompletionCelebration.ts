@@ -7,7 +7,7 @@ import { useEffect, useRef } from 'react';
 // an oscillating net-delta goal).
 export const useCompletionCelebration = (
   completedIds: string[],
-  enabled: boolean,
+  isEnabled: boolean,
   onComplete: (id: string) => void,
 ): void => {
   const celebratedRef = useRef<Set<string> | null>(null);
@@ -24,7 +24,7 @@ export const useCompletionCelebration = (
   const key = completedIds.join('|');
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!isEnabled) return;
 
     // First armed run seeds the baseline without celebrating.
     if (celebratedRef.current === null) {
@@ -40,5 +40,5 @@ export const useCompletionCelebration = (
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, enabled]);
+  }, [key, isEnabled]);
 };

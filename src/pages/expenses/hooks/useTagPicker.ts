@@ -2,7 +2,7 @@ import { useMemo, useState, useTransition } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { useTagsData } from '@/common/contexts/DataContext';
 import { useTagOps } from '@/common/hooks/dataOps/useTagOps';
-import { useProGate } from '@/pages/pro/hooks/useProGate';
+import { useProGate } from '@/common/hooks/useProGate';
 import { dataColors } from '@/design/palette';
 import { collectExpenseTagIds } from '@/constants/expenseTags';
 import type { Tag } from '@/types/Tag';
@@ -40,7 +40,7 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
   const hasExactMatch = tags.some(
     (tag) => tag.name.toLowerCase() === tagSearch.toLowerCase(),
   );
-  const showCreateOption = tagSearch.trim().length > 0 && !hasExactMatch;
+  const shouldShowCreateOption = tagSearch.trim().length > 0 && !hasExactMatch;
 
   const applySelection = (ids: string[]) => {
     form.setValue('tag_id', ids[0], {
@@ -98,7 +98,7 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
     setTagSearch,
     selectedTags,
     filteredTags,
-    showCreateOption,
+    shouldShowCreateOption,
     isCreatingTag,
     handleTagSelect,
     handleTagRemove,
@@ -106,9 +106,7 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
   };
 };
 
-export type TagPickerApi = ReturnType<typeof useTagPicker>;
-
-// --- Helpers ---
+export type UseTagPickerReturn = ReturnType<typeof useTagPicker>;
 
 const resolveSelectedTags = (ids: string[], tags: Tag[]): Tag[] => {
   const resolved: Tag[] = [];

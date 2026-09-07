@@ -55,10 +55,10 @@ export const haptics = {
 export const hapticsSettings = {
   isSupported: (): boolean => canVibrate(),
   isEnabled: (): boolean => isUserEnabled(),
-  setEnabled: (enabled: boolean): void => {
+  setEnabled: (isEnabled: boolean): void => {
     try {
       let stored: 'true' | 'false' = 'false';
-      if (enabled) {
+      if (isEnabled) {
         stored = 'true';
       }
 

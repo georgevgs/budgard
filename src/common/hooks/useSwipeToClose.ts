@@ -12,7 +12,7 @@ type UseSwipeToCloseOptions = {
   // Distance in pixels a slow drag must cover to dismiss.
   threshold?: number;
   // Allow disabling on desktop, where there is no sheet to drag.
-  enabled?: boolean;
+  isEnabled?: boolean;
 };
 
 // How far the sheet can be pulled UP past its resting place before it stops
@@ -51,7 +51,7 @@ type DragStyle = CSSProperties & {
 export const useSwipeToClose = ({
   onClose,
   threshold = 100,
-  enabled = true,
+  isEnabled = true,
 }: UseSwipeToCloseOptions) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isDismissing, setIsDismissing] = useState(false);
@@ -98,7 +98,7 @@ export const useSwipeToClose = ({
 
   const handleTouchStart = useCallback(
     (event: React.TouchEvent) => {
-      if (!enabled || isDismissing) {
+      if (!isEnabled || isDismissing) {
         return;
       }
       if (event.touches.length !== 1) {
@@ -129,12 +129,12 @@ export const useSwipeToClose = ({
       velocity.current = 0;
       setIsDragging(true);
     },
-    [enabled, isDismissing, cancelDrag],
+    [isEnabled, isDismissing, cancelDrag],
   );
 
   const handleTouchMove = useCallback(
     (event: React.TouchEvent) => {
-      if (!isDragging || !enabled) {
+      if (!isDragging || !isEnabled) {
         return;
       }
       if (event.touches.length !== 1) {
@@ -153,12 +153,12 @@ export const useSwipeToClose = ({
 
       setTranslateY(resist(y - startY.current));
     },
-    [isDragging, enabled, cancelDrag],
+    [isDragging, isEnabled, cancelDrag],
   );
 
   const handleTouchEnd = useCallback(
     (event: React.TouchEvent<HTMLElement>) => {
-      if (!isDragging || !enabled) {
+      if (!isDragging || !isEnabled) {
         return;
       }
 
@@ -233,7 +233,7 @@ export const useSwipeToClose = ({
     },
     [
       isDragging,
-      enabled,
+      isEnabled,
       translateY,
       threshold,
       onClose,
@@ -265,8 +265,8 @@ export const useSwipeToClose = ({
     };
   }, [clearDismissalReset]);
 
-  const interactionActive = isDragging || isDismissing;
-  const settle = settleTransition(interactionActive);
+  const isInteractionActive = isDragging || isDismissing;
+  const settle = settleTransition(isInteractionActive);
   const dragStyle: DragStyle = {
     transform: `translateY(${translateY}px)`,
     transition: settle.transform,
@@ -292,7 +292,7 @@ export const useSwipeToClose = ({
     // The overlay thins out as the sheet leaves, so what is underneath comes
     // back gradually rather than all at once when the sheet finally closes.
     overlayStyle: {
-      opacity: overlayOpacity(interactionActive, translateY, threshold),
+      opacity: overlayOpacity(isInteractionActive, translateY, threshold),
       transition: settle.opacity,
       animationDuration: dismissAnimationDuration(
         isDismissing,
@@ -302,8 +302,6 @@ export const useSwipeToClose = ({
     },
   };
 };
-
-// --- Helpers ---
 
 /**
  * iOS-style rubber band. Downward is a real dismissal, so it tracks 1:1.
@@ -325,11 +323,11 @@ const resist = (delta: number): number => {
 };
 
 const overlayOpacity = (
-  interactionActive: boolean,
+  isInteractionActive: boolean,
   translateY: number,
   threshold: number,
 ): number => {
-  if (!interactionActive) {
+  if (!isInteractionActive) {
     return 1;
   }
 
@@ -340,8 +338,8 @@ const overlayOpacity = (
 // directly manipulated and any easing would lag behind the touch. A committed
 // dismissal also leaves transitions off because the Radix exit keyframe owns
 // that phase. The rejected-drag settle is the only transition here.
-const settleTransition = (interactionActive: boolean) => {
-  if (interactionActive) {
+const settleTransition = (isInteractionActive: boolean) => {
+  if (isInteractionActive) {
     return { transform: 'none', opacity: 'none' };
   }
 

@@ -17,7 +17,7 @@ export const WeeklyRecapTile = () => {
   }
 
   return (
-    <BentoTile tone="bare" wide>
+    <BentoTile tone="bare" isWide>
       <WeeklyRecapCard />
     </BentoTile>
   );

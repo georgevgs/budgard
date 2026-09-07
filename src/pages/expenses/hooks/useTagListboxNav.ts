@@ -1,11 +1,11 @@
 import { useId, useState } from 'react';
 import type { KeyboardEvent } from 'react';
-import type { TagPickerApi } from '@/pages/expenses/hooks/useTagPicker';
+import type { UseTagPickerReturn } from '@/pages/expenses/hooks/useTagPicker';
 
 // Keyboard navigation and ARIA wiring for the tag combobox: tracks the
 // active option for aria-activedescendant and handles ArrowUp/ArrowDown/Enter
 // on the search input. Mouse and filter behavior stay in useTagPicker.
-export const useTagListboxNav = (tagPicker: TagPickerApi) => {
+export const useTagListboxNav = (tagPicker: UseTagPickerReturn) => {
   const listboxId = useId();
   const [activeIndex, setActiveIndex] = useState(-1);
   const [prevInputs, setPrevInputs] = useState({
@@ -69,13 +69,16 @@ export const useTagListboxNav = (tagPicker: TagPickerApi) => {
       return;
     }
 
-    if (tagPicker.filteredTags.length === 1 && !tagPicker.showCreateOption) {
+    if (
+      tagPicker.filteredTags.length === 1 &&
+      !tagPicker.shouldShowCreateOption
+    ) {
       tagPicker.handleTagSelect(tagPicker.filteredTags[0].id);
 
       return;
     }
 
-    if (tagPicker.showCreateOption) {
+    if (tagPicker.shouldShowCreateOption) {
       tagPicker.handleTagCreateInline();
     }
   };
@@ -97,9 +100,7 @@ export const useTagListboxNav = (tagPicker: TagPickerApi) => {
   };
 };
 
-export type TagListboxNavApi = ReturnType<typeof useTagListboxNav>;
-
-// --- Helpers ---
+export type UseTagListboxNavReturn = ReturnType<typeof useTagListboxNav>;
 
 const getNextActiveIndex = (
   current: number,

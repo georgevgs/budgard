@@ -4,12 +4,12 @@ import { cn } from '@/constants/utils';
 // The chrome around a chart tooltip is `.chart-tooltip` in index.css, with the
 // other surfaces. This file is only what goes inside one.
 
-type RowProps = {
+type ChartTooltipRowProps = {
   label: ReactNode;
   value: ReactNode;
   labelClassName?: string;
   valueClassName?: string;
-  separated?: boolean;
+  isSeparated?: boolean;
 };
 
 // A single label/value line inside a tooltip. `separated` draws a divider above
@@ -19,12 +19,12 @@ const ChartTooltipRow = ({
   value,
   labelClassName,
   valueClassName,
-  separated = false,
-}: RowProps) => (
+  isSeparated = false,
+}: ChartTooltipRowProps) => (
   <div
     className={cn(
       'flex items-center justify-between gap-3',
-      separated && 'border-t border-border/40 pt-1.5 mt-1.5',
+      isSeparated && 'border-t border-border/40 pt-1.5 mt-1.5',
     )}
   >
     <span className={labelClassName}>{label}</span>

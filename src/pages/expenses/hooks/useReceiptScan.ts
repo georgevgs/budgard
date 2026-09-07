@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isSameDay } from 'date-fns';
 import type { UseFormReturn } from 'react-hook-form';
-import { useProGate } from '@/pages/pro/hooks/useProGate';
+import { useProGate } from '@/common/hooks/useProGate';
 import { useToast } from '@/common/hooks/useToast';
 import { parseReceiptText } from '@/pages/expenses/utils/receiptParse';
 import { formatCurrencyInput } from '@/constants/utils';
@@ -10,7 +10,7 @@ import {
   resolveOcrLanguages,
   runReceiptOcr,
   type OcrRunHandle,
-} from '@/pages/expenses/ocrService';
+} from '@/pages/expenses/utils/ocr';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
 
 type UseReceiptScanArgs = {
@@ -97,9 +97,7 @@ export const useReceiptScan = ({ form, receiptFile }: UseReceiptScanArgs) => {
   };
 };
 
-export type ReceiptScanApi = ReturnType<typeof useReceiptScan>;
-
-// --- Helpers ---
+export type UseReceiptScanReturn = ReturnType<typeof useReceiptScan>;
 
 // Fills only fields the user hasn't provided: empty amount/description, and a
 // date still sitting on the untouched new-expense default (today). Editing an

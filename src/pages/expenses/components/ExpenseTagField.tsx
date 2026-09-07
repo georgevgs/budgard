@@ -19,17 +19,17 @@ import { TagChip } from '@/pages/expenses/components/TagChip';
 import {
   renderCreateTagOption,
   renderNoTagsMessage,
-} from '@/pages/expenses/components/ExpensesForm.helpers';
-import type { TagPickerApi } from '@/pages/expenses/hooks/useTagPicker';
+} from '@/pages/expenses/utils/expensesFormHelpers';
+import type { UseTagPickerReturn } from '@/pages/expenses/hooks/useTagPicker';
 import {
   useTagListboxNav,
-  type TagListboxNavApi,
+  type UseTagListboxNavReturn,
 } from '@/pages/expenses/hooks/useTagListboxNav';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
 
 type ExpenseTagFieldProps = {
   form: UseFormReturn<ExpenseFormData>;
-  tagPicker: TagPickerApi;
+  tagPicker: UseTagPickerReturn;
 };
 
 export const ExpenseTagField = ({ form, tagPicker }: ExpenseTagFieldProps) => {
@@ -82,7 +82,7 @@ export const ExpenseTagField = ({ form, tagPicker }: ExpenseTagFieldProps) => {
                   {renderTagOptions(tagPicker, nav)}
                 </div>
                 {renderCreateTagOption(
-                  tagPicker.showCreateOption,
+                  tagPicker.shouldShowCreateOption,
                   tagPicker.isCreatingTag,
                   tagPicker.tagSearch,
                   tagPicker.handleTagCreateInline,
@@ -90,7 +90,7 @@ export const ExpenseTagField = ({ form, tagPicker }: ExpenseTagFieldProps) => {
                 )}
                 {renderNoTagsMessage(
                   tagPicker.filteredTags.length,
-                  tagPicker.showCreateOption,
+                  tagPicker.shouldShowCreateOption,
                   t,
                 )}
               </div>
@@ -104,7 +104,7 @@ export const ExpenseTagField = ({ form, tagPicker }: ExpenseTagFieldProps) => {
 };
 // ─── Helper render functions ──────────────────────────────────────────────────
 
-const renderSelectedTagChips = (tagPicker: TagPickerApi) => {
+const renderSelectedTagChips = (tagPicker: UseTagPickerReturn) => {
   if (tagPicker.selectedTags.length === 0) return null;
 
   return (
@@ -120,7 +120,7 @@ const renderSelectedTagChips = (tagPicker: TagPickerApi) => {
   );
 };
 
-const renderTagOptions = (tagPicker: TagPickerApi, nav: TagListboxNavApi) =>
+const renderTagOptions = (tagPicker: UseTagPickerReturn, nav: UseTagListboxNavReturn) =>
   tagPicker.filteredTags.map((tag, index) => (
     <button
       key={tag.id}

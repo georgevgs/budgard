@@ -125,12 +125,12 @@ const moveOrLine = (index: number): string => {
 
 export const linePath = (
   points: readonly [number, number][],
-  smooth: boolean,
+  isSmooth: boolean,
 ): string => {
   if (points.length === 0) {
     return '';
   }
-  if (points.length === 1 || !smooth) {
+  if (points.length === 1 || !isSmooth) {
     return points
       .map(([x, y], index) => `${moveOrLine(index)}${round(x)},${round(y)}`)
       .join(' ');
@@ -150,21 +150,19 @@ export const linePath = (
 // Closes a line path down to the baseline so it can be filled.
 export const areaPath = (
   points: readonly [number, number][],
-  smooth: boolean,
+  isSmooth: boolean,
   baseline: number,
 ): string => {
   if (points.length === 0) {
     return '';
   }
 
-  const line = linePath(points, smooth);
+  const line = linePath(points, isSmooth);
   const lastX = points[points.length - 1][0];
   const firstX = points[0][0];
 
   return `${line} L${round(lastX)},${round(baseline)} L${round(firstX)},${round(baseline)} Z`;
 };
-
-// --- Helpers ---
 
 const clamp = (value: number, min: number, max: number): number => {
   return Math.min(Math.max(value, min), max);

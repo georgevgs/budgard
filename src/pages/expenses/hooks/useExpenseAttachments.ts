@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Expense } from '@/types/Expense';
 
-export type ExpenseAttachmentsApi = {
+export type UseExpenseAttachmentsReturn = {
   receiptFile: File | null;
   shouldRemoveExistingReceipt: boolean;
   shouldShowDetails: boolean;
@@ -16,7 +16,7 @@ export type ExpenseAttachmentsApi = {
 export const useExpenseAttachments = (
   expense?: Expense,
   draftReceiptFile?: File,
-): ExpenseAttachmentsApi => {
+): UseExpenseAttachmentsReturn => {
   const [receiptFile, setReceiptFile] = useState<File | null>(
     draftReceiptFile ?? null,
   );

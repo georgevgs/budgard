@@ -178,9 +178,9 @@ export const useCsvImportFlow = (onClose: () => void) => {
     // the amount. Reading it from "any negative cell anywhere in the file"
     // meant one minus sign in a balance or a description flipped every
     // unsigned row in the import from expense to income.
-    let signedConvention = false;
+    let hasSignedConvention = false;
     if (csvPreview) {
-      signedConvention = usesSignedAmountConvention(
+      hasSignedConvention = usesSignedAmountConvention(
         csvPreview,
         columnMapping.amountColumn,
       );
@@ -190,7 +190,7 @@ export const useCsvImportFlow = (onClose: () => void) => {
       categories,
       columnMapping,
       shouldSkipIncome,
-      signedConvention,
+      hasSignedConvention,
     );
 
     setValidRows(result.validRows);
@@ -298,8 +298,6 @@ export const useCsvImportFlow = (onClose: () => void) => {
     updateColumnMapping,
   };
 };
-
-// --- Helpers ---
 
 const IMPORTABLE_EXTENSIONS = ['.csv', '.ofx', '.qfx', '.qif'];
 

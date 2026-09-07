@@ -1,11 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { QuickReceiptScanAction } from '@/pages/expenses/components/QuickReceiptScanAction';
-import type { QuickReceiptScanApi } from '@/pages/expenses/hooks/useQuickReceiptScan';
+import type { UseQuickReceiptScanReturn } from '@/pages/expenses/hooks/useQuickReceiptScan';
 
 const makeScan = (
-  overrides?: Partial<QuickReceiptScanApi>,
-): QuickReceiptScanApi => ({
+  overrides?: Partial<UseQuickReceiptScanReturn>,
+): UseQuickReceiptScanReturn => ({
   receiptFile: null,
   isScanning: false,
   progress: 0,

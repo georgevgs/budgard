@@ -13,4 +13,4 @@ export const useCurrencyConversion = (
     expense?.original_currency,
   );
 
-export type { CurrencyConversionApi } from '@/common/hooks/currency/useCurrencyConversionCore';
+export type { UseCurrencyConversionCoreReturn } from '@/common/hooks/currency/useCurrencyConversionCore';

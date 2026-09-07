@@ -41,16 +41,15 @@ export const PinPad = ({ onPress, onBackspace, disabled }: PinPadProps) => {
     </div>
   );
 };
-// --- Helpers ---
 
-type ButtonProps = {
+type PadButtonProps = {
   label: string;
   onPress: () => void;
   disabled?: boolean;
   icon?: boolean;
 };
 
-const PadButton = ({ label, onPress, disabled, icon }: ButtonProps) => (
+const PadButton = ({ label, onPress, disabled, icon }: PadButtonProps) => (
   <button
     type="button"
     onClick={onPress}

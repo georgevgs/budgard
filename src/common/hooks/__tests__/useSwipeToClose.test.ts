@@ -483,7 +483,7 @@ describe('useSwipeToClose', () => {
 
   it('does nothing when disabled', () => {
     const { result } = renderHook(() =>
-      useSwipeToClose({ onClose: vi.fn(), enabled: false }),
+      useSwipeToClose({ onClose: vi.fn(), isEnabled: false }),
     );
 
     act(() => {
