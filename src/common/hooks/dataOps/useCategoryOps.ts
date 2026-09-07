@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, type Dispatch, type SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDataActions, useDataConfig } from '@/common/contexts/DataContext';
 import { dataService } from '@/common/api/dataService';
@@ -28,6 +28,13 @@ export const useCategoryOps = () => {
 
   return useMemo(() => {
     const shouldSkip = !isInitialized;
+    const slices: CategorySlices = {
+      setCategories,
+      setExpenses,
+      setIncomes,
+      setCategoryBudgets,
+    };
+    const refreshRows = { refreshExpenses, refreshIncomes };
 
     const handleCategoryAdd = (categoryData: Partial<Category>) => {
       const optimistic = {
@@ -62,37 +69,7 @@ export const useCategoryOps = () => {
         operation: 'updateCategory',
         shouldSkip,
         errorMessage: t('categories.toasts.updateFailed'),
-        optimistic: () => {
-          let previousCategories: Category[] = [];
-          let previousExpenses: Expense[] = [];
-          let previousIncomes: Expense[] = [];
-
-          setCategories((prev) => {
-            previousCategories = prev;
-
-            return sortByName(patchById(prev, categoryId, categoryData));
-          });
-          setExpenses((prev) => {
-            previousExpenses = prev;
-
-            return prev.map((e) =>
-              mergeCategoryPatch(e, categoryId, categoryData),
-            );
-          });
-          setIncomes((prev) => {
-            previousIncomes = prev;
-
-            return prev.map((i) =>
-              mergeCategoryPatch(i, categoryId, categoryData),
-            );
-          });
-
-          return () => {
-            setCategories(previousCategories);
-            setExpenses(previousExpenses);
-            setIncomes(previousIncomes);
-          };
-        },
+        optimistic: () => patchEverywhere(slices, categoryId, categoryData),
         perform: () => dataService.updateCategory(categoryId, categoryData),
         commit: (saved) => {
           setCategories((prev) =>
@@ -112,37 +89,7 @@ export const useCategoryOps = () => {
         operation: 'deleteCategory',
         shouldSkip,
         errorMessage: t('categories.toasts.deleteFailed'),
-        optimistic: () => {
-          let previousCategories: Category[] = [];
-          let previousBudgets: CategoryBudget[] = [];
-
-          setCategories((prev) => {
-            previousCategories = prev;
-
-            return prev.filter((c) => c.id !== categoryId);
-          });
-          setExpenses((prev) =>
-            prev.map((e) => clearCategoryRef(e, categoryId)),
-          );
-          setIncomes((prev) =>
-            prev.map((i) => clearCategoryRef(i, categoryId)),
-          );
-          setCategoryBudgets((prev) => {
-            previousBudgets = prev;
-
-            return prev.filter((b) => b.category_id !== categoryId);
-          });
-
-          // The transaction rows had their embedded category stripped;
-          // rebuilding those embeds by hand is not this hook's job, so they
-          // are refetched (whichever slice the category actually belonged to).
-          return () => {
-            setCategories(previousCategories);
-            setCategoryBudgets(previousBudgets);
-            refreshExpenses();
-            refreshIncomes();
-          };
-        },
+        optimistic: () => detachEverywhere(slices, refreshRows, categoryId),
         perform: () => dataService.deleteCategory(categoryId),
       });
 
@@ -156,44 +103,7 @@ export const useCategoryOps = () => {
         operation: 'mergeCategory',
         shouldSkip,
         errorMessage: t('categories.toasts.mergeFailed'),
-        optimistic: () => {
-          let previousCategories: Category[] = [];
-          let previousExpenses: Expense[] = [];
-          let previousIncomes: Expense[] = [];
-          let previousBudgets: CategoryBudget[] = [];
-
-          setCategories((prev) => {
-            previousCategories = prev;
-
-            return prev.filter((c) => c.id !== fromCategoryId);
-          });
-          setExpenses((prev) => {
-            previousExpenses = prev;
-
-            return prev.map((e) =>
-              reassignCategoryRef(e, fromCategoryId, toCategory),
-            );
-          });
-          setIncomes((prev) => {
-            previousIncomes = prev;
-
-            return prev.map((i) =>
-              reassignCategoryRef(i, fromCategoryId, toCategory),
-            );
-          });
-          setCategoryBudgets((prev) => {
-            previousBudgets = prev;
-
-            return prev.filter((b) => b.category_id !== fromCategoryId);
-          });
-
-          return () => {
-            setCategories(previousCategories);
-            setExpenses(previousExpenses);
-            setIncomes(previousIncomes);
-            setCategoryBudgets(previousBudgets);
-          };
-        },
+        optimistic: () => foldEverywhere(slices, fromCategoryId, toCategory),
         perform: () => dataService.mergeCategory(fromCategoryId, toCategory.id),
       });
 
@@ -233,6 +143,126 @@ export const useCategoryOps = () => {
     runMutation,
     t,
   ]);
+};
+
+// A category is embedded in every expense and income row that uses it, so an
+// edit has to sweep those slices too. Each of these applies the optimistic
+// change and returns the rollback that puts every slice back as it was.
+type CategorySlices = {
+  setCategories: Dispatch<SetStateAction<Category[]>>;
+  setExpenses: Dispatch<SetStateAction<Expense[]>>;
+  setIncomes: Dispatch<SetStateAction<Expense[]>>;
+  setCategoryBudgets: Dispatch<SetStateAction<CategoryBudget[]>>;
+};
+
+type RefreshRows = {
+  refreshExpenses: () => Promise<void>;
+  refreshIncomes: () => Promise<void>;
+};
+
+const patchEverywhere = (
+  slices: CategorySlices,
+  categoryId: string,
+  categoryData: Partial<Category>,
+): (() => void) => {
+  let previousCategories: Category[] = [];
+  let previousExpenses: Expense[] = [];
+  let previousIncomes: Expense[] = [];
+
+  slices.setCategories((prev) => {
+    previousCategories = prev;
+
+    return sortByName(patchById(prev, categoryId, categoryData));
+  });
+  slices.setExpenses((prev) => {
+    previousExpenses = prev;
+
+    return prev.map((e) => mergeCategoryPatch(e, categoryId, categoryData));
+  });
+  slices.setIncomes((prev) => {
+    previousIncomes = prev;
+
+    return prev.map((i) => mergeCategoryPatch(i, categoryId, categoryData));
+  });
+
+  return () => {
+    slices.setCategories(previousCategories);
+    slices.setExpenses(previousExpenses);
+    slices.setIncomes(previousIncomes);
+  };
+};
+
+const detachEverywhere = (
+  slices: CategorySlices,
+  refreshRows: RefreshRows,
+  categoryId: string,
+): (() => void) => {
+  let previousCategories: Category[] = [];
+  let previousBudgets: CategoryBudget[] = [];
+
+  slices.setCategories((prev) => {
+    previousCategories = prev;
+
+    return prev.filter((c) => c.id !== categoryId);
+  });
+  slices.setExpenses((prev) =>
+    prev.map((e) => clearCategoryRef(e, categoryId)),
+  );
+  slices.setIncomes((prev) => prev.map((i) => clearCategoryRef(i, categoryId)));
+  slices.setCategoryBudgets((prev) => {
+    previousBudgets = prev;
+
+    return prev.filter((b) => b.category_id !== categoryId);
+  });
+
+  // The transaction rows had their embedded category stripped; rebuilding
+  // those embeds by hand is not this hook's job, so they are refetched
+  // (whichever slice the category actually belonged to).
+  return () => {
+    slices.setCategories(previousCategories);
+    slices.setCategoryBudgets(previousBudgets);
+    refreshRows.refreshExpenses();
+    refreshRows.refreshIncomes();
+  };
+};
+
+const foldEverywhere = (
+  slices: CategorySlices,
+  fromCategoryId: string,
+  toCategory: Category,
+): (() => void) => {
+  let previousCategories: Category[] = [];
+  let previousExpenses: Expense[] = [];
+  let previousIncomes: Expense[] = [];
+  let previousBudgets: CategoryBudget[] = [];
+
+  slices.setCategories((prev) => {
+    previousCategories = prev;
+
+    return prev.filter((c) => c.id !== fromCategoryId);
+  });
+  slices.setExpenses((prev) => {
+    previousExpenses = prev;
+
+    return prev.map((e) => reassignCategoryRef(e, fromCategoryId, toCategory));
+  });
+  slices.setIncomes((prev) => {
+    previousIncomes = prev;
+
+    return prev.map((i) => reassignCategoryRef(i, fromCategoryId, toCategory));
+  });
+  slices.setCategoryBudgets((prev) => {
+    previousBudgets = prev;
+
+    return prev.filter((b) => b.category_id !== fromCategoryId);
+  });
+
+  return () => {
+    slices.setCategories(previousCategories);
+    slices.setExpenses(previousExpenses);
+    slices.setIncomes(previousIncomes);
+    slices.setCategoryBudgets(previousBudgets);
+  };
 };
 
 const sortByName = <T extends { name: string }>(items: T[]): T[] =>

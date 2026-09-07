@@ -76,20 +76,7 @@ export const useOptimisticExpenseActions = () => {
         } else {
           addOptimisticExpense({
             type: 'add',
-            expense: {
-              id: `temp-${Date.now()}`,
-              user_id: rowData.user_id!,
-              amount: rowData.amount!,
-              description: rowData.description!,
-              date: rowData.date!,
-              category_id: rowData.category_id,
-              tag_id: rowData.tag_id,
-              category,
-              tag,
-              extra_tags: extraTags ?? [],
-              receipt_path: null,
-              created_at: new Date().toISOString(),
-            },
+            expense: newRow(rowData, { category, tag }, extraTags ?? []),
           });
         }
 
@@ -127,19 +114,7 @@ export const useOptimisticExpenseActions = () => {
       startTransition(async () => {
         addOptimisticExpense({
           type: 'add',
-          expense: {
-            id: `temp-${Date.now()}`,
-            user_id: userId,
-            amount: template.amount,
-            description: template.description,
-            date: today,
-            category_id: template.category_id,
-            tag_id: template.tag_id,
-            category,
-            tag,
-            receipt_path: null,
-            created_at: new Date().toISOString(),
-          },
+          expense: templateRow(template, userId, today, { category, tag }),
         });
 
         await settleReportedOperation(
@@ -163,6 +138,55 @@ export const useOptimisticExpenseActions = () => {
     handleExpenseFormSubmit,
     handleSaveAsTemplate,
     handleUseTemplate,
+  };
+};
+
+// The row the list renders before the server answers. A write payload carries
+// ids; the list renders resolved objects, so the caller looks category, tag and
+// extra tags up and hands them in.
+type ResolvedRefs = Pick<Expense, 'category' | 'tag'>;
+
+const newRow = (
+  data: Omit<ExpenseWritePayload, 'extra_tag_ids'>,
+  refs: ResolvedRefs,
+  extraTags: EmbeddedTag[],
+): Expense => {
+  return {
+    id: `temp-${Date.now()}`,
+    user_id: data.user_id!,
+    amount: data.amount!,
+    description: data.description!,
+    date: data.date!,
+    category_id: data.category_id,
+    tag_id: data.tag_id,
+    category: refs.category,
+    tag: refs.tag,
+    extra_tags: extraTags,
+    receipt_path: null,
+    created_at: new Date().toISOString(),
+  };
+};
+
+// A template carries no receipt and no extra tags — it is the shape of a
+// recurring purchase, not a copy of one particular row.
+const templateRow = (
+  template: ExpenseTemplate,
+  userId: string,
+  date: string,
+  refs: ResolvedRefs,
+): Expense => {
+  return {
+    id: `temp-${Date.now()}`,
+    user_id: userId,
+    amount: template.amount,
+    description: template.description,
+    date,
+    category_id: template.category_id,
+    tag_id: template.tag_id,
+    category: refs.category,
+    tag: refs.tag,
+    receipt_path: null,
+    created_at: new Date().toISOString(),
   };
 };
 

@@ -26,13 +26,9 @@ const GRANDFATHERED = new Map<string, number>([
   ['useDataLayer', 619],
   ['useExpenseOps', 291],
   ['useCsvImportFlow', 263],
-  ['useOptimisticExpenseActions', 151],
   ['useSwipeToClose', 254],
   ['useNetWorth', 250],
   ['usePwaUpdate', 240],
-  ['useCategoryOps', 222],
-  ['usePullToRefresh', 205],
-  ['useAnalyticsData', 205],
 ]);
 
 const ROOTS = [

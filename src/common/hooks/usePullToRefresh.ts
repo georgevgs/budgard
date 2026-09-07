@@ -74,191 +74,238 @@ export const usePullToRefresh = ({
       return;
     }
 
-    const root = document.documentElement;
-    // A refetch can outlive the effect — a tab switch flips `isEnabled` off
-    // while it is still in flight — and its `finally` must not write the
-    // gesture back onto a document the cleanup has just tidied.
-    let disposed = false;
-    let phase: Phase = 'idle';
-    let stage: Stage = 'idle';
-    let isArmed = false;
-    let startY = 0;
-    let startX = 0;
-    let settleTimer: ReturnType<typeof setTimeout> | undefined;
-    let holdTimer: ReturnType<typeof setTimeout> | undefined;
+    const gesture = createPullGesture({
+      refreshRef,
+      refreshingRef,
+      setIsRefreshing,
+    });
 
-    const paint = (pulled: number) => {
-      const progress = Math.min(pulled / TRIGGER_PX, 1);
-      root.style.setProperty('--pull-y', `${pulled.toFixed(1)}px`);
-      root.style.setProperty('--pull-progress', progress.toFixed(3));
-    };
-
-    const setStage = (next: Stage) => {
-      if (stage === next) {
-        return;
-      }
-      stage = next;
-      root.dataset.pull = next;
-    };
-
-    // Everything the gesture wrote comes back off the document, transform
-    // included: a transform creates a containing block for fixed-position
-    // descendants, and leaving one in place permanently would change how
-    // anything fixed inside a route positions itself.
-    const clearStage = () => {
-      stage = 'idle';
-      delete root.dataset.pull;
-      root.style.removeProperty('--pull-y');
-      root.style.removeProperty('--pull-progress');
-    };
-
-    const settleBack = () => {
-      if (disposed) {
-        return;
-      }
-      setStage('settling');
-      paint(0);
-      clearTimeout(settleTimer);
-      settleTimer = setTimeout(clearStage, SETTLE_MS);
-    };
-
-    const handleStart = (event: TouchEvent) => {
-      if (!canStartPull(event, refreshingRef.current)) {
-        phase = 'idle';
-
-        return;
-      }
-      startY = event.touches[0].clientY;
-      startX = event.touches[0].clientX;
-      phase = 'deciding';
-      isArmed = false;
-    };
-
-    const handleMove = (event: TouchEvent) => {
-      if (phase === 'idle') {
-        return;
-      }
-
-      const deltaY = event.touches[0].clientY - startY;
-      const deltaX = event.touches[0].clientX - startX;
-
-      if (phase === 'deciding') {
-        const verdict = readDirection(deltaX, deltaY);
-        if (verdict === 'undecided') {
-          return;
-        }
-        if (verdict === 'not-a-pull') {
-          phase = 'idle';
-
-          return;
-        }
-        phase = 'pulling';
-        clearTimeout(settleTimer);
-      }
-
-      if (deltaY <= 0) {
-        // The finger went back up past the origin — this is a scroll, not a
-        // pull. Hand it back rather than half-holding the gesture.
-        phase = 'idle';
-        isArmed = false;
-        settleBack();
-
-        return;
-      }
-      // The page would otherwise scroll under the gesture on iOS.
-      if (event.cancelable) {
-        event.preventDefault();
-      }
-
-      const pulled = resist(deltaY);
-      paint(pulled);
-
-      // One tick the moment it would fire, so the pull can be released by
-      // feel without watching the indicator.
-      if (pulled >= TRIGGER_PX && !isArmed) {
-        isArmed = true;
-        haptics.selection();
-      }
-      if (pulled < TRIGGER_PX) {
-        isArmed = false;
-      }
-      setStage(armToStage(isArmed));
-    };
-
-    const finish = () => {
-      refreshingRef.current = false;
-      setIsRefreshing(false);
-      settleBack();
-    };
-
-    const handleEnd = () => {
-      if (phase !== 'pulling') {
-        phase = 'idle';
-
-        return;
-      }
-      phase = 'idle';
-
-      if (!isArmed) {
-        settleBack();
-
-        return;
-      }
-
-      isArmed = false;
-      refreshingRef.current = true;
-      setIsRefreshing(true);
-      setStage('refreshing');
-      // Hold at exactly the point the gesture armed, so releasing moves the
-      // page up to meet a puck that has already landed rather than dragging
-      // the puck around with it.
-      paint(TRIGGER_PX);
-
-      const startedAt = performance.now();
-      void refreshRef
-        .current()
-        .catch(() => {
-          // The data layer raises its own retry toast; the indicator's only
-          // job is to stop.
-        })
-        .finally(() => {
-          const remaining = MIN_REFRESH_MS - (performance.now() - startedAt);
-          if (remaining <= 0) {
-            finish();
-
-            return;
-          }
-          holdTimer = setTimeout(finish, remaining);
-        });
-    };
-
-    const handleCancel = () => {
-      const wasPulling = phase === 'pulling';
-      phase = 'idle';
-      isArmed = false;
-      if (wasPulling) {
-        settleBack();
-      }
-    };
-
-    document.addEventListener('touchstart', handleStart, { passive: true });
-    document.addEventListener('touchmove', handleMove, { passive: false });
-    document.addEventListener('touchend', handleEnd, { passive: true });
-    document.addEventListener('touchcancel', handleCancel, { passive: true });
+    document.addEventListener('touchstart', gesture.onStart, { passive: true });
+    document.addEventListener('touchmove', gesture.onMove, { passive: false });
+    document.addEventListener('touchend', gesture.onEnd, { passive: true });
+    document.addEventListener('touchcancel', gesture.onCancel, {
+      passive: true,
+    });
 
     return () => {
-      document.removeEventListener('touchstart', handleStart);
-      document.removeEventListener('touchmove', handleMove);
-      document.removeEventListener('touchend', handleEnd);
-      document.removeEventListener('touchcancel', handleCancel);
-      disposed = true;
-      clearTimeout(settleTimer);
-      clearTimeout(holdTimer);
-      clearStage();
+      document.removeEventListener('touchstart', gesture.onStart);
+      document.removeEventListener('touchmove', gesture.onMove);
+      document.removeEventListener('touchend', gesture.onEnd);
+      document.removeEventListener('touchcancel', gesture.onCancel);
+      gesture.dispose();
     };
   }, [isEnabled]);
 
   return { isEnabled: isEnabled, isRefreshing };
+};
+
+// Everything the gesture writes to the document element, plus the timer that
+// takes it all back off again. Split from the gesture because it is the half
+// with no opinion about fingers: the gesture decides, this paints.
+const createStageWriter = () => {
+  const root = document.documentElement;
+  // A refetch can outlive the effect — a tab switch flips `isEnabled` off while
+  // it is still in flight — and its `finally` must not write the gesture back
+  // onto a document the cleanup has just tidied.
+  let disposed = false;
+  let stage: Stage = 'idle';
+  let settleTimer: ReturnType<typeof setTimeout> | undefined;
+
+  const paint = (pulled: number) => {
+    const progress = Math.min(pulled / TRIGGER_PX, 1);
+    root.style.setProperty('--pull-y', `${pulled.toFixed(1)}px`);
+    root.style.setProperty('--pull-progress', progress.toFixed(3));
+  };
+
+  const setStage = (next: Stage) => {
+    if (stage === next) {
+      return;
+    }
+    stage = next;
+    root.dataset.pull = next;
+  };
+
+  // Everything comes back off, transform included: a transform creates a
+  // containing block for fixed-position descendants, and leaving one in place
+  // permanently would change how anything fixed inside a route positions
+  // itself.
+  const clearStage = () => {
+    stage = 'idle';
+    delete root.dataset.pull;
+    root.style.removeProperty('--pull-y');
+    root.style.removeProperty('--pull-progress');
+  };
+
+  const settleBack = () => {
+    if (disposed) {
+      return;
+    }
+    setStage('settling');
+    paint(0);
+    clearTimeout(settleTimer);
+    settleTimer = setTimeout(clearStage, SETTLE_MS);
+  };
+
+  const cancelSettle = () => clearTimeout(settleTimer);
+
+  const dispose = () => {
+    disposed = true;
+    clearTimeout(settleTimer);
+    clearStage();
+  };
+
+  return { paint, setStage, settleBack, cancelSettle, dispose };
+};
+
+type PullDeps = {
+  // Read inside listeners registered once, so they always see the current
+  // callback without the effect being torn down and re-added every render.
+  refreshRef: { current: () => Promise<void> };
+  refreshingRef: { current: boolean };
+  setIsRefreshing: (value: boolean) => void;
+};
+
+// The gesture as one object. `phase`, `stage`, the arm flag and the two timers
+// are shared by all four handlers and change many times per gesture, so they
+// stay plain closure variables rather than refs — React never needs to see
+// them, and that is the whole point of this hook.
+const createPullGesture = ({
+  refreshRef,
+  refreshingRef,
+  setIsRefreshing,
+}: PullDeps) => {
+  const screen = createStageWriter();
+  let phase: Phase = 'idle';
+  let isArmed = false;
+  let startY = 0;
+  let startX = 0;
+  let holdTimer: ReturnType<typeof setTimeout> | undefined;
+
+  const finish = () => {
+    refreshingRef.current = false;
+    setIsRefreshing(false);
+    screen.settleBack();
+  };
+
+  const onStart = (event: TouchEvent) => {
+    if (!canStartPull(event, refreshingRef.current)) {
+      phase = 'idle';
+
+      return;
+    }
+    startY = event.touches[0].clientY;
+    startX = event.touches[0].clientX;
+    phase = 'deciding';
+    isArmed = false;
+  };
+
+  const onMove = (event: TouchEvent) => {
+    if (phase === 'idle') {
+      return;
+    }
+
+    const deltaY = event.touches[0].clientY - startY;
+    const deltaX = event.touches[0].clientX - startX;
+
+    if (phase === 'deciding') {
+      const verdict = readDirection(deltaX, deltaY);
+      if (verdict === 'undecided') {
+        return;
+      }
+      if (verdict === 'not-a-pull') {
+        phase = 'idle';
+
+        return;
+      }
+      phase = 'pulling';
+      screen.cancelSettle();
+    }
+
+    if (deltaY <= 0) {
+      // The finger went back up past the origin — this is a scroll, not a
+      // pull. Hand it back rather than half-holding the gesture.
+      phase = 'idle';
+      isArmed = false;
+      screen.settleBack();
+
+      return;
+    }
+    // The page would otherwise scroll under the gesture on iOS.
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+
+    const pulled = resist(deltaY);
+    screen.paint(pulled);
+
+    // One tick the moment it would fire, so the pull can be released by feel
+    // without watching the indicator.
+    if (pulled >= TRIGGER_PX && !isArmed) {
+      isArmed = true;
+      haptics.selection();
+    }
+    if (pulled < TRIGGER_PX) {
+      isArmed = false;
+    }
+    screen.setStage(armToStage(isArmed));
+  };
+
+  const onEnd = () => {
+    if (phase !== 'pulling') {
+      phase = 'idle';
+
+      return;
+    }
+    phase = 'idle';
+
+    if (!isArmed) {
+      screen.settleBack();
+
+      return;
+    }
+
+    isArmed = false;
+    refreshingRef.current = true;
+    setIsRefreshing(true);
+    screen.setStage('refreshing');
+    // Hold at exactly the point the gesture armed, so releasing moves the page
+    // up to meet a puck that has already landed rather than dragging the puck
+    // around with it.
+    screen.paint(TRIGGER_PX);
+
+    const startedAt = performance.now();
+    void refreshRef
+      .current()
+      .catch(() => {
+        // The data layer raises its own retry toast; the indicator's only job
+        // is to stop.
+      })
+      .finally(() => {
+        const remaining = MIN_REFRESH_MS - (performance.now() - startedAt);
+        if (remaining <= 0) {
+          finish();
+
+          return;
+        }
+        holdTimer = setTimeout(finish, remaining);
+      });
+  };
+
+  const onCancel = () => {
+    const wasPulling = phase === 'pulling';
+    phase = 'idle';
+    isArmed = false;
+    if (wasPulling) {
+      screen.settleBack();
+    }
+  };
+
+  const dispose = () => {
+    clearTimeout(holdTimer);
+    screen.dispose();
+  };
+
+  return { onStart, onMove, onEnd, onCancel, dispose };
 };
 
 // Slope 1 at the origin, asymptotic to MAX_PULL_PX. The hyperbolic curve this

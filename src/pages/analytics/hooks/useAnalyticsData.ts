@@ -13,6 +13,7 @@ import { useOnDemandHistory } from '@/common/hooks/data/useOnDemandHistory';
 import { getFreeAnalyticsCutoff } from '@/constants/proLimits';
 import { monthsElapsedInYear } from '@/constants/utils';
 import type { Expense } from '@/types/Expense';
+import type { Category } from '@/types/Category';
 
 export type CategoryRow = {
   id: string;
@@ -41,13 +42,6 @@ export const useAnalyticsData = (now: Date = new Date()) => {
 
   useOnDemandHistory(isPro);
 
-  // Free tier sees the last 3 months only; everything downstream (year list,
-  // charts, breakdowns, month comparison) derives from this window.
-  //
-  // The exclusion is applied HERE, once, rather than per-memo. It used to be
-  // applied in monthlyData only, so the bar chart, the headline sitting above
-  // it and the year totals were computed on different populations and
-  // contradicted each other on screen.
   // Everything that counts as spending, over the full history. The rolling
   // 12-month chart needs this rather than the free-tier window below, which
   // would clip it to three months.
@@ -56,6 +50,13 @@ export const useAnalyticsData = (now: Date = new Date()) => {
     [allExpenses],
   );
 
+  // Free tier sees the last 3 months only; everything downstream (year list,
+  // charts, breakdowns, month comparison) derives from this window.
+  //
+  // The exclusion is applied HERE, once, rather than per-memo. It used to be
+  // applied in monthlyData only, so the bar chart, the headline sitting above
+  // it and the year totals were computed on different populations and
+  // contradicted each other on screen.
   const expenses = useMemo(() => {
     if (isPro) {
       return countedExpenses;
@@ -88,115 +89,20 @@ export const useAnalyticsData = (now: Date = new Date()) => {
     return expenses.filter((e) => Number(e.date.slice(0, 4)) === selectedYear);
   }, [expenses, selectedYear]);
 
-  const monthlyData = useMemo(() => {
-    // Single pass: bucket totals by the row's yyyy-MM prefix, then map the
-    // 12 month keys to human-readable labels (date-fns only for labels).
-    const totals = new Map<string, number>();
-    for (const e of yearExpenses) {
-      const key = e.date.slice(0, 7);
-      totals.set(key, (totals.get(key) ?? 0) + e.amount);
-    }
+  const monthlyData = useMemo(
+    () => buildMonthlyTotals(yearExpenses, selectedYear, dateLocale),
+    [yearExpenses, selectedYear, dateLocale],
+  );
 
-    return Array.from({ length: 12 }, (_, i) => {
-      const month = (i + 1).toString().padStart(2, '0');
-      const key = `${selectedYear}-${month}`;
+  const monthComparison = useMemo<MonthComparison>(
+    () => compareMonths(expenses, dateLocale, now),
+    [expenses, dateLocale, now],
+  );
 
-      return {
-        month: format(parseISO(`${key}-01`), 'LLL', { locale: dateLocale }),
-        fullMonth: format(parseISO(`${key}-01`), 'LLLL', {
-          locale: dateLocale,
-        }),
-        amount: totals.get(key) ?? 0,
-      };
-    });
-  }, [yearExpenses, selectedYear, dateLocale]);
-
-  const monthComparison = useMemo<MonthComparison>(() => {
-    const thisMonthKey = format(now, 'yyyy-MM');
-    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const lastMonthKey = format(lastMonthDate, 'yyyy-MM');
-
-    const thisMonthRows: number[] = [];
-    const lastMonthRows: number[] = [];
-    for (const e of expenses) {
-      const key = e.date.slice(0, 7);
-      if (key === thisMonthKey) {
-        thisMonthRows.push(e.amount);
-      } else if (key === lastMonthKey) {
-        lastMonthRows.push(e.amount);
-      }
-    }
-    const thisMonthAmount = sumAmounts(thisMonthRows);
-    const lastMonthAmount = sumAmounts(lastMonthRows);
-
-    const delta = thisMonthAmount - lastMonthAmount;
-    let percentChange: number | null = null;
-    if (lastMonthAmount > 0) {
-      percentChange = (delta / lastMonthAmount) * 100;
-    }
-
-    return {
-      thisMonthLabel: format(now, 'LLLL yyyy', { locale: dateLocale }),
-      lastMonthLabel: format(lastMonthDate, 'LLLL yyyy', {
-        locale: dateLocale,
-      }),
-      thisMonthAmount,
-      lastMonthAmount,
-      delta,
-      percentChange,
-    };
-  }, [expenses, dateLocale, now]);
-
-  const yearlyStats = useMemo(() => {
-    // Single pass: bucket each expense by category and by month index.
-    type Bucket = { total: number; monthly: number[] };
-    const byCat = new Map<string, Bucket>();
-    let totalSpent = 0;
-
-    for (const e of yearExpenses) {
-      totalSpent += e.amount;
-      if (!e.category_id) {
-        continue;
-      }
-      let slot = byCat.get(e.category_id);
-      if (!slot) {
-        slot = { total: 0, monthly: new Array(12).fill(0) };
-        byCat.set(e.category_id, slot);
-      }
-      const monthIdx = Number(e.date.slice(5, 7)) - 1;
-      slot.total += e.amount;
-      slot.monthly[monthIdx] += e.amount;
-    }
-
-    const monthsElapsed = monthsElapsedInYear(selectedYear, now);
-    let monthlyAverage = 0;
-    if (monthsElapsed > 0) {
-      monthlyAverage = totalSpent / monthsElapsed;
-    }
-
-    const categoryBreakdown: CategoryRow[] = categories
-      .map((cat) => {
-        const slot = byCat.get(cat.id);
-
-        return {
-          id: cat.id,
-          name: cat.name,
-          color: cat.color,
-          icon: cat.icon,
-          amount: slot?.total ?? 0,
-          monthlyAmounts: slot?.monthly ?? new Array(12).fill(0),
-        };
-      })
-      .filter((cat) => cat.amount > 0)
-      .sort((a, b) => b.amount - a.amount);
-
-    return {
-      totalSpent,
-      monthlyAverage,
-      categoryBreakdown,
-      monthsElapsed,
-    };
-  }, [yearExpenses, categories, selectedYear, now]);
+  const yearlyStats = useMemo(
+    () => summariseYear(yearExpenses, categories, selectedYear, now),
+    [yearExpenses, categories, selectedYear, now],
+  );
 
   const yAxisMax = useMemo(() => {
     const maxAmount = Math.max(...monthlyData.map((d) => d.amount), 0);
@@ -235,6 +141,129 @@ export const useAnalyticsData = (now: Date = new Date()) => {
     yearlyStats,
     yAxisMax,
     rhythmMonths,
+  };
+};
+
+// The stored date is YYYY-MM-DD, so bucketing on its yyyy-MM prefix costs a
+// string slice per row where parseISO would cost a parse. date-fns is left to
+// do what only it can: render the twelve labels.
+const buildMonthlyTotals = (
+  yearExpenses: Expense[],
+  year: number,
+  dateLocale: Locale,
+) => {
+  const totals = new Map<string, number>();
+  for (const expense of yearExpenses) {
+    const key = expense.date.slice(0, 7);
+    totals.set(key, (totals.get(key) ?? 0) + expense.amount);
+  }
+
+  return Array.from({ length: 12 }, (_, index) => {
+    const month = (index + 1).toString().padStart(2, '0');
+    const key = `${year}-${month}`;
+
+    return {
+      month: format(parseISO(`${key}-01`), 'LLL', { locale: dateLocale }),
+      fullMonth: format(parseISO(`${key}-01`), 'LLLL', { locale: dateLocale }),
+      amount: totals.get(key) ?? 0,
+    };
+  });
+};
+
+const compareMonths = (
+  expenses: Expense[],
+  dateLocale: Locale,
+  now: Date,
+): MonthComparison => {
+  const thisMonthKey = format(now, 'yyyy-MM');
+  const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastMonthKey = format(lastMonthDate, 'yyyy-MM');
+
+  const thisMonthRows: number[] = [];
+  const lastMonthRows: number[] = [];
+  for (const expense of expenses) {
+    const key = expense.date.slice(0, 7);
+    if (key === thisMonthKey) {
+      thisMonthRows.push(expense.amount);
+    } else if (key === lastMonthKey) {
+      lastMonthRows.push(expense.amount);
+    }
+  }
+
+  const thisMonthAmount = sumAmounts(thisMonthRows);
+  const lastMonthAmount = sumAmounts(lastMonthRows);
+  const delta = thisMonthAmount - lastMonthAmount;
+
+  // No previous spending means no percentage to state — not a 100% rise.
+  let percentChange: number | null = null;
+  if (lastMonthAmount > 0) {
+    percentChange = (delta / lastMonthAmount) * 100;
+  }
+
+  return {
+    thisMonthLabel: format(now, 'LLLL yyyy', { locale: dateLocale }),
+    lastMonthLabel: format(lastMonthDate, 'LLLL yyyy', { locale: dateLocale }),
+    thisMonthAmount,
+    lastMonthAmount,
+    delta,
+    percentChange,
+  };
+};
+
+type CategoryBucket = { total: number; monthly: number[] };
+
+// One pass buckets every row by category and by month index. The category list
+// is then mapped over those buckets, so a category with nothing spent against
+// it drops out rather than rendering a zero row.
+const summariseYear = (
+  yearExpenses: Expense[],
+  categories: Category[],
+  year: number,
+  now: Date,
+) => {
+  const byCategory = new Map<string, CategoryBucket>();
+  let totalSpent = 0;
+
+  for (const expense of yearExpenses) {
+    totalSpent += expense.amount;
+    if (!expense.category_id) {
+      continue;
+    }
+    let slot = byCategory.get(expense.category_id);
+    if (!slot) {
+      slot = { total: 0, monthly: new Array(12).fill(0) };
+      byCategory.set(expense.category_id, slot);
+    }
+    const monthIndex = Number(expense.date.slice(5, 7)) - 1;
+    slot.total += expense.amount;
+    slot.monthly[monthIndex] += expense.amount;
+  }
+
+  const monthsElapsed = monthsElapsedInYear(year, now);
+  let monthlyAverage = 0;
+  if (monthsElapsed > 0) {
+    monthlyAverage = totalSpent / monthsElapsed;
+  }
+
+  const categoryBreakdown: CategoryRow[] = categories
+    .map((category) => toCategoryRow(category, byCategory.get(category.id)))
+    .filter((category) => category.amount > 0)
+    .sort((a, b) => b.amount - a.amount);
+
+  return { totalSpent, monthlyAverage, categoryBreakdown, monthsElapsed };
+};
+
+const toCategoryRow = (
+  category: Category,
+  bucket: CategoryBucket | undefined,
+): CategoryRow => {
+  return {
+    id: category.id,
+    name: category.name,
+    color: category.color,
+    icon: category.icon,
+    amount: bucket?.total ?? 0,
+    monthlyAmounts: bucket?.monthly ?? new Array(12).fill(0),
   };
 };
 
