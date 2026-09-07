@@ -5,7 +5,7 @@ import { DebtsLoading } from '@/pages/debts/components/DebtsLoading';
 import { TransactionsLoading } from '@/common/components/common/TransactionsLoading';
 import { GoalsLoading } from '@/pages/goals/components/GoalsLoading';
 import { NetWorthLoading } from '@/pages/networth/components/NetWorthLoading';
-import { ProRoute } from '@/pages/pro/components/ProRoute';
+import { ProRoute } from '@/common/components/pro/ProRoute';
 import { RecurringLoading } from '@/pages/recurring/components/RecurringLoading';
 import { RouteFallback } from '@/common/components/routing/RouteFallback';
 import {

@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { useNoSpendOps } from '@/common/hooks/dataOps/useNoSpendOps';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
-import { useSetAsideGoal } from '@/common/hooks/savings/useSavingsRhythm';
+import { useSetAsideGoal } from '@/common/hooks/useSavingsRhythm';
 import { RhythmDots } from '@/pages/plan/components/RhythmDots';
 import { SetAsideCard } from '@/pages/plan/components/SetAsideCard';
 import { Button } from '@/common/ui/button';
-import type { SavingsRhythm as Rhythm } from '@/common/hooks/savings/useSavingsRhythm';
+import type { SavingsRhythm as Rhythm } from '@/common/hooks/useSavingsRhythm';
 import type { Goal } from '@/types/Goal';
 import type { TranslateFunction } from '@/constants/translate';
 

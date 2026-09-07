@@ -32,7 +32,9 @@ export const useRecurringList = () => {
   // dropped so a later manual toggle isn't fought by a stale param on
   // back/forward navigation.
   useEffect(() => {
-    if (!searchParams.has('mode')) return;
+    if (!searchParams.has('mode')) {
+      return;
+    }
     setSearchParams({}, { replace: true });
   }, [searchParams, setSearchParams]);
   const [selectedExpense, setSelectedExpense] = useState<

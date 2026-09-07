@@ -62,7 +62,9 @@ export const RecurringExpenseForm = ({
   const shouldShowLinkedAccount = isExpense && investmentAccounts.length > 0;
 
   const handleSubmit = async (values: RecurringExpenseFormData) => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      return;
+    }
     await onSubmit(values);
   };
 
@@ -195,7 +197,9 @@ const renderSubmitLabel = (
     );
   }
 
-  if (isEditing) return t('recurring.update');
+  if (isEditing) {
+    return t('recurring.update');
+  }
 
   return t('recurring.create');
 };

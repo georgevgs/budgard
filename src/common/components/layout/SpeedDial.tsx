@@ -33,11 +33,6 @@ export const SpeedDial = ({ onAddExpense, onAddIncome }: SpeedDialProps) => {
   const actionsRef = useRef<HTMLDivElement>(null);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
 
-  const toggleMenu = () => {
-    haptics.light();
-    setIsOpen((open) => !open);
-  };
-
   const closeMenu = useCallback(() => setIsOpen(false), []);
 
   const closeMenuAndRestoreFocus = useCallback(() => {
@@ -46,6 +41,11 @@ export const SpeedDial = ({ onAddExpense, onAddIncome }: SpeedDialProps) => {
   }, [closeMenu]);
 
   useSpeedDialFocus(isOpen, actionsRef, closeMenuAndRestoreFocus);
+
+  const toggleMenu = () => {
+    haptics.light();
+    setIsOpen((open) => !open);
+  };
 
   const handleAction = (callback: () => void) => {
     haptics.light();

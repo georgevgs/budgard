@@ -33,7 +33,7 @@ export const AccountHistoryChart = ({ account, snapshots }: AccountHistoryChartP
   const isInvestment = account.kind === 'investment';
   // The cost-basis overlay is investment analytics — Pro only. The balance
   // area chart itself stays free for every account kind.
-  const showBasis = isInvestment && isPro;
+  const shouldShowBasis = isInvestment && isPro;
   const [range, setRange] = useState<RangeKey>('all');
 
   const data = useMemo<Point[]>(
@@ -53,14 +53,14 @@ export const AccountHistoryChart = ({ account, snapshots }: AccountHistoryChartP
       <CartesianChart
         data={visible as unknown as ChartPoint[]}
         xKey="label"
-        series={buildSeries(showBasis, t)}
+        series={buildSeries(shouldShowBasis, t)}
         height={180}
         shouldAllowNegative
         formatY={(value) =>
           formatCurrencyCompact(Math.abs(value), account.default_currency)
         }
         renderTooltip={(point) =>
-          renderTooltip(point, showBasis, account.default_currency, t)
+          renderTooltip(point, shouldShowBasis, account.default_currency, t)
         }
         ariaLabel={buildAriaLabel(visible, account.default_currency, t)}
       />
@@ -139,8 +139,12 @@ const getRangeButtonClass = (isActive: boolean): string => {
 };
 
 const filterByRange = (data: Point[], range: RangeKey): Point[] => {
-  if (range === 'all') return data;
-  if (data.length === 0) return data;
+  if (range === 'all') {
+    return data;
+  }
+  if (data.length === 0) {
+    return data;
+  }
 
   const now = new Date();
   let cutoff: Date;
@@ -156,7 +160,9 @@ const filterByRange = (data: Point[], range: RangeKey): Point[] => {
   const inRange = data.filter((p) => p.date >= cutoffStr);
   // Keep at least one anchor before the window so the chart line starts
   // from a known point instead of free-floating.
-  if (inRange.length === data.length) return data;
+  if (inRange.length === data.length) {
+    return data;
+  }
   if (inRange.length === 0) {
     return data.slice(-1);
   }
@@ -169,7 +175,7 @@ const filterByRange = (data: Point[], range: RangeKey): Point[] => {
 
 // The balance area is the account; the cost-basis line is what was put in.
 // Dashed because it is a running total the user built, not a market value.
-const buildSeries = (showBasis: boolean, t: TranslateFunction): Series[] => {
+const buildSeries = (shouldShowBasis: boolean, t: TranslateFunction): Series[] => {
   const value: Series = {
     kind: 'area',
     key: 'balance',
@@ -177,7 +183,7 @@ const buildSeries = (showBasis: boolean, t: TranslateFunction): Series[] => {
     color: '--primary',
   };
 
-  if (!showBasis) {
+  if (!shouldShowBasis) {
     return [value];
   }
 

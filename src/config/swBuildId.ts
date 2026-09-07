@@ -13,7 +13,9 @@
 const REPLY_TIMEOUT_MS = 1200;
 
 const getPageBuildId = (): string | null => {
-  if (typeof __BUILD_ID__ !== 'string') return null;
+  if (typeof __BUILD_ID__ !== 'string') {
+    return null;
+  }
 
   return __BUILD_ID__;
 };
@@ -62,8 +64,12 @@ export const compareBuildIds = (
   pageBuildId: string | null,
   workerBuildId: string | null,
 ): boolean => {
-  if (!isComparableBuildId(pageBuildId)) return false;
-  if (!isComparableBuildId(workerBuildId)) return false;
+  if (!isComparableBuildId(pageBuildId)) {
+    return false;
+  }
+  if (!isComparableBuildId(workerBuildId)) {
+    return false;
+  }
 
   return pageBuildId === workerBuildId;
 };
@@ -74,7 +80,9 @@ export const isSameBuildAsPage = async (
   worker: ServiceWorker,
 ): Promise<boolean> => {
   const pageBuildId = getPageBuildId();
-  if (!isComparableBuildId(pageBuildId)) return false;
+  if (!isComparableBuildId(pageBuildId)) {
+    return false;
+  }
 
   const workerBuildId = await requestWaitingBuildId(worker);
 
@@ -85,8 +93,12 @@ export const isSameBuildAsPage = async (
 // builds would match each other and wrongly suppress real updates while
 // testing service-worker flows locally.
 const isComparableBuildId = (value: string | null): value is string => {
-  if (value === null) return false;
-  if (value.length === 0) return false;
+  if (value === null) {
+    return false;
+  }
+  if (value.length === 0) {
+    return false;
+  }
 
   return value !== 'dev';
 };

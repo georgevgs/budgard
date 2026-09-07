@@ -11,7 +11,7 @@ import { AnalyticsEmpty } from '@/pages/analytics/components/AnalyticsEmpty';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
 import { AnalyticsDrillDownDialogs } from '@/pages/analytics/components/AnalyticsDrillDownDialogs';
 import { TrendsOverview } from '@/pages/analytics/components/TrendsOverview';
-import { YearPill } from '@/pages/analytics/components/YearPill';
+import { YearPill } from '@/common/components/common/YearPill';
 import { useAnalyticsData } from '@/pages/analytics/hooks/useAnalyticsData';
 import { useAnalyticsDrillDown } from '@/pages/analytics/hooks/useAnalyticsDrillDown';
 import { useMonthlyReview } from '@/pages/analytics/hooks/useMonthlyReview';

@@ -73,7 +73,9 @@ const renderSourceLabel = (
 ) => {
   if (goal.source_type === 'category') {
     const category = categories.find((c) => c.id === goal.category_id);
-    if (!category) return null;
+    if (!category) {
+      return null;
+    }
 
     return (
       <p className="text-xs text-muted-foreground truncate">
@@ -84,7 +86,9 @@ const renderSourceLabel = (
 
   if (goal.source_type === 'tag') {
     const tag = tags.find((tg) => tg.id === goal.tag_id);
-    if (!tag) return null;
+    if (!tag) {
+      return null;
+    }
 
     return (
       <p className="text-xs text-muted-foreground truncate">
@@ -97,7 +101,9 @@ const renderSourceLabel = (
     const account = accounts.find(
       (candidate) => candidate.id === goal.linked_account_id,
     );
-    if (!account) return null;
+    if (!account) {
+      return null;
+    }
 
     return (
       <p className="text-xs text-muted-foreground truncate">
@@ -119,7 +125,9 @@ const renderFooter = (
   dateLocale: Locale,
   t: TranslateFunction,
 ) => {
-  if (!goal.deadline) return null;
+  if (!goal.deadline) {
+    return null;
+  }
 
   const deadlineDate = parseISO(goal.deadline);
   const dateLabel = format(deadlineDate, 'PP', { locale: dateLocale });

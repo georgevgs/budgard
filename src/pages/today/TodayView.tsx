@@ -8,7 +8,7 @@ import { useQuickAdd } from '@/common/contexts/QuickAddContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { useCurrentDate } from '@/common/hooks/useCurrentDate';
 import { useDelayedLoading } from '@/common/hooks/useDelayedLoading';
-import { useExpenseAlerts } from '@/pages/expenses/hooks/useExpenseAlerts';
+import { useExpenseAlerts } from '@/pages/today/hooks/useExpenseAlerts';
 import { useDailyPace } from '@/pages/today/hooks/useDailyPace';
 import { useTodayGuidance } from '@/pages/today/hooks/useTodayGuidance';
 import { useTodayLayout } from '@/pages/today/hooks/useTodayLayout';

@@ -75,10 +75,14 @@ const buildEntry = (
   const due: number[] = [];
 
   while (cursor !== null && isWithin(cursor, now, withinDays)) {
-    if (isBeyondEndDate(item, cursor)) break;
+    if (isBeyondEndDate(item, cursor)) {
+      break;
+    }
     due.push(item.amount);
     occurrences += 1;
-    if (occurrences >= MAX_OCCURRENCE_ITERATIONS) break;
+    if (occurrences >= MAX_OCCURRENCE_ITERATIONS) {
+      break;
+    }
     cursor = advanceOccurrence(item, cursor);
   }
 
@@ -97,7 +101,9 @@ const isWithin = (date: Date, now: Date, withinDays: number): boolean => {
 };
 
 const isBeyondEndDate = (item: RecurringExpense, date: Date): boolean => {
-  if (!item.end_date) return false;
+  if (!item.end_date) {
+    return false;
+  }
 
   return date > parseIsoDate(item.end_date);
 };

@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { CategoryGlyph } from '@/common/components/common/CategoryGlyph';
-import { ExpensesCardActions } from '@/pages/expenses/components/ExpensesCardActions';
-import { IncomeCardActions } from '@/pages/income/components/IncomeCardActions';
+import { ExpensesCardActions } from '@/pages/activity/components/ExpensesCardActions';
+import { IncomeCardActions } from '@/pages/activity/components/IncomeCardActions';
 import { cn } from '@/constants/utils';
 import { describeAmount } from '@/constants/transactionAmount';
 import type { Expense } from '@/types/Expense';

@@ -3,7 +3,7 @@ import { Switch } from '@/common/ui/switch';
 import { Badge } from '@/common/ui/badge';
 import Clock from 'lucide-react/dist/esm/icons/clock';
 import { RecurringExpenseCardActions } from '@/pages/recurring/components/RecurringExpenseCardActions';
-import { CategoryBadge } from '@/pages/categories/components/CategoryBadge';
+import { CategoryBadge } from '@/pages/recurring/components/CategoryBadge';
 import { format } from 'date-fns';
 import type { Locale } from 'date-fns';
 import { cn, formatCurrency } from '@/constants/utils';
@@ -80,7 +80,9 @@ export const RecurringExpenseCard = ({
   );
 };
 const renderCategoryBadge = (expense: RecurringExpense) => {
-  if (!expense.category) return null;
+  if (!expense.category) {
+    return null;
+  }
 
   return <CategoryBadge category={expense.category} />;
 };
@@ -90,7 +92,9 @@ const renderOverdueBadge = (
   isOverdue: boolean,
   t: TranslateFunction,
 ) => {
-  if (!isOverdue || !expense.active) return null;
+  if (!isOverdue || !expense.active) {
+    return null;
+  }
 
   return (
     <span className="inline-flex items-center rounded-full bg-destructive/12 px-2.5 py-0.5 text-xs font-semibold text-destructive-ink">
@@ -105,7 +109,9 @@ const renderNextOccurrence = (
   dateLocale: Locale,
   t: TranslateFunction,
 ) => {
-  if (!nextOccurrence || !expense.active) return null;
+  if (!nextOccurrence || !expense.active) {
+    return null;
+  }
 
   return (
     <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">

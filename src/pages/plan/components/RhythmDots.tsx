@@ -1,5 +1,5 @@
 import { cn } from '@/constants/utils';
-import type { DayOutcome, RhythmDay } from '@/common/hooks/savings/useSavingsRhythm';
+import type { DayOutcome, RhythmDay } from '@/common/hooks/useSavingsRhythm';
 
 type RhythmDotsProps = {
   days: RhythmDay[];

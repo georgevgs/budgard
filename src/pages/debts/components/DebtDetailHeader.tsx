@@ -133,7 +133,9 @@ const renderPayoffMonths = (progress: DebtProgress, t: TranslateFunction) => {
 };
 
 const renderUnpayableCallout = (isUnpayable: boolean, t: TranslateFunction) => {
-  if (!isUnpayable) return null;
+  if (!isUnpayable) {
+    return null;
+  }
 
   return (
     <div className="flex items-start gap-2 mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">

@@ -16,7 +16,9 @@ export const useDebtSubmit = ({ debt, onClose }: UseDebtSubmitArgs) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (values: DebtFormData) => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      return;
+    }
 
     setIsSubmitting(true);
     try {

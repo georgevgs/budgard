@@ -1,14 +1,10 @@
 import * as z from 'zod';
 import { parseCurrencyInput } from '@/constants/utils';
-import { AMOUNT_PATTERN, SAFE_STRING, isNotFutureDated } from '@/constants/validations';
-
-export const expenseDescriptionSchema = z
-  .string()
-  .min(1, 'validation.descriptionRequired')
-  .max(100, 'validation.descriptionTooLong100')
-  .regex(SAFE_STRING, 'validation.descriptionInvalid')
-  .transform((str) => str.trim())
-  .refine((str) => str.length > 0, 'validation.descriptionEmpty');
+import {
+  AMOUNT_PATTERN,
+  expenseDescriptionSchema,
+  isNotFutureDated,
+} from '@/constants/validations';
 
 // Expense validation schema
 export const expenseSchema = z.object({

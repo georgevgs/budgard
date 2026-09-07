@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { changeAppLanguage } from '@/config/i18n';
-import { LoginModal } from '@/pages/auth/components/LoginModal';
+import { LoginModal } from '@/pages/landing/components/LoginModal';
 import { Header } from '@/pages/landing/components/Header';
 import { Hero } from '@/pages/landing/components/Hero';
 import { FeatureTour } from '@/pages/landing/components/FeatureTour';

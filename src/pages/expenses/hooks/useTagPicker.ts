@@ -30,7 +30,9 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
   // Already-selected tags are hidden from the list — the combobox only adds.
   const filteredTags = useMemo(() => {
     const unselected = tags.filter((tag) => !selectedTagIds.includes(tag.id));
-    if (!tagSearch) return unselected;
+    if (!tagSearch) {
+      return unselected;
+    }
 
     const lower = tagSearch.toLowerCase();
 
@@ -62,8 +64,12 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
     });
 
   const handleTagSelect = (tagId: string) => {
-    if (selectedTagIds.includes(tagId)) return;
-    if (!guardTagLimit()) return;
+    if (selectedTagIds.includes(tagId)) {
+      return;
+    }
+    if (!guardTagLimit()) {
+      return;
+    }
 
     applySelection([...selectedTagIds, tagId]);
     setIsTagPopoverOpen(false);
@@ -75,8 +81,12 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
   };
 
   const handleTagCreateInline = () => {
-    if (!tagSearch.trim() || isCreatingTag) return;
-    if (!guardTagLimit()) return;
+    if (!tagSearch.trim() || isCreatingTag) {
+      return;
+    }
+    if (!guardTagLimit()) {
+      return;
+    }
 
     startTagCreation(async () => {
       try {

@@ -80,7 +80,9 @@ export const buildWeeklyRecap = ({
     (e) => e.date >= windowStart && e.date <= windowEnd,
   );
 
-  if (weekExpenses.length === 0) return null;
+  if (weekExpenses.length === 0) {
+    return null;
+  }
 
   const baselineExpenses = spendable.filter(
     (e) => e.date >= baselineStart && e.date < windowStart,
@@ -129,7 +131,9 @@ const bucketByCategory = (rows: Expense[]): Map<string, CategoryBucket> => {
   const buckets = new Map<string, CategoryBucket>();
 
   for (const row of rows) {
-    if (!row.category_id) continue;
+    if (!row.category_id) {
+      continue;
+    }
 
     const slot = buckets.get(row.category_id);
     if (!slot) {
@@ -202,11 +206,17 @@ const computeAnomalies = (
 
   for (const [categoryId, baseline] of baselineByCat) {
     const category = catById.get(categoryId);
-    if (!category) continue;
+    if (!category) {
+      continue;
+    }
 
     const baselineWeeklyAvg = baseline.total / BASELINE_WEEKS;
-    if (baselineWeeklyAvg < MIN_BASELINE_WEEKLY_AVG) continue;
-    if (baseline.count < MIN_BASELINE_TRANSACTIONS) continue;
+    if (baselineWeeklyAvg < MIN_BASELINE_WEEKLY_AVG) {
+      continue;
+    }
+    if (baseline.count < MIN_BASELINE_TRANSACTIONS) {
+      continue;
+    }
 
     const thisWeek = weekByCat.get(categoryId)?.total ?? 0;
     const model = buildBaseline(weeklyByCat.get(categoryId) ?? []);
@@ -217,7 +227,9 @@ const computeAnomalies = (
     // a steady one is flagged by a much smaller change. A flat ratio
     // threshold treated both the same and cried wolf on the lumpy ones.
     const direction = directionFor(comparison.verdict);
-    if (direction === null) continue;
+    if (direction === null) {
+      continue;
+    }
 
     anomalies.push({
       categoryId,

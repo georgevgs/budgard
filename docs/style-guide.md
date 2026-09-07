@@ -29,21 +29,33 @@
   `charts/hooks/useChartSize.ts`. `common/hooks/` is for hooks that genuinely
   cross features; a hook only its own module calls does not belong there.
 - **Common folder.** Shared components, hooks and utilities go in `src/common/`.
+  A shared module that is more than one component keeps its parts together as
+  `common/components/<module>/`, with its own `hooks/` and `utils/` beneath it —
+  `common/components/categories/`, `common/components/pro/`,
+  `common/components/csvImport/`. `src/pages/` is for features a route or a
+  screen actually owns; a folder there consumed by several features, or by the
+  router itself, was never a page and belongs under `common/`.
 - **Config folder.** External integrations only (Supabase, Sentry, i18n, the
   service worker).
 - **Constants folder.** App-wide constants and utilities used by more than one
   feature.
 - **Queries at the feature root.** A feature's Supabase queries live in
   `<feature>/<feature>Api.ts`, so an audit of what it reads and writes is one
-  file. (The guide says this about GraphQL; Supabase is our equivalent.)
-- **Barrel files.** The guide recommends them for grouping related exports.
-  Here there is exactly one, `common/components/bento/index.ts`, and the rest
-  are deliberately absent — see *Where this repo is narrower* below.
+  file. (The guide says this about GraphQL; Supabase is our equivalent.) A
+  shared module's queries sit beside `dataService` instead —
+  `common/api/categoriesApi.ts`, `tagsApi.ts`, `proApi.ts` — because the module
+  is not a feature and has no feature root to live at.
+- **Barrel files.** The guide recommends them for grouping related exports and
+  then lists the cases to avoid them in. Here every candidate folder hits one of
+  those cases, so there is exactly one barrel,
+  `common/components/bento/index.ts` — see *Barrel files* below.
 - **Tests live in a `__tests__/` folder** beside the code they cover:
   `pages/expenses/components/__tests__/ExpensesForm.test.tsx`. Mocks go in
   `__tests__/__mocks__/` named `{name}Mock.ts`. The cross-cutting invariant
   suite is the exception and stays in `src/test/invariants/`, because it
   belongs to no feature.
+- **Assets.** Font files live in `src/assets/fonts/`, as the guide asks;
+  `src/design/fonts.css` declares the faces and reaches across to them.
 - **Named imports.** Never a wildcard import; it defeats tree-shaking.
   **[enforced]** — `zod` is exempt, `z` is a schema builder.
 
@@ -73,8 +85,10 @@
   return.
 - **Blank line before `return`.** **[enforced]**
 - **A guard clause keeps its braces.** The guide asks for the brace-less
-  `if (isLoading) return <Loading />`; this repo writes the block. See
-  *Where this repo differs* below.
+  `if (isLoading) return <Loading />`; this repo writes the block.
+  **[enforced]** — `curly`. See *Where this repo differs* below.
+- **A component body keeps its `return`**, even with no logic — not the guide's
+  implicit `() => <section>…`. See *Where this repo differs* below.
 - **PascalCase** components, **camelCase** functions.
 - **Loading components mirror** the structure of what they stand in for.
 - **Move to `common/` only when genuinely reused.**
@@ -146,7 +160,7 @@
 
 ## Where this repo differs
 
-Two rules on the site the repo knowingly does not follow.
+Four rules on the site the repo knowingly does not follow.
 
 **Props are `type`, not `interface`.** The guide asks for `interface` on
 component props. Budgard uses `type ExpensesFormProps = { … }` instead, for one
@@ -165,10 +179,36 @@ if (transactionIds.length === 0) {
 
 not `if (transactionIds.length === 0) return [];`. The block gives the guard a
 shape the eye catches while scanning a column of code, which is the same reason
-this repo bans ternaries and `&&` in JSX. A sweep of the 686 call sites to the
-guide's form was written and rejected on 7 Sep 2026 — do not propose it again.
-Both forms are currently present (337 brace-less predate the decision); new code
-takes the braces, and neither is worth a churn commit on its own.
+this repo bans ternaries and `&&` in JSX. A sweep to the guide's form was
+written and rejected on 7 Sep 2026 — do not propose it again.
+
+**[enforced]** — `curly: ['error', 'all']`. It was conventional for months and
+both forms drifted side by side, ~530 of them brace-less; the sweep to the
+house form ran on 7 Sep 2026 and the rule now holds the line. `eslint --fix`
+collapses a guard onto one line rather than expanding it, so a bulk run of that
+fixer needs the blocks re-expanded afterwards.
+
+**A component body keeps its `return`.** The guide asks for the implicit form
+when a component has no logic — `export const Profile = () => <section>…`.
+Here the braced body stays:
+
+```tsx
+export const TileLabel = ({ children, className }: TileLabelProps) => {
+  return <p className={cn('tile-label', className)}>{children}</p>;
+};
+```
+
+Same reason as the guard clause: one shape for every function in the file, so
+adding a line of logic later is not also a reformat. Eleven components are
+written this way on purpose.
+
+**`dataOps/` stays whole.** Ten of the twenty operation hooks in
+`common/hooks/dataOps/` are called by exactly one feature, and the guide would
+send each of them into that feature's `hooks/`. They stay: `dataOps` is the
+mutation layer, and `useMutationRunner`, the optimistic-shape helpers and the
+rollback contract are what make it one layer rather than twenty. Splitting it
+by consumer would trade a rule the architecture depends on for a rule about
+where files sit. See CLAUDE.md's *Data flow* section.
 
 ## Where this repo is stricter
 
@@ -181,12 +221,13 @@ The guide is silent on these; both are **[enforced]** in `eslint.config.js` for
   values (`{name || '-'}`) are fine — the rule is about hiding a branch inside
   the markup.
 
-## Where this repo is narrower
+## Barrel files
 
-**Barrel files, but only one.** The guide recommends barrels for grouping
-related exports; it also says to avoid them for large or frequently-updated
-sets, and warns they cost tree-shaking. Both cautions bite here, so
-`common/components/bento/index.ts` is the only one:
+Not a deviation — the guide's own avoid-list, applied. It recommends barrels
+"wherever applicable", then names the cases where they are not: a large export
+set, a frequently-updated file, and the tree-shaking cost. Every candidate
+folder here trips one of those, so `common/components/bento/index.ts` is the
+only barrel:
 
 - `common/hooks/dataOps/` is twenty modules that change most weeks — the
   guide's "frequently updated" case exactly.
@@ -195,6 +236,12 @@ sets, and warns they cost tree-shaking. Both cautions bite here, so
   folder into every chunk that imported one file, undoing the code splitting
   that `npm run budget` exists to protect.
 - A feature's `components/` folder is a large, constantly-growing export set.
+
+- `src/types/` looks like the free case, because 359 of its 373 imports are
+  `import type` and erase at build. It is not: two modules there export runtime
+  values (`isLiability`, `DEBT_KINDS`), and a schema change would invalidate
+  every one of those 373 consumers — the guide's "frequently updated" caution,
+  at the widest fan-out in the codebase.
 
 The bento trio qualifies on every count: three exports, stable, tiny, and
 always reached for together.

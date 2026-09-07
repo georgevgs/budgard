@@ -30,9 +30,15 @@ const toast = ({
 }: ToastParams) => {
   const message = title ?? description ?? '';
   const opts: ExternalToast = {};
-  if (title && description) opts.description = description;
-  if (id !== undefined) opts.id = id;
-  if (duration !== undefined) opts.duration = duration;
+  if (title && description) {
+    opts.description = description;
+  }
+  if (id !== undefined) {
+    opts.id = id;
+  }
+  if (duration !== undefined) {
+    opts.duration = duration;
+  }
   if (onDismiss) {
     opts.onDismiss = () => onDismiss();
     opts.onAutoClose = () => onDismiss();
@@ -40,13 +46,17 @@ const toast = ({
   if (action) {
     opts.action = { label: action.label, onClick: action.onClick };
     // Ensure action toasts stay visible long enough to interact with
-    if (duration === undefined) opts.duration = 8000;
+    if (duration === undefined) {
+      opts.duration = 8000;
+    }
   }
 
   if (variant === 'destructive') {
     // Errors need reading time — the 3s global default is too short,
     // especially in a second language
-    if (opts.duration === undefined) opts.duration = 8000;
+    if (opts.duration === undefined) {
+      opts.duration = 8000;
+    }
 
     return sonnerToast.error(message, opts);
   }

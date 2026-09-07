@@ -7,7 +7,7 @@ import { ReceiptUpload } from '@/pages/expenses/components/ReceiptUpload';
 import {
   getDetailsRowsClass,
   renderDetailsToggleLabel,
-} from '@/pages/expenses/utils/expensesFormHelpers';
+} from '@/constants/expensesFormHelpers';
 import type { UseTagPickerReturn } from '@/pages/expenses/hooks/useTagPicker';
 import { useReceiptScan } from '@/pages/expenses/hooks/useReceiptScan';
 import type { ExpenseFormData } from '@/pages/expenses/validations';

@@ -113,8 +113,12 @@ export const xirr = (cashflows: Cashflow[], guess = 0.1): number | null => {
   let hasPositive = false;
   let hasNegative = false;
   for (const cf of cashflows) {
-    if (cf.amount > 0) hasPositive = true;
-    if (cf.amount < 0) hasNegative = true;
+    if (cf.amount > 0) {
+      hasPositive = true;
+    }
+    if (cf.amount < 0) {
+      hasNegative = true;
+    }
   }
   if (!hasPositive || !hasNegative) {
     return null;

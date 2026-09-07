@@ -65,13 +65,17 @@ export const useIncomeOps = () => {
         ),
         offlineFallback: (error) => queueOffline(incomeData, incomeId, error),
         perform: () => {
-          if (incomeId) return dataService.updateIncome(incomeData, incomeId);
+          if (incomeId) {
+            return dataService.updateIncome(incomeData, incomeId);
+          }
 
           return dataService.createIncome(incomeData, activeOwnerId);
         },
         commit: (row) =>
           setIncomes((prev) => {
-            if (incomeId) return replaceById(prev, incomeId, row);
+            if (incomeId) {
+              return replaceById(prev, incomeId, row);
+            }
 
             return [row, ...prev];
           }),
@@ -90,7 +94,9 @@ export const useIncomeOps = () => {
         onStart: () => haptics.warning(),
         successHaptic: 'none',
         offlineFallback: async (error) => {
-          if (!isOfflineError(error)) return false;
+          if (!isOfflineError(error)) {
+            return false;
+          }
 
           await offlineQueue.enqueueWithReconcile('deleteIncome', {
             id: incomeId,
@@ -113,7 +119,9 @@ export const useIncomeOps = () => {
     // The insert returns the created rows with their embeds, so merging them
     // into state replaces a full-history re-download.
     const handleBulkIncomeImport = async (incomesData: BulkIncomeRow[]) => {
-      if (shouldSkip) return;
+      if (shouldSkip) {
+        return;
+      }
 
       const created = await dataService.createIncomesBulk(
         incomesData,
@@ -173,7 +181,9 @@ const queueIncomeOffline = async (
   );
 
   setIncomes((prev) => {
-    if (incomeId) return patchById(prev, incomeId, scopedIncome);
+    if (incomeId) {
+      return patchById(prev, incomeId, scopedIncome);
+    }
 
     const optimistic = {
       ...scopedIncome,

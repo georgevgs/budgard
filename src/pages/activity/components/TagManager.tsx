@@ -1,0 +1,145 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import Pencil from 'lucide-react/dist/esm/icons/pencil';
+import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
+import TagIcon from 'lucide-react/dist/esm/icons/tag';
+import { Button } from '@/common/ui/button';
+import type { TranslateFunction } from '@/constants/translate';
+import {
+  DialogTitle,
+  DialogHeader,
+  DialogDescription,
+} from '@/common/ui/dialog';
+import { ConfirmDestructiveDialog } from '@/common/components/common/ConfirmDestructiveDialog';
+import { useTagsData } from '@/common/contexts/DataContext';
+import { useTagOps } from '@/common/hooks/dataOps/useTagOps';
+import type { Tag } from '@/types/Tag';
+import { TagRenameForm } from '@/pages/activity/components/TagRenameForm';
+
+type View = { type: 'list' } | { type: 'form'; tag: Tag };
+
+export const TagManager = () => {
+  const { t } = useTranslation();
+  const tags = useTagsData();
+  const { handleTagDelete } = useTagOps();
+  const [view, setView] = useState<View>({ type: 'list' });
+  const [deleteTarget, setDeleteTarget] = useState<Tag | null>(null);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) {
+      return;
+    }
+
+    try {
+      await handleTagDelete(deleteTarget.id);
+    } catch {
+      // error toast handled by useTagOps
+    }
+    setDeleteTarget(null);
+  };
+
+  if (view.type === 'form') {
+    return (
+      <TagRenameForm tag={view.tag} onClose={() => setView({ type: 'list' })} />
+    );
+  }
+
+  return (
+    <>
+      <div
+        className="flex justify-center pt-3 pb-2 sm:hidden shrink-0"
+        data-drag-handle
+      >
+        <div className="w-12 h-1.5 bg-muted-foreground/20 rounded-full" />
+      </div>
+
+      <div className="px-4 sm:px-6 pt-2 sm:pt-4 pb-2 shrink-0">
+        <DialogHeader className="pr-10" data-draggable-area>
+          <DialogTitle className="text-xl">{t('tags.title')}</DialogTitle>
+          <DialogDescription>{t('tags.manageDescription')}</DialogDescription>
+        </DialogHeader>
+      </div>
+
+      <div
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-4"
+        style={{ touchAction: 'pan-y' }}
+      >
+        {renderTagList(tags, t, setView, setDeleteTarget)}
+      </div>
+
+      <ConfirmDestructiveDialog
+        open={deleteTarget !== null}
+        title={t('tags.deleteTag')}
+        description={t('tags.deleteConfirmation', { name: deleteTarget?.name })}
+        confirmLabel={t('common.delete')}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTarget(null);
+          }
+        }}
+        onConfirm={handleDelete}
+      />
+    </>
+  );
+};
+
+const renderTagList = (
+  tags: Tag[],
+  t: TranslateFunction,
+  setView: (view: View) => void,
+  setDeleteTarget: (tag: Tag) => void,
+) => {
+  if (tags.length === 0) {
+    return renderEmptyState(t);
+  }
+
+  return (
+    <div className="divide-y divide-border/30">
+      {tags.map((tag) => (
+        <div key={tag.id} className="flex items-center gap-2.5 py-2 group">
+          <div
+            className="w-2.5 h-2.5 rounded-full shrink-0"
+            style={{ backgroundColor: tag.color }}
+            aria-hidden="true"
+          />
+          <span className="flex-1 text-sm font-medium truncate min-w-0">
+            {tag.name}
+          </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 -my-1.5 text-muted-foreground hover:text-foreground shrink-0"
+            onClick={() => setView({ type: 'form', tag })}
+            aria-label={t('tags.renameTag')}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 -my-1.5 text-muted-foreground hover:text-destructive-ink shrink-0"
+            onClick={() => setDeleteTarget(tag)}
+            aria-label={t('tags.deleteTag')}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const renderEmptyState = (t: TranslateFunction) => {
+  return (
+    <div className="flex flex-col items-center text-center py-12 px-4">
+      <TagIcon
+        className="h-12 w-12 text-muted-foreground/50 mb-3"
+        aria-hidden="true"
+      />
+      <p className="text-sm font-medium">{t('tags.noTags')}</p>
+      <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
+        {t('tags.emptyHelp')}
+      </p>
+    </div>
+  );
+};

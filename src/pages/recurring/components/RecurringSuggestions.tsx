@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import { Button } from '@/common/ui/button';
 import { formatCurrency } from '@/constants/utils';
-import type { RecurringSuggestion } from '@/types/RecurringSuggestion';
+import type { RecurringSuggestion } from '@/pages/recurring/recurringTypes';
 import type { TranslateFunction } from '@/constants/translate';
 
 type RecurringSuggestionsProps = {

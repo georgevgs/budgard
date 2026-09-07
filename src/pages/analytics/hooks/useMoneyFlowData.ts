@@ -63,8 +63,12 @@ export const useMoneyFlowData = (now: Date = new Date()): MoneyFlowData => {
     const byCategory = new Map<string, number>();
     let uncategorized = 0;
     for (const expense of expenses) {
-      if (!countsInTotals(expense)) continue;
-      if (expense.date.slice(0, 7) !== monthKey) continue;
+      if (!countsInTotals(expense)) {
+        continue;
+      }
+      if (expense.date.slice(0, 7) !== monthKey) {
+        continue;
+      }
       if (!expense.category_id) {
         uncategorized += expense.amount;
         continue;

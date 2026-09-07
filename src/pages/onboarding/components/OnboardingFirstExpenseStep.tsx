@@ -6,10 +6,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/common/ui/dialog';
-import { AmountKeypad } from '@/pages/expenses/components/AmountKeypad';
-import { QuickAddCategories } from '@/pages/expenses/components/QuickAddCategories';
-import { QuickAddName } from '@/pages/expenses/components/QuickAddName';
-import { useQuickAddDraft } from '@/pages/expenses/hooks/useQuickAddDraft';
+import { AmountKeypad } from '@/common/components/common/AmountKeypad';
+import { QuickAddCategories } from '@/common/components/common/QuickAddCategories';
+import { QuickAddName } from '@/common/components/common/QuickAddName';
+import { useQuickAddDraft } from '@/common/hooks/useQuickAddDraft';
 import { cn, formatCurrency } from '@/constants/utils';
 
 type OnboardingFirstExpenseStepProps = {

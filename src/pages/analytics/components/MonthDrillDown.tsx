@@ -128,7 +128,9 @@ const renderCategoryBreakdown = (
   t: TranslateFunction,
   currency: string,
 ) => {
-  if (breakdown.length === 0) return null;
+  if (breakdown.length === 0) {
+    return null;
+  }
 
   return (
     <div>
@@ -169,7 +171,9 @@ const renderTopExpenses = (
   t: TranslateFunction,
   currency: string,
 ) => {
-  if (expenses.length === 0) return null;
+  if (expenses.length === 0) {
+    return null;
+  }
 
   return (
     <div className="mt-5">
@@ -207,7 +211,9 @@ const renderTopExpenses = (
 };
 
 const renderCategoryDot = (expense: Expense) => {
-  if (!expense.category) return null;
+  if (!expense.category) {
+    return null;
+  }
 
   return (
     <div
@@ -218,7 +224,9 @@ const renderCategoryDot = (expense: Expense) => {
 };
 
 const renderCategoryName = (expense: Expense) => {
-  if (!expense.category) return null;
+  if (!expense.category) {
+    return null;
+  }
 
   return <> · {expense.category.name}</>;
 };

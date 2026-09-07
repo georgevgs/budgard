@@ -169,6 +169,16 @@ export const emailSchema = z.email('validation.emailInvalid').refine(
   },
 );
 
+// Shared by the expense form and the quick-add draft in `common/hooks`, so it
+// lives with the primitives rather than in either caller's feature folder.
+export const expenseDescriptionSchema = z
+  .string()
+  .min(1, 'validation.descriptionRequired')
+  .max(100, 'validation.descriptionTooLong100')
+  .regex(SAFE_STRING, 'validation.descriptionInvalid')
+  .transform((str) => str.trim())
+  .refine((str) => str.length > 0, 'validation.descriptionEmpty');
+
 export const householdInviteSchema = z.object({
   email: emailSchema,
 });

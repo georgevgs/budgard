@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useExpensesData, useIncomesData } from '@/common/contexts/DataContext';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
-import { YearPill } from '@/pages/analytics/components/YearPill';
-import { AnnualExportCard } from '@/pages/analytics/components/AnnualExportCard';
-import { ProUpsellCard } from '@/pages/pro/components/ProUpsellCard';
+import { YearPill } from '@/common/components/common/YearPill';
+import { AnnualExportCard } from '@/pages/settings/components/AnnualExportCard';
+import { ProUpsellCard } from '@/common/components/pro/ProUpsellCard';
 import { useOnDemandHistory } from '@/common/hooks/data/useOnDemandHistory';
 
 // An export utility, not a trend — it used to sit at the bottom of the

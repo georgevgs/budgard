@@ -12,13 +12,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/common/ui/dropdown-menu';
-import { TagManager } from '@/pages/tags/components/TagManager';
+import { TagManager } from '@/pages/activity/components/TagManager';
 import { lazyWithRetry } from '@/constants/lazyWithRetry';
 
 // Lazy: the CSV import flow (~35 KB min incl. parsing logic) is a rare,
 // user-initiated action — no reason to ship it with the Activity chunk.
 const CsvImportDialog = lazyWithRetry(async () => {
-  const module = await import('@/pages/expenses/components/CsvImportDialog');
+  const module = await import('@/common/components/csvImport/CsvImportDialog');
 
   return { default: module.CsvImportDialog };
 });

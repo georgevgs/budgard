@@ -9,7 +9,7 @@ import {
   FormItem,
   FormMessage,
 } from '@/common/ui/form';
-import { CategoryColorPicker } from '@/pages/categories/components/CategoryColorPicker';
+import { CategoryColorPicker } from '@/common/components/categories/CategoryColorPicker';
 import { GoalSourceFields } from '@/pages/goals/components/GoalSourceFields';
 import { formatCurrencyInput } from '@/constants/utils';
 import type { GoalFormData } from '@/pages/goals/validations';

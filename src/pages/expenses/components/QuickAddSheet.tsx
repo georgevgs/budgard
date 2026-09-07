@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogTitle } from '@/common/ui/dialog';
 import { Button } from '@/common/ui/button';
-import { AmountKeypad } from '@/pages/expenses/components/AmountKeypad';
-import { QuickAddCategories } from '@/pages/expenses/components/QuickAddCategories';
-import { QuickAddName } from '@/pages/expenses/components/QuickAddName';
+import { AmountKeypad } from '@/common/components/common/AmountKeypad';
+import { QuickAddCategories } from '@/common/components/common/QuickAddCategories';
+import { QuickAddName } from '@/common/components/common/QuickAddName';
 import { QuickAddTemplates } from '@/pages/expenses/components/QuickAddTemplates';
 import { QuickReceiptScanAction } from '@/pages/expenses/components/QuickReceiptScanAction';
-import { useQuickAddDraft } from '@/pages/expenses/hooks/useQuickAddDraft';
+import { useQuickAddDraft } from '@/common/hooks/useQuickAddDraft';
 import { useQuickReceiptScan } from '@/pages/expenses/hooks/useQuickReceiptScan';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { TranslateFunction } from '@/constants/translate';

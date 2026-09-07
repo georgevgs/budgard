@@ -71,7 +71,9 @@ export type ProjectionInput = {
 // month end. Deliberately allowed to go negative — an honest "you are over"
 // beats a clamped zero.
 export const computeSafeToSpend = (input: SafeToSpendInput): number | null => {
-  if (input.monthlyBudget === null) return null;
+  if (input.monthlyBudget === null) {
+    return null;
+  }
 
   return (
     input.monthlyBudget -
@@ -101,17 +103,23 @@ export const computeUpcomingRecurringThisMonth = (
   let total = 0;
 
   for (const item of recurringExpenses) {
-    if (!item.active) continue;
+    if (!item.active) {
+      continue;
+    }
 
     let cursor = findFirstOccurrenceAfter(item, today);
     let iterations = 0;
     const due: number[] = [];
     while (cursor !== null && cursor <= monthEnd) {
-      if (isBeyondEndDate(item, cursor)) break;
+      if (isBeyondEndDate(item, cursor)) {
+        break;
+      }
       due.push(item.amount);
       cursor = advanceOccurrence(item, cursor);
       iterations += 1;
-      if (iterations >= MAX_OCCURRENCE_ITERATIONS) break;
+      if (iterations >= MAX_OCCURRENCE_ITERATIONS) {
+        break;
+      }
     }
     total = sumAmounts([total, ...due]);
   }
@@ -226,14 +234,18 @@ const findFirstOccurrenceAfter = (
   while (cursor <= today) {
     cursor = advanceOccurrence(item, cursor);
     iterations += 1;
-    if (iterations >= MAX_OCCURRENCE_ITERATIONS) return null;
+    if (iterations >= MAX_OCCURRENCE_ITERATIONS) {
+      return null;
+    }
   }
 
   return cursor;
 };
 
 const isBeyondEndDate = (item: RecurringExpense, date: Date): boolean => {
-  if (!item.end_date) return false;
+  if (!item.end_date) {
+    return false;
+  }
 
   return date > parseISO(item.end_date);
 };
@@ -248,7 +260,9 @@ const isBeyondEndDate = (item: RecurringExpense, date: Date): boolean => {
 // 6 — but a windowed month with zero variable activity still counts as a
 // real zero month. With no full month of history the average is 0.
 const computeVariableMonthlyAverage = (rows: Expense[], now: Date): number => {
-  if (rows.length === 0) return 0;
+  if (rows.length === 0) {
+    return 0;
+  }
 
   // 'yyyy-MM' keys compare correctly as strings — no per-row parsing needed
   // (same pattern as useAnalyticsData).
@@ -264,16 +278,26 @@ const computeVariableMonthlyAverage = (rows: Expense[], now: Date): number => {
   for (let back = 1; back <= 6; back += 1) {
     const monthStart = addMonths(startOfMonth(now), -back);
     const key = format(monthStart, 'yyyy-MM');
-    if (key < earliestKey) break;
+    if (key < earliestKey) {
+      break;
+    }
     windowKeys.add(key);
   }
-  if (windowKeys.size === 0) return 0;
+  if (windowKeys.size === 0) {
+    return 0;
+  }
 
   const counted: number[] = [];
   for (const row of rows) {
-    if (row.recurring_expense_id) continue;
-    if (!countsInTotals(row)) continue;
-    if (!windowKeys.has(row.date.slice(0, 7))) continue;
+    if (row.recurring_expense_id) {
+      continue;
+    }
+    if (!countsInTotals(row)) {
+      continue;
+    }
+    if (!windowKeys.has(row.date.slice(0, 7))) {
+      continue;
+    }
     counted.push(row.amount);
   }
 
@@ -291,9 +315,15 @@ const sumRecurringForMonth = (
   const live: number[] = [];
 
   for (const item of items) {
-    if (!item.active) continue;
-    if (parseISO(item.start_date) > monthEnd) continue;
-    if (item.end_date && parseISO(item.end_date) < monthStart) continue;
+    if (!item.active) {
+      continue;
+    }
+    if (parseISO(item.start_date) > monthEnd) {
+      continue;
+    }
+    if (item.end_date && parseISO(item.end_date) < monthStart) {
+      continue;
+    }
     live.push(getMonthlyAmount(item));
   }
 

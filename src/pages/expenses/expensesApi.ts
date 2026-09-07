@@ -25,10 +25,18 @@ export const expensesApi = {
         .order('created_at', { ascending: false })
         .order('id', { ascending: false })
         .limit(SUPABASE_PAGE_SIZE);
-      if (sinceDate) query = query.gte('date', sinceDate);
-      if (beforeDate) query = query.lt('date', beforeDate);
-      if (cursor) query = query.or(transactionCursorFilter(cursor));
-      if (signal) query = query.abortSignal(signal);
+      if (sinceDate) {
+        query = query.gte('date', sinceDate);
+      }
+      if (beforeDate) {
+        query = query.lt('date', beforeDate);
+      }
+      if (cursor) {
+        query = query.or(transactionCursorFilter(cursor));
+      }
+      if (signal) {
+        query = query.abortSignal(signal);
+      }
 
       return query;
     });
@@ -56,7 +64,9 @@ export const expensesApi = {
       .select(SELECT_WITH_CATEGORY_AND_TAG)
       .single();
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     // undefined = caller didn't touch tags; [] = caller cleared the extras.
     if (extra_tag_ids === undefined) {
@@ -76,7 +86,9 @@ export const expensesApi = {
       .select(SELECT_WITH_CATEGORY_AND_TAG)
       .single();
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     const created = data as Expense;
     if (!extra_tag_ids || extra_tag_ids.length === 0) {
@@ -100,8 +112,12 @@ export const expensesApi = {
       .delete()
       .eq('expense_id', expenseId);
 
-    if (deleteError) throw deleteError;
-    if (tagIds.length === 0) return;
+    if (deleteError) {
+      throw deleteError;
+    }
+    if (tagIds.length === 0) {
+      return;
+    }
 
     const { error: insertError } = await supabase.from('expense_tags').insert(
       tagIds.map((tagId) => ({
@@ -111,7 +127,9 @@ export const expensesApi = {
       })),
     );
 
-    if (insertError) throw insertError;
+    if (insertError) {
+      throw insertError;
+    }
   },
 
   async getExpenseById(expenseId: string) {
@@ -121,7 +139,9 @@ export const expensesApi = {
       .eq('id', expenseId)
       .single();
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     return flattenExtraTags(data as Expense);
   },
@@ -150,7 +170,9 @@ export const expensesApi = {
       )
       .select(SELECT_WITH_CATEGORY_AND_TAG);
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     return (data as Expense[]).map(flattenExtraTags);
   },
@@ -165,7 +187,9 @@ export const expensesApi = {
       .select(SELECT_TEMPLATE)
       .eq('user_id', ownerId)
       .order('created_at', { ascending: false });
-    if (signal) query = query.abortSignal(signal);
+    if (signal) {
+      query = query.abortSignal(signal);
+    }
 
     return rows<ExpenseTemplate>(query);
   },

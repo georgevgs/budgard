@@ -45,14 +45,17 @@ export const useAccountOps = () => {
           t('networth.toasts.accountAdded'),
         ),
         perform: () => {
-          if (accountId)
+          if (accountId) {
             return dataService.updateAccount(accountId, accountData);
+          }
 
           return dataService.createAccount(accountData, activeOwnerId);
         },
         commit: (row) => {
           setAccounts((prev) => {
-            if (accountId) return replaceById(prev, accountId, row);
+            if (accountId) {
+              return replaceById(prev, accountId, row);
+            }
 
             return [...prev, row];
           });

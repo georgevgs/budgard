@@ -25,14 +25,18 @@ export const debtsApi = {
       .eq('user_id', ownerId)
       .eq('is_archived', false)
       .order('created_at', { ascending: true });
-    if (signal) query = query.abortSignal(signal);
+    if (signal) {
+      query = query.abortSignal(signal);
+    }
 
     return rows<Debt>(query);
   },
 
   async getDebtById(debtId: string, signal?: AbortSignal) {
     let query = supabase.from('debts').select('*').eq('id', debtId);
-    if (signal) query = query.abortSignal(signal);
+    if (signal) {
+      query = query.abortSignal(signal);
+    }
 
     return row<Debt>(query.single());
   },
@@ -89,8 +93,12 @@ export const debtsApi = {
         .order('created_at', { ascending: false })
         .order('id', { ascending: false })
         .limit(SUPABASE_PAGE_SIZE);
-      if (cursor) query = query.or(transactionCursorFilter(cursor));
-      if (signal) query = query.abortSignal(signal);
+      if (cursor) {
+        query = query.or(transactionCursorFilter(cursor));
+      }
+      if (signal) {
+        query = query.abortSignal(signal);
+      }
 
       return query;
     });

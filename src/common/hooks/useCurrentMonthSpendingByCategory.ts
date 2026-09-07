@@ -19,9 +19,15 @@ export const useCurrentMonthSpendingByCategory = (
     const totals = new Map<string, number>();
 
     for (const expense of expenses) {
-      if (!countsAsSpending(expense)) continue;
-      if (!expense.category_id) continue;
-      if (!expense.date.startsWith(monthKey)) continue;
+      if (!countsAsSpending(expense)) {
+        continue;
+      }
+      if (!expense.category_id) {
+        continue;
+      }
+      if (!expense.date.startsWith(monthKey)) {
+        continue;
+      }
       totals.set(
         expense.category_id,
         (totals.get(expense.category_id) ?? 0) + expense.amount,

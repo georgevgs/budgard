@@ -314,14 +314,20 @@ const notifyChanged = (): void => {
 };
 
 const mutationOp = (type: MutationType): 'create' | 'update' | 'delete' => {
-  if (type.startsWith('create')) return 'create';
-  if (type.startsWith('update')) return 'update';
+  if (type.startsWith('create')) {
+    return 'create';
+  }
+  if (type.startsWith('update')) {
+    return 'update';
+  }
 
   return 'delete';
 };
 
 const mutationEntity = (type: MutationType): 'expense' | 'income' => {
-  if (type.endsWith('Income')) return 'income';
+  if (type.endsWith('Income')) {
+    return 'income';
+  }
 
   return 'expense';
 };

@@ -27,11 +27,17 @@ is **bun**.
   retryable error toast that every mutation shares. Never hand-roll that shell
   again; the optimistic shapes (`prependOptimistic` / `patchOptimistic` /
   `removeOptimistic` / `setScalarOptimistic`) live in `dataOps/helpers.ts`.
+  Ten of these hooks have a single feature calling them, and the style guide
+  would push each into that feature's `hooks/`; they stay here on purpose,
+  because the shared runner and rollback contract are what make this one layer
+  rather than twenty. That departure is recorded in `docs/style-guide.md`.
 - **Offline queueing covers expenses and incomes only.** `MutationType` and
   `useOfflineSync`'s cases must stay in lock-step — widening one without the
   other silently drops writes.
 - **Supabase queries** live at the feature root (`<feature>Api.ts`) and are
   composed into one `dataService` object by `src/common/api/dataService.ts`.
+  A shared module has no feature root, so its queries sit beside `dataService`
+  instead — `common/api/categoriesApi.ts`, `tagsApi.ts`, `proApi.ts`.
   Service methods end with `rows` / `row` / `maybeRow` / `done` from
   `src/common/api/supabaseCrud.ts`. Keep the query chain spelled out — **every
   embed names its FK explicitly, and that is load-bearing.** A bare embed name
@@ -40,28 +46,35 @@ is **bun**.
 - **Pro gating**: every free-tier limit is declared in
   `src/constants/proGates.ts` and asked through `useProGate().allow(...)`.
   Do not read `isPro` and hand-roll a toast + `openUpgrade()` at a new call site.
-- **Routes** are lazy-loaded in `src/App.tsx`.
+- **Routes** are lazy-loaded in `src/App.tsx`. A folder under `src/pages/` that
+  no route owns is not a page: if several features or the router itself reach
+  for it, it belongs under `src/common/`.
 
 ## 📂 Directory map
 
 ```
-src/pages/<feature>/     a feature: its view, components/, hooks/, utils/, <feature>Api.ts
+src/pages/<feature>/     a feature a route owns: view, components/, hooks/, utils/, <feature>Api.ts
 src/common/components/   bento, charts, layout, routing, and genuinely shared components
+src/common/components/<module>/
+                         a shared module bigger than one file — categories, pro,
+                         csvImport — with its own hooks/ and utils/ beneath it
 src/common/ui/           shadcn primitives — vendored, do not modify
 src/common/hooks/        cross-feature hooks, incl. data/ and dataOps/
 src/common/contexts/     the Provider / Context pairs
-src/common/api/          dataService composition + shared query helpers
+src/common/api/          dataService composition, query helpers, shared-module APIs
 src/config/              external integrations only: supabase, sentry, i18n, sw
 src/constants/           app-wide utilities and constants
+src/assets/fonts/        the self-hosted woff2 faces
 src/design/              tokens and palette
 ```
 
 - `src/common/components/bento`: `BentoGrid` / `BentoTile` / `TileLabel` — the
   grid language Today and Trends are built from. A new module goes in
   `<feature>/components/tiles/`, never inline in the view.
-- Zod schemas live with their feature (`<feature>/validations.ts`);
+- Zod schemas live with their feature (`<feature>/validations.ts`) or with a
+  shared module (`common/components/categories/validations.ts`);
   `src/constants/validations.ts` holds only the shared primitives they are
-  built from.
+  built from — a schema reached from `common/` belongs there too.
 - `src/design/tokens.ts`: **every colour in the app.** The only file to edit for
   a theme change — the generated CSS, the pre-paint script in `index.html`, the
   CSP hash in `netlify.toml` and the manifest colours are all built from it by

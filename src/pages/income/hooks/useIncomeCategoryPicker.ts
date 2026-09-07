@@ -23,7 +23,9 @@ export const useIncomeCategoryPicker = (
   );
 
   const filteredCategories = useMemo(() => {
-    if (!categorySearch) return incomeCategories;
+    if (!categorySearch) {
+      return incomeCategories;
+    }
     const lower = categorySearch.toLowerCase();
 
     return incomeCategories.filter((c) => c.name.toLowerCase().includes(lower));
@@ -47,8 +49,12 @@ export const useIncomeCategoryPicker = (
   };
 
   const handleCategoryCreateInline = () => {
-    if (!categorySearch.trim() || isCreatingCategory) return;
-    if (!session?.user?.id) return;
+    if (!categorySearch.trim() || isCreatingCategory) {
+      return;
+    }
+    if (!session?.user?.id) {
+      return;
+    }
 
     const userId = session.user.id;
     startCategoryCreation(async () => {

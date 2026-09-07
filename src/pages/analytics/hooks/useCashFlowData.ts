@@ -23,14 +23,22 @@ export const useCashFlowData = (selectedYear: number) => {
     // net stayed right by luck while both bars, and avgNet's numerator, were
     // wrong.
     for (const e of expenses) {
-      if (!countsInTotals(e)) continue;
-      if (Number(e.date.slice(0, 4)) !== selectedYear) continue;
+      if (!countsInTotals(e)) {
+        continue;
+      }
+      if (Number(e.date.slice(0, 4)) !== selectedYear) {
+        continue;
+      }
       expByMonth[Number(e.date.slice(5, 7)) - 1] += e.amount;
     }
 
     for (const i of incomes) {
-      if (!countsInTotals(i)) continue;
-      if (Number(i.date.slice(0, 4)) !== selectedYear) continue;
+      if (!countsInTotals(i)) {
+        continue;
+      }
+      if (Number(i.date.slice(0, 4)) !== selectedYear) {
+        continue;
+      }
       incByMonth[Number(i.date.slice(5, 7)) - 1] += i.amount;
     }
 

@@ -58,7 +58,9 @@ export const GoalForm = ({ goal, onSubmit, onClose }: GoalFormProps) => {
   const isEditing = Boolean(goal);
 
   const handleSubmit = async (values: GoalFormData) => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      return;
+    }
     await onSubmit(values);
   };
 
@@ -126,7 +128,9 @@ const resolveDeadline = (goal: Goal | undefined): Date | undefined => {
 };
 
 const renderTitle = (isEditing: boolean, t: TranslateFunction) => {
-  if (isEditing) return t('goals.editTitle');
+  if (isEditing) {
+    return t('goals.editTitle');
+  }
 
   return t('goals.createTitle');
 };
@@ -145,7 +149,9 @@ const renderSubmitLabel = (
     );
   }
 
-  if (isEditing) return t('common.update');
+  if (isEditing) {
+    return t('common.update');
+  }
 
   return t('goals.create');
 };

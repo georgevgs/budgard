@@ -101,7 +101,9 @@ const renderCategoryField = (
   categories: { id: string; name: string; color: string }[],
   t: TranslateFunction,
 ) => {
-  if (sourceType !== 'category') return null;
+  if (sourceType !== 'category') {
+    return null;
+  }
 
   return (
     <FormField
@@ -143,7 +145,9 @@ const renderTagField = (
   tags: { id: string; name: string; color: string }[],
   t: TranslateFunction,
 ) => {
-  if (sourceType !== 'tag') return null;
+  if (sourceType !== 'tag') {
+    return null;
+  }
 
   return (
     <FormField
@@ -185,7 +189,9 @@ const renderAccountField = (
   accounts: Account[],
   t: TranslateFunction,
 ) => {
-  if (sourceType !== 'account') return null;
+  if (sourceType !== 'account') {
+    return null;
+  }
 
   const investmentAccounts = accounts.filter(
     (account) => account.kind === 'investment' && !account.is_archived,

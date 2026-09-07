@@ -1,9 +1,9 @@
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import { useTranslation } from 'react-i18next';
-import { BudgetProgress } from '@/pages/budget/components/BudgetProgress';
-import { FiftyThirtyTwentyRing } from '@/pages/income/components/FiftyThirtyTwentyRing';
+import { BudgetProgress } from '@/pages/plan/components/BudgetProgress';
+import { FiftyThirtyTwentyRing } from '@/pages/plan/components/FiftyThirtyTwentyRing';
 import { SavingsRhythm } from '@/pages/plan/components/SavingsRhythm';
-import type { useSavingsRhythm } from '@/common/hooks/savings/useSavingsRhythm';
+import type { useSavingsRhythm } from '@/common/hooks/useSavingsRhythm';
 
 type PlanDetailsProps = {
   isOpen: boolean;

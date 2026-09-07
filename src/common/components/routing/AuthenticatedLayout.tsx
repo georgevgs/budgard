@@ -6,7 +6,7 @@ import { NavTabs } from '@/common/components/layout/NavTabs';
 import { TopScrim } from '@/common/components/layout/TopScrim';
 import { OnboardingGate } from '@/pages/onboarding/components/OnboardingGate';
 import { MainTabsLayout } from '@/common/components/routing/MainTabsLayout';
-import { UpgradeDialog } from '@/pages/pro/components/UpgradeDialog';
+import { UpgradeDialog } from '@/common/components/pro/UpgradeDialog';
 import {
   LockScreen,
   prefetchMainTabModules,
@@ -15,7 +15,7 @@ import { QuickAddProvider } from '@/common/contexts/QuickAddProvider';
 import { useAppLock } from '@/common/hooks/useAppLock';
 import { useOfflineSync } from '@/common/hooks/useOfflineSync';
 import { usePageRefresh } from '@/common/hooks/usePageRefresh';
-import { useCheckoutReturn } from '@/pages/pro/hooks/useCheckoutReturn';
+import { useCheckoutReturn } from '@/common/hooks/useCheckoutReturn';
 import { useRouteScrollRestoration } from '@/common/hooks/useRouteScrollRestoration';
 import { authApi } from '@/common/api/authApi';
 import { isMainTabPath } from '@/constants/routes';

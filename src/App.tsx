@@ -100,8 +100,12 @@ const renderLegalPage = (page: ReactNode) => {
 };
 
 const renderAuthLoading = (pathname: string) => {
-  if (pathname === '/') return <LandingLoading />;
-  if (isLegalPath(pathname)) return <LegalLoading />;
+  if (pathname === '/') {
+    return <LandingLoading />;
+  }
+  if (isLegalPath(pathname)) {
+    return <LegalLoading />;
+  }
 
   return <AppLoadingSkeleton />;
 };

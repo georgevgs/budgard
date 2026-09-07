@@ -13,7 +13,7 @@ import {
   PopoverContent,
 } from '@/common/ui/popover';
 import { Input } from '@/common/ui/input';
-import { renderSuggestionMeta } from '@/pages/expenses/utils/expensesFormHelpers';
+import { renderSuggestionMeta } from '@/constants/expensesFormHelpers';
 import type { UseDescriptionSuggestionsReturn } from '@/pages/expenses/hooks/useDescriptionSuggestions';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
 

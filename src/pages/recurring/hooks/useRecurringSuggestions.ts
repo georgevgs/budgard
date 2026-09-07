@@ -14,7 +14,7 @@ import { useProGate } from '@/common/hooks/useProGate';
 import { recurringSuggestionService } from '@/common/api/recurringSuggestionService';
 import { detectRecurringSuggestions } from '@/pages/recurring/utils/recurringDetection';
 import type { RecurringMode } from '@/pages/recurring/hooks/useRecurringActions';
-import type { RecurringSuggestion } from '@/types/RecurringSuggestion';
+import type { RecurringSuggestion } from '@/pages/recurring/recurringTypes';
 
 export const useRecurringSuggestions = (mode: RecurringMode) => {
   const expenses = useExpensesData();

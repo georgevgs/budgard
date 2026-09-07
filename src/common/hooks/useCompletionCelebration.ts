@@ -24,7 +24,9 @@ export const useCompletionCelebration = (
   const key = completedIds.join('|');
 
   useEffect(() => {
-    if (!isEnabled) return;
+    if (!isEnabled) {
+      return;
+    }
 
     // First armed run seeds the baseline without celebrating.
     if (celebratedRef.current === null) {

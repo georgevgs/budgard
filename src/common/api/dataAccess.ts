@@ -112,11 +112,15 @@ export const fetchAllPages = async <T>(
   // inserts cannot shift rows across a page boundary.
   for (;;) {
     const { data, error } = await buildPage(cursor);
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     const page = (data ?? []) as T[];
     rows.push(...page);
-    if (page.length < SUPABASE_PAGE_SIZE) break;
+    if (page.length < SUPABASE_PAGE_SIZE) {
+      break;
+    }
     cursor = page[page.length - 1];
   }
 

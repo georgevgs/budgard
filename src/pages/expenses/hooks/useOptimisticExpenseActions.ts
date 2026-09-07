@@ -33,7 +33,9 @@ export const useOptimisticExpenseActions = () => {
 
   const handleExpenseDelete = useCallback(
     (id: string) => {
-      if (id.startsWith('temp-')) return;
+      if (id.startsWith('temp-')) {
+        return;
+      }
       startTransition(async () => {
         addOptimisticExpense({ type: 'delete', id });
         await settleReportedOperation(deleteExpense(id));
@@ -114,7 +116,9 @@ export const useOptimisticExpenseActions = () => {
 
   const handleUseTemplate = useCallback(
     (template: ExpenseTemplate) => {
-      if (!userId) return;
+      if (!userId) {
+        return;
+      }
 
       const today = format(new Date(), 'yyyy-MM-dd');
       const category = categories.find((c) => c.id === template.category_id);
@@ -181,7 +185,9 @@ const resolveExtraTags = (
   extraTagIds: string[] | undefined,
   tags: Tag[],
 ): EmbeddedTag[] | undefined => {
-  if (!extraTagIds) return undefined;
+  if (!extraTagIds) {
+    return undefined;
+  }
 
   const resolved: EmbeddedTag[] = [];
   for (const id of extraTagIds) {
@@ -208,7 +214,9 @@ const expensesReducer = (
       return [action.expense, ...state];
     case 'update':
       return state.map((e) => {
-        if (e.id === action.expense.id) return action.expense;
+        if (e.id === action.expense.id) {
+          return action.expense;
+        }
 
         return e;
       });

@@ -119,17 +119,17 @@ const renameTagRefs = (
   tagId: string,
   name: string,
 ): Expense => {
-  const touchesPrimary = expense.tag?.id === tagId;
-  const touchesExtra = expense.extra_tags?.some((tag) => tag.id === tagId);
-  if (!touchesPrimary && !touchesExtra) {
+  const isPrimaryTag = expense.tag?.id === tagId;
+  const hasExtraTag = expense.extra_tags?.some((tag) => tag.id === tagId);
+  if (!isPrimaryTag && !hasExtraTag) {
     return expense;
   }
 
   const next = { ...expense };
-  if (touchesPrimary && next.tag) {
+  if (isPrimaryTag && next.tag) {
     next.tag = { ...next.tag, name };
   }
-  if (touchesExtra && next.extra_tags) {
+  if (hasExtraTag && next.extra_tags) {
     next.extra_tags = next.extra_tags.map((tag) => {
       if (tag.id !== tagId) {
         return tag;
@@ -143,18 +143,18 @@ const renameTagRefs = (
 };
 
 const clearTagRefs = (expense: Expense, tagId: string): Expense => {
-  const touchesPrimary = expense.tag_id === tagId;
-  const touchesExtra = expense.extra_tags?.some((tag) => tag.id === tagId);
-  if (!touchesPrimary && !touchesExtra) {
+  const isPrimaryTag = expense.tag_id === tagId;
+  const hasExtraTag = expense.extra_tags?.some((tag) => tag.id === tagId);
+  if (!isPrimaryTag && !hasExtraTag) {
     return expense;
   }
 
   const next = { ...expense };
-  if (touchesPrimary) {
+  if (isPrimaryTag) {
     next.tag_id = undefined;
     next.tag = undefined;
   }
-  if (touchesExtra && next.extra_tags) {
+  if (hasExtraTag && next.extra_tags) {
     next.extra_tags = next.extra_tags.filter((tag) => tag.id !== tagId);
   }
 

@@ -1,7 +1,7 @@
 import { supabase } from '@/config/supabase';
 import { done, maybeRow, row, rows } from '@/common/api/supabaseCrud';
 import type { Budget, NotificationPreferences, NotificationSettings } from '@/types/Budget';
-import type { FinancialConnection } from '@/types/FinancialConnection';
+import type { FinancialConnection } from '@/pages/settings/settingsTypes';
 
 export type PushSubscriptionPayload = {
   userId: string;
@@ -32,7 +32,9 @@ export const settingsApi = {
       data: { user },
       error,
     } = await supabase.auth.getUser();
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     return user;
   },
@@ -72,7 +74,9 @@ export const settingsApi = {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
+    if (!session) {
+      throw new Error('Not authenticated');
+    }
 
     return row<NotificationSettings>(
       supabase
@@ -91,7 +95,9 @@ export const settingsApi = {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
+    if (!session) {
+      throw new Error('Not authenticated');
+    }
 
     return row<NotificationSettings>(
       supabase
@@ -107,7 +113,9 @@ export const settingsApi = {
 
   async getNotificationSettings(signal?: AbortSignal) {
     let query = supabase.from('user_notification_settings').select('*');
-    if (signal) query = query.abortSignal(signal);
+    if (signal) {
+      query = query.abortSignal(signal);
+    }
 
     return maybeRow<NotificationSettings>(query.maybeSingle());
   },
@@ -143,7 +151,9 @@ export const settingsApi = {
       .select(SAFE_CONNECTION_COLUMNS)
       .eq('user_id', ownerId)
       .order('created_at');
-    if (signal) query = query.abortSignal(signal);
+    if (signal) {
+      query = query.abortSignal(signal);
+    }
 
     return rows<FinancialConnection>(query);
   },

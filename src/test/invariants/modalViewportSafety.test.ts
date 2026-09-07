@@ -11,15 +11,15 @@ const read = (file: string): string => {
 };
 
 const SCROLLABLE_DIALOGS = [
-  'src/pages/auth/components/LoginModal.tsx',
-  'src/pages/budget/components/BudgetForm.tsx',
+  'src/pages/landing/components/LoginModal.tsx',
+  'src/pages/plan/components/BudgetForm.tsx',
   'src/pages/landing/components/IosInstallModal.tsx',
   'src/pages/onboarding/OnboardingFlow.tsx',
-  'src/pages/security/components/SetPinDialog.tsx',
+  'src/pages/settings/components/SetPinDialog.tsx',
 ] as const;
 
 const ZERO_PADDING_ACTION_SHEETS = [
-  'src/pages/categories/components/CategoryManager.tsx',
+  'src/common/components/categories/CategoryManager.tsx',
   'src/pages/debts/components/DebtForm.tsx',
   'src/pages/debts/components/DebtPaymentForm.tsx',
   'src/pages/goals/components/GoalForm.tsx',

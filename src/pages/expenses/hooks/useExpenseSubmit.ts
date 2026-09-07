@@ -35,7 +35,9 @@ export const useExpenseSubmit = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (values: ExpenseFormData) => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -81,7 +83,9 @@ export const useExpenseSubmit = ({
 };
 
 const normalizeCategoryId = (categoryId: string): string | null => {
-  if (categoryId === 'none') return null;
+  if (categoryId === 'none') {
+    return null;
+  }
 
   return categoryId;
 };
@@ -93,9 +97,13 @@ const pickExtraTagIds = (
   isEditing: boolean,
 ): string[] | undefined => {
   const extraTagIds = orderedTagIds.slice(1);
-  if (isEditing) return extraTagIds;
+  if (isEditing) {
+    return extraTagIds;
+  }
 
-  if (extraTagIds.length === 0) return undefined;
+  if (extraTagIds.length === 0) {
+    return undefined;
+  }
 
   return extraTagIds;
 };

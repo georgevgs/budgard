@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { TodayHeader } from '@/pages/today/components/TodayHeader';
 
-vi.mock('@/common/components/layout/ProfileMenu', () => ({ ProfileMenu: () => null,
+vi.mock('@/pages/today/components/ProfileMenu', () => ({ ProfileMenu: () => null,
 }));
 
 const HeaderHarness = () => {

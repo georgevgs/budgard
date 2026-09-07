@@ -19,7 +19,7 @@ import { TagChip } from '@/pages/expenses/components/TagChip';
 import {
   renderCreateTagOption,
   renderNoTagsMessage,
-} from '@/pages/expenses/utils/expensesFormHelpers';
+} from '@/constants/expensesFormHelpers';
 import type { UseTagPickerReturn } from '@/pages/expenses/hooks/useTagPicker';
 import {
   useTagListboxNav,
@@ -103,7 +103,9 @@ export const ExpenseTagField = ({ form, tagPicker }: ExpenseTagFieldProps) => {
   );
 };
 const renderSelectedTagChips = (tagPicker: UseTagPickerReturn) => {
-  if (tagPicker.selectedTags.length === 0) return null;
+  if (tagPicker.selectedTags.length === 0) {
+    return null;
+  }
 
   return (
     <div className="flex flex-wrap gap-1.5">

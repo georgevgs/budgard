@@ -57,6 +57,13 @@ export default tseslint.config(
     files: ['src/**/*.{ts,tsx}'],
     ignores: ['src/**/*.test.{ts,tsx}', 'src/common/ui/**'],
     rules: {
+      // A guard clause keeps its braces. The style guide asks for the
+      // brace-less `if (isLoading) return <Loading />`; this repo writes the
+      // block, for the same reason it bans ternaries and `&&` in JSX — a
+      // branch should have a shape the eye catches while scanning a column of
+      // code. Enforced rather than conventional, because both forms drifted
+      // side by side for months while this was only written down.
+      curly: ['error', 'all'],
       'no-restricted-syntax': [
         'error',
         {

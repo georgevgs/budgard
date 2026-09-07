@@ -27,9 +27,13 @@ export const useCurrencyConversionCore = (
   } = useExchangeRate(selectedCurrency, watchedDateStr, defaultCurrency);
 
   const previewConvertedAmount = useMemo(() => {
-    if (selectedCurrency === defaultCurrency || !exchangeRate) return null;
+    if (selectedCurrency === defaultCurrency || !exchangeRate) {
+      return null;
+    }
     const raw = parseCurrencyInput(watchedAmount);
-    if (!raw) return null;
+    if (!raw) {
+      return null;
+    }
 
     return convertMoney(raw, exchangeRate, defaultCurrency);
   }, [exchangeRate, selectedCurrency, watchedAmount, defaultCurrency]);
@@ -58,7 +62,9 @@ export type UseCurrencyConversionCoreReturn = ReturnType<
 >;
 
 const toDateString = (date: Date | undefined): string => {
-  if (!date) return '';
+  if (!date) {
+    return '';
+  }
 
   return format(date, 'yyyy-MM-dd');
 };

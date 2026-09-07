@@ -32,7 +32,9 @@ export const IncomeCategoryField = ({ form, picker }: IncomeCategoryFieldProps) 
   const { t } = useTranslation();
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key !== 'Enter') return;
+    if (e.key !== 'Enter') {
+      return;
+    }
 
     e.preventDefault();
     if (picker.filteredCategories.length === 1 && !picker.shouldShowCreateOption) {

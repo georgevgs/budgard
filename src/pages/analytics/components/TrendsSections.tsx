@@ -3,7 +3,7 @@ import { SpendingInsights } from '@/pages/analytics/components/SpendingInsights'
 import { YearRhythm } from '@/pages/analytics/components/YearRhythm';
 import { ForecastSection } from '@/pages/analytics/components/ForecastSection';
 import { CategoryBreakdownSection } from '@/pages/analytics/components/CategoryBreakdownSection';
-import { ProUpsellCard } from '@/pages/pro/components/ProUpsellCard';
+import { ProUpsellCard } from '@/common/components/pro/ProUpsellCard';
 import type { useAnalyticsData } from '@/pages/analytics/hooks/useAnalyticsData';
 import type { CategoryRow } from '@/pages/analytics/hooks/useAnalyticsData';
 import type { Category } from '@/types/Category';

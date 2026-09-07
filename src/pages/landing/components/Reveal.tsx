@@ -14,8 +14,12 @@ export const Reveal = ({ children, delay = 0, className }: RevealProps) => {
 
   useEffect(() => {
     const node = ref.current;
-    if (!node) return;
-    if (prefersReducedMotion()) return;
+    if (!node) {
+      return;
+    }
+    if (prefersReducedMotion()) {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -50,7 +54,9 @@ export const Reveal = ({ children, delay = 0, className }: RevealProps) => {
 };
 
 const getVisibilityClass = (isVisible: boolean): string => {
-  if (isVisible) return 'opacity-100 translate-y-0';
+  if (isVisible) {
+    return 'opacity-100 translate-y-0';
+  }
 
   return 'opacity-0 translate-y-3';
 };

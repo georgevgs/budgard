@@ -6,7 +6,7 @@ import { ActivitySummary } from '@/pages/activity/components/ActivitySummary';
 import { ActivityFilterPanel } from '@/pages/activity/components/ActivityFilterPanel';
 import { ActivityToolsMenu } from '@/pages/activity/components/ActivityToolsMenu';
 import { ReviewQueueBanner } from '@/pages/activity/components/ReviewQueueBanner';
-import { FilterResultsAnnouncer } from '@/pages/expenses/components/FilterResultsAnnouncer';
+import { FilterResultsAnnouncer } from '@/pages/activity/components/FilterResultsAnnouncer';
 import { TransactionsLoading } from '@/common/components/common/TransactionsLoading';
 import {
   useCategoriesData,
@@ -22,7 +22,7 @@ import { useActivityCsvExport } from '@/pages/activity/hooks/useActivityCsvExpor
 import { useDelayedLoading } from '@/common/hooks/useDelayedLoading';
 import { useCurrentDate } from '@/common/hooks/useCurrentDate';
 import { useOnDemandHistory } from '@/common/hooks/data/useOnDemandHistory';
-import { useSeedIncomeCategories } from '@/pages/income/hooks/useSeedIncomeCategories';
+import { useSeedIncomeCategories } from '@/pages/activity/hooks/useSeedIncomeCategories';
 import { isMonthPendingHistory } from '@/constants/dataCache';
 
 const ActivityView = () => {

@@ -113,7 +113,9 @@ export const OnboardingCategoriesStep = ({
   );
 };
 const renderCheckIcon = (isSelected: boolean) => {
-  if (!isSelected) return null;
+  if (!isSelected) {
+    return null;
+  }
 
   return <Check className="h-4 w-4 text-primary-ink shrink-0" />;
 };

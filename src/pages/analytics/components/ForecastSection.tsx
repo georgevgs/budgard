@@ -20,7 +20,9 @@ export const ForecastSection = () => {
   const forecast = useForecastData();
   const { safeToSpend, projection, noData } = forecast;
 
-  if (noData) return null;
+  if (noData) {
+    return null;
+  }
 
   return (
     <div className="space-y-3">
@@ -103,7 +105,9 @@ const renderSafeToSpend = (
   currency: string,
   t: TranslateFunction,
 ) => {
-  if (safeToSpend === null) return null;
+  if (safeToSpend === null) {
+    return null;
+  }
 
   return (
     <div className="pb-4 border-b border-border/40">

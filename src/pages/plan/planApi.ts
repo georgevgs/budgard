@@ -12,7 +12,9 @@ export const planApi = {
       .select('*')
       .eq('user_id', ownerId)
       .order('day', { ascending: false });
-    if (signal) query = query.abortSignal(signal);
+    if (signal) {
+      query = query.abortSignal(signal);
+    }
 
     return rows<NoSpendDay>(query);
   },

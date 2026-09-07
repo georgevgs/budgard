@@ -8,7 +8,7 @@ import {
   useExpensesData,
 } from '@/common/contexts/DataContext';
 import { useAllGoalProgress } from '@/common/hooks/useGoalProgress';
-import { useSavingsRhythm } from '@/common/hooks/savings/useSavingsRhythm';
+import { useSavingsRhythm } from '@/common/hooks/useSavingsRhythm';
 import { useCompletionCelebration } from '@/common/hooks/useCompletionCelebration';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
 import { celebrate } from '@/constants/confetti';
@@ -31,7 +31,7 @@ export const MilestoneWatcher = () => {
 
   // Only arm once the full dataset has loaded — the two-stage fetch and cache
   // hydration would otherwise look like fresh completions.
-  const armed = isInitialized && isSecondaryLoaded;
+  const isArmed = isInitialized && isSecondaryLoaded;
 
   const completedGoalIds = Object.values(goalProgress)
     .filter((p) => p.percent >= 1)
@@ -65,7 +65,9 @@ export const MilestoneWatcher = () => {
   const celebrateGoal = useCallback(
     (id: string) => {
       const goal = goals.find((g) => g.id === id);
-      if (!goal) return;
+      if (!goal) {
+        return;
+      }
 
       celebrate();
       haptics.success();
@@ -81,7 +83,9 @@ export const MilestoneWatcher = () => {
   const celebrateDebt = useCallback(
     (id: string) => {
       const debt = debts.find((d) => d.id === id);
-      if (!debt) return;
+      if (!debt) {
+        return;
+      }
 
       celebrate();
       haptics.success();
@@ -96,9 +100,9 @@ export const MilestoneWatcher = () => {
 
   // Savings goals are a Pro feature — free users can't open /goals, so they
   // get no goal celebrations either. Debt tracking stays free for everyone.
-  useCompletionCelebration(completedGoalIds, armed && isPro, celebrateGoal);
-  useCompletionCelebration(clearedDebtIds, armed, celebrateDebt);
-  useCompletionCelebration(crossedMilestoneIds, armed, celebrateSetAside);
+  useCompletionCelebration(completedGoalIds, isArmed && isPro, celebrateGoal);
+  useCompletionCelebration(clearedDebtIds, isArmed, celebrateDebt);
+  useCompletionCelebration(crossedMilestoneIds, isArmed, celebrateSetAside);
 
   return null;
 };

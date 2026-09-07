@@ -1,5 +1,5 @@
 import { useMemo, type ReactNode } from 'react';
-import { useSubscriptionState } from '@/pages/pro/hooks/useSubscriptionState';
+import { useSubscriptionState } from '@/common/hooks/useSubscriptionState';
 import {
   subscriptionService,
   type CheckoutPlan,

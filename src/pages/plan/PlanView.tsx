@@ -24,7 +24,7 @@ import { useDebts } from '@/common/hooks/useDebts';
 import { useDelayedLoading } from '@/common/hooks/useDelayedLoading';
 import { useCurrentDate } from '@/common/hooks/useCurrentDate';
 import { useMoneyTimeline } from '@/pages/plan/hooks/useMoneyTimeline';
-import { useSavingsRhythm } from '@/common/hooks/savings/useSavingsRhythm';
+import { useSavingsRhythm } from '@/common/hooks/useSavingsRhythm';
 import { getMonthlyAmount } from '@/constants/recurring';
 import { computeUpcomingRecurringThisMonth } from '@/constants/forecast';
 import { buildMonthlyDecision } from '@/pages/plan/utils/monthlyDecision';

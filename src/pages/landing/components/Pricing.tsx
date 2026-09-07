@@ -5,7 +5,7 @@ import { SectionShell } from '@/pages/landing/components/SectionShell';
 import { EyebrowLabel } from '@/pages/landing/components/EyebrowLabel';
 import { Reveal } from '@/pages/landing/components/Reveal';
 import Check from 'lucide-react/dist/esm/icons/check';
-import { useProPlans, type UseProPlansReturn } from '@/pages/pro/hooks/useProPlans';
+import { useProPlans, type UseProPlansReturn } from '@/common/hooks/useProPlans';
 import { yearlySavingsPercent, type ProPlanId } from '@/constants/proPlans';
 
 type PricingProps = {
@@ -92,10 +92,14 @@ const getLabelKey = (value: Cycle): string => {
 // Computed from the live prices so the badge can never drift from what
 // checkout actually charges — same basis as the paywall's savings badge.
 const renderSaveBadge = (t: Tx, value: Cycle, plans: UseProPlansReturn) => {
-  if (value !== 'yearly') return null;
+  if (value !== 'yearly') {
+    return null;
+  }
 
   const percent = yearlySavingsPercent(plans.prices);
-  if (percent <= 0) return null;
+  if (percent <= 0) {
+    return null;
+  }
 
   return (
     <span className="ml-2 text-[11px] font-semibold uppercase tracking-wider text-primary-ink">

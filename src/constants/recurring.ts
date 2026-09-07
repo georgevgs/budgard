@@ -25,14 +25,18 @@ export const calculateNextOccurrence = (
   expense: RecurringExpense,
   now: Date = new Date(),
 ): Date | null => {
-  if (!expense.active) return null;
+  if (!expense.active) {
+    return null;
+  }
 
   const today = startOfToday(now);
 
   // Both sides of this comparison are local midnight. Mixing a UTC-parsed
   // date with a local one used to drop the final occurrence on its end date,
   // and to skip a schedule's first occurrence when it started today.
-  if (expense.end_date && parseIsoDate(expense.end_date) < today) return null;
+  if (expense.end_date && parseIsoDate(expense.end_date) < today) {
+    return null;
+  }
 
   const startDate = parseIsoDate(expense.start_date);
 

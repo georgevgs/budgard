@@ -20,8 +20,12 @@ export const getDateLabel = (
   const parsed = parseISO(dateString);
 
   if (!shouldShowFullDate) {
-    if (isToday(parsed)) return t('dateGroup.today');
-    if (isYesterday(parsed)) return t('dateGroup.yesterday');
+    if (isToday(parsed)) {
+      return t('dateGroup.today');
+    }
+    if (isYesterday(parsed)) {
+      return t('dateGroup.yesterday');
+    }
   }
 
   return format(parsed, 'EEEE, MMM d', { locale: dateLocale });

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Input } from '@/common/ui/input';
-import { ProUpsellCard } from '@/pages/pro/components/ProUpsellCard';
+import { ProUpsellCard } from '@/common/components/pro/ProUpsellCard';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { useDebtPayoffPlan } from '@/pages/debts/hooks/useDebtPayoffPlan';

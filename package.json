@@ -20,6 +20,9 @@
     "brand:generate": "zsh design/brand/generate-assets.zsh",
     "sync:agents": "node scripts/syncAgentDocs.ts",
     "docs:schema": "node scripts/generateSchemaMap.mjs",
+    "backup": "node scripts/backup.mjs",
+    "backup:verify": "node scripts/backup/verify.mjs",
+    "test:backup": "node --test scripts/backup/backup.test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },

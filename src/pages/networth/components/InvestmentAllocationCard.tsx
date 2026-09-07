@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
-import { DonutChart, type DonutSlice } from '@/common/components/charts/DonutChart';
+import { DonutChart, type DonutSlice } from '@/pages/networth/components/DonutChart';
 import { formatCurrency, formatPercent } from '@/constants/utils';
 import type { Account } from '@/types/Account';
 

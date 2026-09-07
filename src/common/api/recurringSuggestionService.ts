@@ -14,7 +14,9 @@ export const recurringSuggestionService = {
       .from('recurring_suggestion_dismissals')
       .select('*')
       .eq('user_id', ownerId);
-    if (signal) query = query.abortSignal(signal);
+    if (signal) {
+      query = query.abortSignal(signal);
+    }
 
     return rows<Dismissal>(query);
   },

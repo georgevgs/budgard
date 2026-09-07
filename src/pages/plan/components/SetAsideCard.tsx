@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
-import { useSetAside } from '@/common/hooks/savings/useSetAside';
+import { useSetAside } from '@/pages/plan/hooks/useSetAside';
 import { Button } from '@/common/ui/button';
 import { formatCurrency } from '@/constants/utils';
-import type { SavingsRhythm } from '@/common/hooks/savings/useSavingsRhythm';
+import type { SavingsRhythm } from '@/common/hooks/useSavingsRhythm';
 import type { Goal } from '@/types/Goal';
 import type { TranslateFunction } from '@/constants/translate';
 

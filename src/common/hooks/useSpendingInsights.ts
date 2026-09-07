@@ -94,7 +94,9 @@ type WeeklyAnomalyArgs = {
 
 const weeklyAnomalyInsight = (args: WeeklyAnomalyArgs): Insight | null => {
   const { anomaly, t } = args;
-  if (!anomaly) return null;
+  if (!anomaly) {
+    return null;
+  }
 
   const multiple = anomaly.ratio.toFixed(1).replace(/\.0$/, '');
 
@@ -139,10 +141,14 @@ const dailyBudgetRemainingInsight = (args: DailyArgs): Insight | null => {
     defaultCurrency,
     t,
   } = args;
-  if (monthlyBudget === null || monthlyBudget === 0) return null;
+  if (monthlyBudget === null || monthlyBudget === 0) {
+    return null;
+  }
 
   const daysRemaining = daysInMonth - dayOfMonth;
-  if (daysRemaining <= 0) return null;
+  if (daysRemaining <= 0) {
+    return null;
+  }
 
   const remaining = monthlyBudget - thisMonthAmount;
 
@@ -185,15 +191,23 @@ type PaceArgs = {
 
 const spendingPaceInsight = (args: PaceArgs): Insight | null => {
   const { monthlyBudget, thisMonthAmount, dayOfMonth, daysInMonth, t } = args;
-  if (monthlyBudget === null || monthlyBudget === 0) return null;
-  if (dayOfMonth < MIN_DAYS_FOR_TRENDS) return null;
-  if (thisMonthAmount === 0) return null;
+  if (monthlyBudget === null || monthlyBudget === 0) {
+    return null;
+  }
+  if (dayOfMonth < MIN_DAYS_FOR_TRENDS) {
+    return null;
+  }
+  if (thisMonthAmount === 0) {
+    return null;
+  }
 
   const timeProgress = (dayOfMonth / daysInMonth) * 100;
   const budgetProgress = (thisMonthAmount / monthlyBudget) * 100;
   const difference = budgetProgress - timeProgress;
 
-  if (Math.abs(difference) < 5) return null;
+  if (Math.abs(difference) < 5) {
+    return null;
+  }
 
   if (difference > 0) {
     return {
@@ -228,14 +242,22 @@ type ProjectionArgs = {
 
 const monthProjectionInsight = (args: ProjectionArgs): Insight | null => {
   const { thisMonthAmount, dayOfMonth, daysInMonth, defaultCurrency, t } = args;
-  if (thisMonthAmount === 0) return null;
-  if (dayOfMonth < MIN_DAYS_FOR_TRENDS) return null;
-  if (dayOfMonth >= daysInMonth - 1) return null;
+  if (thisMonthAmount === 0) {
+    return null;
+  }
+  if (dayOfMonth < MIN_DAYS_FOR_TRENDS) {
+    return null;
+  }
+  if (dayOfMonth >= daysInMonth - 1) {
+    return null;
+  }
 
   const dailyRate = thisMonthAmount / dayOfMonth;
   const projected = Math.round(dailyRate * daysInMonth);
 
-  if (projected <= thisMonthAmount * 1.05) return null;
+  if (projected <= thisMonthAmount * 1.05) {
+    return null;
+  }
 
   return {
     id: 'monthProjection',

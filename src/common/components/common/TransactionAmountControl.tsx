@@ -69,7 +69,9 @@ const renderConversionPreview = (
   conversion: UseCurrencyConversionCoreReturn,
   t: TranslateFunction,
 ) => {
-  if (conversion.selectedCurrency === conversion.defaultCurrency) return null;
+  if (conversion.selectedCurrency === conversion.defaultCurrency) {
+    return null;
+  }
 
   if (conversion.isFetchingRate) {
     return (
@@ -87,7 +89,9 @@ const renderConversionPreview = (
     );
   }
 
-  if (!conversion.previewConvertedAmount) return null;
+  if (!conversion.previewConvertedAmount) {
+    return null;
+  }
 
   return (
     <p className="text-xs text-muted-foreground mt-1">

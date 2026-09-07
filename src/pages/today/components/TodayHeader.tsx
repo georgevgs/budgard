@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import LayoutGrid from 'lucide-react/dist/esm/icons/layout-grid';
-import { ProfileMenu } from '@/common/components/layout/ProfileMenu';
+import { ProfileMenu } from '@/pages/today/components/ProfileMenu';
 
 type TodayHeaderProps = {
   greeting: 'morning' | 'afternoon' | 'evening';

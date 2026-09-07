@@ -243,7 +243,9 @@ const mergeCategoryPatch = (
   categoryId: string,
   categoryData: Partial<Category>,
 ): Expense => {
-  if (row.category_id !== categoryId || !row.category) return row;
+  if (row.category_id !== categoryId || !row.category) {
+    return row;
+  }
 
   return { ...row, category: { ...row.category, ...categoryData } };
 };
@@ -253,13 +255,17 @@ const assignCategory = (
   categoryId: string,
   saved: Category,
 ): Expense => {
-  if (row.category_id !== categoryId) return row;
+  if (row.category_id !== categoryId) {
+    return row;
+  }
 
   return { ...row, category: saved };
 };
 
 const clearCategoryRef = (row: Expense, categoryId: string): Expense => {
-  if (row.category_id !== categoryId) return row;
+  if (row.category_id !== categoryId) {
+    return row;
+  }
 
   return { ...row, category_id: undefined, category: undefined };
 };
@@ -269,7 +275,9 @@ const reassignCategoryRef = (
   fromCategoryId: string,
   toCategory: Category,
 ): Expense => {
-  if (row.category_id !== fromCategoryId) return row;
+  if (row.category_id !== fromCategoryId) {
+    return row;
+  }
 
   return { ...row, category_id: toCategory.id, category: toCategory };
 };

@@ -42,15 +42,20 @@ export const DebtProgressBar = ({ progress, currency }: DebtProgressBarProps) =>
 };
 
 const pickIndicatorClass = (progress: DebtProgress, isCleared: boolean) => {
-  if (isCleared) return 'bg-income';
-  if (progress.isUnpayable || progress.hasBalanceIncreased)
+  if (isCleared) {
+    return 'bg-income';
+  }
+  if (progress.isUnpayable || progress.hasBalanceIncreased) {
     return 'bg-destructive';
+  }
 
   return 'bg-primary';
 };
 
 const getPercentClass = (progress: DebtProgress, isCleared: boolean) => {
-  if (isCleared) return 'text-income-ink font-semibold';
+  if (isCleared) {
+    return 'text-income-ink font-semibold';
+  }
   if (progress.isUnpayable || progress.hasBalanceIncreased) {
     return 'text-destructive-ink font-medium';
   }
@@ -64,7 +69,9 @@ const renderPercentLabel = (
   currency: string,
   t: TranslateFunction,
 ) => {
-  if (isCleared) return t('debts.cleared');
+  if (isCleared) {
+    return t('debts.cleared');
+  }
   if (progress.hasBalanceIncreased) {
     return t('debts.balanceOverOriginal', {
       amount: formatCurrency(progress.balanceOverOriginal, currency),

@@ -23,7 +23,9 @@ export const usePwaUpdate = (): void => {
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(_swUrl, registration) {
-      if (!registration) return;
+      if (!registration) {
+        return;
+      }
       swRegistration.set(registration);
 
       // Check for an update immediately on registration.
@@ -37,8 +39,12 @@ export const usePwaUpdate = (): void => {
       // and does a byte-for-byte comparison. Chrome 68+ bypasses HTTP cache
       // for SW files automatically; no manual fetch needed.
       setInterval(() => {
-        if (registration.installing || !navigator) return;
-        if ('connection' in navigator && !navigator.onLine) return;
+        if (registration.installing || !navigator) {
+          return;
+        }
+        if ('connection' in navigator && !navigator.onLine) {
+          return;
+        }
 
         registration.update().catch(() => {});
       }, UPDATE_CHECK_INTERVAL_MS);
@@ -152,7 +158,9 @@ export const usePwaUpdate = (): void => {
     // offered as before.
     const offerIfActuallyNewer = (worker: ServiceWorker): void => {
       void isSameBuildAsPage(worker).then((sameBuild) => {
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
         if (sameBuild) {
           setNeedRefresh(false);
@@ -160,7 +168,9 @@ export const usePwaUpdate = (): void => {
           return;
         }
 
-        if (toastDismissedRef.current) return;
+        if (toastDismissedRef.current) {
+          return;
+        }
         showUpdateToast();
       });
     };
@@ -204,13 +214,19 @@ export const usePwaUpdate = (): void => {
   // event that fires when a standalone PWA is foregrounded.
   useEffect(() => {
     const handleVisibilityChange = (): void => {
-      if (document.visibilityState !== 'visible') return;
+      if (document.visibilityState !== 'visible') {
+        return;
+      }
 
       // If an update is already pending, don't re-check or re-show toast.
-      if (needRefreshRef.current) return;
+      if (needRefreshRef.current) {
+        return;
+      }
 
       const reg = swRegistration.get();
-      if (!reg) return;
+      if (!reg) {
+        return;
+      }
 
       // Rate-limit update checks on visibility change to avoid iOS triggering
       // spurious SW re-installs on every app focus event.
@@ -263,7 +279,9 @@ const forceReloadAfterSkipWaiting = (): void => {
   let reloaded = false;
 
   const reload = (): void => {
-    if (reloaded) return;
+    if (reloaded) {
+      return;
+    }
     reloaded = true;
     markUpdateReload();
     window.location.reload();
@@ -315,7 +333,9 @@ const reloadedForUpdateRecently = (): boolean => {
   try {
     const raw = sessionStorage.getItem(UPDATE_RELOAD_FLAG);
     sessionStorage.removeItem(UPDATE_RELOAD_FLAG);
-    if (raw === null) return false;
+    if (raw === null) {
+      return false;
+    }
 
     const reloadedAt = Number(raw);
 

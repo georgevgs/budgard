@@ -6,7 +6,9 @@ import { useEffect, useState } from 'react';
  */
 export const useIsMobile = (breakpoint: number = 640): boolean => {
   const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === 'undefined') return false;
+    if (typeof window === 'undefined') {
+      return false;
+    }
 
     return window.innerWidth < breakpoint;
   });

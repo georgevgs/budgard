@@ -15,7 +15,9 @@ type PostgrestResult = PromiseLike<{ data: unknown; error: unknown }>;
 export const rows = async <T>(query: PostgrestResult): Promise<T[]> => {
   const { data, error } = await query;
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 
   return data as T[];
 };
@@ -25,7 +27,9 @@ export const rows = async <T>(query: PostgrestResult): Promise<T[]> => {
 export const row = async <T>(query: PostgrestResult): Promise<T> => {
   const { data, error } = await query;
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 
   return data as T;
 };
@@ -37,7 +41,9 @@ export const maybeRow = async <T>(
 ): Promise<T | null> => {
   const { data, error } = await query;
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 
   return data as T | null;
 };
@@ -46,5 +52,7 @@ export const maybeRow = async <T>(
 export const done = async (query: PostgrestResult): Promise<void> => {
   const { error } = await query;
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 };

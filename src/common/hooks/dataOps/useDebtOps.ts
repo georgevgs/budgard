@@ -43,13 +43,17 @@ export const useDebtOps = () => {
           t('debts.toasts.added'),
         ),
         perform: () => {
-          if (debtId) return dataService.updateDebt(debtId, debtData);
+          if (debtId) {
+            return dataService.updateDebt(debtId, debtData);
+          }
 
           return dataService.createDebt(debtData, activeOwnerId);
         },
         commit: (row) =>
           setDebts((prev) => {
-            if (debtId) return replaceById(prev, debtId, row);
+            if (debtId) {
+              return replaceById(prev, debtId, row);
+            }
 
             return [...prev, row];
           }),

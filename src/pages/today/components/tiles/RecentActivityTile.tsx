@@ -2,7 +2,7 @@ import { format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import { Link } from 'react-router-dom';
-import { TransactionPill } from '@/common/components/common/TransactionPill';
+import { TransactionPill } from '@/pages/today/components/TransactionPill';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { RecentActivityItem } from '@/pages/today/hooks/useTodayGuidance';
 import { BentoTile, TileLabel } from '@/common/components/bento';

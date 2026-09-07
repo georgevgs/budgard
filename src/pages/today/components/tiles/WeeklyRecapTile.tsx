@@ -1,5 +1,5 @@
 import { WeeklyRecapCard } from '@/pages/today/components/WeeklyRecapCard';
-import { useWeeklyRecap } from '@/common/hooks/useWeeklyRecap';
+import { useWeeklyRecap } from '@/pages/today/hooks/useWeeklyRecap';
 import { BentoTile } from '@/common/components/bento';
 
 // The recap only exists on a Monday, and only when the week before it had

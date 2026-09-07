@@ -25,11 +25,17 @@ export const isSubscriptionPro = (
   subscription: Subscription | null,
   now: Date = new Date(),
 ): boolean => {
-  if (!subscription) return false;
-  if (!ACTIVE_STATUSES.includes(subscription.status)) return false;
+  if (!subscription) {
+    return false;
+  }
+  if (!ACTIVE_STATUSES.includes(subscription.status)) {
+    return false;
+  }
 
   const paidThrough = getPaidThrough(subscription);
-  if (!paidThrough) return true;
+  if (!paidThrough) {
+    return true;
+  }
 
   const graceMs = getGraceDays(subscription.status) * DAY_MS;
 
@@ -70,13 +76,17 @@ const getPaidThrough = (subscription: Subscription): Date | null => {
     .map((value) => new Date(value).getTime())
     .filter((time) => Number.isFinite(time));
 
-  if (timestamps.length === 0) return null;
+  if (timestamps.length === 0) {
+    return null;
+  }
 
   return new Date(Math.max(...timestamps));
 };
 
 const getGraceDays = (status: SubscriptionStatus): number => {
-  if (status === 'past_due') return GRACE_DAYS_PAST_DUE;
+  if (status === 'past_due') {
+    return GRACE_DAYS_PAST_DUE;
+  }
 
   return GRACE_DAYS_DEFAULT;
 };

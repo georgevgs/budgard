@@ -170,13 +170,17 @@ const renderSnapshotDescription = (
   if (mode === 'withdrawal') {
     return t('networth.snapshot.descriptionWithdrawal');
   }
-  if (isInvestment) return t('networth.snapshot.descriptionInvestment');
+  if (isInvestment) {
+    return t('networth.snapshot.descriptionInvestment');
+  }
 
   return t('networth.snapshot.description');
 };
 
 const renderSubmitLabel = (isSubmitting: boolean, t: TranslateFunction) => {
-  if (isSubmitting) return t('common.saving');
+  if (isSubmitting) {
+    return t('common.saving');
+  }
 
   return t('networth.snapshot.save');
 };
@@ -188,7 +192,9 @@ const renderBalanceField = (
   isCashflowMode: boolean,
   t: TranslateFunction,
 ) => {
-  if (isCashflowMode) return null;
+  if (isCashflowMode) {
+    return null;
+  }
 
   let placeholder = t('networth.snapshot.balancePlaceholder');
   let label = t('networth.snapshot.balanceLabel');
@@ -227,10 +233,14 @@ const renderContributionField = (
   currency: string,
   t: TranslateFunction,
 ) => {
-  if (!isInvestment) return null;
+  if (!isInvestment) {
+    return null;
+  }
   // "Update value" is now strictly about value — contributions go through the
   // dedicated Add money / Withdraw modes, so we hide this field in value mode.
-  if (!isContributionMode && !isWithdrawalMode) return null;
+  if (!isContributionMode && !isWithdrawalMode) {
+    return null;
+  }
 
   let placeholder = t('networth.snapshot.contributionPlaceholder');
   let hint = t('networth.snapshot.contributionHint');

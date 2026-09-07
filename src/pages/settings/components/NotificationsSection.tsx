@@ -123,7 +123,9 @@ const isPrefEnabled = (
   key: NotificationPreferenceKey,
 ): boolean => {
   // Missing key = enabled (default-on policy mirrors the edge function).
-  if (prefs[key] === false) return false;
+  if (prefs[key] === false) {
+    return false;
+  }
 
   return true;
 };
@@ -196,7 +198,9 @@ const renderDailyReminder = (
   t: TranslateFunction,
 ) => {
   // Only show daily reminder if push notifications are enabled
-  if (pushState !== 'subscribed') return null;
+  if (pushState !== 'subscribed') {
+    return null;
+  }
 
   const isEnabled = reminderHour !== null;
   let localHour = 9;
@@ -232,7 +236,9 @@ const renderReminderTimePicker = (
   onTimeChange: (localHour: number) => void,
   t: TranslateFunction,
 ) => {
-  if (!isEnabled) return null;
+  if (!isEnabled) {
+    return null;
+  }
 
   return (
     <div className="flex items-center justify-between">
@@ -267,7 +273,9 @@ const renderPreferences = (
   onToggle: (key: NotificationPreferenceKey, isEnabled: boolean) => void,
   t: TranslateFunction,
 ) => {
-  if (pushState !== 'subscribed') return null;
+  if (pushState !== 'subscribed') {
+    return null;
+  }
 
   return (
     <div className="border-t border-border/50 pt-4 space-y-3">

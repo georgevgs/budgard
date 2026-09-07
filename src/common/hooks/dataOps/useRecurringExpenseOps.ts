@@ -54,7 +54,9 @@ export const useRecurringExpenseOps = () => {
         },
         commit: (saved) =>
           setRecurringExpenses((prev) => {
-            if (expenseId) return replaceById(prev, expenseId, saved);
+            if (expenseId) {
+              return replaceById(prev, expenseId, saved);
+            }
 
             return [saved, ...prev];
           }),

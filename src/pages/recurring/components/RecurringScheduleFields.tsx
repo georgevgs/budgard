@@ -43,7 +43,9 @@ export const RecurringScheduleFields = ({
   const { t } = useTranslation();
 
   const isStartDateDisabled = (date: Date) => {
-    if (isEditing) return false;
+    if (isEditing) {
+      return false;
+    }
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -133,7 +135,9 @@ const renderLinkedAccountField = (
   accounts: Account[],
   t: TranslateFunction,
 ) => {
-  if (!shouldShow) return null;
+  if (!shouldShow) {
+    return null;
+  }
 
   return (
     <FormField

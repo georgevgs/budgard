@@ -9,7 +9,7 @@ import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Button } from '@/common/ui/button';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
-import { useWeeklyRecap } from '@/common/hooks/useWeeklyRecap';
+import { useWeeklyRecap } from '@/pages/today/hooks/useWeeklyRecap';
 import { formatCurrency } from '@/constants/utils';
 import type { WeeklyAnomaly } from '@/constants/weeklyAnomalies';
 import type { TranslateFunction } from '@/constants/translate';
@@ -20,9 +20,15 @@ export const WeeklyRecapCard = () => {
   const dateLocale = useDateLocale();
   const { recap, isDismissed, dismiss } = useWeeklyRecap();
 
-  if (isDismissed) return null;
-  if (!recap) return null;
-  if (recap.anomalies.length === 0) return null;
+  if (isDismissed) {
+    return null;
+  }
+  if (!recap) {
+    return null;
+  }
+  if (recap.anomalies.length === 0) {
+    return null;
+  }
 
   return (
     <SurfaceCard isFlush>
@@ -83,7 +89,9 @@ const renderHeader = (
 };
 
 const renderTotalComparison = (ratio: number | null, t: TranslateFunction) => {
-  if (ratio === null) return null;
+  if (ratio === null) {
+    return null;
+  }
 
   const percent = Math.round((ratio - 1) * 100);
   if (Math.abs(percent) < 5) {
@@ -114,7 +122,9 @@ const renderAnomalies = (
   currency: string,
   t: TranslateFunction,
 ) => {
-  if (anomalies.length === 0) return null;
+  if (anomalies.length === 0) {
+    return null;
+  }
 
   return (
     <div className="mt-3 space-y-2">
@@ -168,7 +178,9 @@ const renderAnomalyText = (
   multiple: string,
   t: TranslateFunction,
 ): string => {
-  if (direction === 'up') return t('weeklyRecap.upMultiple', { multiple });
+  if (direction === 'up') {
+    return t('weeklyRecap.upMultiple', { multiple });
+  }
 
   return t('weeklyRecap.downMultiple', { multiple });
 };

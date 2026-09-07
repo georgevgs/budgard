@@ -113,7 +113,9 @@ const bumpBudgetAmount = (
   categoryId: string,
   amount: number,
 ): CategoryBudget => {
-  if (budget.category_id !== categoryId) return budget;
+  if (budget.category_id !== categoryId) {
+    return budget;
+  }
 
   return { ...budget, monthly_amount: amount };
 };

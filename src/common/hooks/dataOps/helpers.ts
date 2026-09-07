@@ -4,7 +4,9 @@ export const replaceById = <T extends { id: string }>(
   replacement: T,
 ): T[] =>
   list.map((item) => {
-    if (item.id === id) return replacement;
+    if (item.id === id) {
+      return replacement;
+    }
 
     return item;
   });
@@ -15,7 +17,9 @@ export const patchById = <T extends { id: string }>(
   patch: Partial<T>,
 ): T[] =>
   list.map((item) => {
-    if (item.id === id) return { ...item, ...patch } as T;
+    if (item.id === id) {
+      return { ...item, ...patch } as T;
+    }
 
     return item;
   });
@@ -25,7 +29,9 @@ export const pickByEdit = <T>(
   whenEdit: T,
   whenNew: T,
 ): T => {
-  if (id) return whenEdit;
+  if (id) {
+    return whenEdit;
+  }
 
   return whenNew;
 };

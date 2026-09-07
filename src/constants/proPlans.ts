@@ -47,10 +47,14 @@ export const yearlyPerMonthAmount = (yearlyAmount: number): number =>
 // per-month amounts so the badge always matches the prices next to it.
 export const yearlySavingsPercent = (prices: ProPlanPrices): number => {
   const monthly = prices.monthly.amount;
-  if (monthly <= 0) return 0;
+  if (monthly <= 0) {
+    return 0;
+  }
 
   const saved = monthly - yearlyPerMonthAmount(prices.yearly.amount);
-  if (saved <= 0) return 0;
+  if (saved <= 0) {
+    return 0;
+  }
 
   return Math.round((saved / monthly) * 100);
 };
@@ -61,8 +65,12 @@ export const planIdForPriceId = (
   prices: ProPlanPrices,
   stripePriceId: string,
 ): ProPlanId | null => {
-  if (prices.monthly.priceId === stripePriceId) return 'monthly';
-  if (prices.yearly.priceId === stripePriceId) return 'yearly';
+  if (prices.monthly.priceId === stripePriceId) {
+    return 'monthly';
+  }
+  if (prices.yearly.priceId === stripePriceId) {
+    return 'yearly';
+  }
 
   return null;
 };

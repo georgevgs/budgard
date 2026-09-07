@@ -57,7 +57,9 @@ export const useAnalyticsData = (now: Date = new Date()) => {
   );
 
   const expenses = useMemo(() => {
-    if (isPro) return countedExpenses;
+    if (isPro) {
+      return countedExpenses;
+    }
     const cutoff = getFreeAnalyticsCutoff(now);
 
     return countedExpenses.filter((e) => parseISO(e.date) >= cutoff);
@@ -153,7 +155,9 @@ export const useAnalyticsData = (now: Date = new Date()) => {
 
     for (const e of yearExpenses) {
       totalSpent += e.amount;
-      if (!e.category_id) continue;
+      if (!e.category_id) {
+        continue;
+      }
       let slot = byCat.get(e.category_id);
       if (!slot) {
         slot = { total: 0, monthly: new Array(12).fill(0) };

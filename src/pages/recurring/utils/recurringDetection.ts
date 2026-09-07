@@ -2,7 +2,7 @@ import { addDays, addMonths, differenceInCalendarDays } from 'date-fns';
 import { parseIsoDate, toIsoDate } from '@/constants/dates';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
-import type { RecurringSuggestion } from '@/types/RecurringSuggestion';
+import type { RecurringSuggestion } from '@/pages/recurring/recurringTypes';
 
 type Cadence = {
   frequency: RecurringExpense['frequency'];

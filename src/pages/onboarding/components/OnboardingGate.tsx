@@ -4,7 +4,7 @@ import {
   useDataConfig,
   useExpensesData,
 } from '@/common/contexts/DataContext';
-import { useUpgradeIntent } from '@/pages/pro/hooks/useUpgradeIntent';
+import { useUpgradeIntent } from '@/pages/onboarding/hooks/useUpgradeIntent';
 import { shouldShowOnboarding } from '@/pages/onboarding/utils/onboarding';
 import { OnboardingFlow } from '@/common/components/routing/lazyRouteModules';
 

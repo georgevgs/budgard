@@ -137,13 +137,17 @@ const resolveAprDefault = (debt: Debt | undefined): string => {
 };
 
 const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {
-  if (isEditing) return t('debts.form.editTitle');
+  if (isEditing) {
+    return t('debts.form.editTitle');
+  }
 
   return t('debts.form.addTitle');
 };
 
 const renderSubmitLabel = (isSubmitting: boolean, t: TranslateFunction) => {
-  if (isSubmitting) return t('common.saving');
+  if (isSubmitting) {
+    return t('common.saving');
+  }
 
   return t('debts.form.save');
 };
@@ -154,7 +158,9 @@ const renderBalanceField = (
   currency: string,
   t: TranslateFunction,
 ) => {
-  if (isEditing) return null;
+  if (isEditing) {
+    return null;
+  }
 
   return (
     <FormField

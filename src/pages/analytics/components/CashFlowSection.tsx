@@ -270,7 +270,9 @@ const renderAvgNet = (
   currency: string,
   t: TranslateFunction,
 ) => {
-  if (avgNet === 0) return null;
+  if (avgNet === 0) {
+    return null;
+  }
 
   return (
     <p className="text-xs text-muted-foreground">
@@ -402,7 +404,9 @@ const renderMonthDetailSelect = (
 ) => {
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const monthIndex = Number(event.target.value);
-    if (!Number.isInteger(monthIndex)) return;
+    if (!Number.isInteger(monthIndex)) {
+      return;
+    }
 
     onMonthClick(monthIndex);
   };

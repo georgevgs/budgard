@@ -17,7 +17,7 @@ import {
   FormItem,
   FormMessage,
 } from '@/common/ui/form';
-import { CategoryColorPicker } from '@/pages/categories/components/CategoryColorPicker';
+import { CategoryColorPicker } from '@/common/components/categories/CategoryColorPicker';
 import { AccountIdentityFields } from '@/pages/networth/components/AccountIdentityFields';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useAccountSubmit } from '@/pages/networth/hooks/useAccountSubmit';
@@ -142,13 +142,17 @@ const resolveInitialBalance = (account: Account | undefined): string => {
 };
 
 const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {
-  if (isEditing) return t('networth.form.editTitle');
+  if (isEditing) {
+    return t('networth.form.editTitle');
+  }
 
   return t('networth.form.addTitle');
 };
 
 const renderSubmitLabel = (isSubmitting: boolean, t: TranslateFunction) => {
-  if (isSubmitting) return t('common.saving');
+  if (isSubmitting) {
+    return t('common.saving');
+  }
 
   return t('networth.form.save');
 };
@@ -168,7 +172,9 @@ const renderInitialBalanceField = (
   selectedKind: AccountKind,
   t: TranslateFunction,
 ) => {
-  if (isEditing) return null;
+  if (isEditing) {
+    return null;
+  }
 
   const labelKey = getInitialBalanceLabelKey(selectedKind);
 

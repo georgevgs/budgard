@@ -9,7 +9,7 @@ import {
   DialogHeader,
 } from '@/common/ui/dialog';
 import { Button } from '@/common/ui/button';
-import { CategoryManager } from '@/pages/categories/components/CategoryManager';
+import { CategoryManager } from '@/common/components/categories/CategoryManager';
 import { Form } from '@/common/ui/form';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { useDataConfig } from '@/common/contexts/DataContext';

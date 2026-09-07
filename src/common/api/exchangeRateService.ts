@@ -35,7 +35,9 @@ export const fetchExchangeRate = async (
   signal?: AbortSignal,
   toCurrency: string = 'EUR',
 ): Promise<number> => {
-  if (fromCurrency === toCurrency) return 1;
+  if (fromCurrency === toCurrency) {
+    return 1;
+  }
 
   hydrateFromStorage();
 
@@ -44,22 +46,29 @@ export const fetchExchangeRate = async (
   // historic-vs-latest decision has to be made in the same frame.
   const today = todayIso();
   const cached = rateCache.get(cacheKey);
-  if (cached && isCacheEntryFresh(cached, today)) return cached.rate;
+  if (cached && isCacheEntryFresh(cached, today)) {
+    return cached.rate;
+  }
 
   const params = new URLSearchParams({
     base: fromCurrency,
     quotes: toCurrency,
   });
-  if (date < today) params.set('date', date);
+  if (date < today) {
+    params.set('date', date);
+  }
   const url = `${BASE_URL}/rates?${params.toString()}`;
 
   const response = await fetch(url, { signal });
-  if (!response.ok)
+  if (!response.ok) {
     throw new Error(`Exchange rate fetch failed: ${response.status}`);
+  }
 
   const data = (await response.json()) as RateEntry[];
   const entry = data.find((r) => r.quote === toCurrency);
-  if (!entry) throw new Error(`${toCurrency} rate missing from response`);
+  if (!entry) {
+    throw new Error(`${toCurrency} rate missing from response`);
+  }
 
   // A null or absurd rate has to fail here. Taken on trust it becomes
   // `amount * null` — an expense saved at zero that looks like a real row
@@ -90,7 +99,9 @@ export const fetchExchangeRate = async (
 
 const isCacheEntryFresh = (entry: CachedRate, today: string): boolean => {
   // No fetchedOn means a historic date — immutable, valid forever.
-  if (entry.fetchedOn === undefined) return true;
+  if (entry.fetchedOn === undefined) {
+    return true;
+  }
 
   return entry.fetchedOn === today;
 };
@@ -110,19 +121,29 @@ const buildCacheEntry = (
 // Lazily load the persisted cache once per session. Any storage or parse
 // failure falls back silently to the empty in-memory cache (network wins).
 const hydrateFromStorage = (): void => {
-  if (hydratedFromStorage) return;
+  if (hydratedFromStorage) {
+    return;
+  }
   hydratedFromStorage = true;
 
   try {
     const raw = localStorage.getItem(CACHE_KEY);
-    if (!raw) return;
+    if (!raw) {
+      return;
+    }
 
     const stored = JSON.parse(raw) as StoredRateCache;
-    if (stored.version !== CACHE_VERSION) return;
-    if (typeof stored.rates !== 'object' || stored.rates === null) return;
+    if (stored.version !== CACHE_VERSION) {
+      return;
+    }
+    if (typeof stored.rates !== 'object' || stored.rates === null) {
+      return;
+    }
 
     for (const [key, entry] of Object.entries(stored.rates)) {
-      if (!isUsableRate(entry?.rate)) continue;
+      if (!isUsableRate(entry?.rate)) {
+        continue;
+      }
       rateCache.set(key, entry);
     }
   } catch {

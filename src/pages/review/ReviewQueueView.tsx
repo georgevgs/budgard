@@ -130,7 +130,7 @@ const renderTransactionRow = (
   setRuleTransaction: (transaction: Expense) => void,
   t: TranslateFunction,
 ) => {
-  const checked = review.selectedIds.has(transaction.id);
+  const isChecked = review.selectedIds.has(transaction.id);
 
   return (
     <article key={transaction.id} className="p-4">
@@ -138,7 +138,7 @@ const renderTransactionRow = (
         <input
           type="checkbox"
           className="mt-1 h-4 w-4 rounded border-border accent-primary"
-          checked={checked}
+          checked={isChecked}
           aria-label={t('review.selectTransaction', {
             merchant: getMerchant(transaction),
           })}

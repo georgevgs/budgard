@@ -12,7 +12,7 @@ import {
   setYear,
 } from 'date-fns';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
-import { MonthYearPickerContent } from '@/pages/expenses/components/MonthYearPickerContent';
+import { MonthYearPickerContent } from '@/common/components/common/MonthYearPickerContent';
 
 type ExpensesMonthlySelectorProps = {
   /** Format: "yyyy-MM". */

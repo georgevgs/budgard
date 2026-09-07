@@ -39,7 +39,9 @@ export const useNoSpendOps = () => {
         // comes back null. The optimistic row is already correct in that
         // case — only a real insert needs reconciling with server columns.
         commit: (saved) => {
-          if (!saved) return;
+          if (!saved) {
+            return;
+          }
 
           setNoSpendDays((prev) => [
             saved,

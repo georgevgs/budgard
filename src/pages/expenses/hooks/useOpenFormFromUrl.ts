@@ -10,8 +10,12 @@ export const useOpenFormFromUrl = (
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
-    if (!isInitialized) return;
-    if (searchParams.get('action') !== 'add') return;
+    if (!isInitialized) {
+      return;
+    }
+    if (searchParams.get('action') !== 'add') {
+      return;
+    }
 
     setFormType(FORM_TYPES.NEW_EXPENSE);
     setSearchParams({}, { replace: true });

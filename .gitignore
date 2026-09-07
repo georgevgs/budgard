@@ -60,6 +60,9 @@ Thumbs.db
 # Supabase
 .supabase
 
+# Full-project backups contain every user's data and authentication records.
+/.backups/
+
 # Claude Code
 .agents
 .claude

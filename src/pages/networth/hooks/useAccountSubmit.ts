@@ -19,7 +19,9 @@ export const useAccountSubmit = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (values: AccountFormData) => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      return;
+    }
 
     setIsSubmitting(true);
     try {

@@ -50,7 +50,9 @@ export const DebtPaymentForm = ({ debt, onClose }: DebtPaymentFormProps) => {
   useDialogDirty(form.formState.isDirty);
 
   const handleSubmit = async (values: DebtPaymentFormData) => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -126,7 +128,9 @@ export const DebtPaymentForm = ({ debt, onClose }: DebtPaymentFormProps) => {
 };
 
 const renderSubmitLabel = (isSubmitting: boolean, t: TranslateFunction) => {
-  if (isSubmitting) return t('common.saving');
+  if (isSubmitting) {
+    return t('common.saving');
+  }
 
   return t('debts.payment.save');
 };

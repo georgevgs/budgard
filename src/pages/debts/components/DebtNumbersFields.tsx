@@ -8,7 +8,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/common/ui/form';
-import { CategoryColorPicker } from '@/pages/categories/components/CategoryColorPicker';
+import { CategoryColorPicker } from '@/common/components/categories/CategoryColorPicker';
 import { getCurrencySymbol } from '@/constants/currencies';
 import { formatCurrencyInput } from '@/constants/utils';
 import type { DebtFormData } from '@/pages/debts/validations';

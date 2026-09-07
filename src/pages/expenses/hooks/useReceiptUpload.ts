@@ -23,14 +23,18 @@ export const useReceiptUpload = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const previewUrl = useMemo(() => {
-    if (selectedFile) return URL.createObjectURL(selectedFile);
+    if (selectedFile) {
+      return URL.createObjectURL(selectedFile);
+    }
 
     return null;
   }, [selectedFile]);
 
   useEffect(() => {
     return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
     };
   }, [previewUrl]);
 
@@ -60,7 +64,9 @@ export const useReceiptUpload = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) validateAndSelect(file);
+    if (file) {
+      validateAndSelect(file);
+    }
     // Reset input so re-selecting same file triggers change
     e.target.value = '';
   };
@@ -68,7 +74,9 @@ export const useReceiptUpload = ({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
-    if (file) validateAndSelect(file);
+    if (file) {
+      validateAndSelect(file);
+    }
   };
 
   const handleClear = () => {

@@ -14,7 +14,9 @@ export const recurringApi = {
       .eq('user_id', ownerId)
       .eq('type', 'expense')
       .order('created_at', { ascending: false });
-    if (signal) query = query.abortSignal(signal);
+    if (signal) {
+      query = query.abortSignal(signal);
+    }
 
     return rows<RecurringExpense>(query);
   },
@@ -26,7 +28,9 @@ export const recurringApi = {
       .eq('user_id', ownerId)
       .eq('type', 'income')
       .order('created_at', { ascending: false });
-    if (signal) query = query.abortSignal(signal);
+    if (signal) {
+      query = query.abortSignal(signal);
+    }
 
     return rows<RecurringExpense>(query);
   },

@@ -4,7 +4,7 @@ import { Button } from '@/common/ui/button';
 import { useInfiniteScroll } from '@/pages/activity/hooks/useInfiniteScroll';
 import { ActivityTransactionRow } from '@/pages/activity/components/ActivityTransactionRow';
 import { SwipeableRow } from '@/pages/activity/components/SwipeableRow';
-import { PendingHistoryNotice } from '@/common/components/common/PendingHistoryNotice';
+import { PendingHistoryNotice } from '@/pages/activity/components/PendingHistoryNotice';
 import { groupExpensesByDate } from '@/pages/activity/utils/dateGrouping';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { formatCurrency } from '@/constants/utils';

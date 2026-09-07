@@ -92,10 +92,14 @@ const sumCurrentsForGoals = (
   for (const goal of goals) {
     currents.set(goal.id, 0);
     if (goal.source_type === 'category') {
-      if (!goal.category_id) continue;
+      if (!goal.category_id) {
+        continue;
+      }
       appendToBucket(goalsByCategory, goal.category_id, goal);
     } else if (goal.source_type === 'tag') {
-      if (!goal.tag_id) continue;
+      if (!goal.tag_id) {
+        continue;
+      }
       appendToBucket(goalsByTag, goal.tag_id, goal);
     } else if (goal.source_type === 'net_delta') {
       netDeltaGoals.push(goal);
@@ -146,10 +150,14 @@ const addExtraTagAmounts = (
   expense: Expense,
   amount: number,
 ): void => {
-  if (!expense.extra_tags) return;
+  if (!expense.extra_tags) {
+    return;
+  }
 
   for (const extraTag of expense.extra_tags) {
-    if (extraTag.id === expense.tag_id) continue;
+    if (extraTag.id === expense.tag_id) {
+      continue;
+    }
     addToMatchingGoals(
       currents,
       goalsByTag.get(extraTag.id),
@@ -181,10 +189,14 @@ const addToMatchingGoals = (
   date: string,
   amount: number,
 ): void => {
-  if (!goals) return;
+  if (!goals) {
+    return;
+  }
 
   for (const goal of goals) {
-    if (date < goal.start_date) continue;
+    if (date < goal.start_date) {
+      continue;
+    }
     currents.set(goal.id, (currents.get(goal.id) ?? 0) + amount);
   }
 };
@@ -232,7 +244,9 @@ const sumForSource = (
   startDate: string,
 ): number => {
   if (goal.source_type === 'category') {
-    if (!goal.category_id) return 0;
+    if (!goal.category_id) {
+      return 0;
+    }
 
     return sumExpenses(
       expenses.filter(
@@ -242,7 +256,9 @@ const sumForSource = (
   }
 
   if (goal.source_type === 'tag') {
-    if (!goal.tag_id) return 0;
+    if (!goal.tag_id) {
+      return 0;
+    }
 
     const goalTagId = goal.tag_id;
 

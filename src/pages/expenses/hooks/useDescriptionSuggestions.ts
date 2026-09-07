@@ -29,7 +29,9 @@ export const useDescriptionSuggestions = (
 
   const filteredSuggestions = useMemo(() => {
     const query = descriptionValue.trim().toLowerCase();
-    if (!query) return [];
+    if (!query) {
+      return [];
+    }
 
     return suggestions
       .filter((s) => {

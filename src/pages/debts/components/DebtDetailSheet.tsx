@@ -116,7 +116,9 @@ export const DebtDetailSheet = ({ debt, open, onClose, onEdit }: DebtDetailSheet
         description={t('debts.detail.deletePaymentDescription')}
         confirmLabel={t('common.delete')}
         onOpenChange={(isOpen) => {
-          if (!isOpen) actions.setPaymentToDelete(null);
+          if (!isOpen) {
+            actions.setPaymentToDelete(null);
+          }
         }}
         onConfirm={actions.handlePaymentDeleteConfirm}
       />
@@ -226,7 +228,9 @@ const renderHistoryList = (
 };
 
 const renderDescription = (description: string | null | undefined) => {
-  if (!description) return null;
+  if (!description) {
+    return null;
+  }
 
   return <span className="ml-1">· {description}</span>;
 };

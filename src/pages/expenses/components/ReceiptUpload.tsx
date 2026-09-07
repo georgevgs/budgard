@@ -87,7 +87,9 @@ export const ReceiptUpload = ({
       tabIndex={0}
       onClick={openFilePicker}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') openFilePicker();
+        if (e.key === 'Enter' || e.key === ' ') {
+          openFilePicker();
+        }
       }}
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}

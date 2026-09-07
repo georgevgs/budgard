@@ -21,12 +21,18 @@ const DRAG = 0.992;
 const DURATION_MS = 1600;
 
 export const celebrate = (): void => {
-  if (prefersReducedMotion()) return;
-  if (typeof document === 'undefined' || typeof window === 'undefined') return;
+  if (prefersReducedMotion()) {
+    return;
+  }
+  if (typeof document === 'undefined' || typeof window === 'undefined') {
+    return;
+  }
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  if (!ctx) return;
+  if (!ctx) {
+    return;
+  }
 
   const dpr = window.devicePixelRatio || 1;
   const width = window.innerWidth;

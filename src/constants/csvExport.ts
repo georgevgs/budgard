@@ -124,7 +124,9 @@ const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
 const PLAIN_NUMBER = /^-?\d+(?:\.\d+)?$/;
 
 const escapeCsvField = (cell: CsvCell): string => {
-  if (cell === null || cell === undefined) return '';
+  if (cell === null || cell === undefined) {
+    return '';
+  }
 
   let str = String(cell);
   if (FORMULA_TRIGGERS.test(str) && !PLAIN_NUMBER.test(str)) {
@@ -144,7 +146,9 @@ const escapeCsvField = (cell: CsvCell): string => {
 };
 
 const transactionType = (tx: Expense): 'income' | 'expense' => {
-  if (tx.type === 'income') return 'income';
+  if (tx.type === 'income') {
+    return 'income';
+  }
 
   return 'expense';
 };
@@ -157,13 +161,17 @@ const typeLabel = (
   type: 'income' | 'expense',
   t: TranslateFunction,
 ): string => {
-  if (type === 'income') return t('annualExport.csv.income');
+  if (type === 'income') {
+    return t('annualExport.csv.income');
+  }
 
   return t('annualExport.csv.expense');
 };
 
 const signedAmount = (tx: Expense): number => {
-  if (transactionType(tx) === 'income') return tx.amount;
+  if (transactionType(tx) === 'income') {
+    return tx.amount;
+  }
 
   return -tx.amount;
 };
@@ -172,7 +180,9 @@ const lookupOrEmpty = (
   id: string | null | undefined,
   byId: Map<string, string>,
 ): string => {
-  if (!id) return '';
+  if (!id) {
+    return '';
+  }
 
   return byId.get(id) ?? '';
 };
@@ -199,9 +209,13 @@ const resolveCategoryName = (
   byId: Map<string, Category>,
   fallback: string,
 ): string => {
-  if (!id) return fallback;
+  if (!id) {
+    return fallback;
+  }
   const found = byId.get(id);
-  if (!found) return fallback;
+  if (!found) {
+    return fallback;
+  }
 
   return found.name;
 };
@@ -211,7 +225,9 @@ const compareBuckets = (
   b: { type: 'income' | 'expense'; total: number },
 ): number => {
   if (a.type !== b.type) {
-    if (a.type === 'income') return -1;
+    if (a.type === 'income') {
+      return -1;
+    }
 
     return 1;
   }

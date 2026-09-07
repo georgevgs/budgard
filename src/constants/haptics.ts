@@ -5,13 +5,17 @@
 const STORAGE_KEY = 'haptics-enabled';
 
 const canVibrate = (): boolean => {
-  if (typeof navigator === 'undefined') return false;
+  if (typeof navigator === 'undefined') {
+    return false;
+  }
 
   return 'vibrate' in navigator;
 };
 
 const prefersReducedMotion = (): boolean => {
-  if (typeof window === 'undefined' || !window.matchMedia) return false;
+  if (typeof window === 'undefined' || !window.matchMedia) {
+    return false;
+  }
 
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 };
@@ -19,7 +23,9 @@ const prefersReducedMotion = (): boolean => {
 const isUserEnabled = (): boolean => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === null) return true;
+    if (stored === null) {
+      return true;
+    }
 
     return stored === 'true';
   } catch {
@@ -28,14 +34,20 @@ const isUserEnabled = (): boolean => {
 };
 
 const shouldVibrate = (): boolean => {
-  if (!canVibrate()) return false;
-  if (prefersReducedMotion()) return false;
+  if (!canVibrate()) {
+    return false;
+  }
+  if (prefersReducedMotion()) {
+    return false;
+  }
 
   return isUserEnabled();
 };
 
 const fire = (pattern: number | number[]): void => {
-  if (!shouldVibrate()) return;
+  if (!shouldVibrate()) {
+    return;
+  }
   navigator.vibrate(pattern);
 };
 

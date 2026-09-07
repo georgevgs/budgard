@@ -9,7 +9,7 @@ import { Button } from '@/common/ui/button';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
 import { useUpgradeDialog } from '@/common/contexts/UpgradeDialogContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
-import { useProPlans } from '@/pages/pro/hooks/useProPlans';
+import { useProPlans } from '@/common/hooks/useProPlans';
 import { useToast } from '@/common/hooks/useToast';
 import { planIdForPriceId, type ProPlanPrices } from '@/constants/proPlans';
 import { hasStripeBillingManagement } from '@/constants/subscription';
@@ -167,7 +167,9 @@ const renderPeriodRow = (
   t: TranslateFunction,
 ) => {
   const periodEnd = getPeriodEnd(subscription);
-  if (!periodEnd) return null;
+  if (!periodEnd) {
+    return null;
+  }
 
   // 'PPP' is date-fns's locale-aware long date, matching how the detail
   // sheets render dates in each language.
@@ -192,11 +194,17 @@ const renderTrialNotice = (
   dateLocale: Locale,
   t: TranslateFunction,
 ) => {
-  if (subscription.status !== 'trialing') return null;
-  if (!subscription.trial_ends_at) return null;
+  if (subscription.status !== 'trialing') {
+    return null;
+  }
+  if (!subscription.trial_ends_at) {
+    return null;
+  }
 
   const trialEnd = new Date(subscription.trial_ends_at);
-  if (!Number.isFinite(trialEnd.getTime())) return null;
+  if (!Number.isFinite(trialEnd.getTime())) {
+    return null;
+  }
 
   return (
     <p className="text-xs text-muted-foreground">
@@ -211,7 +219,9 @@ const renderPastDueNotice = (
   subscription: Subscription,
   t: TranslateFunction,
 ) => {
-  if (subscription.status !== 'past_due') return null;
+  if (subscription.status !== 'past_due') {
+    return null;
+  }
 
   return (
     <p className="text-xs font-medium text-destructive-ink">
@@ -226,18 +236,26 @@ const getPlanName = (
   t: TranslateFunction,
 ): string => {
   const planId = planIdForPriceId(prices, subscription.stripe_price_id);
-  if (planId === 'monthly') return t('settings.billing.proMonthly');
-  if (planId === 'yearly') return t('settings.billing.proYearly');
+  if (planId === 'monthly') {
+    return t('settings.billing.proMonthly');
+  }
+  if (planId === 'yearly') {
+    return t('settings.billing.proYearly');
+  }
 
   return t('settings.billing.pro');
 };
 
 const getPeriodEnd = (subscription: Subscription): Date | null => {
   const raw = subscription.renews_at ?? subscription.ends_at;
-  if (!raw) return null;
+  if (!raw) {
+    return null;
+  }
 
   const parsed = new Date(raw);
-  if (!Number.isFinite(parsed.getTime())) return null;
+  if (!Number.isFinite(parsed.getTime())) {
+    return null;
+  }
 
   return parsed;
 };
@@ -246,7 +264,9 @@ const getManageLabel = (
   isOpeningPortal: boolean,
   t: TranslateFunction,
 ): string => {
-  if (isOpeningPortal) return t('settings.billing.opening');
+  if (isOpeningPortal) {
+    return t('settings.billing.opening');
+  }
 
   return t('settings.billing.manage');
 };

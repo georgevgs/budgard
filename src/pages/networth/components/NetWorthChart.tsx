@@ -73,7 +73,9 @@ export const NetWorthChart = ({
 // line is the shape of the assets — worth saying rather than leaving the
 // reader to infer a debt trend that was never drawn.
 const renderDebtCaveat = (hasDebtConstant: boolean, t: TranslateFunction) => {
-  if (!hasDebtConstant) return null;
+  if (!hasDebtConstant) {
+    return null;
+  }
 
   return (
     <p className="text-xs text-muted-foreground">

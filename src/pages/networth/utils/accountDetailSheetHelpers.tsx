@@ -75,15 +75,21 @@ export const renderSinceLast = (
   currency: string,
   t: TranslateFunction,
 ) => {
-  if (!isInvestment) return null;
-  if (snapshots.length < 2) return null;
+  if (!isInvestment) {
+    return null;
+  }
+  if (snapshots.length < 2) {
+    return null;
+  }
 
   const latest = snapshots[0];
   const previous = snapshots[1];
   const latestContribution = latest.contribution_delta ?? 0;
   const delta = latest.balance - previous.balance - latestContribution;
 
-  if (delta === 0) return null;
+  if (delta === 0) {
+    return null;
+  }
 
   const isPositive = delta > 0;
   let pctText = '';
@@ -111,7 +117,9 @@ export const renderSnapshotForm = (
   mode: SnapshotMode | null,
   onClose: () => void,
 ) => {
-  if (mode === null) return null;
+  if (mode === null) {
+    return null;
+  }
 
   return (
     <BalanceSnapshotForm account={account} onClose={onClose} mode={mode} />
@@ -125,7 +133,9 @@ export const renderInvestmentDetail = (
   t: TranslateFunction,
   isPro: boolean,
 ) => {
-  if (!isInvestment) return null;
+  if (!isInvestment) {
+    return null;
+  }
 
   const hasBasis = account.cost_basis > 0;
   const ytd = computeAccountYtd(account, snapshots);
@@ -165,7 +175,9 @@ const renderInvestedKpi = (
   hasBasis: boolean,
   t: TranslateFunction,
 ) => {
-  if (!hasBasis) return null;
+  if (!hasBasis) {
+    return null;
+  }
 
   return (
     <div>
@@ -182,7 +194,9 @@ const renderAllTimeReturnKpi = (
   hasBasis: boolean,
   t: TranslateFunction,
 ) => {
-  if (!hasBasis) return null;
+  if (!hasBasis) {
+    return null;
+  }
 
   const gain = account.current_balance - account.cost_basis;
   const isPositive = gain >= 0;
@@ -207,7 +221,9 @@ const renderAnnualizedKpi = (
   snapshots: AccountBalance[],
   t: TranslateFunction,
 ) => {
-  if (!hasBasis) return null;
+  if (!hasBasis) {
+    return null;
+  }
 
   const annualized = computeAccountXirr(account, snapshots);
 
@@ -219,7 +235,9 @@ const renderYtd = (
   currency: string,
   t: TranslateFunction,
 ) => {
-  if (ytd == null) return null;
+  if (ytd == null) {
+    return null;
+  }
 
   const isPositive = ytd.growth >= 0;
 
@@ -236,7 +254,9 @@ const renderYtd = (
 };
 
 const renderAnnualized = (annualized: number | null, t: TranslateFunction) => {
-  if (annualized == null) return null;
+  if (annualized == null) {
+    return null;
+  }
 
   const isPositive = annualized >= 0;
   const pct = annualized * 100;
@@ -420,8 +440,12 @@ type ActivityKind = 'deposit' | 'withdrawal' | 'value';
 
 const classifyActivity = (s: AccountBalance): ActivityKind => {
   const contribution = s.contribution_delta ?? 0;
-  if (contribution > 0) return 'deposit';
-  if (contribution < 0) return 'withdrawal';
+  if (contribution > 0) {
+    return 'deposit';
+  }
+  if (contribution < 0) {
+    return 'withdrawal';
+  }
 
   return 'value';
 };
@@ -455,8 +479,12 @@ const renderActivityIcon = (s: AccountBalance) => {
 
 const renderActivityLabel = (s: AccountBalance, t: TranslateFunction) => {
   const kind = classifyActivity(s);
-  if (kind === 'deposit') return t('networth.detail.activityDeposit');
-  if (kind === 'withdrawal') return t('networth.detail.activityWithdrawal');
+  if (kind === 'deposit') {
+    return t('networth.detail.activityDeposit');
+  }
+  if (kind === 'withdrawal') {
+    return t('networth.detail.activityWithdrawal');
+  }
 
   return t('networth.detail.activityValueUpdate');
 };
@@ -477,8 +505,12 @@ const renderActivityAmount = (s: AccountBalance, currency: string) => {
 
 const getActivityAmountClass = (s: AccountBalance): string => {
   const kind = classifyActivity(s);
-  if (kind === 'deposit') return 'text-income-ink';
-  if (kind === 'withdrawal') return 'text-destructive-ink';
+  if (kind === 'deposit') {
+    return 'text-income-ink';
+  }
+  if (kind === 'withdrawal') {
+    return 'text-destructive-ink';
+  }
 
   return 'text-foreground';
 };
@@ -503,8 +535,12 @@ const renderActivityMeta = (s: AccountBalance, t: TranslateFunction) => {
 // The recurring-expense trigger writes notes as `Auto: <description>`. We
 // surface the description as a "auto from X" badge instead of raw text.
 const parseAutoNote = (note: string | null | undefined): string | null => {
-  if (!note) return null;
-  if (!note.startsWith('Auto: ')) return null;
+  if (!note) {
+    return null;
+  }
+  if (!note.startsWith('Auto: ')) {
+    return null;
+  }
 
   return note.slice('Auto: '.length);
 };

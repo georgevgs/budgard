@@ -32,7 +32,9 @@ export const useRecurringActions = ({
   } = useRecurringIncomeOps();
 
   const handleSubmit = async (values: RecurringExpenseFormData) => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      return;
+    }
 
     try {
       let categoryId: string | null = values.category_id;

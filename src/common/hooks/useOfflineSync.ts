@@ -20,11 +20,17 @@ export const useOfflineSync = (): void => {
   const isSyncing = useRef(false);
 
   const syncQueue = useCallback(async () => {
-    if (isSyncing.current) return;
-    if (!navigator.onLine) return;
+    if (isSyncing.current) {
+      return;
+    }
+    if (!navigator.onLine) {
+      return;
+    }
 
     const mutations = await offlineQueue.getAll();
-    if (mutations.length === 0) return;
+    if (mutations.length === 0) {
+      return;
+    }
 
     isSyncing.current = true;
     let successCount = 0;

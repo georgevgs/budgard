@@ -24,7 +24,9 @@ export const useIncomeSubmit = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (values: IncomeFormData) => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -56,7 +58,9 @@ export const useIncomeSubmit = ({
 };
 
 const normalizeCategoryId = (categoryId: string): string | null => {
-  if (categoryId === 'none') return null;
+  if (categoryId === 'none') {
+    return null;
+  }
 
   return categoryId;
 };

@@ -3,9 +3,9 @@ import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
 import { Button } from '@/common/ui/button';
 import { Switch } from '@/common/ui/switch';
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
-import { SetPinDialog } from '@/pages/security/components/SetPinDialog';
+import { SetPinDialog } from '@/pages/settings/components/SetPinDialog';
 import { ConfirmDestructiveDialog } from '@/common/components/common/ConfirmDestructiveDialog';
-import { useSecuritySettings } from '@/pages/security/hooks/useSecuritySettings';
+import { useSecuritySettings } from '@/pages/settings/hooks/useSecuritySettings';
 import type { TranslateFunction } from '@/constants/translate';
 
 export const SecuritySection = () => {

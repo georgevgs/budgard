@@ -17,7 +17,9 @@ export const useExpenseFormState = () => {
   }, []);
 
   const handleExpenseEdit = useCallback((expense: Expense) => {
-    if (expense.id.startsWith('temp-')) return;
+    if (expense.id.startsWith('temp-')) {
+      return;
+    }
     setSelectedExpense(expense);
     setFormType(FORM_TYPES.EDIT_EXPENSE);
   }, []);

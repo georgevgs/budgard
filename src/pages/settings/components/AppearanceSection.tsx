@@ -118,7 +118,9 @@ const renderAccentPicker = (
   setAccent: (key: AccentColorKey) => void,
   t: TranslateFunction,
 ) => {
-  if (isBarbie) return null;
+  if (isBarbie) {
+    return null;
+  }
 
   return (
     <div>
@@ -149,7 +151,9 @@ const renderAccentPicker = (
 };
 
 const renderAccentCheck = (isSelected: boolean) => {
-  if (!isSelected) return null;
+  if (!isSelected) {
+    return null;
+  }
 
   return (
     <span className="absolute inset-0 m-auto flex h-6 w-6 items-center justify-center rounded-full bg-foreground">
@@ -164,7 +168,9 @@ const renderHapticsToggle = (
   onToggle: (isEnabled: boolean) => void,
   t: TranslateFunction,
 ) => {
-  if (!isSupported) return null;
+  if (!isSupported) {
+    return null;
+  }
 
   return (
     <div className="flex items-center justify-between border-t border-border/50 pt-4">

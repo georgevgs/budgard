@@ -27,10 +27,14 @@ const TemplatesBarComponent = ({
     null,
   );
 
-  if (templates.length === 0) return null;
+  if (templates.length === 0) {
+    return null;
+  }
 
   const handleTemplateClick = (template: ExpenseTemplate) => {
-    if (isManaging) return;
+    if (isManaging) {
+      return;
+    }
     onUse(template);
   };
 
@@ -125,19 +129,25 @@ const renderManageLabel = (
 };
 
 const getTemplateButtonStateClass = (isManaging: boolean): string => {
-  if (isManaging) return 'cursor-default';
+  if (isManaging) {
+    return 'cursor-default';
+  }
 
   return 'hover:bg-accent/50 active:bg-accent cursor-pointer';
 };
 
 const getTemplatesListClass = (isManaging: boolean): string | undefined => {
-  if (isManaging) return 'pt-2 pr-2';
+  if (isManaging) {
+    return 'pt-2 pr-2';
+  }
 
   return undefined;
 };
 
 const renderCategoryIndicator = (template: ExpenseTemplate) => {
-  if (!template.category) return null;
+  if (!template.category) {
+    return null;
+  }
 
   if (template.category.icon) {
     return <CategoryIcon icon={template.category.icon} />;

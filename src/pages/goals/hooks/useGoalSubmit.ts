@@ -18,7 +18,9 @@ export const useGoalSubmit = ({ selectedGoal, onDone }: UseGoalSubmitArgs) => {
   const { handleGoalCreate, handleGoalUpdate } = useGoalOps();
 
   const handleSubmit = async (values: GoalFormData) => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      return;
+    }
 
     let deadline: string | null = null;
     if (values.deadline) {

@@ -13,7 +13,9 @@ export const transactionRuleService = {
       .eq('user_id', ownerId)
       .order('priority')
       .order('created_at');
-    if (signal) query = query.abortSignal(signal);
+    if (signal) {
+      query = query.abortSignal(signal);
+    }
 
     return rows<TransactionRule>(query);
   },

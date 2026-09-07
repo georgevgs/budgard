@@ -119,13 +119,17 @@ const sortDebts = (debts: Debt[]): Debt[] => {
 };
 
 const pickPayoffMonths = (avalanche: SimResult): number | null => {
-  if (avalanche.monthsToPayoff > 0) return avalanche.monthsToPayoff;
+  if (avalanche.monthsToPayoff > 0) {
+    return avalanche.monthsToPayoff;
+  }
 
   return null;
 };
 
 const pickPayoffDate = (avalanche: SimResult): string | null => {
-  if (avalanche.monthsToPayoff > 0) return avalanche.payoffDate;
+  if (avalanche.monthsToPayoff > 0) {
+    return avalanche.payoffDate;
+  }
 
   return null;
 };
@@ -177,7 +181,9 @@ const renderDetailSheet = (
   onClose: () => void,
   onEdit: (debt: Debt) => void,
 ) => {
-  if (!debt) return null;
+  if (!debt) {
+    return null;
+  }
 
   return (
     <DebtDetailSheet
@@ -194,7 +200,9 @@ const renderFab = (
   onAddClick: () => void,
   t: TranslateFunction,
 ) => {
-  if (debtCount === 0) return null;
+  if (debtCount === 0) {
+    return null;
+  }
 
   return (
     <div

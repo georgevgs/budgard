@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
 import { settingsApi } from '@/pages/settings/settingsApi';
-import type { FinancialConnection } from '@/types/FinancialConnection';
+import type { FinancialConnection } from '@/pages/settings/settingsTypes';
 
 export const useFinancialConnections = () => {
   const { activeOwnerId } = useFinancialSpace();

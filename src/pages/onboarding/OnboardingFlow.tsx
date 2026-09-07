@@ -6,7 +6,7 @@ import { cn } from '@/constants/utils';
 import { getCurrencySymbol } from '@/constants/currencies';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useQuickAdd } from '@/common/contexts/QuickAddContext';
-import { useQuickAddDraft } from '@/pages/expenses/hooks/useQuickAddDraft';
+import { useQuickAddDraft } from '@/common/hooks/useQuickAddDraft';
 import { useOnboardingActions } from '@/pages/onboarding/hooks/useOnboardingActions';
 import { OnboardingWelcomeStep } from '@/pages/onboarding/components/OnboardingWelcomeStep';
 import { OnboardingBudgetStep } from '@/pages/onboarding/components/OnboardingBudgetStep';

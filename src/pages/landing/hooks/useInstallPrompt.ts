@@ -46,7 +46,9 @@ export const useInstallPrompt = (): UseInstallPromptReturn => {
   }, []);
 
   const triggerAndroidInstall = async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      return;
+    }
     await deferredPrompt.prompt();
     await deferredPrompt.userChoice;
     setDeferredPrompt(null);

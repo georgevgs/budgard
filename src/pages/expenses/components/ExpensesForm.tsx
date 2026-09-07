@@ -27,13 +27,13 @@ import { ExpenseCategoryField } from '@/pages/expenses/components/ExpenseCategor
 import { ExpenseDateField } from '@/pages/expenses/components/ExpenseDateField';
 import { ExpenseFormDetails } from '@/pages/expenses/components/ExpenseFormDetails';
 import { ExpenseFormActions } from '@/pages/expenses/components/ExpenseFormActions';
-import { CategoryManager } from '@/pages/categories/components/CategoryManager';
+import { CategoryManager } from '@/common/components/categories/CategoryManager';
 import {
   getInitialAmount,
   getInitialDate,
   getInitialExtraTagIds,
   renderFormTitle,
-} from '@/pages/expenses/utils/expensesFormHelpers';
+} from '@/constants/expensesFormHelpers';
 
 type ExpensesFormProps = {
   expense?: Expense;

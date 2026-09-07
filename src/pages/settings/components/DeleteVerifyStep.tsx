@@ -91,7 +91,9 @@ const resolveVerifyLabel = (isDeleting: boolean, t: TranslateFunction): string =
 };
 
 const renderError = (error: string | null) => {
-  if (!error) return null;
+  if (!error) {
+    return null;
+  }
 
   return (
     <p className="text-sm text-destructive-ink text-center" role="alert">

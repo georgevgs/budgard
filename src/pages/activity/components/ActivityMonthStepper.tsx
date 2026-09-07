@@ -11,7 +11,7 @@ import {
 } from 'date-fns';
 import { Button } from '@/common/ui/button';
 import { Popover, PopoverTrigger } from '@/common/ui/popover';
-import { MonthYearPickerContent } from '@/pages/expenses/components/MonthYearPickerContent';
+import { MonthYearPickerContent } from '@/common/components/common/MonthYearPickerContent';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { ActivityPeriod } from '@/pages/activity/hooks/useActivityFeed';
 

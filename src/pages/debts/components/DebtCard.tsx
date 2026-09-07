@@ -81,7 +81,9 @@ const ICON_BY_KIND: Record<DebtKind, LucideIcon> = {
 };
 
 const renderUnpayableHint = (isUnpayable: boolean, t: TranslateFunction) => {
-  if (!isUnpayable) return null;
+  if (!isUnpayable) {
+    return null;
+  }
 
   return (
     <div className="flex items-center gap-1.5 text-xs text-destructive-ink">

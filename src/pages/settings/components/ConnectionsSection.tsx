@@ -10,11 +10,11 @@ import { Skeleton } from '@/common/ui/skeleton';
 import { useFinancialConnections } from '@/pages/settings/hooks/useFinancialConnections';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { lazyWithRetry } from '@/constants/lazyWithRetry';
-import type { FinancialConnection } from '@/types/FinancialConnection';
+import type { FinancialConnection } from '@/pages/settings/settingsTypes';
 import type { TranslateFunction } from '@/constants/translate';
 
 const CsvImportDialog = lazyWithRetry(async () => {
-  const module = await import('@/pages/expenses/components/CsvImportDialog');
+  const module = await import('@/common/components/csvImport/CsvImportDialog');
 
   return { default: module.CsvImportDialog };
 });

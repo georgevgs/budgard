@@ -17,7 +17,9 @@ export const OfflineBanner = () => {
   }, [isOnline]);
 
   useEffect(() => {
-    if (!isOnline || !wentOffline.current) return;
+    if (!isOnline || !wentOffline.current) {
+      return;
+    }
 
     setIsBackOnlineVisible(true);
     const timer = window.setTimeout(() => setIsBackOnlineVisible(false), 2500);

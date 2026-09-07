@@ -190,8 +190,12 @@ const ARRAY_FIELDS = [
 // so the first release containing this fix can reuse the snapshot already on
 // the device instead of causing one last cold boot.
 const isCompatibleVersion = (version: unknown): boolean => {
-  if (version === CACHE_VERSION) return true;
-  if (typeof version !== 'string') return false;
+  if (version === CACHE_VERSION) {
+    return true;
+  }
+  if (typeof version !== 'string') {
+    return false;
+  }
 
   return version.startsWith(`${CACHE_VERSION}:`);
 };

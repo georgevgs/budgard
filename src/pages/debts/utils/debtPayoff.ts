@@ -93,7 +93,9 @@ export const simulatePayoff = (input: SimInput): SimResult => {
 
   for (let month = 1; month <= MAX_MONTHS; month++) {
     const active = states.filter((s) => s.remaining > 0);
-    if (active.length === 0) break;
+    if (active.length === 0) {
+      break;
+    }
 
     const payments = new Map<string, number>(active.map((s) => [s.debt.id, 0]));
     const daysThisMonth = getDaysInMonth(monthDate(now, month - 1));
@@ -139,7 +141,9 @@ export const minimumCoversInterest = (
   debt: Debt,
   now: Date = new Date(),
 ): boolean => {
-  if (debt.current_balance <= 0) return true;
+  if (debt.current_balance <= 0) {
+    return true;
+  }
 
   // Same daily convention as the simulation and the database, measured over
   // the current month so the warning matches what will actually be charged.
@@ -253,7 +257,9 @@ const payByStrategy = (
 
   let left = pool;
   for (const s of stillActive) {
-    if (left <= 0) break;
+    if (left <= 0) {
+      break;
+    }
     const applied = Math.min(left, s.remaining);
     s.remaining -= applied;
     s.totalPaid += applied;

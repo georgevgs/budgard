@@ -8,7 +8,9 @@ export const householdService = {
       .from('household_shares')
       .select('*')
       .order('created_at', { ascending: false });
-    if (signal) query = query.abortSignal(signal);
+    if (signal) {
+      query = query.abortSignal(signal);
+    }
 
     return rows<HouseholdShare>(query);
   },

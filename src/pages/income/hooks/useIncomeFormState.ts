@@ -6,7 +6,9 @@ export const useIncomeFormState = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   const handleIncomeEdit = useCallback((income: Expense) => {
-    if (income.id.startsWith('temp-')) return;
+    if (income.id.startsWith('temp-')) {
+      return;
+    }
     setSelectedIncome(income);
     setIsFormOpen(true);
   }, []);

@@ -74,7 +74,9 @@ export const useExpenseOps = () => {
           t('expenses.toasts.addFailed'),
         ),
         offlineFallback: async (error) => {
-          if (!isOfflineError(error)) return false;
+          if (!isOfflineError(error)) {
+            return false;
+          }
 
           await queueExpenseOffline(
             expenseData,
@@ -121,12 +123,16 @@ export const useExpenseOps = () => {
           const isDebtPayment = finalExpense.type === 'debt_payment';
           setExpenses((prev) => {
             if (expenseId) {
-              if (isDebtPayment) return prev.filter((e) => e.id !== expenseId);
+              if (isDebtPayment) {
+                return prev.filter((e) => e.id !== expenseId);
+              }
 
               return replaceById(prev, expenseId, finalExpense);
             }
 
-            if (isDebtPayment) return prev;
+            if (isDebtPayment) {
+              return prev;
+            }
 
             return [finalExpense, ...prev];
           });
@@ -183,7 +189,9 @@ export const useExpenseOps = () => {
         onStart: () => haptics.warning(),
         successHaptic: 'none',
         offlineFallback: async (error) => {
-          if (!isOfflineError(error)) return false;
+          if (!isOfflineError(error)) {
+            return false;
+          }
 
           await offlineQueue.enqueueWithReconcile('deleteExpense', {
             id: expenseId,
@@ -221,7 +229,9 @@ export const useExpenseOps = () => {
     // into state replaces a full-history re-download. Consumers sort before
     // display, so append order doesn't matter.
     const handleBulkExpenseImport = async (expensesData: BulkExpenseRow[]) => {
-      if (shouldSkip) return;
+      if (shouldSkip) {
+        return;
+      }
 
       const created = await dataService.createExpensesBulk(
         expensesData,
@@ -382,7 +392,9 @@ const getPreviousDebtId = (
   expenseId: string | undefined,
   expenses: Expense[],
 ): string | null => {
-  if (!expenseId) return null;
+  if (!expenseId) {
+    return null;
+  }
 
   return expenses.find((e) => e.id === expenseId)?.debt_id ?? null;
 };
@@ -510,12 +522,16 @@ const queueExpenseOffline = async (
 
   setExpenses((prev) => {
     if (expenseId) {
-      if (isDebtPayment) return prev.filter((e) => e.id !== expenseId);
+      if (isDebtPayment) {
+        return prev.filter((e) => e.id !== expenseId);
+      }
 
       return patchById(prev, expenseId, offlineRow);
     }
 
-    if (isDebtPayment) return prev;
+    if (isDebtPayment) {
+      return prev;
+    }
 
     const optimistic = {
       ...offlineRow,

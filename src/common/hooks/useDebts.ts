@@ -55,7 +55,9 @@ export const useDebts = () => {
   const byCurrency = useMemo((): DebtsByCurrency => {
     const map: DebtsByCurrency = {};
     for (const d of active) {
-      if (!map[d.currency]) map[d.currency] = [];
+      if (!map[d.currency]) {
+        map[d.currency] = [];
+      }
       map[d.currency].push(d);
     }
 

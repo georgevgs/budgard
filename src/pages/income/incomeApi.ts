@@ -23,10 +23,18 @@ export const incomeApi = {
         .order('created_at', { ascending: false })
         .order('id', { ascending: false })
         .limit(SUPABASE_PAGE_SIZE);
-      if (sinceDate) query = query.gte('date', sinceDate);
-      if (beforeDate) query = query.lt('date', beforeDate);
-      if (cursor) query = query.or(transactionCursorFilter(cursor));
-      if (signal) query = query.abortSignal(signal);
+      if (sinceDate) {
+        query = query.gte('date', sinceDate);
+      }
+      if (beforeDate) {
+        query = query.lt('date', beforeDate);
+      }
+      if (cursor) {
+        query = query.or(transactionCursorFilter(cursor));
+      }
+      if (signal) {
+        query = query.abortSignal(signal);
+      }
 
       return query;
     });

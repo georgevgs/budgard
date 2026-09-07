@@ -14,7 +14,9 @@ export const computeAccountYtd = (
   snapshots: AccountBalance[],
   now: Date = new Date(),
 ): YtdResult | null => {
-  if (snapshots.length === 0) return null;
+  if (snapshots.length === 0) {
+    return null;
+  }
 
   const yearStartStr = `${now.getFullYear()}-01-01`;
 
@@ -22,14 +24,20 @@ export const computeAccountYtd = (
   // to assume — find the most recent snapshot strictly before Jan 1.
   let baseline: AccountBalance | null = null;
   for (const s of snapshots) {
-    if (s.recorded_at >= yearStartStr) continue;
+    if (s.recorded_at >= yearStartStr) {
+      continue;
+    }
     if (!baseline || s.recorded_at > baseline.recorded_at) {
       baseline = s;
     }
   }
 
-  if (!baseline) return null;
-  if (baseline.balance <= 0) return null;
+  if (!baseline) {
+    return null;
+  }
+  if (baseline.balance <= 0) {
+    return null;
+  }
 
   const ytdContributions = snapshots
     .filter((s) => s.recorded_at >= yearStartStr)

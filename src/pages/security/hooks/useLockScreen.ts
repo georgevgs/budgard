@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { haptics } from '@/constants/haptics';
 import { loadLock, verifyPin, PIN_LENGTH } from '@/constants/appLock';
-import { hasEnrolledCredential, requestDeviceUnlock } from '@/pages/security/utils/deviceUnlock';
+import { hasEnrolledCredential, requestDeviceUnlock } from '@/constants/deviceUnlock';
 import type { TranslateFunction } from '@/constants/translate';
 
 // How long the wrong-pin state stays on screen before the dots clear. Long

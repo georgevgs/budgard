@@ -77,7 +77,9 @@ const renderAnswer = (
   answerId: string,
   buttonId: string,
 ) => {
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div

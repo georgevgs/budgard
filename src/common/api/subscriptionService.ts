@@ -10,7 +10,9 @@ export const subscriptionService = {
       .select('*')
       .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     return data as Subscription | null;
   },

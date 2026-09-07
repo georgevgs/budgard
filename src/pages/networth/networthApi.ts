@@ -15,7 +15,9 @@ export const networthApi = {
       .eq('user_id', ownerId)
       .eq('is_archived', false)
       .order('created_at', { ascending: true });
-    if (signal) query = query.abortSignal(signal);
+    if (signal) {
+      query = query.abortSignal(signal);
+    }
 
     return rows<Account>(query);
   },
@@ -31,7 +33,9 @@ export const networthApi = {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     // Seed an initial snapshot so the trigger keeps current_balance accurate
     // and the time-series chart has a starting point.
@@ -49,7 +53,9 @@ export const networthApi = {
           balance: initial_balance,
           contribution_delta: contributionDelta,
         });
-      if (snapshotError) throw snapshotError;
+      if (snapshotError) {
+        throw snapshotError;
+      }
     }
 
     // Re-read so we get the trigger-updated current_balance / cost_basis.
@@ -58,7 +64,9 @@ export const networthApi = {
       .select('*')
       .eq('id', (created as Account).id)
       .single();
-    if (refreshError) throw refreshError;
+    if (refreshError) {
+      throw refreshError;
+    }
 
     return refreshed as Account;
   },
@@ -100,7 +108,9 @@ export const networthApi = {
       if (cursor) {
         query = query.or(accountBalanceCursorFilter(cursor, 'descending'));
       }
-      if (signal) query = query.abortSignal(signal);
+      if (signal) {
+        query = query.abortSignal(signal);
+      }
 
       return query;
     });
@@ -118,7 +128,9 @@ export const networthApi = {
       if (cursor) {
         query = query.or(accountBalanceCursorFilter(cursor, 'ascending'));
       }
-      if (signal) query = query.abortSignal(signal);
+      if (signal) {
+        query = query.abortSignal(signal);
+      }
 
       return query;
     });
@@ -166,7 +178,9 @@ export const networthApi = {
 
   async getAccountById(accountId: string, signal?: AbortSignal) {
     let query = supabase.from('accounts').select('*').eq('id', accountId);
-    if (signal) query = query.abortSignal(signal);
+    if (signal) {
+      query = query.abortSignal(signal);
+    }
 
     return row<Account>(query.single());
   },

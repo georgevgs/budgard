@@ -13,7 +13,9 @@ export const useAnalyticsDrillDown = (
   );
 
   const drillDownCategoryExpenses = useMemo(() => {
-    if (!drillDownCategory) return [];
+    if (!drillDownCategory) {
+      return [];
+    }
 
     return yearExpenses.filter((e) => e.category_id === drillDownCategory.id);
   }, [yearExpenses, drillDownCategory]);

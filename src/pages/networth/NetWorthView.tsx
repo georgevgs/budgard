@@ -23,7 +23,7 @@ import { InvestmentAllocationCard } from '@/pages/networth/components/Investment
 import { AccountGroup } from '@/pages/networth/components/AccountGroup';
 import { AccountForm } from '@/pages/networth/components/AccountForm';
 import { AccountDetailSheet } from '@/pages/networth/components/AccountDetailSheet';
-import { ProUpsellCard } from '@/pages/pro/components/ProUpsellCard';
+import { ProUpsellCard } from '@/common/components/pro/ProUpsellCard';
 import type { NetWorthSummary, NetWorthPoint } from '@/common/hooks/useNetWorth';
 
 const NetWorthView = () => {
@@ -180,7 +180,9 @@ const renderInvestmentsBlock = (
   t: TranslateFunction,
   isPro: boolean,
 ) => {
-  if (investments.length === 0) return null;
+  if (investments.length === 0) {
+    return null;
+  }
 
   return (
     <>
@@ -219,7 +221,9 @@ const renderDetailSheet = (
   onClose: () => void,
   onEdit: (account: Account) => void,
 ) => {
-  if (!account) return null;
+  if (!account) {
+    return null;
+  }
 
   return (
     <AccountDetailSheet
@@ -236,7 +240,9 @@ const renderFab = (
   onAddClick: () => void,
   t: TranslateFunction,
 ) => {
-  if (accountCount === 0) return null;
+  if (accountCount === 0) {
+    return null;
+  }
 
   return (
     <div

@@ -54,7 +54,9 @@ export const useRecurringIncomeOps = () => {
         },
         commit: (saved) =>
           setRecurringIncomes((prev) => {
-            if (incomeId) return replaceById(prev, incomeId, saved);
+            if (incomeId) {
+              return replaceById(prev, incomeId, saved);
+            }
 
             return [saved, ...prev];
           }),

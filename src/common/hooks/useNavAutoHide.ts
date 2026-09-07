@@ -47,14 +47,18 @@ export const useNavAutoHide = (pathname: string): void => {
 
       const delta = currentY - lastYRef.current;
 
-      if (Math.abs(delta) < DIRECTION_DELTA_PX) return;
+      if (Math.abs(delta) < DIRECTION_DELTA_PX) {
+        return;
+      }
 
       lastYRef.current = currentY;
       setHidden(delta > 0);
     };
 
     const handleScroll = () => {
-      if (isTicking) return;
+      if (isTicking) {
+        return;
+      }
 
       isTicking = true;
       frameId = requestAnimationFrame(applyScrollState);
@@ -86,7 +90,9 @@ export const useNavAutoHide = (pathname: string): void => {
 // DOM when the state actually flips — an attribute write invalidates the
 // :has() rules that drive the dock.
 const setHidden = (isHidden: boolean): void => {
-  if (isHidden === document.body.hasAttribute(HIDDEN_ATTRIBUTE)) return;
+  if (isHidden === document.body.hasAttribute(HIDDEN_ATTRIBUTE)) {
+    return;
+  }
 
   if (isHidden) {
     document.body.setAttribute(HIDDEN_ATTRIBUTE, 'true');

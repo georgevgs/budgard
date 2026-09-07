@@ -113,7 +113,9 @@ export const AccountDetailSheet = ({ account, open, onClose, onEdit }: AccountDe
         description={t('networth.detail.deleteSnapshotDescription')}
         confirmLabel={t('common.delete')}
         onOpenChange={(isOpen) => {
-          if (!isOpen) actions.setSnapshotToDelete(null);
+          if (!isOpen) {
+            actions.setSnapshotToDelete(null);
+          }
         }}
         onConfirm={actions.handleSnapshotDeleteConfirm}
       />

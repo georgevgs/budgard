@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
-import { renderSaveButtonLabel } from '@/pages/expenses/utils/expensesFormHelpers';
+import { renderSaveButtonLabel } from '@/constants/expensesFormHelpers';
 import type { TranslateFunction } from '@/constants/translate';
 
 type ExpenseFormActionsProps = {

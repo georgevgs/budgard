@@ -110,7 +110,9 @@ const renderMonthlyBreakdown = (
   t: TranslateFunction,
   currency: string,
 ) => {
-  if (months.length <= 1) return null;
+  if (months.length <= 1) {
+    return null;
+  }
 
   const max = Math.max(...months.map((m) => m.amount));
 
@@ -175,7 +177,9 @@ const renderExpenseRow = (
 };
 
 const renderTagInRow = (expense: Expense) => {
-  if (!expense.tag) return null;
+  if (!expense.tag) {
+    return null;
+  }
 
   return <> · {expense.tag.name}</>;
 };

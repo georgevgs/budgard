@@ -4,7 +4,7 @@ import { AnalyticsEmpty } from '@/pages/analytics/components/AnalyticsEmpty';
 import { TrendsBento } from '@/pages/analytics/components/TrendsBento';
 import { TrendsDeepDiveLoading } from '@/pages/analytics/components/TrendsDeepDiveLoading';
 import { TrendsSections } from '@/pages/analytics/components/TrendsSections';
-import { YearPill } from '@/pages/analytics/components/YearPill';
+import { YearPill } from '@/common/components/common/YearPill';
 import { PageHeader } from '@/common/components/common/PageHeader';
 import {
   useCategoriesData,

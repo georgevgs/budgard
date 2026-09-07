@@ -15,7 +15,9 @@ export const getInitialAmount = (
   income: Expense | undefined,
   defaultCurrency: string,
 ): string => {
-  if (!income) return '';
+  if (!income) {
+    return '';
+  }
 
   return amountToInput(
     resolveSourceAmount(income, defaultCurrency),
@@ -24,7 +26,9 @@ export const getInitialAmount = (
 };
 
 export const getInitialDate = (income: Expense | undefined): Date => {
-  if (income) return parseISO(income.date);
+  if (income) {
+    return parseISO(income.date);
+  }
 
   return new Date();
 };
@@ -34,13 +38,17 @@ const getQuickCreateLabel = (
   trimmedSearch: string,
   t: TranslateFunction,
 ): string => {
-  if (isCreating) return t('common.saving');
+  if (isCreating) {
+    return t('common.saving');
+  }
 
   return t('income.createCategory', { name: trimmedSearch });
 };
 
 export const renderFormTitle = (isEditing: boolean, t: TranslateFunction) => {
-  if (isEditing) return t('income.editIncome');
+  if (isEditing) {
+    return t('income.editIncome');
+  }
 
   return t('income.addIncome');
 };
@@ -49,7 +57,9 @@ export const renderSaveButtonLabel = (
   isSubmitting: boolean,
   t: TranslateFunction,
 ) => {
-  if (isSubmitting) return t('common.saving');
+  if (isSubmitting) {
+    return t('common.saving');
+  }
 
   return t('income.saveIncome');
 };

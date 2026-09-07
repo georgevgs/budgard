@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { EmptyStateCard } from '@/common/ui/empty-state-card';
 import Waves from 'lucide-react/dist/esm/icons/waves';
-import { FlowChart } from '@/common/components/charts/FlowChart';
-import type { FlowNode } from '@/common/components/charts/FlowChart';
+import { FlowChart } from '@/pages/analytics/components/FlowChart';
+import type { FlowNode } from '@/pages/analytics/components/FlowChart';
 import type { TranslateFunction } from '@/constants/translate';
 import {
   UNCATEGORIZED_ID,
