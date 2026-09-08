@@ -13,9 +13,29 @@ const inventoryQuery = `SELECT json_build_object(
   'users', (SELECT count(*) FROM auth.users),
   'schemas', (SELECT json_agg(nspname ORDER BY nspname) FROM pg_namespace
     WHERE nspname NOT LIKE 'pg_%' AND nspname <> 'information_schema'),
+  'app_tables', (SELECT coalesce(json_agg(json_build_object('schema', n.nspname, 'name', c.relname)
+    ORDER BY n.nspname, c.relname), '[]'::json) FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname IN ('public', 'private') AND c.relkind = 'r'),
   'buckets', (SELECT coalesce(json_agg(b), '[]'::json) FROM storage.buckets b),
   'objects', (${storageQuery})
 )`;
+
+export const validateArchiveContents = (contents, inventory) => {
+  if (!Array.isArray(inventory.app_tables)) {
+    throw new Error('Backup is missing its application table inventory');
+  }
+  const required = [
+    { schema: 'auth', name: 'users' },
+    { schema: 'public', name: 'expenses' },
+    ...inventory.app_tables,
+  ];
+  for (const { schema, name } of required) {
+    if (!contents.includes(`TABLE DATA ${schema} ${name} `)) {
+      throw new Error(`Backup lacks required table data: ${schema}.${name}`);
+    }
+  }
+};
 
 export const query = (psql, env, sql) =>
   run(psql, ['-X', '-q', '-A', '-t', '-v', 'ON_ERROR_STOP=1'], {

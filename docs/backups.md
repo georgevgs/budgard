@@ -83,11 +83,35 @@ its disk encrypted; protect the recovery private key with a passphrase.
 Run from the repository:
 
 ```sh
-node scripts/backup.mjs
+bun run backup
 ```
 
+For a configured Mac, the runner also loads owner-only defaults from
+`~/.config/budgard/backup-local.json`. Explicit environment variables take
+precedence. A Storage credential referenced by that file is read from its
+own owner-only file. The private recovery key belongs outside the backup
+directory; a passphrase stored in macOS Keychain is not copied into archives.
+
 The runner uses owner-only directory/file permissions, unique timestamps,
-and temporary staging. Plaintext staging is removed when the run finishes
+and temporary staging. Each successful run creates its own folder under
+`BACKUP_DIR` (currently `~/Backups/Budgard` on the configured Mac):
+
+```text
+Budgard/
+  2026-09-07T18-40-46-114Z-<unique-id>/
+    backup.tar.gz.gpg
+    backup.tar.gz.gpg.sha256
+  2026-09-08T18-40-46-114Z-<unique-id>/
+    backup.tar.gz.gpg
+    backup.tar.gz.gpg.sha256
+```
+
+Folder timestamps use UTC (`Z`); the unique ID allows multiple runs at the
+same time. The completed folder appears only after encryption and checksum
+creation both succeed. Earlier archives stored directly in `BACKUP_DIR`
+remain valid in their original locations.
+
+Plaintext staging is removed when the run finishes
 or fails. A killed process or machine crash can leave `.incomplete-*`
 directories; these are never successful backups and should be removed after
 confirming no backup is running. Existing successful backups are never pruned
@@ -114,11 +138,12 @@ cloud scheduler or provision backup storage.
 
 ## Verify and recover
 
-1. Download the archive and its `.sha256` file to a trusted recovery machine.
-   Check the ciphertext before decrypting:
+1. Copy the complete dated folder to a trusted recovery machine. From the
+   repository root, set its absolute path and check the ciphertext:
 
    ```sh
-   shasum -a 256 -c budgard-<timestamp>.tar.gz.gpg.sha256
+   backup_directory=/absolute/path/to/dated-folder
+   (cd "$backup_directory" && shasum -a 256 -c backup.tar.gz.gpg.sha256)
    ```
 
 2. In an owner-only working directory, decrypt and extract:
@@ -126,10 +151,13 @@ cloud scheduler or provision backup storage.
    ```sh
    umask 077
    mkdir recovery
-   gpg --output recovery.tar.gz --decrypt budgard-<timestamp>.tar.gz.gpg
+   gpg --output recovery.tar.gz --decrypt "$backup_directory/backup.tar.gz.gpg"
    tar -xzf recovery.tar.gz -C recovery
    node scripts/backup/verify.mjs recovery
    ```
+
+   For an older backup stored without a dated folder, substitute its original
+   `budgard-<timestamp>-<unique-id>.tar.gz.gpg` filename in these commands.
 
 3. Restore into a **separate, empty Supabase project** with a compatible
    Postgres version and extensions. Review the archive table of contents and

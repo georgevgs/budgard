@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { access, mkdir, mkdtemp, rename, rm, stat } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -11,8 +11,15 @@ import {
   run,
   writePrivate,
 } from './backup/io.mjs';
-import { openSnapshot, query, storageQuery } from './backup/database.mjs';
+import {
+  openSnapshot,
+  query,
+  storageQuery,
+  validateArchiveContents,
+} from './backup/database.mjs';
 import { downloadObject, sameObjects } from './backup/storage.mjs';
+import { loadLocalDefaults } from './backup/local.mjs';
+import { createArchive } from './backup/archive.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -101,11 +108,7 @@ const dumpDatabase = async (directory, config, snapshot) => {
     },
   );
   const contents = await run(executable('pg_restore'), ['--list', path]);
-  for (const table of ['auth users', 'public expenses', 'public incomes']) {
-    if (!contents.includes(`TABLE DATA ${table} `)) {
-      throw new Error(`Backup lacks required table data: ${table}`);
-    }
-  }
+  validateArchiveContents(contents, snapshot.inventory);
   // Reading every archive block catches truncation beyond the table of contents.
   await run(executable('pg_restore'), ['--file=/dev/null', path]);
   await writePrivate(join(directory, 'database.contents.txt'), contents);
@@ -141,42 +144,9 @@ const copyStorage = async (directory, config, inventory) => {
   return objects;
 };
 
-const createArchive = async (stage, directory, config, name) => {
-  const tarPath = join(stage, 'backup.tar.gz');
-  await run('tar', ['-czf', tarPath, '-C', directory, '.']);
-  await run('gzip', ['--test', tarPath]);
-  const encryptedPath = join(stage, `${name}.tar.gz.gpg`);
-  await run('gpg', [
-    '--no-options',
-    '--batch',
-    '--no-encrypt-to',
-    '--trust-model',
-    'always',
-    '--recipient',
-    config.recipient,
-    '--encrypt',
-    '--output',
-    encryptedPath,
-    tarPath,
-  ]);
-  const digest = await checksum(encryptedPath);
-  const destination = join(config.directory, `${name}.tar.gz.gpg`);
-  await writePrivate(
-    `${encryptedPath}.sha256`,
-    `${digest}  ${name}.tar.gz.gpg\n`,
-  );
-  await rename(`${encryptedPath}.sha256`, `${destination}.sha256`);
-  await rename(encryptedPath, destination);
-
-  return {
-    file: destination,
-    sha256: digest,
-    bytes: (await stat(destination)).size,
-  };
-};
-
 const main = async () => {
   process.umask(0o077);
+  await loadLocalDefaults();
   const config = await configuration();
   for (const tool of ['psql', 'pg_dump', 'pg_dumpall', 'pg_restore']) {
     await run(executable(tool), ['--version']);
@@ -189,7 +159,7 @@ const main = async () => {
   ]);
   await mkdir(config.directory, { recursive: true, mode: 0o700 });
   await assertPrivatePath(config.directory);
-  const name = `budgard-${new Date().toISOString().replace(/[:.]/g, '-')}-${randomUUID()}`;
+  const name = `${new Date().toISOString().replace(/[:.]/g, '-')}-${randomUUID()}`;
   const stage = await mkdtemp(join(config.directory, '.incomplete-'));
   const directory = join(stage, 'backup');
   await mkdir(directory, { mode: 0o700 });
@@ -283,7 +253,7 @@ Required: BACKUP_GPG_RECIPIENT (public encryption key fingerprint).
 Database credentials: ~/.config/budgard/backup.env, or BACKUP_ENV_FILE.
 Storage: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY when objects exist.
 Optional: BACKUP_DIR, BACKUP_PG_BIN (directory of matching Postgres tools).
-Output: encrypted full-project archive plus SHA-256 checksum.
+Output: a dated folder containing backup.tar.gz.gpg and its SHA-256 checksum.
 See docs/backups.md for setup, scheduling, recovery and coverage limits.`);
 } else {
   await access(join(root, 'supabase/config.toml'));

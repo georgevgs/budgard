@@ -10,13 +10,34 @@ import {
   readEnvironment,
   run,
 } from './io.mjs';
-import { openSnapshot } from './database.mjs';
+import { openSnapshot, validateArchiveContents } from './database.mjs';
 import {
   downloadObject,
   objectFilename,
   objectUrl,
   sameObjects,
 } from './storage.mjs';
+
+test('archive validation accepts the shared transaction table and requires every application table', () => {
+  const contents =
+    '1; 0 1 TABLE DATA auth users auth_admin\n2; 0 2 TABLE DATA public expenses postgres\n3; 0 3 TABLE DATA public goals postgres\n';
+  const inventory = {
+    app_tables: [
+      { schema: 'public', name: 'expenses' },
+      { schema: 'public', name: 'goals' },
+    ],
+  };
+  assert.doesNotThrow(() => validateArchiveContents(contents, inventory));
+  assert.throws(
+    () =>
+      validateArchiveContents(
+        contents.replace('TABLE DATA public goals', 'OMITTED public goals'),
+        inventory,
+      ),
+    /public.goals/,
+  );
+  assert.throws(() => validateArchiveContents(contents, {}), /table inventory/);
+});
 
 test('backup credentials reject shared permissions and symbolic links before being read', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'budgard-backup-access-'));
