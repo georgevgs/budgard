@@ -126,6 +126,13 @@ scoped to `FinancialSpaceProvider.activeOwnerId`; the owner/member space key
 also scopes the local cache and offline queue. The consumer hooks live in
 `contexts/DataContext.tsx`.
 
+`useDataLayer` composes the reducer, session lifecycle, snapshot persistence,
+and memoised context slices. `useDataLifecycle` owns one mutable request
+session per financial space; its helpers read that session only in effects
+and action callbacks. Disposing it aborts primary, secondary and history reads
+and invalidates late refresh results and retry actions. The public setters and
+action identities stay stable while data changes.
+
 ### FinancialSpaceProvider (`contexts/FinancialSpaceProvider.tsx`)
 
 Exposes the signed-in user's own space plus any accepted household space. The

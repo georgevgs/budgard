@@ -33,8 +33,6 @@ import {
 } from '@/common/components/csvImport/utils/importReducer';
 import type { Category } from '@/types/Category';
 
-export type { ImportStep } from '@/common/components/csvImport/utils/importReducer';
-
 export const useCsvImportFlow = (onClose: () => void) => {
   const { t } = useTranslation();
   const { expenseCategories: categories } = useCategoriesData();

@@ -1,11 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 
-// --- Mocks ---
 // vi.mock factories are hoisted, so anything read eagerly is built by vi.hoisted.
 
 const mockToast = vi.hoisted(() => vi.fn());
-vi.mock('@/common/hooks/useToast', () => ({ useToast: () => ({ toast: mockToast }) }));
+vi.mock('@/common/hooks/useToast', () => ({
+  useToast: () => ({ toast: mockToast }),
+}));
 
 const mockSentry = vi.hoisted(() => ({ captureException: vi.fn() }));
 vi.mock('@/config/sentry', () => mockSentry);
@@ -13,11 +14,14 @@ vi.mock('@/config/sentry', () => mockSentry);
 const auth = vi.hoisted(() => ({
   session: { user: { id: 'u1' } } as { user: { id: string } } | null,
   isLoading: false,
+  ownerId: null as string | null,
 }));
 vi.mock('@/common/contexts/AuthContext', () => ({ useAuth: () => auth }));
 
 vi.mock('@/common/contexts/FinancialSpaceContext', () => ({
-  useFinancialSpace: () => ({ activeOwnerId: auth.session?.user.id ?? '' }),
+  useFinancialSpace: () => ({
+    activeOwnerId: auth.ownerId ?? auth.session?.user.id ?? '',
+  }),
 }));
 
 const cache = vi.hoisted(() => ({
@@ -79,6 +83,10 @@ const svc = vi.hoisted(() => {
 vi.mock('@/common/api/dataService', () => ({ dataService: svc }));
 
 import { useDataLayer } from '@/common/hooks/data/useDataLayer';
+import { EMPTY_DATA, toSnapshot } from '@/common/hooks/data/dataReducer';
+import { DataProvider } from '@/common/contexts/DataProvider';
+import { useExpensesData } from '@/common/contexts/DataContext';
+import { useOnDemandHistory } from '@/common/hooks/data/useOnDemandHistory';
 
 // getExpenses/getIncomes take the owner id first, then (signal, sinceDate,
 // beforeDate). Boot asks for the recent window (a `sinceDate`); loadHistory
@@ -123,12 +131,18 @@ beforeEach(() => {
   vi.clearAllMocks();
   auth.session = { user: { id: 'u1' } };
   auth.isLoading = false;
+  auth.ownerId = null;
   cache.loadDataSnapshot.mockReturnValue(null);
   cache.hasDataSnapshot.mockReturnValue(false);
   cache.getRecentCutoff.mockReturnValue('2026-01-01');
   svc.getExpenses = twoStageExpenses() as typeof svc.getExpenses;
   svc.getIncomes = twoStageIncomes() as typeof svc.getIncomes;
   svc.refreshDebtBalances.mockResolvedValue(undefined);
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 
 describe('useDataLayer boot fetch', () => {
@@ -305,5 +319,413 @@ describe('useDataLayer boot fetch', () => {
     });
 
     expect(svc.getExpenses).toHaveBeenCalledWith('u1', undefined, '2026-01-01');
+  });
+});
+
+const deferred = <T>() => {
+  let resolve!: (value: T) => void;
+  let reject!: (error: unknown) => void;
+  const promise = new Promise<T>((onResolve, onReject) => {
+    resolve = onResolve;
+    reject = onReject;
+  });
+
+  return { promise, resolve, reject };
+};
+
+const setVisibility = (visibility: DocumentVisibilityState) => {
+  vi.spyOn(document, 'visibilityState', 'get').mockReturnValue(visibility);
+  act(() => document.dispatchEvent(new Event('visibilitychange')));
+};
+
+describe('useDataLayer session lifecycle', () => {
+  it('waits for auth and does not reboot on a token refresh', async () => {
+    auth.isLoading = true;
+    const { result, rerender } = renderHook(() => useDataLayer());
+    expect(svc.getCategories).not.toHaveBeenCalled();
+    auth.isLoading = false;
+    rerender();
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+    const actions = result.current.actions;
+    auth.session = { user: { id: 'u1' } };
+    rerender();
+    expect(svc.getCategories).toHaveBeenCalledTimes(1);
+    expect(result.current.actions).toBe(actions);
+  });
+
+  it('keeps actions and unrelated slices stable while updating mutation refs', async () => {
+    const { result } = renderHook(() => useDataLayer());
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+    const before = result.current;
+    act(() => {
+      before.actions.setExpenses((rows) => [
+        { ...rows[0], id: 'optimistic' },
+        ...rows,
+      ]);
+      before.actions.setIncomes((rows) => [
+        { ...rows[0], id: 'income-optimistic' },
+        ...rows,
+      ]);
+    });
+    expect(result.current.actions).toBe(before.actions);
+    expect(result.current.config).toBe(before.config);
+    expect(result.current.categoriesSlice).toBe(before.categoriesSlice);
+    expect(result.current.recurringSlice).toBe(before.recurringSlice);
+    expect(result.current.accountsSlice).toBe(before.accountsSlice);
+    expect(before.actions.expensesRef.current[0].id).toBe('optimistic');
+    expect(before.actions.incomesRef.current[0].id).toBe('income-optimistic');
+  });
+
+  it('hydrates before the first paint and loads history requested by a cached child', async () => {
+    const pending = deferred<Awaited<ReturnType<typeof svc.getExpenses>>>();
+    svc.getExpenses.mockImplementationOnce(() => pending.promise);
+    cache.loadDataSnapshot.mockReturnValue({
+      ...toSnapshot(EMPTY_DATA),
+      expenses: [{ id: 'cached', date: '2026-08-01' }],
+    } as never);
+    cache.hasDataSnapshot.mockReturnValue(true);
+    const { result } = renderHook(
+      () => {
+        useOnDemandHistory(true);
+
+        return useExpensesData();
+      },
+      { wrapper: DataProvider },
+    );
+    expect(result.current.map((row) => row.id)).toEqual(['cached']);
+    await waitFor(() =>
+      expect(result.current.map((row) => row.id)).toContain('e-old'),
+    );
+    await act(async () =>
+      pending.resolve([{ id: 'fresh', date: '2026-08-01' }]),
+    );
+    expect(result.current.map((row) => row.id)).toEqual(['fresh', 'e-old']);
+  });
+
+  it.each(['resolve', 'reject'] as const)(
+    'ignores a primary fetch that settles with %s after sign-out',
+    async (settle) => {
+      const pending = deferred<Awaited<ReturnType<typeof svc.getExpenses>>>();
+      svc.getExpenses.mockImplementationOnce(() => pending.promise);
+      const { result, rerender } = renderHook(() => useDataLayer());
+      const signal = svc.getExpenses.mock.calls[0][1] as AbortSignal;
+      auth.session = null;
+      rerender();
+      expect(signal.aborted).toBe(true);
+      await act(async () => {
+        if (settle === 'resolve')
+          pending.resolve([{ id: 'late', date: '2026-08-01' }]);
+        else pending.reject(new Error('late failure'));
+      });
+      expect(result.current.expenses).toEqual([]);
+      expect(result.current.config.isInitialized).toBe(false);
+      expect(svc.getGoals).not.toHaveBeenCalled();
+      expect(mockToast).not.toHaveBeenCalled();
+      expect(mockSentry.captureException).not.toHaveBeenCalled();
+      expect(cache.clearDataSnapshot).toHaveBeenCalled();
+    },
+  );
+
+  it('clears the old space immediately and prevents its late fetch replacing the new space', async () => {
+    const { result, rerender } = renderHook(() => useDataLayer());
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+    const oldRefresh = deferred<Awaited<ReturnType<typeof svc.getExpenses>>>();
+    svc.getExpenses.mockImplementationOnce(() => oldRefresh.promise);
+    let refreshing!: Promise<void>;
+    await act(async () => {
+      refreshing = result.current.actions.refreshData();
+    });
+    const newBoot = deferred<Awaited<ReturnType<typeof svc.getExpenses>>>();
+    svc.getExpenses.mockImplementationOnce(() => newBoot.promise);
+    auth.ownerId = 'household-owner';
+    rerender();
+    expect(result.current.expenses).toEqual([]);
+    expect(result.current.config.monthlyBudget).toBeNull();
+    expect(result.current.config.isHistoryLoaded).toBe(false);
+    expect(cache.loadDataSnapshot).toHaveBeenLastCalledWith(
+      'u1:household-owner',
+    );
+    expect(svc.getExpenses).toHaveBeenLastCalledWith(
+      'household-owner',
+      expect.any(AbortSignal),
+      '2026-01-01',
+    );
+    await act(async () =>
+      newBoot.resolve([{ id: 'household', date: '2026-08-01' }]),
+    );
+    await act(async () => {
+      oldRefresh.resolve([{ id: 'old-space', date: '2026-08-01' }]);
+      await refreshing;
+    });
+    expect(result.current.expenses.map((row) => row.id)).toEqual(['household']);
+  });
+
+  it('ignores secondary results and history failures after sign-out', async () => {
+    const secondary = deferred<Awaited<ReturnType<typeof svc.getGoals>>>();
+    svc.getGoals.mockImplementationOnce(() => secondary.promise);
+    const { result, rerender } = renderHook(() => useDataLayer());
+    await waitFor(() => expect(result.current.config.isInitialized).toBe(true));
+    const history = deferred<Awaited<ReturnType<typeof svc.getExpenses>>>();
+    svc.getExpenses.mockImplementationOnce(() => history.promise);
+    let loading!: Promise<void>;
+    await act(async () => {
+      loading = result.current.actions.loadHistory();
+    });
+    auth.session = null;
+    rerender();
+    await act(async () => {
+      secondary.resolve([{ id: 'late-goal' }]);
+      history.reject(new Error('late history failure'));
+      await loading;
+    });
+    expect(result.current.goals).toEqual([]);
+    expect(result.current.config.isSecondaryLoaded).toBe(false);
+    expect(result.current.config.isHistoryLoaded).toBe(false);
+    expect(mockSentry.captureException).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['refreshExpenses', 'getExpenses'],
+    ['refreshIncomes', 'getIncomes'],
+    ['refreshAccounts', 'getAccounts'],
+    ['refreshDebts', 'getDebts'],
+  ] as const)(
+    'discards %s results when its session ends',
+    async (action, method) => {
+      const { result, rerender } = renderHook(() => useDataLayer());
+      await waitFor(() =>
+        expect(result.current.config.isSecondaryLoaded).toBe(true),
+      );
+      const pending = deferred<never[]>();
+      svc[method].mockImplementationOnce(() => pending.promise);
+      let refreshing!: Promise<void>;
+      await act(async () => {
+        refreshing = result.current.actions[action]();
+      });
+      auth.session = null;
+      rerender();
+      await act(async () => {
+        pending.resolve([{ id: 'late', date: '2026-08-01' }] as never[]);
+        await refreshing;
+      });
+      expect(result.current.expenses).toEqual([]);
+      expect(result.current.incomes).toEqual([]);
+      expect(result.current.accountsSlice).toEqual({
+        accounts: [],
+        accountBalances: [],
+      });
+      expect(result.current.debts).toEqual([]);
+    },
+  );
+
+  it.each(['refreshData', 'refreshExpenses'] as const)(
+    'retries %s while active and makes its old retry harmless after sign-out',
+    async (action) => {
+      const { result, rerender } = renderHook(() => useDataLayer());
+      await waitFor(() =>
+        expect(result.current.config.isSecondaryLoaded).toBe(true),
+      );
+      svc.getExpenses.mockRejectedValueOnce(new Error('refresh failed'));
+      await act(async () => {
+        await result.current.actions[action]();
+      });
+      const retry = mockToast.mock.lastCall?.[0].action.onClick;
+      expect(retry).toBeTypeOf('function');
+      const calls = svc.getExpenses.mock.calls.length;
+      await act(async () => retry());
+      expect(svc.getExpenses).toHaveBeenCalledTimes(calls + 1);
+      auth.session = null;
+      rerender();
+      await act(async () => retry());
+      expect(svc.getExpenses).toHaveBeenCalledTimes(calls + 1);
+    },
+  );
+
+  it('aborts both fetches on unmount and removes visibility listeners', async () => {
+    const pending = deferred<Awaited<ReturnType<typeof svc.getExpenses>>>();
+    svc.getExpenses.mockImplementation(() => pending.promise);
+    const { result, unmount } = renderHook(() => useDataLayer());
+    let loading!: Promise<void>;
+    await act(async () => {
+      loading = result.current.actions.loadHistory();
+    });
+    const signals = svc.getExpenses.mock.calls.map(
+      (call) => call[1] as AbortSignal,
+    );
+    expect(signals).toHaveLength(2);
+    unmount();
+    expect(signals.every((signal) => signal.aborted)).toBe(true);
+    setVisibility('hidden');
+    setVisibility('visible');
+    expect(svc.getExpenses).toHaveBeenCalledTimes(2);
+    expect(cache.saveDataSnapshot).not.toHaveBeenCalled();
+    await act(async () => {
+      pending.resolve([]);
+      await loading;
+    });
+  });
+
+  it('finishes boot after Strict Mode replays the lifecycle effects', async () => {
+    const { result } = renderHook(() => useDataLayer(), {
+      reactStrictMode: true,
+    });
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+    const signals = svc.getExpenses.mock.calls.map(
+      (call) => call[1] as AbortSignal,
+    );
+    expect(signals).toHaveLength(2);
+    expect(signals[0].aborted).toBe(true);
+    expect(signals[1].aborted).toBe(false);
+    expect(result.current.expenses.map((row) => row.id)).toEqual(['e-recent']);
+  });
+});
+
+describe('useDataLayer foreground and snapshots', () => {
+  it('skips a fresh foreground refresh and fetches after the freshness window', async () => {
+    const now = vi.spyOn(Date, 'now').mockReturnValue(100_000);
+    const { result } = renderHook(() => useDataLayer());
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+    setVisibility('hidden');
+    now.mockReturnValue(129_999);
+    setVisibility('visible');
+    expect(svc.getExpenses).toHaveBeenCalledTimes(1);
+    now.mockReturnValue(130_000);
+    setVisibility('visible');
+    expect(svc.getExpenses).toHaveBeenCalledTimes(2);
+    await act(async () => {});
+    expect(stage2Calls(svc.getExpenses)).toHaveLength(0);
+  });
+
+  it('restarts an aborted primary refresh even before its rejection arrives', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(100_000);
+    const { result } = renderHook(() => useDataLayer());
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+    const pending = deferred<Awaited<ReturnType<typeof svc.getExpenses>>>();
+    svc.getExpenses.mockImplementationOnce(() => pending.promise);
+    let refreshing!: Promise<void>;
+    await act(async () => {
+      refreshing = result.current.actions.refreshData();
+    });
+    setVisibility('hidden');
+    setVisibility('visible');
+    expect(svc.getExpenses).toHaveBeenCalledTimes(3);
+    await act(async () => {
+      pending.reject(new DOMException('aborted', 'AbortError'));
+      await refreshing;
+    });
+    expect(mockToast).not.toHaveBeenCalled();
+    expect(result.current.expenses.map((row) => row.id)).toEqual(['e-recent']);
+  });
+
+  it('resumes requested history and keeps the replacement load deduplicated', async () => {
+    const { result } = renderHook(() => useDataLayer());
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+    const oldTail = deferred<Awaited<ReturnType<typeof svc.getExpenses>>>();
+    const newTail = deferred<Awaited<ReturnType<typeof svc.getExpenses>>>();
+    svc.getExpenses
+      .mockImplementationOnce(() => oldTail.promise)
+      .mockImplementationOnce(() => newTail.promise);
+    let oldLoad!: Promise<void>;
+    await act(async () => {
+      oldLoad = result.current.actions.loadHistory();
+    });
+    setVisibility('hidden');
+    setVisibility('visible');
+    expect(stage2Calls(svc.getExpenses)).toHaveLength(2);
+    await act(async () => {
+      oldTail.resolve([{ id: 'cancelled-tail', date: '2025-03-01' }]);
+      await oldLoad;
+    });
+    let sameLoad!: Promise<void>;
+    await act(async () => {
+      sameLoad = result.current.actions.loadHistory();
+    });
+    expect(stage2Calls(svc.getExpenses)).toHaveLength(2);
+    await act(async () => {
+      newTail.resolve(olderExpenses);
+      await sameLoad;
+    });
+    expect(result.current.expenses.map((row) => row.id)).toEqual([
+      'e-recent',
+      'e-old',
+    ]);
+  });
+
+  it.each(['refreshExpenses', 'refreshIncomes'] as const)(
+    '%s reconciles the full history once the tail is loaded',
+    async (action) => {
+      const { result } = renderHook(() => useDataLayer());
+      await waitFor(() =>
+        expect(result.current.config.isSecondaryLoaded).toBe(true),
+      );
+      await act(async () => {
+        await result.current.actions.loadHistory();
+      });
+      const method =
+        action === 'refreshExpenses' ? svc.getExpenses : svc.getIncomes;
+      method.mockResolvedValueOnce([
+        { id: 'only-server-row', date: '2025-03-01' },
+      ]);
+      await act(async () => {
+        await result.current.actions[action]();
+      });
+      expect(method).toHaveBeenLastCalledWith('u1', undefined, undefined);
+      const rows =
+        action === 'refreshExpenses'
+          ? result.current.expenses
+          : result.current.incomes;
+      expect(rows.map((row) => row.id)).toEqual(['only-server-row']);
+    },
+  );
+
+  it('debounces snapshots using the latest mutation and flushes them on hide', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    const { result } = renderHook(() => useDataLayer());
+    await act(async () => {});
+    expect(result.current.config.isSecondaryLoaded).toBe(true);
+    act(() => vi.advanceTimersByTime(1999));
+    expect(cache.saveDataSnapshot).not.toHaveBeenCalled();
+    act(() => result.current.actions.setMonthlyBudget(2500));
+    act(() => vi.advanceTimersByTime(1999));
+    expect(cache.saveDataSnapshot).not.toHaveBeenCalled();
+    act(() => vi.advanceTimersByTime(1));
+    expect(cache.saveDataSnapshot).toHaveBeenCalledTimes(1);
+    expect(cache.saveDataSnapshot).toHaveBeenLastCalledWith(
+      'u1:u1',
+      expect.objectContaining({ monthlyBudget: 2500, secondaryLoaded: true }),
+    );
+    act(() => result.current.actions.setMonthlyBudget(3000));
+    setVisibility('hidden');
+    expect(cache.saveDataSnapshot).toHaveBeenLastCalledWith(
+      'u1:u1',
+      expect.objectContaining({ monthlyBudget: 3000 }),
+    );
+  });
+
+  it('cancels pending snapshot writes on sign-out', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    const { result, rerender } = renderHook(() => useDataLayer());
+    await act(async () => {});
+    expect(result.current.config.isInitialized).toBe(true);
+    auth.session = null;
+    rerender();
+    act(() => vi.advanceTimersByTime(2000));
+    setVisibility('hidden');
+    expect(cache.saveDataSnapshot).not.toHaveBeenCalled();
+    expect(cache.clearDataSnapshot).toHaveBeenCalled();
   });
 });
