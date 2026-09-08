@@ -131,10 +131,22 @@ A scheduler's existence does not prove backups are running. Inspect the
 last successful archive timestamp and verify copies at the destination.
 Do not upload plaintext staging or use public Git repositories as storage.
 
-The old `~/Scripts/budgard-backup.sh` is a separate, incomplete weekly backup.
-Replace its schedule only after the new job has completed and its output has
-been decrypted and verified. A local source script alone does not activate a
-cloud scheduler or provision backup storage.
+The Mac LaunchAgent `com.budgard.backup` runs this backup weekly, on Sunday at
+12:00, through `~/Scripts/budgard-backup.sh`. That script is a launcher and
+nothing else: it sets `PATH` — launchd gives a job `/usr/bin:/bin:/usr/sbin:/sbin`,
+which has neither node nor gpg on it — and runs `scripts/backup.mjs`, which
+reads its own configuration.
+
+Until 2026-09-08 that script instead took its own smaller, unencrypted
+`pg_dump` of `public` and `auth`, missing `private`, Storage bytes, roles and
+every validation below; and the agent was scheduled for 03:00 on a Mac that is
+shut down overnight. It had produced nothing since it was installed in May.
+Keep the hour inside the working day: a LaunchAgent cannot wake the machine,
+and a missed weekly slot is a week with no backup. Check `backup.log` and the
+newest dated folder rather than trusting the schedule.
+
+Nothing prunes `BACKUP_DIR`; each run adds roughly 17 MB. A local source
+script alone does not activate a cloud scheduler or provision backup storage.
 
 ## Verify and recover
 
