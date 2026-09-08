@@ -77,6 +77,3 @@ The script compiles the renderer into the temporary directory, writes all icon
 and social exports, replaces the 40 light launch images, and creates their 40
 dark counterparts. Run `npm run build` afterward so the manifest colours and
 asset revisions are regenerated too.
-
-`design/brand/budgard-icon-source.png` is the superseded raster experiment and
-does not ship.

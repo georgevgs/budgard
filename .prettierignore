@@ -2,4 +2,4 @@
 src/design/tokens.generated.css
 
 # shadcn primitives are repository-protected vendor code.
-src/components/ui/
+src/common/ui/
