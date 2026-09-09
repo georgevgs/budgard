@@ -4,7 +4,7 @@
      Regenerate with `npm run docs:schema`. -->
 
 An index from each database object to the migrations that touch it, built by
-scanning `supabase/migrations`. Covers 84 migrations: 48 functions, 27 triggers, 26 tables, 87 policies, 51 indexes.
+scanning `supabase/migrations`. Covers 88 migrations: 48 functions, 27 triggers, 26 tables, 87 policies, 55 indexes.
 
 This is a **map, not a schema definition**. Migrations are append-only history
 and the live schema is what you get by replaying them, so nothing here states
@@ -597,6 +597,9 @@ First defined in `20250104165613_remote_schema.sql`.
 - defines — `20260822000000_fix_recurring_anchor_and_exclusions.sql`
 - grants on — `20260822000000_fix_recurring_anchor_and_exclusions.sql`
 - revokes on — `20260822000000_fix_recurring_anchor_and_exclusions.sql`
+- defines — `20260904170059_harden_advisor_functions.sql`
+- grants on — `20260904170059_harden_advisor_functions.sql`
+- revokes on — `20260904170059_harden_advisor_functions.sql`
 
 ### `recompute_debt_balance`
 
@@ -887,6 +890,12 @@ First defined in `20250104165613_remote_schema.sql`.
 - defines — `20250104165613_remote_schema.sql`
 - defines — `20260502000000_add_accounts.sql`
 
+### `account_balances_user_history_cursor_idx`
+
+First defined in `20260904165547_optimize_keyset_pagination.sql`.
+
+- defines — `20260904165547_optimize_keyset_pagination.sql`
+
 ### `account_balances_user_idx`
 
 First defined in `20250104165613_remote_schema.sql`.
@@ -979,6 +988,12 @@ First defined in `20250104165613_remote_schema.sql`.
 
 - defines — `20250104165613_remote_schema.sql`
 
+### `expenses_debt_history_cursor_idx`
+
+First defined in `20260904165547_optimize_keyset_pagination.sql`.
+
+- defines — `20260904165547_optimize_keyset_pagination.sql`
+
 ### `expenses_debt_id_idx`
 
 First defined in `20250104165613_remote_schema.sql`.
@@ -1029,6 +1044,12 @@ First defined in `20250104165613_remote_schema.sql`.
 - defines — `20250104165613_remote_schema.sql`
 - defines — `20260426181145_income_tracking_foundation.sql`
 
+### `expenses_user_type_history_cursor_idx`
+
+First defined in `20260904165547_optimize_keyset_pagination.sql`.
+
+- defines — `20260904165547_optimize_keyset_pagination.sql`
+
 ### `feedback_reports_created_at_idx`
 
 First defined in `20260826160000_add_ui_preferences_and_feedback.sql`.
@@ -1052,6 +1073,12 @@ First defined in `20260831171142_add_financial_connection_boundary.sql`.
 First defined in `20260831171142_add_financial_connection_boundary.sql`.
 
 - defines — `20260831171142_add_financial_connection_boundary.sql`
+
+### `financial_connections_created_by_idx`
+
+First defined in `20260909100000_index_financial_connection_created_by.sql`.
+
+- defines — `20260909100000_index_financial_connection_created_by.sql`
 
 ### `financial_connections_user_id_idx`
 

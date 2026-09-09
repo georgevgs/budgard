@@ -53,9 +53,10 @@ export type DataActions = {
 // Carved out so consumers don't re-render on every expense/income mutation.
 export type DataConfig = {
   isInitialized: boolean;
-  // Flips true after the deferred stage finishes loading goals, accounts,
-  // accountBalances and debts. Views that depend on those (GoalsList,
-  // NetWorthView, DebtsView) wait on this before rendering content.
+  // Flips true after the deferred stage finishes: accounts, templates and
+  // notification settings in one group, goals, accountBalances and debts in
+  // the other. Views that depend on those (PlanView, GoalsList, NetWorthView,
+  // DebtsView) wait on this before rendering content.
   isSecondaryLoaded: boolean;
   // Flips true once a screen has requested the pre-cutoff transaction tail and
   // it has landed (or definitively failed). Until then only the recent window

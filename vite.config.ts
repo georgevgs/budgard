@@ -302,6 +302,11 @@ export default defineConfig({
           // Social-preview image: fetched by crawlers off our CDN, never by
           // the app itself. No reason to spend 98 KB of every SW install.
           "**/og-image.png",
+          // Manifest screenshots: shown by the browser's install prompt, and
+          // by nothing in the app. 125 KB on every install for an image most
+          // users never see, and the one moment it is needed — deciding to
+          // install — is by definition an online one, so the network serves it.
+          "**/screenshots/**",
           "**/assets/pdfmake-*.js",
           "**/assets/vfs_fonts-*.js",
           "**/assets/sentry-*.js",

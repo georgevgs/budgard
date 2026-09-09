@@ -138,6 +138,15 @@ beforeEach(() => {
   svc.getExpenses = twoStageExpenses() as typeof svc.getExpenses;
   svc.getIncomes = twoStageIncomes() as typeof svc.getIncomes;
   svc.refreshDebtBalances.mockResolvedValue(undefined);
+  // Rebuilt per test rather than adjusted with mockImplementationOnce: the
+  // deferred-stage cases below need every call to a domain to be slow or to
+  // fail, so that a regression folding one back into the essential batch is
+  // caught rather than served by the leftover default.
+  svc.getTemplates = vi.fn(async () => []) as typeof svc.getTemplates;
+  svc.getNotificationSettings = vi.fn(async () => ({
+    daily_reminder_hour: null,
+    notification_preferences: {},
+  })) as typeof svc.getNotificationSettings;
 });
 
 afterEach(() => {
@@ -171,6 +180,50 @@ describe('useDataLayer boot fetch', () => {
     expect(result.current.accountsSlice.accountBalances).toHaveLength(1);
     // Interest is accrued before the balances are read.
     expect(svc.refreshDebtBalances).toHaveBeenCalled();
+  });
+
+  it('starts the deferred domains without waiting for the essential batch', async () => {
+    const pending = deferred<Awaited<ReturnType<typeof svc.getExpenses>>>();
+    svc.getExpenses.mockImplementationOnce(() => pending.promise);
+
+    renderHook(() => useDataLayer());
+
+    // Still blocked on the essential batch, yet already asking for the rest:
+    // deferring these must not cost them a round trip.
+    await waitFor(() => expect(svc.getAccounts).toHaveBeenCalled());
+    expect(svc.getTemplates).toHaveBeenCalled();
+    expect(svc.getNotificationSettings).toHaveBeenCalled();
+
+    await act(async () =>
+      pending.resolve([{ id: 'e-recent', date: '2026-08-01' }]),
+    );
+  });
+
+  it('initialises the dashboard even when a deferred read is slow', async () => {
+    // A settings read that never lands used to hold back every expense on
+    // screen, because it shared one Promise.all with them.
+    svc.getNotificationSettings.mockImplementation(
+      () => deferred<never>().promise,
+    );
+
+    const { result } = renderHook(() => useDataLayer());
+
+    await waitFor(() => expect(result.current.config.isInitialized).toBe(true));
+    expect(result.current.expenses.map((e) => e.id)).toContain('e-recent');
+  });
+
+  it('initialises the dashboard even when a deferred read fails', async () => {
+    svc.getTemplates.mockRejectedValue(new Error('templates down'));
+
+    const { result } = renderHook(() => useDataLayer());
+
+    await waitFor(() => expect(result.current.config.isInitialized).toBe(true));
+    // The dashboard is whole; only the deferred domains are missing, and they
+    // report themselves as still loading rather than as empty.
+    expect(result.current.categoriesSlice.categories).toHaveLength(1);
+    expect(result.current.config.isSecondaryLoaded).toBe(false);
+    expect(mockToast).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockSentry.captureException).toHaveBeenCalled());
   });
 
   it('still loads debts when the interest refresh fails', async () => {
@@ -423,7 +476,11 @@ describe('useDataLayer session lifecycle', () => {
       });
       expect(result.current.expenses).toEqual([]);
       expect(result.current.config.isInitialized).toBe(false);
-      expect(svc.getGoals).not.toHaveBeenCalled();
+      // The deferred stage goes out with the essential batch rather than
+      // after it, so what keeps its results out of state is the aborted
+      // signal, not a start it never got to.
+      expect(result.current.goals).toEqual([]);
+      expect(result.current.config.isSecondaryLoaded).toBe(false);
       expect(mockToast).not.toHaveBeenCalled();
       expect(mockSentry.captureException).not.toHaveBeenCalled();
       expect(cache.clearDataSnapshot).toHaveBeenCalled();

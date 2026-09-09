@@ -1,0 +1,31 @@
+-- Restores inlining for the legacy `tag:tags(*)` compatibility relationship.
+--
+-- 20260731165831_restore_legacy_tags_embed.sql created public.tags(expenses)
+-- and said so explicitly: "The single-SELECT body carries no SET clause and is
+-- fully schema-qualified, so Postgres inlines it into the outer query." That
+-- was load-bearing, not incidental. 20260904170059_harden_advisor_functions
+-- then added SET search_path = '' to satisfy the advisor's
+-- function_search_path_mutable lint, and a SQL function carrying a SET clause
+-- cannot be inlined — see
+-- https://wiki.postgresql.org/wiki/Inlining_of_SQL_functions.
+--
+-- Measured on a read of 725 recent expenses with the category/tag embeds: the
+-- function-scan plan calls the function once per row (725 executions, 123.0 ms)
+-- where the inlined plan memoizes the tag lookup to six evaluations (36.1 ms).
+-- Only stale PWA bundles take this path — current clients name
+-- tags!expenses_tag_id_fkey directly — but those are precisely the installs
+-- already having the worst time.
+--
+-- Dropping the SET clause is safe here, and the advisor warning it re-opens is
+-- a false positive for this function specifically:
+--   * SECURITY INVOKER (the default), so the body runs with the caller's own
+--     rights and tags RLS still decides which rows it can see. search_path
+--     cannot be used to gain privileges the caller does not already hold.
+--   * The one object it names is written public.tags, so no caller-controlled
+--     schema can shadow it whatever search_path is set to.
+-- Both properties are what made the original body safe before the ALTER, and
+-- neither changed.
+--
+-- Rollback: ALTER FUNCTION public.tags(public.expenses) SET search_path = '';
+-- (restores the advisor-clean state and the per-row function scan with it).
+ALTER FUNCTION public.tags(public.expenses) RESET search_path;

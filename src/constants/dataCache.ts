@@ -34,10 +34,11 @@ export type DataSnapshot = {
   defaultSavingsPct: number | null;
   dailyReminderHour: number | null;
   notificationPreferences: NotificationPreferences;
-  // Whether the deferred fetch stage (goals, account balances, debts) had
-  // completed when this snapshot was taken. Hydrating an incomplete snapshot
-  // must not flip isSecondaryLoaded, or those views would flash an empty
-  // state instead of their loading skeleton.
+  // Whether the deferred fetch stage (accounts, templates and notification
+  // settings in one group; goals, account balances and debts in the other)
+  // had completed when this snapshot was taken. Hydrating an incomplete
+  // snapshot must not flip isSecondaryLoaded, or those views would flash an
+  // empty state instead of their loading skeleton.
   secondaryLoaded: boolean;
 };
 

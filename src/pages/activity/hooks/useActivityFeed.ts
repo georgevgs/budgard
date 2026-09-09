@@ -30,11 +30,21 @@ export const useActivityFeed = (
     null,
   );
 
+  // Merging the two collections clones every row and sorts the result, and
+  // that answer only changes when the rows do. Keeping it out of the filter
+  // memo below means a keystroke re-runs the filters over an already-sorted
+  // array instead of rebuilding it — the cost of typing stops growing with
+  // the length of the history.
+  const allRows = useMemo(
+    () =>
+      [
+        ...expenses.map((row) => normalizeType(row, 'expense')),
+        ...incomes.map((row) => normalizeType(row, 'income')),
+      ].sort(compareNewestFirst),
+    [expenses, incomes],
+  );
+
   const activity = useMemo(() => {
-    const allRows = [
-      ...expenses.map((row) => normalizeType(row, 'expense')),
-      ...incomes.map((row) => normalizeType(row, 'income')),
-    ].sort(compareNewestFirst);
     const normalizedSearch = search.trim().toLocaleLowerCase();
     const isSearchingAllTime = normalizedSearch.length > 0;
     const effectivePeriod = resolveEffectivePeriod(period, isSearchingAllTime);
@@ -57,8 +67,7 @@ export const useActivityFeed = (
       incomeTotal: sumKind(filteredRows, 'income'),
     };
   }, [
-    expenses,
-    incomes,
+    allRows,
     kind,
     now,
     period,

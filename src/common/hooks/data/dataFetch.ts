@@ -19,7 +19,12 @@ export const fetchData = async (session: DataSession): Promise<void> => {
   const recentCutoff = getRecentCutoff();
 
   try {
-    const { expenses, incomes, ...values } = await fetchPrimaryData(
+    // Deferred domains go out now, alongside the essential batch rather than
+    // after it, so nothing is slower than it was — but they are awaited
+    // separately. A slow notification read no longer holds the dashboard
+    // back, and a failing one no longer rejects the whole boot.
+    startDeferredFetch(session, controller.signal);
+    const { expenses, incomes, ...values } = await fetchEssentialData(
       session.ownerId,
       controller.signal,
       recentCutoff,
@@ -45,7 +50,6 @@ export const fetchData = async (session: DataSession): Promise<void> => {
     session.isHydratedFromCache = false;
     session.lastFetchAt = Date.now();
     session.wasAborted = false;
-    startSecondaryFetch(session, controller.signal);
   } catch (error) {
     if (controller.signal.aborted) {
       return;
@@ -58,7 +62,11 @@ export const fetchData = async (session: DataSession): Promise<void> => {
   }
 };
 
-const fetchPrimaryData = async (
+// What the first authenticated screen is made of, and nothing else. Every
+// request here is one the dashboard cannot draw without, so they are awaited
+// together and committed in one go; anything that only a form, a settings
+// screen or a child route reads belongs in the deferred stage below.
+const fetchEssentialData = async (
   ownerId: string,
   signal: AbortSignal,
   recentCutoff: string,
@@ -70,11 +78,8 @@ const fetchPrimaryData = async (
     recurringExpenses,
     recurringIncomes,
     budget,
-    notifications,
     tags,
-    templates,
     categoryBudgets,
-    accounts,
     noSpendDays,
   ] = await Promise.all([
     dataService.getCategories(ownerId, signal),
@@ -83,12 +88,8 @@ const fetchPrimaryData = async (
     dataService.getRecurringExpenses(ownerId, signal),
     dataService.getRecurringIncomes(ownerId, signal),
     dataService.getBudget(ownerId, signal),
-    dataService.getNotificationSettings(signal),
     dataService.getTags(ownerId, signal),
-    dataService.getTemplates(ownerId, signal),
     dataService.getCategoryBudgets(ownerId, signal),
-    // Accounts are needed by the recurring form on the initial tabs.
-    dataService.getAccounts(ownerId, signal),
     dataService.getNoSpendDays(ownerId, signal),
   ]);
 
@@ -99,42 +100,35 @@ const fetchPrimaryData = async (
     recurringExpenses,
     recurringIncomes,
     tags,
-    templates,
     categoryBudgets,
-    accounts,
     noSpendDays,
     monthlyBudget: budget?.monthly_amount ?? null,
     defaultCurrency: budget?.default_currency ?? 'EUR',
     defaultSavingsPct: budget?.default_savings_pct ?? null,
-    dailyReminderHour: notifications?.daily_reminder_hour ?? null,
-    notificationPreferences: notifications?.notification_preferences ?? {},
     isInitialized: true,
   };
 };
 
-// Child-route data must not block the first paint of the main tabs.
-const startSecondaryFetch = (
+// Two independent groups, both started with the essential batch. They are
+// split because the debt accrual is a write followed by a read, so anything
+// grouped with it inherits that chain's latency for no reason.
+//
+// isSecondaryLoaded flips only once both have landed. That flag is the
+// loading state the deferred domains are read behind — PlanView, GoalsList,
+// NetWorthView and DebtsView all wait on it before drawing content.
+const startDeferredFetch = (
   session: DataSession,
   signal: AbortSignal,
 ): void => {
-  const { ownerId, setters } = session;
   Promise.all([
-    dataService.getGoals(ownerId, signal),
-    dataService.getAllAccountBalances(ownerId, signal),
-    // Accrual is best-effort; a failure must not stop debts from loading.
-    dataService
-      .refreshDebtBalances(ownerId)
-      .catch(() => undefined)
-      .then(() => dataService.getDebts(ownerId, signal)),
+    fetchAuxiliaryDomains(session, signal),
+    fetchChildRouteDomains(session, signal),
   ])
-    .then(([goals, balances, debts]) => {
+    .then(() => {
       if (signal.aborted) {
         return;
       }
-      setters.setGoals(goals);
-      setters.setAccountBalances(balances);
-      setters.setDebts(debts);
-      setters.setIsSecondaryLoaded(true);
+      session.setters.setIsSecondaryLoaded(true);
     })
     .catch((error) => {
       if (signal.aborted || isAbortError(error) || isExpiredJwtError(error)) {
@@ -142,6 +136,54 @@ const startSecondaryFetch = (
       }
       captureException(error, { tags: { context: 'fetchSecondaryDomains' } });
     });
+};
+
+// Forms and the settings screen. None of these draws on the first paint:
+// the templates bar renders nothing until it has templates, the account
+// picker belongs to the recurring and goal forms, and notification settings
+// default to "on" in exactly the way the edge function reads a missing row.
+const fetchAuxiliaryDomains = async (
+  session: DataSession,
+  signal: AbortSignal,
+): Promise<void> => {
+  const { ownerId, setters } = session;
+  const [accounts, templates, notifications] = await Promise.all([
+    dataService.getAccounts(ownerId, signal),
+    dataService.getTemplates(ownerId, signal),
+    dataService.getNotificationSettings(signal),
+  ]);
+  if (signal.aborted) {
+    return;
+  }
+  setters.setAccounts(accounts);
+  setters.setTemplates(templates);
+  setters.setDailyReminderHour(notifications?.daily_reminder_hour ?? null);
+  setters.setNotificationPreferences(
+    notifications?.notification_preferences ?? {},
+  );
+};
+
+// Child-route data must not block the first paint of the main tabs.
+const fetchChildRouteDomains = async (
+  session: DataSession,
+  signal: AbortSignal,
+): Promise<void> => {
+  const { ownerId, setters } = session;
+  const [goals, balances, debts] = await Promise.all([
+    dataService.getGoals(ownerId, signal),
+    dataService.getAllAccountBalances(ownerId, signal),
+    // Accrual is best-effort; a failure must not stop debts from loading.
+    dataService
+      .refreshDebtBalances(ownerId)
+      .catch(() => undefined)
+      .then(() => dataService.getDebts(ownerId, signal)),
+  ]);
+  if (signal.aborted) {
+    return;
+  }
+  setters.setGoals(goals);
+  setters.setAccountBalances(balances);
+  setters.setDebts(debts);
 };
 
 const handleFetchError = (error: unknown, session: DataSession): void => {
