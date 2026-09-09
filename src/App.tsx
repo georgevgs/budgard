@@ -1,6 +1,7 @@
-import { Suspense, type ReactNode } from 'react';
+import { Suspense, useEffect, type ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from '@/common/contexts/AuthContext';
+import { useI18nReady } from '@/common/hooks/useI18nReady';
 import { usePwaUpdate } from '@/common/hooks/usePwaUpdate';
 import { useTheme } from '@/common/hooks/useTheme';
 import { lazyWithRetry } from '@/constants/lazyWithRetry';
@@ -29,8 +30,15 @@ export const App = () => {
   usePwaUpdate();
   useTheme();
   const { session, isLoading } = useAuth();
+  const isI18nReady = useI18nReady();
 
-  if (isLoading) {
+  usePrefetchAuthenticatedShell(Boolean(session));
+
+  // React mounts before the translations arrive, so this holds the same
+  // skeleton it always did until both the session and the bundle are in.
+  // Waiting on i18n here rather than around createRoot is what lets the two
+  // resolve at the same time instead of one after the other.
+  if (isLoading || !isI18nReady) {
     return renderAuthLoading(window.location.pathname);
   }
   if (session) {
@@ -81,6 +89,20 @@ const PublicApp = () => {
       </div>
     </BrowserRouter>
   );
+};
+
+// <AuthenticatedApp> only renders once the skeleton above is done, so without
+// this its chunk could not start downloading until the translations had landed
+// too. Knowing there is a session is enough to start fetching it.
+const usePrefetchAuthenticatedShell = (hasSession: boolean) => {
+  useEffect(() => {
+    if (!hasSession) {
+      return;
+    }
+    loadAuthenticatedApp().catch(() => {
+      // The lazy boundary owns the real failure path (reset.html recovery).
+    });
+  }, [hasSession]);
 };
 
 const loadAuthenticatedApp = async () => {

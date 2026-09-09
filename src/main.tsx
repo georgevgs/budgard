@@ -2,7 +2,10 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RootProvider } from '@/common/contexts/RootProvider';
 import { App } from '@/App';
-import { i18nReady } from '@/config/i18n';
+// Side-effect import: evaluating this module initialises i18next
+// synchronously, before anything below renders. It no longer gates the mount —
+// see the comment in that file.
+import '@/config/i18n';
 import { captureException, loadSentry } from '@/config/sentry';
 // Imported through the module graph rather than @import-ed from index.css:
 // Tailwind inlines its own @import chain and the relative url()s inside would
@@ -104,12 +107,14 @@ if (reloadAttempts < 1) {
   );
 }
 
-i18nReady.then(() => {
-  createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-      <RootProvider>
-        <App />
-      </RootProvider>
-    </StrictMode>,
-  );
-});
+// Mounted without waiting for the translations: the locale download, the auth
+// session check and the authenticated shell chunk then overlap instead of
+// queueing behind a JSON file. App holds its loading skeleton until the bundle
+// lands, so no raw translation key ever reaches the screen.
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <RootProvider>
+      <App />
+    </RootProvider>
+  </StrictMode>,
+);
