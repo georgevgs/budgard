@@ -7,7 +7,7 @@ import { ExpensesForm } from '@/pages/expenses/components/ExpensesForm';
 import { useCategoriesData, useDataConfig } from '@/common/contexts/DataContext';
 import { FORM_TYPES, type FormType } from '@/common/components/layout/formTypes';
 
-type FormsManagerProps = {
+export type FormsManagerProps = {
   formType: FormType;
   onClose: () => void;
   selectedExpense?: Expense;

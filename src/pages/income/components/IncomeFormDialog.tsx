@@ -3,7 +3,7 @@ import { Dialog, DialogContent } from '@/common/ui/dialog';
 import { IncomeForm } from '@/pages/income/components/IncomeForm';
 import type { Expense } from '@/types/Expense';
 
-type IncomeFormDialogProps = {
+export type IncomeFormDialogProps = {
   open: boolean;
   income: Expense | undefined;
   onClose: () => void;

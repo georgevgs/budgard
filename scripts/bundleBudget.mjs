@@ -26,10 +26,13 @@ const BUDGETS = {
   // shell, the Today route and the fallback locale. This is the number that
   // actually describes a cold start — the critical path above stops at
   // index.html and so misses more than half of it.
-  authenticatedStartupGzipKb: 430,
+  authenticatedStartupGzipKb: 375,
   // What the service worker downloads on install. Every user pays this on
-  // every update, so it is the number that decides how heavy an update feels.
-  precacheGzipKb: 545,
+  // a fresh install, and on an update pays only for the chunks whose revision
+  // moved. Raised from 545 when the transaction forms were split out of the
+  // shell: eight more chunks cost ~7 kB of per-chunk boilerplate here to take
+  // 48 kB off the authenticated startup above, which is the better trade.
+  precacheGzipKb: 565,
   // No single precached chunk should dominate an install.
   largestPrecachedChunkGzipKb: 80,
 };

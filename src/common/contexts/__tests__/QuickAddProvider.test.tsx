@@ -1,13 +1,26 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-vi.mock('@/common/components/layout/SpeedDial', () => ({ SpeedDial: () => <div data-testid="speed-dial" />,
+type SpeedDialProps = { onAddExpense: () => void; onAddIncome: () => void };
+
+vi.mock('@/common/components/layout/SpeedDial', () => ({
+  SpeedDial: ({ onAddExpense, onAddIncome }: SpeedDialProps) => (
+    <div data-testid="speed-dial">
+      <button onClick={onAddExpense}>add expense</button>
+      <button onClick={onAddIncome}>add income</button>
+    </div>
+  ),
 }));
 
-vi.mock('@/common/components/layout/FormsManager', () => ({ FormsManager: () => null }));
+// These two render a marker rather than null: the point of the tests below is
+// whether the module is mounted at all, not what it draws.
+vi.mock('@/common/components/layout/FormsManager', () => ({
+  FormsManager: () => <div data-testid="expense-form" />,
+}));
 vi.mock('@/pages/expenses/components/QuickAddSheet', () => ({ QuickAddSheet: () => null }));
-vi.mock('@/pages/income/components/IncomeFormDialog', () => ({ IncomeFormDialog: () => null,
+vi.mock('@/pages/income/components/IncomeFormDialog', () => ({
+  IncomeFormDialog: () => <div data-testid="income-form" />,
 }));
 
 vi.mock('@/common/contexts/DataContext', () => ({
@@ -37,12 +50,27 @@ vi.mock('@/pages/expenses/hooks/useOptimisticExpenseActions', () => ({
 }));
 
 import { QuickAddProvider } from '@/common/contexts/QuickAddProvider';
+import { useQuickAdd } from '@/common/contexts/QuickAddContext';
+import type { Expense } from '@/types/Expense';
+
+// The FAB opens the keypad sheet, not the full form — the full expense form is
+// only reached by "More details" or by editing a row. Editing is the shorter
+// of the two to drive from here.
+const EditExpenseButton = () => {
+  const { handleExpenseEdit } = useQuickAdd();
+
+  return (
+    <button onClick={() => handleExpenseEdit({ id: 'e1' } as Expense)}>
+      edit expense
+    </button>
+  );
+};
 
 const renderAt = (path: string) =>
   render(
     <MemoryRouter initialEntries={[path]}>
       <QuickAddProvider>
-        <div />
+        <EditExpenseButton />
       </QuickAddProvider>
     </MemoryRouter>,
   );
@@ -75,5 +103,21 @@ describe('contexts/QuickAddProvider', () => {
       expect(screen.queryByTestId('speed-dial')).toBeNull();
       view.unmount();
     }
+  });
+
+  // The full forms carry react-hook-form, the date picker and the Zod feature
+  // schemas, so they are lazy and must not be mounted by the shell itself —
+  // and must still arrive when someone actually asks for one.
+  it.each([
+    ['edit expense', 'expense-form'],
+    ['add income', 'income-form'],
+  ])('mounts the full form only once %s is pressed', async (label, testId) => {
+    renderAt('/today');
+
+    expect(screen.queryByTestId(testId)).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: label }));
+
+    expect(await screen.findByTestId(testId)).toBeInTheDocument();
   });
 });

@@ -12,6 +12,7 @@ import {
   prefetchMainTabModules,
 } from '@/common/components/routing/lazyRouteModules';
 import { QuickAddProvider } from '@/common/contexts/QuickAddProvider';
+import { prefetchFormModules } from '@/common/components/layout/lazyFormModules';
 import { useAppLock } from '@/common/hooks/useAppLock';
 import { useOfflineSync } from '@/common/hooks/useOfflineSync';
 import { usePageRefresh } from '@/common/hooks/usePageRefresh';
@@ -82,16 +83,23 @@ const renderLockScreen = (lock: ReturnType<typeof useAppLock>) => {
 
 const useIdleTabPrefetch = () => {
   useEffect(() => {
+    // The other tabs and the full transaction forms: everything a user
+    // reaches within seconds of landing, fetched once the first screen has
+    // had the network to itself.
+    const prefetch = () => {
+      prefetchMainTabModules();
+      prefetchFormModules();
+    };
     const requestIdleCallback = window.requestIdleCallback;
     if (typeof requestIdleCallback === 'function') {
-      const handle = requestIdleCallback(prefetchMainTabModules, {
+      const handle = requestIdleCallback(prefetch, {
         timeout: 4000,
       });
 
       return () => window.cancelIdleCallback?.(handle);
     }
 
-    const timer = window.setTimeout(prefetchMainTabModules, 2000);
+    const timer = window.setTimeout(prefetch, 2000);
 
     return () => window.clearTimeout(timer);
   }, []);
