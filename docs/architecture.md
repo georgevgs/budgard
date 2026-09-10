@@ -152,6 +152,24 @@ keyset-paginated fetch and `isHistoryLoaded` tells consumers whether the tail
 is present. Routine foreground refreshes stay bounded unless the tail was
 already loaded.
 
+Financial summaries retain a 30-second foreground freshness window. Overlapping
+automatic refreshes share a request; manual refresh supersedes it and refreshes
+all previously requested data. Once transaction history has loaded, refreshes
+include it too so edits and deletions on another device do not leave a stale tail.
+Debt accrual runs once per UTC day per financial-space session, retries after
+failure, and can always be forced by manual refresh. Debt/payment writes still
+recompute balances on the server.
+
+Templates, notification settings and account-balance history are requested by
+`OnDemandData` only when their form or screen opens. Each domain shares in-flight
+reads and revalidates after 30 seconds on opening/resume or on reconnect. Their
+loading/error boundaries prevent editable defaults and false empty histories;
+known cached domains remain available offline. Snapshots record which optional
+domains actually loaded, while accepting older snapshots that fetched all of
+them during boot. Today's net-worth tile computes only its headline and current
+exchange rates; historical conversion and chart work belong to the net-worth
+screen.
+
 #### Consumer hooks
 
 Prefer the narrow ones — they re-render only when their own slice changes:

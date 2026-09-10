@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useNetWorth } from '@/common/hooks/useNetWorth';
+import { fetchExchangeRate } from '@/common/api/exchangeRateService';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import type { Debt } from '@/types/Debt';
@@ -100,6 +101,7 @@ const makeBalance = (
 
 describe('useNetWorth', () => {
   beforeEach(() => {
+    vi.mocked(fetchExchangeRate).mockClear();
     vi.setSystemTime(new Date('2026-05-01'));
     dataMock = {
       accounts: [],
@@ -183,6 +185,31 @@ describe('useNetWorth', () => {
       expect(result.current.summary.assets).toBe(900);
     });
     expect(result.current.summary.total).toBe(900);
+  });
+
+  it('keeps the headline current without fetching historical rates for a summary tile', async () => {
+    dataMock.accounts = [
+      makeAccount({
+        id: 'usd',
+        default_currency: 'USD',
+        current_balance: 1000,
+      }),
+    ];
+    dataMock.accountBalances = [
+      makeBalance('usd', '2026-01-01', 500),
+      makeBalance('usd', '2026-02-01', 800),
+    ];
+    const { result } = renderHook(() => useNetWorth(false));
+
+    await waitFor(() => expect(result.current.summary.total).toBe(900));
+    expect(result.current.series).toEqual([]);
+    expect(fetchExchangeRate).toHaveBeenCalledTimes(1);
+    expect(fetchExchangeRate).toHaveBeenCalledWith(
+      'USD',
+      '2026-05-01',
+      undefined,
+      'EUR',
+    );
   });
 
   it('builds a forward-filled time series across snapshots', () => {

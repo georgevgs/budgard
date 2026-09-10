@@ -43,6 +43,7 @@ export type DataState = {
   defaultSavingsPct: number | null;
   dailyReminderHour: number | null;
   notificationPreferences: NotificationPreferences;
+  loadedOptionalDomains: string[];
   isInitialized: boolean;
   // Sticky once true — flips false only on the sign-out reset, never on a
   // background refetch, so /goals, /networth and /debts don't blank on a
@@ -75,6 +76,7 @@ export const EMPTY_DATA: DataState = {
   defaultCurrency: 'EUR',
   defaultSavingsPct: null,
   notificationPreferences: {},
+  loadedOptionalDomains: [],
   dailyReminderHour: null,
   isInitialized: false,
   isSecondaryLoaded: false,
@@ -182,7 +184,17 @@ const pickSnapshotFields = (snapshot: DataSnapshot): Partial<DataState> => ({
   defaultSavingsPct: snapshot.defaultSavingsPct,
   dailyReminderHour: snapshot.dailyReminderHour,
   notificationPreferences: snapshot.notificationPreferences,
+  loadedOptionalDomains:
+    snapshot.loadedOptionalDomains ?? legacyOptionalDomains(snapshot),
 });
+
+const legacyOptionalDomains = (snapshot: DataSnapshot): string[] => {
+  if (snapshot.secondaryLoaded) {
+    return ['templates', 'notifications', 'accountBalances'];
+  }
+
+  return [];
+};
 
 // The locally cached snapshot is every data field plus a flag describing how
 // far the fetch had got — i.e. the state minus the two booleans that describe
@@ -207,6 +219,8 @@ export const toSnapshot = (state: DataState): DataSnapshot => {
 export const createSetters = (
   dispatch: (action: DataAction) => void,
 ): DataSetters => ({
+  setLoadedOptionalDomains: (value) =>
+    dispatch({ type: 'set', key: 'loadedOptionalDomains', value }),
   setCategories: (value) => dispatch({ type: 'set', key: 'categories', value }),
   setExpenses: (value) => dispatch({ type: 'set', key: 'expenses', value }),
   setIncomes: (value) => dispatch({ type: 'set', key: 'incomes', value }),

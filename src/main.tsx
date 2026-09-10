@@ -7,6 +7,7 @@ import { App } from '@/App';
 // see the comment in that file.
 import '@/config/i18n';
 import { captureException, loadSentry } from '@/config/sentry';
+import { scheduleBackgroundWork } from '@/constants/backgroundWork';
 // Imported through the module graph rather than @import-ed from index.css:
 // Tailwind inlines its own @import chain and the relative url()s inside would
 // stop resolving, shipping dead font URLs. Vite rebases them correctly here.
@@ -75,11 +76,12 @@ scheduleIdleWork(() => {
       return;
     }
 
-    import('@/config/sentryHeavy')
-      .then((m) => m.initHeavySentryIntegrations())
-      .catch(() => {
-        // Best-effort: replay/profiling must never block or break the app.
-      });
+    scheduleBackgroundWork([
+      () =>
+        import('@/config/sentryHeavy').then((m) =>
+          m.initHeavySentryIntegrations(),
+        ),
+    ]);
   });
 });
 

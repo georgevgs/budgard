@@ -34,8 +34,10 @@ export type DataSnapshot = {
   defaultSavingsPct: number | null;
   dailyReminderHour: number | null;
   notificationPreferences: NotificationPreferences;
-  // Whether the deferred fetch stage (accounts, templates and notification
-  // settings in one group; goals, account balances and debts in the other)
+  // Older snapshots fetched every optional domain during boot. New snapshots
+  // record which ones actually loaded so an unvisited screen isn't "empty" offline.
+  loadedOptionalDomains?: string[];
+  // Whether the deferred financial summaries (accounts, goals and debts)
   // had completed when this snapshot was taken. Hydrating an incomplete
   // snapshot must not flip isSecondaryLoaded, or those views would flash an
   // empty state instead of their loading skeleton.
@@ -225,6 +227,15 @@ const isStructurallyValid = (data: unknown): data is DataSnapshot => {
     return false;
   }
   if (typeof record.secondaryLoaded !== 'boolean') {
+    return false;
+  }
+  if (
+    record.loadedOptionalDomains !== undefined &&
+    (!Array.isArray(record.loadedOptionalDomains) ||
+      !record.loadedOptionalDomains.every(
+        (domain) => typeof domain === 'string',
+      ))
+  ) {
     return false;
   }
   // Scalar fields are number-or-null; reject anything else so a malformed or

@@ -1,3 +1,4 @@
+import type { OnDemandDomain } from '@/common/hooks/data/dataOptional';
 import type { Dispatch, SetStateAction } from 'react';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
@@ -21,6 +22,10 @@ import type { NotificationPreferences } from '@/types/Budget';
 // by data mutations.
 export type DataActions = {
   refreshData: () => Promise<void>;
+  loadOptionalData: (
+    domain: OnDemandDomain,
+    isForced?: boolean,
+  ) => Promise<void>;
   loadHistory: () => Promise<void>;
   refreshExpenses: () => Promise<void>;
   refreshIncomes: () => Promise<void>;
@@ -53,9 +58,7 @@ export type DataActions = {
 // Carved out so consumers don't re-render on every expense/income mutation.
 export type DataConfig = {
   isInitialized: boolean;
-  // Flips true after the deferred stage finishes: accounts, templates and
-  // notification settings in one group, goals, accountBalances and debts in
-  // the other. Views that depend on those (PlanView, GoalsList, NetWorthView,
+  // Flips true after accounts, goals and debts finish loading. Views that depend on those (PlanView, GoalsList, NetWorthView,
   // DebtsView) wait on this before rendering content.
   isSecondaryLoaded: boolean;
   // Flips true once a screen has requested the pre-cutoff transaction tail and

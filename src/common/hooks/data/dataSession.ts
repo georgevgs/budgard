@@ -2,6 +2,10 @@ import type { DataAction, DataSetters } from '@/common/hooks/data/dataReducer';
 import type { TranslateFunction } from '@/constants/translate';
 import type { useToast } from '@/common/hooks/useToast';
 import { hasDataSnapshot } from '@/constants/dataCache';
+import type {
+  OnDemandDomain,
+  OnDemandRequest,
+} from '@/common/hooks/data/dataOptional';
 
 type DataFeedback = {
   t: TranslateFunction;
@@ -19,6 +23,9 @@ export type DataSession = {
   isActive: boolean;
   controller: AbortController | null;
   isFetching: boolean;
+  fetchPromise: Promise<void> | null;
+  lastDebtAccrualDay: string | null;
+  optionalRequests: Map<OnDemandDomain, OnDemandRequest>;
   lastFetchAt: number;
   wasAborted: boolean;
   isHydratedFromCache: boolean;
@@ -43,6 +50,9 @@ export const createDataSession = (
   isActive: true,
   controller: null,
   isFetching: false,
+  fetchPromise: null,
+  lastDebtAccrualDay: null,
+  optionalRequests: new Map(),
   lastFetchAt: 0,
   wasAborted: false,
   isHydratedFromCache: hasDataSnapshot(spaceKey),
@@ -57,6 +67,11 @@ export const abortDataSession = (session: DataSession): void => {
     session.wasAborted = true;
   }
   session.controller?.abort();
+  session.fetchPromise = null;
+  for (const request of session.optionalRequests.values()) {
+    request.controller?.abort();
+    request.promise = null;
+  }
   session.historyController?.abort();
   session.historyLoad = null;
 };

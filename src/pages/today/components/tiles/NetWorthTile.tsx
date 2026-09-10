@@ -9,7 +9,7 @@ import { BentoTile, TileLabel } from '@/common/components/bento';
 // Available to anyone who wants it in the grid, which is what Arrange is for.
 export const NetWorthTile = () => {
   const { t } = useTranslation();
-  const { summary, isComputing } = useNetWorth();
+  const { summary, isComputing } = useNetWorth(false);
   const { defaultCurrency } = useDataConfig();
 
   return (

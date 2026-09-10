@@ -5,6 +5,7 @@ import { AmountKeypad } from '@/common/components/common/AmountKeypad';
 import { QuickAddCategories } from '@/common/components/common/QuickAddCategories';
 import { QuickAddName } from '@/common/components/common/QuickAddName';
 import { QuickAddTemplates } from '@/pages/expenses/components/QuickAddTemplates';
+import { OnDemandData } from '@/common/components/onDemandData/OnDemandData';
 import { QuickReceiptScanAction } from '@/pages/expenses/components/QuickReceiptScanAction';
 import { useQuickAddDraft } from '@/common/hooks/useQuickAddDraft';
 import { useQuickReceiptScan } from '@/pages/expenses/hooks/useQuickReceiptScan';
@@ -132,7 +133,11 @@ const renderTemplates = (
     return null;
   }
 
-  return <QuickAddTemplates onUse={onUse} onClose={onClose} />;
+  return (
+    <OnDemandData domain="templates">
+      <QuickAddTemplates onUse={onUse} onClose={onClose} />
+    </OnDemandData>
+  );
 };
 
 const renderActions = (

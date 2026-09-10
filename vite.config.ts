@@ -22,7 +22,7 @@ import { PWA_NAVIGATION_DENYLIST } from "./src/boot/pwaNavigation.ts";
 //
 // Only group a package here when it is EITHER genuinely needed at boot
 // (react, supabase) OR must be kept whole and off the critical path
-// (sentry). Grouping anything else backfires: rolldown hoists a shared
+// (Sentry core). Grouping anything else backfires: rolldown hoists a shared
 // module into whichever named chunk already exists, so one eager import can
 // drag in the whole group. `@radix-ui/react-slot` (eager via Button) used to
 // land in a "ui-vendor" group holding dialog/select/popover/dropdown, and
@@ -47,9 +47,10 @@ const chunkForModule = (id: string): string | undefined => {
     return undefined;
   }
 
-  // Whole Sentry SDK (loaded lazily via src/config/sentry.ts) in one chunk.
-  if (matchesPackage(id, ["@sentry", "@sentry-internal"])) {
-    return "sentry";
+  // Name only the shared core, so Workbox can exclude it. Browser/replay
+  // integrations stay naturally split between sentryClient and sentryHeavy.
+  if (matchesPackage(id, ["@sentry/core"])) {
+    return "sentry-core";
   }
 
   if (
@@ -311,6 +312,7 @@ export default defineConfig({
           "**/assets/vfs_fonts-*.js",
           "**/assets/sentry-*.js",
           "**/assets/sentryHeavy-*.js",
+          "**/assets/sentryClient-*.js",
           // Same rule as the PDF and OCR runtimes above: optional and
           // user-initiated. Image compression only runs when someone attaches
           // a receipt photo, and the landing page is never reached by an

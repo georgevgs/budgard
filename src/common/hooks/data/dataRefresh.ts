@@ -3,6 +3,7 @@ import { dataService } from '@/common/api/dataService';
 import type { DataSession } from '@/common/hooks/data/dataSession';
 import { replaceRecentWindow } from '@/common/contexts/dataContextHelpers';
 import { getRecentCutoff } from '@/constants/dataCache';
+import { loadOptionalData } from '@/common/hooks/data/dataOptional';
 
 export const refreshTransactions = (
   session: DataSession,
@@ -36,15 +37,14 @@ export const refreshTransactions = (
 
 export const refreshAccounts = (session: DataSession): Promise<void> => {
   return runRefresh(session, 'refresh accounts', async () => {
-    const [accounts, balances] = await Promise.all([
-      dataService.getAccounts(session.ownerId),
-      dataService.getAllAccountBalances(session.ownerId),
-    ]);
+    const accounts = await dataService.getAccounts(session.ownerId);
     if (!session.isActive) {
       return;
     }
     session.setters.setAccounts(accounts);
-    session.setters.setAccountBalances(balances);
+    if (session.optionalRequests.has('accountBalances')) {
+      await loadOptionalData(session, 'accountBalances', true);
+    }
   });
 };
 

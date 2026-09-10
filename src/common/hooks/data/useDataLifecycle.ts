@@ -15,6 +15,11 @@ import {
   refreshAccounts,
   refreshDebts,
 } from '@/common/hooks/data/dataRefresh';
+import {
+  loadOptionalData,
+  DATA_FRESH_MS,
+  type OnDemandDomain,
+} from '@/common/hooks/data/dataOptional';
 import { clearDataSnapshot } from '@/constants/dataCache';
 
 // The mutable session stays in this hook. Helpers receive it only from
@@ -74,7 +79,14 @@ export const useDataLifecycle = (
 
   return useMemo(
     () => ({
-      refreshData: () => runForSpace(sessionRef, spaceKey, fetchData),
+      refreshData: () =>
+        runForSpace(sessionRef, spaceKey, (session) =>
+          fetchData(session, true),
+        ),
+      loadOptionalData: (domain: OnDemandDomain, isForced = false) =>
+        runForSpace(sessionRef, spaceKey, (session) =>
+          loadOptionalData(session, domain, isForced),
+        ),
       loadHistory: () => runForSpace(sessionRef, spaceKey, loadHistory),
       refreshExpenses: () =>
         runForSpace(sessionRef, spaceKey, (session) =>
@@ -112,7 +124,7 @@ const handleVisibilityChange = (session: DataSession): void => {
 
     return;
   }
-  if (session.wasAborted || Date.now() - session.lastFetchAt >= 30_000) {
+  if (session.wasAborted || Date.now() - session.lastFetchAt >= DATA_FRESH_MS) {
     void fetchData(session);
   }
   if (session.isHistoryRequested && !session.isHistoryLoaded) {

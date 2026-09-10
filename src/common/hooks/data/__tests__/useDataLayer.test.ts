@@ -87,6 +87,7 @@ import { EMPTY_DATA, toSnapshot } from '@/common/hooks/data/dataReducer';
 import { DataProvider } from '@/common/contexts/DataProvider';
 import { useExpensesData } from '@/common/contexts/DataContext';
 import { useOnDemandHistory } from '@/common/hooks/data/useOnDemandHistory';
+import { useOnDemandData } from '@/common/components/onDemandData/hooks/useOnDemandData';
 
 // getExpenses/getIncomes take the owner id first, then (signal, sinceDate,
 // beforeDate). Boot asks for the recent window (a `sinceDate`); loadHistory
@@ -108,6 +109,8 @@ const twoStageExpenses = () =>
       before?: unknown,
     ) => {
       if (before !== undefined) return olderExpenses;
+      if (_since === undefined)
+        return [...olderExpenses, { id: 'e-recent', date: '2026-08-01' }];
 
       return [{ id: 'e-recent', date: '2026-08-01' }];
     },
@@ -122,6 +125,8 @@ const twoStageIncomes = () =>
       before?: unknown,
     ) => {
       if (before !== undefined) return olderIncomes;
+      if (_since === undefined)
+        return [...olderIncomes, { id: 'i-recent', date: '2026-08-01' }];
 
       return [{ id: 'i-recent', date: '2026-08-01' }];
     },
@@ -155,6 +160,37 @@ afterEach(() => {
 });
 
 describe('useDataLayer boot fetch', () => {
+  it('leaves form, notification and account history reads until requested', async () => {
+    const { result } = renderHook(() => useDataLayer());
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+
+    expect(svc.getTemplates).not.toHaveBeenCalled();
+    expect(svc.getNotificationSettings).not.toHaveBeenCalled();
+    expect(svc.getAllAccountBalances).not.toHaveBeenCalled();
+    expect(result.current.accountsSlice.accounts).toEqual([]);
+    expect(result.current.debts).toHaveLength(1);
+  });
+
+  it('keeps finance fresh on resume without repeating successful daily accrual', async () => {
+    const clock = vi
+      .spyOn(Date, 'now')
+      .mockReturnValue(Date.parse('2026-09-10T10:00:00Z'));
+    const { result } = renderHook(() => useDataLayer());
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+    setVisibility('hidden');
+    clock.mockReturnValue(Date.parse('2026-09-10T10:01:00Z'));
+    setVisibility('visible');
+    await waitFor(() => expect(svc.getDebts).toHaveBeenCalledTimes(2));
+
+    expect(svc.getExpenses).toHaveBeenCalledTimes(2);
+    expect(svc.getBudget).toHaveBeenCalledTimes(2);
+    expect(svc.refreshDebtBalances).toHaveBeenCalledTimes(1);
+  });
+
   it('stage 1 initialises the app with the recent window', async () => {
     const { result } = renderHook(() => useDataLayer());
 
@@ -177,7 +213,7 @@ describe('useDataLayer boot fetch', () => {
 
     expect(result.current.goals).toHaveLength(1);
     expect(result.current.debts).toHaveLength(1);
-    expect(result.current.accountsSlice.accountBalances).toHaveLength(1);
+    expect(result.current.accountsSlice.accountBalances).toHaveLength(0);
     // Interest is accrued before the balances are read.
     expect(svc.refreshDebtBalances).toHaveBeenCalled();
   });
@@ -191,8 +227,9 @@ describe('useDataLayer boot fetch', () => {
     // Still blocked on the essential batch, yet already asking for the rest:
     // deferring these must not cost them a round trip.
     await waitFor(() => expect(svc.getAccounts).toHaveBeenCalled());
-    expect(svc.getTemplates).toHaveBeenCalled();
-    expect(svc.getNotificationSettings).toHaveBeenCalled();
+    expect(svc.getGoals).toHaveBeenCalled();
+    expect(svc.getTemplates).not.toHaveBeenCalled();
+    expect(svc.getNotificationSettings).not.toHaveBeenCalled();
 
     await act(async () =>
       pending.resolve([{ id: 'e-recent', date: '2026-08-01' }]),
@@ -213,7 +250,7 @@ describe('useDataLayer boot fetch', () => {
   });
 
   it('initialises the dashboard even when a deferred read fails', async () => {
-    svc.getTemplates.mockRejectedValue(new Error('templates down'));
+    svc.getGoals.mockRejectedValueOnce(new Error('goals down'));
 
     const { result } = renderHook(() => useDataLayer());
 
@@ -222,7 +259,7 @@ describe('useDataLayer boot fetch', () => {
     // report themselves as still loading rather than as empty.
     expect(result.current.categoriesSlice.categories).toHaveLength(1);
     expect(result.current.config.isSecondaryLoaded).toBe(false);
-    expect(mockToast).not.toHaveBeenCalled();
+    expect(mockToast).toHaveBeenCalled();
     await waitFor(() => expect(mockSentry.captureException).toHaveBeenCalled());
   });
 
@@ -269,7 +306,7 @@ describe('useDataLayer boot fetch', () => {
       await result.current.actions.refreshData();
     });
 
-    // No second tail download...
+    // The full refresh includes history in its main read, without a separate tail request.
     expect(stage2Calls(svc.getExpenses)).toHaveLength(1);
     // ...and the tail already in state survives the refetch.
     expect(result.current.expenses.map((e) => e.id)).toContain('e-old');
@@ -390,6 +427,155 @@ const setVisibility = (visibility: DocumentVisibilityState) => {
   vi.spyOn(document, 'visibilityState', 'get').mockReturnValue(visibility);
   act(() => document.dispatchEvent(new Event('visibilitychange')));
 };
+
+describe('on-demand data freshness', () => {
+  it('removes server-deleted older transactions when refreshing loaded history', async () => {
+    const { result } = renderHook(() => useDataLayer());
+    await waitFor(() => expect(result.current.config.isInitialized).toBe(true));
+    await act(async () => result.current.actions.loadHistory());
+    expect(result.current.expenses.map((row) => row.id)).toContain('e-old');
+    svc.getExpenses.mockResolvedValueOnce([
+      { id: 'e-recent', date: '2026-08-01' },
+    ]);
+    await act(async () => result.current.actions.refreshData());
+    expect(result.current.expenses.map((row) => row.id)).not.toContain('e-old');
+    expect(svc.getExpenses).toHaveBeenLastCalledWith(
+      'u1',
+      expect.any(AbortSignal),
+      undefined,
+    );
+  });
+
+  it('shares a pending read, reuses it briefly and revalidates on a later open', async () => {
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(100_000);
+    const pending = deferred<never[]>();
+    svc.getTemplates.mockImplementationOnce(() => pending.promise);
+    const { result } = renderHook(() => useDataLayer());
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+    let first!: Promise<void>;
+    let second!: Promise<void>;
+    await act(async () => {
+      first = result.current.actions.loadOptionalData('templates');
+      second = result.current.actions.loadOptionalData('templates');
+    });
+    expect(svc.getTemplates).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      pending.resolve([]);
+      await Promise.all([first, second]);
+      await result.current.actions.loadOptionalData('templates');
+    });
+    expect(svc.getTemplates).toHaveBeenCalledTimes(1);
+    clock.mockReturnValue(131_000);
+    await act(async () => result.current.actions.loadOptionalData('templates'));
+    expect(svc.getTemplates).toHaveBeenCalledTimes(2);
+    await act(async () => result.current.actions.refreshData());
+    expect(svc.getTemplates).toHaveBeenCalledTimes(3);
+    expect(svc.getNotificationSettings).not.toHaveBeenCalled();
+  });
+
+  it('does not treat a failed optional read as fresh', async () => {
+    svc.getTemplates.mockRejectedValueOnce(new Error('templates down'));
+    const { result } = renderHook(() => useDataLayer());
+    await waitFor(() => expect(result.current.config.isInitialized).toBe(true));
+    await act(async () => {
+      await expect(
+        result.current.actions.loadOptionalData('templates'),
+      ).rejects.toThrow('templates down');
+      await result.current.actions.loadOptionalData('templates');
+    });
+    expect(svc.getTemplates).toHaveBeenCalledTimes(2);
+  });
+
+  it('discards optional data after switching financial spaces', async () => {
+    const pending = deferred<never[]>();
+    svc.getTemplates.mockImplementationOnce(() => pending.promise);
+    const { result, rerender } = renderHook(() => useDataLayer());
+    await waitFor(() => expect(result.current.config.isInitialized).toBe(true));
+    let loading!: Promise<unknown>;
+    await act(async () => {
+      loading = result.current.actions
+        .loadOptionalData('templates')
+        .catch((error: unknown) => error);
+    });
+    auth.ownerId = 'partner';
+    rerender();
+    await act(async () => {
+      pending.resolve([{ id: 'private-old-template' }] as never[]);
+      await loading;
+    });
+    expect(result.current.templates).toEqual([]);
+    await act(async () => result.current.actions.loadOptionalData('templates'));
+    expect(svc.getTemplates).toHaveBeenLastCalledWith(
+      'partner',
+      expect.any(AbortSignal),
+    );
+  });
+
+  it('uses a known cached domain offline and revalidates it when online again', async () => {
+    cache.loadDataSnapshot.mockReturnValue({
+      ...toSnapshot(EMPTY_DATA),
+      loadedOptionalDomains: ['templates'],
+    } as never);
+    svc.getTemplates.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+    const { result } = renderHook(() => useOnDemandData('templates'), {
+      wrapper: DataProvider,
+    });
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    act(() => window.dispatchEvent(new Event('online')));
+    await waitFor(() => expect(svc.getTemplates).toHaveBeenCalledTimes(2));
+    expect(result.current.status).toBe('ready');
+  });
+
+  it('reports unavailable optional data instead of showing empty defaults offline', async () => {
+    cache.loadDataSnapshot.mockReturnValue({
+      ...toSnapshot(EMPTY_DATA),
+      loadedOptionalDomains: [],
+    } as never);
+    svc.getNotificationSettings.mockRejectedValueOnce(
+      new TypeError('Failed to fetch'),
+    );
+    const { result } = renderHook(() => useOnDemandData('notifications'), {
+      wrapper: DataProvider,
+    });
+    await waitFor(() => expect(result.current.status).toBe('error'));
+    act(() => result.current.retry());
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+  });
+
+  it('recovers an interrupted deferred boot even when primary data already landed', async () => {
+    const pending = deferred<Awaited<ReturnType<typeof svc.getGoals>>>();
+    svc.getGoals.mockImplementationOnce(() => pending.promise);
+    const { result } = renderHook(() => useDataLayer());
+    await waitFor(() => expect(result.current.config.isInitialized).toBe(true));
+    expect(result.current.config.isSecondaryLoaded).toBe(false);
+    setVisibility('hidden');
+    setVisibility('visible');
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+    await act(async () => pending.resolve([{ id: 'old-goal' }]));
+    expect(result.current.goals.map((goal) => goal.id)).toEqual(['g1']);
+  });
+
+  it('accrues again at UTC midnight and on explicit refresh', async () => {
+    const clock = vi
+      .spyOn(Date, 'now')
+      .mockReturnValue(Date.parse('2026-09-10T23:59:00Z'));
+    const { result } = renderHook(() => useDataLayer());
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+    setVisibility('hidden');
+    clock.mockReturnValue(Date.parse('2026-09-11T00:01:00Z'));
+    setVisibility('visible');
+    await waitFor(() => expect(svc.getDebts).toHaveBeenCalledTimes(2));
+    expect(svc.refreshDebtBalances).toHaveBeenCalledTimes(2);
+    await act(async () => result.current.actions.refreshData());
+    expect(svc.refreshDebtBalances).toHaveBeenCalledTimes(3);
+  });
+});
 
 describe('useDataLayer session lifecycle', () => {
   it('waits for auth and does not reboot on a token refresh', async () => {

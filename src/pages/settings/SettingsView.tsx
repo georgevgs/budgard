@@ -21,6 +21,7 @@ import { AnnualExportSection } from '@/pages/settings/components/AnnualExportSec
 import { DataManagementSection } from '@/pages/settings/components/DataManagementSection';
 import { LanguageSection } from '@/pages/settings/components/LanguageSection';
 import { NotificationsSection } from '@/pages/settings/components/NotificationsSection';
+import { OnDemandData } from '@/common/components/onDemandData/OnDemandData';
 import { ProfileSection } from '@/pages/settings/components/ProfileSection';
 import { SecuritySection } from '@/pages/settings/components/SecuritySection';
 import { HouseholdSection } from '@/pages/settings/components/HouseholdSection';
@@ -210,17 +211,19 @@ const renderPreferences = (data: SettingsData) => (
 
 const renderNotifications = (data: SettingsData) => (
   <div className="space-y-8">
-    <NotificationsSection
-      pushState={data.push.state}
-      dailyReminderHour={data.config.dailyReminderHour}
-      notificationPreferences={data.config.notificationPreferences}
-      onPushSubscribe={data.push.subscribe}
-      onPushUnsubscribe={data.push.unsubscribe}
-      onDailyReminderToggle={data.handlers.handleDailyReminderToggle}
-      onDailyReminderTimeChange={data.handlers.handleDailyReminderTimeChange}
-      onPreferenceToggle={data.handlers.handlePreferenceToggle}
-      t={data.t}
-    />
+    <OnDemandData domain="notifications">
+      <NotificationsSection
+        pushState={data.push.state}
+        dailyReminderHour={data.config.dailyReminderHour}
+        notificationPreferences={data.config.notificationPreferences}
+        onPushSubscribe={data.push.subscribe}
+        onPushUnsubscribe={data.push.unsubscribe}
+        onDailyReminderToggle={data.handlers.handleDailyReminderToggle}
+        onDailyReminderTimeChange={data.handlers.handleDailyReminderTimeChange}
+        onPreferenceToggle={data.handlers.handlePreferenceToggle}
+        t={data.t}
+      />
+    </OnDemandData>
     <SecuritySection />
   </div>
 );

@@ -60,6 +60,11 @@ vi.mock('@/common/hooks/dataOps/useTemplateOps', () => ({
   useTemplateOps: () => ({ handleTemplateDelete: vi.fn() }),
 }));
 
+// Request lifecycle is covered by useDataLayer; these tests exercise the pad.
+vi.mock('@/common/components/onDemandData/OnDemandData', () => ({
+  OnDemandData: ({ children }: { children: ReactNode }) => children,
+}));
+
 vi.mock('@/pages/expenses/hooks/useQuickReceiptScan', () => ({
   useQuickReceiptScan: () => ({
     inputRef: { current: null },

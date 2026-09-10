@@ -95,13 +95,19 @@ type RateComputation = {
 // memos with a fresh identity every render.
 const EMPTY_RATES: Map<string, number> = new Map();
 const EMPTY_FAILED_KEYS: Set<string> = new Set();
+const EMPTY_BALANCES: AccountBalance[] = [];
 
-export const useNetWorth = () => {
-  const { accounts, accountBalances } = useAccountsData();
+export const useNetWorth = (shouldIncludeHistory = true) => {
+  const { accounts, accountBalances: storedBalances } = useAccountsData();
   const debts = useDebtsData();
   const { defaultCurrency } = useDataConfig();
   const [rateComputation, setRateComputation] =
     useState<RateComputation | null>(null);
+
+  let accountBalances = EMPTY_BALANCES;
+  if (shouldIncludeHistory) {
+    accountBalances = storedBalances;
+  }
 
   // Every (currency, date) pair a rate is needed for.
   const required = useMemo(

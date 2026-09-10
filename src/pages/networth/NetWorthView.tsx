@@ -14,6 +14,7 @@ import {
 import { type Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import { PageHeader } from '@/common/components/common/PageHeader';
+import { OnDemandData } from '@/common/components/onDemandData/OnDemandData';
 import { NetWorthHeader } from '@/pages/networth/components/NetWorthHeader';
 import { NetWorthEmpty } from '@/pages/networth/components/NetWorthEmpty';
 import { NetWorthLoading } from '@/pages/networth/components/NetWorthLoading';
@@ -24,7 +25,10 @@ import { AccountGroup } from '@/pages/networth/components/AccountGroup';
 import { AccountForm } from '@/pages/networth/components/AccountForm';
 import { AccountDetailSheet } from '@/pages/networth/components/AccountDetailSheet';
 import { ProUpsellCard } from '@/common/components/pro/ProUpsellCard';
-import type { NetWorthSummary, NetWorthPoint } from '@/common/hooks/useNetWorth';
+import type {
+  NetWorthSummary,
+  NetWorthPoint,
+} from '@/common/hooks/useNetWorth';
 
 const NetWorthView = () => {
   const { t } = useTranslation();
@@ -77,18 +81,20 @@ const NetWorthView = () => {
     <div className="flex flex-col min-h-[calc(100dvh-var(--header-height)-env(safe-area-inset-top)-var(--dock-inset))]">
       <div className="page-shell flex-1 space-y-4">
         <PageHeader title={t('navigation.networth')} />
-        {renderBody(
-          accounts.length,
-          summary,
-          series,
-          defaultCurrency,
-          grouped,
-          latestSnapshotByAccount,
-          handleAccountClick,
-          handleAddClick,
-          t,
-          isPro,
-        )}
+        <OnDemandData domain="accountBalances">
+          {renderBody(
+            accounts.length,
+            summary,
+            series,
+            defaultCurrency,
+            grouped,
+            latestSnapshotByAccount,
+            handleAccountClick,
+            handleAddClick,
+            t,
+            isPro,
+          )}
+        </OnDemandData>
       </div>
 
       <Dialog open={isFormOpen} onOpenChange={handleFormClose}>

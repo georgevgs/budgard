@@ -12,9 +12,8 @@ import type { IncomeFormDialogProps } from '@/pages/income/components/IncomeForm
 // sheet is deliberately NOT here: two taps and a number is the thing this app
 // is fastest at, and it must never wait on a chunk.
 //
-// prefetchFormModules runs on idle after the shell mounts, so in practice the
-// chunk is already in memory by the time anyone opens a form; the lazy
-// boundary is what keeps it off the critical path, not what defers it forever.
+// Forms are prefetched individually at idle on capable devices/connections.
+// Data Saver and constrained devices fetch them when the user opens them.
 
 export const FormsManager = lazyWithRetry<FormsManagerProps>(() =>
   import('@/common/components/layout/FormsManager').then((module) => ({
@@ -28,8 +27,7 @@ export const IncomeFormDialog = lazyWithRetry<IncomeFormDialogProps>(() =>
   })),
 );
 
-export const prefetchFormModules = (): void => {
-  const swallow = () => {};
-  import('@/common/components/layout/FormsManager').catch(swallow);
-  import('@/pages/income/components/IncomeFormDialog').catch(swallow);
-};
+export const formPrefetches = [
+  () => import('@/common/components/layout/FormsManager'),
+  () => import('@/pages/income/components/IncomeFormDialog'),
+];

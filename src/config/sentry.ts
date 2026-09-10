@@ -1,5 +1,5 @@
 /**
- * Lightweight facade over `@sentry/react` so the SDK (~355 KB min) stays out
+ * Lightweight facade over `@sentry/react` so the SDK stays out
  * of the entry bundle. App code imports this module instead of the SDK.
  *
  * Until `loadSentry()` finishes, calls are buffered in a bounded queue and
@@ -7,11 +7,14 @@
  * (offline PWA boot, blocked CDN), every export stays a safe no-op.
  *
  * IMPORTANT: this module must never statically import '@sentry/react' —
- * only the `await import()` inside `loadSentry` may reference it, so the
- * SDK lands in its own lazy chunk instead of the critical path.
+ * `loadSentry` imports the narrow sentryClient wrapper dynamically, so the
+ * SDK stays in lazy chunks outside the critical path.
  */
 
-type SentrySdk = typeof import('@sentry/react');
+type SentrySdk = Pick<
+  typeof import('@sentry/react'),
+  'captureException' | 'setUser'
+>;
 
 type QueuedCall =
   | {
@@ -62,25 +65,8 @@ export const loadSentry = async (): Promise<boolean> => {
   }
 
   try {
-    const module = await import('@sentry/react');
-
-    module.init({
-      dsn: import.meta.env.VITE_SENTRY_DSN,
-      enabled: import.meta.env.PROD && !!import.meta.env.VITE_SENTRY_DSN,
-      integrations: [module.browserTracingIntegration()],
-      tracesSampleRate: 0.1,
-      profileSessionSampleRate: 0.1,
-      replaysSessionSampleRate: 0.1,
-      replaysOnErrorSampleRate: 1.0,
-      ignoreErrors: [
-        // Cloudflare Turnstile's bootstrap script triggers `eval` in some paths
-        // (mostly older Safari). Our CSP intentionally omits `unsafe-eval`, so the
-        // rejection bubbles up here as noise — Turnstile still works.
-        /Refused to evaluate a string as JavaScript/,
-        /'unsafe-eval' is not an allowed source/,
-      ],
-    });
-
+    const { createSentryClient } = await import('@/config/sentryClient');
+    const module = createSentryClient();
     sdk = module;
     flushQueue(module);
 
