@@ -1899,6 +1899,7 @@
     "dateRequired": "Date is required",
     "categoryNameRequired": "Category name is required",
     "categoryNameTooLong": "Category name must be less than 50 characters",
+    "iconTooLong": "Choose a shorter icon",
     "categoryNameInvalid": "Category name contains invalid characters",
     "categoryNameEmpty": "Category name cannot be empty",
     "startDateRequired": "Start date is required",

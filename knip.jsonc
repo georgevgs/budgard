@@ -31,6 +31,8 @@
   "ignore": ["src/config/realtimeStub.ts"],
 
   "ignoreDependencies": [
+    // scripts/edgeDependencies.mjs spawns the pinned local Deno executable.
+    "deno",
     // Declared in netlify.toml as a build plugin, never imported.
     "netlify-purge-cloudflare-on-deploy",
     // Tailwind 4 is CSS-first: `@import`/`@plugin` in index.css, no JS import.

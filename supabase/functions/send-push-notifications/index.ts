@@ -1,6 +1,7 @@
 import { createClient } from 'supabase';
-import webpush from 'npm:web-push';
+import webpush from 'npm:web-push@3.6.7';
 import { corsHeadersFor } from '../_shared/cors.ts';
+import { deliverPush, PUSH_SUBSCRIPTION_LIMIT } from '../_shared/pushDelivery.ts';
 
 type RecurringDue = {
   user_id: string;
@@ -459,30 +460,29 @@ Deno.serve(async (req) => {
       const { data: subscriptions } = await adminClient
         .from('push_subscriptions')
         .select('endpoint, p256dh, auth')
-        .eq('user_id', notification.user_id);
+        .eq('user_id', notification.user_id)
+        .order('created_at', { ascending: false })
+        .limit(PUSH_SUBSCRIPTION_LIMIT);
 
       if (!subscriptions || subscriptions.length === 0) continue;
 
       for (const sub of subscriptions as PushSubscription[]) {
-        const pushSubscription = {
-          endpoint: sub.endpoint,
-          keys: { p256dh: sub.p256dh, auth: sub.auth },
-        };
+        const result = await deliverPush(
+          sub,
+          JSON.stringify(notification.payload),
+          webpush.sendNotification.bind(webpush),
+        );
 
-        try {
-          await webpush.sendNotification(
-            pushSubscription,
-            JSON.stringify(notification.payload),
-          );
+        if (result === 'sent') {
           sent++;
-        } catch (err: unknown) {
-          const statusCode = (err as { statusCode?: number }).statusCode;
-          // 410 Gone or 404 = subscription expired/invalid
-          if (statusCode === 410 || statusCode === 404) {
-            staleEndpoints.push(sub.endpoint);
-          }
-          failed++;
+
+          continue;
         }
+
+        if (result === 'stale') {
+          staleEndpoints.push(sub.endpoint);
+        }
+        failed++;
       }
     }
 

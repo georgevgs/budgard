@@ -10,7 +10,11 @@ export const categorySchema = z.object({
     .transform((str) => str.trim())
     .refine((str) => str.length > 0, 'validation.categoryNameEmpty'),
   color: z.string().regex(HEX_COLOR, 'validation.colorInvalid'),
-  icon: z.string().max(4).optional(),
+  // Preserve the existing UTF-16 limit after Zod switched to code-point lengths.
+  icon: z
+    .string()
+    .refine((icon) => icon.length <= 4, 'validation.iconTooLong')
+    .optional(),
   kind: z.enum(['need', 'want', 'savings'] as const).optional(),
 });
 

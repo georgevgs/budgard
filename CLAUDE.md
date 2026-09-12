@@ -30,6 +30,14 @@ is **bun**.
 - **Offline queueing covers expenses and incomes only.** `MutationType` and
   `useOfflineSync`'s cases must stay in lock-step — widening one without the
   other silently drops writes.
+- **The push endpoint allowlist is written twice and must stay in lock-step.**
+  `supabase/functions/_shared/pushDelivery.ts` and the
+  `push_subscriptions_endpoint_allowed` CHECK are the same rule in two
+  languages: the constraint stops a hostile destination being stored, the
+  guard stops the privileged worker requesting one that is already there.
+  Loosening either alone re-opens the hole the other closes. The ten-device cap
+  is paired the same way — a trigger enforces it, and the delivery query
+  `.limit()`s to the same number.
 - **Supabase queries** live at the feature root (`<feature>Api.ts`) and are
   composed into one `dataService` object by `src/common/api/dataService.ts`.
   A shared module has no feature root, so its queries sit beside `dataService`
@@ -61,6 +69,7 @@ src/common/api/          dataService composition, query helpers, shared-module A
 src/config/              external integrations only: supabase, sentry, i18n, sw
 src/constants/           app-wide utilities and constants
 src/assets/fonts/        the self-hosted woff2 faces
+supabase/tests/          SQL suites run against the linked project by hand
 src/design/              tokens and palette
 ```
 
@@ -173,6 +182,13 @@ constrain new work:
   new one, break the line it covers and watch it fail — a test that passes
   against broken code is worse than no test.
 - Run `npm run lint`, `npm run test` and `npm run build`.
+- **Adding or changing an Edge Function dependency needs `npm run edge:lock`.**
+  Each function is its own Deno project with a frozen `deno.lock`, so a new
+  import fails `npm run edge:check` until the lock is regenerated and committed.
+  `npm run audit:dependencies` covers the frontend and all six backend graphs;
+  `.github/workflows/security.yml` runs both daily and fails if either rewrites
+  a lockfile. Deploys upload `deno.json` but not `deno.lock` — what pins the
+  hosted runtime is the exact version in each import map, so keep them exact.
 - `npm run knip` finds dead code, and its config is what makes it
   readable: ten live files (the service worker, the recovery page, the
   Deno edge functions, the realtime stub behind a vite alias) are

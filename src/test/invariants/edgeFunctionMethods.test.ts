@@ -3,6 +3,9 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const ROOT = path.resolve(__dirname, '../../..');
+const PACKAGE = JSON.parse(
+  readFileSync(path.join(ROOT, 'package.json'), 'utf8'),
+) as { dependencies: { '@supabase/supabase-js': string } };
 
 const readFunction = (name: string): string =>
   readFileSync(
@@ -41,7 +44,11 @@ describe('mutating Edge Function boundaries', () => {
 
       expect(source).toContain("from 'supabase'");
       expect(source).not.toContain('esm.sh/@supabase/supabase-js@2');
-      expect(config.imports.supabase).toBe('npm:@supabase/supabase-js@2.112.2');
+      const version = PACKAGE.dependencies['@supabase/supabase-js'];
+      expect(version).toMatch(/^\d+\.\d+\.\d+$/);
+      expect(config.imports.supabase).toBe(
+        `npm:@supabase/supabase-js@${version}`,
+      );
     },
   );
 
