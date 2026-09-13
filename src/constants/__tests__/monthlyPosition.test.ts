@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { buildMonthlyDecision } from '@/pages/plan/utils/monthlyDecision';
+import { buildMonthlyPosition } from '@/constants/monthlyPosition';
 
-describe('buildMonthlyDecision', () => {
-  it('starts with the budget when no boundary exists', () => {
+describe('buildMonthlyPosition', () => {
+  it('has no available amount before a budget is set', () => {
     expect(
-      buildMonthlyDecision({
+      buildMonthlyPosition({
         monthlyBudget: null,
         spent: 300,
         committed: 100,
@@ -13,7 +13,7 @@ describe('buildMonthlyDecision', () => {
       }),
     ).toEqual({
       state: 'noBudget',
-      amount: null,
+      available: null,
       spent: 300,
       committed: 100,
       savingsReserve: 0,
@@ -22,7 +22,7 @@ describe('buildMonthlyDecision', () => {
 
   it('reserves the unfinished part of the savings target', () => {
     expect(
-      buildMonthlyDecision({
+      buildMonthlyPosition({
         monthlyBudget: 2_000,
         spent: 900,
         committed: 300,
@@ -31,16 +31,16 @@ describe('buildMonthlyDecision', () => {
       }),
     ).toEqual({
       state: 'save',
-      amount: 550,
+      available: 550,
       spent: 900,
       committed: 300,
       savingsReserve: 250,
     });
   });
 
-  it('reports the size of a shortfall instead of a negative allowance', () => {
+  it('keeps a shortfall signed so every consumer reads the same position', () => {
     expect(
-      buildMonthlyDecision({
+      buildMonthlyPosition({
         monthlyBudget: 1_000,
         spent: 800,
         committed: 250,
@@ -49,7 +49,7 @@ describe('buildMonthlyDecision', () => {
       }),
     ).toEqual({
       state: 'shortfall',
-      amount: 150,
+      available: -150,
       spent: 800,
       committed: 250,
       savingsReserve: 100,
@@ -58,7 +58,7 @@ describe('buildMonthlyDecision', () => {
 
   it('shows what remains when bills and savings are already covered', () => {
     expect(
-      buildMonthlyDecision({
+      buildMonthlyPosition({
         monthlyBudget: 1_500,
         spent: 700,
         committed: 200,
@@ -67,7 +67,7 @@ describe('buildMonthlyDecision', () => {
       }),
     ).toEqual({
       state: 'ready',
-      amount: 600,
+      available: 600,
       spent: 700,
       committed: 200,
       savingsReserve: 0,

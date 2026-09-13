@@ -4,6 +4,7 @@ import { formatCurrency } from '@/constants/utils';
 import type { TodayStatus } from '@/pages/today/hooks/useTodayGuidance';
 import { BentoTile, TileLabel } from '@/common/components/bento';
 import type { TranslateFunction } from '@/constants/translate';
+import { trackProductEvent } from '@/common/api/productEventService';
 
 type SafeToSpendTileProps = {
   status: TodayStatus;
@@ -29,6 +30,7 @@ export const SafeToSpendTile = (props: SafeToSpendTileProps) => {
       isWide
       to={resolveDestination(props)}
       ariaLabel={resolveAriaLabel(props, t)}
+      onClick={() => trackProductEvent({ name: 'monthly_position_opened' })}
       className="px-5.5 pt-5.5 pb-5"
     >
       <div className="flex items-center justify-between gap-3">
@@ -75,7 +77,10 @@ const renderLabel = (props: SafeToSpendTileProps, t: TranslateFunction) => {
 const isOverBudget = (props: SafeToSpendTileProps): boolean =>
   props.safeToSpend !== null && props.safeToSpend < 0;
 
-const resolveLabel = (props: SafeToSpendTileProps, t: TranslateFunction): string => {
+const resolveLabel = (
+  props: SafeToSpendTileProps,
+  t: TranslateFunction,
+): string => {
   if (props.safeToSpend === null) {
     return t('today.spentSoFar');
   }
@@ -99,25 +104,23 @@ const renderChip = (props: SafeToSpendTileProps, t: TranslateFunction) => {
   );
 };
 
-// Only the no-budget slab is a doorway. Everywhere else the number IS the
-// answer, and a tap that navigated away from it would be a tap that took the
-// screen's whole point off screen.
-const resolveDestination = (props: SafeToSpendTileProps): string | undefined => {
-  if (props.safeToSpend === null) {
-    return '/plan';
-  }
+// The headline is also the doorway to the same figure's deductions on Plan.
+// Its existing label names the link without adding a second explanation.
+const resolveDestination = (_props: SafeToSpendTileProps): string => '/plan';
 
-  return undefined;
-};
-
-// Only the no-budget state is a link, so it is the only one with a name to
-// give. Everywhere else the slab is a div and a label would be dropped.
-const resolveAriaLabel = (props: SafeToSpendTileProps, t: TranslateFunction): string | undefined => {
+const resolveAriaLabel = (
+  props: SafeToSpendTileProps,
+  t: TranslateFunction,
+): string | undefined => {
   if (props.safeToSpend === null) {
     return t('today.setBudget');
   }
 
-  return undefined;
+  if (isOverBudget(props)) {
+    return t('today.tiles.overBudget');
+  }
+
+  return t('today.tiles.safeToSpend');
 };
 
 // The daily allowance is the slab's caption because it is the figure that

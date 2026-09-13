@@ -1,22 +1,24 @@
 import { dataService } from '@/common/api/dataService';
 import type { DataSession } from '@/common/hooks/data/dataSession';
 
-// These feed Today tiles and app-wide milestone tracking as well as their
-// own routes, so they retain the same foreground freshness as transactions.
+// These feed planning tools, Today tiles and app-wide milestone tracking, so
+// they retain foreground freshness without holding back Today's first answer.
 export const fetchDeferredData = async (
   session: DataSession,
   signal: AbortSignal,
   isForced: boolean,
 ): Promise<void> => {
-  const [accounts, goals, debts] = await Promise.all([
+  const [accounts, goals, debts, recurringIncomes] = await Promise.all([
     dataService.getAccounts(session.ownerId, signal),
     dataService.getGoals(session.ownerId, signal),
     loadCurrentDebts(session, signal, isForced),
+    dataService.getRecurringIncomes(session.ownerId, signal),
   ]);
   signal.throwIfAborted();
   session.setters.setAccounts(accounts);
   session.setters.setGoals(goals);
   session.setters.setDebts(debts);
+  session.setters.setRecurringIncomes(recurringIncomes);
   session.setters.setIsSecondaryLoaded(true);
 };
 

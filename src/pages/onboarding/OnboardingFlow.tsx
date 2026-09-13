@@ -13,6 +13,7 @@ import { OnboardingBudgetStep } from '@/pages/onboarding/components/OnboardingBu
 import { OnboardingCategoriesStep } from '@/pages/onboarding/components/OnboardingCategoriesStep';
 import { OnboardingFirstExpenseStep } from '@/pages/onboarding/components/OnboardingFirstExpenseStep';
 import type { TranslateFunction } from '@/constants/translate';
+import { trackProductEvent } from '@/common/api/productEventService';
 
 const STEP_COUNT = 4;
 
@@ -22,7 +23,11 @@ type OnboardingFlowProps = {
   onDismiss?: () => void;
 };
 
-const OnboardingFlow = ({ isOpen, onComplete, onDismiss }: OnboardingFlowProps) => {
+const OnboardingFlow = ({
+  isOpen,
+  onComplete,
+  onDismiss,
+}: OnboardingFlowProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { defaultCurrency } = useDataConfig();
@@ -43,14 +48,15 @@ const OnboardingFlow = ({ isOpen, onComplete, onDismiss }: OnboardingFlowProps) 
   } = useOnboardingActions({ onComplete: finishFlow });
   const handleFirstExpense = useCallback(
     (data: Parameters<typeof quickAdd.handleExpenseFormSubmit>[0]) => {
+      trackProductEvent({ name: 'onboarding_first_expense_submitted' });
       quickAdd.handleExpenseFormSubmit(data);
-      setStep(2);
+      setStep(3);
     },
     [quickAdd, setStep],
   );
   const keepFlowOpen = useCallback(() => {}, []);
   const firstExpense = useQuickAddDraft({
-    isOpen: isOpen && step === 1,
+    isOpen: isOpen && step === 2,
     onSubmit: handleFirstExpense,
     onClose: keepFlowOpen,
   });
@@ -62,20 +68,20 @@ const OnboardingFlow = ({ isOpen, onComplete, onDismiss }: OnboardingFlowProps) 
     }
     if (step === 1) {
       return (
-        <OnboardingFirstExpenseStep
-          draft={firstExpense}
+        <OnboardingCategoriesStep
+          isSubmitting={isSubmitting}
           onBack={() => setStep(0)}
           onSkip={() => setStep(2)}
+          onNext={handleCategoriesNext}
         />
       );
     }
     if (step === 2) {
       return (
-        <OnboardingCategoriesStep
-          isSubmitting={isSubmitting}
+        <OnboardingFirstExpenseStep
+          draft={firstExpense}
           onBack={() => setStep(1)}
           onSkip={() => setStep(3)}
-          onNext={handleCategoriesNext}
         />
       );
     }

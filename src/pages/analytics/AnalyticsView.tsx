@@ -16,21 +16,23 @@ import { useAnalyticsData } from '@/pages/analytics/hooks/useAnalyticsData';
 import { useAnalyticsDrillDown } from '@/pages/analytics/hooks/useAnalyticsDrillDown';
 import { useMonthlyReview } from '@/pages/analytics/hooks/useMonthlyReview';
 import { useCurrentDate } from '@/common/hooks/useCurrentDate';
+import { useMonthlyPosition } from '@/common/hooks/useMonthlyPosition';
 
 const AnalyticsView = () => {
   const { t } = useTranslation();
   const { isPro } = useSubscription();
   const { expenseCategories: categories } = useCategoriesData();
-  const { monthlyBudget, defaultCurrency, isInitialized } = useDataConfig();
+  const { defaultCurrency, isInitialized } = useDataConfig();
   const allExpenses = useExpensesData();
   const now = useCurrentDate();
+  const monthly = useMonthlyPosition(allExpenses, now);
 
   const analytics = useAnalyticsData(now);
   const review = useMonthlyReview({
     expenses: analytics.expenses,
     categories,
     comparison: analytics.monthComparison,
-    monthlyBudget,
+    position: monthly.position,
     currency: defaultCurrency,
     now,
   });

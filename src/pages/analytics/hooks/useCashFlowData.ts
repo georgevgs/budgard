@@ -2,14 +2,16 @@ import { useMemo } from 'react';
 import { format } from 'date-fns';
 import { useExpensesData, useIncomesData } from '@/common/contexts/DataContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
-import { monthsElapsedInYear } from '@/constants/utils';
 import { countsInTotals } from '@/constants/spending';
 import { sumAmounts } from '@/constants/money';
+import { countObservedMonths } from '@/constants/observedMonths';
+import { useCurrentDate } from '@/common/hooks/useCurrentDate';
 
 export const useCashFlowData = (selectedYear: number) => {
   const expenses = useExpensesData();
   const incomes = useIncomesData();
   const dateLocale = useDateLocale();
+  const now = useCurrentDate();
 
   const monthlyData = useMemo(() => {
     const expByMonth = new Array(12).fill(0);
@@ -61,7 +63,14 @@ export const useCashFlowData = (selectedYear: number) => {
     const totalIncome = sumAmounts(monthlyData.map((m) => m.income));
     const totalExpense = sumAmounts(monthlyData.map((m) => -m.expense));
 
-    const monthsElapsed = monthsElapsedInYear(selectedYear);
+    const observedRows = [...expenses, ...incomes].filter((row) => {
+      if (!countsInTotals(row)) {
+        return false;
+      }
+
+      return Number(row.date.slice(0, 4)) === selectedYear;
+    });
+    const monthsElapsed = countObservedMonths(observedRows, selectedYear, now);
     let avgNet = 0;
     if (monthsElapsed > 0) {
       avgNet = (totalIncome - totalExpense) / monthsElapsed;
@@ -73,7 +82,7 @@ export const useCashFlowData = (selectedYear: number) => {
       net: totalIncome - totalExpense,
       avgNet,
     };
-  }, [monthlyData, selectedYear]);
+  }, [expenses, incomes, monthlyData, now, selectedYear]);
 
   const noData = yearTotals.totalIncome === 0 && yearTotals.totalExpense === 0;
 

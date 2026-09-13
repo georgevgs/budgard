@@ -6,6 +6,7 @@ import type { CategoryBudget } from '@/types/CategoryBudget';
 import { setScalarOptimistic } from '@/common/hooks/dataOps/helpers';
 import { useMutationRunner } from '@/common/hooks/dataOps/useMutationRunner';
 import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
+import { trackProductEvent } from '@/common/api/productEventService';
 
 export const useBudgetOps = () => {
   const { activeOwnerId } = useFinancialSpace();
@@ -28,6 +29,7 @@ export const useBudgetOps = () => {
           setScalarOptimistic(setMonthlyBudget, monthlyBudget, amount),
         perform: () => dataService.upsertBudget(amount, activeOwnerId),
       });
+      trackProductEvent({ name: 'monthly_budget_saved' });
     };
 
     // Upsert, so the optimistic pass either bumps the existing cap or adds a

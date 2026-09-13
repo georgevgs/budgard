@@ -1,5 +1,7 @@
 import {
   Suspense,
+  useCallback,
+  useEffect,
   useMemo,
   useState,
   type ComponentProps,
@@ -24,6 +26,7 @@ import { useOptimisticExpenseActions } from '@/pages/expenses/hooks/useOptimisti
 import { useIncomeFormState } from '@/pages/income/hooks/useIncomeFormState';
 import { isTransactionEntryPath } from '@/constants/routes';
 import { FORM_TYPES } from '@/common/components/layout/formTypes';
+import { trackProductEvent } from '@/common/api/productEventService';
 
 type QuickAddProviderProps = {
   children: ReactNode;
@@ -35,6 +38,7 @@ export const QuickAddProvider = ({ children }: QuickAddProviderProps) => {
   const expenseForm = useExpenseFormState();
   const incomeForm = useIncomeFormState();
   const expenseActions = useOptimisticExpenseActions();
+  const submitExpense = expenseActions.handleExpenseFormSubmit;
   const { handleIncomeDelete } = useIncomeOps();
   // The full forms are lazy, so they can only be mounted once something asks
   // for them. Mounting stays sticky afterwards: unmounting on close would take
@@ -44,6 +48,25 @@ export const QuickAddProvider = ({ children }: QuickAddProviderProps) => {
   const isExpenseFormOpen =
     expenseForm.formType === FORM_TYPES.NEW_EXPENSE ||
     expenseForm.formType === FORM_TYPES.EDIT_EXPENSE;
+  const isQuickAddOpen = expenseForm.formType === FORM_TYPES.QUICK_ADD;
+
+  useEffect(() => {
+    if (!isQuickAddOpen) {
+      return;
+    }
+
+    trackProductEvent({ name: 'quick_add_opened' });
+  }, [isQuickAddOpen]);
+
+  const handleQuickAddSubmit = useCallback<
+    QuickAddValue['handleExpenseFormSubmit']
+  >(
+    (data, expenseId, receiptOptions) => {
+      trackProductEvent({ name: 'quick_add_submitted' });
+      submitExpense(data, expenseId, receiptOptions);
+    },
+    [submitExpense],
+  );
 
   if (isExpenseFormOpen && !wasExpenseFormOpened) {
     setWasExpenseFormOpened(true);
@@ -81,9 +104,9 @@ export const QuickAddProvider = ({ children }: QuickAddProviderProps) => {
     <QuickAddContext.Provider value={value}>
       {children}
       <QuickAddSheet
-        open={expenseForm.formType === FORM_TYPES.QUICK_ADD}
+        open={isQuickAddOpen}
         onClose={expenseForm.handleFormClose}
-        onSubmit={expenseActions.handleExpenseFormSubmit}
+        onSubmit={handleQuickAddSubmit}
         onOpenFullForm={expenseForm.openFullForm}
         onUseTemplate={expenseActions.handleUseTemplate}
       />

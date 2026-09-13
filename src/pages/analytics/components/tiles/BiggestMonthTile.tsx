@@ -6,6 +6,7 @@ import { BentoTile, TileLabel } from '@/common/components/bento';
 type MonthlyDatum = {
   month: string;
   fullMonth: string;
+  monthIndex: number;
   amount: number;
 };
 
@@ -17,7 +18,10 @@ type BiggestMonthTileProps = {
 // The year's high-water mark, and a doorway into the month that set it —
 // "which month was that" is the immediate next question, and the tile is the
 // shortest possible route to the answer.
-export const BiggestMonthTile = ({ monthlyData, onMonthClick }: BiggestMonthTileProps) => {
+export const BiggestMonthTile = ({
+  monthlyData,
+  onMonthClick,
+}: BiggestMonthTileProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const peak = findPeak(monthlyData);
@@ -28,7 +32,7 @@ export const BiggestMonthTile = ({ monthlyData, onMonthClick }: BiggestMonthTile
 
   return (
     <BentoTile
-      onClick={() => onMonthClick(peak.index)}
+      onClick={() => onMonthClick(peak.monthIndex)}
       ariaLabel={t('analytics.tile.biggestMonth')}
       className="flex min-h-26 flex-col justify-between p-4"
     >
@@ -46,7 +50,7 @@ export const BiggestMonthTile = ({ monthlyData, onMonthClick }: BiggestMonthTile
 };
 
 type Peak = {
-  index: number;
+  monthIndex: number;
   month: string;
   amount: number;
 };
@@ -54,14 +58,18 @@ type Peak = {
 const findPeak = (monthlyData: MonthlyDatum[]): Peak | null => {
   let peak: Peak | null = null;
 
-  monthlyData.forEach((datum, index) => {
+  monthlyData.forEach((datum) => {
     if (datum.amount <= 0) {
       return;
     }
     if (peak !== null && datum.amount <= peak.amount) {
       return;
     }
-    peak = { index, month: datum.month, amount: datum.amount };
+    peak = {
+      monthIndex: datum.monthIndex,
+      month: datum.month,
+      amount: datum.amount,
+    };
   });
 
   return peak;

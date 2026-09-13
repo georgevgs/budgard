@@ -9,6 +9,7 @@ import {
 import { getRecentCutoff } from '@/constants/dataCache';
 import { fetchDeferredData } from '@/common/hooks/data/dataDeferred';
 import { refreshOptionalData } from '@/common/hooks/data/dataOptional';
+import { fetchSupportingData } from '@/common/hooks/data/dataSupporting';
 
 export const fetchData = (
   session: DataSession,
@@ -53,6 +54,13 @@ const performFetch = async (
       handleFetchError(error, session);
     }
   });
+  const supporting = fetchSupportingData(session, controller.signal).catch(
+    (error) => {
+      if (!controller.signal.aborted) {
+        handleFetchError(error, session);
+      }
+    },
+  );
   let optional = Promise.resolve();
   if (isForced) {
     optional = refreshOptionalData(session).catch((error) => {
@@ -95,7 +103,7 @@ const performFetch = async (
     }
     handleFetchError(error, session);
   } finally {
-    await Promise.all([deferred, optional]);
+    await Promise.all([deferred, supporting, optional]);
     if (session.controller === controller) {
       session.isFetching = false;
     }
@@ -111,37 +119,20 @@ const fetchEssentialData = async (
   signal: AbortSignal,
   recentCutoff: string | undefined,
 ) => {
-  const [
-    categories,
-    expenses,
-    incomes,
-    recurringExpenses,
-    recurringIncomes,
-    budget,
-    tags,
-    categoryBudgets,
-    noSpendDays,
-  ] = await Promise.all([
-    dataService.getCategories(ownerId, signal),
-    dataService.getExpenses(ownerId, signal, recentCutoff),
-    dataService.getIncomes(ownerId, signal, recentCutoff),
-    dataService.getRecurringExpenses(ownerId, signal),
-    dataService.getRecurringIncomes(ownerId, signal),
-    dataService.getBudget(ownerId, signal),
-    dataService.getTags(ownerId, signal),
-    dataService.getCategoryBudgets(ownerId, signal),
-    dataService.getNoSpendDays(ownerId, signal),
-  ]);
+  const [categories, expenses, incomes, recurringExpenses, budget] =
+    await Promise.all([
+      dataService.getCategories(ownerId, signal),
+      dataService.getExpenses(ownerId, signal, recentCutoff),
+      dataService.getIncomes(ownerId, signal, recentCutoff),
+      dataService.getRecurringExpenses(ownerId, signal),
+      dataService.getBudget(ownerId, signal),
+    ]);
 
   return {
     categories,
     expenses,
     incomes,
     recurringExpenses,
-    recurringIncomes,
-    tags,
-    categoryBudgets,
-    noSpendDays,
     monthlyBudget: budget?.monthly_amount ?? null,
     defaultCurrency: budget?.default_currency ?? 'EUR',
     defaultSavingsPct: budget?.default_savings_pct ?? null,

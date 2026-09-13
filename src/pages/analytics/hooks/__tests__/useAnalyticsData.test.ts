@@ -27,7 +27,9 @@ vi.mock('@/common/contexts/DataContext', () => ({
   useDataActions: () => ({ loadHistory: data.loadHistory }),
 }));
 
-vi.mock('@/common/hooks/useDateLocale', () => ({ useDateLocale: () => undefined }));
+vi.mock('@/common/hooks/useDateLocale', () => ({
+  useDateLocale: () => undefined,
+}));
 
 import { useAnalyticsData } from '@/pages/analytics/hooks/useAnalyticsData';
 
@@ -146,21 +148,25 @@ describe('year selection', () => {
 });
 
 describe('monthly data', () => {
-  it('always returns twelve months, zero-filled', () => {
+  it('starts at the first observed month and fills later quiet months', () => {
     plan.isPro = true;
     data.expenses = [expense('2026-03-05', 60)];
     const r = render();
 
-    expect(r.current.monthlyData).toHaveLength(12);
-    expect(r.current.monthlyData[2].amount).toBe(60);
-    expect(r.current.monthlyData[0].amount).toBe(0);
+    expect(r.current.monthlyData).toHaveLength(6);
+    expect(r.current.monthlyData[0]).toEqual(
+      expect.objectContaining({ monthIndex: 2, amount: 60 }),
+    );
+    expect(r.current.monthlyData[1]).toEqual(
+      expect.objectContaining({ monthIndex: 3, amount: 0 }),
+    );
   });
 
   it('buckets several expenses into the same month', () => {
     plan.isPro = true;
     data.expenses = [expense('2026-03-05', 60), expense('2026-03-20', 40)];
 
-    expect(render().current.monthlyData[2].amount).toBe(100);
+    expect(render().current.monthlyData[0].amount).toBe(100);
   });
 });
 
@@ -230,6 +236,20 @@ describe('yearly stats', () => {
     expect(totalSpent).toBe(450);
     expect(monthsElapsed).toBe(8);
     expect(monthlyAverage).toBeCloseTo(450 / 8, 5);
+  });
+
+  it('does not count months before the first tracked expense as zeroes', () => {
+    data.expenses = [expense('2026-08-05', 450, 'c1')];
+    const { monthlyAverage, monthsElapsed } = render().current.yearlyStats;
+
+    expect(monthsElapsed).toBe(1);
+    expect(monthlyAverage).toBe(450);
+  });
+
+  it('does not draw missing months before the first tracked expense', () => {
+    data.expenses = [expense('2026-08-05', 450, 'c1')];
+
+    expect(render().current.rhythmMonths).toHaveLength(1);
   });
 
   it('counts uncategorised spending in the total but not the breakdown', () => {

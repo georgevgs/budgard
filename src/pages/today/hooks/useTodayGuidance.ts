@@ -8,10 +8,8 @@ import {
 } from '@/common/contexts/DataContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { useSpendingInsights } from '@/common/hooks/useSpendingInsights';
-import {
-  computeSafeToSpend,
-  computeUpcomingRecurringThisMonth,
-} from '@/constants/forecast';
+import { useMonthlyPosition } from '@/common/hooks/useMonthlyPosition';
+import { computeUpcomingRecurringThisMonth } from '@/constants/forecast';
 import { buildUpcomingBills } from '@/pages/today/utils/upcomingBills';
 import type { Expense } from '@/types/Expense';
 import { countsAsSpending, sumSpending } from '@/constants/spending';
@@ -32,6 +30,7 @@ export const useTodayGuidance = (
   const { expenseCategories } = useCategoriesData();
   const { recurringExpenses } = useRecurringData();
   const { monthlyBudget, defaultCurrency } = useDataConfig();
+  const { position } = useMonthlyPosition(expenses, now);
   const dateLocale = useDateLocale();
   const monthKey = format(now, 'yyyy-MM');
   const previousMonthKey = format(
@@ -64,11 +63,7 @@ export const useTodayGuidance = (
       recurringExpenses,
       now,
     );
-    const safeToSpend = computeSafeToSpend({
-      monthlyBudget,
-      spentThisMonth,
-      upcomingRecurringThisMonth: upcomingThisMonth,
-    });
+    const safeToSpend = position.available;
     const daysRemaining = getDaysInMonth(now) - now.getDate() + 1;
     const dailyAllowance = computeDailyAllowance(safeToSpend, daysRemaining);
     // What an ordinary day actually costs this person, from their own recent
@@ -128,6 +123,7 @@ export const useTodayGuidance = (
     monthKey,
     monthlyBudget,
     now,
+    position.available,
     previousMonthKey,
     recurringExpenses,
   ]);

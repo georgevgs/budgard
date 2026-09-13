@@ -8,6 +8,7 @@ import type { TranslateFunction } from '@/constants/translate';
 type MonthlyDataPoint = {
   month: string;
   fullMonth: string;
+  monthIndex: number;
   amount: number;
   // Pro only: income and net ride the same chart as extra series rather
   // than a second chart repeating the same twelve months.
@@ -35,7 +36,10 @@ const MonthlyTrendChartComponent = ({
   shouldShowCashFlow,
 }: MonthlyTrendChartProps) => {
   const { t } = useTranslation();
-  const series = useMemo(() => buildSeries(shouldShowCashFlow, t), [shouldShowCashFlow, t]);
+  const series = useMemo(
+    () => buildSeries(shouldShowCashFlow, t),
+    [shouldShowCashFlow, t],
+  );
 
   return (
     <CartesianChart
@@ -48,7 +52,7 @@ const MonthlyTrendChartComponent = ({
       formatY={(value) => `${Math.round(value)}${currencySymbol}`}
       reference={buildBudgetReference(monthlyBudget, defaultCurrency, t)}
       renderTooltip={(point) => renderTooltip(point, defaultCurrency, t)}
-      onPointClick={onMonthClick}
+      onPointClick={(pointIndex) => onMonthClick(data[pointIndex].monthIndex)}
       ariaLabel={buildAriaLabel(data, defaultCurrency, t)}
     />
   );
@@ -57,7 +61,10 @@ const MonthlyTrendChartComponent = ({
 // Memoised: the parent re-renders on every data mutation, this subtree does not.
 export const MonthlyTrendChart = memo(MonthlyTrendChartComponent);
 
-const buildSeries = (shouldShowCashFlow: boolean, t: TranslateFunction): Series[] => {
+const buildSeries = (
+  shouldShowCashFlow: boolean,
+  t: TranslateFunction,
+): Series[] => {
   const series: Series[] = [
     {
       kind: 'area',
@@ -82,7 +89,11 @@ const buildSeries = (shouldShowCashFlow: boolean, t: TranslateFunction): Series[
   ];
 };
 
-const renderTooltip = (point: ChartPoint, currency: string, t: TranslateFunction) => {
+const renderTooltip = (
+  point: ChartPoint,
+  currency: string,
+  t: TranslateFunction,
+) => {
   if (point.income === undefined) {
     return (
       <>

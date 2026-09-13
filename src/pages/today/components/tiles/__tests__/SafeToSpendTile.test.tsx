@@ -100,6 +100,12 @@ describe('SafeToSpendTile', () => {
     expect(screen.getByText('today.chip.watchful')).toBeInTheDocument();
   });
 
+  it('opens the matching breakdown on Plan from every budget state', () => {
+    renderTile();
+
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/plan');
+  });
+
   it('falls back to what has been spent when there is no budget', () => {
     renderTile({ status: 'noBudget', safeToSpend: null, dailyAllowance: null });
 

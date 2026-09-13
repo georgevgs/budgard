@@ -22,10 +22,14 @@ import { authApi } from '@/common/api/authApi';
 import { isMainTabPath } from '@/constants/routes';
 import { scheduleBackgroundWork } from '@/constants/backgroundWork';
 import { SkipToContentLink } from '@/common/components/routing/SkipToContentLink';
+import { useDataConfig } from '@/common/contexts/DataContext';
+import { useProductMetrics } from '@/common/hooks/useProductMetrics';
 
 export const AuthenticatedLayout = () => {
   const { pathname } = useLocation();
+  const { isInitialized } = useDataConfig();
   const lock = useAppLock(true);
+  useProductMetrics(pathname, isInitialized);
   useOfflineSync();
   useCheckoutReturn();
   useRouteScrollRestoration();

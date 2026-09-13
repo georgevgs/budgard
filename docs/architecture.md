@@ -525,7 +525,7 @@ Supabase PostgreSQL. Every table is RLS-protected and owner-scoped.
   `no_spend_days`
 - Net worth: `accounts`, `account_balances`, `debts`
 - Platform: `subscriptions`, `checkout_attempts`, `push_subscriptions`,
-  `user_ui_preferences`, `feedback_reports`
+  `user_ui_preferences`, `feedback_reports`, `product_events`
 
 Migrations are in `supabase/migrations/` and are append-only history — never
 edit an applied one. Run `supabase migration list --linked` to see what is

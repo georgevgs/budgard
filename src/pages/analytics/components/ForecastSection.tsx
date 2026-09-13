@@ -97,8 +97,8 @@ const renderNoBalanceHint = (t: TranslateFunction) => (
   </p>
 );
 
-// Only rendered when a monthly budget exists (computeSafeToSpend returns
-// null otherwise). Negative values stay visible in destructive red — an
+// Only rendered when a monthly budget exists. Negative values stay visible
+// in destructive red — an
 // honest "you are over" beats a clamped zero.
 const renderSafeToSpend = (
   safeToSpend: number | null,

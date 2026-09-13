@@ -7,6 +7,7 @@ import { BentoGrid } from '@/common/components/bento';
 type MonthlyDatum = {
   month: string;
   fullMonth: string;
+  monthIndex: number;
   amount: number;
 };
 

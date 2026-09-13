@@ -2,17 +2,24 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import { formatCurrency } from '@/constants/utils';
-import type { MonthlyDecision } from '@/pages/plan/utils/monthlyDecision';
+import type {
+  MonthlyPosition,
+  MonthlyPositionState,
+} from '@/constants/monthlyPosition';
 import { TileLabel } from '@/common/components/bento';
 import type { TranslateFunction } from '@/constants/translate';
 
 type MonthlyDecisionCardProps = {
-  decision: MonthlyDecision;
+  decision: MonthlyPosition;
   currency: string;
   onOpenDetails: () => void;
 };
 
-export const MonthlyDecisionCard = ({ decision, currency, onOpenDetails }: MonthlyDecisionCardProps) => {
+export const MonthlyDecisionCard = ({
+  decision,
+  currency,
+  onOpenDetails,
+}: MonthlyDecisionCardProps) => {
   const { t } = useTranslation();
 
   return (
@@ -33,23 +40,23 @@ export const MonthlyDecisionCard = ({ decision, currency, onOpenDetails }: Month
 };
 
 const renderFigure = (
-  decision: MonthlyDecision,
+  decision: MonthlyPosition,
   currency: string,
   t: TranslateFunction,
 ) => {
-  if (decision.amount === null) {
+  if (decision.available === null) {
     return <p className="mt-3 type-figure-lg">{t('plan.decision.start')}</p>;
   }
 
   return (
     <p className="mt-3 type-figure-xl">
-      {formatCurrency(decision.amount, currency)}
+      {formatCurrency(Math.abs(decision.available), currency)}
     </p>
   );
 };
 
 const decisionBody = (
-  decision: MonthlyDecision,
+  decision: MonthlyPosition,
   currency: string,
   t: TranslateFunction,
 ): string => {
@@ -59,7 +66,7 @@ const decisionBody = (
 };
 
 const renderAllocation = (
-  decision: MonthlyDecision,
+  decision: MonthlyPosition,
   currency: string,
   t: TranslateFunction,
 ) => {
@@ -92,7 +99,7 @@ const allocation = (label: string, amount: number, currency: string) => (
 );
 
 const renderAction = (
-  state: MonthlyDecision['state'],
+  state: MonthlyPositionState,
   onOpenDetails: () => void,
   t: TranslateFunction,
 ) => {

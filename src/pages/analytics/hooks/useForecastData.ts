@@ -2,20 +2,18 @@ import { useMemo } from 'react';
 import { format } from 'date-fns';
 import {
   useAccountsData,
-  useDataConfig,
   useExpensesData,
   useIncomesData,
   useRecurringData,
 } from '@/common/contexts/DataContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import {
-  computeSafeToSpend,
   computeSpendableBalance,
   computeTwelveMonthProjection,
-  computeUpcomingRecurringThisMonth,
   findFirstShortfall,
 } from '@/constants/forecast';
-import { countsAsSpending } from '@/constants/spending';
+import { useCurrentDate } from '@/common/hooks/useCurrentDate';
+import { useMonthlyPosition } from '@/common/hooks/useMonthlyPosition';
 
 // Wires DataContext slices into the pure forecast math (lib/forecast.ts).
 // ForecastSection only renders for Pro users, so the full expense history is
@@ -24,38 +22,12 @@ export const useForecastData = () => {
   const expenses = useExpensesData();
   const incomes = useIncomesData();
   const { recurringExpenses, recurringIncomes } = useRecurringData();
-  const { monthlyBudget } = useDataConfig();
   const { accounts } = useAccountsData();
   const dateLocale = useDateLocale();
+  const now = useCurrentDate();
+  const monthly = useMonthlyPosition(expenses, now);
 
   return useMemo(() => {
-    const now = new Date();
-    const thisMonthKey = format(now, 'yyyy-MM');
-
-    // YYYY-MM-DD dates: slicing the month key off the string is ~10x faster
-    // than parseISO per row (same pattern as useAnalyticsData).
-    let spentThisMonth = 0;
-    for (const expense of expenses) {
-      // A transfer the user marked as not-spending must not eat into what is
-      // safe to spend. This was reading every row in the month; it is the one
-      // total the exclusion sweep missed.
-      if (!countsAsSpending(expense)) {
-        continue;
-      }
-      if (expense.date.slice(0, 7) === thisMonthKey) {
-        spentThisMonth += expense.amount;
-      }
-    }
-
-    const safeToSpend = computeSafeToSpend({
-      monthlyBudget,
-      spentThisMonth,
-      upcomingRecurringThisMonth: computeUpcomingRecurringThisMonth(
-        recurringExpenses,
-        now,
-      ),
-    });
-
     // What the spendable accounts hold now. Null when the user tracks none,
     // in which case the projection reports flows without a balance line.
     const openingBalance = computeSpendableBalance(accounts);
@@ -78,7 +50,7 @@ export const useForecastData = () => {
       recurringIncomes.length === 0;
 
     return {
-      safeToSpend,
+      safeToSpend: monthly.position.available,
       projection,
       noData,
       openingBalance,
@@ -89,8 +61,9 @@ export const useForecastData = () => {
     incomes,
     recurringExpenses,
     recurringIncomes,
-    monthlyBudget,
+    monthly.position.available,
     accounts,
     dateLocale,
+    now,
   ]);
 };

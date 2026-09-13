@@ -24,7 +24,12 @@ const MoneyFlowPanel = lazyWithRetry(async () => {
   return { default: module.MoneyFlowPanel };
 });
 
-type MonthlyDatum = { month: string; fullMonth: string; amount: number };
+type MonthlyDatum = {
+  month: string;
+  fullMonth: string;
+  monthIndex: number;
+  amount: number;
+};
 type YearTotals = ReturnType<typeof useCashFlowData>['yearTotals'];
 type View = 'trend' | 'flow';
 
@@ -127,10 +132,10 @@ const buildChartData = (
     return monthlyData;
   }
 
-  return monthlyData.map((point, index) => ({
+  return monthlyData.map((point) => ({
     ...point,
-    income: cashFlowMonthly[index]?.income ?? 0,
-    net: cashFlowMonthly[index]?.net ?? 0,
+    income: cashFlowMonthly[point.monthIndex]?.income ?? 0,
+    net: cashFlowMonthly[point.monthIndex]?.net ?? 0,
   }));
 };
 

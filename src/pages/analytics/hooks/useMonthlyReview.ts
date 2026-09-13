@@ -7,6 +7,7 @@ import type { MonthComparison } from '@/pages/analytics/hooks/useAnalyticsData';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import type { TranslateFunction } from '@/constants/translate';
+import type { MonthlyPosition } from '@/constants/monthlyPosition';
 
 export type MonthlyReviewItem = {
   id: 'comparison' | 'category' | 'budget' | 'count';
@@ -17,7 +18,7 @@ type Params = {
   expenses: Expense[];
   categories: Category[];
   comparison: MonthComparison;
-  monthlyBudget: number | null;
+  position: MonthlyPosition;
   currency: string;
   now: Date;
 };
@@ -26,7 +27,7 @@ export const useMonthlyReview = ({
   expenses,
   categories,
   comparison,
-  monthlyBudget,
+  position,
   currency,
   now,
 }: Params) => {
@@ -51,10 +52,8 @@ export const useMonthlyReview = ({
         }),
       });
     }
-    if (monthlyBudget !== null && monthlyBudget > 0) {
-      items.push(
-        buildBudget(comparison.thisMonthAmount, monthlyBudget, currency, t),
-      );
+    if (position.available !== null) {
+      items.push(buildBudget(position.available, currency, t));
     } else if (current.length > 0) {
       items.push({
         id: 'count',
@@ -70,7 +69,7 @@ export const useMonthlyReview = ({
     expenses,
     categories,
     comparison,
-    monthlyBudget,
+    position.available,
     currency,
     now,
     dateLocale,
@@ -115,17 +114,15 @@ const buildComparison = (
 };
 
 const buildBudget = (
-  spent: number,
-  budget: number,
+  available: number,
   currency: string,
   t: TranslateFunction,
 ): MonthlyReviewItem => {
-  const remaining = budget - spent;
-  if (remaining >= 0) {
+  if (available >= 0) {
     return {
       id: 'budget',
       text: t('analytics.review.budgetLeft', {
-        amount: formatCurrency(remaining, currency),
+        amount: formatCurrency(available, currency),
       }),
     };
   }
@@ -133,7 +130,7 @@ const buildBudget = (
   return {
     id: 'budget',
     text: t('analytics.review.budgetOver', {
-      amount: formatCurrency(Math.abs(remaining), currency),
+      amount: formatCurrency(Math.abs(available), currency),
     }),
   };
 };

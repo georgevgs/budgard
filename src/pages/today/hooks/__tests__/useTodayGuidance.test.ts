@@ -8,11 +8,18 @@ let monthlyBudget: number | null = 1000;
 vi.mock('@/common/contexts/DataContext', () => ({
   useIncomesData: () => [],
   useCategoriesData: () => ({ expenseCategories: [] }),
+  useNoSpendDaysData: () => [],
   useRecurringData: () => ({ recurringExpenses: [] }),
-  useDataConfig: () => ({ monthlyBudget, defaultCurrency: 'EUR' }),
+  useDataConfig: () => ({
+    monthlyBudget,
+    defaultCurrency: 'EUR',
+    defaultSavingsPct: 0,
+  }),
 }));
 
-vi.mock('@/common/hooks/useDateLocale', () => ({ useDateLocale: () => undefined }));
+vi.mock('@/common/hooks/useDateLocale', () => ({
+  useDateLocale: () => undefined,
+}));
 vi.mock('@/common/hooks/useSpendingInsights', () => ({
   useSpendingInsights: () => [],
 }));

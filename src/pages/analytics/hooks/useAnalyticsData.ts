@@ -11,9 +11,12 @@ import { sumAmounts } from '@/constants/money';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
 import { useOnDemandHistory } from '@/common/hooks/data/useOnDemandHistory';
 import { getFreeAnalyticsCutoff } from '@/constants/proLimits';
-import { monthsElapsedInYear } from '@/constants/utils';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
+import {
+  countObservedMonths,
+  getObservedMonthRange,
+} from '@/constants/observedMonths';
 
 export type CategoryRow = {
   id: string;
@@ -31,6 +34,13 @@ export type MonthComparison = {
   lastMonthAmount: number;
   delta: number;
   percentChange: number | null;
+};
+
+export type MonthlyDatum = {
+  month: string;
+  fullMonth: string;
+  monthIndex: number;
+  amount: number;
 };
 
 export const useAnalyticsData = (now: Date = new Date()) => {
@@ -90,8 +100,8 @@ export const useAnalyticsData = (now: Date = new Date()) => {
   }, [expenses, selectedYear]);
 
   const monthlyData = useMemo(
-    () => buildMonthlyTotals(yearExpenses, selectedYear, dateLocale),
-    [yearExpenses, selectedYear, dateLocale],
+    () => buildMonthlyTotals(yearExpenses, selectedYear, dateLocale, now),
+    [yearExpenses, selectedYear, dateLocale, now],
   );
 
   const monthComparison = useMemo<MonthComparison>(
@@ -151,20 +161,28 @@ const buildMonthlyTotals = (
   yearExpenses: Expense[],
   year: number,
   dateLocale: Locale,
-) => {
+  now: Date,
+): MonthlyDatum[] => {
   const totals = new Map<string, number>();
   for (const expense of yearExpenses) {
     const key = expense.date.slice(0, 7);
     totals.set(key, (totals.get(key) ?? 0) + expense.amount);
   }
 
-  return Array.from({ length: 12 }, (_, index) => {
+  const range = getObservedMonthRange(yearExpenses, year, now);
+  if (range === null) {
+    return [];
+  }
+
+  return Array.from({ length: range.end - range.start + 1 }, (_, offset) => {
+    const index = range.start + offset;
     const month = (index + 1).toString().padStart(2, '0');
     const key = `${year}-${month}`;
 
     return {
       month: format(parseISO(`${key}-01`), 'LLL', { locale: dateLocale }),
       fullMonth: format(parseISO(`${key}-01`), 'LLLL', { locale: dateLocale }),
+      monthIndex: index,
       amount: totals.get(key) ?? 0,
     };
   });
@@ -239,7 +257,7 @@ const summariseYear = (
     slot.monthly[monthIndex] += expense.amount;
   }
 
-  const monthsElapsed = monthsElapsedInYear(year, now);
+  const monthsElapsed = countObservedMonths(yearExpenses, year, now);
   let monthlyAverage = 0;
   if (monthsElapsed > 0) {
     monthlyAverage = totalSpent / monthsElapsed;
@@ -282,7 +300,7 @@ const buildRollingMonths = (
     totals.set(key, (totals.get(key) ?? 0) + expense.amount);
   }
 
-  return Array.from({ length: ROLLING_MONTHS }, (_, offset) => {
+  const rolling = Array.from({ length: ROLLING_MONTHS }, (_, offset) => {
     const date = new Date(
       now.getFullYear(),
       now.getMonth() - (ROLLING_MONTHS - 1 - offset),
@@ -291,9 +309,34 @@ const buildRollingMonths = (
     const key = format(date, 'yyyy-MM');
 
     return {
+      key,
       month: format(date, 'LLL', { locale: dateLocale }),
       fullMonth: format(date, 'LLLL yyyy', { locale: dateLocale }),
       amount: totals.get(key) ?? 0,
     };
   });
+
+  if (expenses.length === 0) {
+    return [];
+  }
+
+  const earliestKey = expenses.reduce(
+    (earliest, expense) => {
+      const key = expense.date.slice(0, 7);
+      if (key < earliest) {
+        return key;
+      }
+
+      return earliest;
+    },
+    expenses[0].date.slice(0, 7),
+  );
+
+  return rolling
+    .filter((month) => month.key >= earliestKey)
+    .map((month) => ({
+      month: month.month,
+      fullMonth: month.fullMonth,
+      amount: month.amount,
+    }));
 };

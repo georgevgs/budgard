@@ -13,6 +13,7 @@ import {
 } from '@/common/hooks/dataOps/helpers';
 import { useMutationRunner } from '@/common/hooks/dataOps/useMutationRunner';
 import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
+import { trackProductEvent } from '@/common/api/productEventService';
 
 export const useRecurringExpenseOps = () => {
   const { activeOwnerId } = useFinancialSpace();
@@ -52,14 +53,18 @@ export const useRecurringExpenseOps = () => {
 
           return dataService.createRecurringExpense(expenseData, activeOwnerId);
         },
-        commit: (saved) =>
+        commit: (saved) => {
           setRecurringExpenses((prev) => {
             if (expenseId) {
               return replaceById(prev, expenseId, saved);
             }
 
             return [saved, ...prev];
-          }),
+          });
+          if (!expenseId) {
+            trackProductEvent({ name: 'recurring_expense_created' });
+          }
+        },
       });
 
     const handleRecurringExpenseDelete = (expenseId: string) =>

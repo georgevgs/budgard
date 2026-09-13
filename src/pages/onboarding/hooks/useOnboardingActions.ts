@@ -12,6 +12,7 @@ import {
   startOnboarding,
 } from '@/pages/onboarding/utils/onboarding';
 import { PRESET_CATEGORIES } from '@/pages/onboarding/components/presetCategories';
+import { trackProductEvent } from '@/common/api/productEventService';
 
 type UseOnboardingActionsArgs = {
   onComplete: () => void;
@@ -29,7 +30,9 @@ export const useOnboardingActions = ({
   const [step, setCurrentStep] = useState(readOnboardingStep);
 
   useEffect(() => {
-    startOnboarding();
+    if (startOnboarding()) {
+      trackProductEvent({ name: 'onboarding_started' });
+    }
   }, []);
 
   const setStep = useCallback((nextStep: number) => {
@@ -38,6 +41,7 @@ export const useOnboardingActions = ({
   }, []);
 
   const handleComplete = useCallback(() => {
+    trackProductEvent({ name: 'onboarding_completed' });
     completeOnboarding();
     onComplete();
   }, [onComplete]);
@@ -69,7 +73,8 @@ export const useOnboardingActions = ({
   const handleCategoriesNext = useCallback(
     async (selectedIndices: number[]) => {
       if (selectedIndices.length === 0) {
-        setStep(3);
+        trackProductEvent({ name: 'onboarding_categories_submitted' });
+        setStep(2);
 
         return;
       }
@@ -96,7 +101,8 @@ export const useOnboardingActions = ({
         return;
       }
       setIsSubmitting(false);
-      setStep(3);
+      trackProductEvent({ name: 'onboarding_categories_submitted' });
+      setStep(2);
     },
     [session?.user?.id, handleCategoriesAddBulk, t, toast, setStep],
   );

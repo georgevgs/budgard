@@ -4,7 +4,7 @@
      Regenerate with `npm run docs:schema`. -->
 
 An index from each database object to the migrations that touch it, built by
-scanning `supabase/migrations`. Covers 88 migrations: 48 functions, 27 triggers, 26 tables, 87 policies, 55 indexes.
+scanning `supabase/migrations`. Covers 90 migrations: 49 functions, 28 triggers, 27 tables, 88 policies, 57 indexes.
 
 This is a **map, not a schema definition**. Migrations are append-only history
 and the live schema is what you get by replaying them, so nothing here states
@@ -162,6 +162,13 @@ First defined in `20260807120000_add_no_spend_days.sql`.
 - creates — `20260807120000_add_no_spend_days.sql`
 - alters — `20260807120000_add_no_spend_days.sql`
 
+### `product_events`
+
+First defined in `20260913165741_add_product_events.sql`.
+
+- creates — `20260913165741_add_product_events.sql`
+- alters — `20260913165741_add_product_events.sql`
+
 ### `push_subscriptions`
 
 First defined in `20250104165613_remote_schema.sql`.
@@ -170,6 +177,7 @@ First defined in `20250104165613_remote_schema.sql`.
 - alters — `20250104165613_remote_schema.sql`
 - creates — `20260424000000_add_push_subscriptions.sql`
 - alters — `20260424000000_add_push_subscriptions.sql`
+- alters — `20260910211908_harden_push_delivery.sql`
 
 ### `recurring_expenses`
 
@@ -517,6 +525,13 @@ First defined in `20260831151127_add_secure_household_spaces.sql`.
 - grants on — `20260831151127_add_secure_household_spaces.sql`
 - revokes on — `20260831151127_add_secure_household_spaces.sql`
 
+### `private.enforce_push_subscription_limit`
+
+First defined in `20260910211908_harden_push_delivery.sql`.
+
+- defines — `20260910211908_harden_push_delivery.sql`
+- revokes on — `20260910211908_harden_push_delivery.sql`
+
 ### `private.prevent_expense_creator_change`
 
 First defined in `20260831151127_add_secure_household_spaces.sql`.
@@ -766,6 +781,12 @@ First defined in `20250104165613_remote_schema.sql`.
 First defined in `20260822000001_debt_balance_freshness.sql`.
 
 - defines — `20260822000001_debt_balance_freshness.sql`
+
+### `enforce_push_subscription_limit`
+
+First defined in `20260910211908_harden_push_delivery.sql`.
+
+- defines — `20260910211908_harden_push_delivery.sql`
 
 ### `expense_tags_pro_only`
 
@@ -1198,6 +1219,18 @@ First defined in `20250104165613_remote_schema.sql`.
 
 - defines — `20250104165613_remote_schema.sql`
 
+### `product_events_name_occurred_idx`
+
+First defined in `20260913165741_add_product_events.sql`.
+
+- defines — `20260913165741_add_product_events.sql`
+
+### `product_events_user_occurred_idx`
+
+First defined in `20260913165741_add_product_events.sql`.
+
+- defines — `20260913165741_add_product_events.sql`
+
 ### `recurring_expenses_linked_account_idx`
 
 First defined in `20250104165613_remote_schema.sql`.
@@ -1608,6 +1641,12 @@ First defined in `20260517000002_add_receipts_storage_policies.sql`.
 First defined in `20260826160000_add_ui_preferences_and_feedback.sql`.
 
 - defines — `20260826160000_add_ui_preferences_and_feedback.sql`
+
+### `Users can submit their own product events`
+
+First defined in `20260913165741_add_product_events.sql`.
+
+- defines — `20260913165741_add_product_events.sql`
 
 ### `Users can update own budget`
 

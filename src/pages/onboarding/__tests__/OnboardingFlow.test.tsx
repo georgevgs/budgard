@@ -3,7 +3,10 @@ import { swatch } from '@/design/palette';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import OnboardingFlow from '@/pages/onboarding/OnboardingFlow';
-import { shouldShowOnboarding } from '@/pages/onboarding/utils/onboarding';
+import {
+  readOnboardingStep,
+  shouldShowOnboarding,
+} from '@/pages/onboarding/utils/onboarding';
 
 // Mock useAuth
 const mockSession = {
@@ -99,6 +102,13 @@ describe('shouldShowOnboarding', () => {
 
     expect(shouldShowOnboarding(true, 0, 3, 1500)).toBe(true);
   });
+
+  it('preserves the place of an expense-first flow already in progress', () => {
+    localStorage.setItem('budgard_onboarding_started', 'true');
+    localStorage.setItem('budgard_onboarding_step', '1');
+
+    expect(readOnboardingStep()).toBe(2);
+  });
 });
 
 // ─── OnboardingFlow ──────────────────────────────────────────────────────────
@@ -109,26 +119,25 @@ describe('OnboardingFlow', () => {
     expect(screen.getByText('onboarding.welcomeTitle')).toBeInTheDocument();
   });
 
-  it('starts with a real expense instead of setup questions', () => {
+  it('sets up useful categories before the first expense', () => {
     renderFlow();
     fireEvent.click(screen.getByText('onboarding.getStarted'));
+    expect(screen.getByText('onboarding.categoriesTitle')).toBeInTheDocument();
+  });
+
+  it('moves to the first expense when categories are deferred', () => {
+    renderFlow();
+    fireEvent.click(screen.getByText('onboarding.getStarted'));
+    fireEvent.click(screen.getByText('onboarding.skip'));
+
     expect(
       screen.getByText('onboarding.firstExpenseTitle'),
     ).toBeInTheDocument();
   });
 
-  it('moves to categories when the first expense is deferred', () => {
-    renderFlow();
-    fireEvent.click(screen.getByText('onboarding.getStarted'));
-    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
-
-    expect(screen.getByText('onboarding.categoriesTitle')).toBeInTheDocument();
-  });
-
   it('renders category buttons with translation keys', () => {
     renderFlow();
     fireEvent.click(screen.getByText('onboarding.getStarted'));
-    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
 
     expect(
       screen.getByText('onboarding.presetCategories.food'),
@@ -144,7 +153,6 @@ describe('OnboardingFlow', () => {
   it('toggles category selection on click', () => {
     renderFlow();
     fireEvent.click(screen.getByText('onboarding.getStarted'));
-    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
 
     const foodButton = screen
       .getByText('onboarding.presetCategories.food')
@@ -162,7 +170,6 @@ describe('OnboardingFlow', () => {
 
     renderFlow();
     fireEvent.click(screen.getByText('onboarding.getStarted'));
-    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
     fireEvent.click(screen.getByText('onboarding.next'));
 
     await waitFor(() => {
@@ -181,13 +188,14 @@ describe('OnboardingFlow', () => {
     expect(foodCategory?.color).toBe(swatch.mint);
     expect(foodCategory?.icon).toBe('🍔');
     expect(foodCategory?.user_id).toBe('user-123');
-    expect(screen.getByText('onboarding.budgetTitle')).toBeInTheDocument();
+    expect(
+      screen.getByText('onboarding.firstExpenseTitle'),
+    ).toBeInTheDocument();
   });
 
   it('skips category creation when none selected', async () => {
     renderFlow();
     fireEvent.click(screen.getByText('onboarding.getStarted'));
-    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
 
     const categoryNames = ['food', 'housing', 'transport', 'entertainment'];
     for (const name of categoryNames) {
@@ -200,7 +208,9 @@ describe('OnboardingFlow', () => {
     fireEvent.click(screen.getByText('onboarding.next'));
 
     await waitFor(() => {
-      expect(screen.getByText('onboarding.budgetTitle')).toBeInTheDocument();
+      expect(
+        screen.getByText('onboarding.firstExpenseTitle'),
+      ).toBeInTheDocument();
     });
 
     expect(mockHandleCategoriesAddBulk).not.toHaveBeenCalled();
@@ -211,16 +221,18 @@ describe('OnboardingFlow', () => {
     renderFlow(onComplete);
 
     fireEvent.click(screen.getByText('onboarding.getStarted'));
+    fireEvent.click(screen.getByText('onboarding.skip'));
     fireEvent.click(screen.getByText('onboarding.exploreFirst'));
 
     expect(onComplete).not.toHaveBeenCalled();
     expect(localStorage.getItem('budgard_onboarded')).toBeNull();
   });
 
-  it('saves the first expense before asking setup questions', () => {
+  it('saves the first expense after categories are available', () => {
     const onComplete = vi.fn();
     renderFlow(onComplete);
     fireEvent.click(screen.getByText('onboarding.getStarted'));
+    fireEvent.click(screen.getByText('onboarding.skip'));
 
     fireEvent.click(screen.getByRole('button', { name: '4' }));
     fireEvent.click(screen.getByRole('button', { name: '0' }));
@@ -232,7 +244,7 @@ describe('OnboardingFlow', () => {
     expect(mockHandleExpenseFormSubmit).toHaveBeenCalledWith(
       expect.objectContaining({ amount: 4, date: expect.any(String) }),
     );
-    expect(screen.getByText('onboarding.categoriesTitle')).toBeInTheDocument();
+    expect(screen.getByText('onboarding.budgetTitle')).toBeInTheDocument();
     expect(onComplete).not.toHaveBeenCalled();
   });
 
@@ -241,8 +253,8 @@ describe('OnboardingFlow', () => {
     renderFlow(onComplete);
 
     fireEvent.click(screen.getByText('onboarding.getStarted'));
-    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
     fireEvent.click(screen.getByText('onboarding.skip'));
+    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
     fireEvent.click(screen.getByText('onboarding.skip'));
 
     expect(localStorage.getItem('budgard_onboarded')).toBe('true');
@@ -253,8 +265,8 @@ describe('OnboardingFlow', () => {
     const onComplete = vi.fn();
     renderFlow(onComplete);
     fireEvent.click(screen.getByText('onboarding.getStarted'));
-    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
     fireEvent.click(screen.getByText('onboarding.skip'));
+    fireEvent.click(screen.getByText('onboarding.exploreFirst'));
     fireEvent.change(
       screen.getByRole('textbox', {
         name: 'onboarding.budgetAmountLabel',

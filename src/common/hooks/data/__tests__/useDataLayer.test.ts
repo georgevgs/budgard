@@ -249,6 +249,19 @@ describe('useDataLayer boot fetch', () => {
     expect(result.current.expenses.map((e) => e.id)).toContain('e-recent');
   });
 
+  it('initialises Today while supporting dashboard reads are still slow', async () => {
+    svc.getTags.mockImplementationOnce(() => deferred<never>().promise);
+    svc.getRecurringIncomes.mockImplementationOnce(
+      () => deferred<never>().promise,
+    );
+
+    const { result } = renderHook(() => useDataLayer());
+
+    await waitFor(() => expect(result.current.config.isInitialized).toBe(true));
+    expect(result.current.expenses.map((e) => e.id)).toContain('e-recent');
+    expect(result.current.config.isSecondaryLoaded).toBe(false);
+  });
+
   it('initialises the dashboard even when a deferred read fails', async () => {
     svc.getGoals.mockRejectedValueOnce(new Error('goals down'));
 

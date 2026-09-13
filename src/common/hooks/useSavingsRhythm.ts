@@ -58,7 +58,10 @@ const BUILDING_DAYS = 6;
 // Returns null without a budget: an allowance is the whole basis of the score,
 // and inventing one would make the card fiction. The Today hero drops its pace
 // chart in exactly the same case.
-export const useSavingsRhythm = (expenses: Expense[]): SavingsRhythm | null => {
+export const useSavingsRhythm = (
+  expenses: Expense[],
+  now: Date = new Date(),
+): SavingsRhythm | null => {
   const noSpendDays = useNoSpendDaysData();
   const { recurringExpenses } = useRecurringData();
   const { expenseCategories } = useCategoriesData();
@@ -69,7 +72,6 @@ export const useSavingsRhythm = (expenses: Expense[]): SavingsRhythm | null => {
       return null;
     }
 
-    const now = new Date();
     const thisMonth = format(now, 'yyyy-MM');
     const lastMonth = format(subMonths(now, 1), 'yyyy-MM');
     const savingsCategoryIds = buildSavingsCategoryIds(expenseCategories);
@@ -135,6 +137,7 @@ export const useSavingsRhythm = (expenses: Expense[]): SavingsRhythm | null => {
     expenseCategories,
     monthlyBudget,
     noSpendDays,
+    now,
     recurringExpenses,
   ]);
 };

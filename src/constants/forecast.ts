@@ -31,12 +31,6 @@ import type { RecurringExpense } from '@/types/RecurringExpense';
 // with a weekly cadence this covers ~19 years of catch-up before we bail.
 const MAX_OCCURRENCE_ITERATIONS = 1000;
 
-export type SafeToSpendInput = {
-  monthlyBudget: number | null;
-  spentThisMonth: number;
-  upcomingRecurringThisMonth: number;
-};
-
 export type ProjectionMonth = {
   monthKey: string;
   label: string;
@@ -65,21 +59,6 @@ export type ProjectionInput = {
   // 300 or 30,000, and the flows alone cannot say. This is what turns the
   // forecast from a chart into an answer to "will I make it to payday".
   openingBalance?: number | null;
-};
-
-// Budget minus what is already spent minus recurring bills still due before
-// month end. Deliberately allowed to go negative — an honest "you are over"
-// beats a clamped zero.
-export const computeSafeToSpend = (input: SafeToSpendInput): number | null => {
-  if (input.monthlyBudget === null) {
-    return null;
-  }
-
-  return (
-    input.monthlyBudget -
-    input.spentThisMonth -
-    input.upcomingRecurringThisMonth
-  );
 };
 
 // Sums the actual amounts of recurring-expense occurrences that fall strictly

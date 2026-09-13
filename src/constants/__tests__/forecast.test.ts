@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import {
-  computeSafeToSpend,
   computeUpcomingRecurringThisMonth,
   computeTwelveMonthProjection,
   computeSpendableBalance,
@@ -44,44 +43,6 @@ const emptyProjectionInput = (now: Date) => ({
   recurringExpenses: [] as RecurringExpense[],
   recurringIncomes: [] as RecurringExpense[],
   now,
-});
-
-describe('computeSafeToSpend', () => {
-  it('returns null when there is no budget', () => {
-    const result = computeSafeToSpend({
-      monthlyBudget: null,
-      spentThisMonth: 500,
-      upcomingRecurringThisMonth: 100,
-    });
-    expect(result).toBeNull();
-  });
-
-  it('subtracts spent and upcoming recurring from the budget', () => {
-    const result = computeSafeToSpend({
-      monthlyBudget: 1000,
-      spentThisMonth: 400,
-      upcomingRecurringThisMonth: 100,
-    });
-    expect(result).toBe(500);
-  });
-
-  it('goes negative honestly when overspent', () => {
-    const result = computeSafeToSpend({
-      monthlyBudget: 500,
-      spentThisMonth: 450,
-      upcomingRecurringThisMonth: 200,
-    });
-    expect(result).toBe(-150);
-  });
-
-  it('treats a zero budget as a real budget, not as missing', () => {
-    const result = computeSafeToSpend({
-      monthlyBudget: 0,
-      spentThisMonth: 50,
-      upcomingRecurringThisMonth: 0,
-    });
-    expect(result).toBe(-50);
-  });
 });
 
 describe('computeUpcomingRecurringThisMonth', () => {
