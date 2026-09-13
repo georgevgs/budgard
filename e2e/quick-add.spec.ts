@@ -111,6 +111,7 @@ test.describe('quick add', () => {
     }
     await app.getByRole('textbox', { name: /name/i }).fill('Rejected expense');
     failNextBackendRequest(
+      'expenses',
       400,
       '23514',
       'Expense failed a database constraint',

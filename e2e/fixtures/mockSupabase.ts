@@ -11,6 +11,7 @@ const E2E_EMAIL = 'e2e@budgard.test';
 export type Dataset = Record<string, Record<string, unknown>[]>;
 
 type BackendFailure = {
+  table: string;
   status: number;
   body: {
     code: string;
@@ -184,16 +185,16 @@ const handleRest = async (route: Route, dataset: Dataset) => {
     return route.abort('internetdisconnected');
   }
 
+  const request = route.request();
+  const url = new URL(request.url());
+  const table = url.pathname.replace('/rest/v1/', '').split('/')[0];
   const failure = backend.nextFailure;
-  if (failure) {
+  if (failure?.table === table) {
     backend.nextFailure = null;
 
     return json(route, failure.body, failure.status);
   }
 
-  const request = route.request();
-  const url = new URL(request.url());
-  const table = url.pathname.replace('/rest/v1/', '').split('/')[0];
   const rows = (dataset[table] ??= []);
   const method = request.method();
   // PostgREST returns a bare object rather than an array when the client asks

@@ -1,4 +1,16 @@
-import { defineConfig, devices } from '@playwright/test';
+import {
+  defineConfig,
+  devices,
+  type ReporterDescription,
+} from '@playwright/test';
+
+const getReporters = (): ReporterDescription[] => {
+  if (!process.env.CI) {
+    return [['list']];
+  }
+
+  return [['github'], ['list'], ['html', { open: 'never' }]];
+};
 
 // The suite runs against a real production build in `--mode e2e`, which points
 // the app at a placeholder Supabase host. Every request to that host is
@@ -12,7 +24,7 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: Number(process.env.CI ? 1 : 0),
   workers: Number(process.env.CI ? 2 : 4),
-  reporter: process.env.CI ? [['github'], ['list']] : [['list']],
+  reporter: getReporters(),
   timeout: 30_000,
   expect: { timeout: 7_000 },
 

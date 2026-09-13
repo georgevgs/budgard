@@ -39,11 +39,13 @@ export const setBackendReachable = (reachable: boolean): void => {
 };
 
 export const failNextBackendRequest = (
+  table: string,
   status: number,
   code: string,
   message: string,
 ): void => {
   backend.nextFailure = {
+    table,
     status,
     body: { code, message },
   };
