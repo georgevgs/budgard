@@ -4,27 +4,43 @@ import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import { Link } from 'react-router-dom';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { cn, formatCurrency } from '@/constants/utils';
-import type { MoneyTimeline, MoneyTimelineEntry } from '@/pages/plan/utils/moneyTimeline';
+import {
+  TIMELINE_DAYS,
+  type MoneyTimeline,
+  type MoneyTimelineEntry,
+  type TimelineRange,
+} from '@/pages/plan/utils/moneyTimeline';
 import type { TranslateFunction } from '@/constants/translate';
 
 type PlanTimelineProps = {
   timeline: MoneyTimeline;
+  hasSchedules: boolean;
   currency: string;
+  onRangeChange: (range: TimelineRange) => void;
 };
 
-export const PlanTimeline = ({ timeline, currency }: PlanTimelineProps) => {
+export const PlanTimeline = ({
+  timeline,
+  hasSchedules,
+  currency,
+  onRangeChange,
+}: PlanTimelineProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
 
   return (
-    <section className="mt-6" aria-labelledby="plan-timeline-title">
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          <h2 id="plan-timeline-title" className="type-heading">
-            {t('plan.timeline.title')}
-          </h2>
-          {renderSummary(timeline, currency, t)}
-        </div>
+    <section
+      // The "Due" figure on the decision card is a hash link to this id. A
+      // native jump rather than a scripted scroll: it moves focus as well as
+      // the viewport, so a keyboard reader lands on the list, not just near it.
+      id="plan-timeline"
+      className="mt-6 scroll-mt-20"
+      aria-labelledby="plan-timeline-title"
+    >
+      <div className="flex items-center justify-between gap-4">
+        <h2 id="plan-timeline-title" className="type-heading">
+          {t('plan.timeline.title')}
+        </h2>
         <Link
           to={buildManageLink(timeline)}
           viewTransition
@@ -34,44 +50,99 @@ export const PlanTimeline = ({ timeline, currency }: PlanTimelineProps) => {
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
-      {renderBody(timeline, currency, dateLocale, t)}
+      {renderRangeTabs(timeline.range, onRangeChange, t)}
+      {renderSummary(timeline, currency, dateLocale, t)}
+      {renderBody(timeline, hasSchedules, currency, dateLocale, onRangeChange, t)}
     </section>
   );
 };
 
 type DateLocale = ReturnType<typeof useDateLocale>;
 
-const renderSummary = (timeline: MoneyTimeline, currency: string, t: TranslateFunction) => {
-  if (timeline.count === 0) {
-    return null;
-  }
+const SEGMENT =
+  'segmented-item cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 
-  let key = 'plan.timeline.summary.both';
-  if (timeline.incomeTotal === 0) {
-    key = 'plan.timeline.summary.expensesOnly';
-  }
-  if (timeline.expenseTotal === 0) {
-    key = 'plan.timeline.summary.incomeOnly';
-  }
+const renderRangeTabs = (
+  range: TimelineRange,
+  onRangeChange: (range: TimelineRange) => void,
+  t: TranslateFunction,
+) => (
+  <div
+    role="tablist"
+    aria-label={t('plan.timeline.range.label')}
+    className="segmented mt-3"
+  >
+    <button
+      type="button"
+      role="tab"
+      aria-selected={range === 'month'}
+      data-active={range === 'month'}
+      onClick={() => onRangeChange('month')}
+      className={SEGMENT}
+    >
+      {t('plan.timeline.range.month')}
+    </button>
+    <button
+      type="button"
+      role="tab"
+      aria-selected={range === 'days'}
+      data-active={range === 'days'}
+      onClick={() => onRangeChange('days')}
+      className={SEGMENT}
+    >
+      {t('plan.timeline.range.days', { count: TIMELINE_DAYS })}
+    </button>
+  </div>
+);
 
-  return (
-    <p className="mt-0.5 text-sm text-muted-foreground">
-      {t(key, {
-        income: formatCurrency(timeline.incomeTotal, currency),
-        expenses: formatCurrency(timeline.expenseTotal, currency),
-      })}
-    </p>
-  );
-};
-
-const renderBody = (
+// The month window's summary carries the net, because that is the projection
+// the window exists to make: what this month's remaining flows leave behind by
+// the time it closes. The rolling window has no such closing date to land on,
+// so it states the two flows and stops.
+const renderSummary = (
   timeline: MoneyTimeline,
   currency: string,
   dateLocale: DateLocale,
   t: TranslateFunction,
 ) => {
   if (timeline.count === 0) {
-    return renderEmpty(t);
+    return null;
+  }
+
+  return (
+    <p className="mt-2 text-sm text-muted-foreground">
+      {t(summaryKey(timeline), {
+        income: formatCurrency(timeline.incomeTotal, currency),
+        expenses: formatCurrency(timeline.expenseTotal, currency),
+        net: formatCurrency(timeline.net, currency),
+        date: format(timeline.endsOn, 'd LLL', { locale: dateLocale }),
+      })}
+    </p>
+  );
+};
+
+const summaryKey = (timeline: MoneyTimeline): string => {
+  const scope = `plan.timeline.summary.${timeline.range}`;
+  if (timeline.incomeTotal === 0) {
+    return `${scope}.expensesOnly`;
+  }
+  if (timeline.expenseTotal === 0) {
+    return `${scope}.incomeOnly`;
+  }
+
+  return `${scope}.both`;
+};
+
+const renderBody = (
+  timeline: MoneyTimeline,
+  hasSchedules: boolean,
+  currency: string,
+  dateLocale: DateLocale,
+  onRangeChange: (range: TimelineRange) => void,
+  t: TranslateFunction,
+) => {
+  if (timeline.count === 0) {
+    return renderEmpty(timeline, hasSchedules, dateLocale, onRangeChange, t);
   }
 
   return (
@@ -88,9 +159,9 @@ const renderBody = (
 
 // The timeline can hold recurring income and expenses side by side, but
 // /recurring only ever shows one at a time (defaulting to expenses). When the
-// next 30 days are income alone, Manage should land there instead of a tab
-// with nothing in it — otherwise the destination stays the same one it's
-// always been.
+// window holds income alone, Manage should land there instead of a tab with
+// nothing in it — otherwise the destination stays the same one it's always
+// been.
 const buildManageLink = (timeline: MoneyTimeline): string => {
   if (timeline.expenseTotal === 0 && timeline.incomeTotal > 0) {
     return '/recurring?mode=income';
@@ -99,22 +170,101 @@ const buildManageLink = (timeline: MoneyTimeline): string => {
   return '/recurring';
 };
 
-const renderEmpty = (t: TranslateFunction) => (
-  <div className="surface-card mt-3 px-5 py-7">
-    <p className="type-heading">{t('plan.timeline.emptyTitle')}</p>
-    <p className="mt-1 max-w-md text-sm leading-relaxed text-muted-foreground">
-      {t('plan.timeline.emptyBody')}
-    </p>
-    <Link
-      to="/recurring"
-      viewTransition
-      className="mt-4 inline-flex min-h-11 items-center gap-1 rounded-full bg-foreground px-4 text-sm font-semibold text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-    >
-      {t('plan.timeline.emptyAction')}
-      <ArrowRight className="h-4 w-4" />
-    </Link>
-  </div>
-);
+// Three different nothings, one card. No schedules at all is the onboarding
+// case and points at /recurring. A quiet rest-of-month is the common one and
+// is good news, so it says so and offers the wider window rather than leaving
+// the reader at a dead end.
+const renderEmpty = (
+  timeline: MoneyTimeline,
+  hasSchedules: boolean,
+  dateLocale: DateLocale,
+  onRangeChange: (range: TimelineRange) => void,
+  t: TranslateFunction,
+) => {
+  const card = resolveEmptyCard(timeline, hasSchedules, dateLocale, t);
+
+  return (
+    <div className="surface-card mt-3 px-5 py-7">
+      <p className="type-heading">{card.title}</p>
+      <p className="mt-1 max-w-md text-sm leading-relaxed text-muted-foreground">
+        {card.body}
+      </p>
+      {renderEmptyAction(card.action, onRangeChange, t)}
+    </div>
+  );
+};
+
+type EmptyAction = 'addPlan' | 'widen' | 'none';
+
+type EmptyCard = {
+  title: string;
+  body: string;
+  action: EmptyAction;
+};
+
+const resolveEmptyCard = (
+  timeline: MoneyTimeline,
+  hasSchedules: boolean,
+  dateLocale: DateLocale,
+  t: TranslateFunction,
+): EmptyCard => {
+  if (!hasSchedules) {
+    return {
+      title: t('plan.timeline.emptyTitle'),
+      body: t('plan.timeline.emptyBody'),
+      action: 'addPlan',
+    };
+  }
+
+  if (timeline.range === 'days') {
+    return {
+      title: t('plan.timeline.quiet.daysTitle'),
+      body: t('plan.timeline.quiet.daysBody', { count: TIMELINE_DAYS }),
+      action: 'none',
+    };
+  }
+
+  return {
+    title: t('plan.timeline.quiet.monthTitle'),
+    body: t('plan.timeline.quiet.monthBody', {
+      date: format(timeline.endsOn, 'd LLL', { locale: dateLocale }),
+    }),
+    action: 'widen',
+  };
+};
+
+const EMPTY_ACTION =
+  'mt-4 inline-flex min-h-11 items-center gap-1 rounded-full bg-foreground px-4 text-sm font-semibold text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
+
+const renderEmptyAction = (
+  action: EmptyAction,
+  onRangeChange: (range: TimelineRange) => void,
+  t: TranslateFunction,
+) => {
+  if (action === 'addPlan') {
+    return (
+      <Link to="/recurring" viewTransition className={EMPTY_ACTION}>
+        {t('plan.timeline.emptyAction')}
+        <ArrowRight className="h-4 w-4" />
+      </Link>
+    );
+  }
+
+  if (action === 'widen') {
+    return (
+      <button
+        type="button"
+        onClick={() => onRangeChange('days')}
+        className={cn(EMPTY_ACTION, 'cursor-pointer')}
+      >
+        {t('plan.timeline.quiet.monthAction', { count: TIMELINE_DAYS })}
+        <ArrowRight className="h-4 w-4" />
+      </button>
+    );
+  }
+
+  return null;
+};
 
 const renderEntry = (
   entry: MoneyTimelineEntry,

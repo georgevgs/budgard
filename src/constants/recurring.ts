@@ -1,4 +1,4 @@
-import { addWeeks } from 'date-fns';
+import { addDays, addWeeks, endOfMonth, startOfDay } from 'date-fns';
 import {
   addMonthsAnchored,
   anchorDayOf,
@@ -117,4 +117,130 @@ const advanceByFrequency = (
     default:
       return addMonthsAnchored(fromDate, 1, anchor);
   }
+};
+
+/**
+ * Every charge a schedule makes inside a window, in calendar order.
+ *
+ * Three screens used to walk a schedule themselves — Today's seven-day bills,
+ * Plan's timeline, and safe-to-spend's "still due this month" — and the three
+ * walks disagreed. Two read a stale `last_generated_date` as "nothing is
+ * coming" where the third caught the schedule up to the present, so a cron
+ * that lagged removed a bill from the list while leaving it in the figure. A
+ * list and the total that links to it cannot describe different months. This
+ * is that walk, once.
+ */
+export type OccurrenceWindow = {
+  /** Local midnight of the first day the window covers. */
+  from: Date;
+  /** Local midnight of the last day the window covers. Inclusive. */
+  to: Date;
+  /** Whether a charge falling on `from` itself belongs to the window. */
+  includeFrom: boolean;
+};
+
+export const collectOccurrences = (
+  expense: RecurringExpense,
+  window: OccurrenceWindow,
+): Date[] => {
+  if (!expense.active) {
+    return [];
+  }
+
+  let cursor = firstOccurrenceIn(expense, window);
+  if (cursor === null) {
+    return [];
+  }
+
+  const dates: Date[] = [];
+  let iterations = 0;
+  while (cursor <= window.to) {
+    if (isPastEndDate(expense, cursor)) {
+      break;
+    }
+    dates.push(cursor);
+    cursor = advanceOccurrence(expense, cursor);
+    iterations += 1;
+    if (iterations >= MAX_CATCHUP_ITERATIONS) {
+      break;
+    }
+  }
+
+  return dates;
+};
+
+// The first charge at or after the window opens, catching a lagging schedule
+// up to the present. A `last_generated_date` months behind means the cron has
+// not run, not that the charge has stopped coming.
+const firstOccurrenceIn = (
+  expense: RecurringExpense,
+  window: OccurrenceWindow,
+): Date | null => {
+  let cursor = seedOccurrence(expense);
+  let iterations = 0;
+  while (isBeforeWindow(cursor, window)) {
+    cursor = advanceOccurrence(expense, cursor);
+    iterations += 1;
+    if (iterations >= MAX_CATCHUP_ITERATIONS) {
+      return null;
+    }
+  }
+
+  return cursor;
+};
+
+const seedOccurrence = (expense: RecurringExpense): Date => {
+  if (expense.last_generated_date) {
+    return advanceOccurrence(
+      expense,
+      parseIsoDate(expense.last_generated_date),
+    );
+  }
+
+  return parseIsoDate(expense.start_date);
+};
+
+const isBeforeWindow = (cursor: Date, window: OccurrenceWindow): boolean => {
+  if (window.includeFrom) {
+    return cursor < window.from;
+  }
+
+  return cursor <= window.from;
+};
+
+const isPastEndDate = (expense: RecurringExpense, date: Date): boolean => {
+  if (!expense.end_date) {
+    return false;
+  }
+
+  return date > parseIsoDate(expense.end_date);
+};
+
+/**
+ * The window "still to come this month" is cut from: tomorrow through the
+ * last day of the current month.
+ *
+ * `includeFrom: false` is the load-bearing half. The cron writes the expense
+ * row on its due date, so a charge falling today is already counted in this
+ * month's spending; counting it again as still-to-come would take it out of
+ * safe-to-spend twice. Safe-to-spend and Plan's month timeline both cut from
+ * here, which is what makes the figure and the list it opens agree.
+ */
+export const restOfMonthWindow = (now: Date): OccurrenceWindow => ({
+  from: startOfDay(now),
+  to: endOfMonth(now),
+  includeFrom: false,
+});
+
+/**
+ * A plain forward-looking calendar window of `days` whole days from today.
+ *
+ * Today counts, unlike the month window above: this one answers "what is
+ * about to leave the account", where a bill going out this morning is the
+ * first thing worth seeing rather than a double count.
+ */
+export const nextDaysWindow = (now: Date, days: number): OccurrenceWindow => {
+  const from = startOfDay(now);
+
+  return { from, to: addDays(from, days), includeFrom: true };
 };

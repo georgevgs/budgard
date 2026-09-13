@@ -207,14 +207,21 @@
   },
   "plan": {
     "title": "Plan",
-    "subtitle": "See what is moving in the next 30 days, then shape the month around it.",
+    "subtitle": "See what is still to come this month, then shape the month around it.",
     "timeline": {
-      "title": "Next 30 days",
+      "title": "Coming up",
       "manage": "Manage",
       "summary": {
-        "both": "{{income}} coming in · {{expenses}} going out",
-        "incomeOnly": "{{income}} expected to come in",
-        "expensesOnly": "{{expenses}} scheduled to go out"
+        "month": {
+          "both": "{{expenses}} still to go out · {{income}} still to come in · {{net}} net by {{date}}",
+          "expensesOnly": "{{expenses}} still to go out before {{date}}",
+          "incomeOnly": "{{income}} still to come in before {{date}}"
+        },
+        "days": {
+          "both": "{{income}} coming in · {{expenses}} going out",
+          "expensesOnly": "{{expenses}} scheduled to go out",
+          "incomeOnly": "{{income}} expected to come in"
+        }
       },
       "kind": {
         "expense": "Planned payment",
@@ -223,7 +230,19 @@
       "emptyTitle": "Nothing scheduled yet",
       "emptyBody": "Add planned payments or income to see the month unfold here.",
       "emptyAction": "Add a plan",
-      "more": "{{count}} more scheduled"
+      "more": "{{count}} more scheduled",
+      "range": {
+        "label": "Timeline window",
+        "month": "Rest of this month",
+        "days": "Next {{count}} days"
+      },
+      "quiet": {
+        "monthTitle": "Nothing else due this month",
+        "monthBody": "Nothing is scheduled between now and {{date}}. What is left of the month is yours to decide.",
+        "monthAction": "Look at the next {{count}} days",
+        "daysTitle": "Nothing scheduled",
+        "daysBody": "Nothing is due in the next {{count}} days."
+      }
     },
     "context": {
       "title": "Adjust this month",
@@ -256,7 +275,8 @@
         "review": "Review spending",
         "save": "Set money aside",
         "steady": "No change needed"
-      }
+      },
+      "committedAction": "{{amount}} still due — see what it is"
     },
     "recurring": {
       "title": "Recurring expenses",

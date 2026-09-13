@@ -1,10 +1,29 @@
-import { differenceInCalendarDays, format } from 'date-fns';
-import { parseIsoDate, startOfToday } from '@/constants/dates';
+import { format } from 'date-fns';
 import { sumAmounts } from '@/constants/money';
-import { advanceOccurrence, calculateNextOccurrence } from '@/constants/recurring';
+import {
+  collectOccurrences,
+  nextDaysWindow,
+  restOfMonthWindow,
+  type OccurrenceWindow,
+} from '@/constants/recurring';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
+/** How far the rolling window looks ahead. Named here so the label the user
+ *  reads and the window they get can never drift apart. */
+export const TIMELINE_DAYS = 30;
+
 export type MoneyTimelineKind = 'expense' | 'income';
+
+/**
+ * Which window Plan's timeline is showing.
+ *
+ * `month` is the one the budget is kept in: everything still to move between
+ * tomorrow and the last day of this month, cut from the same window
+ * safe-to-spend subtracts, so the list totals the "Due" figure that opens it.
+ * `days` is a rolling calendar preview that crosses the month boundary — on
+ * the 20th it shows next month's rent, which answers a different question.
+ */
+export type TimelineRange = 'month' | 'days';
 
 export type MoneyTimelineEntry = {
   id: string;
@@ -14,19 +33,24 @@ export type MoneyTimelineEntry = {
 };
 
 export type MoneyTimeline = {
+  range: TimelineRange;
   items: MoneyTimelineEntry[];
   count: number;
   remainingCount: number;
   incomeTotal: number;
   expenseTotal: number;
+  /** What the window leaves behind: income in, minus everything going out. */
+  net: number;
+  /** The last day the window covers — the date the totals are "by". */
+  endsOn: Date;
 };
 
 type Options = {
+  range: TimelineRange;
+  /** Length of the rolling window. Ignored when the range is `month`. */
   withinDays: number;
   limit: number;
 };
-
-const MAX_OCCURRENCE_ITERATIONS = 1000;
 
 export const buildMoneyTimeline = (
   recurringExpenses: RecurringExpense[],
@@ -34,84 +58,54 @@ export const buildMoneyTimeline = (
   now: Date,
   options: Options,
 ): MoneyTimeline => {
-  const expenses = expandSchedules(
-    recurringExpenses,
-    'expense',
-    now,
-    options.withinDays,
-  );
-  const incomes = expandSchedules(
-    recurringIncomes,
-    'income',
-    now,
-    options.withinDays,
-  );
+  const window = resolveWindow(options, now);
+  const expenses = expandSchedules(recurringExpenses, 'expense', window);
+  const incomes = expandSchedules(recurringIncomes, 'income', window);
   const entries = [...expenses, ...incomes].sort(compareEntries);
   const limit = Math.max(0, options.limit);
   const items = entries.slice(0, limit);
+  const incomeTotal = sumAmounts(incomes.map((entry) => entry.item.amount));
+  const expenseTotal = sumAmounts(expenses.map((entry) => entry.item.amount));
 
   return {
+    range: options.range,
     items,
     count: entries.length,
     remainingCount: Math.max(0, entries.length - items.length),
-    incomeTotal: sumAmounts(incomes.map((entry) => entry.item.amount)),
-    expenseTotal: sumAmounts(expenses.map((entry) => entry.item.amount)),
+    incomeTotal,
+    expenseTotal,
+    net: sumAmounts([incomeTotal, -expenseTotal]),
+    endsOn: window.to,
   };
+};
+
+const resolveWindow = (options: Options, now: Date): OccurrenceWindow => {
+  if (options.range === 'month') {
+    return restOfMonthWindow(now);
+  }
+
+  return nextDaysWindow(now, options.withinDays);
 };
 
 const expandSchedules = (
   schedules: RecurringExpense[],
   kind: MoneyTimelineKind,
-  now: Date,
-  withinDays: number,
+  window: OccurrenceWindow,
 ): MoneyTimelineEntry[] => {
-  return schedules.flatMap((item) =>
-    expandSchedule(item, kind, now, withinDays),
-  );
+  return schedules.flatMap((item) => expandSchedule(item, kind, window));
 };
 
 const expandSchedule = (
   item: RecurringExpense,
   kind: MoneyTimelineKind,
-  now: Date,
-  withinDays: number,
+  window: OccurrenceWindow,
 ): MoneyTimelineEntry[] => {
-  const entries: MoneyTimelineEntry[] = [];
-  let cursor = calculateNextOccurrence(item, now);
-  let iterations = 0;
-
-  while (cursor !== null && isWithin(cursor, now, withinDays)) {
-    if (isBeyondEndDate(item, cursor)) {
-      break;
-    }
-    entries.push({
-      id: `${kind}:${item.id}:${format(cursor, 'yyyy-MM-dd')}`,
-      item,
-      date: cursor,
-      kind,
-    });
-    cursor = advanceOccurrence(item, cursor);
-    iterations += 1;
-    if (iterations >= MAX_OCCURRENCE_ITERATIONS) {
-      break;
-    }
-  }
-
-  return entries;
-};
-
-const isWithin = (date: Date, now: Date, withinDays: number): boolean => {
-  const distance = differenceInCalendarDays(date, startOfToday(now));
-
-  return distance >= 0 && distance <= withinDays;
-};
-
-const isBeyondEndDate = (item: RecurringExpense, date: Date): boolean => {
-  if (!item.end_date) {
-    return false;
-  }
-
-  return date > parseIsoDate(item.end_date);
+  return collectOccurrences(item, window).map((date) => ({
+    id: `${kind}:${item.id}:${format(date, 'yyyy-MM-dd')}`,
+    item,
+    date,
+    kind,
+  }));
 };
 
 const compareEntries = (

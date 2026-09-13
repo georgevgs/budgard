@@ -18,18 +18,17 @@ import {
   endOfMonth,
   format,
   parseISO,
-  startOfDay,
   startOfMonth,
 } from 'date-fns';
-import { advanceOccurrence, getMonthlyAmount } from '@/constants/recurring';
+import {
+  collectOccurrences,
+  getMonthlyAmount,
+  restOfMonthWindow,
+} from '@/constants/recurring';
 import { sumAmounts } from '@/constants/money';
 import { countsInTotals } from '@/constants/spending';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
-
-// Same belt-and-braces cap as calculateNextOccurrence in lib/recurring.ts:
-// with a weekly cadence this covers ~19 years of catch-up before we bail.
-const MAX_OCCURRENCE_ITERATIONS = 1000;
 
 export type ProjectionMonth = {
   monthKey: string;
@@ -61,49 +60,25 @@ export type ProjectionInput = {
   openingBalance?: number | null;
 };
 
-// Sums the actual amounts of recurring-expense occurrences that fall strictly
-// after `now` (day granularity) and on or before the end of the current
-// month. Actual amounts — not monthly equivalents — because a quarterly 30
-// due next week costs 30 this month, not 10, and a weekly item counts once
-// per remaining occurrence.
+// Sums the actual amounts of recurring-expense occurrences still to come
+// between tomorrow and the last day of the current month. Actual amounts —
+// not monthly equivalents — because a quarterly 30 due next week costs 30
+// this month, not 10, and a weekly item counts once per remaining occurrence.
 //
-// Assumptions (matching lib/recurring.ts and the DB cron):
-// - The item shape has no next_date/day_of_month column; the next charge
-//   derives from last_generated_date + frequency, falling back to start_date.
-// - A charge due today is excluded: the cron generates the expense row on the
-//   due date, so today's charge lands in spentThisMonth — counting it here
-//   would double-count it in safe-to-spend.
+// Plan's "rest of this month" timeline cuts the same window over the same
+// schedules, so the list a reader opens from this figure totals this figure —
+// by construction rather than by comment. `restOfMonthWindow` carries the
+// reasoning for excluding a charge that falls today.
 export const computeUpcomingRecurringThisMonth = (
   recurringExpenses: RecurringExpense[],
   now: Date,
 ): number => {
-  const today = startOfDay(now);
-  const monthEnd = endOfMonth(now);
-  let total = 0;
+  const window = restOfMonthWindow(now);
+  const due = recurringExpenses.flatMap((item) =>
+    collectOccurrences(item, window).map(() => item.amount),
+  );
 
-  for (const item of recurringExpenses) {
-    if (!item.active) {
-      continue;
-    }
-
-    let cursor = findFirstOccurrenceAfter(item, today);
-    let iterations = 0;
-    const due: number[] = [];
-    while (cursor !== null && cursor <= monthEnd) {
-      if (isBeyondEndDate(item, cursor)) {
-        break;
-      }
-      due.push(item.amount);
-      cursor = advanceOccurrence(item, cursor);
-      iterations += 1;
-      if (iterations >= MAX_OCCURRENCE_ITERATIONS) {
-        break;
-      }
-    }
-    total = sumAmounts([total, ...due]);
-  }
-
-  return total;
+  return sumAmounts(due);
 };
 
 // 12 months starting the month after `now`. Each month sums the
@@ -193,40 +168,6 @@ const SPENDABLE_KINDS: readonly string[] = ['cash', 'bank'];
 
 const defaultMonthLabel = (monthStart: Date): string => {
   return format(monthStart, 'LLL yyyy');
-};
-
-// First occurrence strictly after `today` (a startOfDay date). Row dates
-// parse to local midnight, so `cursor <= today` treats a charge due today as
-// already handled by the cron.
-const findFirstOccurrenceAfter = (
-  item: RecurringExpense,
-  today: Date,
-): Date | null => {
-  let cursor: Date;
-  if (item.last_generated_date) {
-    cursor = advanceOccurrence(item, parseISO(item.last_generated_date));
-  } else {
-    cursor = parseISO(item.start_date);
-  }
-
-  let iterations = 0;
-  while (cursor <= today) {
-    cursor = advanceOccurrence(item, cursor);
-    iterations += 1;
-    if (iterations >= MAX_OCCURRENCE_ITERATIONS) {
-      return null;
-    }
-  }
-
-  return cursor;
-};
-
-const isBeyondEndDate = (item: RecurringExpense, date: Date): boolean => {
-  if (!item.end_date) {
-    return false;
-  }
-
-  return date > parseISO(item.end_date);
 };
 
 // Average of NON-recurring-generated rows over the last up-to-6 full months.

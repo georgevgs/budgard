@@ -23,6 +23,7 @@ import { useDebts } from '@/common/hooks/useDebts';
 import { useDelayedLoading } from '@/common/hooks/useDelayedLoading';
 import { useCurrentDate } from '@/common/hooks/useCurrentDate';
 import { useMoneyTimeline } from '@/pages/plan/hooks/useMoneyTimeline';
+import type { TimelineRange } from '@/pages/plan/utils/moneyTimeline';
 import { useMonthlyPosition } from '@/common/hooks/useMonthlyPosition';
 import { getMonthlyAmount } from '@/constants/recurring';
 import { formatCurrency } from '@/constants/utils';
@@ -37,11 +38,16 @@ const PlanView = () => {
   const { handleBudgetUpdate } = useBudgetOps();
   const { optimisticExpenses } = useQuickAdd();
   const [areDetailsOpen, setDetailsOpen] = useState(false);
+  // The month is the window the budget is kept in, so it is the one the screen
+  // opens on. The rolling 30 days stays a tap away for "what is coming after
+  // this month closes".
+  const [timelineRange, setTimelineRange] = useState<TimelineRange>('month');
   const now = useCurrentDate();
   const monthly = useMonthlyPosition(optimisticExpenses, now);
-  const timeline = useMoneyTimeline({
+  const { timeline, hasSchedules } = useMoneyTimeline({
     recurringExpenses,
     recurringIncomes,
+    range: timelineRange,
     now,
   });
   const model = useMemo(
@@ -67,8 +73,14 @@ const PlanView = () => {
         decision={monthly.position}
         currency={config.defaultCurrency}
         onOpenDetails={() => setDetailsOpen(true)}
+        onShowCommitted={() => setTimelineRange('month')}
       />
-      <PlanTimeline timeline={timeline} currency={config.defaultCurrency} />
+      <PlanTimeline
+        timeline={timeline}
+        hasSchedules={hasSchedules}
+        currency={config.defaultCurrency}
+        onRangeChange={setTimelineRange}
+      />
       <PlanDetails
         isOpen={areDetailsOpen}
         monthKey={monthly.monthKey}

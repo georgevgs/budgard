@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
-import { formatCurrency } from '@/constants/utils';
+import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
+import { cn, formatCurrency } from '@/constants/utils';
 import type {
   MonthlyPosition,
   MonthlyPositionState,
@@ -13,12 +14,14 @@ type MonthlyDecisionCardProps = {
   decision: MonthlyPosition;
   currency: string;
   onOpenDetails: () => void;
+  onShowCommitted: () => void;
 };
 
 export const MonthlyDecisionCard = ({
   decision,
   currency,
   onOpenDetails,
+  onShowCommitted,
 }: MonthlyDecisionCardProps) => {
   const { t } = useTranslation();
 
@@ -33,7 +36,7 @@ export const MonthlyDecisionCard = ({
       <p className="mt-2 max-w-[34rem] text-sm leading-relaxed text-muted-foreground">
         {decisionBody(decision, currency, t)}
       </p>
-      {renderAllocation(decision, currency, t)}
+      {renderAllocation(decision, currency, onShowCommitted, t)}
       {renderAction(decision.state, onOpenDetails, t)}
     </section>
   );
@@ -68,6 +71,7 @@ const decisionBody = (
 const renderAllocation = (
   decision: MonthlyPosition,
   currency: string,
+  onShowCommitted: () => void,
   t: TranslateFunction,
 ) => {
   if (decision.state === 'noBudget') {
@@ -77,7 +81,7 @@ const renderAllocation = (
   return (
     <div className="mt-5 grid grid-cols-3 divide-x divide-border/50 border-t border-border/50 pt-4">
       {allocation(t('plan.decision.spent'), decision.spent, currency)}
-      {allocation(t('plan.decision.committed'), decision.committed, currency)}
+      {renderCommitted(decision.committed, currency, onShowCommitted, t)}
       {allocation(
         t('plan.decision.savings'),
         decision.savingsReserve,
@@ -87,8 +91,10 @@ const renderAllocation = (
   );
 };
 
+const ALLOCATION_CELL = 'min-w-0 px-2 first:pl-0 last:pr-0';
+
 const allocation = (label: string, amount: number, currency: string) => (
-  <div className="min-w-0 px-2 first:pl-0 last:pr-0">
+  <div className={ALLOCATION_CELL}>
     <TileLabel className="truncate text-[0.65rem] opacity-75">
       {label}
     </TileLabel>
@@ -96,6 +102,38 @@ const allocation = (label: string, amount: number, currency: string) => (
       {formatCurrency(amount, currency)}
     </p>
   </div>
+);
+
+// The one cell of the three that leads somewhere. Spent and Save are already
+// itemised elsewhere on the screen; what is still due was a number with no
+// list behind it, which is the question this figure always raised and never
+// answered. It jumps to the timeline and switches it to the same window this
+// figure is cut from, so the list underneath adds up to exactly this.
+const renderCommitted = (
+  committed: number,
+  currency: string,
+  onShowCommitted: () => void,
+  t: TranslateFunction,
+) => (
+  <a
+    href="#plan-timeline"
+    onClick={onShowCommitted}
+    aria-label={t('plan.decision.committedAction', {
+      amount: formatCurrency(committed, currency),
+    })}
+    className={cn(
+      ALLOCATION_CELL,
+      'block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    )}
+  >
+    <TileLabel className="truncate text-[0.65rem] opacity-75">
+      {t('plan.decision.committed')}
+    </TileLabel>
+    <p className="mt-1 flex items-center gap-0.5 text-sm font-semibold tabular-nums text-primary-ink">
+      <span className="truncate">{formatCurrency(committed, currency)}</span>
+      <ChevronRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+    </p>
+  </a>
 );
 
 const renderAction = (
