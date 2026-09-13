@@ -60,6 +60,27 @@ BEGIN
     RAISE EXCEPTION 'Push read isolation failed';
   END IF;
 
+  -- Suggestion dismissal uses the same UPSERT on both the insert and conflict
+  -- paths, so the authenticated role needs both table privileges.
+  INSERT INTO public.recurring_suggestion_dismissals (user_id, fingerprint)
+  VALUES (owner_uuid, 'security-fixture')
+  ON CONFLICT (user_id, fingerprint) DO UPDATE
+    SET fingerprint = EXCLUDED.fingerprint;
+
+  INSERT INTO public.recurring_suggestion_dismissals (user_id, fingerprint)
+  VALUES (owner_uuid, 'security-fixture')
+  ON CONFLICT (user_id, fingerprint) DO UPDATE
+    SET fingerprint = EXCLUDED.fingerprint;
+
+  BEGIN
+    INSERT INTO public.recurring_suggestion_dismissals (user_id, fingerprint)
+    VALUES (other_uuid, 'forged-security-fixture')
+    ON CONFLICT (user_id, fingerprint) DO UPDATE
+      SET fingerprint = EXCLUDED.fingerprint;
+    RAISE EXCEPTION 'Cross-user suggestion dismissal was accepted';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+
   BEGIN
     INSERT INTO public.push_subscriptions (user_id, endpoint, p256dh, auth)
     VALUES (other_uuid, 'https://web.push.apple.com/forged-' || owner_uuid::text, repeat('B', 87), repeat('A', 22));
