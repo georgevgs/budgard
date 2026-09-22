@@ -1,4 +1,6 @@
-import { test, expect } from './fixtures/test';
+import { E2E_USER_ID, expect, test } from './fixtures/test';
+
+const TODAY_LAYOUT_KEY = `today-layout:${E2E_USER_ID}`;
 
 // The Today grid is the one screen whose layout is user state rather than
 // ours, so the things worth pinning are: a hide sticks, it survives a reload,
@@ -71,9 +73,9 @@ test.describe('arranging the Today grid', () => {
     // Every id has to be listed. A tile in neither list is treated as one this
     // build just added and placed by its default — which is the behaviour that
     // lets a later release ship a new module without it looking user-hidden.
-    await app.addInitScript(() => {
+    await app.addInitScript((storageKey) => {
       localStorage.setItem(
-        'today-layout',
+        storageKey,
         JSON.stringify({
           visible: [],
           hidden: [
@@ -83,7 +85,7 @@ test.describe('arranging the Today grid', () => {
           ],
         }),
       );
-    });
+    }, TODAY_LAYOUT_KEY);
     await app.goto('/today');
 
     await expect(app.getByText(/your grid is empty/i)).toBeVisible();
@@ -100,8 +102,8 @@ test.describe('arranging the Today grid', () => {
 const readVisibleOrder = async (
   page: import('@playwright/test').Page,
 ): Promise<string[]> =>
-  page.evaluate(() => {
-    const raw = localStorage.getItem('today-layout');
+  page.evaluate((storageKey) => {
+    const raw = localStorage.getItem(storageKey);
     if (!raw) {
 
       return [];
@@ -110,4 +112,4 @@ const readVisibleOrder = async (
     const stored = JSON.parse(raw) as { visible?: string[] };
 
     return stored.visible ?? [];
-  });
+  }, TODAY_LAYOUT_KEY);

@@ -9,6 +9,7 @@ import { E2E_USER_ID, test } from './fixtures/test';
 // a human (or a model that can see) looking at the result, which is the only
 // way a layout regression gets caught. Gitignored output.
 const SHOTS = 'test-results/screens';
+const TODAY_LAYOUT_KEY = `today-layout:${E2E_USER_ID}`;
 
 const seed = (data: Record<string, Record<string, unknown>[]>) => {
   data.expenses.push(
@@ -155,10 +156,10 @@ test('screenshot today-dark', async ({ app, data }) => {
 
 test('screenshot today-empty-grid', async ({ app, data }) => {
   seed(data);
-  await app.addInitScript(() => {
+  await app.addInitScript((storageKey) => {
     // Every tile hidden — reachable with ten taps in Arrange.
     localStorage.setItem(
-      'today-layout',
+      storageKey,
       JSON.stringify({
         visible: [],
         hidden: [
@@ -175,7 +176,7 @@ test('screenshot today-empty-grid', async ({ app, data }) => {
         ],
       }),
     );
-  });
+  }, TODAY_LAYOUT_KEY);
   await app.goto('/today');
   await app.waitForTimeout(2000);
   await app.screenshot({

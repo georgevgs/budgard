@@ -137,7 +137,7 @@ export const seedSession = async (page: Page): Promise<void> => {
         JSON.stringify(session),
       );
       // Skip the first-run flow; the onboarding journey clears this itself.
-      window.localStorage.setItem('budgard_onboarded', 'true');
+      window.localStorage.setItem(`budgard_onboarded:${userId}`, 'true');
     },
     { userId: E2E_USER_ID, email: E2E_EMAIL },
   );
