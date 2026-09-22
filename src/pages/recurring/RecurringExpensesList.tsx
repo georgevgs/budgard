@@ -20,7 +20,7 @@ const RecurringExpensesList = () => {
   const { t } = useTranslation();
   const list = useRecurringList();
 
-  if (!list.isInitialized) {
+  if (!list.isReady) {
     return renderLoading(list.showSkeleton);
   }
 
@@ -42,6 +42,8 @@ const RecurringExpensesList = () => {
       <RecurringSuggestions
         suggestions={list.suggestions}
         currency={list.defaultCurrency}
+        hasError={list.hasSuggestionsError}
+        onRetry={list.retrySuggestions}
         onAccept={list.handleSuggestionAccept}
         onDismiss={list.handleSuggestionDismiss}
       />

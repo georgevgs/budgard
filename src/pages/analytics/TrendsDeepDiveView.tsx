@@ -16,12 +16,19 @@ import { useAnalyticsData } from '@/pages/analytics/hooks/useAnalyticsData';
 import { useAnalyticsDrillDown } from '@/pages/analytics/hooks/useAnalyticsDrillDown';
 import { useCurrentDate } from '@/common/hooks/useCurrentDate';
 import { useDelayedLoading } from '@/common/hooks/useDelayedLoading';
+import { isAnalyticsReady } from '@/pages/analytics/utils/readiness';
 
 const TrendsDeepDiveView = () => {
   const { t } = useTranslation();
   const { isPro } = useSubscription();
   const { expenseCategories: categories } = useCategoriesData();
-  const { monthlyBudget, defaultCurrency, isInitialized } = useDataConfig();
+  const {
+    monthlyBudget,
+    defaultCurrency,
+    isInitialized,
+    isHistoryLoaded,
+    isSecondaryLoaded,
+  } = useDataConfig();
   const allExpenses = useExpensesData();
   const now = useCurrentDate();
   const analytics = useAnalyticsData(now);
@@ -29,9 +36,16 @@ const TrendsDeepDiveView = () => {
     analytics.yearExpenses,
     analytics.selectedYear,
   );
-  const showSkeleton = useDelayedLoading(!isInitialized);
+  const isReady = isAnalyticsReady({
+    isInitialized,
+    isHistoryLoaded,
+    isSecondaryLoaded,
+    isPro,
+    requiresForecastData: true,
+  });
+  const showSkeleton = useDelayedLoading(!isReady);
 
-  if (!isInitialized) {
+  if (!isReady) {
     return renderLoading(showSkeleton);
   }
   if (allExpenses.length === 0) {

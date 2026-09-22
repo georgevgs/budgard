@@ -10,7 +10,7 @@ import { BentoTile, TileLabel } from '@/common/components/bento';
 export const NetWorthTile = () => {
   const { t } = useTranslation();
   const { summary, isComputing } = useNetWorth(false);
-  const { defaultCurrency } = useDataConfig();
+  const { defaultCurrency, isSecondaryLoaded } = useDataConfig();
 
   return (
     <BentoTile
@@ -20,7 +20,11 @@ export const NetWorthTile = () => {
     >
       <TileLabel>{t('today.tiles.netWorth')}</TileLabel>
       <p className="type-figure-sm">
-        {renderTotal(summary.total, defaultCurrency, isComputing)}
+        {renderTotal(
+          summary.total,
+          defaultCurrency,
+          isComputing || !isSecondaryLoaded,
+        )}
       </p>
     </BentoTile>
   );

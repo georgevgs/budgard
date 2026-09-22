@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
-import { offlineQueue, OFFLINE_QUEUE_CHANGED_EVENT } from '@/constants/offlineQueue';
+import {
+  offlineQueue,
+  OFFLINE_QUEUE_CHANGED_EVENT,
+} from '@/constants/offlineQueue';
 
 // Reactive count of mutations still waiting to sync. Re-reads on queue changes
 // and connectivity transitions — no polling.
-export const useOfflineQueueCount = (): number => {
-  const [count, setCount] = useState(0);
+export const useOfflineQueueCount = (): number | null => {
+  const [count, setCount] = useState<number | null>(null);
 
   useEffect(() => {
     let active = true;

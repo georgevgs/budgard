@@ -8,6 +8,8 @@ import type { TranslateFunction } from '@/constants/translate';
 type RecurringSuggestionsProps = {
   suggestions: RecurringSuggestion[];
   currency: string;
+  hasError: boolean;
+  onRetry: () => void;
   onAccept: (suggestion: RecurringSuggestion) => Promise<void>;
   onDismiss: (suggestion: RecurringSuggestion) => Promise<void>;
 };
@@ -15,10 +17,27 @@ type RecurringSuggestionsProps = {
 export const RecurringSuggestions = ({
   suggestions,
   currency,
+  hasError,
+  onRetry,
   onAccept,
   onDismiss,
 }: RecurringSuggestionsProps) => {
   const { t } = useTranslation();
+  if (hasError) {
+    return (
+      <div
+        role="alert"
+        className="flex items-center justify-between gap-3 py-2"
+      >
+        <p className="text-sm text-muted-foreground">
+          {t('common.loadDataFailed')}
+        </p>
+        <Button type="button" size="sm" variant="outline" onClick={onRetry}>
+          {t('common.tryAgain')}
+        </Button>
+      </div>
+    );
+  }
   if (suggestions.length === 0) {
     return null;
   }

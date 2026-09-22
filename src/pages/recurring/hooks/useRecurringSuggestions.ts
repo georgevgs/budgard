@@ -16,6 +16,38 @@ import { detectRecurringSuggestions } from '@/pages/recurring/utils/recurringDet
 import type { RecurringMode } from '@/pages/recurring/hooks/useRecurringActions';
 import type { RecurringSuggestion } from '@/pages/recurring/recurringTypes';
 
+type DismissalLoadState =
+  | {
+      ownerId: string;
+      status: 'loading' | 'error';
+    }
+  | {
+      ownerId: string;
+      status: 'loaded';
+      fingerprints: ReadonlySet<string>;
+    };
+
+const getDismissalStateForOwner = (
+  state: DismissalLoadState | null,
+  ownerId: string,
+): DismissalLoadState | null => {
+  if (state?.ownerId !== ownerId) {
+    return null;
+  }
+
+  return state;
+};
+
+const getDismissals = (
+  state: DismissalLoadState | null,
+): ReadonlySet<string> | null => {
+  if (state?.status !== 'loaded') {
+    return null;
+  }
+
+  return state.fingerprints;
+};
+
 export const useRecurringSuggestions = (mode: RecurringMode) => {
   const expenses = useExpensesData();
   const incomes = useIncomesData();
@@ -26,15 +58,27 @@ export const useRecurringSuggestions = (mode: RecurringMode) => {
   const runMutation = useMutationRunner();
   const { allow } = useProGate();
   const { t } = useTranslation();
-  const [dismissed, setDismissed] = useState<ReadonlySet<string>>(
-    () => new Set(),
-  );
+  const [dismissalState, setDismissalState] =
+    useState<DismissalLoadState | null>(null);
+  const [requestVersion, setRequestVersion] = useState(0);
+  const currentState = getDismissalStateForOwner(dismissalState, activeOwnerId);
+  const dismissed = getDismissals(currentState);
+  const hasLoadError = currentState?.status === 'error';
 
   useEffect(() => {
     const controller = new AbortController();
     recurringSuggestionService
       .getDismissals(activeOwnerId, controller.signal)
-      .then((rows) => setDismissed(new Set(rows.map((row) => row.fingerprint))))
+      .then((rows) => {
+        if (controller.signal.aborted) {
+          return;
+        }
+        setDismissalState({
+          ownerId: activeOwnerId,
+          status: 'loaded',
+          fingerprints: new Set(rows.map((row) => row.fingerprint)),
+        });
+      })
       .catch((error) => {
         if (controller.signal.aborted) {
           return;
@@ -42,12 +86,17 @@ export const useRecurringSuggestions = (mode: RecurringMode) => {
         captureException(error, {
           tags: { context: 'loadRecurringSuggestionDismissals' },
         });
+        setDismissalState({ ownerId: activeOwnerId, status: 'error' });
       });
 
     return () => controller.abort();
-  }, [activeOwnerId]);
+  }, [activeOwnerId, requestVersion]);
 
   const suggestions = useMemo(() => {
+    if (!dismissed) {
+      return [];
+    }
+
     const detected = detectRecurringSuggestions(
       [...expenses, ...incomes],
       [...recurringExpenses, ...recurringIncomes],
@@ -56,6 +105,11 @@ export const useRecurringSuggestions = (mode: RecurringMode) => {
 
     return detected.filter((suggestion) => suggestion.type === mode);
   }, [expenses, incomes, recurringExpenses, recurringIncomes, dismissed, mode]);
+
+  const retry = () => {
+    setDismissalState({ ownerId: activeOwnerId, status: 'loading' });
+    setRequestVersion((version) => version + 1);
+  };
 
   const accept = async (suggestion: RecurringSuggestion): Promise<void> => {
     if (
@@ -92,10 +146,31 @@ export const useRecurringSuggestions = (mode: RecurringMode) => {
       errorMessage: t('recurring.suggestions.dismissFailed'),
       successHaptic: 'none',
       optimistic: () => {
-        const previous = dismissed;
-        setDismissed((current) => new Set(current).add(suggestion.fingerprint));
+        const previous = dismissalState;
+        setDismissalState((current) => {
+          const fingerprints = new Set<string>();
+          if (
+            current?.ownerId === activeOwnerId &&
+            current.status === 'loaded'
+          ) {
+            current.fingerprints.forEach((fingerprint) =>
+              fingerprints.add(fingerprint),
+            );
+          }
+          fingerprints.add(suggestion.fingerprint);
 
-        return () => setDismissed(previous);
+          return { ownerId: activeOwnerId, status: 'loaded', fingerprints };
+        });
+
+        return () => {
+          setDismissalState((current) => {
+            if (current?.ownerId !== activeOwnerId) {
+              return current;
+            }
+
+            return previous;
+          });
+        };
       },
       perform: () =>
         recurringSuggestionService.dismiss(
@@ -105,5 +180,5 @@ export const useRecurringSuggestions = (mode: RecurringMode) => {
     });
   };
 
-  return { suggestions, accept, dismiss };
+  return { suggestions, hasLoadError, retry, accept, dismiss };
 };

@@ -23,28 +23,32 @@ export const useOnboardingActions = ({
 }: UseOnboardingActionsArgs) => {
   const { t } = useTranslation();
   const { session } = useAuth();
+  const userId = session?.user.id ?? '';
   const { handleBudgetUpdate } = useBudgetOps();
   const { handleCategoriesAddBulk } = useCategoryOps();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [step, setCurrentStep] = useState(readOnboardingStep);
+  const [step, setCurrentStep] = useState(() => readOnboardingStep(userId));
 
   useEffect(() => {
-    if (startOnboarding()) {
+    if (startOnboarding(userId)) {
       trackProductEvent({ name: 'onboarding_started' });
     }
-  }, []);
+  }, [userId]);
 
-  const setStep = useCallback((nextStep: number) => {
-    saveOnboardingStep(nextStep);
-    setCurrentStep(nextStep);
-  }, []);
+  const setStep = useCallback(
+    (nextStep: number) => {
+      saveOnboardingStep(userId, nextStep);
+      setCurrentStep(nextStep);
+    },
+    [userId],
+  );
 
   const handleComplete = useCallback(() => {
     trackProductEvent({ name: 'onboarding_completed' });
-    completeOnboarding();
+    completeOnboarding(userId);
     onComplete();
-  }, [onComplete]);
+  }, [onComplete, userId]);
 
   const handleBudgetNext = useCallback(
     async (budgetInput: string) => {

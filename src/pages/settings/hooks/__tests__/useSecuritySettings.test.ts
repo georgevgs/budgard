@@ -62,6 +62,21 @@ beforeEach(() => {
 });
 
 describe('useSecuritySettings', () => {
+  it('keeps device support unknown while the platform check is pending', async () => {
+    let resolveSupport: (supported: boolean) => void = () => undefined;
+    mockIsDeviceUnlockSupported.mockReturnValue(
+      new Promise((resolve) => {
+        resolveSupport = resolve;
+      }),
+    );
+    const { result } = renderHook(() => useSecuritySettings());
+
+    expect(result.current.isDeviceSupported).toBeNull();
+
+    await act(async () => resolveSupport(true));
+    expect(result.current.isDeviceSupported).toBe(true);
+  });
+
   it('opens on whatever the stored lock says', async () => {
     mockIsLockEnabled.mockReturnValue(true);
     mockLoadLock.mockReturnValue(lock({ biometrics: true }));

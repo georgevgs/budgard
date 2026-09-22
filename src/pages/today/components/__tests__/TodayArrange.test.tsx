@@ -16,6 +16,13 @@ import {
   type TodayTileId,
 } from '@/pages/today/utils/bentoLayout';
 
+const USER_ID = 'user-123';
+const STORAGE_KEY = `today-layout:${USER_ID}`;
+
+vi.mock('@/common/contexts/AuthContext', () => ({
+  useAuth: () => ({ session: { user: { id: USER_ID } } }),
+}));
+
 const ArrangeHarness = () => {
   const layout = useTodayLayout();
 
@@ -33,7 +40,7 @@ describe('TodayArrange', () => {
 
     fireEvent.click(getMoveControl('safeToSpend', 'moveDown'));
 
-    expect(readStoredLayout().visible.slice(0, 2)).toEqual([
+    expect(readStoredLayout(USER_ID).visible.slice(0, 2)).toEqual([
       'budgetUsed',
       'safeToSpend',
     ]);
@@ -68,7 +75,7 @@ describe('TodayArrange', () => {
 
     fireEvent.click(reset);
 
-    expect(readStoredLayout().visible).toEqual(DEFAULT_VISIBLE);
+    expect(readStoredLayout(USER_ID).visible).toEqual(DEFAULT_VISIBLE);
     expect(
       screen.getByText('today.arrange.resetAnnouncement'),
     ).toBeInTheDocument();
@@ -123,7 +130,7 @@ describe('TodayArrange', () => {
       clientY: 220,
     });
 
-    expect(readStoredLayout().visible.slice(0, 2)).toEqual([
+    expect(readStoredLayout(USER_ID).visible.slice(0, 2)).toEqual([
       'budgetUsed',
       'safeToSpend',
     ]);
@@ -195,7 +202,7 @@ describe('TodayArrange', () => {
 const storeLayout = (visible: TodayTileId[]) => {
   const visibleSet = new Set(visible);
   const hidden = TODAY_TILES.filter((tile) => !visibleSet.has(tile));
-  localStorage.setItem('today-layout', JSON.stringify({ visible, hidden }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ visible, hidden }));
 };
 
 const renderArrange = () =>

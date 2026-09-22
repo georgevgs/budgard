@@ -13,17 +13,20 @@ import {
   markTodayLayoutSyncPending,
 } from '@/pages/today/utils/bentoLayout';
 
+const USER_ID = 'user-123';
+const STORAGE_KEY = `today-layout:${USER_ID}`;
+
 describe('normalizing a stored Today layout', () => {
   const load = (stored: unknown): TodayLayout => {
-    localStorage.setItem('today-layout', JSON.stringify(stored));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
 
-    return readStoredLayout();
+    return readStoredLayout(USER_ID);
   };
 
   it('gives a first-time user the defaults', () => {
     localStorage.clear();
 
-    expect(readStoredLayout().visible).toEqual(DEFAULT_VISIBLE);
+    expect(readStoredLayout(USER_ID).visible).toEqual(DEFAULT_VISIBLE);
   });
 
   // The reason both lists are stored rather than just `visible`: a tile in
@@ -70,16 +73,16 @@ describe('normalizing a stored Today layout', () => {
   });
 
   it('survives unreadable storage', () => {
-    localStorage.setItem('today-layout', 'not json');
+    localStorage.setItem(STORAGE_KEY, 'not json');
 
-    expect(readStoredLayout().visible).toEqual(DEFAULT_VISIBLE);
+    expect(readStoredLayout(USER_ID).visible).toEqual(DEFAULT_VISIBLE);
   });
 
   it('round-trips through storage', () => {
     const layout: TodayLayout = { visible: ['insight'], hidden: [] };
-    expect(writeStoredLayout(layout)).toBe(true);
+    expect(writeStoredLayout(USER_ID, layout)).toBe(true);
 
-    expect(readStoredLayout().visible[0]).toBe('insight');
+    expect(readStoredLayout(USER_ID).visible[0]).toBe('insight');
   });
 
   it('reports when the browser refuses to persist a change', () => {
@@ -90,8 +93,15 @@ describe('normalizing a stored Today layout', () => {
       });
     const layout: TodayLayout = { visible: ['insight'], hidden: [] };
 
-    expect(writeStoredLayout(layout)).toBe(false);
+    expect(writeStoredLayout(USER_ID, layout)).toBe(false);
     setItem.mockRestore();
+  });
+
+  it('does not expose one account layout to another account', () => {
+    const layout: TodayLayout = { visible: ['insight'], hidden: [] };
+    writeStoredLayout(USER_ID, layout);
+
+    expect(readStoredLayout('another-user').visible).toEqual(DEFAULT_VISIBLE);
   });
 
   it('recognizes only the complete default layout', () => {
@@ -110,13 +120,13 @@ describe('normalizing a stored Today layout', () => {
 
 describe('Today layout sync marker', () => {
   it('tracks and clears a layout waiting to sync', () => {
-    expect(hasTodayLayoutSyncPending()).toBe(false);
+    expect(hasTodayLayoutSyncPending(USER_ID)).toBe(false);
 
-    expect(markTodayLayoutSyncPending()).toBe(true);
-    expect(hasTodayLayoutSyncPending()).toBe(true);
+    expect(markTodayLayoutSyncPending(USER_ID)).toBe(true);
+    expect(hasTodayLayoutSyncPending(USER_ID)).toBe(true);
 
-    clearTodayLayoutSyncPending();
-    expect(hasTodayLayoutSyncPending()).toBe(false);
+    clearTodayLayoutSyncPending(USER_ID);
+    expect(hasTodayLayoutSyncPending(USER_ID)).toBe(false);
   });
 });
 

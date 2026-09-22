@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useAuth } from '@/common/contexts/AuthContext';
 import {
   DEFAULT_VISIBLE,
   TODAY_TILES,
@@ -7,7 +8,7 @@ import {
   isDefaultLayout,
   markTodayLayoutSyncPending,
   moveTile,
-  readStoredLayout,
+  readStoredLayoutSnapshot,
   writeStoredLayout,
   type TodayLayout,
   type TodayTileId,
@@ -15,6 +16,7 @@ import {
 import { todayApi } from '@/pages/today/todayApi';
 
 export type UseTodayLayoutReturn = TodayLayout & {
+  isHydrated: boolean;
   isArranging: boolean;
   isDefault: boolean;
   isPersisted: boolean;
@@ -30,35 +32,42 @@ export type UseTodayLayoutReturn = TodayLayout & {
  * the owner-scoped server copy then brings the same layout to every device.
  */
 export const useTodayLayout = (): UseTodayLayoutReturn => {
-  const [layout, setLayout] = useState<TodayLayout>(readStoredLayout);
+  const { session } = useAuth();
+  const userId = session?.user.id ?? '';
+  const [initial] = useState(() => readStoredLayoutSnapshot(userId));
+  const [layout, setLayout] = useState<TodayLayout>(initial.layout);
   const layoutRef = useRef(layout);
+  const [isHydrated, setIsHydrated] = useState(initial.isStored);
   const [isArranging, setArranging] = useState(false);
-  const [isPersisted, setIsPersisted] = useState(true);
+  const [isPersisted, setIsPersisted] = useState(initial.isStored);
   const hasCommittedRef = useRef(false);
   const persistVersionRef = useRef(0);
 
-  const persist = useCallback((next: TodayLayout) => {
-    const version = persistVersionRef.current + 1;
-    persistVersionRef.current = version;
-    setIsPersisted(writeStoredLayout(next));
-    markTodayLayoutSyncPending();
+  const persist = useCallback(
+    (next: TodayLayout) => {
+      const version = persistVersionRef.current + 1;
+      persistVersionRef.current = version;
+      setIsPersisted(writeStoredLayout(userId, next));
+      markTodayLayoutSyncPending(userId);
 
-    void todayApi
-      .saveLayout(next)
-      .then(() => {
-        if (persistVersionRef.current !== version) {
-          return;
-        }
+      void todayApi
+        .saveLayout(next)
+        .then(() => {
+          if (persistVersionRef.current !== version) {
+            return;
+          }
 
-        clearTodayLayoutSyncPending();
-        setIsPersisted(true);
-      })
-      .catch(() => {
-        if (persistVersionRef.current === version) {
-          setIsPersisted(false);
-        }
-      });
-  }, []);
+          clearTodayLayoutSyncPending(userId);
+          setIsPersisted(true);
+        })
+        .catch(() => {
+          if (persistVersionRef.current === version) {
+            setIsPersisted(false);
+          }
+        });
+    },
+    [userId],
+  );
 
   useEffect(() => {
     const run = { active: true };
@@ -67,13 +76,15 @@ export const useTodayLayout = (): UseTodayLayoutReturn => {
       layoutRef,
       hasCommittedRef,
       setLayout,
+      setIsHydrated,
       setIsPersisted,
+      userId,
     });
 
     return () => {
       run.active = false;
     };
-  }, [persist]);
+  }, [persist, userId]);
 
   const commit = useCallback(
     (update: LayoutUpdate) => {
@@ -85,6 +96,7 @@ export const useTodayLayout = (): UseTodayLayoutReturn => {
       hasCommittedRef.current = true;
       layoutRef.current = next;
       setLayout(next);
+      setIsHydrated(true);
       persist(next);
     },
     [persist],
@@ -151,6 +163,7 @@ export const useTodayLayout = (): UseTodayLayoutReturn => {
 
   return {
     ...layout,
+    isHydrated,
     isArranging,
     isDefault: isDefaultLayout(layout),
     isPersisted,
@@ -169,7 +182,9 @@ type HydrateDeps = {
   layoutRef: { current: TodayLayout };
   hasCommittedRef: { current: boolean };
   setLayout: (next: TodayLayout) => void;
+  setIsHydrated: (value: boolean) => void;
   setIsPersisted: (value: boolean) => void;
+  userId: string;
 };
 
 // On mount, reconcile the layout held locally with the owner-scoped row. A
@@ -177,19 +192,34 @@ type HydrateDeps = {
 // server's copy is adopted so a second device sees the same grid.
 const hydrateFromServer = async (
   run: { active: boolean },
-  { persist, layoutRef, hasCommittedRef, setLayout, setIsPersisted }: HydrateDeps,
+  {
+    persist,
+    layoutRef,
+    hasCommittedRef,
+    setLayout,
+    setIsHydrated,
+    setIsPersisted,
+    userId,
+  }: HydrateDeps,
 ): Promise<void> => {
   try {
     const remote = await todayApi.getLayout();
-    if (!run.active || hasCommittedRef.current) {
+    if (!run.active) {
       return;
     }
-    if (hasTodayLayoutSyncPending()) {
+    if (hasCommittedRef.current) {
+      setIsHydrated(true);
+
+      return;
+    }
+    if (hasTodayLayoutSyncPending(userId)) {
+      setIsHydrated(true);
       persist(layoutRef.current);
 
       return;
     }
     if (!remote) {
+      setIsHydrated(true);
       persist(layoutRef.current);
 
       return;
@@ -197,10 +227,12 @@ const hydrateFromServer = async (
 
     layoutRef.current = remote;
     setLayout(remote);
-    writeStoredLayout(remote);
+    writeStoredLayout(userId, remote);
+    setIsHydrated(true);
     setIsPersisted(true);
   } catch {
     if (run.active) {
+      setIsHydrated(true);
       setIsPersisted(false);
     }
   }

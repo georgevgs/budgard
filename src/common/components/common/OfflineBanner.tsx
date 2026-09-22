@@ -30,7 +30,7 @@ export const OfflineBanner = () => {
   if (!isOnline) {
     return renderStatusPill(OFFLINE_PILL, t('common.offline'));
   }
-  if (pendingCount > 0) {
+  if (pendingCount !== null && pendingCount > 0) {
     return renderStatusPill(
       PENDING_PILL,
       t('offline.pending', { count: pendingCount }),

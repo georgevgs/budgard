@@ -5,7 +5,10 @@ import { SectionShell } from '@/pages/landing/components/SectionShell';
 import { EyebrowLabel } from '@/pages/landing/components/EyebrowLabel';
 import { Reveal } from '@/pages/landing/components/Reveal';
 import Check from 'lucide-react/dist/esm/icons/check';
-import { useProPlans, type UseProPlansReturn } from '@/common/hooks/useProPlans';
+import {
+  useProPlans,
+  type UseProPlansReturn,
+} from '@/common/hooks/useProPlans';
 import { yearlySavingsPercent, type ProPlanId } from '@/constants/proPlans';
 
 type PricingProps = {
@@ -92,7 +95,7 @@ const getLabelKey = (value: Cycle): string => {
 // Computed from the live prices so the badge can never drift from what
 // checkout actually charges — same basis as the paywall's savings badge.
 const renderSaveBadge = (t: Tx, value: Cycle, plans: UseProPlansReturn) => {
-  if (value !== 'yearly') {
+  if (value !== 'yearly' || plans.isLoading) {
     return null;
   }
 
@@ -150,7 +153,11 @@ const renderProCard = (
       {t('landing.pricing.pro.subtitle')}
     </p>
     {renderProPrice(t, cycle, plans)}
-    <Button onClick={() => onGetPro(cycle)} className="mt-6 rounded-full h-11">
+    <Button
+      onClick={() => onGetPro(cycle)}
+      disabled={plans.isLoading}
+      className="mt-6 rounded-full h-11"
+    >
       {t('landing.pricing.pro.cta')}
     </Button>
     <p className="mt-2 text-center text-xs text-muted-foreground">

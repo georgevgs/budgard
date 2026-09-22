@@ -4,6 +4,14 @@ import { useTodayLayout } from '@/pages/today/hooks/useTodayLayout';
 import { todayApi } from '@/pages/today/todayApi';
 import { TODAY_TILES, type TodayLayout } from '@/pages/today/utils/bentoLayout';
 
+const USER_ID = 'user-123';
+const LAYOUT_KEY = `today-layout:${USER_ID}`;
+const PENDING_KEY = `today-layout-sync-pending:${USER_ID}`;
+
+vi.mock('@/common/contexts/AuthContext', () => ({
+  useAuth: () => ({ session: { user: { id: USER_ID } } }),
+}));
+
 vi.mock('@/pages/today/todayApi', () => ({
   todayApi: {
     getLayout: vi.fn(),
@@ -36,14 +44,14 @@ describe('useTodayLayout account sync', () => {
       expect(result.current.visible).toEqual(remote.visible);
     });
 
-    expect(JSON.parse(localStorage.getItem('today-layout') ?? '{}')).toEqual(
+    expect(JSON.parse(localStorage.getItem(LAYOUT_KEY) ?? '{}')).toEqual(
       remote,
     );
   });
 
   it('seeds a missing server row from the existing device layout', async () => {
     const local = customLayout(['weeklyRecap', 'budgetUsed']);
-    localStorage.setItem('today-layout', JSON.stringify(local));
+    localStorage.setItem(LAYOUT_KEY, JSON.stringify(local));
     renderHook(() => useTodayLayout());
 
     await waitFor(() => {
@@ -73,8 +81,8 @@ describe('useTodayLayout account sync', () => {
 
   it('retries a pending offline layout instead of accepting an older server copy', async () => {
     const local = customLayout(['weeklyRecap', 'budgetUsed']);
-    localStorage.setItem('today-layout', JSON.stringify(local));
-    localStorage.setItem('today-layout-sync-pending', 'true');
+    localStorage.setItem(LAYOUT_KEY, JSON.stringify(local));
+    localStorage.setItem(PENDING_KEY, 'true');
     vi.mocked(todayApi.getLayout).mockResolvedValue(
       customLayout(['safeToSpend']),
     );
@@ -85,23 +93,21 @@ describe('useTodayLayout account sync', () => {
     });
 
     expect(result.current.visible).toEqual(local.visible);
-    expect(localStorage.getItem('today-layout-sync-pending')).toBeNull();
+    expect(localStorage.getItem(PENDING_KEY)).toBeNull();
   });
 
   it('reports when the latest account sync fails', async () => {
     vi.mocked(todayApi.getLayout).mockResolvedValue(
       customLayout(['safeToSpend', 'budgetUsed']),
     );
-    vi.mocked(todayApi.saveLayout).mockRejectedValue(
-      new Error('offline'),
-    );
+    vi.mocked(todayApi.saveLayout).mockRejectedValue(new Error('offline'));
     const { result } = renderHook(() => useTodayLayout());
     await waitFor(() => expect(result.current.visible).toHaveLength(2));
 
     act(() => result.current.move('safeToSpend', 1));
 
     await waitFor(() => expect(result.current.isPersisted).toBe(false));
-    expect(localStorage.getItem('today-layout-sync-pending')).toBe('true');
+    expect(localStorage.getItem(PENDING_KEY)).toBe('true');
   });
 
   it('keeps the retry marker until the latest save succeeds', async () => {
@@ -122,9 +128,24 @@ describe('useTodayLayout account sync', () => {
     await waitFor(() => expect(resolveSaves).toHaveLength(2));
 
     await act(async () => resolveSaves[0]());
-    expect(localStorage.getItem('today-layout-sync-pending')).toBe('true');
+    expect(localStorage.getItem(PENDING_KEY)).toBe('true');
 
     await act(async () => resolveSaves[1]());
-    expect(localStorage.getItem('today-layout-sync-pending')).toBeNull();
+    expect(localStorage.getItem(PENDING_KEY)).toBeNull();
+  });
+
+  it('keeps a cache miss unresolved until the account row is checked', async () => {
+    let resolveRemote: (layout: TodayLayout | null) => void = () => undefined;
+    vi.mocked(todayApi.getLayout).mockReturnValue(
+      new Promise((resolve) => {
+        resolveRemote = resolve;
+      }),
+    );
+    const { result } = renderHook(() => useTodayLayout());
+
+    expect(result.current.isHydrated).toBe(false);
+
+    await act(async () => resolveRemote(null));
+    await waitFor(() => expect(result.current.isHydrated).toBe(true));
   });
 });

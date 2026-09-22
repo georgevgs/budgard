@@ -8,11 +8,14 @@ import { RouteFallback } from '@/common/components/routing/RouteFallback';
 import { ErrorBoundary } from '@/common/ui/error-boundary';
 import { Toaster } from '@/common/ui/toaster';
 import { AuthenticatedProviders } from '@/common/contexts/AuthenticatedProviders';
+import { useAuth } from '@/common/contexts/AuthContext';
 
 const AuthenticatedApp = () => {
+  const { session } = useAuth();
+
   return (
     <BrowserRouter>
-      <AuthenticatedProviders>
+      <AuthenticatedProviders key={session?.user.id}>
         <RouteMetadata />
         <div className="min-h-dvh bg-background flex flex-col">
           <ErrorBoundary>

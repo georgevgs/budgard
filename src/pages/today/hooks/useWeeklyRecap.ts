@@ -1,6 +1,13 @@
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
-import { useExpensesData, useCategoriesData } from '@/common/contexts/DataContext';
-import { buildWeeklyRecap, type WeeklyRecap } from '@/constants/weeklyAnomalies';
+import {
+  useExpensesData,
+  useCategoriesData,
+} from '@/common/contexts/DataContext';
+import { useAuth } from '@/common/contexts/AuthContext';
+import {
+  buildWeeklyRecap,
+  type WeeklyRecap,
+} from '@/constants/weeklyAnomalies';
 
 const STORAGE_KEY = 'budgard_weekly_recap_dismissed';
 
@@ -15,17 +22,20 @@ const subscribeDismissed = (cb: Listener): (() => void) => {
   };
 };
 
-const readDismissed = (): string => {
+export const readWeeklyRecapDismissal = (userId: string): string => {
   try {
-    return localStorage.getItem(STORAGE_KEY) ?? '';
+    return localStorage.getItem(scopedKey(userId)) ?? '';
   } catch {
     return '';
   }
 };
 
-const writeDismissed = (windowEnd: string): void => {
+export const writeWeeklyRecapDismissal = (
+  userId: string,
+  windowEnd: string,
+): void => {
   try {
-    localStorage.setItem(STORAGE_KEY, windowEnd);
+    localStorage.setItem(scopedKey(userId), windowEnd);
   } catch {
     // localStorage may be unavailable
   }
@@ -43,6 +53,8 @@ export type UseWeeklyRecapReturn = {
 const MONDAY = 1;
 
 export const useWeeklyRecap = (): UseWeeklyRecapReturn => {
+  const { session } = useAuth();
+  const userId = session?.user.id ?? '';
   const expenses = useExpensesData();
   const { expenseCategories } = useCategoriesData();
 
@@ -59,10 +71,14 @@ export const useWeeklyRecap = (): UseWeeklyRecapReturn => {
     });
   }, [expenses, expenseCategories]);
 
+  const readDismissal = useCallback(
+    () => readWeeklyRecapDismissal(userId),
+    [userId],
+  );
   const dismissedValue = useSyncExternalStore(
     subscribeDismissed,
-    readDismissed,
-    readDismissed,
+    readDismissal,
+    readDismissal,
   );
 
   const isDismissed = useMemo(() => {
@@ -80,8 +96,10 @@ export const useWeeklyRecap = (): UseWeeklyRecapReturn => {
     if (!recap) {
       return;
     }
-    writeDismissed(recap.windowEnd);
-  }, [recap]);
+    writeWeeklyRecapDismissal(userId, recap.windowEnd);
+  }, [recap, userId]);
 
   return { recap, isDismissed, dismiss };
 };
+
+const scopedKey = (userId: string): string => `${STORAGE_KEY}:${userId}`;

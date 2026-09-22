@@ -9,8 +9,9 @@ import {
 } from '@/pages/onboarding/utils/onboarding';
 
 // Mock useAuth
+const USER_ID = 'user-123';
 const mockSession = {
-  user: { id: 'user-123' },
+  user: { id: USER_ID },
 };
 vi.mock('@/common/contexts/AuthContext', () => ({
   useAuth: () => ({ session: mockSession }),
@@ -73,41 +74,47 @@ const renderFlow = (onComplete = vi.fn()) => {
 
 describe('shouldShowOnboarding', () => {
   it('returns false when not initialized', () => {
-    expect(shouldShowOnboarding(false, 0, 0, null)).toBe(false);
+    expect(shouldShowOnboarding(USER_ID, false, 0, 0, null)).toBe(false);
   });
 
   it('returns false when already onboarded', () => {
-    localStorage.setItem('budgard_onboarded', 'true');
-    expect(shouldShowOnboarding(true, 0, 0, null)).toBe(false);
+    localStorage.setItem(`budgard_onboarded:${USER_ID}`, 'true');
+    expect(shouldShowOnboarding(USER_ID, true, 0, 0, null)).toBe(false);
   });
 
   it('returns false when user has expenses', () => {
-    expect(shouldShowOnboarding(true, 5, 0, null)).toBe(false);
+    expect(shouldShowOnboarding(USER_ID, true, 5, 0, null)).toBe(false);
   });
 
   it('returns false when user has categories', () => {
-    expect(shouldShowOnboarding(true, 0, 3, null)).toBe(false);
+    expect(shouldShowOnboarding(USER_ID, true, 0, 3, null)).toBe(false);
   });
 
   it('returns false when user has a budget', () => {
-    expect(shouldShowOnboarding(true, 0, 0, 1500)).toBe(false);
+    expect(shouldShowOnboarding(USER_ID, true, 0, 0, 1500)).toBe(false);
   });
 
   it('returns true for fresh user with no data', () => {
-    expect(shouldShowOnboarding(true, 0, 0, null)).toBe(true);
+    expect(shouldShowOnboarding(USER_ID, true, 0, 0, null)).toBe(true);
   });
 
   it('resumes a started flow after setup data has been saved', () => {
-    localStorage.setItem('budgard_onboarding_started', 'true');
+    localStorage.setItem(`budgard_onboarding_started:${USER_ID}`, 'true');
 
-    expect(shouldShowOnboarding(true, 0, 3, 1500)).toBe(true);
+    expect(shouldShowOnboarding(USER_ID, true, 0, 3, 1500)).toBe(true);
   });
 
   it('preserves the place of an expense-first flow already in progress', () => {
-    localStorage.setItem('budgard_onboarding_started', 'true');
-    localStorage.setItem('budgard_onboarding_step', '1');
+    localStorage.setItem(`budgard_onboarding_started:${USER_ID}`, 'true');
+    localStorage.setItem(`budgard_onboarding_step:${USER_ID}`, '1');
 
-    expect(readOnboardingStep()).toBe(2);
+    expect(readOnboardingStep(USER_ID)).toBe(2);
+  });
+
+  it('does not reuse another account onboarding state', () => {
+    localStorage.setItem(`budgard_onboarded:${USER_ID}`, 'true');
+
+    expect(shouldShowOnboarding('user-456', true, 0, 0, null)).toBe(true);
   });
 });
 
@@ -225,7 +232,7 @@ describe('OnboardingFlow', () => {
     fireEvent.click(screen.getByText('onboarding.exploreFirst'));
 
     expect(onComplete).not.toHaveBeenCalled();
-    expect(localStorage.getItem('budgard_onboarded')).toBeNull();
+    expect(localStorage.getItem(`budgard_onboarded:${USER_ID}`)).toBeNull();
   });
 
   it('saves the first expense after categories are available', () => {
@@ -257,7 +264,7 @@ describe('OnboardingFlow', () => {
     fireEvent.click(screen.getByText('onboarding.exploreFirst'));
     fireEvent.click(screen.getByText('onboarding.skip'));
 
-    expect(localStorage.getItem('budgard_onboarded')).toBe('true');
+    expect(localStorage.getItem(`budgard_onboarded:${USER_ID}`)).toBe('true');
     expect(onComplete).toHaveBeenCalled();
   });
 
@@ -282,7 +289,7 @@ describe('OnboardingFlow', () => {
   });
 
   it('returns to the saved step when setup resumes', () => {
-    localStorage.setItem('budgard_onboarding_step', '3');
+    localStorage.setItem(`budgard_onboarding_step:${USER_ID}`, '3');
 
     renderFlow();
 

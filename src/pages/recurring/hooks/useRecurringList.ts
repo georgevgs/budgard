@@ -44,9 +44,10 @@ export const useRecurringList = () => {
   const { recurringExpenses, recurringIncomes } = useRecurringData();
   const { expenseCategories, incomeCategories } = useCategoriesData();
   const { accounts } = useAccountsData();
-  const { defaultCurrency, isInitialized } = useDataConfig();
+  const { defaultCurrency, isInitialized, isSecondaryLoaded } = useDataConfig();
   const { allow } = useProGate();
-  const showSkeleton = useDelayedLoading(!isInitialized);
+  const isReady = isRecurringDataReady(isInitialized, isSecondaryLoaded);
+  const showSkeleton = useDelayedLoading(!isReady);
   const suggestions = useRecurringSuggestions(mode);
 
   const closeForm = () => {
@@ -91,7 +92,7 @@ export const useRecurringList = () => {
       (account) => account.kind === 'investment' && !account.is_archived,
     ),
     defaultCurrency,
-    isInitialized,
+    isReady,
     showSkeleton,
     isFormOpen,
     selectedExpense,
@@ -106,6 +107,8 @@ export const useRecurringList = () => {
     handleDelete: actions.handleDelete,
     handleToggle: actions.handleToggle,
     suggestions: suggestions.suggestions,
+    hasSuggestionsError: suggestions.hasLoadError,
+    retrySuggestions: suggestions.retry,
     handleSuggestionAccept: suggestions.accept,
     handleSuggestionDismiss: suggestions.dismiss,
   };
@@ -126,3 +129,8 @@ export const resolveInitialMode = (params: URLSearchParams): RecurringMode => {
 
   return 'expense';
 };
+
+export const isRecurringDataReady = (
+  isInitialized: boolean,
+  isSecondaryLoaded: boolean,
+): boolean => isInitialized && isSecondaryLoaded;

@@ -22,7 +22,9 @@ export const useSecuritySettings = () => {
   const [usesDevice, setUsesDevice] = useState(
     () => loadLock()?.biometrics === true,
   );
-  const [isDeviceSupported, setIsDeviceSupported] = useState(false);
+  const [isDeviceSupported, setIsDeviceSupported] = useState<boolean | null>(
+    null,
+  );
   const [isSettingPin, setIsSettingPin] = useState(false);
   const [isConfirmingSignOutAll, setIsConfirmingSignOutAll] = useState(false);
 

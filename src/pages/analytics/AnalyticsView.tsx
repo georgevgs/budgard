@@ -17,12 +17,14 @@ import { useAnalyticsDrillDown } from '@/pages/analytics/hooks/useAnalyticsDrill
 import { useMonthlyReview } from '@/pages/analytics/hooks/useMonthlyReview';
 import { useCurrentDate } from '@/common/hooks/useCurrentDate';
 import { useMonthlyPosition } from '@/common/hooks/useMonthlyPosition';
+import { isAnalyticsReady } from '@/pages/analytics/utils/readiness';
 
 const AnalyticsView = () => {
   const { t } = useTranslation();
   const { isPro } = useSubscription();
   const { expenseCategories: categories } = useCategoriesData();
-  const { defaultCurrency, isInitialized } = useDataConfig();
+  const { defaultCurrency, isInitialized, isHistoryLoaded, isSecondaryLoaded } =
+    useDataConfig();
   const allExpenses = useExpensesData();
   const now = useCurrentDate();
   const monthly = useMonthlyPosition(allExpenses, now);
@@ -40,9 +42,16 @@ const AnalyticsView = () => {
     analytics.yearExpenses,
     analytics.selectedYear,
   );
-  const showSkeleton = useDelayedLoading(!isInitialized);
+  const isReady = isAnalyticsReady({
+    isInitialized,
+    isHistoryLoaded,
+    isSecondaryLoaded,
+    isPro,
+    requiresForecastData: false,
+  });
+  const showSkeleton = useDelayedLoading(!isReady);
 
-  if (!isInitialized) {
+  if (!isReady) {
     return renderLoading(showSkeleton);
   }
 

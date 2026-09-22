@@ -88,23 +88,47 @@ export const normalizeLayout = (stored: unknown): TodayLayout => {
   };
 };
 
-export const readStoredLayout = (): TodayLayout => {
+export type StoredTodayLayoutSnapshot = {
+  layout: TodayLayout;
+  isStored: boolean;
+};
+
+export const readStoredLayoutSnapshot = (
+  userId: string,
+): StoredTodayLayoutSnapshot => {
+  if (!userId) {
+    return { layout: normalizeLayout(null), isStored: false };
+  }
+
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(scopedKey(STORAGE_KEY, userId));
     if (!raw) {
-      return normalizeLayout(null);
+      return { layout: normalizeLayout(null), isStored: false };
     }
 
-    return normalizeLayout(JSON.parse(raw));
+    return { layout: normalizeLayout(JSON.parse(raw)), isStored: true };
   } catch {
     // Unreadable or unavailable storage is not worth a broken home screen.
-    return normalizeLayout(null);
+    return { layout: normalizeLayout(null), isStored: false };
   }
 };
 
-export const writeStoredLayout = (layout: TodayLayout): boolean => {
+export const readStoredLayout = (userId: string): TodayLayout =>
+  readStoredLayoutSnapshot(userId).layout;
+
+export const writeStoredLayout = (
+  userId: string,
+  layout: TodayLayout,
+): boolean => {
+  if (!userId) {
+    return false;
+  }
+
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
+    localStorage.setItem(
+      scopedKey(STORAGE_KEY, userId),
+      JSON.stringify(layout),
+    );
 
     return true;
   } catch {
@@ -114,9 +138,13 @@ export const writeStoredLayout = (layout: TodayLayout): boolean => {
   }
 };
 
-export const markTodayLayoutSyncPending = (): boolean => {
+export const markTodayLayoutSyncPending = (userId: string): boolean => {
+  if (!userId) {
+    return false;
+  }
+
   try {
-    localStorage.setItem(SYNC_PENDING_KEY, 'true');
+    localStorage.setItem(scopedKey(SYNC_PENDING_KEY, userId), 'true');
 
     return true;
   } catch {
@@ -124,22 +152,24 @@ export const markTodayLayoutSyncPending = (): boolean => {
   }
 };
 
-export const clearTodayLayoutSyncPending = (): void => {
+export const clearTodayLayoutSyncPending = (userId: string): void => {
   try {
-    localStorage.removeItem(SYNC_PENDING_KEY);
+    localStorage.removeItem(scopedKey(SYNC_PENDING_KEY, userId));
   } catch {
     // The server copy is already current. A blocked local store cannot make
     // that write unsafe, and the next successful save will try again.
   }
 };
 
-export const hasTodayLayoutSyncPending = (): boolean => {
+export const hasTodayLayoutSyncPending = (userId: string): boolean => {
   try {
-    return localStorage.getItem(SYNC_PENDING_KEY) === 'true';
+    return localStorage.getItem(scopedKey(SYNC_PENDING_KEY, userId)) === 'true';
   } catch {
     return false;
   }
 };
+
+const scopedKey = (key: string, userId: string): string => `${key}:${userId}`;
 
 /** Moves one tile by one position, clamped. Returns the same array if it
  *  cannot move, so React can skip the re-render. */

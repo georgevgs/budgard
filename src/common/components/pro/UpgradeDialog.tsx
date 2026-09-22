@@ -78,10 +78,10 @@ export const UpgradeDialog = () => {
         <div className="space-y-3 border-t border-border/40 px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-4 sm:pb-6">
           <Button
             onClick={handleCheckout}
-            disabled={isRedirecting}
+            disabled={isRedirecting || plans.isLoading}
             className="lift h-12 w-full rounded-full text-base font-semibold"
           >
-            {renderCtaLabel(isRedirecting, isTrialEligible, t)}
+            {renderCtaLabel(isRedirecting, plans.isLoading, isTrialEligible, t)}
           </Button>
           {renderFootnote(t, closeUpgrade)}
         </div>
@@ -92,11 +92,15 @@ export const UpgradeDialog = () => {
 
 const renderCtaLabel = (
   isRedirecting: boolean,
+  isPlansLoading: boolean,
   isTrialEligible: boolean,
   t: TranslateFunction,
 ): string => {
   if (isRedirecting) {
     return t('pro.redirecting');
+  }
+  if (isPlansLoading) {
+    return t('common.loading');
   }
   if (isTrialEligible) {
     return t('pro.trialCta');

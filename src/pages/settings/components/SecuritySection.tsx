@@ -95,7 +95,20 @@ type Security = ReturnType<typeof useSecuritySettings>;
 // Only offered where the device actually has a biometric or passcode to check
 // against — an unavailable toggle that always fails is worse than no toggle.
 const renderDeviceUnlock = (security: Security, t: TranslateFunction) => {
-  if (!security.isEnabled || !security.isDeviceSupported) {
+  if (!security.isEnabled) {
+    return null;
+  }
+  if (security.isDeviceSupported === null) {
+    return (
+      <p
+        role="status"
+        className="border-t border-border/40 pt-4 text-xs text-muted-foreground"
+      >
+        {t('common.loading')}
+      </p>
+    );
+  }
+  if (!security.isDeviceSupported) {
     return null;
   }
 

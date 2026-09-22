@@ -58,7 +58,14 @@ type PlanCard = {
   subLine: string | null;
 };
 
-const buildSavingsBadge = (plans: UseProPlansReturn, t: TranslateFunction): string | null => {
+const buildSavingsBadge = (
+  plans: UseProPlansReturn,
+  t: TranslateFunction,
+): string | null => {
+  if (plans.isLoading) {
+    return null;
+  }
+
   const percent = yearlySavingsPercent(plans.prices);
   if (percent <= 0) {
     return null;

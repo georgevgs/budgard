@@ -17,7 +17,9 @@ type FinancialSpaceProviderProps = {
   children: ReactNode;
 };
 
-export const FinancialSpaceProvider = ({ children }: FinancialSpaceProviderProps) => {
+export const FinancialSpaceProvider = ({
+  children,
+}: FinancialSpaceProviderProps) => {
   const { session } = useAuth();
   const userId = session?.user.id ?? '';
   const email = session?.user.email ?? '';
@@ -67,7 +69,9 @@ const useFinancialSpaceState = (
   email: string,
 ): FinancialSpaceState => {
   const [shares, setShares] = useState<HouseholdShare[]>([]);
-  const [activeOwnerId, setActiveOwnerId] = useState(userId);
+  const [activeOwnerId, setActiveOwnerId] = useState(() =>
+    loadStoredOwner(userId),
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [stateUserId, setStateUserId] = useState(userId);

@@ -7,8 +7,10 @@ import {
 import { useUpgradeIntent } from '@/pages/onboarding/hooks/useUpgradeIntent';
 import { shouldShowOnboarding } from '@/pages/onboarding/utils/onboarding';
 import { OnboardingFlow } from '@/common/components/routing/lazyRouteModules';
+import { useAuth } from '@/common/contexts/AuthContext';
 
 export const OnboardingGate = () => {
+  const { session } = useAuth();
   const expenses = useExpensesData();
   const { categories } = useCategoriesData();
   const { isInitialized, monthlyBudget } = useDataConfig();
@@ -16,6 +18,7 @@ export const OnboardingGate = () => {
   const [hasDismissedThisSession, setHasDismissedThisSession] = useState(false);
 
   const onboardingDue = shouldShowOnboarding(
+    session?.user.id ?? '',
     isInitialized,
     expenses.length,
     categories.length,

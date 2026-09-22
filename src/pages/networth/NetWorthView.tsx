@@ -34,7 +34,7 @@ const NetWorthView = () => {
   const { t } = useTranslation();
   const { accounts, grouped, latestSnapshotByAccount } = useGroupedAccounts();
   const { defaultCurrency, isInitialized, isSecondaryLoaded } = useDataConfig();
-  const { summary, series } = useNetWorth();
+  const { summary, series, isComputing } = useNetWorth();
   const { isPro, allow } = useProGate();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | undefined>();
@@ -93,6 +93,7 @@ const NetWorthView = () => {
             handleAddClick,
             t,
             isPro,
+            isComputing,
           )}
         </OnDemandData>
       </div>
@@ -143,7 +144,16 @@ const renderBody = (
   onAddClick: () => void,
   t: TranslateFunction,
   isPro: boolean,
+  isComputing: boolean,
 ) => {
+  if (isComputing) {
+    return (
+      <p role="status" className="py-4 text-sm text-muted-foreground">
+        {t('common.loading')}
+      </p>
+    );
+  }
+
   if (accountCount === 0) {
     return <NetWorthEmpty onAddClick={onAddClick} />;
   }

@@ -20,7 +20,7 @@ export const BillingSection = () => {
   const { t } = useTranslation();
   const { subscription, isPro, startPortal } = useSubscription();
   const { openUpgrade } = useUpgradeDialog();
-  const { prices } = useProPlans();
+  const { prices, isLoading: arePricesLoading } = useProPlans();
   const dateLocale = useDateLocale();
   const { toast } = useToast();
   const [isOpeningPortal, setIsOpeningPortal] = useState(false);
@@ -50,6 +50,7 @@ export const BillingSection = () => {
             isPro,
             subscription,
             prices,
+            arePricesLoading,
             dateLocale,
             isOpeningPortal,
             handleManage,
@@ -66,6 +67,7 @@ const renderContent = (
   isPro: boolean,
   subscription: Subscription | null,
   prices: ProPlanPrices,
+  arePricesLoading: boolean,
   dateLocale: Locale,
   isOpeningPortal: boolean,
   onManage: () => void,
@@ -79,6 +81,7 @@ const renderContent = (
   return renderProContent(
     subscription,
     prices,
+    arePricesLoading,
     dateLocale,
     isOpeningPortal,
     onManage,
@@ -102,6 +105,7 @@ const renderFreeContent = (onUpgrade: () => void, t: TranslateFunction) => (
 const renderProContent = (
   subscription: Subscription,
   prices: ProPlanPrices,
+  arePricesLoading: boolean,
   dateLocale: Locale,
   isOpeningPortal: boolean,
   onManage: () => void,
@@ -110,7 +114,7 @@ const renderProContent = (
   <>
     {renderRow(
       t('settings.billing.planLabel'),
-      getPlanName(subscription, prices, t),
+      getDisplayedPlanName(subscription, prices, arePricesLoading, t),
     )}
     {renderPeriodRow(subscription, dateLocale, t)}
     {renderTrialNotice(subscription, dateLocale, t)}
@@ -118,6 +122,19 @@ const renderProContent = (
     {renderBillingManagement(subscription, isOpeningPortal, onManage, t)}
   </>
 );
+
+const getDisplayedPlanName = (
+  subscription: Subscription,
+  prices: ProPlanPrices,
+  arePricesLoading: boolean,
+  t: TranslateFunction,
+): string => {
+  if (arePricesLoading) {
+    return t('common.loading');
+  }
+
+  return getPlanName(subscription, prices, t);
+};
 
 const renderBillingManagement = (
   subscription: Subscription,

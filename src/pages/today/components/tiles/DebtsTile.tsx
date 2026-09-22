@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useDebts } from '@/common/hooks/useDebts';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { formatCurrency } from '@/constants/utils';
+import type { TranslateFunction } from '@/constants/translate';
 import { BentoTile, TileLabel } from '@/common/components/bento';
 
 // What is still owed, and to how many places. Off by default, because a debts
@@ -12,7 +13,7 @@ import { BentoTile, TileLabel } from '@/common/components/bento';
 export const DebtsTile = () => {
   const { t } = useTranslation();
   const { summary } = useDebts();
-  const { defaultCurrency } = useDataConfig();
+  const { defaultCurrency, isSecondaryLoaded } = useDataConfig();
 
   return (
     <BentoTile
@@ -23,12 +24,40 @@ export const DebtsTile = () => {
       <TileLabel>{t('today.tiles.debts')}</TileLabel>
       <div>
         <p className="type-figure-sm">
-          {formatCurrency(summary.totalBalance, defaultCurrency)}
+          {renderBalance(
+            summary.totalBalance,
+            defaultCurrency,
+            isSecondaryLoaded,
+          )}
         </p>
         <p className="mt-1 text-[0.72rem] leading-none text-muted-foreground">
-          {t('today.tile.debtCount', { count: summary.activeCount })}
+          {renderCount(summary.activeCount, isSecondaryLoaded, t)}
         </p>
       </div>
     </BentoTile>
   );
+};
+
+const renderBalance = (
+  total: number,
+  currency: string,
+  isReady: boolean,
+): string => {
+  if (!isReady) {
+    return '—';
+  }
+
+  return formatCurrency(total, currency);
+};
+
+const renderCount = (
+  count: number,
+  isReady: boolean,
+  t: TranslateFunction,
+): string => {
+  if (!isReady) {
+    return t('common.loading');
+  }
+
+  return t('today.tile.debtCount', { count });
 };

@@ -9,6 +9,7 @@ const closeUpgradeMock = vi.fn();
 
 // null = never subscribed (trial-eligible); any row means no trial CTA.
 let mockSubscription: Subscription | null = null;
+let mockPlansLoading = false;
 
 // jsdom cannot navigate; replace location so the redirect after checkout
 // creation is observable instead of throwing.
@@ -36,6 +37,19 @@ vi.mock('@/common/contexts/UpgradeDialogContext', () => ({
   }),
 }));
 
+vi.mock('@/common/hooks/useProPlans', () => ({
+  useProPlans: () => ({
+    prices: {
+      monthly: { priceId: null, amount: 199, currency: 'EUR' },
+      yearly: { priceId: null, amount: 1999, currency: 'EUR' },
+    },
+    isLoading: mockPlansLoading,
+    monthlyLabel: mockPlansLoading ? '—' : '€1.99',
+    yearlyLabel: mockPlansLoading ? '—' : '€19.99',
+    yearlyPerMonthLabel: mockPlansLoading ? '—' : '€1.66',
+  }),
+}));
+
 // The footnote's legal links need a router in scope.
 const renderDialog = () =>
   render(
@@ -47,6 +61,7 @@ const renderDialog = () =>
 describe('UpgradeDialog', () => {
   beforeEach(() => {
     mockSubscription = null;
+    mockPlansLoading = false;
   });
 
   it('shows both plan cards with the yearly plan selected by default', () => {
@@ -114,6 +129,16 @@ describe('UpgradeDialog', () => {
 
     expect(screen.getByText('pro.cta')).toBeInTheDocument();
     expect(screen.queryByText('pro.trialCta')).not.toBeInTheDocument();
+  });
+
+  it('keeps checkout disabled until a price source has settled', () => {
+    mockPlansLoading = true;
+    renderDialog();
+
+    expect(
+      screen.getByRole('button', { name: 'common.loading' }),
+    ).toBeDisabled();
+    expect(screen.queryByText('€1.99')).not.toBeInTheDocument();
   });
 
   it('links to the legal pages and closes the dialog on the way out', () => {

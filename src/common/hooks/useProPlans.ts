@@ -14,6 +14,7 @@ import { proApi } from '@/common/api/proApi';
 
 export type UseProPlansReturn = {
   prices: ProPlanPrices;
+  isLoading: boolean;
   // Ready-to-render labels, e.g. "€1.99".
   monthlyLabel: string;
   yearlyLabel: string;
@@ -24,26 +25,38 @@ export type UseProPlansReturn = {
 // pricing, upgrade dialog, billing section can all be alive at once).
 let inFlight: Promise<ProPlanPrices> | null = null;
 
-// Live Pro prices with cache-then-network semantics: compiled-in fallback on
-// first paint, localStorage snapshot when fresh, network refresh otherwise.
+// Live Pro prices with cache-then-network semantics: a fresh snapshot can
+// paint immediately; a cache miss stays explicitly unknown until the endpoint
+// either returns or fails, at which point the compiled fallback is honest.
 export const useProPlans = (): UseProPlansReturn => {
   const { i18n } = useTranslation();
-  const [prices, setPrices] = useState<ProPlanPrices>(() => {
+  const [state, setState] = useState(() => {
     const snapshot = loadPlanPricesSnapshot();
     if (snapshot) {
-      return snapshot;
+      return { prices: snapshot, isLoading: false };
     }
 
-    return FALLBACK_PLAN_PRICES;
+    return { prices: FALLBACK_PLAN_PRICES, isLoading: true };
   });
 
   useEffect(() => {
-    // A fresh snapshot means the state already holds live prices.
-    if (loadPlanPricesSnapshot()) {
-      return;
-    }
-
     let cancelled = false;
+
+    // Another consumer can finish the shared request between this component's
+    // render and effect. Adopt the snapshot it just wrote; returning without
+    // doing so would leave this instance stuck in its unknown state.
+    const snapshot = loadPlanPricesSnapshot();
+    if (snapshot) {
+      queueMicrotask(() => {
+        if (!cancelled) {
+          setState({ prices: snapshot, isLoading: false });
+        }
+      });
+
+      return () => {
+        cancelled = true;
+      };
+    }
 
     if (!inFlight) {
       // Save once here (not per consumer) and always release the slot so a
@@ -63,12 +76,15 @@ export const useProPlans = (): UseProPlansReturn => {
     inFlight
       .then((fresh) => {
         if (!cancelled) {
-          setPrices(fresh);
+          setState({ prices: fresh, isLoading: false });
         }
       })
       .catch(() => {
-        // Endpoint unreachable — keep showing the fallback prices and let
-        // the next mount retry.
+        // Endpoint unreachable — the fallback is now the best available
+        // answer, rather than a temporary value shown as if it were live.
+        if (!cancelled) {
+          setState({ prices: FALLBACK_PLAN_PRICES, isLoading: false });
+        }
       });
 
     return () => {
@@ -78,27 +94,44 @@ export const useProPlans = (): UseProPlansReturn => {
 
   const locale = i18n.language || 'en';
 
-  return useMemo(() => buildDisplay(prices, locale), [prices, locale]);
+  return useMemo(
+    () => buildDisplay(state.prices, locale, state.isLoading),
+    [state.isLoading, state.prices, locale],
+  );
 };
 
 const buildDisplay = (
   prices: ProPlanPrices,
   locale: string,
-): UseProPlansReturn => ({
-  prices,
-  monthlyLabel: formatPlanAmount(
-    prices.monthly.amount,
-    prices.monthly.currency,
-    locale,
-  ),
-  yearlyLabel: formatPlanAmount(
-    prices.yearly.amount,
-    prices.yearly.currency,
-    locale,
-  ),
-  yearlyPerMonthLabel: formatPlanAmount(
-    yearlyPerMonthAmount(prices.yearly.amount),
-    prices.yearly.currency,
-    locale,
-  ),
-});
+  isLoading: boolean,
+): UseProPlansReturn => {
+  if (isLoading) {
+    return {
+      prices,
+      isLoading,
+      monthlyLabel: '—',
+      yearlyLabel: '—',
+      yearlyPerMonthLabel: '—',
+    };
+  }
+
+  return {
+    prices,
+    isLoading,
+    monthlyLabel: formatPlanAmount(
+      prices.monthly.amount,
+      prices.monthly.currency,
+      locale,
+    ),
+    yearlyLabel: formatPlanAmount(
+      prices.yearly.amount,
+      prices.yearly.currency,
+      locale,
+    ),
+    yearlyPerMonthLabel: formatPlanAmount(
+      yearlyPerMonthAmount(prices.yearly.amount),
+      prices.yearly.currency,
+      locale,
+    ),
+  };
+};

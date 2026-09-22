@@ -27,7 +27,8 @@ const TodayView = () => {
   const pace = useDailyPace(optimisticExpenses, guidance.dailyAllowance, now);
   const topCategory = useTopCategory(optimisticExpenses);
   const layout = useTodayLayout();
-  const showSkeleton = useDelayedLoading(!isInitialized);
+  const isLoading = !isInitialized || !layout.isHydrated;
+  const showSkeleton = useDelayedLoading(isLoading);
   const currentMonth = format(now, 'yyyy-MM');
 
   // Today is the tab that is always mounted, so the budget and per-category
@@ -39,7 +40,7 @@ const TodayView = () => {
     monthlyTotal: guidance.spentThisMonth,
   });
 
-  if (!isInitialized) {
+  if (isLoading) {
     return renderLoading(showSkeleton);
   }
 
