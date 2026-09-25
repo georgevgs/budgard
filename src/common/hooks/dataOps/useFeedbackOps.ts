@@ -3,7 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { captureException } from '@/config/sentry';
 import { useToast } from '@/common/hooks/useToast';
 import { haptics } from '@/constants/haptics';
-import { feedbackService, type FeedbackKind } from '@/common/api/feedbackService';
+import {
+  feedbackService,
+  type FeedbackKind,
+} from '@/common/api/feedbackService';
 
 type FeedbackInput = {
   kind: FeedbackKind;
@@ -34,7 +37,7 @@ export const useFeedbackOps = () => {
         });
         toast({
           variant: 'destructive',
-          description: t('settings.feedback.failed'),
+          description: t(resolveFailureKey(error)),
         });
         throw error;
       }
@@ -43,4 +46,15 @@ export const useFeedbackOps = () => {
   );
 
   return { submitFeedback };
+};
+
+// The database caps reports per account (20260925110000_bound_client_writes);
+// retrying at once would only fail again, so say when it will work.
+const resolveFailureKey = (error: unknown): string => {
+  const message = (error as { message?: unknown } | null)?.message;
+  if (message === 'Feedback limit reached') {
+    return 'settings.feedback.limited';
+  }
+
+  return 'settings.feedback.failed';
 };

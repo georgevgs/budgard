@@ -854,7 +854,8 @@
       "submit": "Send",
       "sending": "Sending…",
       "success": "Thanks — your message was sent.",
-      "failed": "Couldn't send your message. Try again."
+      "failed": "Couldn't send your message. Try again.",
+      "limited": "You've sent several messages recently. Try again in an hour."
     },
     "about": {
       "title": "About",

@@ -381,6 +381,85 @@ BEGIN
 END;
 $$;
 
+-- Per-account ceilings on client-writable stores. Rows are backdated on the
+-- way in to prove the window runs on server time, not on what the client sent.
+RESET ROLE;
+SELECT pg_temp.sign_in(owner_id, 'otp') FROM security_test_users;
+SET LOCAL ROLE authenticated;
+
+DO $$
+BEGIN
+  FOR attempt IN 1..5 LOOP
+    INSERT INTO public.feedback_reports (kind, message, app_version, created_at)
+    VALUES ('bug', 'Security fixture report', 'test', now() - INTERVAL '30 days');
+  END LOOP;
+
+  BEGIN
+    INSERT INTO public.feedback_reports (kind, message, app_version)
+    VALUES ('bug', 'Security fixture report', 'test');
+    RAISE EXCEPTION 'Feedback ceiling was bypassed';
+  EXCEPTION WHEN check_violation THEN NULL;
+  END;
+
+  FOR attempt IN 1..500 LOOP
+    INSERT INTO public.product_events (event_name, app_version, occurred_at)
+    VALUES ('app_opened', 'test', now() - INTERVAL '30 days');
+  END LOOP;
+
+  BEGIN
+    INSERT INTO public.product_events (event_name, app_version)
+    VALUES ('app_opened', 'test');
+    RAISE EXCEPTION 'Product event ceiling was bypassed';
+  EXCEPTION WHEN check_violation THEN NULL;
+  END;
+END;
+$$;
+
+RESET ROLE;
+INSERT INTO storage.objects (bucket_id, name)
+  SELECT 'receipts', owner_id::text || '/quota-' || n || '.webp'
+  FROM security_test_users, generate_series(1, 1998) AS n;
+INSERT INTO storage.objects (bucket_id, name, metadata)
+  SELECT 'receipts', other_id::text || '/quota-large.webp',
+         jsonb_build_object('size', 524288000)
+  FROM security_test_users;
+SELECT pg_temp.sign_in(owner_id, 'otp') FROM security_test_users;
+SET LOCAL ROLE authenticated;
+
+DO $$
+DECLARE
+  owner_uuid UUID;
+BEGIN
+  SELECT owner_id INTO owner_uuid FROM security_test_users;
+
+  -- 1,999 objects (the fixture plus 1,998): one more fits, the next does not.
+  INSERT INTO storage.objects (bucket_id, name)
+  VALUES ('receipts', owner_uuid::text || '/quota-last.webp');
+
+  BEGIN
+    INSERT INTO storage.objects (bucket_id, name)
+    VALUES ('receipts', owner_uuid::text || '/quota-over.webp');
+    RAISE EXCEPTION 'Receipt object ceiling was bypassed';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+END;
+$$;
+
+RESET ROLE;
+SELECT pg_temp.sign_in(other_id, 'otp') FROM security_test_users;
+SET LOCAL ROLE authenticated;
+
+DO $$
+BEGIN
+  BEGIN
+    INSERT INTO storage.objects (bucket_id, name)
+    VALUES ('receipts', (SELECT other_id FROM security_test_users)::text || '/quota-over.webp');
+    RAISE EXCEPTION 'Receipt byte ceiling was bypassed';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+END;
+$$;
+
 RESET ROLE;
 ROLLBACK;
 SELECT 'Security boundary checks passed; all fixtures rolled back' AS result;
