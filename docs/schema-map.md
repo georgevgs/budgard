@@ -4,7 +4,7 @@
      Regenerate with `npm run docs:schema`. -->
 
 An index from each database object to the migrations that touch it, built by
-scanning `supabase/migrations`. Covers 95 migrations: 53 functions, 30 triggers, 27 tables, 88 policies, 58 indexes.
+scanning `supabase/migrations`. Covers 96 migrations: 53 functions, 30 triggers, 27 tables, 88 policies, 58 indexes.
 
 This is a **map, not a schema definition**. Migrations are append-only history
 and the live schema is what you get by replaying them, so nothing here states

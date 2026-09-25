@@ -8,6 +8,13 @@ const MIGRATION = path.join(
   'supabase/migrations/20260904113851_share_household_receipts.sql',
 );
 const sql = readFileSync(MIGRATION, 'utf8');
+const legacyDropSql = readFileSync(
+  path.join(
+    ROOT,
+    'supabase/migrations/20260925140000_drop_legacy_receipt_policies.sql',
+  ),
+  'utf8',
+);
 
 describe('household receipt Storage boundary', () => {
   it('uses the shared financial-space predicate for every Storage operation', () => {
@@ -32,5 +39,18 @@ describe('household receipt Storage boundary', () => {
     expect(sql).toContain('CASE');
     expect(sql).toContain('ELSE NULL');
     expect(sql).toMatch(/\[0-9a-f\]\{8\}.*\[0-9a-f\]\{12\}/);
+  });
+
+  // Permissive policies OR together: one dashboard-made policy that checks
+  // only the folder owner re-opens everything the shared predicate closes.
+  it('drops the dashboard policies that sat beside the shared predicate', () => {
+    expect(legacyDropSql).toContain(
+      'DROP POLICY IF EXISTS "Users can view own receipts" ON storage.objects;',
+    );
+    expect(legacyDropSql).toContain(
+      'DROP POLICY IF EXISTS "Users can upload receipts to own folder" ON storage.objects;',
+    );
+    expect(legacyDropSql).toContain("NOT LIKE '%can_access_financial_space%'");
+    expect(legacyDropSql).toContain('RAISE EXCEPTION');
   });
 });

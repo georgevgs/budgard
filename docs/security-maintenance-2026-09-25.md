@@ -1,8 +1,8 @@
 # Security maintenance — 25 September 2026
 
-Status: on `main`. Netlify deploys the frontend from it; the four
-migrations, three Edge Functions and four hosted settings are released by
-hand, in the order under **Deployment**.
+Status: released. Netlify deploys the frontend from `main`; the five
+migrations and three Edge Functions are on the linked project. Three
+dashboard steps remain, under **Still to do**.
 
 This follows the 12 September batch. That one hardened dependencies and push
 delivery; this one closes the gaps between auth settings, the client and
@@ -20,6 +20,7 @@ billing that the follow-up audit found.
 | F6 | Sentry sampled 10 % of sessions for replay on SDK-default masking, and sent full URLs (invite tokens, PostgREST filters). | Replays only on error, masking spelled out; every URL in events, spans and breadcrumbs keeps its path only. | 5 |
 | F7 | `CRON_SECRET` lived in plain text in `cron.job.command`, and the job existed only in the dashboard. | The job reads the secret from Vault and is defined in a migration. | 5 |
 | F8 | Hardening. | CSP drops the unused font CDN and adds `object-src 'none'` and `frame-ancestors 'none'`; `Cross-Origin-Opener-Policy: same-origin`; the service worker only opens same-origin paths from a notification; `supabase/.temp/` is untracked. | 5 |
+| F9 | Two receipts policies made in the dashboard, never in a migration, compared only the first folder segment with `auth.uid()`. Storage policies OR together, so they let a password session read and write its own folder past F1, and uploads skip the F4 quota. Found when the boundary suite first ran against the linked project. | `20260925140000` drops both, and fails if any receipts policy still skips `can_access_financial_space`. | 6 |
 
 A trigger rejecting non-empty `auth.users.encrypted_password` was considered and
 **rejected**. GoTrue creates every passwordless user with a random temporary
@@ -31,20 +32,22 @@ password, so it would have blocked every sign-up. For the same reason,
 | Check | Result |
 | ----- | ------ |
 | Lint, `tsc -b` | Pass |
-| Unit and invariant tests | Pass: 203 files, 1,791 tests |
+| Unit and invariant tests | Pass: 208 files, 1,810 tests |
 | Production build, bundle budgets | Pass, all five budgets |
 | Edge Function typecheck against frozen locks (`edge:check`) | Pass, lockfiles unchanged |
 | Knip | Pass, existing CSS hint only |
 | SQL boundary suite, replayed schema | Pass on a local PG16 database rebuilt from the baseline plus every later migration |
 | Playwright journeys | Pass: 98 tests, chromium and pwa-cache, with the new CSP applied |
-| SQL boundary suite, linked project | **Not run** — needs the backup credentials (see 12 September note) |
+| SQL boundary suite, linked project | Pass after `20260925140000`. Before it, failed at "Password session read receipts" (F9) |
 
 Each new guard was mutation-checked: removing it made its test fail. That
 covered the SQL password guard in `can_access_financial_space` and separately in
 `accept_household_invite`, each quota, the server-side time stamp, the
 second-subscription guard, the TS denylist and base64url decoding, the sign-out
 releases, the foreign-endpoint detach, the Stripe listing's 400 handling and
-terminal filter, the redirect allowlist and the service-worker URL guard.
+terminal filter, the redirect allowlist and the service-worker URL guard. The
+receipts-policy guard in `20260925140000` was checked by adding an unrelated
+bypass policy, which it refused by name.
 
 The SQL suite now signs in with realistic `amr` claims. It covers password
 sessions, the full household lifecycle (invite, stranger, accept, partner
@@ -53,51 +56,35 @@ billing mirror.
 
 ## Deployment
 
-The frontend and backend halves each work with the other's previous version,
-so either can go first. Netlify ships the frontend on every push to `main`.
+Released 25 September 2026. The frontend and backend halves each work with
+the other's previous version, so the order did not matter.
 
-1. **Migrations** (`supabase db push`), in filename order:
-   `20260925100000_reject_password_sessions`,
-   `20260925110000_bound_client_writes`,
-   `20260925120000_guard_second_subscription_events`,
-   `20260925130000_read_push_cron_secret_from_vault` (see step 3 first).
-2. **Edge Functions**, keeping each one's `verify_jwt`: `delete-account`,
-   `stripe-checkout`, `stripe-portal`. `stripe-webhook`,
-   `send-push-notifications` and `stripe-prices` are unchanged. No import map
-   changed, so no lock regeneration was needed.
-3. **Vault, before the last migration.** In the SQL editor:
-   `SELECT vault.create_secret('<current CRON_SECRET>', 'send_push_notifications_cron_secret');`
-   If the migration was already applied without it, it raised a WARNING and
-   changed nothing. Create the secret, then run the migration's `DO` block by
-   hand. Afterwards rotate the secret, because the old one sat in plain text:
-   `supabase secrets set CRON_SECRET=<new>` and `vault.update_secret(...)`
-   back to back. Confirm with `SELECT jobname, schedule FROM cron.job;`:
-   there should be exactly one job calling the function, and no secret in its
-   command.
-4. **Hosted Auth settings** (Dashboard → Authentication):
-   - Email → **Email OTP Expiration: 600**. This covers codes and links.
-   - Attack Protection → **Captcha protection on, provider Turnstile**, with
-     the secret key set. Without it the client's `captchaToken` is ignored.
-   - Email → **Confirm email: on** is recommended but no longer load-bearing,
-     because F1 refuses password sessions regardless. Before turning it on,
-     make sure the "Confirm signup" template includes `{{ .Token }}` or the
-     link, since first-time sign-ins will receive that template.
-5. **Check for existing password sessions.** GoTrue records each session's
-   methods in `auth.mfa_amr_claims`:
-   ```sql
-   SELECT s.user_id, c.created_at
-   FROM auth.mfa_amr_claims AS c
-   JOIN auth.sessions AS s ON s.id = c.session_id
-   WHERE c.authentication_method = 'password';
-   ```
-   This should return no rows. Any rows it does return are already refused by
-   step 1. Review them, then revoke with
-   `DELETE FROM auth.sessions WHERE id IN (...)`.
-6. **Run `supabase/tests/security_boundaries.sql`** against the linked project.
-   The receipt-quota case also confirms that the quota's definer function can
-   count `storage.objects`; if it passes, the project's `postgres` role
-   bypasses RLS there as expected.
-7. **Frontend**: deployed by Netlify from `main`, CSP and COOP included. Confirm the live build carries the new release.
+| Step | State |
+| ---- | ----- |
+| Migrations `20260925100000` to `20260925140000` | Applied to the linked project; history versions match the filenames |
+| Edge Functions `delete-account`, `stripe-checkout`, `stripe-portal` | Deployed with `verify_jwt` kept. `stripe-webhook`, `send-push-notifications` and `stripe-prices` are unchanged, and no import map changed |
+| Vault secret `send_push_notifications_cron_secret` | Created from the old job's command without the value leaving the database. The migration's job replaced it; the next run returned 200, and no job carries the secret in its command |
+| Existing password sessions (`auth.mfa_amr_claims`) | Seven, each created and last used on its account's sign-up day: GoTrue's temporary password, not a sign-in. Refused by F1 and left in place |
+| `security_boundaries.sql` on the linked project | Failed at "Password session read receipts" until `20260925140000`, passes after. The receipt-quota case also confirms the quota's definer function can count `storage.objects` |
+| Frontend | Netlify, from `main`, CSP and COOP included |
+
+### Still to do
+
+1. **Rotate `CRON_SECRET`**, because the old value sat in plain text in
+   `cron.job.command`. Run these back to back so no scheduled run falls
+   between them:
+   `supabase secrets set CRON_SECRET=<new>`, then
+   `SELECT vault.update_secret((SELECT id FROM vault.secrets WHERE name = 'send_push_notifications_cron_secret'), '<new>');`
+2. **Dashboard → Authentication → Email → Email OTP Expiration: 600.** This
+   covers codes and links.
+3. **Dashboard → Authentication → Attack Protection → Captcha protection on,
+   provider Turnstile**, with the secret key set. Without it the client's
+   `captchaToken` is ignored.
+
+**Confirm email: on** is recommended but no longer load-bearing, because F1
+refuses password sessions regardless. Before turning it on, make sure the
+"Confirm signup" template includes `{{ .Token }}` or the link, since
+first-time sign-ins will receive that template.
 
 ## Not done, and why
 
