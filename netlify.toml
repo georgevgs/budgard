@@ -83,6 +83,11 @@
   command = "npm run lint && npm run test && npm run build"
   publish = "dist"
 
+# Purges the whole Cloudflare zone after a production deploy, and only then.
+# Install it here and in package.json, never from the Netlify UI: a UI install
+# runs in every context, and Netlify refuses to parse this file for a deploy
+# preview while both exist. Running everywhere would be worse still, since
+# each preview would empty the production cache.
 [[context.production.plugins]]
   package = "netlify-purge-cloudflare-on-deploy"
 
