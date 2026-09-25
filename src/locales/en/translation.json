@@ -1923,6 +1923,7 @@
     "iconTooLong": "Choose a shorter icon",
     "categoryNameInvalid": "Category name contains invalid characters",
     "categoryNameEmpty": "Category name cannot be empty",
+    "categoryNameTaken": "You already have a category with this name",
     "startDateRequired": "Start date is required",
     "startDateTooEarly": "Start date cannot be before 2000",
     "endDateBeforeStart": "End date must be after start date",

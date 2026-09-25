@@ -14,7 +14,10 @@ import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import { Form } from '@/common/ui/form';
 import { useCategorySubmit } from '@/common/components/categories/hooks/useCategorySubmit';
-import { categorySchema, type CategoryFormData } from '@/common/components/categories/validations';
+import {
+  categorySchema,
+  type CategoryFormData,
+} from '@/common/components/categories/validations';
 import type { Category } from '@/types/Category';
 import { CategoryFormFields } from '@/common/components/categories/CategoryFormFields';
 import { type SelectableCategoryKind } from '@/common/components/categories/CategoryKindSelector';
@@ -45,12 +48,6 @@ export const CategoryForm = ({
   const editableKind = getEditableKind(category);
   const defaultColor = getDefaultColor(isIncomeCategory);
 
-  const { handleSubmit, isInitialized } = useCategorySubmit({
-    category,
-    isIncomeCategory,
-    onClose,
-  });
-
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     mode: 'onTouched',
@@ -60,6 +57,18 @@ export const CategoryForm = ({
       icon: category?.icon ?? undefined,
       kind: editableKind,
     },
+  });
+
+  const { handleSubmit, isInitialized } = useCategorySubmit({
+    category,
+    isIncomeCategory,
+    onClose,
+    onNameTaken: () =>
+      form.setError(
+        'name',
+        { type: 'validate', message: 'validation.categoryNameTaken' },
+        { shouldFocus: true },
+      ),
   });
 
   useDialogDirty(form.formState.isDirty);

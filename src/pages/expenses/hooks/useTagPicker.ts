@@ -7,6 +7,7 @@ import { dataColors } from '@/design/palette';
 import { collectExpenseTagIds } from '@/constants/expenseTags';
 import type { Tag } from '@/types/Tag';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
+import { isSameName } from '@/constants/names';
 
 export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
   const tags = useTagsData();
@@ -39,9 +40,9 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
     return unselected.filter((tag) => tag.name.toLowerCase().includes(lower));
   }, [tags, selectedTagIds, tagSearch]);
 
-  const hasExactMatch = tags.some(
-    (tag) => tag.name.toLowerCase() === tagSearch.toLowerCase(),
-  );
+  // Trimmed on both sides: the create below trims, and iOS appends a space
+  // after a keyboard suggestion, so "Food " must still match "Food".
+  const hasExactMatch = tags.some((tag) => isSameName(tag.name, tagSearch));
   const shouldShowCreateOption = tagSearch.trim().length > 0 && !hasExactMatch;
 
   const applySelection = (ids: string[]) => {
@@ -82,6 +83,14 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
 
   const handleTagCreateInline = () => {
     if (!tagSearch.trim() || isCreatingTag) {
+      return;
+    }
+    // Enter can reach here with an existing name; pick it rather than send a
+    // create the database refuses (tags_user_id_name_key).
+    const existing = tags.find((tag) => isSameName(tag.name, tagSearch));
+    if (existing) {
+      handleTagSelect(existing.id);
+
       return;
     }
     if (!guardTagLimit()) {

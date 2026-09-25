@@ -3,6 +3,9 @@ import type { UseFormReturn } from 'react-hook-form';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useCategoriesData } from '@/common/contexts/DataContext';
 import { useCategoryOps } from '@/common/hooks/dataOps/useCategoryOps';
+import { useProGate } from '@/common/hooks/useProGate';
+import { isCategoryNameTaken } from '@/common/components/categories/utils/categoryNames';
+import { isSameName } from '@/constants/names';
 import { incomeColors } from '@/design/palette';
 import type { IncomeFormData } from '@/pages/income/validations';
 
@@ -10,8 +13,9 @@ export const useIncomeCategoryPicker = (
   form: UseFormReturn<IncomeFormData>,
 ) => {
   const { session } = useAuth();
-  const { incomeCategories } = useCategoriesData();
+  const { categories, incomeCategories } = useCategoriesData();
   const { handleCategoryAdd } = useCategoryOps();
+  const { allow } = useProGate();
   const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
   const [isCreatingCategory, startCategoryCreation] = useTransition();
@@ -32,12 +36,12 @@ export const useIncomeCategoryPicker = (
   }, [incomeCategories, categorySearch]);
 
   const trimmedSearch = categorySearch.trim();
-  const hasExactMatch = incomeCategories.some(
-    (c) => c.name.toLowerCase() === trimmedSearch.toLowerCase(),
-  );
   // When the user is typing a unique new name, the bottom row becomes a quick
-  // "+ Create" action. Otherwise it's "Manage sources" (combined add + edit + delete).
-  const shouldShowCreateOption = trimmedSearch.length > 0 && !hasExactMatch;
+  // "+ Create" action. Otherwise it's "Manage sources" (combined add + edit +
+  // delete). Unique across the whole space, not just income: the database's
+  // name key spans both types, so "Other" is taken if an expense has it.
+  const shouldShowCreateOption =
+    trimmedSearch.length > 0 && !isCategoryNameTaken(trimmedSearch, categories);
 
   const handleCategorySelect = (id: string) => {
     form.setValue('category_id', id, {
@@ -53,6 +57,25 @@ export const useIncomeCategoryPicker = (
       return;
     }
     if (!session?.user?.id) {
+      return;
+    }
+    const existing = incomeCategories.find((c) =>
+      isSameName(c.name, categorySearch),
+    );
+    if (existing) {
+      handleCategorySelect(existing.id);
+
+      return;
+    }
+    if (isCategoryNameTaken(categorySearch, categories)) {
+      return;
+    }
+    // Same free cap as the manager's add button; the database trigger would
+    // otherwise refuse the eleventh source with a generic failure.
+    const isAllowed = allow('categories', incomeCategories.length, {
+      onBlock: () => setIsCategoryPopoverOpen(false),
+    });
+    if (!isAllowed) {
       return;
     }
 

@@ -1,7 +1,12 @@
 import type { Session } from '@supabase/supabase-js';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useCategoryOps } from '@/common/hooks/dataOps/useCategoryOps';
-import { useDataConfig } from '@/common/contexts/DataContext';
+import {
+  useCategoriesData,
+  useDataConfig,
+} from '@/common/contexts/DataContext';
+import { isCategoryNameTaken } from '@/common/components/categories/utils/categoryNames';
+import { isNameConflictError } from '@/constants/names';
 import type { CategoryFormData } from '@/common/components/categories/validations';
 import type { Category } from '@/types/Category';
 import type { CategoryKind } from '@/types/Category';
@@ -10,14 +15,18 @@ type UseCategorySubmitArgs = {
   category: Category | undefined;
   isIncomeCategory: boolean;
   onClose: () => void;
+  // Marks the name field; the database would refuse the name as a duplicate.
+  onNameTaken: () => void;
 };
 
 export const useCategorySubmit = ({
   category,
   isIncomeCategory,
   onClose,
+  onNameTaken,
 }: UseCategorySubmitArgs) => {
   const { session } = useAuth();
+  const { categories } = useCategoriesData();
   const { handleCategoryAdd, handleCategoryUpdate } = useCategoryOps();
   const { isInitialized } = useDataConfig();
 
@@ -26,6 +35,11 @@ export const useCategorySubmit = ({
       return;
     }
     if (!session) {
+      return;
+    }
+    if (isCategoryNameTaken(values.name, categories, category)) {
+      onNameTaken();
+
       return;
     }
 
@@ -41,8 +55,12 @@ export const useCategorySubmit = ({
         );
       }
       onClose();
-    } catch {
-      // Hook already shows error toast via useCategoryOps
+    } catch (error) {
+      // useCategoryOps already toasts; a stale list still deserves the field
+      // saying why, so the retry is not the same doomed request.
+      if (isNameConflictError(error)) {
+        onNameTaken();
+      }
     }
   };
 

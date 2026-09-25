@@ -11,6 +11,8 @@
  * SDK stays in lazy chunks outside the critical path.
  */
 
+import { normalizeCaptureArgs } from '@/config/sentryErrors';
+
 type SentrySdk = Pick<
   typeof import('@sentry/react'),
   'captureException' | 'setUser'
@@ -29,8 +31,10 @@ let sdk: SentrySdk | null = null;
 let queuedCalls: QueuedCall[] = [];
 
 export const captureException = (
-  ...args: Parameters<SentrySdk['captureException']>
+  ...rawArgs: Parameters<SentrySdk['captureException']>
 ): void => {
+  // Database rejections arrive as plain objects; see sentryErrors.ts.
+  const args = normalizeCaptureArgs(rawArgs);
   if (sdk) {
     sdk.captureException(...args);
 
