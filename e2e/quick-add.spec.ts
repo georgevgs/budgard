@@ -40,7 +40,9 @@ test.describe('quick add', () => {
     for (const digit of ['8', '2', '5']) {
       await app.getByRole('button', { name: digit, exact: true }).click();
     }
-    await app.getByRole('textbox', { name: /name/i }).fill('Bus fare');
+    await app
+      .getByRole('textbox', { name: 'Description (optional)' })
+      .fill('Bus fare');
     await app.getByRole('radio', { name: /transport/i }).click();
     await app.getByRole('button', { name: /^save$/i }).click();
 
@@ -109,7 +111,9 @@ test.describe('quick add', () => {
     for (const digit of ['5', '0', '0']) {
       await app.getByRole('button', { name: digit, exact: true }).click();
     }
-    await app.getByRole('textbox', { name: /name/i }).fill('Rejected expense');
+    await app
+      .getByRole('textbox', { name: 'Description (optional)' })
+      .fill('Rejected expense');
     failNextBackendRequest(
       'expenses',
       400,
