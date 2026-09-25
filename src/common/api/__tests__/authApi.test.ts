@@ -1,13 +1,29 @@
 import { describe, it, expect, vi } from 'vitest';
 import { supabase } from '@/config/supabase';
 
+const lastCallOrder = (fn: unknown): number => {
+  const order = vi.mocked(fn as () => void).mock.invocationCallOrder;
+
+  return order[order.length - 1] ?? 0;
+};
+
 // Must mock authStore before importing the auth module
 vi.mock('@/constants/authStore', () => ({
   markIntentionalSignOut: vi.fn(),
+  getCurrentUserId: vi.fn(() => 'user-1'),
+}));
+
+vi.mock('@/common/api/pushDeviceApi', () => ({
+  releaseDevicePush: vi.fn().mockResolvedValue(undefined),
+  releaseAccountPush: vi.fn().mockResolvedValue(undefined),
 }));
 
 import { authApi } from '@/common/api/authApi';
 import { markIntentionalSignOut } from '@/constants/authStore';
+import {
+  releaseAccountPush,
+  releaseDevicePush,
+} from '@/common/api/pushDeviceApi';
 
 describe('authApi', () => {
   it('requestOTP calls signInWithOtp with email', async () => {
@@ -58,5 +74,34 @@ describe('authApi', () => {
     await authApi.signOut();
     expect(markIntentionalSignOut).toHaveBeenCalled();
     expect(supabase.auth.signOut).toHaveBeenCalled();
+  });
+
+  // After the token is gone RLS will not let the row be deleted, and the
+  // device would keep showing this account's bills on its lock screen.
+  it('signOut releases this device push row while the session is still valid', async () => {
+    vi.mocked(supabase.auth.signOut).mockResolvedValue({
+      error: null,
+    } as never);
+
+    await authApi.signOut();
+
+    expect(releaseDevicePush).toHaveBeenCalled();
+    expect(lastCallOrder(releaseDevicePush)).toBeLessThan(
+      lastCallOrder(supabase.auth.signOut),
+    );
+  });
+
+  it('signOutEverywhere releases every device row for the account', async () => {
+    vi.mocked(supabase.auth.signOut).mockResolvedValue({
+      error: null,
+    } as never);
+
+    await authApi.signOutEverywhere();
+
+    expect(releaseAccountPush).toHaveBeenCalledWith('user-1');
+    expect(lastCallOrder(releaseAccountPush)).toBeLessThan(
+      lastCallOrder(supabase.auth.signOut),
+    );
+    expect(supabase.auth.signOut).toHaveBeenLastCalledWith({ scope: 'global' });
   });
 });

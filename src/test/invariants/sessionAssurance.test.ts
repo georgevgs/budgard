@@ -72,9 +72,9 @@ describe('Edge Function session assurance', () => {
   });
 
   it('fails closed when no sign-in time is readable', () => {
-    expect(isRecentlyAuthenticated(bearer({ sub: 'user-1' }), WINDOW, NOW)).toBe(
-      false,
-    );
+    expect(
+      isRecentlyAuthenticated(bearer({ sub: 'user-1' }), WINDOW, NOW),
+    ).toBe(false);
   });
 
   it('refuses exactly the methods the database refuses', () => {

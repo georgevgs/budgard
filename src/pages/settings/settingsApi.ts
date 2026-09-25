@@ -139,12 +139,6 @@ export const settingsApi = {
     );
   },
 
-  async removePushSubscription(endpoint: string): Promise<void> {
-    await done(
-      supabase.from('push_subscriptions').delete().eq('endpoint', endpoint),
-    );
-  },
-
   async getFinancialConnections(ownerId: string, signal?: AbortSignal) {
     let query = supabase
       .from('financial_connections')

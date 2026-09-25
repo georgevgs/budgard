@@ -1,5 +1,12 @@
 import { supabase } from '@/config/supabase';
-import { markIntentionalSignOut } from '@/constants/authStore';
+import {
+  getCurrentUserId,
+  markIntentionalSignOut,
+} from '@/constants/authStore';
+import {
+  releaseAccountPush,
+  releaseDevicePush,
+} from '@/common/api/pushDeviceApi';
 
 // Auth mutations are sitewide, not feature-scoped: routing, settings, security
 // and the login flow all call them. They live beside dataService rather than in
@@ -23,8 +30,10 @@ export const authApi = {
     });
   },
 
+  // The push row is released first, while the session can still delete it.
   async signOut() {
     markIntentionalSignOut();
+    await releaseDevicePush();
 
     return supabase.auth.signOut();
   },
@@ -33,8 +42,11 @@ export const authApi = {
   // Supabase does not expose a per-device session list to the client — that
   // needs a service-role call — so "sign out everywhere" is the honest thing
   // this can offer without an edge function standing behind it.
+  //
+  // Revoking tokens does not stop push delivery, so every device row goes too.
   async signOutEverywhere() {
     markIntentionalSignOut();
+    await releaseAccountPush(getCurrentUserId());
 
     return supabase.auth.signOut({ scope: 'global' });
   },

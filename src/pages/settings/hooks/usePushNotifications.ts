@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useToast } from '@/common/hooks/useToast';
 import { settingsApi } from '@/pages/settings/settingsApi';
+import { pushDeviceApi, unsubscribeQuietly } from '@/common/api/pushDeviceApi';
 
 type PushState =
   'loading' | 'unsupported' | 'denied' | 'subscribed' | 'unsubscribed';
@@ -60,23 +61,7 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
       return;
     }
 
-    getRegistration().then((reg) => {
-      if (!reg) {
-        setState('unsubscribed');
-
-        return;
-      }
-
-      reg.pushManager.getSubscription().then((sub) => {
-        if (sub) {
-          setState('subscribed');
-
-          return;
-        }
-
-        setState('unsubscribed');
-      });
-    });
+    void resolveDeviceState().then(setState);
   }, []);
 
   const subscribe = useCallback(async () => {
@@ -114,6 +99,7 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
         return;
       }
 
+      await detachUnregisteredSubscription(reg);
       createdSubscription = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(
@@ -160,7 +146,7 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
         return;
       }
 
-      await settingsApi.removePushSubscription(subscription.endpoint);
+      await pushDeviceApi.removeDevice(subscription.endpoint);
       await unsubscribeQuietly(subscription);
 
       setState('unsubscribed');
@@ -191,17 +177,53 @@ const resolveInitialPushState = (): PushState => {
   return 'loading';
 };
 
-const unsubscribeQuietly = async (
-  subscription: PushSubscription | null,
-): Promise<void> => {
+// A browser subscription only counts when this account has a row for it. One
+// without — left by another account on a shared browser, or by "sign out
+// everywhere" — delivers nothing, so the switch must read off, not on.
+const resolveDeviceState = async (): Promise<PushState> => {
+  const reg = await getRegistration();
+  if (!reg) {
+    return 'unsubscribed';
+  }
+
+  const subscription = await reg.pushManager.getSubscription();
   if (!subscription) {
+    return 'unsubscribed';
+  }
+
+  if (!(await isRegisteredOrUnknown(subscription))) {
+    await unsubscribeQuietly(subscription);
+
+    return 'unsubscribed';
+  }
+
+  return 'subscribed';
+};
+
+// subscribe() hands back an existing subscription unchanged. If that endpoint
+// belongs to another account, saving it fails RLS forever; dropping it first
+// makes the browser mint a fresh endpoint this account can own.
+const detachUnregisteredSubscription = async (
+  reg: ServiceWorkerRegistration,
+): Promise<void> => {
+  const existing = await reg.pushManager.getSubscription();
+  if (!existing) {
     return;
   }
 
+  if (!(await isRegisteredOrUnknown(existing))) {
+    await unsubscribeQuietly(existing);
+  }
+};
+
+// Offline, the lookup fails; keeping the local subscription is the safe
+// guess, because tearing it down cannot be undone without the network.
+const isRegisteredOrUnknown = async (
+  subscription: PushSubscription,
+): Promise<boolean> => {
   try {
-    await subscription.unsubscribe();
+    return await pushDeviceApi.isRegistered(subscription.endpoint);
   } catch {
-    // The server row is authoritative. Browser cleanup is best effort so a
-    // stale local subscription cannot keep the UI stuck in an enabled state.
+    return true;
   }
 };

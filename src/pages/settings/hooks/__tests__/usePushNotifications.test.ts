@@ -5,6 +5,7 @@ import { usePushNotifications } from '@/pages/settings/hooks/usePushNotification
 const mocks = vi.hoisted(() => ({
   save: vi.fn(),
   remove: vi.fn(),
+  isRegistered: vi.fn(),
   toast: vi.fn(),
 }));
 
@@ -19,19 +20,29 @@ vi.mock('@/common/hooks/useToast', () => ({
 vi.mock('@/pages/settings/settingsApi', () => ({
   settingsApi: {
     savePushSubscription: mocks.save,
-    removePushSubscription: mocks.remove,
+  },
+}));
+
+vi.mock('@/common/api/pushDeviceApi', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/common/api/pushDeviceApi')>()),
+  pushDeviceApi: {
+    removeDevice: mocks.remove,
+    isRegistered: mocks.isRegistered,
   },
 }));
 
 type PushMocks = {
   subscription: PushSubscription;
   unsubscribe: ReturnType<typeof vi.fn>;
+  registration: ServiceWorkerRegistration;
 };
 
 describe('usePushNotifications', () => {
   beforeEach(() => {
     mocks.save.mockReset();
     mocks.remove.mockReset();
+    mocks.isRegistered.mockReset();
+    mocks.isRegistered.mockResolvedValue(true);
     mocks.toast.mockReset();
     vi.stubEnv('VITE_VAPID_PUBLIC_KEY', 'AQ');
     vi.stubGlobal('PushManager', class PushManager {});
@@ -104,6 +115,45 @@ describe('usePushNotifications', () => {
     );
     expect(result.current.state).toBe('unsubscribed');
   });
+
+  it('reads off, and drops, a browser subscription this account has no row for', async () => {
+    const { unsubscribe } = installPushMocks({ isInitiallySubscribed: true });
+    mocks.isRegistered.mockResolvedValue(false);
+    const { result } = renderHook(() => usePushNotifications());
+
+    await waitFor(() => expect(result.current.state).toBe('unsubscribed'));
+    expect(unsubscribe).toHaveBeenCalledOnce();
+  });
+
+  it('keeps the browser subscription when its row cannot be checked offline', async () => {
+    const { unsubscribe } = installPushMocks({ isInitiallySubscribed: true });
+    mocks.isRegistered.mockRejectedValue(new TypeError('Failed to fetch'));
+    const { result } = renderHook(() => usePushNotifications());
+
+    await waitFor(() => expect(result.current.state).toBe('subscribed'));
+    expect(unsubscribe).not.toHaveBeenCalled();
+  });
+
+  it("drops another account's endpoint before subscribing, so a fresh one is minted", async () => {
+    const { unsubscribe, registration } = installPushMocks({
+      isInitiallySubscribed: true,
+    });
+    mocks.isRegistered.mockResolvedValue(false);
+    mocks.save.mockResolvedValue(undefined);
+    const { result } = renderHook(() => usePushNotifications());
+    await waitFor(() => expect(result.current.state).toBe('unsubscribed'));
+    unsubscribe.mockClear();
+
+    await act(async () => {
+      await result.current.subscribe();
+    });
+
+    expect(unsubscribe).toHaveBeenCalledOnce();
+    expect(unsubscribe.mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(registration.pushManager.subscribe).mock.invocationCallOrder[0],
+    );
+    expect(result.current.state).toBe('subscribed');
+  });
 });
 
 type InstallPushMocksOptions = {
@@ -139,5 +189,5 @@ const installPushMocks = (options: InstallPushMocksOptions = {}): PushMocks => {
     },
   });
 
-  return { subscription, unsubscribe };
+  return { subscription, unsubscribe, registration };
 };

@@ -42,22 +42,4 @@ describe('settingsApi push subscriptions', () => {
       }),
     ).rejects.toEqual({ message: 'write failed' });
   });
-
-  it('throws when deleting the subscription fails', async () => {
-    const eq = vi.fn().mockResolvedValue({
-      data: null,
-      error: { message: 'delete failed' },
-    });
-    const remove = vi.fn().mockReturnValue({ eq });
-    vi.mocked(supabase.from).mockReturnValue({ delete: remove } as never);
-
-    await expect(
-      settingsApi.removePushSubscription('https://push.example/subscription'),
-    ).rejects.toEqual({ message: 'delete failed' });
-
-    expect(eq).toHaveBeenCalledWith(
-      'endpoint',
-      'https://push.example/subscription',
-    );
-  });
 });
