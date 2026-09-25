@@ -4,7 +4,7 @@
      Regenerate with `npm run docs:schema`. -->
 
 An index from each database object to the migrations that touch it, built by
-scanning `supabase/migrations`. Covers 91 migrations: 49 functions, 28 triggers, 27 tables, 88 policies, 57 indexes.
+scanning `supabase/migrations`. Covers 95 migrations: 53 functions, 30 triggers, 27 tables, 88 policies, 58 indexes.
 
 This is a **map, not a schema definition**. Migrations are append-only history
 and the live schema is what you get by replaying them, so nothing here states
@@ -257,6 +257,9 @@ First defined in `20260831151127_add_secure_household_spaces.sql`.
 - defines — `20260831151127_add_secure_household_spaces.sql`
 - grants on — `20260831151127_add_secure_household_spaces.sql`
 - revokes on — `20260831151127_add_secure_household_spaces.sql`
+- defines — `20260925100000_reject_password_sessions.sql`
+- grants on — `20260925100000_reject_password_sessions.sql`
+- revokes on — `20260925100000_reject_password_sessions.sql`
 
 ### `apply_subscription_event`
 
@@ -265,6 +268,9 @@ First defined in `20260720000000_guard_subscription_event_ordering.sql`.
 - defines — `20260720000000_guard_subscription_event_ordering.sql`
 - grants on — `20260720000000_guard_subscription_event_ordering.sql`
 - revokes on — `20260720000000_guard_subscription_event_ordering.sql`
+- defines — `20260925120000_guard_second_subscription_events.sql`
+- grants on — `20260925120000_guard_second_subscription_events.sql`
+- revokes on — `20260925120000_guard_second_subscription_events.sql`
 
 ### `apply_transaction_rule_to_existing`
 
@@ -326,6 +332,9 @@ First defined in `20260831151127_add_secure_household_spaces.sql`.
 - defines — `20260831151127_add_secure_household_spaces.sql`
 - grants on — `20260831151127_add_secure_household_spaces.sql`
 - revokes on — `20260831151127_add_secure_household_spaces.sql`
+- defines — `20260925100000_reject_password_sessions.sql`
+- grants on — `20260925100000_reject_password_sessions.sql`
+- revokes on — `20260925100000_reject_password_sessions.sql`
 
 ### `enforce_free_account_cap`
 
@@ -500,6 +509,9 @@ First defined in `20260831151127_add_secure_household_spaces.sql`.
 - defines — `20260831151127_add_secure_household_spaces.sql`
 - grants on — `20260831151127_add_secure_household_spaces.sql`
 - revokes on — `20260831151127_add_secure_household_spaces.sql`
+- defines — `20260925100000_reject_password_sessions.sql`
+- grants on — `20260925100000_reject_password_sessions.sql`
+- revokes on — `20260925100000_reject_password_sessions.sql`
 
 ### `merge_category`
 
@@ -524,6 +536,9 @@ First defined in `20260831151127_add_secure_household_spaces.sql`.
 - defines — `20260831151127_add_secure_household_spaces.sql`
 - grants on — `20260831151127_add_secure_household_spaces.sql`
 - revokes on — `20260831151127_add_secure_household_spaces.sql`
+- defines — `20260925100000_reject_password_sessions.sql`
+- grants on — `20260925100000_reject_password_sessions.sql`
+- revokes on — `20260925100000_reject_password_sessions.sql`
 
 ### `private.enforce_push_subscription_limit`
 
@@ -531,6 +546,28 @@ First defined in `20260910211908_harden_push_delivery.sql`.
 
 - defines — `20260910211908_harden_push_delivery.sql`
 - revokes on — `20260910211908_harden_push_delivery.sql`
+
+### `private.is_passwordless_session`
+
+First defined in `20260925100000_reject_password_sessions.sql`.
+
+- defines — `20260925100000_reject_password_sessions.sql`
+- grants on — `20260925100000_reject_password_sessions.sql`
+- revokes on — `20260925100000_reject_password_sessions.sql`
+
+### `private.limit_feedback_reports`
+
+First defined in `20260925110000_bound_client_writes.sql`.
+
+- defines — `20260925110000_bound_client_writes.sql`
+- revokes on — `20260925110000_bound_client_writes.sql`
+
+### `private.limit_product_events`
+
+First defined in `20260925110000_bound_client_writes.sql`.
+
+- defines — `20260925110000_bound_client_writes.sql`
+- revokes on — `20260925110000_bound_client_writes.sql`
 
 ### `private.prevent_expense_creator_change`
 
@@ -545,6 +582,14 @@ First defined in `20260831171142_add_financial_connection_boundary.sql`.
 
 - defines — `20260831171142_add_financial_connection_boundary.sql`
 - revokes on — `20260831171142_add_financial_connection_boundary.sql`
+
+### `private.receipt_quota_available`
+
+First defined in `20260925110000_bound_client_writes.sql`.
+
+- defines — `20260925110000_bound_client_writes.sql`
+- grants on — `20260925110000_bound_client_writes.sql`
+- revokes on — `20260925110000_bound_client_writes.sql`
 
 ### `private.validate_connection_account_space`
 
@@ -654,6 +699,9 @@ First defined in `20260831151127_add_secure_household_spaces.sql`.
 - defines — `20260831151127_add_secure_household_spaces.sql`
 - grants on — `20260831151127_add_secure_household_spaces.sql`
 - revokes on — `20260831151127_add_secure_household_spaces.sql`
+- defines — `20260925100000_reject_password_sessions.sql`
+- grants on — `20260925100000_reject_password_sessions.sql`
+- revokes on — `20260925100000_reject_password_sessions.sql`
 
 ### `sync_account_from_balances`
 
@@ -844,6 +892,12 @@ First defined in `20260831161403_add_transaction_review_and_rules.sql`.
 
 - defines — `20260831161403_add_transaction_review_and_rules.sql`
 
+### `feedback_reports_limit`
+
+First defined in `20260925110000_bound_client_writes.sql`.
+
+- defines — `20260925110000_bound_client_writes.sql`
+
 ### `financial_connection_accounts_validate_space`
 
 First defined in `20260831171142_add_financial_connection_boundary.sql`.
@@ -868,6 +922,12 @@ First defined in `20250104165613_remote_schema.sql`.
 First defined in `20260831163506_add_account_funded_goals_and_investable_surplus.sql`.
 
 - defines — `20260831163506_add_account_funded_goals_and_investable_surplus.sql`
+
+### `product_events_limit`
+
+First defined in `20260925110000_bound_client_writes.sql`.
+
+- defines — `20260925110000_bound_client_writes.sql`
 
 ### `recurring_expenses_free_cap`
 
@@ -1076,6 +1136,12 @@ First defined in `20260904165547_optimize_keyset_pagination.sql`.
 First defined in `20260826160000_add_ui_preferences_and_feedback.sql`.
 
 - defines — `20260826160000_add_ui_preferences_and_feedback.sql`
+
+### `feedback_reports_user_created_idx`
+
+First defined in `20260925110000_bound_client_writes.sql`.
+
+- defines — `20260925110000_bound_client_writes.sql`
 
 ### `feedback_reports_user_id_idx`
 
@@ -1297,6 +1363,7 @@ First defined in `20260904113851_share_household_receipts.sql`.
 First defined in `20260904113851_share_household_receipts.sql`.
 
 - defines — `20260904113851_share_household_receipts.sql`
+- defines — `20260925110000_bound_client_writes.sql`
 
 ### `Household can manage account balances`
 
@@ -1418,6 +1485,7 @@ First defined in `20260831151127_add_secure_household_spaces.sql`.
 
 - defines — `20260831151127_add_secure_household_spaces.sql`
 - defines — `20260904120958_optimize_household_policy_and_checkout_window.sql`
+- defines — `20260925100000_reject_password_sessions.sql`
 
 ### `Users can create categories`
 
@@ -1617,6 +1685,7 @@ First defined in `20250104165613_remote_schema.sql`.
 First defined in `20260831151127_add_secure_household_spaces.sql`.
 
 - defines — `20260831151127_add_secure_household_spaces.sql`
+- defines — `20260925100000_reject_password_sessions.sql`
 
 ### `Users can read own categories`
 
@@ -1806,6 +1875,7 @@ First defined in `20250104165613_remote_schema.sql`.
 First defined in `20260719000000_add_subscriptions.sql`.
 
 - defines — `20260719000000_add_subscriptions.sql`
+- defines — `20260925100000_reject_password_sessions.sql`
 
 ### `Users can view their own tags`
 
@@ -1830,6 +1900,7 @@ First defined in `20250104165613_remote_schema.sql`.
 - defines — `20260424000000_add_push_subscriptions.sql`
 - defines — `20260425000000_fix_rls_initplan_performance.sql`
 - defines — `20260430100000_scope_push_subscriptions_policy_to_authenticated.sql`
+- defines — `20260925100000_reject_password_sessions.sql`
 
 ### `financial_connection_accounts_household_select`
 

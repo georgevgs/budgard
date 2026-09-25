@@ -33,6 +33,13 @@ returns true only for the owner or an accepted member whose owner still has
 Pro. Every finance table uses that predicate for reads and writes, with
 additional cross-space checks for foreign keys.
 
+It also returns false for any session whose `amr` claim names `password` or
+`anonymous` (`private.is_passwordless_session()`). Budgard only signs people in
+by email code or link, but Supabase still accepts a password sign-up from the
+anon key, and invitations are matched on the JWT email. A password session is
+therefore one that may belong to someone who never proved the inbox — so it
+can neither see a pending invitation nor accept one, nor read any space.
+
 Receipt objects follow the same boundary. Their first Storage path segment is
 the financial-space owner's UUID, and all four `storage.objects` policies call
 `private.can_access_financial_space()` for that owner. A partner can therefore

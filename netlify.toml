@@ -94,6 +94,10 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+    # Keeps a window this app opens (or one that opens it) from holding a
+    # reference to it. Checkout and the billing portal replace the tab rather
+    # than opening a popup, so nothing here depends on window.opener.
+    Cross-Origin-Opener-Policy = "same-origin"
     # The sha256 hash allows the inline theme-init script in index.html.
     # DO NOT edit it by hand: the script is generated from src/design/tokens.ts
     # and plugins/designTokens.ts rewrites this line on every build. Commit the
@@ -108,7 +112,11 @@
     # required by the self-hosted Tesseract OCR runtime; Chromium blocks
     # WebAssembly.compile without it while Safari/Firefox don't enforce, so
     # missing it would surface as a Chrome/Android-only scan failure.
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-rQ1IPWSEQVhsG568ZPy/q0J2vTYsN8WvQ9/2XqDAOLs=' https://static.cloudflareinsights.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://htamokfphaqudeivpowr.supabase.co https://cloudflareinsights.com https://challenges.cloudflare.com https://*.sentry.io https://api.frankfurter.dev; worker-src 'self' blob:; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self';"
+    # Fonts are self-hosted (src/assets/fonts), so no font CDN is allowed.
+    # frame-ancestors repeats X-Frame-Options for browsers that only honour
+    # CSP. https://*.sentry.io stays a wildcard only because the DSN host is a
+    # build secret; pin it to the project's ingest host when that is known.
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-rQ1IPWSEQVhsG568ZPy/q0J2vTYsN8WvQ9/2XqDAOLs=' https://static.cloudflareinsights.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://htamokfphaqudeivpowr.supabase.co https://cloudflareinsights.com https://challenges.cloudflare.com https://*.sentry.io https://api.frankfurter.dev; worker-src 'self' blob:; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none';"
 
 # no-cache (not no-store): the browser must revalidate, but can reuse the
 # cached body on a 304 and keep the page eligible for back/forward cache.

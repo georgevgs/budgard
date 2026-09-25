@@ -41,7 +41,7 @@ export const pushDeviceApi = {
   },
 };
 
-export const getDeviceSubscription =
+const getDeviceSubscription =
   async (): Promise<PushSubscription | null> => {
     if (!('serviceWorker' in navigator)) {
       return null;

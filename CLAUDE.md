@@ -38,6 +38,16 @@ is **bun**.
   Loosening either alone re-opens the hole the other closes. The ten-device cap
   is paired the same way — a trigger enforces it, and the delivery query
   `.limit()`s to the same number.
+- **Password sessions are refused in two places, in lock-step.** The app only
+  signs in by email code or link, yet Supabase accepts `auth.signUp({ email,
+  password })` from the anon key. `private.is_passwordless_session()` (ANDed
+  into `can_access_financial_space`, the household RPCs and the push,
+  notification and subscription policies) and
+  `supabase/functions/_shared/sessionAssurance.ts` (delete-account, Stripe
+  checkout and portal) refuse any session whose `amr` names `password` or
+  `anonymous`. It is a denylist on purpose: an allowlist that missed one of
+  GoTrue's email methods would lock every user out. `sessionAssurance.test.ts`
+  pins the two lists together.
 - **Supabase queries** live at the feature root (`<feature>Api.ts`) and are
   composed into one `dataService` object by `src/common/api/dataService.ts`.
   A shared module has no feature root, so its queries sit beside `dataService`

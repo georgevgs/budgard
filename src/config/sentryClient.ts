@@ -4,6 +4,7 @@ import {
   captureException,
   setUser,
 } from '@sentry/react';
+import { scrubBreadcrumb, scrubEvent, scrubSpan } from '@/config/sentryScrub';
 
 // A narrow import surface keeps replay/profiling out of the diagnostics
 // download. The heavy integrations remain in their own lazy module.
@@ -14,8 +15,16 @@ export const createSentryClient = () => {
     integrations: [browserTracingIntegration()],
     tracesSampleRate: 0.1,
     profileSessionSampleRate: 0.1,
-    replaysSessionSampleRate: 0.1,
+    // Replays only around an error. Recording a sample of ordinary sessions in
+    // a finance app buys little debugging and is hard to justify to the
+    // people in them; the error buffer is what explains a crash.
+    replaysSessionSampleRate: 0,
     replaysOnErrorSampleRate: 1.0,
+    // Every URL leaves with its path only; see sentryScrub.ts for why.
+    beforeSend: (event) => scrubEvent(event),
+    beforeSendTransaction: (event) => scrubEvent(event),
+    beforeSendSpan: (span) => scrubSpan(span),
+    beforeBreadcrumb: (breadcrumb) => scrubBreadcrumb(breadcrumb),
     ignoreErrors: [
       // Cloudflare Turnstile's bootstrap script triggers `eval` in some paths
       // (mostly older Safari). Our CSP intentionally omits `unsafe-eval`, so the

@@ -77,7 +77,7 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  const targetUrl = event.notification.data?.url || '/';
+  const targetUrl = resolveTargetUrl(event.notification.data?.url);
 
   event.waitUntil(
     self.clients
@@ -96,3 +96,24 @@ self.addEventListener('notificationclick', (event) => {
       })
   );
 });
+
+// Only a same-origin path is a destination. Payloads are encrypted to this
+// device and signed with our VAPID key, so today's sender is trusted; checking
+// here keeps a future sender, or a bug in one, from turning a tap on a
+// notification into a navigation away from the app.
+const resolveTargetUrl = (raw) => {
+  if (typeof raw !== 'string' || raw === '') {
+    return '/';
+  }
+
+  try {
+    const url = new URL(raw, self.location.origin);
+    if (url.origin !== self.location.origin) {
+      return '/';
+    }
+
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return '/';
+  }
+};

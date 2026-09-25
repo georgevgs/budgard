@@ -59,6 +59,9 @@ Thumbs.db
 
 # Supabase
 .supabase
+# CLI link state: project ref, organisation id and pooler user. Rewritten by
+# every `supabase link`, specific to one machine, and not needed to build.
+supabase/.temp/
 
 # Full-project backups contain every user's data and authentication records.
 /.backups/
