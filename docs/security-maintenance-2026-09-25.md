@@ -66,16 +66,10 @@ the other's previous version, so the order did not matter.
 | ---- | ----- |
 | Migrations `20260925100000` to `20260925150000` | Applied to the linked project; history versions match the filenames |
 | Edge Functions `delete-account`, `stripe-checkout`, `stripe-portal`, `send-push-notifications` | Deployed with `verify_jwt` kept (false for the push worker). `stripe-webhook` and `stripe-prices` are unchanged, and no import map changed |
-| Vault secret `send_push_notifications_cron_secret` | Created from the old job's command without the value leaving the database. The migration's job replaced it and no job carries the secret in its command. Rotated after the push worker moved to Vault, to a value generated inside the database; the old one's 3,710 run-history rows in `cron.job_run_details` were deleted |
+| Vault secret `send_push_notifications_cron_secret` | Created from the old job's command without the value leaving the database. The migration's job replaced it and no job carries the secret in its command. Rotated after the push worker moved to Vault, to a value generated inside the database; the old one's 3,710 run-history rows in `cron.job_run_details` were deleted, and so was the function's `CRON_SECRET`, which nothing read any more |
 | Existing password sessions (`auth.mfa_amr_claims`) | Seven, each created and last used on its account's sign-up day: GoTrue's temporary password, not a sign-in. Refused by F1 and left in place |
 | `security_boundaries.sql` on the linked project | Failed at "Password session read receipts" until `20260925140000`, passes after. The receipt-quota case also confirms the quota's definer function can count `storage.objects` |
 | Frontend | Netlify, from `main`, CSP and COOP included |
-
-### Left in place
-
-- `CRON_SECRET` is still set in the Edge Function secrets, holding the old
-  value. Nothing reads it any more, and the value no longer authenticates;
-  removing it (Edge Functions → Secrets) is tidying, not security.
 
 **Confirm email: on** is recommended but no longer load-bearing, because F1
 refuses password sessions regardless. Before turning it on, make sure the
