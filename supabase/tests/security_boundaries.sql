@@ -32,10 +32,24 @@ INSERT INTO storage.objects (bucket_id, name)
   SELECT 'receipts', other_id::text || '/security-fixture.jpg'
   FROM security_test_users;
 
-SELECT set_config('request.jwt.claims', json_build_object(
-  'sub', owner_id, 'role', 'authenticated',
-  'email', owner_id::text || '@example.invalid'
-)::text, true) FROM security_test_users;
+-- A real access token: sub, role, email and the amr entry GoTrue writes for
+-- the method that established the session. Budgard only issues email codes
+-- and links, so 'password' marks a session the app never created.
+CREATE FUNCTION pg_temp.sign_in(p_user_id UUID, p_method TEXT)
+RETURNS TEXT
+LANGUAGE sql
+AS $$
+  SELECT set_config('request.jwt.claims', json_build_object(
+    'sub', p_user_id, 'role', 'authenticated',
+    'email', p_user_id::text || '@example.invalid',
+    'amr', json_build_array(json_build_object(
+      'method', p_method,
+      'timestamp', extract(epoch FROM now())::bigint
+    ))
+  )::text, true);
+$$;
+
+SELECT pg_temp.sign_in(owner_id, 'otp') FROM security_test_users;
 SET LOCAL ROLE authenticated;
 
 DO $$
@@ -147,6 +161,223 @@ BEGIN
   UPDATE storage.objects SET metadata = '{"audit":true}'::jsonb
     WHERE name = other_uuid::text || '/security-fixture.jpg';
   IF FOUND THEN RAISE EXCEPTION 'Cross-user receipt update succeeded'; END IF;
+END;
+$$;
+
+-- A password session for the same account sees none of it. Supabase accepts
+-- auth.signUp({ email, password }) from the anon key even though the app never
+-- calls it, so without this a stranger could pre-register an address.
+-- The other fixture account is used because the owner is at the device cap,
+-- whose trigger would fire before the policy under test.
+RESET ROLE;
+SELECT pg_temp.sign_in(other_id, 'password') FROM security_test_users;
+SET LOCAL ROLE authenticated;
+
+DO $$
+DECLARE
+  other_uuid UUID;
+BEGIN
+  SELECT other_id INTO other_uuid FROM security_test_users;
+
+  IF EXISTS (SELECT 1 FROM public.categories) THEN
+    RAISE EXCEPTION 'Password session read finance rows';
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM storage.objects) THEN
+    RAISE EXCEPTION 'Password session read receipts';
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM public.push_subscriptions) THEN
+    RAISE EXCEPTION 'Password session read push subscriptions';
+  END IF;
+
+  BEGIN
+    INSERT INTO public.categories (user_id, name, type, color, icon)
+    VALUES (other_uuid, 'Password fixture', 'expense', 'primary', 'Tag');
+    RAISE EXCEPTION 'Password session wrote a finance row';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+
+  BEGIN
+    INSERT INTO public.push_subscriptions (user_id, endpoint, p256dh, auth)
+    VALUES (other_uuid, 'https://web.push.apple.com/password-' || other_uuid::text, repeat('B', 87), repeat('A', 22));
+    RAISE EXCEPTION 'Password session registered a push device';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+END;
+$$;
+
+-- Household sharing: the invited address claims the invitation, the partner
+-- reaches the owner's space only while the owner is Pro, and a revoke ends it.
+RESET ROLE;
+CREATE TEMP TABLE security_test_household AS
+  SELECT gen_random_uuid() AS stranger_id, NULL::UUID AS invite_token;
+GRANT SELECT, UPDATE ON security_test_household TO authenticated;
+
+INSERT INTO auth.users (id, email)
+  SELECT stranger_id, stranger_id::text || '@example.invalid'
+  FROM security_test_household;
+
+INSERT INTO public.subscriptions (
+  user_id, stripe_subscription_id, stripe_customer_id, stripe_price_id, status
+)
+  SELECT owner_id, 'sub_security_fixture', 'cus_security_fixture',
+         'price_security_fixture', 'active'
+  FROM security_test_users;
+
+SELECT pg_temp.sign_in(owner_id, 'otp') FROM security_test_users;
+SET LOCAL ROLE authenticated;
+
+UPDATE security_test_household
+SET invite_token = (
+  SELECT share.invite_token
+  FROM public.create_household_invite(
+    (SELECT other_id::text || '@example.invalid' FROM security_test_users)
+  ) AS share
+);
+
+RESET ROLE;
+SELECT pg_temp.sign_in(other_id, 'password') FROM security_test_users;
+SET LOCAL ROLE authenticated;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM public.household_shares) THEN
+    RAISE EXCEPTION 'Password session saw a household invitation';
+  END IF;
+
+  BEGIN
+    PERFORM public.accept_household_invite(
+      (SELECT invite_token FROM security_test_household)
+    );
+    RAISE EXCEPTION 'Password session accepted a household invitation';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+END;
+$$;
+
+RESET ROLE;
+SELECT pg_temp.sign_in(stranger_id, 'otp') FROM security_test_household;
+SET LOCAL ROLE authenticated;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM public.household_shares) THEN
+    RAISE EXCEPTION 'A stranger saw another address''s invitation';
+  END IF;
+
+  BEGIN
+    PERFORM public.accept_household_invite(
+      (SELECT invite_token FROM security_test_household)
+    );
+    RAISE EXCEPTION 'A stranger accepted another address''s invitation';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+END;
+$$;
+
+RESET ROLE;
+SELECT pg_temp.sign_in(other_id, 'otp') FROM security_test_users;
+SET LOCAL ROLE authenticated;
+
+DO $$
+DECLARE
+  owner_uuid UUID;
+  other_uuid UUID;
+BEGIN
+  SELECT owner_id, other_id INTO owner_uuid, other_uuid FROM security_test_users;
+
+  IF NOT EXISTS (SELECT 1 FROM public.household_shares WHERE status = 'pending') THEN
+    RAISE EXCEPTION 'The invited address could not see its invitation';
+  END IF;
+
+  PERFORM public.accept_household_invite(
+    (SELECT invite_token FROM security_test_household)
+  );
+
+  IF NOT EXISTS (SELECT 1 FROM public.categories WHERE user_id = owner_uuid) THEN
+    RAISE EXCEPTION 'An accepted partner could not read the shared space';
+  END IF;
+
+  INSERT INTO public.expenses (user_id, amount, description, date)
+  VALUES (owner_uuid, 1, 'Partner fixture', CURRENT_DATE);
+
+  BEGIN
+    INSERT INTO public.expenses (user_id, amount, description, date, created_by)
+    VALUES (owner_uuid, 1, 'Forged creator fixture', CURRENT_DATE, owner_uuid);
+    RAISE EXCEPTION 'A partner recorded an expense as the owner';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+
+  BEGIN
+    UPDATE public.expenses SET created_by = owner_uuid
+    WHERE user_id = owner_uuid AND created_by = other_uuid;
+    RAISE EXCEPTION 'A partner rewrote an expense creator';
+  EXCEPTION WHEN check_violation THEN NULL;
+  END;
+END;
+$$;
+
+RESET ROLE;
+SELECT pg_temp.sign_in(other_id, 'password') FROM security_test_users;
+SET LOCAL ROLE authenticated;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM public.categories
+    WHERE user_id = (SELECT owner_id FROM security_test_users)
+  ) THEN
+    RAISE EXCEPTION 'A partner password session read the shared space';
+  END IF;
+END;
+$$;
+
+RESET ROLE;
+UPDATE public.subscriptions SET status = 'canceled'
+WHERE user_id = (SELECT owner_id FROM security_test_users);
+SELECT pg_temp.sign_in(other_id, 'otp') FROM security_test_users;
+SET LOCAL ROLE authenticated;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM public.categories
+    WHERE user_id = (SELECT owner_id FROM security_test_users)
+  ) THEN
+    RAISE EXCEPTION 'A partner kept access after the owner lost Pro';
+  END IF;
+END;
+$$;
+
+RESET ROLE;
+UPDATE public.subscriptions SET status = 'active'
+WHERE user_id = (SELECT owner_id FROM security_test_users);
+SELECT pg_temp.sign_in(owner_id, 'otp') FROM security_test_users;
+SET LOCAL ROLE authenticated;
+
+SELECT public.revoke_household_share();
+
+RESET ROLE;
+SELECT pg_temp.sign_in(other_id, 'otp') FROM security_test_users;
+SET LOCAL ROLE authenticated;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM public.categories
+    WHERE user_id = (SELECT owner_id FROM security_test_users)
+  ) THEN
+    RAISE EXCEPTION 'A partner kept access after a revoke';
+  END IF;
+
+  BEGIN
+    PERFORM public.accept_household_invite(
+      (SELECT invite_token FROM security_test_household)
+    );
+    RAISE EXCEPTION 'A revoked invitation token was accepted again';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
 END;
 $$;
 

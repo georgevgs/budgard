@@ -52,6 +52,18 @@ describe('mutating Edge Function boundaries', () => {
     },
   );
 
+  it.each(['delete-account', 'stripe-checkout', 'stripe-portal'])(
+    '%s refuses password sessions',
+    (name) => {
+      const source = readFunction(name);
+
+      expect(source).toContain("from '../_shared/sessionAssurance.ts'");
+      expect(source).toMatch(
+        /if \(!(isPasswordlessSession|isRecentlyAuthenticated)\(authHeader/,
+      );
+    },
+  );
+
   it('does not create checkout when the subscription lookup fails', () => {
     const source = readFunction('stripe-checkout');
 

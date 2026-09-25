@@ -1,5 +1,6 @@
 import { createClient } from 'supabase';
 import { corsHeadersFor, jsonResponder } from '../_shared/cors.ts';
+import { isPasswordlessSession } from '../_shared/sessionAssurance.ts';
 import {
   resolveStripeCustomerReference,
   type StripeCustomerReference,
@@ -55,6 +56,12 @@ Deno.serve(async (req) => {
     } = await userClient.auth.getUser();
     if (userError || !user) {
       return jsonResponse({ error: 'Unauthorized' }, 401);
+    }
+
+    // Budgard never issues password sessions; one here was registered through
+    // the raw auth API against an address its holder may not control.
+    if (!isPasswordlessSession(authHeader)) {
+      return jsonResponse({ error: 'reauth_required' }, 403);
     }
 
     const plan = await readPlan(req);
