@@ -52,13 +52,15 @@ describe('createCheckout', () => {
 
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ url: 'https://checkout.example/abc' }),
+      json: async () => ({
+        url: 'https://checkout.stripe.com/c/pay/cs_test_abc',
+      }),
     });
     vi.stubGlobal('fetch', fetchMock);
 
     const url = await subscriptionService.createCheckout('yearly');
 
-    expect(url).toBe('https://checkout.example/abc');
+    expect(url).toBe('https://checkout.stripe.com/c/pay/cs_test_abc');
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringContaining('/functions/v1/stripe-checkout'),
       expect.objectContaining({
@@ -111,13 +113,15 @@ describe('createPortalSession', () => {
 
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ url: 'https://portal.example/session' }),
+      json: async () => ({
+        url: 'https://billing.stripe.com/p/session/test_abc',
+      }),
     });
     vi.stubGlobal('fetch', fetchMock);
 
     const url = await subscriptionService.createPortalSession();
 
-    expect(url).toBe('https://portal.example/session');
+    expect(url).toBe('https://billing.stripe.com/p/session/test_abc');
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringContaining('/functions/v1/stripe-portal'),
       expect.objectContaining({
@@ -137,6 +141,29 @@ describe('createPortalSession', () => {
 
     await expect(subscriptionService.createPortalSession()).rejects.toThrow(
       'Not authenticated',
+    );
+  });
+});
+
+describe('billing redirect guard', () => {
+  it.each([
+    'http://checkout.stripe.com/c/pay/cs_test_abc',
+    'https://checkout.stripe.com.attacker.example/pay',
+    'https://attacker.example/?next=https://checkout.stripe.com',
+    'javascript:alert(1)',
+    'not a url',
+  ])('refuses to hand the tab to %s', async (url) => {
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: { access_token: 'jwt-token' } },
+      error: null,
+    } as never);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, json: async () => ({ url }) }),
+    );
+
+    await expect(subscriptionService.createCheckout('monthly')).rejects.toThrow(
+      'Failed to start checkout',
     );
   });
 });

@@ -69,7 +69,116 @@ export const cancelStripeSubscription = async ({
   throw new Error(`Stripe cancellation failed with status ${response.status}`);
 };
 
+type ListLiveSubscriptionsArgs = {
+  customerReference: StripeCustomerReference;
+  secretKey: string;
+  fetcher?: StripeFetch;
+};
+
+// A customer page holds at most 100; ten pages is far past anyone's history
+// and keeps a malformed has_more from looping forever.
+const MAX_LIST_PAGES = 10;
+
+// Every subscription Stripe could still charge this customer for, not only the
+// one the subscriptions row points at. The row is one-per-user, so a second
+// subscription opened beside an unpaid or paused one is invisible to it, and
+// deleting the account would leave that one billing a person with no account.
+//
+// Null when Stripe rejects the query itself (400): that is permanent, and it
+// must not block deletion forever — the caller still cancels the known one.
+// Any other failure throws, so a transient outage keeps the account intact
+// and the deletion retryable.
+export const listLiveStripeSubscriptions = async ({
+  customerReference,
+  secretKey,
+  fetcher = fetch,
+}: ListLiveSubscriptionsArgs): Promise<string[] | null> => {
+  const liveIds: string[] = [];
+  let startingAfter: string | null = null;
+
+  for (let page = 0; page < MAX_LIST_PAGES; page += 1) {
+    const response = await fetcher(
+      buildListUrl(customerReference, startingAfter),
+      { method: 'GET', headers: stripeHeaders(secretKey) },
+    );
+    if (response.status === 400) {
+      return null;
+    }
+    if (!response.ok) {
+      throw new Error(
+        `Stripe subscription listing failed with status ${response.status}`,
+      );
+    }
+
+    const { subscriptions, hasMore } = readSubscriptionPage(
+      await response.json(),
+    );
+    liveIds.push(
+      ...subscriptions
+        .filter((subscription) =>
+          shouldCancelStripeSubscription(subscription.status),
+        )
+        .map((subscription) => subscription.id),
+    );
+
+    const last = subscriptions[subscriptions.length - 1];
+    if (!hasMore || !last) {
+      return liveIds;
+    }
+    startingAfter = last.id;
+  }
+
+  return liveIds;
+};
+
 // --- Helpers ---
+
+type ListedSubscription = { id: string; status: string };
+
+const buildListUrl = (
+  customerReference: StripeCustomerReference,
+  startingAfter: string | null,
+): string => {
+  const params = new URLSearchParams({ status: 'all', limit: '100' });
+  params.set(customerReference.parameter, customerReference.id);
+  if (startingAfter) {
+    params.set('starting_after', startingAfter);
+  }
+
+  return `${STRIPE_API_BASE}/subscriptions?${params}`;
+};
+
+const readSubscriptionPage = (
+  body: unknown,
+): { subscriptions: ListedSubscription[]; hasMore: boolean } => {
+  if (!body || typeof body !== 'object' || !('data' in body)) {
+    throw new Error('Unexpected Stripe subscription list payload');
+  }
+
+  const { data } = body as { data: unknown };
+  if (!Array.isArray(data)) {
+    throw new Error('Unexpected Stripe subscription list payload');
+  }
+
+  const subscriptions = data.filter(isListedSubscription);
+  const hasMore = 'has_more' in body && body.has_more === true;
+
+  return { subscriptions, hasMore };
+};
+
+const isListedSubscription = (value: unknown): value is ListedSubscription => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as { id?: unknown; status?: unknown };
+
+  return (
+    typeof candidate.id === 'string' &&
+    candidate.id.startsWith('sub_') &&
+    typeof candidate.status === 'string'
+  );
+};
 
 const stripeHeaders = (secretKey: string): HeadersInit => ({
   Authorization: `Bearer ${secretKey}`,

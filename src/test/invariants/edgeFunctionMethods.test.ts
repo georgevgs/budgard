@@ -64,6 +64,15 @@ describe('mutating Edge Function boundaries', () => {
     },
   );
 
+  it('sends unpaid and paused subscribers to the portal instead of a second checkout', () => {
+    const source = readFunction('stripe-checkout');
+
+    expect(source).toContain(
+      "const RESUMABLE_STATUSES = ['unpaid', 'paused'];",
+    );
+    expect(source).toContain("{ error: 'manage_billing' }, 409");
+  });
+
   it('does not create checkout when the subscription lookup fails', () => {
     const source = readFunction('stripe-checkout');
 
@@ -84,6 +93,9 @@ describe('mutating Edge Function boundaries', () => {
 
     expect(source).toContain('runAccountDeletion({');
     expect(source).toContain('cancelStripeSubscription({');
-    expect(source).toContain(".select('stripe_subscription_id, status')");
+    expect(source).toContain(
+      ".select('stripe_subscription_id, stripe_customer_id, status')",
+    );
+    expect(source).toContain('listLiveStripeSubscriptions({');
   });
 });

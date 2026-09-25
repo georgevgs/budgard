@@ -23,6 +23,12 @@ type Plan = 'monthly' | 'yearly';
 // second Stripe subscription and a double charge.
 const ACTIVE_STATUSES = ['trialing', 'active', 'past_due'];
 
+// Still live in Stripe and resumable once paid or unpaused, but not Pro. A new
+// Checkout here would open a second subscription beside the first — and the
+// subscriptions row, one per user, can only track one of them. The portal is
+// where these get settled.
+const RESUMABLE_STATUSES = ['unpaid', 'paused'];
+
 // First-time subscribers get a free trial; anyone with a subscription row —
 // whatever its status — has already had one.
 const TRIAL_PERIOD_DAYS = 7;
@@ -103,6 +109,9 @@ Deno.serve(async (req) => {
     }
     if (existing && ACTIVE_STATUSES.includes(existing.status)) {
       return jsonResponse({ error: 'Already subscribed' }, 409);
+    }
+    if (existing && RESUMABLE_STATUSES.includes(existing.status)) {
+      return jsonResponse({ error: 'manage_billing' }, 409);
     }
 
     const customerReference = resolveStripeCustomerReference(

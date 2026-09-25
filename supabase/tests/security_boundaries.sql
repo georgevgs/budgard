@@ -6,7 +6,7 @@ SET LOCAL lock_timeout = '3s';
 
 CREATE TEMP TABLE security_test_users AS
   SELECT gen_random_uuid() AS owner_id, gen_random_uuid() AS other_id;
-GRANT SELECT ON security_test_users TO authenticated;
+GRANT SELECT ON security_test_users TO authenticated, service_role;
 
 INSERT INTO auth.users (id, email)
   SELECT owner_id, owner_id::text || '@example.invalid' FROM security_test_users
@@ -457,6 +457,83 @@ BEGIN
     RAISE EXCEPTION 'Receipt byte ceiling was bypassed';
   EXCEPTION WHEN insufficient_privilege THEN NULL;
   END;
+END;
+$$;
+
+-- Billing mirror: only the webhook's service role writes it, and a stale event
+-- about a second subscription cannot knock the live one out of the row.
+DO $$
+BEGIN
+  BEGIN
+    PERFORM public.apply_subscription_event(
+      (SELECT other_id FROM security_test_users), 'sub_forged', 'cus_forged',
+      'price_forged', 'active', false, NULL, NULL, NULL, true, now()
+    );
+    RAISE EXCEPTION 'A client wrote its own subscription';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+END;
+$$;
+
+RESET ROLE;
+SET LOCAL ROLE service_role;
+
+DO $$
+DECLARE
+  other_uuid UUID;
+  row_subscription TEXT;
+  row_status TEXT;
+BEGIN
+  SELECT other_id INTO other_uuid FROM security_test_users;
+
+  PERFORM public.apply_subscription_event(
+    other_uuid, 'sub_old_fixture', 'cus_fixture', 'price_fixture', 'unpaid',
+    false, NULL, NULL, NULL, true, now() - INTERVAL '3 hours'
+  );
+  PERFORM public.apply_subscription_event(
+    other_uuid, 'sub_new_fixture', 'cus_fixture', 'price_fixture', 'active',
+    false, NULL, NULL, NULL, true, now() - INTERVAL '2 hours'
+  );
+  PERFORM public.apply_subscription_event(
+    other_uuid, 'sub_old_fixture', 'cus_fixture', 'price_fixture', 'canceled',
+    false, NULL, NULL, NULL, true, now() - INTERVAL '1 hour'
+  );
+
+  SELECT stripe_subscription_id, status INTO row_subscription, row_status
+  FROM public.subscriptions WHERE user_id = other_uuid;
+  IF row_subscription <> 'sub_new_fixture' OR row_status <> 'active' THEN
+    RAISE EXCEPTION 'A second subscription''s cancellation downgraded the live one';
+  END IF;
+
+  PERFORM public.apply_subscription_event(
+    other_uuid, 'sub_new_fixture', 'cus_fixture', 'price_fixture', 'active',
+    false, NULL, NULL, NULL, true, now() - INTERVAL '90 minutes'
+  );
+  PERFORM public.apply_subscription_event(
+    other_uuid, 'sub_new_fixture', 'cus_fixture', 'price_fixture', 'canceled',
+    false, NULL, NULL, NULL, true, now()
+  );
+  PERFORM public.apply_subscription_event(
+    other_uuid, 'sub_new_fixture', 'cus_fixture', 'price_fixture', 'active',
+    false, NULL, NULL, NULL, true, now() - INTERVAL '30 minutes'
+  );
+
+  SELECT status INTO row_status
+  FROM public.subscriptions WHERE user_id = other_uuid;
+  IF row_status <> 'canceled' THEN
+    RAISE EXCEPTION 'An older event re-granted a canceled subscription';
+  END IF;
+
+  PERFORM public.apply_subscription_event(
+    other_uuid, 'sub_next_fixture', 'cus_fixture', 'price_fixture', 'incomplete',
+    false, NULL, NULL, NULL, true, now() + INTERVAL '1 minute'
+  );
+
+  SELECT stripe_subscription_id INTO row_subscription
+  FROM public.subscriptions WHERE user_id = other_uuid;
+  IF row_subscription <> 'sub_next_fixture' THEN
+    RAISE EXCEPTION 'A new subscription could not replace an ended one';
+  END IF;
 END;
 $$;
 

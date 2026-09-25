@@ -94,7 +94,7 @@ export const mockSupabase = async (
     json(route, {}),
   );
   await page.route('https://e2e.supabase.co/functions/v1/**', (route) =>
-    json(route, { url: 'https://checkout.stripe.test/session' }),
+    json(route, { url: 'https://checkout.stripe.com/c/pay/cs_test_e2e' }),
   );
   // Third-party scripts the app loads but which have nothing to do with the
   // behaviour under test. Blocked so the suite never depends on the network.

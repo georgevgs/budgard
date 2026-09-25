@@ -3,7 +3,11 @@ import { runAccountDeletion } from '../_shared/accountDeletion.ts';
 import { corsHeadersFor } from '../_shared/cors.ts';
 import { isRecentlyAuthenticated } from '../_shared/sessionAssurance.ts';
 import { emptyStorageFolder } from '../_shared/storageCleanup.ts';
-import { cancelStripeSubscription } from '../_shared/stripeBilling.ts';
+import {
+  cancelStripeSubscription,
+  listLiveStripeSubscriptions,
+  resolveStripeCustomerReference,
+} from '../_shared/stripeBilling.ts';
 
 Deno.serve(async (req) => {
   const corsHeaders = corsHeadersFor(req);
@@ -90,7 +94,7 @@ Deno.serve(async (req) => {
       loadSubscription: async () => {
         const { data, error } = await adminClient
           .from('subscriptions')
-          .select('stripe_subscription_id, status')
+          .select('stripe_subscription_id, stripe_customer_id, status')
           .eq('user_id', user.id)
           .maybeSingle();
         if (error) {
@@ -98,6 +102,23 @@ Deno.serve(async (req) => {
         }
 
         return data;
+      },
+      // The row tracks one subscription per user; the customer can hold more.
+      listLiveSubscriptions: async (subscription) => {
+        const customerReference = resolveStripeCustomerReference(
+          subscription.stripe_customer_id,
+        );
+        if (!customerReference) {
+          return null;
+        }
+        if (!stripeSecretKey) {
+          throw new Error('Stripe billing is not configured');
+        }
+
+        return listLiveStripeSubscriptions({
+          customerReference,
+          secretKey: stripeSecretKey,
+        });
       },
       // Immediate cancellation prevents another renewal after the account and
       // its billing portal are gone. The helper verifies already-canceled

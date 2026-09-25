@@ -16,7 +16,7 @@ import type { TranslateFunction } from '@/constants/translate';
 export const UpgradeDialog = () => {
   const { t } = useTranslation();
   const { isUpgradeOpen, closeUpgrade, preferredPlan } = useUpgradeDialog();
-  const { subscription, startCheckout } = useSubscription();
+  const { subscription, startCheckout, startPortal } = useSubscription();
 
   // No subscription row means the user never subscribed — the server gives
   // first-timers a free trial, so the CTA should say so. The server is the
@@ -52,7 +52,7 @@ export const UpgradeDialog = () => {
   const handleCheckout = async () => {
     setIsRedirecting(true);
     try {
-      const url = await startCheckout(plan);
+      const url = await resolveCheckoutUrl(plan, startCheckout, startPortal);
       window.location.assign(url);
     } catch {
       toast({ variant: 'destructive', title: t('pro.checkoutError') });
@@ -88,6 +88,25 @@ export const UpgradeDialog = () => {
       </DialogContent>
     </Dialog>
   );
+};
+
+// An unpaid or paused subscription is still live in Stripe, and checkout
+// refuses to open a second one beside it (`manage_billing`). The portal is
+// where it gets paid or resumed, so that is where the button leads instead.
+const resolveCheckoutUrl = async (
+  plan: CheckoutPlan,
+  startCheckout: (plan: CheckoutPlan) => Promise<string>,
+  startPortal: () => Promise<string>,
+): Promise<string> => {
+  try {
+    return await startCheckout(plan);
+  } catch (error) {
+    if (error instanceof Error && error.message === 'manage_billing') {
+      return startPortal();
+    }
+
+    throw error;
+  }
 };
 
 const renderCtaLabel = (

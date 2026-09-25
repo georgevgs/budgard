@@ -5,6 +5,7 @@ import { UpgradeDialog } from '@/common/components/pro/UpgradeDialog';
 import type { Subscription } from '@/types/Subscription';
 
 const startCheckoutMock = vi.fn();
+const startPortalMock = vi.fn();
 const closeUpgradeMock = vi.fn();
 
 // null = never subscribed (trial-eligible); any row means no trial CTA.
@@ -25,6 +26,7 @@ vi.mock('@/common/contexts/SubscriptionContext', () => ({
     isLoading: false,
     refresh: vi.fn(),
     startCheckout: startCheckoutMock,
+    startPortal: startPortalMock,
   }),
 }));
 
@@ -105,6 +107,35 @@ describe('UpgradeDialog', () => {
     await waitFor(() => {
       expect(startCheckoutMock).toHaveBeenCalledWith('monthly');
     });
+  });
+
+  it('sends an unpaid or paused subscriber to the billing portal instead', async () => {
+    startCheckoutMock.mockRejectedValue(new Error('manage_billing'));
+    startPortalMock.mockResolvedValue(
+      'https://billing.stripe.com/p/session/test',
+    );
+    renderDialog();
+
+    fireEvent.click(screen.getByText('pro.trialCta'));
+
+    await waitFor(() => {
+      expect(window.location.assign).toHaveBeenCalledWith(
+        'https://billing.stripe.com/p/session/test',
+      );
+    });
+  });
+
+  it('does not open the portal for any other checkout failure', async () => {
+    startCheckoutMock.mockRejectedValue(new Error('Failed to start checkout'));
+    startPortalMock.mockClear();
+    renderDialog();
+
+    fireEvent.click(screen.getByText('pro.trialCta'));
+
+    await waitFor(() => {
+      expect(startCheckoutMock).toHaveBeenCalled();
+    });
+    expect(startPortalMock).not.toHaveBeenCalled();
   });
 
   it('lists the full Pro feature set including early access', () => {

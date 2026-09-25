@@ -67,7 +67,27 @@ const callStripeFunction = async (
     throw new Error(errorData?.error || fallbackError);
   }
 
-  const { url } = (await response.json()) as { url: string };
+  const { url } = (await response.json()) as { url: unknown };
+  if (!isStripeHostedUrl(url)) {
+    throw new Error(fallbackError);
+  }
 
   return url;
+};
+
+// Both flows hand the whole tab to the returned URL. Only a Stripe-hosted page
+// is ever a legitimate destination, so anything else — a misconfigured
+// function, a tampered response — stops here instead of navigating.
+const isStripeHostedUrl = (url: unknown): url is string => {
+  if (typeof url !== 'string') {
+    return false;
+  }
+
+  try {
+    const { protocol, hostname } = new URL(url);
+
+    return protocol === 'https:' && hostname.endsWith('.stripe.com');
+  } catch {
+    return false;
+  }
 };
