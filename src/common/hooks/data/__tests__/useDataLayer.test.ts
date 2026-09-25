@@ -386,7 +386,8 @@ describe('useDataLayer boot fetch', () => {
     expect(svc.getCategories).not.toHaveBeenCalled();
   });
 
-  it('marks history loaded even when the tail fails to arrive', async () => {
+  it('marks a failed history load and clears the error after retry', async () => {
+    let hasFailed = false;
     svc.getExpenses = vi.fn(
       async (
         _ownerId?: unknown,
@@ -394,7 +395,14 @@ describe('useDataLayer boot fetch', () => {
         _since?: unknown,
         before?: unknown,
       ) => {
-        if (before !== undefined) throw new Error('tail down');
+        if (before !== undefined) {
+          if (!hasFailed) {
+            hasFailed = true;
+            throw new Error('tail down');
+          }
+
+          return olderExpenses;
+        }
 
         return [{ id: 'e-recent', date: '2026-08-01' }];
       },
@@ -407,8 +415,16 @@ describe('useDataLayer boot fetch', () => {
       await result.current.actions.loadHistory();
     });
 
-    // Screens must fall back to their empty state rather than wait forever.
     expect(result.current.config.isHistoryLoaded).toBe(true);
+    expect(result.current.config.hasHistoryLoadError).toBe(true);
+
+    await act(async () => {
+      await result.current.actions.loadHistory();
+    });
+
+    expect(result.current.config.isHistoryLoaded).toBe(true);
+    expect(result.current.config.hasHistoryLoadError).toBe(false);
+    expect(result.current.expenses.map((row) => row.id)).toContain('e-old');
   });
 
   it('keeps a routine expense refresh inside the recent window', async () => {

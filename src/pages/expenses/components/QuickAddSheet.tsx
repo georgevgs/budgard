@@ -146,25 +146,40 @@ const renderActions = (
   receiptOptions: ReceiptOptions | undefined,
   t: TranslateFunction,
 ) => (
-  <div className="mt-4 flex items-center gap-3">
-    <Button
-      type="button"
-      variant="ghost"
-      className="shrink-0 text-muted-foreground"
-      onClick={onMoreDetails}
-    >
-      {t('expenses.quickAdd.moreDetails')}
-    </Button>
-    <Button
-      type="button"
-      className="flex-1 rounded-full"
-      disabled={!draft.canSave}
-      onClick={() => draft.submit(receiptOptions)}
-    >
-      {t('common.save')}
-    </Button>
+  <div className="mt-4">
+    {renderSaveHint(draft.pad.isEmpty, t)}
+    <div className="flex items-center gap-3">
+      <Button
+        type="button"
+        variant="ghost"
+        className="shrink-0 text-muted-foreground"
+        onClick={onMoreDetails}
+      >
+        {t('expenses.quickAdd.moreDetails')}
+      </Button>
+      <Button
+        type="button"
+        className="flex-1 rounded-full"
+        disabled={!draft.canSave}
+        onClick={() => draft.submit(receiptOptions)}
+      >
+        {t('common.save')}
+      </Button>
+    </div>
   </div>
 );
+
+const renderSaveHint = (isAmountEmpty: boolean, t: TranslateFunction) => {
+  if (!isAmountEmpty) {
+    return null;
+  }
+
+  return (
+    <p className="mb-2 text-center text-xs text-muted-foreground">
+      {t('expenses.quickAdd.saveHint')}
+    </p>
+  );
+};
 
 const openFullForm = (
   draft: ExpenseWritePayload,

@@ -49,10 +49,10 @@ export type DataState = {
   // background refetch, so /goals, /networth and /debts don't blank on a
   // foreground visibility refresh.
   isSecondaryLoaded: boolean;
-  // Sticky in the same way: once the pre-cutoff tail is in state it stays for
-  // the session, so a refetch never re-opens the "loading older transactions"
-  // placeholder.
+  // Settles after the pre-cutoff request succeeds or fails. The separate
+  // error flag keeps a failed request from masquerading as an empty history.
   isHistoryLoaded: boolean;
+  hasHistoryLoadError: boolean;
 };
 
 // Every collection empty, every scalar at its default. This is also the
@@ -81,6 +81,7 @@ export const EMPTY_DATA: DataState = {
   isInitialized: false,
   isSecondaryLoaded: false,
   isHistoryLoaded: false,
+  hasHistoryLoadError: false,
 };
 
 // A value or an updater, matching what a useState setter accepts — the
@@ -202,9 +203,16 @@ const legacyOptionalDomains = (snapshot: DataSnapshot): string[] => {
 // fields at the call site removes the last place the field list was written
 // out by hand.
 export const toSnapshot = (state: DataState): DataSnapshot => {
-  const { isInitialized, isSecondaryLoaded, isHistoryLoaded, ...data } = state;
+  const {
+    isInitialized,
+    isSecondaryLoaded,
+    isHistoryLoaded,
+    hasHistoryLoadError,
+    ...data
+  } = state;
   void isInitialized;
   void isHistoryLoaded;
+  void hasHistoryLoadError;
 
   return { ...data, secondaryLoaded: isSecondaryLoaded };
 };
@@ -255,4 +263,6 @@ export const createSetters = (
     dispatch({ type: 'set', key: 'isSecondaryLoaded', value }),
   setIsHistoryLoaded: (value) =>
     dispatch({ type: 'set', key: 'isHistoryLoaded', value }),
+  setHasHistoryLoadError: (value) =>
+    dispatch({ type: 'set', key: 'hasHistoryLoadError', value }),
 });

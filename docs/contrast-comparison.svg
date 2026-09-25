@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-labelledby="title description">
+  <title id="title">Budgard orange contrast comparison</title>
+  <desc id="description">Three examples show the current orange with white text, the existing Increase Contrast orange with white text, and brand orange with dark text.</desc>
+  <rect width="1200" height="520" fill="#ffffff"/>
+  <text x="30" y="42" fill="#171717" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="700">Orange fill and label options</text>
+  <text x="30" y="70" fill="#6b6b6b" font-family="Inter,Arial,sans-serif" font-size="14">Representative Today slab and small Save control · light theme</text>
+
+  <g font-family="Inter,Arial,sans-serif">
+    <text x="30" y="112" fill="#171717" font-size="16" font-weight="700">Current</text>
+    <text x="30" y="134" fill="#6b6b6b" font-size="13">#ff8300 + white · 2.47:1</text>
+    <rect x="30" y="155" width="360" height="230" rx="26" fill="#ff8300"/>
+    <text x="54" y="194" fill="#ffffff" font-size="12" font-weight="700" letter-spacing="2">SAFE TO SPEND</text>
+    <text x="54" y="278" fill="#ffffff" font-size="56" font-weight="800">€1,183.50</text>
+    <text x="54" y="330" fill="#ffffff" font-size="16" font-weight="600">€169.07 a day for 7 days</text>
+    <rect x="30" y="405" width="360" height="55" rx="22" fill="#ff8300"/>
+    <text x="210" y="439" fill="#ffffff" font-size="16" font-weight="700" text-anchor="middle">Save expense</text>
+
+    <text x="420" y="112" fill="#171717" font-size="16" font-weight="700">Existing Increase Contrast</text>
+    <text x="420" y="134" fill="#6b6b6b" font-size="13">#a84600 + white · 5.91:1</text>
+    <rect x="420" y="155" width="360" height="230" rx="26" fill="#a84600"/>
+    <text x="444" y="194" fill="#ffffff" font-size="12" font-weight="700" letter-spacing="2">SAFE TO SPEND</text>
+    <text x="444" y="278" fill="#ffffff" font-size="56" font-weight="800">€1,183.50</text>
+    <text x="444" y="330" fill="#ffffff" font-size="16" font-weight="600">€169.07 a day for 7 days</text>
+    <rect x="420" y="405" width="360" height="55" rx="22" fill="#a84600"/>
+    <text x="600" y="439" fill="#ffffff" font-size="16" font-weight="700" text-anchor="middle">Save expense</text>
+
+    <text x="810" y="112" fill="#171717" font-size="16" font-weight="700">Dark text on brand orange</text>
+    <text x="810" y="134" fill="#6b6b6b" font-size="13">#ff8300 + #171717 · 7.25:1</text>
+    <rect x="810" y="155" width="360" height="230" rx="26" fill="#ff8300"/>
+    <text x="834" y="194" fill="#171717" font-size="12" font-weight="700" letter-spacing="2">SAFE TO SPEND</text>
+    <text x="834" y="278" fill="#171717" font-size="56" font-weight="800">€1,183.50</text>
+    <text x="834" y="330" fill="#171717" font-size="16" font-weight="600">€169.07 a day for 7 days</text>
+    <rect x="810" y="405" width="360" height="55" rx="22" fill="#ff8300"/>
+    <text x="990" y="439" fill="#171717" font-size="16" font-weight="700" text-anchor="middle">Save expense</text>
+  </g>
+  <text x="30" y="495" fill="#6b6b6b" font-family="Inter,Arial,sans-serif" font-size="12">Contrast values use src/design/contrast.ts. Color comparison only; this is not a production screen.</text>
+</svg>

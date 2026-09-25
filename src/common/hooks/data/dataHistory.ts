@@ -21,6 +21,8 @@ export const loadHistory = async (session: DataSession): Promise<void> => {
   if (session.historyLoad) {
     return session.historyLoad;
   }
+  session.setters.setIsHistoryLoaded(false);
+  session.setters.setHasHistoryLoadError(false);
   session.historyController?.abort();
   const controller = new AbortController();
   session.historyController = controller;
@@ -50,6 +52,7 @@ const fetchHistoryTopUp = async (
       return;
     }
     session.isHistoryLoaded = true;
+    setters.setHasHistoryLoadError(false);
     setters.setIsHistoryLoaded(true);
     // Concurrent mutations may already have inserted some of these rows.
     setters.setExpenses((prev) => mergeUniqueById(prev, expenses));
@@ -58,7 +61,8 @@ const fetchHistoryTopUp = async (
     if (signal.aborted || isAbortError(error) || isExpiredJwtError(error)) {
       return;
     }
-    // Let screens leave their loading state; a later request can still retry.
+    // Let screens leave their loading state without claiming the tail is empty.
+    setters.setHasHistoryLoadError(true);
     setters.setIsHistoryLoaded(true);
     captureException(error, { tags: { context: 'fetchOlderTransactions' } });
   }

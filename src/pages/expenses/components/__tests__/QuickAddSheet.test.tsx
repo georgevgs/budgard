@@ -132,6 +132,28 @@ beforeEach(() => {
 });
 
 describe('components/expenses/QuickAddSheet', () => {
+  it('keeps the name label visible after typing', () => {
+    renderSheet();
+
+    expect(screen.getByText('expenses.quickAdd.nameLabel')).toHaveAttribute(
+      'for',
+      nameField().id,
+    );
+    fireEvent.change(nameField(), { target: { value: 'Lunch' } });
+    expect(screen.getByText('expenses.quickAdd.nameLabel')).toBeVisible();
+  });
+
+  it('explains why Save is unavailable until an amount is entered', () => {
+    renderSheet();
+
+    expect(screen.getByRole('button', { name: 'common.save' })).toBeDisabled();
+    expect(screen.getByText('expenses.quickAdd.saveHint')).toBeVisible();
+
+    typeAmount();
+    expect(screen.getByRole('button', { name: 'common.save' })).toBeEnabled();
+    expect(screen.queryByText('expenses.quickAdd.saveHint')).toBeNull();
+  });
+
   it('saves the typed name as the description', () => {
     const { onSubmit } = renderSheet();
 

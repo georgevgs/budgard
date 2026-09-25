@@ -178,6 +178,15 @@
     "uncategorized": "Uncategorized",
     "emptyTitle": "Nothing here yet",
     "emptyBody": "Log money going out or coming in and it will appear here together.",
+    "firstUseTitle": "Your activity starts here",
+    "firstUseBody": "Add an expense to start your history. Income and imported transactions will appear here too.",
+    "historyLoadFailedTitle": "Couldn't load all activity",
+    "historyLoadFailedBody": "Try again to check older transactions.",
+    "emptyPeriodTitle": "No activity in this period",
+    "emptyPeriodBody": "Choose another period or see all activity.",
+    "noMatchesTitle": "No matching activity",
+    "noMatchesBody": "Try a different search or see all activity.",
+    "showAll": "See all activity",
     "loadMore": "Show more activity",
     "filterByCategory": "Filter activity by category",
     "allCategories": "All categories",
@@ -378,7 +387,8 @@
       "untitled": "Expense",
       "moreDetails": "More details",
       "namePlaceholder": "What was it for?",
-      "nameLabel": "Name"
+      "nameLabel": "Description (optional)",
+      "saveHint": "Add an amount to save"
     },
     "pad": {
       "backspace": "Delete",

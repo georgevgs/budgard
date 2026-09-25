@@ -16,6 +16,9 @@ type ActivityFeedProps = {
   transactions: Expense[];
   currency: string;
   isHistoryPending: boolean;
+  hasTransactions: boolean;
+  hasPeriodRows: boolean;
+  onShowAll: () => void;
   onExpenseEdit: (expense: Expense) => void;
   onExpenseDelete: (id: string) => void;
   onSaveAsTemplate: (expense: Expense) => void;
@@ -54,17 +57,7 @@ export const ActivityFeed = (props: ActivityFeedProps) => {
       return <PendingHistoryNotice />;
     }
 
-    return (
-      <div
-        className="rounded-[1.625rem] border border-dashed border-border px-5 py-10 text-center sm:px-6 sm:py-12"
-        role="status"
-      >
-        <p className="type-heading">{t('activity.emptyTitle')}</p>
-        <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-          {t('activity.emptyBody')}
-        </p>
-      </div>
-    );
+    return renderEmptyState(props, t);
   }
 
   return (
@@ -78,6 +71,60 @@ export const ActivityFeed = (props: ActivityFeedProps) => {
         t,
       )}
     </div>
+  );
+};
+
+const renderEmptyState = (props: ActivityFeedProps, t: TranslateFunction) => {
+  const copy = getEmptyCopy(props, t);
+
+  return (
+    <div
+      className="rounded-[1.625rem] border border-dashed border-border px-5 py-10 text-center sm:px-6 sm:py-12"
+      role="status"
+    >
+      <p className="type-heading">{copy.title}</p>
+      <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
+        {copy.body}
+      </p>
+      {renderShowAllAction(props, t)}
+    </div>
+  );
+};
+
+const getEmptyCopy = (props: ActivityFeedProps, t: TranslateFunction) => {
+  if (!props.hasTransactions) {
+    return { title: t('activity.emptyTitle'), body: t('activity.emptyBody') };
+  }
+  if (!props.hasPeriodRows) {
+    return {
+      title: t('activity.emptyPeriodTitle'),
+      body: t('activity.emptyPeriodBody'),
+    };
+  }
+
+  return {
+    title: t('activity.noMatchesTitle'),
+    body: t('activity.noMatchesBody'),
+  };
+};
+
+const renderShowAllAction = (
+  props: ActivityFeedProps,
+  t: TranslateFunction,
+) => {
+  if (!props.hasTransactions) {
+    return null;
+  }
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      className="mt-4 rounded-full"
+      onClick={props.onShowAll}
+    >
+      {t('activity.showAll')}
+    </Button>
   );
 };
 

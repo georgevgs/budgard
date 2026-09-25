@@ -104,6 +104,28 @@ for (const [name, path] of ROUTES) {
   });
 }
 
+test('screenshot activity-first-use', async ({ app, data }) => {
+  data.expenses.length = 0;
+  await app.goto('/activity');
+  await app.getByText('Your activity starts here').waitFor();
+  await app.screenshot({
+    path: `${SHOTS}/activity-first-use.png`,
+    fullPage: true,
+  });
+});
+
+test('screenshot activity-no-results', async ({ app, data }) => {
+  seed(data);
+  await app.goto('/activity');
+  await app
+    .getByRole('textbox', { name: 'Search activity' })
+    .fill('No matching transaction');
+  await app.screenshot({
+    path: `${SHOTS}/activity-no-results.png`,
+    fullPage: true,
+  });
+});
+
 test('screenshot today-arrange', async ({ app, data }) => {
   seed(data);
   await app.goto('/today');
@@ -133,7 +155,9 @@ test('screenshot quick-add-saved', async ({ app, data }) => {
   await app.getByRole('button', { name: /open actions menu/i }).click();
   await app.getByRole('button', { name: /add expense/i }).click();
   await app.waitForTimeout(900);
-  await app.getByLabel('Name', { exact: true }).fill('Coffee run');
+  await app
+    .getByLabel('Description (optional)', { exact: true })
+    .fill('Coffee run');
   await app.getByRole('button', { name: '1', exact: true }).click();
   await app.getByRole('button', { name: '2', exact: true }).click();
   await app.getByRole('button', { name: '0', exact: true }).click();

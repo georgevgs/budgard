@@ -77,8 +77,17 @@ export const useActivityFeed = (
     selectedTagId,
   ]);
 
+  const showAllActivity = () => {
+    setPeriod('all');
+    setSearch('');
+    setKind('all');
+    setSelectedCategoryId(null);
+    setSelectedTagId(null);
+  };
+
   return {
     ...activity,
+    hasTransactions: allRows.length > 0,
     // The period control always holds a value, so it isn't a "filter" — only
     // the controls that can hide rows from within the chosen period count.
     hasActiveFilters:
@@ -101,6 +110,7 @@ export const useActivityFeed = (
     setSelectedTagId,
     selectedCategoryId,
     setSelectedCategoryId,
+    showAllActivity,
   };
 };
 

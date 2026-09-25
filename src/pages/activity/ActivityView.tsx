@@ -1,5 +1,9 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import ReceiptText from 'lucide-react/dist/esm/icons/receipt-text';
 import { PageHeader } from '@/common/components/common/PageHeader';
+import { EmptyStateCard } from '@/common/ui/empty-state-card';
+import { ActivityHistoryError } from '@/pages/activity/components/ActivityHistoryError';
 import { ActivityFeed } from '@/pages/activity/components/ActivityFeed';
 import { ActivityToolbar } from '@/pages/activity/components/ActivityToolbar';
 import { ActivitySummary } from '@/pages/activity/components/ActivitySummary';
@@ -10,6 +14,7 @@ import { FilterResultsAnnouncer } from '@/pages/activity/components/FilterResult
 import { TransactionsLoading } from '@/common/components/common/TransactionsLoading';
 import {
   useCategoriesData,
+  useDataActions,
   useDataConfig,
   useTagsData,
 } from '@/common/contexts/DataContext';
@@ -27,7 +32,14 @@ import { isMonthPendingHistory } from '@/constants/dataCache';
 
 const ActivityView = () => {
   const { t } = useTranslation();
-  const { isInitialized, isHistoryLoaded, defaultCurrency } = useDataConfig();
+  const navigate = useNavigate();
+  const {
+    isInitialized,
+    isHistoryLoaded,
+    hasHistoryLoadError,
+    defaultCurrency,
+  } = useDataConfig();
+  const { loadHistory } = useDataActions();
   const { categories } = useCategoriesData();
   const tags = useTagsData();
   const quickAdd = useQuickAdd();
@@ -37,32 +49,65 @@ const ActivityView = () => {
     activity.filteredRows,
     activity.exportScope,
   );
-  const isHistoryPending = isPendingHistory(
-    isHistoryLoaded,
-    activity.effectivePeriod,
-    activity.selectedMonth,
-  );
+  const isHistoryPending =
+    (!activity.hasTransactions && !isHistoryLoaded) ||
+    isPendingHistory(
+      isHistoryLoaded,
+      activity.effectivePeriod,
+      activity.selectedMonth,
+    );
   const showSkeleton = useDelayedLoading(!isInitialized);
 
   useOnDemandHistory(isHistoryPending);
   useSeedIncomeCategories();
 
+  const toolsMenu = (
+    <ActivityToolsMenu
+      isExportDisabled={csvExport.isExportDisabled}
+      onExport={csvExport.handleExport}
+    />
+  );
+
   if (!isInitialized) {
     return renderLoading(showSkeleton);
+  }
+
+  if (hasHistoryLoadError && !activity.hasTransactions) {
+    return (
+      <div className="page-shell">
+        <PageHeader title={t('activity.title')} action={toolsMenu} />
+        <div className="mt-8">
+          <ActivityHistoryError onRetry={() => void loadHistory()} />
+        </div>
+      </div>
+    );
+  }
+
+  if (isHistoryLoaded && !activity.hasTransactions) {
+    return (
+      <div className="page-shell">
+        <PageHeader title={t('activity.title')} action={toolsMenu} />
+        <div className="mt-8">
+          <EmptyStateCard
+            variant="page"
+            media={
+              <ReceiptText className="h-12 w-12 text-muted-foreground/50" />
+            }
+            title={t('activity.firstUseTitle')}
+            description={t('activity.firstUseBody')}
+            actionLabel={t('expenses.addExpense')}
+            onAction={() => navigate('/today?action=add')}
+          />
+        </div>
+      </div>
+    );
   }
 
   return (
     <div>
       <div className="page-shell">
-        <PageHeader
-          title={t('activity.title')}
-          action={
-            <ActivityToolsMenu
-              isExportDisabled={csvExport.isExportDisabled}
-              onExport={csvExport.handleExport}
-            />
-          }
-        />
+        <PageHeader title={t('activity.title')} action={toolsMenu} />
+        {renderHistoryError(hasHistoryLoadError, loadHistory)}
         <div className="mt-3">
           <ReviewQueueBanner />
         </div>
@@ -92,19 +137,15 @@ const ActivityView = () => {
           count={activity.filteredRows.length}
           active={activity.hasActiveFilters}
         />
-        <div className="mt-3">
-          <ActivitySummary
-            count={activity.filteredRows.length}
-            expenseTotal={activity.expenseTotal}
-            incomeTotal={activity.incomeTotal}
-            currency={defaultCurrency}
-          />
-        </div>
+        {renderSummary(activity, defaultCurrency)}
         <div className="mt-2">
           <ActivityFeed
             transactions={activity.filteredRows}
             currency={defaultCurrency}
             isHistoryPending={isHistoryPending}
+            hasTransactions={activity.hasTransactions}
+            hasPeriodRows={activity.periodRows.length > 0}
+            onShowAll={activity.showAllActivity}
             onExpenseEdit={quickAdd.handleExpenseEdit}
             onExpenseDelete={quickAdd.handleExpenseDelete}
             onSaveAsTemplate={quickAdd.handleSaveAsTemplate}
@@ -118,6 +159,41 @@ const ActivityView = () => {
 };
 
 export default ActivityView;
+
+const renderHistoryError = (
+  hasHistoryLoadError: boolean,
+  loadHistory: () => Promise<void>,
+) => {
+  if (!hasHistoryLoadError) {
+    return null;
+  }
+
+  return (
+    <div className="mt-3">
+      <ActivityHistoryError onRetry={() => void loadHistory()} />
+    </div>
+  );
+};
+
+const renderSummary = (
+  activity: ReturnType<typeof useActivityFeed>,
+  currency: string,
+) => {
+  if (activity.filteredRows.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-3">
+      <ActivitySummary
+        count={activity.filteredRows.length}
+        expenseTotal={activity.expenseTotal}
+        incomeTotal={activity.incomeTotal}
+        currency={currency}
+      />
+    </div>
+  );
+};
 
 // Stage 1 fetches the last 12 months; everything older streams in afterwards.
 // Only the periods that can actually reach past that horizon care.

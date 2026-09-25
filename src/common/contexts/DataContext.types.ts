@@ -61,12 +61,10 @@ export type DataConfig = {
   // Flips true after accounts, goals and debts finish loading. Views that depend on those (PlanView, GoalsList, NetWorthView,
   // DebtsView) wait on this before rendering content.
   isSecondaryLoaded: boolean;
-  // Flips true once a screen has requested the pre-cutoff transaction tail and
-  // it has landed (or definitively failed). Until then only the recent window
-  // is in state, so consumers requesting older periods show "still loading"
-  // instead of an incorrect empty state. Resolves on failure too: a placeholder
-  // that never goes away is worse than an honest empty state.
+  // True when the pre-cutoff request has settled. Inspect the error flag
+  // before claiming that an empty result covers the full history.
   isHistoryLoaded: boolean;
+  hasHistoryLoadError: boolean;
   monthlyBudget: number | null;
   defaultCurrency: string;
   defaultSavingsPct: number | null;

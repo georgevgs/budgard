@@ -44,6 +44,34 @@ describe('useActivityFeed', () => {
     expect(result.current.filteredRows.map((r) => r.id)).toEqual(['aug']);
   });
 
+  it('distinguishes an empty period from an account with no transactions', () => {
+    const empty = renderHook(() => useActivityFeed([]));
+    expect(empty.result.current.hasTransactions).toBe(false);
+
+    const older = renderHook(() =>
+      useActivityFeed([row({ date: '2026-07-05' })]),
+    );
+    expect(older.result.current.hasTransactions).toBe(true);
+    expect(older.result.current.filteredRows).toEqual([]);
+  });
+
+  it('shows all activity when the empty-result action is used', () => {
+    const { result } = renderHook(() =>
+      useActivityFeed([row({ description: 'Coffee', date: '2026-07-05' })]),
+    );
+
+    act(() => {
+      result.current.setSearch('rent');
+      result.current.setKind('income');
+    });
+    expect(result.current.filteredRows).toEqual([]);
+
+    act(() => result.current.showAllActivity());
+    expect(result.current.filteredRows).toHaveLength(1);
+    expect(result.current.effectivePeriod).toBe('all');
+    expect(result.current.hasActiveFilters).toBe(false);
+  });
+
   it('reaches past the selected month once the period widens', () => {
     const { result } = renderHook(() =>
       useActivityFeed([

@@ -1,10 +1,6 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Popover,
-  PopoverAnchor,
-  PopoverContent,
-} from '@/common/ui/popover';
+import { Popover, PopoverAnchor, PopoverContent } from '@/common/ui/popover';
 import { Input } from '@/common/ui/input';
 import { renderSuggestionMeta } from '@/constants/expensesFormHelpers';
 import type { Expense } from '@/types/Expense';
@@ -31,6 +27,7 @@ export const QuickAddName = ({
 }: QuickAddNameProps) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const inputId = useId();
 
   const choose = (suggestion: Expense) => {
     onSelect(suggestion);
@@ -39,6 +36,12 @@ export const QuickAddName = ({
 
   return (
     <div>
+      <label
+        htmlFor={inputId}
+        className="mb-1.5 block text-center text-xs font-semibold text-foreground"
+      >
+        {t('expenses.quickAdd.nameLabel')}
+      </label>
       <Popover
         open={isListOpen(isOpen, suggestions)}
         onOpenChange={setIsOpen}
@@ -46,6 +49,7 @@ export const QuickAddName = ({
       >
         <PopoverAnchor asChild>
           <Input
+            id={inputId}
             value={value}
             onChange={(event) => {
               onChange(event.target.value);
@@ -54,7 +58,6 @@ export const QuickAddName = ({
             onFocus={() => setIsOpen(true)}
             onBlur={() => setIsOpen(false)}
             placeholder={t('expenses.quickAdd.namePlaceholder')}
-            aria-label={t('expenses.quickAdd.nameLabel')}
             aria-invalid={Boolean(errorKey)}
             aria-describedby={describedBy(errorKey)}
             maxLength={100}
