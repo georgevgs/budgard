@@ -4,7 +4,7 @@
      Regenerate with `npm run docs:schema`. -->
 
 An index from each database object to the migrations that touch it, built by
-scanning `supabase/migrations`. Covers 96 migrations: 53 functions, 30 triggers, 27 tables, 88 policies, 58 indexes.
+scanning `supabase/migrations`. Covers 97 migrations: 54 functions, 30 triggers, 27 tables, 88 policies, 58 indexes.
 
 This is a **map, not a schema definition**. Migrations are append-only history
 and the live schema is what you get by replaying them, so nothing here states
@@ -660,6 +660,14 @@ First defined in `20250104165613_remote_schema.sql`.
 - defines — `20260904170059_harden_advisor_functions.sql`
 - grants on — `20260904170059_harden_advisor_functions.sql`
 - revokes on — `20260904170059_harden_advisor_functions.sql`
+
+### `push_cron_secret_matches`
+
+First defined in `20260925150000_verify_push_cron_secret_in_vault.sql`.
+
+- defines — `20260925150000_verify_push_cron_secret_in_vault.sql`
+- grants on — `20260925150000_verify_push_cron_secret_in_vault.sql`
+- revokes on — `20260925150000_verify_push_cron_secret_in_vault.sql`
 
 ### `recompute_debt_balance`
 

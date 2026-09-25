@@ -472,6 +472,13 @@ BEGIN
     RAISE EXCEPTION 'A client wrote its own subscription';
   EXCEPTION WHEN insufficient_privilege THEN NULL;
   END;
+
+  -- The push worker's secret check answers the service role alone.
+  BEGIN
+    PERFORM public.push_cron_secret_matches('security-fixture-guess');
+    RAISE EXCEPTION 'A client probed the push cron secret';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
 END;
 $$;
 
@@ -534,9 +541,34 @@ BEGIN
   IF row_subscription <> 'sub_next_fixture' THEN
     RAISE EXCEPTION 'A new subscription could not replace an ended one';
   END IF;
+
+  IF public.push_cron_secret_matches('security-fixture-guess')
+     OR public.push_cron_secret_matches('')
+     OR COALESCE(public.push_cron_secret_matches(NULL), true) THEN
+    RAISE EXCEPTION 'The push cron secret check accepted a wrong token';
+  END IF;
 END;
 $$;
 
+-- The value pg_cron sends is the one the worker accepts. Run as the
+-- administrator because only it reads Vault; a project without the secret
+-- yet has no job sending it either.
 RESET ROLE;
+
+DO $$
+DECLARE
+  cron_secret TEXT;
+BEGIN
+  SELECT decrypted_secret INTO cron_secret
+  FROM vault.decrypted_secrets
+  WHERE name = 'send_push_notifications_cron_secret';
+
+  IF cron_secret IS NOT NULL
+     AND NOT public.push_cron_secret_matches(cron_secret) THEN
+    RAISE EXCEPTION 'The push worker would refuse the secret pg_cron sends';
+  END IF;
+END;
+$$;
+
 ROLLBACK;
 SELECT 'Security boundary checks passed; all fixtures rolled back' AS result;

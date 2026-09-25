@@ -68,14 +68,15 @@ type PreferencesByUser = Map<string, Record<string, boolean>>;
 // Matches the historical batch hour so existing users see no shift.
 const DEFAULT_BATCH_HOUR_UTC = 8;
 
-const constantTimeEqual = (a: string, b: string): boolean => {
-  if (a.length !== b.length) return false;
-  let mismatch = 0;
-  for (let i = 0; i < a.length; i++) {
-    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
+// pg_cron sends `Bearer <Vault secret>`. Anything else is refused before it
+// costs a database round trip, and the bound keeps the digest input small.
+const CRON_TOKEN = /^Bearer ([A-Za-z0-9._~+/=-]{32,256})$/;
 
-  return mismatch === 0;
+const readCronToken = (header: string | null): string | null => {
+  const match = CRON_TOKEN.exec(header ?? '');
+  if (!match) return null;
+
+  return match[1];
 };
 
 // Missing key == enabled. Mirrors the client-side default so a user with no
@@ -125,11 +126,11 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Authenticate via cron secret (not user JWT — called by pg_cron)
-    const authHeader = req.headers.get('Authorization') ?? '';
-    const cronSecret = Deno.env.get('CRON_SECRET');
-
-    if (!cronSecret || !constantTimeEqual(authHeader, `Bearer ${cronSecret}`)) {
+    // Called by pg_cron with the Vault secret, not a user JWT. The database
+    // says whether the token matches, so the secret lives only in Vault and
+    // rotating it never touches this function's environment.
+    const cronToken = readCronToken(req.headers.get('Authorization'));
+    if (!cronToken) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -138,14 +139,39 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+
+    const { data: tokenMatches, error: tokenError } = await adminClient.rpc(
+      'push_cron_secret_matches',
+      { p_candidate: cronToken },
+    );
+    if (tokenError) {
+      console.error(
+        'send-push-notifications: secret check failed:',
+        tokenError,
+      );
+
+      return new Response(
+        JSON.stringify({ error: 'Unable to verify caller' }),
+        {
+          status: 503,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      );
+    }
+    if (tokenMatches !== true) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!;
     const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY')!;
     const vapidSubject =
       Deno.env.get('VAPID_SUBJECT') || 'mailto:noreply@budgard.com';
 
     webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
-
-    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
     const notifications: NotificationPayload[] = [];
 
