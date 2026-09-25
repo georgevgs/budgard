@@ -70,6 +70,7 @@ the other's previous version, so the order did not matter.
 | Existing password sessions (`auth.mfa_amr_claims`) | Seven, each created and last used on its account's sign-up day: GoTrue's temporary password, not a sign-in. Refused by F1 and left in place |
 | `security_boundaries.sql` on the linked project | Failed at "Password session read receipts" until `20260925140000`, passes after. The receipt-quota case also confirms the quota's definer function can count `storage.objects` |
 | Frontend | Netlify, from `main`, CSP and COOP included |
+| Netlify deploy previews | Failed while parsing `netlify.toml`: the Cloudflare purge plugin was also installed in the UI, which runs it in every context, and Netlify refuses that beside a production-only entry. Disabled in the UI; it now runs from `netlify.toml` in production only, so previews never purge the live zone |
 
 **Confirm email: on** is recommended but no longer load-bearing, because F1
 refuses password sessions regardless. Before turning it on, make sure the
