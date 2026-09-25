@@ -1,0 +1,23 @@
+# Keeps the commit-pinned actions in .github/workflows current. Each pin
+# carries its release in a trailing comment, and Dependabot rewrites the SHA
+# and the comment together.
+#
+# Actions only. npm and the Edge Function Deno graphs have frozen lockfiles
+# that `npm run audit:dependencies` watches daily; bumping them stays a
+# deliberate change, not a bot's.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    # A release this new has not had time to be caught if its tag was
+    # hijacked, which is the attack the pins exist to stop.
+    cooldown:
+      default-days: 7
+    # One pull request a week for every action, not one per action.
+    groups:
+      github-actions:
+        patterns:
+          - '*'
