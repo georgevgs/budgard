@@ -7,7 +7,7 @@ import { dataColors } from '@/design/palette';
 import { collectExpenseTagIds } from '@/constants/expenseTags';
 import type { Tag } from '@/types/Tag';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
-import { isSameName } from '@/constants/names';
+import { isSameName, toNameKey } from '@/constants/names';
 
 export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
   const tags = useTagsData();
@@ -35,9 +35,9 @@ export const useTagPicker = (form: UseFormReturn<ExpenseFormData>) => {
       return unselected;
     }
 
-    const lower = tagSearch.toLowerCase();
+    const lower = toNameKey(tagSearch);
 
-    return unselected.filter((tag) => tag.name.toLowerCase().includes(lower));
+    return unselected.filter((tag) => toNameKey(tag.name).includes(lower));
   }, [tags, selectedTagIds, tagSearch]);
 
   // Trimmed on both sides: the create below trims, and iOS appends a space

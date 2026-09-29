@@ -34,11 +34,9 @@ export const useDescriptionSuggestions = (
     }
 
     return suggestions
-      .filter((s) => {
-        const desc = s.description.toLowerCase();
-
-        return desc.includes(query) && desc !== query;
-      })
+      .filter((suggestion) =>
+        suggestion.description.toLowerCase().includes(query),
+      )
       .slice(0, 5);
   }, [suggestions, descriptionValue]);
 

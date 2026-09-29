@@ -197,6 +197,25 @@ describe('components/expenses/QuickAddSheet', () => {
     );
   });
 
+  it('keeps an exact name available to apply its saved category', () => {
+    const { onSubmit } = renderSheet();
+
+    typeAmount();
+    fireEvent.change(nameField(), { target: { value: 'Cinema' } });
+
+    const list = screen.getByTestId('suggestions');
+    expect(list).toHaveAttribute('data-open', 'true');
+    fireEvent.click(within(list).getByRole('button', { name: 'Cinema' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.save' }));
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: 'Cinema',
+        category_id: 'cat-fun',
+      }),
+    );
+  });
+
   it('narrows the empty-field suggestions to the chosen category', () => {
     renderSheet();
 

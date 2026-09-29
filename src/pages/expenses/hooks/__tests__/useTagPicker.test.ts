@@ -43,6 +43,7 @@ describe('useTagPicker', () => {
     });
 
     expect(result.current.picker.shouldShowCreateOption).toBe(false);
+    expect(result.current.picker.filteredTags).toEqual([FOOD]);
   });
 
   it('selects the existing tag instead of creating a duplicate', () => {

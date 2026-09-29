@@ -5,7 +5,7 @@ import { useCategoriesData } from '@/common/contexts/DataContext';
 import { useCategoryOps } from '@/common/hooks/dataOps/useCategoryOps';
 import { useProGate } from '@/common/hooks/useProGate';
 import { isCategoryNameTaken } from '@/common/components/categories/utils/categoryNames';
-import { isSameName } from '@/constants/names';
+import { isSameName, toNameKey } from '@/constants/names';
 import { incomeColors } from '@/design/palette';
 import type { IncomeFormData } from '@/pages/income/validations';
 
@@ -30,9 +30,9 @@ export const useIncomeCategoryPicker = (
     if (!categorySearch) {
       return incomeCategories;
     }
-    const lower = categorySearch.toLowerCase();
+    const lower = toNameKey(categorySearch);
 
-    return incomeCategories.filter((c) => c.name.toLowerCase().includes(lower));
+    return incomeCategories.filter((c) => toNameKey(c.name).includes(lower));
   }, [incomeCategories, categorySearch]);
 
   const trimmedSearch = categorySearch.trim();

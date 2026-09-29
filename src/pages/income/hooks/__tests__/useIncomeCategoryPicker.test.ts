@@ -60,6 +60,7 @@ describe('useIncomeCategoryPicker', () => {
     act(() => {
       result.current.picker.setCategorySearch('Salary ');
     });
+    expect(result.current.picker.filteredCategories).toEqual([SALARY]);
     act(() => {
       result.current.picker.handleCategoryCreateInline();
     });

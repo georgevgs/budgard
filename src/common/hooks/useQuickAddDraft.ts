@@ -181,11 +181,7 @@ const matchNames = (
   }
 
   return recent
-    .filter((expense) => {
-      const description = expense.description.toLowerCase();
-
-      return description.includes(typed) && description !== typed;
-    })
+    .filter((expense) => expense.description.toLowerCase().includes(typed))
     .slice(0, SUGGESTION_LIMIT);
 };
 
