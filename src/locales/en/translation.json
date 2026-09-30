@@ -39,6 +39,7 @@
     "enterEmail": "Enter your email",
     "sendCode": "Send code",
     "verifyCode": "Verify code",
+    "invalidEmail": "Enter a valid email address, like name@example.com.",
     "invalidCode": "Invalid verification code. Please try again.",
     "securityCheck": "Please complete the security check.",
     "codeSent": "Code sent",

@@ -58,8 +58,14 @@ export const useTagOps = () => {
     // Rolling back a tag edit puts the tag list back directly, but the expense
     // rows that embedded it are refetched — reversing the sweep by hand would
     // mean rebuilding embeds this hook does not own.
-    const restoreTagsAndResync = (previousTags: Tag[]) => () => {
-      setTags(previousTags);
+    //
+    // Takes a getter, not the list: the data layer is a reducer, and React
+    // runs its updaters lazily at render time. When the rollback is built the
+    // updater that captures the previous list has not run yet, so passing the
+    // value here captured the empty placeholder — and a failed rename or
+    // delete wiped every tag.
+    const restoreTagsAndResync = (readPreviousTags: () => Tag[]) => () => {
+      setTags(readPreviousTags());
       refreshExpenses();
     };
 
@@ -76,7 +82,7 @@ export const useTagOps = () => {
           });
           setExpenses((prev) => prev.map((e) => renameTagRefs(e, tagId, name)));
 
-          return restoreTagsAndResync(previousTags);
+          return restoreTagsAndResync(() => previousTags);
         },
         perform: () => dataService.updateTag(tagId, { name }),
       });
@@ -94,7 +100,7 @@ export const useTagOps = () => {
           });
           setExpenses((prev) => prev.map((e) => clearTagRefs(e, tagId)));
 
-          return restoreTagsAndResync(previousTags);
+          return restoreTagsAndResync(() => previousTags);
         },
         perform: () => dataService.deleteTag(tagId),
       });

@@ -229,4 +229,63 @@ describe('useOfflineSync', () => {
       expect.objectContaining({ variant: 'destructive' }),
     );
   });
+
+  it('replays a queued create once when two triggers overlap', async () => {
+    // Coming back online and foregrounding the app fire together. The mount
+    // pass is still reading the queue when the 'online' pass starts; both
+    // reading the same entries replayed the create twice.
+    const pendingReads: Array<() => void> = [];
+    const queued = [
+      {
+        id: 11,
+        type: 'createExpense',
+        payload: { amount: 3, user_id: 'owner-1' },
+        createdAt: '',
+      },
+    ];
+    mockGetAll.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          pendingReads.push(() => resolve(queued));
+        }),
+    );
+    mockCreateExpense.mockReset();
+    mockCreateExpense.mockResolvedValue({});
+
+    renderHook(() => useOfflineSync());
+    act(() => {
+      window.dispatchEvent(new Event('online'));
+    });
+    await act(async () => {
+      pendingReads.forEach((release) => release());
+    });
+
+    expect(mockCreateExpense).toHaveBeenCalledTimes(1);
+  });
+
+  it('syncs again after a pass whose queue bookkeeping failed', async () => {
+    // A permanent failure, and then IndexedDB refusing to record the retry.
+    // The pass must still release its claim, or nothing syncs until reload.
+    mockGetAll.mockResolvedValue([
+      {
+        id: 12,
+        type: 'createExpense',
+        payload: { amount: 4, user_id: 'owner-1' },
+        createdAt: '',
+      },
+    ]);
+    mockCreateExpense.mockReset();
+    mockCreateExpense.mockRejectedValueOnce(new Error('permanent rejection'));
+    mockCreateExpense.mockResolvedValue({});
+    mockUpdate.mockRejectedValueOnce(new Error('IndexedDB unavailable'));
+
+    renderHook(() => useOfflineSync());
+    await act(async () => {});
+
+    await act(async () => {
+      window.dispatchEvent(new Event('online'));
+    });
+
+    expect(mockCreateExpense).toHaveBeenCalledTimes(2);
+  });
 });

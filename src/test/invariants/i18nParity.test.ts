@@ -1,3 +1,5 @@
+import { readFileSync, readdirSync } from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import en from '@/locales/en/translation.json';
 import el from '@/locales/el/translation.json';
@@ -50,7 +52,53 @@ describe('translation parity', () => {
 
     expect(mismatched).toEqual([]);
   });
+
+  // Parity says the two locales agree with each other, not that either holds
+  // the key the code asks for. `auth.invalidEmail` was in neither, so the
+  // sign-in screen printed the dotted key. Only literal keys can be checked;
+  // a key built at runtime is the caller's to keep honest.
+  it('has an English entry for every literal key the source asks for', () => {
+    const missing = sourceFiles(SRC).flatMap((file) =>
+      [...readFileSync(file, 'utf8').matchAll(LITERAL_T_CALL)]
+        .map((match) => match[1])
+        .filter((key) => !resolves(key, enKeys))
+        .map((key) => `${path.relative(SRC, file)}: ${key}`),
+    );
+
+    expect(missing).toEqual([]);
+  });
 });
+
+const SRC = path.resolve(__dirname, '../..');
+
+const LITERAL_T_CALL = /\bt\(\s*['"]([\w.]+)['"]/g;
+
+const sourceFiles = (dir: string): string[] =>
+  readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name === '__tests__') {
+        return [];
+      }
+
+      return sourceFiles(full);
+    }
+    if (/\.tsx?$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name)) {
+      return [full];
+    }
+
+    return [];
+  });
+
+// A plural key lives under its suffixes, and a key read with returnObjects
+// names a subtree rather than a leaf.
+const resolves = (key: string, keys: Map<string, string>): boolean => {
+  if (keys.has(key) || keys.has(`${key}_one`) || keys.has(`${key}_other`)) {
+    return true;
+  }
+
+  return [...keys.keys()].some((candidate) => candidate.startsWith(`${key}.`));
+};
 
 const flatten = (node: Node, prefix = ''): Map<string, string> => {
   const entries = new Map<string, string>();

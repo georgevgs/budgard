@@ -67,7 +67,9 @@ const parseOfx = (content: string): StatementParseResult => {
   for (const match of content.matchAll(OFX_TRANSACTION)) {
     const block = match[1];
     const date = ofxDate(readTag(block, 'DTPOSTED'));
-    const amount = Number.parseFloat(readTag(block, 'TRNAMT') ?? '');
+    // The OFX spec allows either a point or a comma before the fraction, and
+    // European banks send the comma — parseFloat read "-24,50" as 24.
+    const amount = parseStatementAmount(readTag(block, 'TRNAMT'));
 
     if (!date || !Number.isFinite(amount)) {
       skipped += 1;
@@ -136,7 +138,7 @@ const parseQif = (content: string): StatementParseResult => {
     }
 
     const date = qifDate(fields.get('D'));
-    const amount = parseQifAmount(fields.get('T'));
+    const amount = parseStatementAmount(fields.get('T'));
 
     if (!date || !Number.isFinite(amount)) {
       skipped += 1;
@@ -159,14 +161,15 @@ const parseQif = (content: string): StatementParseResult => {
   return { format: 'qif', rows, skipped };
 };
 
-// A comma in a QIF amount is either a decimal separator (24,50 — European)
-// or a thousands separator (1,234.56 — Anglo). Stripping commas outright,
-// which is the obvious thing to write, silently turns €24,50 into €2450.
+// In both formats a comma in an amount is either a decimal separator
+// (24,50 — European) or a thousands separator (1,234.56 — Anglo). Stripping
+// commas outright, which is the obvious thing to write, silently turns €24,50
+// into €2450.
 //
 // The rule: whichever of "," and "." appears last is the decimal separator,
 // and everything else is grouping. A lone comma followed by exactly two
 // digits at the end of the string is decimal; anything else is grouping.
-const parseQifAmount = (raw: string | undefined): number => {
+const parseStatementAmount = (raw: string | null | undefined): number => {
   if (!raw) {
     return Number.NaN;
   }

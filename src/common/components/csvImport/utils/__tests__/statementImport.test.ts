@@ -92,6 +92,18 @@ describe('OFX', () => {
   it('survives a file with no transactions at all', () => {
     expect(parseStatement('ofx', '<OFX></OFX>').rows).toEqual([]);
   });
+
+  // The OFX spec allows a comma before the fraction and European banks use
+  // it. parseFloat stopped at the comma and imported €24,50 as €24.
+  it('reads a comma as a decimal separator', () => {
+    const european = parseStatement(
+      'ofx',
+      '<STMTTRN><DTPOSTED>20260812<TRNAMT>-24,50<NAME>Shop</STMTTRN>',
+    );
+
+    expect(european.rows[0].amount).toBe(24.5);
+    expect(european.rows[0].isIncome).toBe(false);
+  });
 });
 
 describe('QIF', () => {
