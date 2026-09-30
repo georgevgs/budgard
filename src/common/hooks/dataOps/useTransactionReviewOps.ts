@@ -116,32 +116,52 @@ const toggleId = (
   return next;
 };
 
+// The undo puts back the review fields of these rows only, inside updaters, so
+// an expense added or edited while the write was in flight survives a failure
+// here — restoring a snapshot of both lists used to undo it too.
 const markReviewedOptimistically = (
   ids: string[],
   setExpenses: ExpenseSetter,
   setIncomes: ExpenseSetter,
 ) => {
   const idSet = new Set(ids);
-  let previousExpenses: Expense[] = [];
-  let previousIncomes: Expense[] = [];
+  const previous = new Map<string, ReviewFields>();
   const patch = (transactions: Expense[]) =>
-    transactions.map((transaction) => markOneReviewed(transaction, idSet));
-  setExpenses((current) => {
-    previousExpenses = current;
+    transactions.map((transaction) => {
+      if (idSet.has(transaction.id)) {
+        previous.set(transaction.id, pickReviewFields(transaction));
+      }
 
-    return patch(current);
-  });
-  setIncomes((current) => {
-    previousIncomes = current;
+      return markOneReviewed(transaction, idSet);
+    });
+  const restore = (transactions: Expense[]) =>
+    transactions.map((transaction) => {
+      const fields = previous.get(transaction.id);
+      if (!fields) {
+        return transaction;
+      }
 
-    return patch(current);
-  });
+      return { ...transaction, ...fields };
+    });
+  setExpenses(patch);
+  setIncomes(patch);
 
   return () => {
-    setExpenses(previousExpenses);
-    setIncomes(previousIncomes);
+    setExpenses(restore);
+    setIncomes(restore);
   };
 };
+
+type ReviewFields = Pick<
+  Expense,
+  'review_status' | 'review_reason' | 'reviewed_at'
+>;
+
+const pickReviewFields = (transaction: Expense): ReviewFields => ({
+  review_status: transaction.review_status,
+  review_reason: transaction.review_reason,
+  reviewed_at: transaction.reviewed_at,
+});
 
 const markOneReviewed = (
   transaction: Expense,

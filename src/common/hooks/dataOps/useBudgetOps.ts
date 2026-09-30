@@ -48,19 +48,31 @@ export const useBudgetOps = () => {
         operation: 'upsertCategoryBudget',
         shouldSkip,
         errorMessage: t('budget.toasts.categoryUpdateFailed'),
+        // The undo reverses only this cap, so an overlapping write to another
+        // category's cap survives a failure here (see dataOps/helpers).
         optimistic: () => {
-          let previousBudgets: CategoryBudget[] = [];
+          let previousAmount: number | null = null;
           setCategoryBudgets((prev) => {
-            previousBudgets = prev;
             const existing = prev.find((b) => b.category_id === categoryId);
             if (existing) {
+              previousAmount = existing.monthly_amount;
+
               return prev.map((b) => bumpBudgetAmount(b, categoryId, amount));
             }
 
             return [...prev, optimisticBudget];
           });
 
-          return () => setCategoryBudgets(previousBudgets);
+          return () =>
+            setCategoryBudgets((prev) => {
+              if (previousAmount === null) {
+                return prev.filter((b) => b.id !== optimisticBudget.id);
+              }
+
+              return prev.map((b) =>
+                bumpBudgetAmount(b, categoryId, previousAmount as number),
+              );
+            });
         },
         perform: () =>
           dataService.upsertCategoryBudget(categoryId, amount, activeOwnerId),
@@ -81,14 +93,21 @@ export const useBudgetOps = () => {
         shouldSkip,
         errorMessage: t('budget.toasts.categoryRemoveFailed'),
         optimistic: () => {
-          let previousBudgets: CategoryBudget[] = [];
+          let removed: CategoryBudget | undefined;
           setCategoryBudgets((prev) => {
-            previousBudgets = prev;
+            removed = prev.find((b) => b.category_id === categoryId);
 
             return prev.filter((b) => b.category_id !== categoryId);
           });
 
-          return () => setCategoryBudgets(previousBudgets);
+          return () =>
+            setCategoryBudgets((prev) => {
+              if (!removed || prev.some((b) => b.category_id === categoryId)) {
+                return prev;
+              }
+
+              return [...prev, removed];
+            });
         },
         perform: () =>
           dataService.deleteCategoryBudget(categoryId, activeOwnerId),

@@ -55,34 +55,43 @@ export const useTagOps = () => {
       return saved as Tag;
     };
 
-    // Rolling back a tag edit puts the tag list back directly, but the expense
-    // rows that embedded it are refetched — reversing the sweep by hand would
-    // mean rebuilding embeds this hook does not own.
+    // Rolling back a tag edit reverses only that tag in the list, but the
+    // expense rows that embedded it are refetched — reversing the sweep by
+    // hand would mean rebuilding embeds this hook does not own.
     //
-    // Takes a getter, not the list: the data layer is a reducer, and React
-    // runs its updaters lazily at render time. When the rollback is built the
-    // updater that captures the previous list has not run yet, so passing the
-    // value here captured the empty placeholder — and a failed rename or
-    // delete wiped every tag.
-    const restoreTagsAndResync = (readPreviousTags: () => Tag[]) => () => {
-      setTags(readPreviousTags());
-      refreshExpenses();
-    };
-
+    // What to reverse is read inside the updaters, when they run: the data
+    // layer is a reducer and React runs its updaters lazily at render time.
+    // Capturing the previous list up front captured the empty placeholder,
+    // and a failed rename or delete wiped every tag. Reversing only this tag,
+    // rather than restoring a snapshot, keeps an overlapping edit to another
+    // tag from being undone with it.
     const handleTagUpdate = (tagId: string, name: string) =>
       runMutation({
         operation: 'updateTag',
         errorMessage: t('expenses.toasts.tagUpdateFailed'),
         optimistic: () => {
-          let previousTags: Tag[] = [];
+          let previousName: string | null = null;
           setTags((prev) => {
-            previousTags = prev;
+            previousName = prev.find((tag) => tag.id === tagId)?.name ?? null;
 
             return sortByName(prev.map((tag) => renameTag(tag, tagId, name)));
           });
           setExpenses((prev) => prev.map((e) => renameTagRefs(e, tagId, name)));
 
-          return restoreTagsAndResync(() => previousTags);
+          return () => {
+            setTags((prev) => {
+              if (previousName === null) {
+                return prev;
+              }
+
+              return sortByName(
+                prev.map((tag) =>
+                  renameTag(tag, tagId, previousName as string),
+                ),
+              );
+            });
+            refreshExpenses();
+          };
         },
         perform: () => dataService.updateTag(tagId, { name }),
       });
@@ -92,15 +101,24 @@ export const useTagOps = () => {
         operation: 'deleteTag',
         errorMessage: t('expenses.toasts.tagDeleteFailed'),
         optimistic: () => {
-          let previousTags: Tag[] = [];
+          let removed: Tag | undefined;
           setTags((prev) => {
-            previousTags = prev;
+            removed = prev.find((tag) => tag.id === tagId);
 
             return prev.filter((tag) => tag.id !== tagId);
           });
           setExpenses((prev) => prev.map((e) => clearTagRefs(e, tagId)));
 
-          return restoreTagsAndResync(() => previousTags);
+          return () => {
+            setTags((prev) => {
+              if (!removed || prev.some((tag) => tag.id === tagId)) {
+                return prev;
+              }
+
+              return sortByName([...prev, removed]);
+            });
+            refreshExpenses();
+          };
         },
         perform: () => dataService.deleteTag(tagId),
       });

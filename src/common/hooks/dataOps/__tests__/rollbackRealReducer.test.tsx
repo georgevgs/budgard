@@ -34,6 +34,7 @@ const svc = vi.hoisted(() => ({
   updateTag: vi.fn(),
   deleteTag: vi.fn(),
   deleteGoal: vi.fn(),
+  mergeCategory: vi.fn(),
 }));
 vi.mock('@/common/api/dataService', () => ({ dataService: svc }));
 
@@ -56,6 +57,7 @@ vi.mock('@/common/contexts/DataContext', async () => {
     useDataActions: () => ({
       ...useContext(harness.SettersContext),
       refreshExpenses: () => Promise.resolve(),
+      refreshIncomes: () => Promise.resolve(),
     }),
     useDataConfig: () => ({ isInitialized: true }),
   };
@@ -63,6 +65,10 @@ vi.mock('@/common/contexts/DataContext', async () => {
 
 import { useTagOps } from '@/common/hooks/dataOps/useTagOps';
 import { useGoalOps } from '@/common/hooks/dataOps/useGoalOps';
+import { useCategoryOps } from '@/common/hooks/dataOps/useCategoryOps';
+import { useDataActions } from '@/common/contexts/DataContext';
+import type { Category } from '@/types/Category';
+import type { Expense } from '@/types/Expense';
 
 const TAGS: Tag[] = [
   { id: 't1', user_id: 'u1', name: 'Alpha', color: '#000', created_at: '' },
@@ -71,7 +77,21 @@ const TAGS: Tag[] = [
 
 const GOALS = [{ id: 'g1' }, { id: 'g2' }] as Goal[];
 
-const INITIAL: DataState = { ...EMPTY_DATA, tags: TAGS, goals: GOALS };
+const FOOD = { id: 'food', name: 'Food' } as Category;
+const GROCERIES = { id: 'groceries', name: 'Groceries' } as Category;
+const LUNCH = {
+  id: 'lunch',
+  category_id: 'food',
+  category: FOOD,
+} as unknown as Expense;
+
+const INITIAL: DataState = {
+  ...EMPTY_DATA,
+  tags: TAGS,
+  goals: GOALS,
+  categories: [FOOD, GROCERIES],
+  expenses: [LUNCH],
+};
 
 const DataHarness = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(dataReducer, INITIAL);
@@ -89,9 +109,17 @@ const DataHarness = ({ children }: { children: ReactNode }) => {
 };
 
 const renderOps = () =>
-  renderHook(() => ({ ...useTagOps(), ...useGoalOps() }), {
-    wrapper: DataHarness,
-  });
+  renderHook(
+    () => ({
+      ...useTagOps(),
+      ...useGoalOps(),
+      ...useCategoryOps(),
+      actions: useDataActions(),
+    }),
+    {
+      wrapper: DataHarness,
+    },
+  );
 
 const currentState = (): DataState => harness.state as DataState;
 
@@ -142,5 +170,59 @@ describe('rollback against the real reducer', () => {
     await runAndFail(() => result.current.handleGoalDelete('g1'));
 
     expect(currentState().goals).toEqual(GOALS);
+  });
+
+  // Undo used to restore a snapshot of the whole list, which also undid every
+  // write that overlapped: delete two goals, have the first fail, and the
+  // second — deleted on the server — came back.
+  it('undoes only its own delete when two overlap', async () => {
+    svc.deleteGoal.mockImplementation((id: string) => {
+      if (id === 'g1') {
+        return failSoon();
+      }
+
+      return Promise.resolve();
+    });
+    const { result } = renderOps();
+
+    let pending: Promise<unknown>[] = [];
+    act(() => {
+      pending = [
+        result.current.handleGoalDelete('g1').catch(() => undefined),
+        result.current.handleGoalDelete('g2').catch(() => undefined),
+      ];
+    });
+    await act(async () => {
+      await Promise.all(pending);
+    });
+
+    expect(currentState().goals).toEqual([GOALS[0]]);
+  });
+
+  // A failed merge used to restore snapshots of every slice it touched, so an
+  // expense logged while it was in flight vanished with the undo.
+  it('undoes a failed merge without losing an expense logged meanwhile', async () => {
+    svc.mergeCategory.mockImplementation(failSoon);
+    const { result } = renderOps();
+    const coffee = { id: 'coffee', category_id: null } as unknown as Expense;
+
+    let pending: Promise<unknown> = Promise.resolve();
+    act(() => {
+      pending = result.current
+        .handleCategoryMerge('food', GROCERIES)
+        .catch(() => undefined);
+    });
+    act(() => {
+      result.current.actions.setExpenses((prev) => [coffee, ...prev]);
+    });
+    await act(async () => {
+      await pending;
+    });
+
+    expect(currentState().expenses).toEqual([coffee, LUNCH]);
+    expect(currentState().categories.map((c) => c.id)).toEqual([
+      'food',
+      'groceries',
+    ]);
   });
 });

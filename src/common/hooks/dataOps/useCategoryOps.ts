@@ -5,7 +5,11 @@ import { dataService } from '@/common/api/dataService';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import type { CategoryBudget } from '@/types/CategoryBudget';
-import { patchById, replaceById } from '@/common/hooks/dataOps/helpers';
+import {
+  patchById,
+  pickFields,
+  replaceById,
+} from '@/common/hooks/dataOps/helpers';
 import { useMutationRunner } from '@/common/hooks/dataOps/useMutationRunner';
 import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
 
@@ -147,7 +151,9 @@ export const useCategoryOps = () => {
 
 // A category is embedded in every expense and income row that uses it, so an
 // edit has to sweep those slices too. Each of these applies the optimistic
-// change and returns the rollback that puts every slice back as it was.
+// change and returns the rollback that reverses exactly that change, inside
+// updaters — an expense logged while the write was in flight survives a
+// failure here, where restoring whole-list snapshots used to undo it too.
 type CategorySlices = {
   setCategories: Dispatch<SetStateAction<Category[]>>;
   setExpenses: Dispatch<SetStateAction<Expense[]>>;
@@ -165,30 +171,37 @@ const patchEverywhere = (
   categoryId: string,
   categoryData: Partial<Category>,
 ): (() => void) => {
-  let previousCategories: Category[] = [];
-  let previousExpenses: Expense[] = [];
-  let previousIncomes: Expense[] = [];
+  let original: Partial<Category> | null = null;
 
   slices.setCategories((prev) => {
-    previousCategories = prev;
+    const current = prev.find((c) => c.id === categoryId);
+    if (current) {
+      original = pickFields(current, categoryData);
+    }
 
     return sortByName(patchById(prev, categoryId, categoryData));
   });
-  slices.setExpenses((prev) => {
-    previousExpenses = prev;
-
-    return prev.map((e) => mergeCategoryPatch(e, categoryId, categoryData));
-  });
-  slices.setIncomes((prev) => {
-    previousIncomes = prev;
-
-    return prev.map((i) => mergeCategoryPatch(i, categoryId, categoryData));
-  });
+  slices.setExpenses((prev) =>
+    prev.map((e) => mergeCategoryPatch(e, categoryId, categoryData)),
+  );
+  slices.setIncomes((prev) =>
+    prev.map((i) => mergeCategoryPatch(i, categoryId, categoryData)),
+  );
 
   return () => {
-    slices.setCategories(previousCategories);
-    slices.setExpenses(previousExpenses);
-    slices.setIncomes(previousIncomes);
+    if (!original) {
+      return;
+    }
+    const fields = original;
+    slices.setCategories((prev) =>
+      sortByName(patchById(prev, categoryId, fields)),
+    );
+    slices.setExpenses((prev) =>
+      prev.map((e) => mergeCategoryPatch(e, categoryId, fields)),
+    );
+    slices.setIncomes((prev) =>
+      prev.map((i) => mergeCategoryPatch(i, categoryId, fields)),
+    );
   };
 };
 
@@ -197,30 +210,17 @@ const detachEverywhere = (
   refreshRows: RefreshRows,
   categoryId: string,
 ): (() => void) => {
-  let previousCategories: Category[] = [];
-  let previousBudgets: CategoryBudget[] = [];
-
-  slices.setCategories((prev) => {
-    previousCategories = prev;
-
-    return prev.filter((c) => c.id !== categoryId);
-  });
+  const removed = removeCategoryAndBudgets(slices, categoryId);
   slices.setExpenses((prev) =>
     prev.map((e) => clearCategoryRef(e, categoryId)),
   );
   slices.setIncomes((prev) => prev.map((i) => clearCategoryRef(i, categoryId)));
-  slices.setCategoryBudgets((prev) => {
-    previousBudgets = prev;
-
-    return prev.filter((b) => b.category_id !== categoryId);
-  });
 
   // The transaction rows had their embedded category stripped; rebuilding
   // those embeds by hand is not this hook's job, so they are refetched
   // (whichever slice the category actually belonged to).
   return () => {
-    slices.setCategories(previousCategories);
-    slices.setCategoryBudgets(previousBudgets);
+    removed.restore();
     refreshRows.refreshExpenses();
     refreshRows.refreshIncomes();
   };
@@ -231,37 +231,75 @@ const foldEverywhere = (
   fromCategoryId: string,
   toCategory: Category,
 ): (() => void) => {
-  let previousCategories: Category[] = [];
-  let previousExpenses: Expense[] = [];
-  let previousIncomes: Expense[] = [];
-  let previousBudgets: CategoryBudget[] = [];
+  const removed = removeCategoryAndBudgets(slices, fromCategoryId);
+  // Which rows this fold moved, with what they carried before, so the undo
+  // moves back those rows and no others.
+  const moved = new Map<string, Pick<Expense, 'category_id' | 'category'>>();
+  const fold = (prev: Expense[]) =>
+    prev.map((row) => {
+      if (row.category_id === fromCategoryId) {
+        moved.set(row.id, {
+          category_id: row.category_id,
+          category: row.category,
+        });
+      }
 
-  slices.setCategories((prev) => {
-    previousCategories = prev;
+      return reassignCategoryRef(row, fromCategoryId, toCategory);
+    });
+  const unfold = (prev: Expense[]) =>
+    prev.map((row) => {
+      const before = moved.get(row.id);
+      if (!before || row.category_id !== toCategory.id) {
+        return row;
+      }
 
-    return prev.filter((c) => c.id !== fromCategoryId);
-  });
-  slices.setExpenses((prev) => {
-    previousExpenses = prev;
-
-    return prev.map((e) => reassignCategoryRef(e, fromCategoryId, toCategory));
-  });
-  slices.setIncomes((prev) => {
-    previousIncomes = prev;
-
-    return prev.map((i) => reassignCategoryRef(i, fromCategoryId, toCategory));
-  });
-  slices.setCategoryBudgets((prev) => {
-    previousBudgets = prev;
-
-    return prev.filter((b) => b.category_id !== fromCategoryId);
-  });
+      return { ...row, ...before };
+    });
+  slices.setExpenses(fold);
+  slices.setIncomes(fold);
 
   return () => {
-    slices.setCategories(previousCategories);
-    slices.setExpenses(previousExpenses);
-    slices.setIncomes(previousIncomes);
-    slices.setCategoryBudgets(previousBudgets);
+    removed.restore();
+    slices.setExpenses(unfold);
+    slices.setIncomes(unfold);
+  };
+};
+
+// Takes a category and its budget cap out of the lists, and knows how to put
+// back exactly those two.
+const removeCategoryAndBudgets = (
+  slices: CategorySlices,
+  categoryId: string,
+) => {
+  let category: Category | undefined;
+  let budgets: CategoryBudget[] = [];
+
+  slices.setCategories((prev) => {
+    category = prev.find((c) => c.id === categoryId);
+
+    return prev.filter((c) => c.id !== categoryId);
+  });
+  slices.setCategoryBudgets((prev) => {
+    budgets = prev.filter((b) => b.category_id === categoryId);
+
+    return prev.filter((b) => b.category_id !== categoryId);
+  });
+
+  return {
+    restore: () => {
+      slices.setCategories((prev) => {
+        if (!category || prev.some((c) => c.id === categoryId)) {
+          return prev;
+        }
+
+        return sortByName([...prev, category]);
+      });
+      slices.setCategoryBudgets((prev) => {
+        const present = new Set(prev.map((b) => b.id));
+
+        return [...prev, ...budgets.filter((b) => !present.has(b.id))];
+      });
+    },
   };
 };
 

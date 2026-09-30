@@ -15,18 +15,27 @@ export const useNoSpendOps = () => {
   const runMutation = useMutationRunner();
 
   return useMemo(() => {
+    // Each undo reverses only its own change, so an overlapping write to the
+    // list survives a failure here (see dataOps/helpers).
     const claimOptimistically = (day: string) => {
-      let previous: NoSpendDay[] = [];
+      let isAdded = false;
       setNoSpendDays((prev) => {
-        previous = prev;
         if (prev.some((entry) => entry.day === day)) {
           return prev;
         }
+        isAdded = true;
 
         return [buildOptimisticDay(day), ...prev];
       });
 
-      return () => setNoSpendDays(previous);
+      return () =>
+        setNoSpendDays((prev) => {
+          if (!isAdded) {
+            return prev;
+          }
+
+          return prev.filter((entry) => entry.day !== day);
+        });
     };
 
     const handleNoSpendClaim = (day: string) =>
@@ -59,14 +68,21 @@ export const useNoSpendOps = () => {
         errorMessage: t('today.rhythm.toasts.undoFailed'),
         successHaptic: 'selection',
         optimistic: () => {
-          let previous: NoSpendDay[] = [];
+          let removed: NoSpendDay | undefined;
           setNoSpendDays((prev) => {
-            previous = prev;
+            removed = prev.find((entry) => entry.day === day);
 
             return prev.filter((entry) => entry.day !== day);
           });
 
-          return () => setNoSpendDays(previous);
+          return () =>
+            setNoSpendDays((prev) => {
+              if (!removed || prev.some((entry) => entry.day === day)) {
+                return prev;
+              }
+
+              return [removed, ...prev];
+            });
         },
         perform: () => dataService.deleteNoSpendDay(day, activeOwnerId),
       });
