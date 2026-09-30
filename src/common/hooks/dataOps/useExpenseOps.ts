@@ -16,11 +16,11 @@ import {
   replaceById,
   patchById,
   pickByEdit,
+  reconcileImportedRows,
 } from '@/common/hooks/dataOps/helpers';
 import { mergeUniqueById } from '@/common/contexts/dataContextHelpers';
 import { useMutationRunner } from '@/common/hooks/dataOps/useMutationRunner';
 import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
-import { recurringSuggestionService } from '@/common/api/recurringSuggestionService';
 
 export type ReceiptOptions = {
   receiptFile: File | null;
@@ -336,12 +336,7 @@ const importExpenseRows = async (
   );
   deps.setExpenses((prev) => mergeUniqueById(prev, created));
 
-  const reconciled = await recurringSuggestionService.reconcile(
-    deps.activeOwnerId,
-  );
-  if (reconciled > 0) {
-    await refreshExpenses();
-  }
+  await reconcileImportedRows(deps.activeOwnerId, refreshExpenses);
 };
 
 const deleteExpenseOffline = async (

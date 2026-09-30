@@ -29,9 +29,11 @@ import {
   importReducer,
   INITIAL_IMPORT_STATE,
   type ImportAction,
+  type ImportKind,
   type ImportState,
 } from '@/common/components/csvImport/utils/importReducer';
 import type { Category } from '@/types/Category';
+import type { TranslateFunction } from '@/constants/translate';
 
 export const useCsvImportFlow = (onClose: () => void) => {
   const { t } = useTranslation();
@@ -116,13 +118,13 @@ export const useCsvImportFlow = (onClose: () => void) => {
   const handleImport = useCallback(async () => {
     dispatch({ type: 'importStarted' });
 
+    const writers = buildImportWriters(state, categories, dispatch, {
+      importExpenses: handleBulkExpenseImport,
+      importIncomes: handleBulkIncomeImport,
+    });
+
     try {
-      const count = await writeImportedRows(state.validRows, {
-        categories,
-        categoryMappings: state.categoryMappings,
-        importExpenses: handleBulkExpenseImport,
-        importIncomes: handleBulkIncomeImport,
-      });
+      const count = await writeImportedRows(state.validRows, writers);
 
       toast({
         title: t('common.success'),
@@ -131,11 +133,13 @@ export const useCsvImportFlow = (onClose: () => void) => {
 
       handleClose();
     } catch {
-      dispatch({ type: 'importFailed', message: t('import.importError') });
+      dispatch({
+        type: 'importFailed',
+        message: describeImportFailure(state.validRows, writers, t),
+      });
     }
   }, [
-    state.validRows,
-    state.categoryMappings,
+    state,
     categories,
     handleBulkExpenseImport,
     handleBulkIncomeImport,
@@ -312,12 +316,41 @@ const readImportFile = async (
 type ImportWriters = {
   categories: Category[];
   categoryMappings: Map<string, string | null>;
+  landed: ImportState['landed'];
   importExpenses: (rows: ReturnType<typeof mapRowsToExpenses>) => Promise<void>;
   importIncomes: (rows: ReturnType<typeof mapRowsToIncomes>) => Promise<void>;
+  onLanded: (kind: ImportKind) => void;
 };
 
-// Returns how many rows were actually written, which is what the success
-// toast reports.
+// Each attempt gets its own copy of what has landed, so a half that lands
+// mid-attempt is already known to the failure message, not only to the next
+// render.
+const buildImportWriters = (
+  state: ImportState,
+  categories: Category[],
+  dispatch: (action: ImportAction) => void,
+  imports: Pick<ImportWriters, 'importExpenses' | 'importIncomes'>,
+): ImportWriters => {
+  const landed = { ...state.landed };
+
+  return {
+    categories,
+    categoryMappings: state.categoryMappings,
+    landed,
+    ...imports,
+    onLanded: (kind) => {
+      landed[kind] = true;
+      dispatch({ type: 'kindLanded', kind });
+    },
+  };
+};
+
+// Returns how many rows the file put on the server, across attempts — which is
+// what the success toast reports.
+//
+// A half that landed on an earlier attempt is not sent again. The two halves
+// are separate inserts, so a failed income insert left the expenses written;
+// retrying used to send both and duplicate every one of them.
 const writeImportedRows = async (
   validRows: ParsedExpenseRow[],
   writers: ImportWriters,
@@ -329,12 +362,35 @@ const writeImportedRows = async (
   );
   const incomes = mapRowsToIncomes(validRows);
 
-  if (expenses.length > 0) {
+  if (expenses.length > 0 && !writers.landed.expenses) {
     await writers.importExpenses(expenses);
+    writers.onLanded('expenses');
   }
-  if (incomes.length > 0) {
+  if (incomes.length > 0 && !writers.landed.incomes) {
     await writers.importIncomes(incomes);
+    writers.onLanded('incomes');
   }
 
   return expenses.length + incomes.length;
+};
+
+// Says what is already saved when only part of the file made it, so the
+// "Import" button reads as finishing the job rather than starting it again.
+const describeImportFailure = (
+  validRows: ParsedExpenseRow[],
+  writers: ImportWriters,
+  t: TranslateFunction,
+): string => {
+  const expenses = mapRowsToExpenses(
+    validRows,
+    writers.categories,
+    writers.categoryMappings,
+  );
+  const incomes = mapRowsToIncomes(validRows);
+  const hasExpensesSaved = expenses.length > 0 && writers.landed.expenses;
+  if (hasExpensesSaved && incomes.length > 0) {
+    return t('import.partialImportError', { count: expenses.length });
+  }
+
+  return t('import.importError');
 };

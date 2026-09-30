@@ -230,6 +230,75 @@ describe('importing', () => {
   });
 });
 
+describe('retrying a partly saved import', () => {
+  // One expense and one income, with no category to map.
+  const MIXED_QIF = [
+    '!Type:Bank',
+    'D08/01/2026',
+    'T-12.34',
+    'PSupermarket',
+    '^',
+    'D08/02/2026',
+    'T2400.00',
+    'PAcme Ltd',
+    '^',
+  ].join('\n');
+
+  const reachMixedPreview = async () => {
+    const r = render();
+    await dropFile(r, 'statement.qif', MIXED_QIF);
+    await waitFor(() => expect(r.current.step).toBe('preview'));
+
+    return r;
+  };
+
+  // The halves are two inserts. When the income insert fails the expenses are
+  // already saved, and importing again used to send them a second time.
+  it('does not send the expenses again once they are saved', async () => {
+    incomeOps.handleBulkIncomeImport.mockRejectedValueOnce(new Error('down'));
+    const r = await reachMixedPreview();
+
+    await act(async () => {
+      await r.current.handleImport();
+    });
+    await act(async () => {
+      await r.current.handleImport();
+    });
+
+    expect(expenseOps.handleBulkExpenseImport).toHaveBeenCalledTimes(1);
+    expect(incomeOps.handleBulkIncomeImport).toHaveBeenCalledTimes(2);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('says which half is already saved', async () => {
+    incomeOps.handleBulkIncomeImport.mockRejectedValueOnce(new Error('down'));
+    const r = await reachMixedPreview();
+
+    await act(async () => {
+      await r.current.handleImport();
+    });
+
+    expect(r.current.importError).toContain('import.partialImportError');
+  });
+
+  it('starts over for a new file', async () => {
+    incomeOps.handleBulkIncomeImport.mockRejectedValueOnce(new Error('down'));
+    const r = await reachMixedPreview();
+    await act(async () => {
+      await r.current.handleImport();
+    });
+
+    act(() => r.current.resetState());
+    await dropFile(r, 'next.qif', MIXED_QIF);
+    await waitFor(() => expect(r.current.step).toBe('preview'));
+    await act(async () => {
+      await r.current.handleImport();
+    });
+
+    expect(expenseOps.handleBulkExpenseImport).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe('closing', () => {
   it('resets everything so the next open starts clean', async () => {
     const r = render();

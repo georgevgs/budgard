@@ -19,7 +19,17 @@ export type ImportState = {
   skippedIncomeCount: number;
   categoryMappings: Map<string, string | null>;
   importError: string | null;
+  // Which halves of this file are already on the server. Expenses and incomes
+  // are written as two inserts; when the second fails the first has still
+  // landed, and a retry that sent both duplicated every expense.
+  landed: LandedKinds;
 };
+
+export type ImportKind = 'expenses' | 'incomes';
+
+type LandedKinds = Record<ImportKind, boolean>;
+
+const NOTHING_LANDED: LandedKinds = { expenses: false, incomes: false };
 
 const INITIAL_COLUMN_MAPPING: ColumnMapping = {
   dateColumn: 0,
@@ -40,6 +50,7 @@ export const INITIAL_IMPORT_STATE: ImportState = {
   skippedIncomeCount: 0,
   categoryMappings: new Map(),
   importError: null,
+  landed: NOTHING_LANDED,
 };
 
 export type ImportAction =
@@ -65,6 +76,7 @@ export type ImportAction =
     }
   | { type: 'categoryMapped'; name: string; categoryId: string | null }
   | { type: 'importStarted' }
+  | { type: 'kindLanded'; kind: ImportKind }
   | { type: 'importFailed'; message: string }
   | { type: 'backToMapping' }
   | {
@@ -91,6 +103,7 @@ export const importReducer = (
     case 'csvLoaded':
       return {
         ...state,
+        landed: NOTHING_LANDED,
         step: 'mapping',
         csvContent: action.content,
         csvPreview: action.preview,
@@ -102,6 +115,7 @@ export const importReducer = (
     case 'statementLoaded':
       return {
         ...state,
+        landed: NOTHING_LANDED,
         step: 'preview',
         csvContent: action.content,
         validRows: action.rows,
@@ -131,6 +145,9 @@ export const importReducer = (
 
     case 'importStarted':
       return { ...state, step: 'importing' };
+
+    case 'kindLanded':
+      return { ...state, landed: { ...state.landed, [action.kind]: true } };
 
     case 'importFailed':
       return { ...state, step: 'preview', importError: action.message };

@@ -8,11 +8,15 @@ import { offlineQueue, createTempId } from '@/constants/offlineQueue';
 import { isOfflineError } from '@/constants/offlineError';
 import type { TranslateFunction } from '@/constants/translate';
 import type { Expense } from '@/types/Expense';
-import { replaceById, patchById, pickByEdit } from '@/common/hooks/dataOps/helpers';
+import {
+  replaceById,
+  patchById,
+  pickByEdit,
+  reconcileImportedRows,
+} from '@/common/hooks/dataOps/helpers';
 import { mergeUniqueById } from '@/common/contexts/dataContextHelpers';
 import { useMutationRunner } from '@/common/hooks/dataOps/useMutationRunner';
 import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
-import { recurringSuggestionService } from '@/common/api/recurringSuggestionService';
 
 type BulkIncomeRow = {
   date: string;
@@ -128,11 +132,7 @@ export const useIncomeOps = () => {
         activeOwnerId,
       );
       setIncomes((prev) => mergeUniqueById(prev, created));
-      const reconciled =
-        await recurringSuggestionService.reconcile(activeOwnerId);
-      if (reconciled > 0) {
-        await refreshIncomes();
-      }
+      await reconcileImportedRows(activeOwnerId, refreshIncomes);
     };
 
     return { handleIncomeSubmit, handleIncomeDelete, handleBulkIncomeImport };

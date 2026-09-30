@@ -1378,6 +1378,8 @@
     "importButton": "Import {{count}} expense(s)",
     "importing": "Importing {{count}} expense(s)...",
     "successMessage": "Successfully imported {{count}} expense(s)",
+    "partialImportError_one": "{{count}} expense was imported, but the incomes were not. Import again to add just the incomes.",
+    "partialImportError_other": "{{count}} expenses were imported, but the incomes were not. Import again to add just the incomes.",
     "importError": "Failed to import expenses",
     "rowErrors": {
       "tooFewColumns": "Row must have at least {{count}} columns",

@@ -1,3 +1,6 @@
+import { captureException } from '@/config/sentry';
+import { recurringSuggestionService } from '@/common/api/recurringSuggestionService';
+
 export const replaceById = <T extends { id: string }>(
   list: T[],
   id: string,
@@ -96,4 +99,22 @@ export const setScalarOptimistic = <T>(
   setValue(next);
 
   return () => setValue(previous);
+};
+
+// Links imported rows to the recurring schedules they belong to. It runs after
+// the rows are saved, so a failure here must not report the import as failed:
+// the user would retry, and the retry would insert every row a second time.
+// Unlinked rows are still correct rows; the next import reconciles them.
+export const reconcileImportedRows = async (
+  ownerId: string,
+  refresh: () => Promise<void>,
+): Promise<void> => {
+  try {
+    const reconciled = await recurringSuggestionService.reconcile(ownerId);
+    if (reconciled > 0) {
+      await refresh();
+    }
+  } catch (error) {
+    captureException(error, { tags: { operation: 'reconcileImport' } });
+  }
 };
