@@ -127,6 +127,12 @@ const DialogContent = React.forwardRef<
           onInteractOutside={(e) => {
             onInteractOutside?.(e);
             if (e.defaultPrevented) return;
+            // A toast sits outside the dialog's DOM, but tapping its "Try
+            // again" must not close the form it is reporting on.
+            if (isToastTarget(e.target)) {
+              e.preventDefault();
+              return;
+            }
             if (dirtyRef.current) {
               e.preventDefault();
               setConfirmDiscard(true);
@@ -215,6 +221,9 @@ const DialogContent = React.forwardRef<
   );
 });
 DialogContent.displayName = DialogPrimitive.Content.displayName;
+
+const isToastTarget = (target: EventTarget | null): boolean =>
+  target instanceof Element && target.closest('[data-sonner-toaster]') !== null;
 
 const DialogHeader = ({
   className,

@@ -21,6 +21,7 @@
     "offline": "No internet connection",
     "backOnline": "Back online",
     "close": "Close",
+    "notifications": "Notifications",
     "skipToContent": "Skip to content",
     "discardTitle": "Discard changes?",
     "discardBody": "You have unsaved changes. Closing this form will throw them away.",

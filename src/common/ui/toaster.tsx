@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Toaster as SonnerToaster } from 'sonner';
 
 function getTheme(): 'light' | 'dark' {
@@ -10,6 +11,7 @@ function getTheme(): 'light' | 'dark' {
 }
 
 export function Toaster() {
+  const { t } = useTranslation();
   const [theme, setTheme] = useState<'light' | 'dark'>(getTheme);
 
   useEffect(() => {
@@ -26,6 +28,7 @@ export function Toaster() {
     <SonnerToaster
       position="top-center"
       theme={theme}
+      containerAriaLabel={t('common.notifications')}
       gap={8}
       style={
         {
@@ -33,7 +36,8 @@ export function Toaster() {
         } as React.CSSProperties
       }
       toastOptions={{
-        duration: 3000,
+        // Durations are set per toast by useToast; see its reading-time floor.
+        closeButtonAriaLabel: t('common.close'),
         classNames: {
           toast:
             'toast-custom rounded-xl! shadow-lg! border! border-border/50! backdrop-blur-xl! px-4! py-3! gap-2! text-sm! font-medium!',

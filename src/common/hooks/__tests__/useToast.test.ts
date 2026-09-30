@@ -67,4 +67,50 @@ describe('toast', () => {
       expect.objectContaining({ duration: 2000 }),
     );
   });
+
+  // The old 3s global default cleared a two-line toast before it could be
+  // read — the 80% budget warning, "saved offline, will sync".
+  it('gives a toast time to be read', () => {
+    toast({ title: 'Saved' });
+    expect(sonnerToast).toHaveBeenLastCalledWith(
+      'Saved',
+      expect.objectContaining({ duration: 4000 }),
+    );
+
+    toast({ title: 'Saved offline', description: 'Will sync later' });
+    expect(sonnerToast).toHaveBeenLastCalledWith(
+      'Saved offline',
+      expect.objectContaining({ duration: 6000 }),
+    );
+  });
+
+  it('gives an error a visible close button', () => {
+    toast({ variant: 'destructive', title: 'Failed' });
+    expect(sonnerToast.error).toHaveBeenLastCalledWith(
+      'Failed',
+      expect.objectContaining({ closeButton: true, duration: 8000 }),
+    );
+  });
+
+  // Both refreshes failing on one bad connection used to stack two identical
+  // "Could not refresh" toasts. The same failure now updates one.
+  it('files a repeated error under one id', () => {
+    toast({ variant: 'destructive', title: 'Error', description: 'Refresh' });
+    toast({ variant: 'destructive', title: 'Error', description: 'Refresh' });
+
+    const [first, second] = vi
+      .mocked(sonnerToast.error)
+      .mock.calls.slice(-2)
+      .map(([, options]) => options?.id);
+    expect(first).toBeDefined();
+    expect(first).toBe(second);
+  });
+
+  it('keeps an id the caller chose', () => {
+    toast({ variant: 'destructive', title: 'Update', id: 'pwa-update' });
+    expect(sonnerToast.error).toHaveBeenLastCalledWith(
+      'Update',
+      expect.objectContaining({ id: 'pwa-update' }),
+    );
+  });
 });

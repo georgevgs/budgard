@@ -1036,6 +1036,15 @@
     top: calc(env(safe-area-inset-top, 0px) + 1rem) !important;
   }
 
+  /* A modal Radix dialog sets pointer-events: none on <body> while it is open,
+     and the toaster inherits it — so an error raised by a form that stays open
+     showed a "Try again" nobody could tap, and could not be swiped away. The
+     toasts opt back in; dialog.tsx keeps a tap on one from counting as a tap
+     outside the dialog. Hidden stacked toasts stay inert, as sonner has them. */
+  [data-sonner-toast]:not([data-visible='false']) {
+    pointer-events: auto;
+  }
+
   /* Toast — frosted glass style matching app design */
   .toast-custom {
     background: hsl(var(--card) / 0.85) !important;

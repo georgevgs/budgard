@@ -19,6 +19,15 @@ export type ToastParams = {
   onDismiss?: () => void;
 };
 
+// How long a toast stays when the caller does not say. The floor is reading
+// time for one line in a second language — the old 3s global default cleared
+// a toast with a second line before it could be read. A description adds a
+// line to read; anything the user can act on, and every error, stays long
+// enough to reach for.
+const DURATION_TITLE_ONLY = 4000;
+const DURATION_WITH_DESCRIPTION = 6000;
+const DURATION_ACTIONABLE = 8000;
+
 const toast = ({
   variant,
   title,
@@ -29,15 +38,17 @@ const toast = ({
   onDismiss,
 }: ToastParams) => {
   const message = title ?? description ?? '';
-  const opts: ExternalToast = {};
-  if (title && description) {
+  const hasDescription = Boolean(title && description);
+  const isActionable = variant === 'destructive' || Boolean(action);
+  const opts: ExternalToast = {
+    duration:
+      duration ?? resolveDuration(hasDescription, isActionable),
+  };
+  if (hasDescription) {
     opts.description = description;
   }
   if (id !== undefined) {
     opts.id = id;
-  }
-  if (duration !== undefined) {
-    opts.duration = duration;
   }
   if (onDismiss) {
     opts.onDismiss = () => onDismiss();
@@ -45,18 +56,15 @@ const toast = ({
   }
   if (action) {
     opts.action = { label: action.label, onClick: action.onClick };
-    // Ensure action toasts stay visible long enough to interact with
-    if (duration === undefined) {
-      opts.duration = 8000;
-    }
   }
 
   if (variant === 'destructive') {
-    // Errors need reading time — the 3s global default is too short,
-    // especially in a second language
-    if (opts.duration === undefined) {
-      opts.duration = 8000;
-    }
+    // An error stays for eight seconds, so it gets a visible way out — swipe
+    // is the only other one, and a mouse user never discovers it. The same
+    // failure raised twice (both refreshes on one bad connection) updates
+    // one toast instead of stacking an identical pair.
+    opts.closeButton = true;
+    opts.id ??= `error:${message}:${opts.description ?? ''}`;
 
     return sonnerToast.error(message, opts);
   }
@@ -65,6 +73,20 @@ const toast = ({
   }
 
   return sonnerToast(message, opts);
+};
+
+const resolveDuration = (
+  hasDescription: boolean,
+  isActionable: boolean,
+): number => {
+  if (isActionable) {
+    return DURATION_ACTIONABLE;
+  }
+  if (hasDescription) {
+    return DURATION_WITH_DESCRIPTION;
+  }
+
+  return DURATION_TITLE_ONLY;
 };
 
 const useToast = () => {
