@@ -1,5 +1,5 @@
 import { supabase } from '@/config/supabase';
-import { done, row, rows } from '@/common/api/supabaseCrud';
+import { done, isDuplicateOf, row, rows } from '@/common/api/supabaseCrud';
 import { SELECT_TEMPLATE, SELECT_WITH_CATEGORY_AND_TAG, SUPABASE_PAGE_SIZE, buildBulkExpense, fetchAllPages, flattenExtraTags, transactionCursorFilter } from '@/common/api/dataAccess';
 import type { ExpenseWritePayload } from '@/common/api/dataAccess';
 import type { Expense } from '@/types/Expense';
@@ -78,6 +78,10 @@ export const expensesApi = {
     return this.getExpenseById(expenseId);
   },
 
+  // Idempotent when the payload carries its own id: a create that already
+  // landed — the request outlived the client timeout, or a queued write is
+  // replayed, or the user tapped "Try again" — answers with the saved row
+  // instead of inserting it a second time.
   async createExpense(expenseData: ExpenseWritePayload, ownerId: string) {
     const { extra_tag_ids, extra_tags: _e, ...rowData } = expenseData;
     const { data, error } = await supabase
@@ -86,18 +90,23 @@ export const expensesApi = {
       .select(SELECT_WITH_CATEGORY_AND_TAG)
       .single();
 
-    if (error) {
+    const hasLandedBefore =
+      Boolean(rowData.id) && isDuplicateOf(error, 'expenses_pkey');
+    if (error && !hasLandedBefore) {
       throw error;
     }
 
-    const created = data as Expense;
-    if (!extra_tag_ids || extra_tag_ids.length === 0) {
-      return flattenExtraTags(created);
+    const hasExtraTags = Boolean(extra_tag_ids && extra_tag_ids.length > 0);
+    if (!hasLandedBefore && !hasExtraTags) {
+      return flattenExtraTags(data as Expense);
     }
 
-    await this.setExpenseExtraTags(created.id, extra_tag_ids, ownerId);
+    const id = resolveCreatedId(data as Expense | null, rowData.id);
+    if (extra_tag_ids && hasExtraTags) {
+      await this.setExpenseExtraTags(id, extra_tag_ids, ownerId);
+    }
 
-    return this.getExpenseById(created.id);
+    return this.getExpenseById(id);
   },
 
   // Replaces the full extras set for one expense. Delete-then-insert keeps
@@ -212,4 +221,17 @@ export const expensesApi = {
       supabase.from('expense_templates').delete().eq('id', templateId),
     );
   },
+};
+
+// The row the insert returned, or — when an earlier attempt already created
+// it — the id the caller chose for it.
+const resolveCreatedId = (
+  created: Expense | null,
+  chosenId: string | undefined,
+): string => {
+  if (created) {
+    return created.id;
+  }
+
+  return chosenId as string;
 };

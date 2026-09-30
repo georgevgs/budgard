@@ -113,6 +113,25 @@ describe('offlineQueue', () => {
       expect(all[0].payload.id).toBeUndefined();
     });
 
+    // Offline creates now carry a real UUID rather than a "temp-" id, so the
+    // row keeps its id on the server. Coalescing must not depend on a prefix.
+    it('folds an edit into a pending create filed under a real UUID', async () => {
+      const id = '6f1c2d3e-4b5a-4c6d-8e7f-9a0b1c2d3e4f';
+      await offlineQueue.enqueueWithReconcile('createExpense', {
+        id,
+        __tempId: id,
+        amount: 5,
+      });
+      await offlineQueue.enqueueWithReconcile('updateExpense', {
+        id,
+        amount: 6,
+      });
+
+      const all = await offlineQueue.getAll();
+      expect(all).toHaveLength(1);
+      expect(all[0].payload).toEqual({ id, __tempId: id, amount: 6 });
+    });
+
     it('cancels out a create+delete done entirely offline', async () => {
       await offlineQueue.enqueue('createIncome', {
         __tempId: 'temp-2',

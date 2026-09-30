@@ -1,5 +1,5 @@
 import { supabase } from '@/config/supabase';
-import { done, row, rows } from '@/common/api/supabaseCrud';
+import { done, isDuplicateOf, row, rows } from '@/common/api/supabaseCrud';
 import { SELECT_WITH_CATEGORY, SUPABASE_PAGE_SIZE, fetchAllPages, transactionCursorFilter } from '@/common/api/dataAccess';
 import type { Expense } from '@/types/Expense';
 
@@ -66,12 +66,28 @@ export const incomeApi = {
     );
   },
 
+  // Idempotent when the payload carries its own id, like createExpense: an
+  // income that already landed on an earlier attempt is read back rather than
+  // inserted twice.
   async createIncome(incomeData: Partial<Expense>, ownerId: string) {
+    const { data, error } = await supabase
+      .from('expenses')
+      .insert({ ...incomeData, user_id: ownerId, type: 'income' })
+      .select(SELECT_WITH_CATEGORY)
+      .single();
+
+    if (!error) {
+      return data as Expense;
+    }
+    if (!incomeData.id || !isDuplicateOf(error, 'expenses_pkey')) {
+      throw error;
+    }
+
     return row<Expense>(
       supabase
         .from('expenses')
-        .insert({ ...incomeData, user_id: ownerId, type: 'income' })
         .select(SELECT_WITH_CATEGORY)
+        .eq('id', incomeData.id)
         .single(),
     );
   },

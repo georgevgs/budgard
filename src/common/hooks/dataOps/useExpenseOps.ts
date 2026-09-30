@@ -7,7 +7,7 @@ import { dataService } from '@/common/api/dataService';
 import type { ExpenseWritePayload } from '@/common/api/dataService';
 import { uploadReceipt, deleteReceipt } from '@/common/api/receiptService';
 import { haptics } from '@/constants/haptics';
-import { offlineQueue, createTempId } from '@/constants/offlineQueue';
+import { offlineQueue, createClientId } from '@/constants/offlineQueue';
 import { isOfflineError } from '@/constants/offlineError';
 import { describeAmount } from '@/constants/transactionAmount';
 import type { TranslateFunction } from '@/constants/translate';
@@ -68,6 +68,8 @@ export const useExpenseOps = () => {
       receiptOptions?: ReceiptOptions,
     ): Promise<void> => {
       const previousDebtId = getPreviousDebtId(expenseId, expensesRef.current);
+      // Chosen once per submit, so every attempt names the same row.
+      const writeData = withClientId(expenseData, expenseId);
 
       await runMutation({
         operation: pickByEdit(expenseId, 'updateExpense', 'createExpense'),
@@ -77,18 +79,11 @@ export const useExpenseOps = () => {
           t('expenses.toasts.updateFailed'),
           t('expenses.toasts.addFailed'),
         ),
-        offlineFallback: async (error) => {
-          if (!isOfflineError(error)) {
-            return false;
-          }
-
-          await saveExpenseOffline(deps, expenseData, expenseId);
-
-          return true;
-        },
+        offlineFallback: (error) =>
+          saveExpenseOffline(deps, writeData, expenseId, error),
         perform: () =>
           performExpenseSave(
-            expenseData,
+            writeData,
             expenseId,
             receiptOptions,
             activeOwnerId,
@@ -217,11 +212,18 @@ const refreshDebtsQuietly = (
   });
 };
 
+// Queues the write when the failure was connectivity. Returns true to tell
+// the runner it is handled.
 const saveExpenseOffline = async (
   deps: ExpenseOpDeps,
   expenseData: ExpenseWritePayload,
   expenseId: string | undefined,
-): Promise<void> => {
+  error: unknown,
+): Promise<boolean> => {
+  if (!isOfflineError(error)) {
+    return false;
+  }
+
   await queueExpenseOffline(
     expenseData,
     expenseId,
@@ -234,6 +236,8 @@ const saveExpenseOffline = async (
     title: deps.t('offline.savedOffline'),
     description: deps.t('offline.willSync'),
   });
+
+  return true;
 };
 
 const performExpenseSave = async (
@@ -589,11 +593,12 @@ const queueExpenseOffline = async (
   setExpenses: (updater: (prev: Expense[]) => Expense[]) => void,
 ): Promise<void> => {
   const mutationType = pickByEdit(expenseId, 'updateExpense', 'createExpense');
-  const tempId = pickByEdit<string | null>(expenseId, null, createTempId());
+  // A create arrives with the id withClientId chose for it; the queue files
+  // the create under that id so later edits of the row coalesce into it.
   const idPayload = pickByEdit<Record<string, unknown>>(
     expenseId,
     { id: expenseId },
-    { __tempId: tempId },
+    { __tempId: expenseData.id },
   );
 
   await offlineQueue.enqueueWithReconcile(mutationType, {
@@ -623,10 +628,24 @@ const queueExpenseOffline = async (
 
     const optimistic = {
       ...offlineRow,
-      id: tempId as string,
       created_at: new Date().toISOString(),
     } as Expense;
 
     return [optimistic, ...prev];
   });
+};
+
+// A new row gets its id on the device rather than from the database default.
+// The "Try again" re-run, the offline replay and a request that outlived its
+// timeout then all name the same row, and the create answers with it instead
+// of inserting a duplicate. Edits keep their id.
+const withClientId = (
+  expenseData: ExpenseWritePayload,
+  expenseId: string | undefined,
+): ExpenseWritePayload => {
+  if (expenseId) {
+    return expenseData;
+  }
+
+  return { ...expenseData, id: createClientId() };
 };

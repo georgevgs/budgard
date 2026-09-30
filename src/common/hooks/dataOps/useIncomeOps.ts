@@ -4,7 +4,7 @@ import { useToast } from '@/common/hooks/useToast';
 import { useDataActions, useDataConfig } from '@/common/contexts/DataContext';
 import { dataService } from '@/common/api/dataService';
 import { haptics } from '@/constants/haptics';
-import { offlineQueue, createTempId } from '@/constants/offlineQueue';
+import { offlineQueue, createClientId } from '@/constants/offlineQueue';
 import { isOfflineError } from '@/constants/offlineError';
 import type { TranslateFunction } from '@/constants/translate';
 import type { Expense } from '@/types/Expense';
@@ -54,6 +54,9 @@ export const useIncomeOps = () => {
       incomeData: Partial<Expense>,
       incomeId?: string,
     ): Promise<Expense | null> => {
+      // Chosen once per submit, so a retry, an offline replay or a request
+      // that outlived its timeout all name the same row — see withClientId.
+      const writeData = withClientId(incomeData, incomeId);
       const saved = await runMutation<Expense>({
         operation: pickByEdit(incomeId, 'updateIncome', 'createIncome'),
         shouldSkip,
@@ -67,13 +70,13 @@ export const useIncomeOps = () => {
           t('income.toasts.updated'),
           t('income.toasts.added'),
         ),
-        offlineFallback: (error) => queueOffline(incomeData, incomeId, error),
+        offlineFallback: (error) => queueOffline(writeData, incomeId, error),
         perform: () => {
           if (incomeId) {
-            return dataService.updateIncome(incomeData, incomeId);
+            return dataService.updateIncome(writeData, incomeId);
           }
 
-          return dataService.createIncome(incomeData, activeOwnerId);
+          return dataService.createIncome(writeData, activeOwnerId);
         },
         commit: (row) =>
           setIncomes((prev) => {
@@ -166,7 +169,6 @@ const queueIncomeOffline = async (
     return false;
   }
 
-  const tempId = pickByEdit<string | null>(incomeId, null, createTempId());
   const scopedIncome = { ...incomeData, user_id: ownerId };
   await offlineQueue.enqueueWithReconcile(
     pickByEdit(incomeId, 'updateIncome', 'createIncome'),
@@ -175,7 +177,7 @@ const queueIncomeOffline = async (
       ...pickByEdit<Record<string, unknown>>(
         incomeId,
         { id: incomeId },
-        { __tempId: tempId },
+        { __tempId: incomeData.id },
       ),
     } as Record<string, unknown>,
   );
@@ -187,7 +189,6 @@ const queueIncomeOffline = async (
 
     const optimistic = {
       ...scopedIncome,
-      id: tempId as string,
       created_at: new Date().toISOString(),
     } as Expense;
 
@@ -201,4 +202,17 @@ const queueIncomeOffline = async (
   });
 
   return true;
+};
+
+// A new income gets its id on the device rather than from the database
+// default, so every attempt at writing it names the same row.
+const withClientId = (
+  incomeData: Partial<Expense>,
+  incomeId: string | undefined,
+): Partial<Expense> => {
+  if (incomeId) {
+    return incomeData;
+  }
+
+  return { ...incomeData, id: createClientId() };
 };

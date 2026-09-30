@@ -52,7 +52,7 @@ vi.mock('@/constants/offlineQueue', () => ({
   offlineQueue: {
     enqueueWithReconcile: (...args: unknown[]) => mockEnqueue(...args),
   },
-  createTempId: () => 'temp-123',
+  createClientId: () => 'client-123',
 }));
 
 let offline = false;
@@ -401,7 +401,7 @@ describe('handleExpenseSubmit receipts', () => {
 // --- handleExpenseSubmit: offline + errors ---
 
 describe('handleExpenseSubmit offline', () => {
-  it('queues a create and shows an optimistic row with the temp id', async () => {
+  it('queues a create and shows an optimistic row under its own id', async () => {
     offline = true;
     mockDataService.createExpense.mockRejectedValue(new Error('offline'));
     mockEnqueue.mockResolvedValue(undefined);
@@ -416,11 +416,15 @@ describe('handleExpenseSubmit offline', () => {
 
     expect(mockEnqueue).toHaveBeenCalledWith(
       'createExpense',
-      expect.objectContaining({ amount: 9, __tempId: 'temp-123' }),
+      expect.objectContaining({
+        amount: 9,
+        id: 'client-123',
+        __tempId: 'client-123',
+      }),
     );
 
     const [optimistic] = applyLastSetExpenses([]);
-    expect(optimistic.id).toBe('temp-123');
+    expect(optimistic.id).toBe('client-123');
     // extra_tag_ids is write-only: it rides the queued payload, not the row.
     expect(optimistic).not.toHaveProperty('extra_tag_ids');
   });
@@ -445,6 +449,30 @@ describe('handleExpenseSubmit offline', () => {
     expect(
       applyLastSetExpenses([makeExpense({ id: 'e1' })])[0].description,
     ).toBe('Patched');
+  });
+
+  // A create the server saved but never answered (the 15s client timeout)
+  // is retried from the toast. The retry has to name the same row, so the
+  // create can answer with it rather than inserting a second one.
+  it('retries a create under the id the first attempt used', async () => {
+    mockDataService.createExpense.mockRejectedValueOnce(new Error('timeout'));
+    mockDataService.createExpense.mockResolvedValue(makeExpense({ id: 'x' }));
+
+    const ops = renderOps();
+    await act(async () => {
+      await ops.current
+        .handleExpenseSubmit({ amount: 5 } as never)
+        .catch(() => undefined);
+    });
+    const calls = mockShowErrorToast.mock.calls;
+    const retry = calls[calls.length - 1][1] as () => void;
+    await act(async () => {
+      retry();
+    });
+
+    const [first, second] = mockDataService.createExpense.mock.calls;
+    expect(first[0]).toMatchObject({ id: 'client-123' });
+    expect(second[0]).toMatchObject({ id: 'client-123' });
   });
 
   it('surfaces a isRetryable error toast and rethrows when genuinely failing', async () => {

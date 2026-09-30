@@ -51,14 +51,13 @@ export type QueuedMutation = {
   retries?: number;
 };
 
-const TEMP_ID_PREFIX = 'temp-';
-
-// Optimistic id for an offline-created row. Includes a random suffix so two
-// creates in the same millisecond can't collide (which would break reconcile).
-export const createTempId = (): string =>
-  `${TEMP_ID_PREFIX}${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-
-const isTempId = (id: string): boolean => id.startsWith(TEMP_ID_PREFIX);
+// The id an offline-created row is written with — a real UUID, not a
+// placeholder. The row keeps it on the server: the queued create sends it, so
+// a replay of a create that already landed is recognised instead of inserted
+// twice, and an edit queued after the create synced targets a row that exists.
+// (The payload key is still `__tempId`: entries queued by older builds carry
+// "temp-…" ids under it and must keep coalescing.)
+export const createClientId = (): string => crypto.randomUUID();
 
 const openDb = (): Promise<IDBDatabase> => {
   return new Promise((resolve, reject) => {
@@ -263,7 +262,7 @@ const serialized = <T>(operation: () => Promise<T>): Promise<T> => {
 };
 
 // Collapses a chain acting on a not-yet-synced offline create (identified by
-// its temp id): an edit folds into the pending create, a delete cancels it out
+// the id it was queued under): an edit folds into the pending create, a delete cancels it out
 // entirely — so the server never sees an op for an id it was never told about.
 const reconcileThenEnqueue = async (
   type: MutationType,
@@ -272,11 +271,7 @@ const reconcileThenEnqueue = async (
   const op = mutationOp(type);
   const targetId = payload.id;
 
-  if (
-    (op === 'update' || op === 'delete') &&
-    typeof targetId === 'string' &&
-    isTempId(targetId)
-  ) {
+  if ((op === 'update' || op === 'delete') && typeof targetId === 'string') {
     const all = await offlineQueue.getAll();
     const pendingCreate = all.find(
       (m) =>
@@ -292,8 +287,9 @@ const reconcileThenEnqueue = async (
         return;
       }
 
-      // Merge the edit into the queued create; drop the temp `id` so it never
-      // gets sent to the server as a column.
+      // Merge the edit into the queued create. The edit's `id` is dropped: the
+      // queued create already carries the row's id (or, from an older build,
+      // a "temp-…" one that must never reach the server as a column).
       const { id: _omitId, ...edit } = payload;
       await offlineQueue.update(pendingCreate.id, {
         payload: { ...pendingCreate.payload, ...edit },

@@ -153,6 +153,65 @@ describe('dataService', () => {
     expect(result).toEqual({ ...expense, extra_tags: [] });
   });
 
+  // A create carries its own id so a repeat of it can be recognised: the
+  // request outlived the client timeout, a queued write is replayed, or the
+  // user tapped "Try again". The second insert must answer with the saved row.
+  it('reads back an expense that an earlier attempt already created', async () => {
+    const saved = { id: 'e1', amount: 50, description: 'Test' };
+    const duplicate = {
+      code: '23505',
+      message: 'duplicate key value violates unique constraint "expenses_pkey"',
+    };
+    const insertChain = mockChain(null, duplicate);
+    const readChain = mockChain(saved);
+    vi.mocked(supabase.from)
+      .mockReturnValueOnce(insertChain as never)
+      .mockReturnValueOnce(readChain as never);
+
+    const result = await dataService.createExpense(
+      { id: 'e1', amount: 50, description: 'Test' },
+      OWNER_ID,
+    );
+
+    expect(readChain.eq).toHaveBeenCalledWith('id', 'e1');
+    expect(result).toEqual({ ...saved, extra_tags: [] });
+  });
+
+  it('still fails a create that collides with some other constraint', async () => {
+    const conflict = {
+      code: '23505',
+      message:
+        'duplicate key value violates unique constraint "expenses_other"',
+    };
+    vi.mocked(supabase.from).mockReturnValue(
+      mockChain(null, conflict) as never,
+    );
+
+    await expect(
+      dataService.createExpense({ id: 'e1', amount: 5 }, OWNER_ID),
+    ).rejects.toEqual(conflict);
+  });
+
+  it('reads back an income that an earlier attempt already created', async () => {
+    const saved = { id: 'i1', amount: 900, type: 'income' };
+    const duplicate = {
+      code: '23505',
+      message: 'duplicate key value violates unique constraint "expenses_pkey"',
+    };
+    const readChain = mockChain(saved);
+    vi.mocked(supabase.from)
+      .mockReturnValueOnce(mockChain(null, duplicate) as never)
+      .mockReturnValueOnce(readChain as never);
+
+    const result = await dataService.createIncome(
+      { id: 'i1', amount: 900 },
+      OWNER_ID,
+    );
+
+    expect(readChain.eq).toHaveBeenCalledWith('id', 'i1');
+    expect(result).toEqual(saved);
+  });
+
   // --- updateExpense ---
   it('updates an expense by id', async () => {
     const updated = { id: 'e1', amount: 75 };

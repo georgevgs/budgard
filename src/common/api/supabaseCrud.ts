@@ -56,3 +56,21 @@ export const done = async (query: PostgrestResult): Promise<void> => {
     throw error;
   }
 };
+
+// True when a write failed because the row is already there — Postgres's
+// unique_violation on the named constraint. A create that carries its own id
+// uses this to tell "an earlier attempt already landed" (a timeout that the
+// server outlived, a queued replay, a tapped retry) from a real failure.
+export const isDuplicateOf = (error: unknown, constraint: string): boolean => {
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+
+  const { code, message } = error as { code?: unknown; message?: unknown };
+
+  return (
+    code === '23505' &&
+    typeof message === 'string' &&
+    message.includes(constraint)
+  );
+};
