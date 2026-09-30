@@ -138,14 +138,22 @@ export const findFirstShortfall = (
   );
 };
 
-// What the accounts a person can actually spend from hold right now.
+// What the accounts a person can actually spend from hold right now, in the
+// default currency.
 //
 // Investments are excluded because selling them is a decision, not a payment,
 // and counting them would quietly promise that a shortfall is covered by
 // something the user may have no intention of touching. Liabilities are
 // excluded for the mirror reason: a credit card balance is not cash you have.
+//
+// The converter is required, not defaulted. Balances are stored in each
+// account's own currency, and adding them raw put a ¥200,000 account into a
+// euro forecast as €200,000. A converter that cannot price an account returns
+// null, and so does this: a balance line drawn from a guessed rate is worse
+// than the flows-only projection the forecast falls back to.
 export const computeSpendableBalance = (
   accounts: readonly SpendableAccount[],
+  toDefaultCurrency: (account: SpendableAccount) => number | null,
 ): number | null => {
   const spendable = accounts.filter(
     (account) => !account.is_archived && SPENDABLE_KINDS.includes(account.kind),
@@ -155,12 +163,22 @@ export const computeSpendableBalance = (
     return null;
   }
 
-  return sumAmounts(spendable.map((account) => account.current_balance));
+  const converted: number[] = [];
+  for (const account of spendable) {
+    const balance = toDefaultCurrency(account);
+    if (balance === null) {
+      return null;
+    }
+    converted.push(balance);
+  }
+
+  return sumAmounts(converted);
 };
 
-type SpendableAccount = {
+export type SpendableAccount = {
   kind: string;
   current_balance: number;
+  default_currency: string;
   is_archived: boolean;
 };
 

@@ -338,16 +338,24 @@ describe('computeSpendableBalance', () => {
     ({
       kind: 'bank',
       current_balance: 100,
+      default_currency: 'EUR',
       is_archived: false,
       ...over,
     }) as never;
 
+  // Everything below is already in the default currency.
+  const asIs = (account: { current_balance: number }) =>
+    account.current_balance;
+
   it('adds up cash and bank accounts', () => {
     expect(
-      computeSpendableBalance([
-        account({ kind: 'bank', current_balance: 1200 }),
-        account({ kind: 'cash', current_balance: 80 }),
-      ]),
+      computeSpendableBalance(
+        [
+          account({ kind: 'bank', current_balance: 1200 }),
+          account({ kind: 'cash', current_balance: 80 }),
+        ],
+        asIs,
+      ),
     ).toBe(1280);
   });
 
@@ -356,39 +364,91 @@ describe('computeSpendableBalance', () => {
   // no intention of touching.
   it('leaves investments out', () => {
     expect(
-      computeSpendableBalance([
-        account({ kind: 'bank', current_balance: 500 }),
-        account({ kind: 'investment', current_balance: 40000 }),
-      ]),
+      computeSpendableBalance(
+        [
+          account({ kind: 'bank', current_balance: 500 }),
+          account({ kind: 'investment', current_balance: 40000 }),
+        ],
+        asIs,
+      ),
     ).toBe(500);
   });
 
   // Mirror reason: a card balance is not cash you have.
   it('leaves liabilities out', () => {
     expect(
-      computeSpendableBalance([
-        account({ kind: 'bank', current_balance: 500 }),
-        account({ kind: 'credit_card', current_balance: -300 }),
-        account({ kind: 'loan', current_balance: -9000 }),
-      ]),
+      computeSpendableBalance(
+        [
+          account({ kind: 'bank', current_balance: 500 }),
+          account({ kind: 'credit_card', current_balance: -300 }),
+          account({ kind: 'loan', current_balance: -9000 }),
+        ],
+        asIs,
+      ),
     ).toBe(500);
   });
 
   it('ignores archived accounts', () => {
     expect(
-      computeSpendableBalance([
-        account({ current_balance: 500 }),
-        account({ current_balance: 900, is_archived: true }),
-      ]),
+      computeSpendableBalance(
+        [
+          account({ current_balance: 500 }),
+          account({ current_balance: 900, is_archived: true }),
+        ],
+        asIs,
+      ),
     ).toBe(500);
   });
 
   // Null, not zero. Zero is a balance; null means the app does not know one,
   // and the projection must say so rather than draw a line from nowhere.
   it('has no opinion when nothing spendable is tracked', () => {
-    expect(computeSpendableBalance([])).toBeNull();
+    expect(computeSpendableBalance([], asIs)).toBeNull();
     expect(
-      computeSpendableBalance([account({ kind: 'investment' })]),
+      computeSpendableBalance([account({ kind: 'investment' })], asIs),
+    ).toBeNull();
+  });
+
+  // Balances are stored in each account's own currency. Adding them raw put a
+  // ¥200,000 account into a euro forecast as €200,000.
+  it('converts every account into the default currency', () => {
+    const toEuro = (a: {
+      current_balance: number;
+      default_currency: string;
+    }) => {
+      if (a.default_currency === 'JPY') {
+        return a.current_balance / 160;
+      }
+
+      return a.current_balance;
+    };
+
+    expect(
+      computeSpendableBalance(
+        [
+          account({ current_balance: 1000 }),
+          account({ current_balance: 200000, default_currency: 'JPY' }),
+        ],
+        toEuro,
+      ),
+    ).toBe(2250);
+  });
+
+  it('draws no balance when an account cannot be priced', () => {
+    expect(
+      computeSpendableBalance(
+        [
+          account({ current_balance: 1000 }),
+          account({ current_balance: 200000, default_currency: 'JPY' }),
+        ],
+        (a) => {
+          if (a.default_currency === 'JPY') {
+            return null;
+          }
+
+          return a.current_balance;
+        },
+      ),
     ).toBeNull();
   });
 });

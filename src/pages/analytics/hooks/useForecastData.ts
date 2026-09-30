@@ -1,19 +1,18 @@
 import { useMemo } from 'react';
 import { format } from 'date-fns';
 import {
-  useAccountsData,
   useExpensesData,
   useIncomesData,
   useRecurringData,
 } from '@/common/contexts/DataContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import {
-  computeSpendableBalance,
   computeTwelveMonthProjection,
   findFirstShortfall,
 } from '@/constants/forecast';
 import { useCurrentDate } from '@/common/hooks/useCurrentDate';
 import { useMonthlyPosition } from '@/common/hooks/useMonthlyPosition';
+import { useNetWorth } from '@/common/hooks/useNetWorth';
 
 // Wires DataContext slices into the pure forecast math (lib/forecast.ts).
 // ForecastSection only renders for Pro users, so the full expense history is
@@ -22,15 +21,17 @@ export const useForecastData = () => {
   const expenses = useExpensesData();
   const incomes = useIncomesData();
   const { recurringExpenses, recurringIncomes } = useRecurringData();
-  const { accounts } = useAccountsData();
+  // Balances only — no snapshot history is needed for an opening balance.
+  const { summary } = useNetWorth(false);
   const dateLocale = useDateLocale();
   const now = useCurrentDate();
   const monthly = useMonthlyPosition(expenses, now);
 
   return useMemo(() => {
-    // What the spendable accounts hold now. Null when the user tracks none,
-    // in which case the projection reports flows without a balance line.
-    const openingBalance = computeSpendableBalance(accounts);
+    // What the spendable accounts hold now, in the default currency. Null when
+    // the user tracks none, or one cannot be priced yet, in which case the
+    // projection reports flows without a balance line.
+    const openingBalance = summary.spendableBalance;
 
     const projection = computeTwelveMonthProjection({
       expenses,
@@ -62,7 +63,7 @@ export const useForecastData = () => {
     recurringExpenses,
     recurringIncomes,
     monthly.position.available,
-    accounts,
+    summary.spendableBalance,
     dateLocale,
     now,
   ]);

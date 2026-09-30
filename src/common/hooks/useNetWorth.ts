@@ -10,6 +10,10 @@ import { fetchExchangeRate } from '@/common/api/exchangeRateService';
 import { type Account, type AccountKind, isLiability } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import type { Debt } from '@/types/Debt';
+import {
+  computeSpendableBalance,
+  type SpendableAccount,
+} from '@/constants/forecast';
 
 export type NetWorthPoint = {
   date: string;
@@ -34,6 +38,11 @@ export type NetWorthSummary = {
   // total above mixes raw foreign-currency balances at rate=1 — the UI must
   // surface this so users don't trust the headline number blindly.
   staleCurrencies: string[];
+  // Cash and bank balances in the default currency, for the forecast's opening
+  // balance. Null when nothing spendable is tracked, or when an account's rate
+  // is missing: unlike the headline above, a projection has no room to flag a
+  // guessed rate, so it goes without a balance line instead.
+  spendableBalance: number | null;
 };
 
 /**
@@ -76,6 +85,26 @@ const resolveRate = ({
   }
 
   return rate;
+};
+
+const convertOrNull = (
+  account: SpendableAccount,
+  defaultCurrency: string,
+  date: string,
+  rates: Map<string, number>,
+  failedKeys: Set<string>,
+): number | null => {
+  if (account.default_currency === defaultCurrency) {
+    return account.current_balance;
+  }
+
+  const key = RATE_KEY(account.default_currency, date);
+  const rate = rates.get(key);
+  if (rate === undefined || failedKeys.has(key)) {
+    return null;
+  }
+
+  return account.current_balance * rate;
 };
 
 const isLiveDebt = (d: Debt): boolean =>
@@ -310,6 +339,9 @@ const buildSummary = (
     investmentCostBasis,
     investmentGain: investmentValue - investmentCostBasis,
     staleCurrencies: Array.from(staleCurrencies).sort(),
+    spendableBalance: computeSpendableBalance(accounts, (account) =>
+      convertOrNull(account, defaultCurrency, today, rates, failedKeys),
+    ),
   };
 };
 
