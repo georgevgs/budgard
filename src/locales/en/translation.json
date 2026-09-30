@@ -122,6 +122,8 @@
       "dailyPace_other": "{{amount}} a day for the {{count}} days left",
       "spentOfBudget": "{{spent}} of {{budget}}",
       "noBudgetYet": "No budget set yet",
+      "slabAria": "{{label}}: {{amount}}",
+      "noBudgetSlabAria": "{{amount}} spent so far this month. Set a monthly budget",
       "budgetUsedAria": "Budget used: {{percent}} percent of your monthly plan",
       "dayOfMonth": "Day {{day}} of {{days}}",
       "monthPaceAria": "Spending over the last seven days, on day {{day}} of {{days}}",

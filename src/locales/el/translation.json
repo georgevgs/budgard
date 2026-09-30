@@ -122,6 +122,8 @@
       "dailyPace_other": "{{amount}} την ημέρα για τις {{count}} ημέρες που απομένουν",
       "spentOfBudget": "{{spent}} από {{budget}}",
       "noBudgetYet": "Δεν έχεις ορίσει προϋπολογισμό",
+      "slabAria": "{{label}}: {{amount}}",
+      "noBudgetSlabAria": "{{amount}} έχουν ξοδευτεί μέχρι τώρα αυτόν τον μήνα. Ορισμός μηνιαίου προϋπολογισμού",
       "budgetUsedAria": "Χρήση προϋπολογισμού: {{percent}} τοις εκατό του μηνιαίου πλάνου σου",
       "dayOfMonth": "Ημέρα {{day}} από {{days}}",
       "monthPaceAria": "Έξοδα των τελευταίων επτά ημερών, ημέρα {{day}} από {{days}}",

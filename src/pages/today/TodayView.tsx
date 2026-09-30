@@ -24,7 +24,7 @@ const TodayView = () => {
   const dateLocale = useDateLocale();
   const now = useCurrentDate();
   const guidance = useTodayGuidance(optimisticExpenses, now);
-  const pace = useDailyPace(optimisticExpenses, guidance.dailyAllowance, now);
+  const pace = useDailyPace(optimisticExpenses, guidance.paceAllowance, now);
   const topCategory = useTopCategory(optimisticExpenses);
   const layout = useTodayLayout();
   const isLoading = !isInitialized || !layout.isHydrated;

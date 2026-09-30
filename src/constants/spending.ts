@@ -1,3 +1,4 @@
+import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 
 /**
@@ -61,3 +62,36 @@ export const sumSpending = (expenses: Expense[]): number => {
     return sum + expense.amount;
   }, 0);
 };
+
+/**
+ * Whether a row is everyday spending: the part of the month a person steers
+ * day to day.
+ *
+ * Two kinds of spending row are left out. A recurring bill was planned before
+ * the month began, so rent landing on the 1st is not a day that ran hot. A
+ * transfer into a savings category leaves the spending pool without being
+ * consumed, so setting money aside must never read as overspending. The Today
+ * status, its seven-day pace chart and the savings rhythm all measure pace, and
+ * they have to agree on what pace is made of.
+ */
+export const countsAsEverydaySpending = (
+  expense: Expense,
+  savingsCategoryIds: ReadonlySet<string>,
+): boolean => {
+  if (!countsAsSpending(expense)) {
+    return false;
+  }
+  if (expense.recurring_expense_id) {
+    return false;
+  }
+
+  return !savingsCategoryIds.has(expense.category_id ?? '');
+};
+
+/** The ids of the categories a transfer into counts as setting money aside. */
+export const buildSavingsCategoryIds = (categories: Category[]): Set<string> =>
+  new Set(
+    categories
+      .filter((category) => category.kind === 'savings')
+      .map((category) => category.id),
+  );

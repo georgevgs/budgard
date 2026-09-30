@@ -97,7 +97,7 @@ const renderTile = (id: TodayTileId, props: TodayGridProps) => {
     return (
       <BudgetUsedTile
         key={id}
-        spentThisMonth={guidance.spentThisMonth}
+        spentThisMonth={guidance.budgetSpent}
         monthlyBudget={props.monthlyBudget}
         currency={guidance.currency}
       />

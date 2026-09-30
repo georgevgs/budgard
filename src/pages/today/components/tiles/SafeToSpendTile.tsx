@@ -84,6 +84,9 @@ const resolveLabel = (
   if (props.safeToSpend === null) {
     return t('today.spentSoFar');
   }
+  if (isOverBudget(props)) {
+    return t('today.tiles.overBudget');
+  }
 
   return t('today.tiles.safeToSpend');
 };
@@ -111,18 +114,17 @@ const resolveDestination = (_props: SafeToSpendTileProps): string => '/plan';
 const resolveAriaLabel = (
   props: SafeToSpendTileProps,
   t: TranslateFunction,
-): string | undefined => {
+): string => {
+  // The label replaces the tile's content for assistive tech, so it has to
+  // carry the figure too — it used to name the tile and drop the one number
+  // the screen exists to answer.
+  const amount = formatCurrency(resolveAmount(props), props.currency);
   if (props.safeToSpend === null) {
-    return t('today.setBudget');
+    return t('today.tile.noBudgetSlabAria', { amount });
   }
 
-  if (isOverBudget(props)) {
-    return t('today.tiles.overBudget');
-  }
-
-  return t('today.tiles.safeToSpend');
+  return t('today.tile.slabAria', { label: resolveLabel(props, t), amount });
 };
-
 // The daily allowance is the slab's caption because it is the figure that
 // turns a balance into a decision. The other two states each have a different
 // next step, and the caption is where it goes:

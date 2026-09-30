@@ -9,9 +9,12 @@ import {
   useRecurringData,
 } from '@/common/contexts/DataContext';
 import { computeUpcomingRecurringThisMonth } from '@/constants/forecast';
-import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
-import { countsAsSpending, sumSpending } from '@/constants/spending';
+import {
+  buildSavingsCategoryIds,
+  countsAsSpending,
+  sumSpending,
+} from '@/constants/spending';
 import type { Goal } from '@/types/Goal';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
@@ -40,6 +43,10 @@ export type SavingsRhythm = {
   // of real savings transfers this month — never a hypothetical.
   surplusYesterday: number;
   setAside: number;
+  // The part of `setAside` that spending totals leave out (an investment
+  // transfer is written with is_excluded). The monthly position adds it back
+  // as outflow; see useMonthlyPosition.
+  setAsideOutsideSpending: number;
   isSetAsideToday: boolean;
   milestone: number;
   milestoneProgress: number;
@@ -110,6 +117,11 @@ export const useSavingsRhythm = (
     }));
     const goodDays = days.filter((day) => isGoodDay(day.outcome)).length;
     const setAside = sumSetAside(expenses, savingsCategoryIds, thisMonth);
+    const setAsideOutsideSpending = sumSetAside(
+      expenses.filter((expense) => !countsAsSpending(expense)),
+      savingsCategoryIds,
+      thisMonth,
+    );
 
     return {
       days,
@@ -129,6 +141,7 @@ export const useSavingsRhythm = (
         allowances,
       ),
       setAside,
+      setAsideOutsideSpending,
       isSetAsideToday: hasSetAsideOn(expenses, savingsCategoryIds, todayKey),
       ...buildMilestone(setAside),
     };
@@ -190,13 +203,6 @@ export const useSetAsideGoal = (): Goal | null => {
 
 const isGoodDay = (outcome: DayOutcome): boolean =>
   outcome === 'noSpend' || outcome === 'under';
-
-const buildSavingsCategoryIds = (categories: Category[]): Set<string> =>
-  new Set(
-    categories
-      .filter((category) => category.kind === 'savings')
-      .map((category) => category.id),
-  );
 
 // Everyday spend only, matching the pace model in useTodayGuidance: rent
 // landing on the 1st is not a day you overspent, it is a bill you planned.

@@ -12,7 +12,14 @@ import { useMonthlyPosition } from '@/common/hooks/useMonthlyPosition';
 import { computeUpcomingRecurringThisMonth } from '@/constants/forecast';
 import { buildUpcomingBills } from '@/pages/today/utils/upcomingBills';
 import type { Expense } from '@/types/Expense';
-import { countsAsSpending, sumSpending } from '@/constants/spending';
+import {
+  buildSavingsCategoryIds,
+  countsAsEverydaySpending,
+  countsAsSpending,
+  sumSpending,
+} from '@/constants/spending';
+import { sumAmounts } from '@/constants/money';
+import { toIsoDate } from '@/constants/dates';
 import { buildBaseline } from '@/constants/baseline';
 
 export type TodayStatus = 'comfortable' | 'watchful' | 'tight' | 'noBudget';
@@ -66,6 +73,12 @@ export const useTodayGuidance = (
     const safeToSpend = position.available;
     const daysRemaining = getDaysInMonth(now) - now.getDate() + 1;
     const dailyAllowance = computeDailyAllowance(safeToSpend, daysRemaining);
+    const savingsCategoryIds = buildSavingsCategoryIds(expenseCategories);
+    const paceAllowance = computePaceAllowance(
+      safeToSpend,
+      sumEverydaySpending(monthExpenses, savingsCategoryIds, toIsoDate(now)),
+      daysRemaining,
+    );
     // What an ordinary day actually costs this person, from their own recent
     // history. Over plan there is no allowance left to quote, and a screen
     // that only says "you are past your plan" delivers a verdict and no way
@@ -77,10 +90,16 @@ export const useTodayGuidance = (
     // "60% of the budget gone on day 1" and the hero cried "watch the pace"
     // for a fortnight while the user spent nothing. Fixed costs were always
     // planned; they say nothing about how fast you are going.
+    //
+    // Money moved into a savings category is left out for the same reason: it
+    // is not consumed, and setting some aside must not read as a fast month.
     const recurringSpentThisMonth = sumTransactions(
       monthExpenses.filter((expense) => expense.recurring_expense_id),
     );
-    const everydaySpent = spentThisMonth - recurringSpentThisMonth;
+    const everydaySpent = sumEverydaySpending(
+      monthExpenses,
+      savingsCategoryIds,
+    );
     const everydayBudget = computeEverydayBudget(
       monthlyBudget,
       recurringSpentThisMonth + upcomingThisMonth,
@@ -100,11 +119,17 @@ export const useTodayGuidance = (
     return {
       monthExpenses,
       spentThisMonth,
+      // What the budget ring reads: the same outflow Plan's decision card
+      // splits into Spent / Due / Save, never below zero. `spentThisMonth` is
+      // spending alone, for month-on-month comparison, and a refund-heavy
+      // month could take it negative — which drew a ring of negative length.
+      budgetSpent: position.spent,
       spentLastMonth,
       spentLastMonthToDate,
       upcomingThisMonth,
       safeToSpend,
       dailyAllowance,
+      paceAllowance,
       typicalDay,
       daysRemaining,
       timeProgress,
@@ -118,12 +143,14 @@ export const useTodayGuidance = (
       recentActivity: buildRecentActivity(expenses, incomes),
     };
   }, [
+    expenseCategories,
     expenses,
     incomes,
     monthKey,
     monthlyBudget,
     now,
     position.available,
+    position.spent,
     previousMonthKey,
     recurringExpenses,
   ]);
@@ -150,6 +177,36 @@ export const useTodayGuidance = (
 
 const sumTransactions = (transactions: Expense[]): number =>
   sumSpending(transactions);
+
+const sumEverydaySpending = (
+  expenses: Expense[],
+  savingsCategoryIds: ReadonlySet<string>,
+  onDay?: string,
+): number =>
+  sumAmounts(
+    expenses
+      .filter((expense) => onDay === undefined || expense.date === onDay)
+      .filter((expense) =>
+        countsAsEverydaySpending(expense, savingsCategoryIds),
+      )
+      .map((expense) => expense.amount),
+  );
+
+// The yardstick the seven-day chart holds each bar against: the allowance as
+// it stood when today began. `dailyAllowance` has today's spending taken out
+// already, so measuring today's bar against it flagged a day spent exactly on
+// plan as running hot.
+const computePaceAllowance = (
+  safeToSpend: number | null,
+  spentToday: number,
+  daysRemaining: number,
+): number | null => {
+  if (safeToSpend === null) {
+    return null;
+  }
+
+  return computeDailyAllowance(safeToSpend + spentToday, daysRemaining);
+};
 
 const computeDailyAllowance = (
   safeToSpend: number | null,

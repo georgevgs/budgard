@@ -7,7 +7,13 @@ let monthlyBudget: number | null = 1000;
 
 vi.mock('@/common/contexts/DataContext', () => ({
   useIncomesData: () => [],
-  useCategoriesData: () => ({ expenseCategories: [] }),
+  useCategoriesData: () => ({
+    expenseCategories: [
+      { id: 'savings-cat', name: 'Savings', kind: 'savings' },
+    ],
+  }),
+  useGoalsData: () => [],
+  useAccountsData: () => ({ accounts: [] }),
   useNoSpendDaysData: () => [],
   useRecurringData: () => ({ recurringExpenses: [] }),
   useDataConfig: () => ({
@@ -152,5 +158,34 @@ describe('useTodayGuidance pace', () => {
 
     // 40 of the 400 everyday budget — the 600 rent is absent from the pace.
     expect(Math.round(result.current.everydayProgress)).toBe(10);
+  });
+
+  // Setting money aside is the opposite of a fast month. Counting the
+  // transfer as everyday spend turned a good day into "watch the pace".
+  it('does not count a transfer into savings towards the pace', () => {
+    atDay(3);
+    const toSavings = {
+      ...spend('saved', 300, '2026-08-02'),
+      category_id: 'savings-cat',
+    } as Expense;
+    const { result } = renderHook(() => useTodayGuidance([toSavings]));
+
+    expect(result.current.everydayProgress).toBe(0);
+    expect(result.current.status).toBe('comfortable');
+  });
+
+  // The chart's yardstick is the allowance as the day began. The caption's
+  // allowance has today's spending taken out, so holding today's bar against
+  // it flagged a day spent exactly on plan.
+  it('holds today against the allowance it started with', () => {
+    // 1000 over the 31 days of August, nothing spent before the 1st.
+    atDay(1);
+    const onPlan = 1000 / 31;
+    const { result } = renderHook(() =>
+      useTodayGuidance([spend('lunch', onPlan, '2026-08-01')]),
+    );
+
+    expect(result.current.paceAllowance).toBeCloseTo(onPlan);
+    expect(result.current.dailyAllowance).toBeLessThan(onPlan);
   });
 });

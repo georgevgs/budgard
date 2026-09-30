@@ -1,6 +1,10 @@
 import { useMemo } from 'react';
 import { getDaysInMonth, subDays } from 'date-fns';
-import { countsAsSpending } from '@/constants/spending';
+import { useCategoriesData } from '@/common/contexts/DataContext';
+import {
+  buildSavingsCategoryIds,
+  countsAsEverydaySpending,
+} from '@/constants/spending';
 import { toIsoDate } from '@/constants/dates';
 import type { Expense } from '@/types/Expense';
 
@@ -26,16 +30,23 @@ const WINDOW = 7;
  * allowance allows. The window is fixed rather than month-to-date so the tile
  * is the same shape on the 2nd as on the 28th — a chart that grows a bar a day
  * is unreadable for the first week of every month.
+ *
+ * Bars are everyday spending only, like the status the chart sits beside: a
+ * bill that was always coming, or money moved into savings, is not a day that
+ * ran hot, and a rent bar towering over the week flattened every real one.
  */
 export const useDailyPace = (
   expenses: Expense[],
   dailyAllowance: number | null,
   now: Date,
 ): DailyPace => {
+  const { expenseCategories } = useCategoriesData();
+
   return useMemo(() => {
+    const savingsCategoryIds = buildSavingsCategoryIds(expenseCategories);
     const totals = new Map<string, number>();
     for (const expense of expenses) {
-      if (!countsAsSpending(expense)) {
+      if (!countsAsEverydaySpending(expense, savingsCategoryIds)) {
         continue;
       }
       totals.set(
@@ -56,7 +67,7 @@ export const useDailyPace = (
       daysInMonth: getDaysInMonth(now),
       peak: Math.max(...days.map((day) => day.amount), 0),
     };
-  }, [expenses, dailyAllowance, now]);
+  }, [expenses, expenseCategories, dailyAllowance, now]);
 };
 
 const buildWindow = (now: Date): string[] => {
