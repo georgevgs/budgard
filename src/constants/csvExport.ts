@@ -1,4 +1,5 @@
 import { format, parseISO } from 'date-fns';
+import { downloadBlob } from '@/constants/download';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import type { Tag } from '@/types/Tag';
@@ -20,15 +21,10 @@ export const buildCsv = (headers: string[], rows: CsvRow[]): string => {
 
 export const downloadCsv = (filename: string, csv: string): void => {
   // BOM helps Excel/Numbers detect UTF-8.
-  const blob = new Blob(['﻿', csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', filename);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  downloadBlob(
+    filename,
+    new Blob(['﻿', csv], { type: 'text/csv;charset=utf-8;' }),
+  );
 };
 
 export const buildTransactionsCsv = (

@@ -89,10 +89,19 @@ describe('downloadCsv', () => {
     expect(capturedBlob!.type).toBe('text/csv;charset=utf-8;');
   });
 
-  it('revokes object URL after download', () => {
-    downloadCsv('transactions_2026.csv', 'A,B');
+  // Safari reads the blob after the click handler returns; revoking the URL
+  // in the same tick cancelled the download in the installed iOS app.
+  it('revokes the object URL only once the download has had time to read it', () => {
+    vi.useFakeTimers();
+    try {
+      downloadCsv('transactions_2026.csv', 'A,B');
 
-    expect(revokeObjectURLSpy).toHaveBeenCalledWith('blob:test');
+      expect(revokeObjectURLSpy).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(60_000);
+      expect(revokeObjectURLSpy).toHaveBeenCalledWith('blob:test');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

@@ -5,6 +5,8 @@ import { dataService } from '@/common/api/dataService';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { toast } from '@/common/hooks/useToast';
 import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
+import { todayIso } from '@/constants/dates';
+import { downloadBlob } from '@/constants/download';
 
 // Full-account JSON export (data portability). Fetches everything fresh from
 // the server so the file is complete even before the background history
@@ -87,21 +89,15 @@ export const useDataExport = () => {
 };
 
 const buildFileName = (): string => {
-  const stamp = new Date().toISOString().slice(0, 10);
+  // The user's own calendar day, not the UTC one — see constants/dates.
+  const stamp = todayIso();
 
   return `budgard-export-${stamp}.json`;
 };
 
 const downloadJson = (filename: string, payload: unknown): void => {
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {
-    type: 'application/json',
-  });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', filename);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  downloadBlob(
+    filename,
+    new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }),
+  );
 };
