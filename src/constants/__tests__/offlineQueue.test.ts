@@ -1,6 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import 'fake-indexeddb/auto';
-import { offlineQueue, OFFLINE_QUEUE_CHANGED_EVENT } from '@/constants/offlineQueue';
+import {
+  offlineQueue,
+  OFFLINE_QUEUE_CHANGED_EVENT,
+  readPendingWrites,
+} from '@/constants/offlineQueue';
 
 // Who the queue believes is signed in. Hoisted so the mock factory below can
 // close over it — vi.mock runs before the module body.
@@ -282,5 +286,16 @@ describe('offlineQueue', () => {
       window.removeEventListener(OFFLINE_QUEUE_CHANGED_EVENT, handler);
       expect(handler).toHaveBeenCalledTimes(2);
     });
+  });
+
+  it('reports which rows are still owed to the server', async () => {
+    await offlineQueue.enqueue('createExpense', { id: 'new', __tempId: 'new' });
+    await offlineQueue.enqueue('updateIncome', { id: 'edited' });
+    await offlineQueue.enqueue('deleteExpense', { id: 'gone' });
+
+    const pending = await readPendingWrites();
+
+    expect([...pending.kept].sort()).toEqual(['edited', 'new']);
+    expect([...pending.deleted]).toEqual(['gone']);
   });
 });

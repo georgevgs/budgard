@@ -303,6 +303,54 @@ const reconcileThenEnqueue = async (
   await offlineQueue.enqueue(type, payload);
 };
 
+/**
+ * The rows the queue still owes the server, by id.
+ *
+ * A refetch that lands before the queue drains knows nothing about them: it
+ * replaced an offline-saved row's window with server rows that did not have it
+ * yet, so the expense vanished until the sync caught up, an offline edit
+ * reverted, and an offline delete came back. The data layer lays these back
+ * over whatever the server returned.
+ */
+export type PendingWrites = {
+  // Created or edited here and not yet synced: the local row is the truth.
+  kept: ReadonlySet<string>;
+  // Deleted here and not yet synced: the row must stay gone.
+  deleted: ReadonlySet<string>;
+};
+
+const NO_PENDING_WRITES: PendingWrites = {
+  kept: new Set(),
+  deleted: new Set(),
+};
+
+export const readPendingWrites = async (): Promise<PendingWrites> => {
+  let mutations: QueuedMutation[];
+  try {
+    mutations = await offlineQueue.getAll();
+  } catch {
+    // No IndexedDB (private mode, an old engine): nothing can be queued, so
+    // there is nothing to lay back over the server's rows.
+    return NO_PENDING_WRITES;
+  }
+
+  const kept = new Set<string>();
+  const deleted = new Set<string>();
+  for (const mutation of mutations) {
+    const id = mutation.payload.id ?? mutation.payload.__tempId;
+    if (typeof id !== 'string') {
+      continue;
+    }
+    if (mutationOp(mutation.type) === 'delete') {
+      deleted.add(id);
+    } else {
+      kept.add(id);
+    }
+  }
+
+  return { kept, deleted };
+};
+
 const notifyChanged = (): void => {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event(OFFLINE_QUEUE_CHANGED_EVENT));

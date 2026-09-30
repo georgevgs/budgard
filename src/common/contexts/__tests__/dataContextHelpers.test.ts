@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  keepPendingWrites,
   mergeUniqueById,
   replaceRecentWindow,
 } from '@/common/contexts/dataContextHelpers';
@@ -63,5 +64,43 @@ describe('mergeUniqueById', () => {
     const prev = [row('a', '2026-01-01')];
 
     expect(mergeUniqueById(prev, [row('a', '2026-01-01')])).toBe(prev);
+  });
+});
+
+// A refetch that lands before the offline queue drains knows nothing about
+// what is still waiting: an offline-saved expense vanished until the sync
+// caught up, an offline edit reverted, and an offline delete came back.
+describe('keepPendingWrites', () => {
+  const row = (id: string, amount: number) => ({ id, amount });
+  const none = { kept: new Set<string>(), deleted: new Set<string>() };
+
+  it('takes the server rows as they are when nothing is queued', () => {
+    const fresh = [row('a', 1)];
+
+    expect(keepPendingWrites([row('a', 9)], fresh, none)).toBe(fresh);
+  });
+
+  it('keeps a row created offline that the server has not seen yet', () => {
+    const pending = { ...none, kept: new Set(['new']) };
+
+    expect(
+      keepPendingWrites([row('new', 5), row('a', 1)], [row('a', 1)], pending),
+    ).toEqual([row('new', 5), row('a', 1)]);
+  });
+
+  it('keeps the local version of a row edited offline', () => {
+    const pending = { ...none, kept: new Set(['a']) };
+
+    expect(keepPendingWrites([row('a', 7)], [row('a', 1)], pending)).toEqual([
+      row('a', 7),
+    ]);
+  });
+
+  it('keeps a row deleted offline gone', () => {
+    const pending = { ...none, deleted: new Set(['a']) };
+
+    expect(keepPendingWrites([], [row('a', 1), row('b', 2)], pending)).toEqual([
+      row('b', 2),
+    ]);
   });
 });

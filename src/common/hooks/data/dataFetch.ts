@@ -2,10 +2,12 @@ import { captureException } from '@/config/sentry';
 import { dataService } from '@/common/api/dataService';
 import type { DataSession } from '@/common/hooks/data/dataSession';
 import {
+  keepPendingWrites,
   replaceRecentWindow,
   isAbortError,
   isExpiredJwtError,
 } from '@/common/contexts/dataContextHelpers';
+import { readPendingWrites } from '@/constants/offlineQueue';
 import { getRecentCutoff } from '@/constants/dataCache';
 import { fetchDeferredData } from '@/common/hooks/data/dataDeferred';
 import { refreshOptionalData } from '@/common/hooks/data/dataOptional';
@@ -76,6 +78,7 @@ const performFetch = async (
       controller.signal,
       sinceDate,
     );
+    const pending = await readPendingWrites();
     if (controller.signal.aborted) {
       return;
     }
@@ -85,14 +88,26 @@ const performFetch = async (
       // window to disappear. A merge alone would resurrect those rows.
       session.setters.setIsHistoryLoaded(true);
       session.setters.setExpenses((prev) =>
-        replaceRecentWindow(prev, expenses, recentCutoff),
+        keepPendingWrites(
+          prev,
+          replaceRecentWindow(prev, expenses, recentCutoff),
+          pending,
+        ),
       );
       session.setters.setIncomes((prev) =>
-        replaceRecentWindow(prev, incomes, recentCutoff),
+        keepPendingWrites(
+          prev,
+          replaceRecentWindow(prev, incomes, recentCutoff),
+          pending,
+        ),
       );
     } else {
-      session.setters.setExpenses(expenses);
-      session.setters.setIncomes(incomes);
+      session.setters.setExpenses((prev) =>
+        keepPendingWrites(prev, expenses, pending),
+      );
+      session.setters.setIncomes((prev) =>
+        keepPendingWrites(prev, incomes, pending),
+      );
     }
     session.isHydratedFromCache = false;
     session.lastFetchAt = Date.now();

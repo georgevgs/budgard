@@ -1,7 +1,11 @@
 import { captureException } from '@/config/sentry';
 import { dataService } from '@/common/api/dataService';
 import type { DataSession } from '@/common/hooks/data/dataSession';
-import { replaceRecentWindow } from '@/common/contexts/dataContextHelpers';
+import {
+  keepPendingWrites,
+  replaceRecentWindow,
+} from '@/common/contexts/dataContextHelpers';
+import { readPendingWrites } from '@/constants/offlineQueue';
 import { getRecentCutoff } from '@/constants/dataCache';
 import { loadOptionalData } from '@/common/hooks/data/dataOptional';
 
@@ -23,15 +27,22 @@ export const refreshTransactions = (
       setRows = session.setters.setIncomes;
     }
     const rows = await getRows(session.ownerId, undefined, sinceDate);
+    const pending = await readPendingWrites();
     if (!session.isActive) {
       return;
     }
     if (includesFullHistory) {
-      setRows(rows);
+      setRows((prev) => keepPendingWrites(prev, rows, pending));
 
       return;
     }
-    setRows((prev) => replaceRecentWindow(prev, rows, recentCutoff));
+    setRows((prev) =>
+      keepPendingWrites(
+        prev,
+        replaceRecentWindow(prev, rows, recentCutoff),
+        pending,
+      ),
+    );
   });
 };
 

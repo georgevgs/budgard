@@ -31,6 +31,37 @@ export const replaceRecentWindow = <T extends { id: string; date: string }>(
   return [...recent, ...olderTail];
 };
 
+// Lays the writes still waiting in the offline queue back over rows the server
+// just returned. A queued create or edit keeps the local row (the server has
+// not seen it, or has an older version); a queued delete stays deleted. See
+// PendingWrites for what went wrong without this.
+export const keepPendingWrites = <T extends { id: string }>(
+  local: T[],
+  fresh: T[],
+  pending: { kept: ReadonlySet<string>; deleted: ReadonlySet<string> },
+): T[] => {
+  if (pending.kept.size === 0 && pending.deleted.size === 0) {
+    return fresh;
+  }
+
+  const localById = new Map(local.map((row) => [row.id, row]));
+  const freshIds = new Set(fresh.map((row) => row.id));
+  const merged = fresh
+    .filter((row) => !pending.deleted.has(row.id))
+    .map((row) => {
+      if (!pending.kept.has(row.id)) {
+        return row;
+      }
+
+      return localById.get(row.id) ?? row;
+    });
+  const unsynced = local.filter(
+    (row) => pending.kept.has(row.id) && !freshIds.has(row.id),
+  );
+
+  return [...unsynced, ...merged];
+};
+
 export const isAbortError = (error: unknown): boolean => {
   if (error instanceof DOMException && error.name === 'AbortError') {
     return true;
