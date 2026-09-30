@@ -4,7 +4,9 @@ import {
   anchorDayOf,
   parseIsoDate,
   startOfToday,
+  toIsoDate,
 } from '@/constants/dates';
+import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
 // Calendar-month approximations used to convert sub-monthly cadences into a
@@ -217,20 +219,46 @@ const isPastEndDate = (expense: RecurringExpense, date: Date): boolean => {
 };
 
 /**
- * The window "still to come this month" is cut from: tomorrow through the
- * last day of the current month.
+ * The window "still to come this month" is cut from: today through the last
+ * day of the current month.
  *
- * `includeFrom: false` is the load-bearing half. The cron writes the expense
- * row on its due date, so a charge falling today is already counted in this
- * month's spending; counting it again as still-to-come would take it out of
- * safe-to-spend twice. Safe-to-spend and Plan's month timeline both cut from
- * here, which is what makes the figure and the list it opens agree.
+ * Today is in, and `withoutGenerated` is what keeps that from double-counting.
+ * The scheduled job writes a charge's expense row on its due date, but at an
+ * hour this app does not choose — so a window that simply skipped today left a
+ * bill due today out of safe-to-spend entirely until the job ran: neither
+ * spent yet, nor still to come. A charge counts as still to come until its row
+ * exists, whichever order the two arrive in. Safe-to-spend and Plan's month
+ * timeline both cut from here, which is what makes the figure and the list it
+ * opens agree.
  */
 export const restOfMonthWindow = (now: Date): OccurrenceWindow => ({
   from: startOfDay(now),
   to: endOfMonth(now),
-  includeFrom: false,
+  includeFrom: true,
 });
+
+/** The charges already written as expense rows, keyed schedule + day. */
+export const buildGeneratedCharges = (
+  rows: ReadonlyArray<Pick<Expense, 'recurring_expense_id' | 'date'>>,
+): Set<string> =>
+  new Set(
+    rows
+      .filter((row) => row.recurring_expense_id)
+      .map((row) => chargeKey(row.recurring_expense_id as string, row.date)),
+  );
+
+/** A schedule's charges in the window that have no expense row yet. */
+export const collectPendingOccurrences = (
+  expense: RecurringExpense,
+  window: OccurrenceWindow,
+  generated: ReadonlySet<string>,
+): Date[] =>
+  collectOccurrences(expense, window).filter(
+    (date) => !generated.has(chargeKey(expense.id, toIsoDate(date))),
+  );
+
+const chargeKey = (scheduleId: string, day: string): string =>
+  `${scheduleId}|${day}`;
 
 /**
  * A plain forward-looking calendar window of `days` whole days from today.

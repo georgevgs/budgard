@@ -174,6 +174,8 @@ describe('buildUpcomingBills', () => {
       limit: 10,
     });
 
-    expect(upcoming.total).toBe(computeUpcomingRecurringThisMonth(items, NOW));
+    expect(upcoming.total).toBe(
+      computeUpcomingRecurringThisMonth(items, NOW, []),
+    );
   });
 });

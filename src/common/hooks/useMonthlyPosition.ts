@@ -29,7 +29,11 @@ export const useMonthlyPosition = (
     // still add up to what is gone.
     const spent =
       sumSpending(monthRows) + (rhythm?.setAsideOutsideSpending ?? 0);
-    const committed = computeUpcomingRecurringThisMonth(recurringExpenses, now);
+    const committed = computeUpcomingRecurringThisMonth(
+      recurringExpenses,
+      now,
+      monthRows,
+    );
 
     return buildMonthlyPosition({
       monthlyBudget,

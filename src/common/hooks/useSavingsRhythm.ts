@@ -94,7 +94,14 @@ export const useSavingsRhythm = (
     const allowances = new Map([
       [
         thisMonth,
-        computeAllowance(monthlyBudget, everyday, recurringExpenses, now, true),
+        computeAllowance(
+          monthlyBudget,
+          everyday,
+          recurringExpenses,
+          now,
+          true,
+          expenses,
+        ),
       ],
       [
         lastMonth,
@@ -104,6 +111,7 @@ export const useSavingsRhythm = (
           recurringExpenses,
           subMonths(now, 1),
           false,
+          expenses,
         ),
       ],
     ]);
@@ -349,6 +357,7 @@ const computeAllowance = (
   recurringExpenses: RecurringExpense[],
   reference: Date,
   isCurrentMonth: boolean,
+  allRows: Expense[],
 ): number => {
   const monthKey = format(reference, 'yyyy-MM');
   const recurringSpent = sumSpending(
@@ -361,7 +370,13 @@ const computeAllowance = (
   // the allowance now — otherwise every month would start generous and tighten.
   let upcoming = 0;
   if (isCurrentMonth) {
-    upcoming = computeUpcomingRecurringThisMonth(recurringExpenses, reference);
+    // Every row, not only the everyday ones: a bill that has already been
+    // written — into a savings category, say — is no longer still to come.
+    upcoming = computeUpcomingRecurringThisMonth(
+      recurringExpenses,
+      reference,
+      allRows,
+    );
   }
 
   const everydayBudget = monthlyBudget - recurringSpent - upcoming;

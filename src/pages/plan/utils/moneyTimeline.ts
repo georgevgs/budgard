@@ -1,11 +1,14 @@
 import { format } from 'date-fns';
 import { sumAmounts } from '@/constants/money';
 import {
+  buildGeneratedCharges,
   collectOccurrences,
+  collectPendingOccurrences,
   nextDaysWindow,
   restOfMonthWindow,
   type OccurrenceWindow,
 } from '@/constants/recurring';
+import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
 /** How far the rolling window looks ahead. Named here so the label the user
@@ -18,8 +21,9 @@ export type MoneyTimelineKind = 'expense' | 'income';
  * Which window Plan's timeline is showing.
  *
  * `month` is the one the budget is kept in: everything still to move between
- * tomorrow and the last day of this month, cut from the same window
- * safe-to-spend subtracts, so the list totals the "Due" figure that opens it.
+ * today and the last day of this month, cut from the same window safe-to-spend
+ * subtracts and dropping the same already-written charges, so the list totals
+ * the "Due" figure that opens it.
  * `days` is a rolling calendar preview that crosses the month boundary — on
  * the 20th it shows next month's rent, which answers a different question.
  */
@@ -47,6 +51,9 @@ export type MoneyTimeline = {
 
 type Options = {
   range: TimelineRange;
+  /** The transactions already loaded. In the `month` range a charge that
+   *  already has its row is spent, not still to move. */
+  rows: ReadonlyArray<Pick<Expense, 'recurring_expense_id' | 'date'>>;
   /** Length of the rolling window. Ignored when the range is `month`. */
   withinDays: number;
   limit: number;
@@ -59,8 +66,14 @@ export const buildMoneyTimeline = (
   options: Options,
 ): MoneyTimeline => {
   const window = resolveWindow(options, now);
-  const expenses = expandSchedules(recurringExpenses, 'expense', window);
-  const incomes = expandSchedules(recurringIncomes, 'income', window);
+  const pending = resolvePending(options);
+  const expenses = expandSchedules(
+    recurringExpenses,
+    'expense',
+    window,
+    pending,
+  );
+  const incomes = expandSchedules(recurringIncomes, 'income', window, pending);
   const entries = [...expenses, ...incomes].sort(compareEntries);
   const limit = Math.max(0, options.limit);
   const items = entries.slice(0, limit);
@@ -87,20 +100,40 @@ const resolveWindow = (options: Options, now: Date): OccurrenceWindow => {
   return nextDaysWindow(now, options.withinDays);
 };
 
+type OccurrenceWalk = (
+  item: RecurringExpense,
+  window: OccurrenceWindow,
+) => Date[];
+
+// The month range lists what is still to move, so a charge already written is
+// dropped. The rolling range is a calendar preview and keeps today's bill even
+// once it has gone out — seeing it there is the point.
+const resolvePending = (options: Options): OccurrenceWalk => {
+  if (options.range !== 'month') {
+    return collectOccurrences;
+  }
+
+  const generated = buildGeneratedCharges(options.rows);
+
+  return (item, window) => collectPendingOccurrences(item, window, generated);
+};
+
 const expandSchedules = (
   schedules: RecurringExpense[],
   kind: MoneyTimelineKind,
   window: OccurrenceWindow,
+  walk: OccurrenceWalk,
 ): MoneyTimelineEntry[] => {
-  return schedules.flatMap((item) => expandSchedule(item, kind, window));
+  return schedules.flatMap((item) => expandSchedule(item, kind, window, walk));
 };
 
 const expandSchedule = (
   item: RecurringExpense,
   kind: MoneyTimelineKind,
   window: OccurrenceWindow,
+  walk: OccurrenceWalk,
 ): MoneyTimelineEntry[] => {
-  return collectOccurrences(item, window).map((date) => ({
+  return walk(item, window).map((date) => ({
     id: `${kind}:${item.id}:${format(date, 'yyyy-MM-dd')}`,
     item,
     date,

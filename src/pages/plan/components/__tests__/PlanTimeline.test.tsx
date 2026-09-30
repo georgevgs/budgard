@@ -79,6 +79,7 @@ const renderTimeline = (options: Options = {}) => {
   const incomes = options.incomes ?? [];
   const timeline = buildMoneyTimeline(expenses, incomes, NOW, {
     range: 'month',
+    rows: [],
     withinDays: 30,
     limit: 8,
   });

@@ -15,6 +15,7 @@ import {
   useAccountsData,
   useDataConfig,
   useGoalsData,
+  useIncomesData,
   useRecurringData,
 } from '@/common/contexts/DataContext';
 import { useQuickAdd } from '@/common/contexts/QuickAddContext';
@@ -32,6 +33,7 @@ const PlanView = () => {
   const { t } = useTranslation();
   const config = useDataConfig();
   const goals = useGoalsData();
+  const incomes = useIncomesData();
   const { recurringExpenses, recurringIncomes } = useRecurringData();
   const { accounts } = useAccountsData();
   const { summary: debtSummary } = useDebts();
@@ -44,9 +46,14 @@ const PlanView = () => {
   const [timelineRange, setTimelineRange] = useState<TimelineRange>('month');
   const now = useCurrentDate();
   const monthly = useMonthlyPosition(optimisticExpenses, now);
+  const transactions = useMemo(
+    () => [...optimisticExpenses, ...incomes],
+    [optimisticExpenses, incomes],
+  );
   const { timeline, hasSchedules } = useMoneyTimeline({
     recurringExpenses,
     recurringIncomes,
+    transactions,
     range: timelineRange,
     now,
   });

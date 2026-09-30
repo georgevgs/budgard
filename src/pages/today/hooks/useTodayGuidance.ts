@@ -69,6 +69,7 @@ export const useTodayGuidance = (
     const upcomingThisMonth = computeUpcomingRecurringThisMonth(
       recurringExpenses,
       now,
+      monthExpenses,
     );
     const safeToSpend = position.available;
     const daysRemaining = getDaysInMonth(now) - now.getDate() + 1;

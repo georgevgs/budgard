@@ -47,12 +47,12 @@ const emptyProjectionInput = (now: Date) => ({
 
 describe('computeUpcomingRecurringThisMonth', () => {
   it('returns 0 for an empty list', () => {
-    expect(computeUpcomingRecurringThisMonth([], JULY_15_2026)).toBe(0);
+    expect(computeUpcomingRecurringThisMonth([], JULY_15_2026, [])).toBe(0);
   });
 
   it('ignores a monthly item whose next charge falls in the next month', () => {
     const items = [buildRecurring({ last_generated_date: '2026-07-05' })];
-    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026)).toBe(0);
+    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026, [])).toBe(0);
   });
 
   it('counts a monthly item still due later this month', () => {
@@ -64,7 +64,7 @@ describe('computeUpcomingRecurringThisMonth', () => {
         last_generated_date: '2026-06-20',
       }),
     ];
-    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026)).toBe(10);
+    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026, [])).toBe(10);
   });
 
   it('counts every remaining weekly occurrence in the month', () => {
@@ -75,7 +75,7 @@ describe('computeUpcomingRecurringThisMonth', () => {
         last_generated_date: '2026-07-14',
       }),
     ];
-    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026)).toBe(20);
+    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026, [])).toBe(20);
   });
 
   it('uses the actual charge amount for quarterly items, not the monthly equivalent', () => {
@@ -88,14 +88,14 @@ describe('computeUpcomingRecurringThisMonth', () => {
         last_generated_date: '2026-04-20',
       }),
     ];
-    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026)).toBe(30);
+    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026, [])).toBe(30);
   });
 
   it('ignores inactive items', () => {
     const items = [
       buildRecurring({ active: false, last_generated_date: '2026-06-20' }),
     ];
-    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026)).toBe(0);
+    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026, [])).toBe(0);
   });
 
   it('ignores occurrences beyond the end_date', () => {
@@ -105,12 +105,35 @@ describe('computeUpcomingRecurringThisMonth', () => {
         end_date: '2026-07-18',
       }),
     ];
-    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026)).toBe(0);
+    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026, [])).toBe(0);
   });
 
-  it('excludes a charge due today (the cron already generates it)', () => {
-    const items = [buildRecurring({ last_generated_date: '2026-06-15' })];
-    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026)).toBe(0);
+  // The job that writes a charge's row runs at an hour the app does not
+  // choose. Skipping today outright left a bill due today out of the figure
+  // until then — neither spent yet nor still to come.
+  it('counts a charge due today until its row is written', () => {
+    const items = [
+      buildRecurring({
+        start_date: '2026-01-15',
+        last_generated_date: '2026-06-15',
+      }),
+    ];
+    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026, [])).toBe(10);
+  });
+
+  it('drops a charge due today once its row exists', () => {
+    const items = [
+      buildRecurring({
+        start_date: '2026-01-15',
+        last_generated_date: '2026-06-15',
+      }),
+    ];
+    const written = [
+      buildExpense({ recurring_expense_id: 'r1', date: '2026-07-15' }),
+    ];
+    expect(
+      computeUpcomingRecurringThisMonth(items, JULY_15_2026, written),
+    ).toBe(0);
   });
 
   it('counts an item whose start_date falls later this month', () => {
@@ -120,7 +143,7 @@ describe('computeUpcomingRecurringThisMonth', () => {
         last_generated_date: undefined,
       }),
     ];
-    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026)).toBe(10);
+    expect(computeUpcomingRecurringThisMonth(items, JULY_15_2026, [])).toBe(10);
   });
 
   it('does not leak January charges into December (year boundary)', () => {
@@ -134,7 +157,7 @@ describe('computeUpcomingRecurringThisMonth', () => {
       last_generated_date: '2026-11-28',
     });
     const items = [dueNextJanuary, dueDec28];
-    expect(computeUpcomingRecurringThisMonth(items, DEC_20_2026)).toBe(10);
+    expect(computeUpcomingRecurringThisMonth(items, DEC_20_2026, [])).toBe(10);
   });
 });
 

@@ -9,8 +9,8 @@ const NOW = new Date(2026, 8, 1, 12); // 1 Sep 2026, local
 // case the month window exists to answer.
 const LATE = new Date(2026, 8, 20, 12); // 20 Sep 2026, local
 
-const days = { range: 'days', withinDays: 30, limit: 8 } as const;
-const month = { range: 'month', withinDays: 30, limit: 8 } as const;
+const days = { range: 'days', rows: [], withinDays: 30, limit: 8 } as const;
+const month = { range: 'month', rows: [], withinDays: 30, limit: 8 } as const;
 
 describe('buildMoneyTimeline', () => {
   it('expands, sorts and totals income and expense occurrences', () => {
@@ -113,18 +113,21 @@ describe('buildMoneyTimeline, rest of the month', () => {
     expect(restOfMonth.endsOn).toEqual(endOfMonth(LATE));
   });
 
-  it('leaves out a charge falling today, which the rolling window keeps', () => {
-    // The cron writes the expense row on its due date, so today's charge is
-    // already inside this month's spending. Listing it as still-to-come would
-    // make the list disagree with the figure that opens it.
+  // The row for a charge due today is written by a scheduled job at an hour
+  // the app does not choose. Until it exists the charge is still to move; once
+  // it does, it is spent and leaves the month list — while the rolling window
+  // keeps showing it either way.
+  it('lists a charge due today until its row is written', () => {
     const today = schedule({ id: 'today', start_date: '2026-09-01' });
-    const ids = (options: typeof days | typeof month) =>
-      buildMoneyTimeline([today], [], NOW, options).items.map(
+    const written = [{ recurring_expense_id: 'today', date: '2026-09-01' }];
+    const ids = (options: typeof days | typeof month, rows = written) =>
+      buildMoneyTimeline([today], [], NOW, { ...options, rows }).items.map(
         (entry) => entry.id,
       );
 
-    expect(ids(days)).toContain('expense:today:2026-09-01');
+    expect(ids(month, [])).toEqual(['expense:today:2026-09-01']);
     expect(ids(month)).toEqual([]);
+    expect(ids(days)).toContain('expense:today:2026-09-01');
   });
 
   it('nets income against expenses over the window', () => {
@@ -180,7 +183,7 @@ describe('buildMoneyTimeline, rest of the month', () => {
     const timeline = buildMoneyTimeline(items, [], NOW, month);
 
     expect(timeline.expenseTotal).toBe(
-      computeUpcomingRecurringThisMonth(items, NOW),
+      computeUpcomingRecurringThisMonth(items, NOW, []),
     );
     expect(timeline.expenseTotal).toBeGreaterThan(0);
   });

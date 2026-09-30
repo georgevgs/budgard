@@ -21,7 +21,8 @@ import {
   startOfMonth,
 } from 'date-fns';
 import {
-  collectOccurrences,
+  buildGeneratedCharges,
+  collectPendingOccurrences,
   getMonthlyAmount,
   restOfMonthWindow,
 } from '@/constants/recurring';
@@ -61,21 +62,23 @@ export type ProjectionInput = {
 };
 
 // Sums the actual amounts of recurring-expense occurrences still to come
-// between tomorrow and the last day of the current month. Actual amounts —
-// not monthly equivalents — because a quarterly 30 due next week costs 30
-// this month, not 10, and a weekly item counts once per remaining occurrence.
+// between today and the last day of the current month. Actual amounts — not
+// monthly equivalents — because a quarterly 30 due next week costs 30 this
+// month, not 10, and a weekly item counts once per remaining occurrence.
 //
-// Plan's "rest of this month" timeline cuts the same window over the same
-// schedules, so the list a reader opens from this figure totals this figure —
-// by construction rather than by comment. `restOfMonthWindow` carries the
-// reasoning for excluding a charge that falls today.
+// A charge whose expense row already exists is spent, not still to come, so
+// `rows` — the transactions already loaded — take those out. Plan's "rest of
+// this month" timeline cuts the same window and drops the same rows, so the
+// list a reader opens from this figure totals this figure by construction.
 export const computeUpcomingRecurringThisMonth = (
   recurringExpenses: RecurringExpense[],
   now: Date,
+  rows: ReadonlyArray<Pick<Expense, 'recurring_expense_id' | 'date'>>,
 ): number => {
   const window = restOfMonthWindow(now);
+  const generated = buildGeneratedCharges(rows);
   const due = recurringExpenses.flatMap((item) =>
-    collectOccurrences(item, window).map(() => item.amount),
+    collectPendingOccurrences(item, window, generated).map(() => item.amount),
   );
 
   return sumAmounts(due);
