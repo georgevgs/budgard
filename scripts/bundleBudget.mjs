@@ -33,8 +33,10 @@ const BUDGETS = {
   // shell: eight more chunks cost ~7 kB of per-chunk boilerplate here to take
   // 48 kB off the authenticated startup above, which is the better trade.
   precacheGzipKb: 565,
-  // No single precached chunk should dominate an install.
-  largestPrecachedChunkGzipKb: 80,
+  // No single precached chunk should dominate an install. Raised from 80 for
+  // React 19.3: react-dom's production client grew 93.5 -> 109.0 kB gzip
+  // upstream, which took react-vendor from 72.7 to 81.5 kB with no app change.
+  largestPrecachedChunkGzipKb: 86,
 };
 
 const main = () => {
