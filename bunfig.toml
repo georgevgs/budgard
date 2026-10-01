@@ -3,9 +3,6 @@
 # Refuse versions published less than 7 days ago (604,800 seconds)
 minimumReleaseAge = 604800
 
-# Exact-pinned security patch for GHSA-7p8r-x3mc-p8w7.
-minimumReleaseAgeExcludes = ["fast-uri"]
-
 # 2. BLOCK EXOTIC TRANSITIVE MALWARE (Block Exotic Subdeps)
 # Prevents dependencies from sneaking in malicious git/S3 tarball URLs
 blockExoticSubdeps = true
