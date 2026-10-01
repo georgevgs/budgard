@@ -54,9 +54,7 @@ export const NetWorthChart = ({
           series={SERIES}
           height={220}
           shouldAllowNegative
-          formatY={(value) =>
-            formatCurrencyCompact(Math.abs(value), defaultCurrency)
-          }
+          formatY={(value) => formatCurrencyCompact(value, defaultCurrency)}
           reference={{ value: 0, color: '--muted-foreground' }}
           renderTooltip={(point) => renderTooltip(point, defaultCurrency, t)}
           ariaLabel={buildAriaLabel(data, defaultCurrency, t)}

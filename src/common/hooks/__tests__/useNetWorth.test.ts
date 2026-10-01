@@ -373,4 +373,33 @@ describe('useNetWorth', () => {
       total: 700,
     });
   });
+
+  it('withholds historical points when an old exchange rate is unavailable', async () => {
+    dataMock.accounts = [
+      makeAccount({
+        id: 'usd',
+        default_currency: 'USD',
+        current_balance: 1000,
+      }),
+    ];
+    dataMock.accountBalances = [
+      makeBalance('usd', '2026-01-01', 500),
+      makeBalance('usd', '2026-02-01', 700),
+    ];
+    vi.mocked(fetchExchangeRate).mockImplementation(async (_from, date) => {
+      if (date === '2026-01-01') {
+        throw new Error('historical rate unavailable');
+      }
+
+      return 0.9;
+    });
+
+    const { result } = renderHook(() => useNetWorth());
+    await waitFor(() => expect(result.current.isComputing).toBe(false));
+
+    expect(result.current.summary.total).toBe(900);
+    expect(result.current.summary.staleCurrencies).toEqual([]);
+    expect(result.current.missingHistoryCurrencies).toEqual(['USD']);
+    expect(result.current.series).toEqual([]);
+  });
 });

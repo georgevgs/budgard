@@ -1,10 +1,13 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { CategoryRow } from '@/pages/analytics/hooks/useAnalyticsData';
+import { UNCATEGORIZED_ID } from '@/pages/analytics/hooks/useMoneyFlowData';
 import type { Expense } from '@/types/Expense';
+import type { Category } from '@/types/Category';
 
 export const useAnalyticsDrillDown = (
   yearExpenses: Expense[],
   selectedYear: number,
+  categories: Category[],
 ) => {
   const [drillDownCategory, setDrillDownCategory] =
     useState<CategoryRow | null>(null);
@@ -17,8 +20,16 @@ export const useAnalyticsDrillDown = (
       return [];
     }
 
-    return yearExpenses.filter((e) => e.category_id === drillDownCategory.id);
-  }, [yearExpenses, drillDownCategory]);
+    const categoryIds = new Set(categories.map((category) => category.id));
+
+    return yearExpenses.filter((expense) => {
+      if (drillDownCategory.id === UNCATEGORIZED_ID) {
+        return !expense.category_id || !categoryIds.has(expense.category_id);
+      }
+
+      return expense.category_id === drillDownCategory.id;
+    });
+  }, [yearExpenses, drillDownCategory, categories]);
 
   const handleCategoryClick = useCallback((cat: CategoryRow) => {
     setDrillDownCategory(cat);

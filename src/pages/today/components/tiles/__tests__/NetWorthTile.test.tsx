@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const state = vi.hoisted(() => ({
   isSecondaryLoaded: false,
   isComputing: false,
+  staleCurrencies: [] as string[],
 }));
 
 vi.mock('@/common/contexts/DataContext', () => ({
@@ -16,7 +17,7 @@ vi.mock('@/common/contexts/DataContext', () => ({
 
 vi.mock('@/common/hooks/useNetWorth', () => ({
   useNetWorth: () => ({
-    summary: { total: 42000 },
+    summary: { total: 42000, staleCurrencies: state.staleCurrencies },
     isComputing: state.isComputing,
   }),
 }));
@@ -34,6 +35,7 @@ describe('NetWorthTile', () => {
   beforeEach(() => {
     state.isSecondaryLoaded = false;
     state.isComputing = false;
+    state.staleCurrencies = [];
   });
 
   it('does not present a zero-value answer before deferred data arrives', () => {
@@ -45,6 +47,15 @@ describe('NetWorthTile', () => {
   it('keeps net worth unknown while exchange rates are being computed', () => {
     state.isSecondaryLoaded = true;
     state.isComputing = true;
+
+    renderTile();
+
+    expect(screen.getByText('—')).toBeInTheDocument();
+  });
+
+  it('does not show a guessed total when an exchange rate failed', () => {
+    state.isSecondaryLoaded = true;
+    state.staleCurrencies = ['JPY'];
 
     renderTile();
 

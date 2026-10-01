@@ -34,7 +34,8 @@ const NetWorthView = () => {
   const { t } = useTranslation();
   const { accounts, grouped, latestSnapshotByAccount } = useGroupedAccounts();
   const { defaultCurrency, isInitialized, isSecondaryLoaded } = useDataConfig();
-  const { summary, series, isComputing } = useNetWorth();
+  const { summary, series, missingHistoryCurrencies, isComputing } =
+    useNetWorth();
   const { isPro, allow } = useProGate();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | undefined>();
@@ -86,6 +87,7 @@ const NetWorthView = () => {
             accounts.length,
             summary,
             series,
+            missingHistoryCurrencies,
             defaultCurrency,
             grouped,
             latestSnapshotByAccount,
@@ -137,6 +139,7 @@ const renderBody = (
   accountCount: number,
   summary: NetWorthSummary,
   series: NetWorthPoint[],
+  missingHistoryCurrencies: string[],
   defaultCurrency: string,
   grouped: GroupedAccounts,
   latestSnapshotByAccount: Map<string, AccountBalance>,
@@ -161,11 +164,13 @@ const renderBody = (
   return (
     <>
       <NetWorthHeader summary={summary} defaultCurrency={defaultCurrency} />
-      <NetWorthChart
-        series={series}
-        defaultCurrency={defaultCurrency}
-        hasDebtConstant={summary.debts > 0}
-      />
+      {renderChart(
+        series,
+        summary,
+        missingHistoryCurrencies,
+        defaultCurrency,
+        t,
+      )}
       <AccountGroup
         title={t('networth.groups.assets')}
         accounts={grouped.assets}
@@ -186,6 +191,36 @@ const renderBody = (
         onAccountClick={onAccountClick}
       />
     </>
+  );
+};
+
+const renderChart = (
+  series: NetWorthPoint[],
+  summary: NetWorthSummary,
+  missingHistoryCurrencies: string[],
+  defaultCurrency: string,
+  t: TranslateFunction,
+) => {
+  if (summary.staleCurrencies.length > 0) {
+    return null;
+  }
+
+  if (missingHistoryCurrencies.length > 0) {
+    return (
+      <p role="status" className="text-sm text-muted-foreground">
+        {t('networth.chart.historyRatesUnavailable', {
+          currencies: missingHistoryCurrencies.join(', '),
+        })}
+      </p>
+    );
+  }
+
+  return (
+    <NetWorthChart
+      series={series}
+      defaultCurrency={defaultCurrency}
+      hasDebtConstant={summary.debts > 0}
+    />
   );
 };
 

@@ -3,10 +3,13 @@ type CategorySparklineProps = {
   color: string;
 };
 
-export const CategorySparkline = ({ values, color }: CategorySparklineProps) => {
+export const CategorySparkline = ({
+  values,
+  color,
+}: CategorySparklineProps) => {
   let lastNonZero = -1;
   for (let i = values.length - 1; i >= 0; i--) {
-    if (values[i] > 0) {
+    if (values[i] !== 0) {
       lastNonZero = i;
       break;
     }
@@ -17,11 +20,8 @@ export const CategorySparkline = ({ values, color }: CategorySparklineProps) => 
   }
 
   const displayValues = values.slice(0, lastNonZero + 1);
-  const max = Math.max(...displayValues);
-
-  if (max === 0) {
-    return <div className="h-7 w-16" aria-hidden="true" />;
-  }
+  const max = Math.max(0, ...displayValues);
+  const min = Math.min(0, ...displayValues);
 
   const W = 64;
   const H = 28;
@@ -33,7 +33,7 @@ export const CategorySparkline = ({ values, color }: CategorySparklineProps) => 
 
   const points = displayValues.map((val, i) => ({
     x: pad + i * step,
-    y: H - pad - (val / max) * (H - pad * 2),
+    y: H - pad - ((val - min) / (max - min)) * (H - pad * 2),
   }));
 
   const d = points.map(pointToPathSegment).join(' ');

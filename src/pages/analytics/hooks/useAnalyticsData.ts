@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format, parseISO, type Locale } from 'date-fns';
 import {
   useDataConfig,
@@ -8,6 +9,8 @@ import {
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { onlySpending } from '@/constants/spending';
 import { sumAmounts } from '@/constants/money';
+import { swatch } from '@/design/palette';
+import { UNCATEGORIZED_ID } from '@/pages/analytics/hooks/useMoneyFlowData';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
 import { useOnDemandHistory } from '@/common/hooks/data/useOnDemandHistory';
 import { getFreeAnalyticsCutoff } from '@/constants/proLimits';
@@ -48,6 +51,7 @@ export const useAnalyticsData = (now: Date = new Date()) => {
   const { expenseCategories: categories } = useCategoriesData();
   const { monthlyBudget } = useDataConfig();
   const dateLocale = useDateLocale();
+  const { t } = useTranslation();
   const { isPro } = useSubscription();
 
   useOnDemandHistory(isPro);
@@ -110,8 +114,15 @@ export const useAnalyticsData = (now: Date = new Date()) => {
   );
 
   const yearlyStats = useMemo(
-    () => summariseYear(yearExpenses, categories, selectedYear, now),
-    [yearExpenses, categories, selectedYear, now],
+    () =>
+      summariseYear(
+        yearExpenses,
+        categories,
+        selectedYear,
+        now,
+        t('analytics.drillDown.uncategorized'),
+      ),
+    [yearExpenses, categories, selectedYear, now, t],
   );
 
   const yAxisMax = useMemo(() => {
@@ -166,7 +177,7 @@ const buildMonthlyTotals = (
   const totals = new Map<string, number>();
   for (const expense of yearExpenses) {
     const key = expense.date.slice(0, 7);
-    totals.set(key, (totals.get(key) ?? 0) + expense.amount);
+    totals.set(key, sumAmounts([totals.get(key) ?? 0, expense.amount]));
   }
 
   const range = getObservedMonthRange(yearExpenses, year, now);
@@ -210,7 +221,7 @@ const compareMonths = (
 
   const thisMonthAmount = sumAmounts(thisMonthRows);
   const lastMonthAmount = sumAmounts(lastMonthRows);
-  const delta = thisMonthAmount - lastMonthAmount;
+  const delta = sumAmounts([thisMonthAmount, -lastMonthAmount]);
 
   // No previous spending means no percentage to state — not a 100% rise.
   let percentChange: number | null = null;
@@ -238,24 +249,30 @@ const summariseYear = (
   categories: Category[],
   year: number,
   now: Date,
+  uncategorizedName: string,
 ) => {
   const byCategory = new Map<string, CategoryBucket>();
-  let totalSpent = 0;
+  const categoryIds = new Set(categories.map((category) => category.id));
 
   for (const expense of yearExpenses) {
-    totalSpent += expense.amount;
-    if (!expense.category_id) {
-      continue;
+    let categoryId = UNCATEGORIZED_ID;
+    if (expense.category_id && categoryIds.has(expense.category_id)) {
+      categoryId = expense.category_id;
     }
-    let slot = byCategory.get(expense.category_id);
+    let slot = byCategory.get(categoryId);
     if (!slot) {
       slot = { total: 0, monthly: new Array(12).fill(0) };
-      byCategory.set(expense.category_id, slot);
+      byCategory.set(categoryId, slot);
     }
     const monthIndex = Number(expense.date.slice(5, 7)) - 1;
-    slot.total += expense.amount;
-    slot.monthly[monthIndex] += expense.amount;
+    slot.total = sumAmounts([slot.total, expense.amount]);
+    slot.monthly[monthIndex] = sumAmounts([
+      slot.monthly[monthIndex],
+      expense.amount,
+    ]);
   }
+
+  const totalSpent = sumAmounts(yearExpenses.map((expense) => expense.amount));
 
   const monthsElapsed = countObservedMonths(yearExpenses, year, now);
   let monthlyAverage = 0;
@@ -265,8 +282,19 @@ const summariseYear = (
 
   const categoryBreakdown: CategoryRow[] = categories
     .map((category) => toCategoryRow(category, byCategory.get(category.id)))
-    .filter((category) => category.amount > 0)
-    .sort((a, b) => b.amount - a.amount);
+    .filter((category) => category.amount !== 0);
+  const uncategorized = byCategory.get(UNCATEGORIZED_ID);
+  if (uncategorized && uncategorized.total !== 0) {
+    categoryBreakdown.push({
+      id: UNCATEGORIZED_ID,
+      name: uncategorizedName,
+      color: swatch.steel,
+      icon: null,
+      amount: uncategorized.total,
+      monthlyAmounts: uncategorized.monthly,
+    });
+  }
+  categoryBreakdown.sort((a, b) => b.amount - a.amount);
 
   return { totalSpent, monthlyAverage, categoryBreakdown, monthsElapsed };
 };
@@ -297,7 +325,7 @@ const buildRollingMonths = (
   const totals = new Map<string, number>();
   for (const expense of expenses) {
     const key = expense.date.slice(0, 7);
-    totals.set(key, (totals.get(key) ?? 0) + expense.amount);
+    totals.set(key, sumAmounts([totals.get(key) ?? 0, expense.amount]));
   }
 
   const rolling = Array.from({ length: ROLLING_MONTHS }, (_, offset) => {

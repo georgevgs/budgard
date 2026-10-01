@@ -15,7 +15,9 @@ vi.mock('@/common/contexts/DataContext', () => ({
   useCategoriesData: () => ({ expenseCategories: data.categories }),
 }));
 
-vi.mock('@/common/hooks/useDateLocale', () => ({ useDateLocale: () => undefined }));
+vi.mock('@/common/hooks/useDateLocale', () => ({
+  useDateLocale: () => undefined,
+}));
 
 import {
   useMoneyFlowData,
@@ -134,6 +136,34 @@ describe('useMoneyFlowData', () => {
         amount: 75,
       },
     ]);
+  });
+
+  it('includes refunds in the signed expense total and net', () => {
+    data.categories = [
+      category('cat-groceries', 'Groceries'),
+      category('cat-travel', 'Travel'),
+    ];
+    data.incomes = [row('2026-08-01', 500, { type: 'income' })];
+    data.expenses = [
+      row('2026-08-05', 100, { category_id: 'cat-groceries' }),
+      row('2026-08-06', -150, { category_id: 'cat-travel' }),
+    ];
+
+    const r = render();
+    expect(r.current.totalExpenses).toBe(-50);
+    expect(r.current.savings).toBe(550);
+    expect(r.current.categories).toContainEqual(
+      expect.objectContaining({ id: 'cat-travel', amount: -150 }),
+    );
+  });
+
+  it('counts a refund-only month as activity', () => {
+    data.expenses = [row('2026-08-05', -25)];
+
+    const r = render();
+    expect(r.current.totalExpenses).toBe(-25);
+    expect(r.current.savings).toBe(25);
+    expect(r.current.hasData).toBe(true);
   });
 
   it('folds everything past the top 6 categories into one Other row', () => {

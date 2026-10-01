@@ -25,11 +25,22 @@ export const DebtPayoffPlanner = ({ debts }: DebtPayoffPlannerProps) => {
   const dateLocale = useDateLocale();
   const [strategy, setStrategy] = useState<PayoffStrategy>('snowball');
   const [extraInput, setExtraInput] = useState('0');
-  const plan = useDebtPayoffPlan(debts, parseExtra(extraInput));
+  const activeDebts = debts.filter(isActiveDebt);
+  const currencies = new Set(activeDebts.map((debt) => debt.currency));
+  const hasMixedCurrencies = currencies.size > 1;
+  let planDebts = debts;
+  if (hasMixedCurrencies) {
+    planDebts = [];
+  }
+  const plan = useDebtPayoffPlan(planDebts, parseExtra(extraInput));
 
-  const hasActiveDebt = debts.some(isActiveDebt);
+  const hasActiveDebt = activeDebts.length > 0;
 
   if (!hasActiveDebt) {
+    return null;
+  }
+
+  if (hasMixedCurrencies) {
     return null;
   }
 
@@ -41,6 +52,8 @@ export const DebtPayoffPlanner = ({ debts }: DebtPayoffPlannerProps) => {
       />
     );
   }
+
+  const currency = activeDebts[0].currency ?? defaultCurrency;
 
   return (
     <SurfaceCard>
@@ -68,7 +81,7 @@ export const DebtPayoffPlanner = ({ debts }: DebtPayoffPlannerProps) => {
           />
         </div>
 
-        {renderResults(plan, strategy, defaultCurrency, dateLocale, t)}
+        {renderResults(plan, strategy, currency, dateLocale, t)}
       </div>
     </SurfaceCard>
   );

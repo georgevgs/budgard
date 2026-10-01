@@ -112,6 +112,9 @@ const sumCurrentsForGoals = (
   }
 
   for (const expense of expenses) {
+    if (!countsInTotals(expense)) {
+      continue;
+    }
     const amount = Number(expense.amount ?? 0);
     if (expense.category_id) {
       addToMatchingGoals(
@@ -135,6 +138,9 @@ const sumCurrentsForGoals = (
   }
 
   for (const income of incomes) {
+    if (!countsInTotals(income)) {
+      continue;
+    }
     const amount = Number(income.amount ?? 0);
     addToMatchingGoals(currents, netDeltaGoals, income.date, amount);
   }
@@ -197,7 +203,7 @@ const addToMatchingGoals = (
     if (date < goal.start_date) {
       continue;
     }
-    currents.set(goal.id, (currents.get(goal.id) ?? 0) + amount);
+    currents.set(goal.id, sumAmounts([currents.get(goal.id) ?? 0, amount]));
   }
 };
 
@@ -284,7 +290,7 @@ const sumForSource = (
   const incomeSum = sumExpenses(incomes.filter((i) => i.date >= startDate));
   const expenseSum = sumExpenses(expenses.filter((e) => e.date >= startDate));
 
-  return incomeSum - expenseSum;
+  return sumAmounts([incomeSum, -expenseSum]);
 };
 
 // Rows the user marked as not-spending are left out here for the same reason

@@ -89,4 +89,66 @@ describe('useMonthlyReview', () => {
       { id: 'comparison', text: 'analytics.review.noSpending' },
     ]);
   });
+
+  it('describes a refund-offset month without calling it empty or naming negative spending as the leader', () => {
+    const { result } = renderHook(() =>
+      useMonthlyReview({
+        expenses: [expense('charge', 20), expense('refund', -30)],
+        categories,
+        comparison: {
+          thisMonthLabel: 'August 2026',
+          lastMonthLabel: 'July 2026',
+          thisMonthAmount: -10,
+          lastMonthAmount: 40,
+          delta: -50,
+          percentChange: -125,
+        },
+        position: {
+          state: 'noBudget',
+          available: null,
+          spent: 0,
+          committed: 0,
+          savingsReserve: 0,
+        },
+        currency: 'EUR',
+        now,
+      }),
+    );
+
+    expect(result.current.items[0].text).toBe('analytics.review.refundOffset');
+    expect(result.current.items.map((item) => item.id)).not.toContain(
+      'category',
+    );
+  });
+
+  it('does not call this the first month when last month had net refunds', () => {
+    const { result } = renderHook(() =>
+      useMonthlyReview({
+        expenses: [
+          expense('current', 20),
+          expense('old-refund', -30, '2026-07-10'),
+        ],
+        categories,
+        comparison: {
+          thisMonthLabel: 'August 2026',
+          lastMonthLabel: 'July 2026',
+          thisMonthAmount: 20,
+          lastMonthAmount: -30,
+          delta: 50,
+          percentChange: null,
+        },
+        position: {
+          state: 'noBudget',
+          available: null,
+          spent: 20,
+          committed: 0,
+          savingsReserve: 0,
+        },
+        currency: 'EUR',
+        now,
+      }),
+    );
+
+    expect(result.current.items[0].text).toBe('analytics.review.noBaseline');
+  });
 });

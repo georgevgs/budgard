@@ -111,4 +111,43 @@ describe('useDebts', () => {
     expect(result.current.byCurrency.EUR).toHaveLength(2);
     expect(result.current.byCurrency.USD).toHaveLength(1);
   });
+
+  it('does not add balances or minimums from different currencies', () => {
+    dataMock.debts = [
+      makeDebt({
+        id: 'eur',
+        currency: 'EUR',
+        current_balance: 100,
+        minimum_payment: 10,
+      }),
+      makeDebt({
+        id: 'jpy',
+        currency: 'JPY',
+        current_balance: 20000,
+        minimum_payment: 2000,
+      }),
+    ];
+
+    const { result } = renderHook(() => useDebts());
+    expect(result.current.summary.hasMixedCurrencies).toBe(true);
+    expect(result.current.summary.totalBalance).toBeNull();
+    expect(result.current.summary.totalMinimumPayment).toBeNull();
+    expect(result.current.summary.weightedAverageApr).toBeNull();
+    expect(result.current.summary.balanceByCurrency).toEqual({
+      EUR: 100,
+      JPY: 20000,
+    });
+    expect(result.current.summary.minimumByCurrency).toEqual({
+      EUR: 10,
+      JPY: 2000,
+    });
+  });
+
+  it('uses the debt currency for a single-currency summary', () => {
+    dataMock.debts = [makeDebt({ currency: 'USD', current_balance: 100 })];
+
+    const { result } = renderHook(() => useDebts());
+    expect(result.current.summary.currency).toBe('USD');
+    expect(result.current.summary.totalBalance).toBe(100);
+  });
 });

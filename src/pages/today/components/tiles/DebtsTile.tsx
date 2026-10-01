@@ -26,8 +26,10 @@ export const DebtsTile = () => {
         <p className="type-figure-sm">
           {renderBalance(
             summary.totalBalance,
-            defaultCurrency,
+            summary.currency ?? defaultCurrency,
+            summary.hasMixedCurrencies,
             isSecondaryLoaded,
+            t,
           )}
         </p>
         <p className="mt-1 text-[0.72rem] leading-none text-muted-foreground">
@@ -39,15 +41,21 @@ export const DebtsTile = () => {
 };
 
 const renderBalance = (
-  total: number,
+  total: number | null,
   currency: string,
+  hasMixedCurrencies: boolean,
   isReady: boolean,
+  t: TranslateFunction,
 ): string => {
   if (!isReady) {
     return '—';
   }
 
-  return formatCurrency(total, currency);
+  if (hasMixedCurrencies) {
+    return t('debts.mixedCurrencies');
+  }
+
+  return formatCurrency(total ?? 0, currency);
 };
 
 const renderCount = (

@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useGoalProgress, useAllGoalProgress } from '@/common/hooks/useGoalProgress';
+import {
+  useGoalProgress,
+  useAllGoalProgress,
+} from '@/common/hooks/useGoalProgress';
 import type { Account } from '@/types/Account';
 import type { Expense } from '@/types/Expense';
 import type { Goal } from '@/types/Goal';
@@ -393,5 +396,58 @@ describe('useAllGoalProgress', () => {
     expect(result.current.g2.current).toBe(50);
     expect(result.current.g1.percent).toBe(0.5);
     expect(result.current.g2.percent).toBeCloseTo(0.1, 5);
+  });
+
+  it('matches individual progress for excluded rows, debt payments, and decimal amounts', () => {
+    const categoryGoal = makeGoal({
+      id: 'category',
+      source_type: 'category',
+      category_id: 'savings',
+    });
+    const tagGoal = makeGoal({
+      id: 'tag',
+      source_type: 'tag',
+      tag_id: 'saved',
+    });
+    const netGoal = makeGoal({ id: 'net', source_type: 'net_delta' });
+    dataMock = {
+      expenses: [
+        makeExpense('2026-03-01', 0.1, {
+          category_id: 'savings',
+          tag_id: 'saved',
+        }),
+        makeExpense('2026-03-02', 0.2, {
+          category_id: 'savings',
+          tag_id: 'saved',
+        }),
+        makeExpense('2026-03-03', 5, {
+          category_id: 'savings',
+          tag_id: 'saved',
+          is_excluded: true,
+        }),
+        makeExpense('2026-03-04', 7, {
+          category_id: 'savings',
+          tag_id: 'saved',
+          type: 'debt_payment',
+        }),
+      ],
+      incomes: [
+        makeExpense('2026-03-01', 1, { type: 'income' }),
+        makeExpense('2026-03-02', 2, { type: 'income', is_excluded: true }),
+      ],
+      goals: [categoryGoal, tagGoal, netGoal],
+      accounts: [],
+    };
+
+    const { result } = renderHook(() => useAllGoalProgress());
+    expect(result.current.category.current).toBe(0.3);
+    expect(result.current.tag.current).toBe(0.3);
+    expect(result.current.net.current).toBe(0.7);
+    for (const goal of dataMock.goals) {
+      const individual = renderHook(() => useGoalProgress(goal));
+      expect(result.current[goal.id].current).toBe(
+        individual.result.current.current,
+      );
+    }
   });
 });

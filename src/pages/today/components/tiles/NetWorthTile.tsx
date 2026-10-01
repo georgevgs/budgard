@@ -23,7 +23,9 @@ export const NetWorthTile = () => {
         {renderTotal(
           summary.total,
           defaultCurrency,
-          isComputing || !isSecondaryLoaded,
+          isComputing ||
+            !isSecondaryLoaded ||
+            summary.staleCurrencies.length > 0,
         )}
       </p>
     </BentoTile>
@@ -35,9 +37,9 @@ export const NetWorthTile = () => {
 const renderTotal = (
   total: number,
   currency: string,
-  isComputing: boolean,
+  isUnavailable: boolean,
 ): string => {
-  if (isComputing) {
+  if (isUnavailable) {
     return '—';
   }
 

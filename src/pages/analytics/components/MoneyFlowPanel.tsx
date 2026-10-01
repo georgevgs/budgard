@@ -37,6 +37,14 @@ export const MoneyFlowPanel = ({ flow, currency }: MoneyFlowPanelProps) => {
     );
   }
 
+  if (
+    flow.income <= 0 ||
+    flow.isDeficit ||
+    flow.categories.some((category) => category.amount < 0)
+  ) {
+    return renderSignedBreakdown(flow, currency, t);
+  }
+
   const nodes = buildNodes(flow, t);
 
   return (
@@ -47,6 +55,34 @@ export const MoneyFlowPanel = ({ flow, currency }: MoneyFlowPanelProps) => {
       nodes={nodes}
       ariaLabel={buildAriaLabel(flow, currency, t)}
     />
+  );
+};
+
+const renderSignedBreakdown = (
+  flow: MoneyFlowData,
+  currency: string,
+  t: TranslateFunction,
+) => {
+  let description = t('moneyFlow.signedBreakdown');
+  if (flow.categories.length === 0) {
+    description = t('moneyFlow.zeroNet');
+  }
+
+  return (
+    <div className="space-y-3 text-sm">
+      <p className="text-muted-foreground">{description}</p>
+      {flow.categories.map((category) => (
+        <div
+          key={category.id}
+          className="flex items-center justify-between gap-3"
+        >
+          <span>{categoryLabel(category, t)}</span>
+          <span className="tabular-nums">
+            {formatCurrency(category.amount, currency)}
+          </span>
+        </div>
+      ))}
+    </div>
   );
 };
 

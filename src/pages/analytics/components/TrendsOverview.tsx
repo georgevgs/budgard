@@ -43,7 +43,6 @@ export const TrendsOverview = (props: TrendsOverviewProps) => {
       <BentoGrid>
         <WhereItWentTile
           breakdown={stats.categoryBreakdown}
-          totalSpent={stats.totalSpent}
           onCategoryClick={props.onCategoryClick}
         />
       </BentoGrid>

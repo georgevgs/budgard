@@ -26,7 +26,10 @@ type Point = {
   costBasis: number | null;
 };
 
-export const AccountHistoryChart = ({ account, snapshots }: AccountHistoryChartProps) => {
+export const AccountHistoryChart = ({
+  account,
+  snapshots,
+}: AccountHistoryChartProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const { isPro } = useSubscription();
@@ -57,7 +60,7 @@ export const AccountHistoryChart = ({ account, snapshots }: AccountHistoryChartP
         height={180}
         shouldAllowNegative
         formatY={(value) =>
-          formatCurrencyCompact(Math.abs(value), account.default_currency)
+          formatCurrencyCompact(value, account.default_currency)
         }
         renderTooltip={(point) =>
           renderTooltip(point, shouldShowBasis, account.default_currency, t)
@@ -175,7 +178,10 @@ const filterByRange = (data: Point[], range: RangeKey): Point[] => {
 
 // The balance area is the account; the cost-basis line is what was put in.
 // Dashed because it is a running total the user built, not a market value.
-const buildSeries = (shouldShowBasis: boolean, t: TranslateFunction): Series[] => {
+const buildSeries = (
+  shouldShowBasis: boolean,
+  t: TranslateFunction,
+): Series[] => {
   const value: Series = {
     kind: 'area',
     key: 'balance',

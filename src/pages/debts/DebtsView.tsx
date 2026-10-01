@@ -24,7 +24,11 @@ const DebtsView = () => {
   const { t } = useTranslation();
   const { defaultCurrency, isInitialized, isSecondaryLoaded } = useDataConfig();
   const { debts, summary } = useDebts();
-  const { avalanche } = useDebtPayoffPlan(debts, 0);
+  let planDebts = debts;
+  if (summary.hasMixedCurrencies) {
+    planDebts = [];
+  }
+  const { avalanche } = useDebtPayoffPlan(planDebts, 0);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedDebt, setSelectedDebt] = useState<Debt | undefined>();
   const [detailDebt, setDetailDebt] = useState<Debt | undefined>();

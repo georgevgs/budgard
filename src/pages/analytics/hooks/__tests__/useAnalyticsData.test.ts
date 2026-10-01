@@ -168,6 +168,16 @@ describe('monthly data', () => {
 
     expect(render().current.monthlyData[0].amount).toBe(100);
   });
+
+  it('keeps chart buckets and the year total exact for decimal amounts', () => {
+    plan.isPro = true;
+    data.expenses = [expense('2026-08-01', 0.1), expense('2026-08-02', 0.2)];
+
+    const r = render();
+    expect(r.current.monthlyData[0].amount).toBe(0.3);
+    expect(r.current.rhythmMonths[0].amount).toBe(0.3);
+    expect(r.current.yearlyStats.totalSpent).toBe(0.3);
+  });
 });
 
 describe('month comparison', () => {
@@ -252,14 +262,30 @@ describe('yearly stats', () => {
     expect(render().current.rhythmMonths).toHaveLength(1);
   });
 
-  it('counts uncategorised spending in the total but not the breakdown', () => {
+  it('reconciles uncategorised spending with the annual breakdown', () => {
     data.expenses = [...data.expenses, expense('2026-04-01', 70)];
     const r = render();
 
     expect(r.current.yearlyStats.totalSpent).toBe(520);
     expect(
       r.current.yearlyStats.categoryBreakdown.reduce((s, c) => s + c.amount, 0),
-    ).toBe(450);
+    ).toBe(520);
+    expect(r.current.yearlyStats.categoryBreakdown).toContainEqual(
+      expect.objectContaining({ amount: 70 }),
+    );
+  });
+
+  it('keeps a refund-heavy category in the breakdown', () => {
+    data.expenses = [
+      expense('2026-08-01', 100, 'c1'),
+      expense('2026-08-02', -120, 'c2'),
+    ];
+
+    const r = render();
+    expect(r.current.yearlyStats.totalSpent).toBe(-20);
+    expect(r.current.yearlyStats.categoryBreakdown).toContainEqual(
+      expect.objectContaining({ id: 'c2', amount: -120 }),
+    );
   });
 });
 

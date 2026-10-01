@@ -31,7 +31,8 @@ export const useCashFlowData = (selectedYear: number) => {
       if (Number(e.date.slice(0, 4)) !== selectedYear) {
         continue;
       }
-      expByMonth[Number(e.date.slice(5, 7)) - 1] += e.amount;
+      const month = Number(e.date.slice(5, 7)) - 1;
+      expByMonth[month] = sumAmounts([expByMonth[month], e.amount]);
     }
 
     for (const i of incomes) {
@@ -41,7 +42,8 @@ export const useCashFlowData = (selectedYear: number) => {
       if (Number(i.date.slice(0, 4)) !== selectedYear) {
         continue;
       }
-      incByMonth[Number(i.date.slice(5, 7)) - 1] += i.amount;
+      const month = Number(i.date.slice(5, 7)) - 1;
+      incByMonth[month] = sumAmounts([incByMonth[month], i.amount]);
     }
 
     return Array.from({ length: 12 }, (_, idx) => {
@@ -54,7 +56,7 @@ export const useCashFlowData = (selectedYear: number) => {
         fullMonth: format(monthDate, 'LLLL yyyy', { locale: dateLocale }),
         income: incomeTotal,
         expense: -expenseTotal,
-        net: incomeTotal - expenseTotal,
+        net: sumAmounts([incomeTotal, -expenseTotal]),
       };
     });
   }, [expenses, incomes, selectedYear, dateLocale]);
@@ -73,13 +75,13 @@ export const useCashFlowData = (selectedYear: number) => {
     const monthsElapsed = countObservedMonths(observedRows, selectedYear, now);
     let avgNet = 0;
     if (monthsElapsed > 0) {
-      avgNet = (totalIncome - totalExpense) / monthsElapsed;
+      avgNet = sumAmounts([totalIncome, -totalExpense]) / monthsElapsed;
     }
 
     return {
       totalIncome,
       totalExpense,
-      net: totalIncome - totalExpense,
+      net: sumAmounts([totalIncome, -totalExpense]),
       avgNet,
     };
   }, [expenses, incomes, monthlyData, now, selectedYear]);

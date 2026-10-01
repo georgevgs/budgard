@@ -52,16 +52,16 @@ export const useMoneyFlowData = (now: Date = new Date()): MoneyFlowData => {
   const monthKey = format(now, 'yyyy-MM');
 
   return useMemo(() => {
-    const income = sumAmounts(
-      incomes
-        .filter(
-          (row) => countsInTotals(row) && row.date.slice(0, 7) === monthKey,
-        )
-        .map((row) => row.amount),
+    const countedIncomes = incomes.filter(
+      (row) => countsInTotals(row) && row.date.slice(0, 7) === monthKey,
     );
+    const income = sumAmounts(countedIncomes.map((row) => row.amount));
 
     const byCategory = new Map<string, number>();
     let uncategorized = 0;
+    const countedExpenses: number[] = [];
+    const categoryIds = new Set(categories.map((category) => category.id));
+    let hasExpenseRows = false;
     for (const expense of expenses) {
       if (!countsInTotals(expense)) {
         continue;
@@ -69,13 +69,15 @@ export const useMoneyFlowData = (now: Date = new Date()): MoneyFlowData => {
       if (expense.date.slice(0, 7) !== monthKey) {
         continue;
       }
-      if (!expense.category_id) {
-        uncategorized += expense.amount;
+      hasExpenseRows = true;
+      countedExpenses.push(expense.amount);
+      if (!expense.category_id || !categoryIds.has(expense.category_id)) {
+        uncategorized = sumAmounts([uncategorized, expense.amount]);
         continue;
       }
       byCategory.set(
         expense.category_id,
-        (byCategory.get(expense.category_id) ?? 0) + expense.amount,
+        sumAmounts([byCategory.get(expense.category_id) ?? 0, expense.amount]),
       );
     }
 
@@ -84,8 +86,8 @@ export const useMoneyFlowData = (now: Date = new Date()): MoneyFlowData => {
       byCategory,
       uncategorized,
     );
-    const totalExpenses = sumAmounts(categoryRows.map((row) => row.amount));
-    const savings = income - totalExpenses;
+    const totalExpenses = sumAmounts(countedExpenses);
+    const savings = sumAmounts([income, -totalExpenses]);
 
     return {
       monthLabel: format(now, 'LLLL yyyy', { locale: dateLocale }),
@@ -94,7 +96,7 @@ export const useMoneyFlowData = (now: Date = new Date()): MoneyFlowData => {
       savings,
       categories: categoryRows,
       isDeficit: savings < 0,
-      hasData: income > 0 || totalExpenses > 0,
+      hasData: countedIncomes.length > 0 || hasExpenseRows,
     };
   }, [expenses, incomes, categories, monthKey, now, dateLocale]);
 };
@@ -112,9 +114,9 @@ const buildCategoryRows = (
       color: category.color,
       amount: byCategory.get(category.id) ?? 0,
     }))
-    .filter((row) => row.amount > 0);
+    .filter((row) => row.amount !== 0);
 
-  if (uncategorized > 0) {
+  if (uncategorized !== 0) {
     rows.push({
       id: UNCATEGORIZED_ID,
       name: '',
@@ -125,6 +127,10 @@ const buildCategoryRows = (
   }
 
   rows.sort((a, b) => b.amount - a.amount);
+
+  if (rows.some((row) => row.amount < 0)) {
+    return rows;
+  }
 
   return foldTail(rows);
 };

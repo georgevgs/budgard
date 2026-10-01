@@ -57,4 +57,23 @@ describe('CategorySparkline', () => {
 
     expect(container.querySelector('svg')).toBeNull();
   });
+
+  it('plots negative net months inside the SVG', () => {
+    const { container } = render(
+      <CategorySparkline values={[-20, 10, -5]} color="#000" />,
+    );
+    const path = container.querySelector('path');
+    expect(path).not.toBeNull();
+    const coordinates = [
+      ...(path?.getAttribute('d') ?? '').matchAll(
+        /\d+(?:\.\d+)?,(\d+(?:\.\d+)?)/g,
+      ),
+    ];
+    expect(coordinates).toHaveLength(3);
+    for (const coordinate of coordinates) {
+      const y = Number(coordinate[1]);
+      expect(y).toBeGreaterThanOrEqual(0);
+      expect(y).toBeLessThanOrEqual(28);
+    }
+  });
 });

@@ -21,7 +21,13 @@ export const DebtsHeader = ({
   payoffDate,
 }: DebtsHeaderProps) => {
   const { t } = useTranslation();
-  const animatedTotal = useAnimatedNumber(summary.totalBalance);
+  const animatedTotal = useAnimatedNumber(summary.totalBalance ?? 0);
+
+  if (summary.hasMixedCurrencies) {
+    return renderMixedCurrencies(summary, t);
+  }
+
+  const currency = summary.currency ?? defaultCurrency;
 
   return (
     <SurfaceCard className="p-5 space-y-3">
@@ -29,7 +35,7 @@ export const DebtsHeader = ({
         {t('debts.totalLabel')}
       </p>
       <p className="text-3xl font-bold tracking-tight tabular-nums text-destructive-ink">
-        {formatCurrency(animatedTotal, defaultCurrency)}
+        {formatCurrency(animatedTotal, currency)}
       </p>
 
       <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border/40">
@@ -39,7 +45,7 @@ export const DebtsHeader = ({
             {t('debts.monthlyMinimumsLabel')}
           </div>
           <p className="text-base font-semibold tabular-nums mt-0.5">
-            {formatCurrency(summary.totalMinimumPayment, defaultCurrency)}
+            {formatCurrency(summary.totalMinimumPayment ?? 0, currency)}
           </p>
         </div>
         <div>
@@ -48,12 +54,46 @@ export const DebtsHeader = ({
             {t('debts.avgAprLabel')}
           </div>
           <p className="text-base font-semibold tabular-nums mt-0.5">
-            {formatPercent(summary.weightedAverageApr, 2)}%
+            {formatPercent(summary.weightedAverageApr ?? 0, 2)}%
           </p>
         </div>
       </div>
 
       {renderPayoffRow(monthsToDebtFree, payoffDate, t)}
+    </SurfaceCard>
+  );
+};
+
+const renderMixedCurrencies = (summary: DebtSummary, t: TranslateFunction) => {
+  const currencies = Object.keys(summary.balanceByCurrency).sort();
+
+  return (
+    <SurfaceCard className="p-5 space-y-3">
+      <p className="text-sm font-medium text-muted-foreground">
+        {t('debts.totalLabel')}
+      </p>
+      <div className="space-y-1 text-xl font-bold tabular-nums text-destructive-ink">
+        {currencies.map((currency) => (
+          <p key={currency}>
+            {formatCurrency(summary.balanceByCurrency[currency], currency)}
+          </p>
+        ))}
+      </div>
+      <div className="border-t border-border/40 pt-2">
+        <p className="text-xs text-muted-foreground">
+          {t('debts.monthlyMinimumsLabel')}
+        </p>
+        <div className="mt-1 space-y-1 text-sm font-semibold tabular-nums">
+          {currencies.map((currency) => (
+            <p key={currency}>
+              {formatCurrency(summary.minimumByCurrency[currency], currency)}
+            </p>
+          ))}
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {t('debts.mixedCurrencyNote')}
+      </p>
     </SurfaceCard>
   );
 };

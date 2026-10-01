@@ -66,6 +66,10 @@ describe('sumSpending', () => {
   it('lets a refund reduce the total', () => {
     expect(sumSpending([row({ amount: 40 }), row({ amount: -15 })])).toBe(25);
   });
+
+  it('sums decimal transaction amounts without floating point drift', () => {
+    expect(sumSpending([row({ amount: 0.1 }), row({ amount: 0.2 })])).toBe(0.3);
+  });
 });
 
 describe('onlySpending', () => {

@@ -183,12 +183,67 @@ export const useNetWorth = (shouldIncludeHistory = true) => {
     [accounts, debts, rates, failedKeys, defaultCurrency],
   );
 
-  const series = useMemo<NetWorthPoint[]>(
-    () => buildSeries(accounts, accountBalances, debts, rates, defaultCurrency),
-    [accounts, accountBalances, debts, rates, defaultCurrency],
+  const missingHistoryCurrencies = useMemo(
+    () =>
+      findMissingHistoryCurrencies(
+        accounts,
+        accountBalances,
+        rates,
+        failedKeys,
+        defaultCurrency,
+      ),
+    [accounts, accountBalances, rates, failedKeys, defaultCurrency],
   );
 
-  return { summary, series, isComputing };
+  const series = useMemo<NetWorthPoint[]>(() => {
+    if (missingHistoryCurrencies.length > 0) {
+      return [];
+    }
+
+    return buildSeries(
+      accounts,
+      accountBalances,
+      debts,
+      rates,
+      defaultCurrency,
+    );
+  }, [
+    accounts,
+    accountBalances,
+    debts,
+    rates,
+    defaultCurrency,
+    missingHistoryCurrencies,
+  ]);
+
+  return { summary, series, missingHistoryCurrencies, isComputing };
+};
+
+const findMissingHistoryCurrencies = (
+  accounts: Account[],
+  accountBalances: AccountBalance[],
+  rates: Map<string, number>,
+  failedKeys: Set<string>,
+  defaultCurrency: string,
+): string[] => {
+  const currencyByAccount = new Map(
+    accounts.map((account) => [account.id, account.default_currency]),
+  );
+  const missing = new Set<string>();
+
+  accountBalances.forEach((balance) => {
+    const currency = currencyByAccount.get(balance.account_id);
+    if (!currency || currency === defaultCurrency) {
+      return;
+    }
+
+    const key = RATE_KEY(currency, balance.recorded_at);
+    if (rates.get(key) === undefined || failedKeys.has(key)) {
+      missing.add(currency);
+    }
+  });
+
+  return Array.from(missing).sort();
 };
 
 const collectRequiredRates = (

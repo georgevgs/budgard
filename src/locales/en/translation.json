@@ -502,6 +502,8 @@
     "viewFlow": "This month"
   },
   "moneyFlow": {
+    "signedBreakdown": "Category net amounts, including refunds and spending beyond this month's income:",
+    "zeroNet": "This month's transactions offset each other, leaving no category net amount.",
     "income": "Income",
     "savings": "Savings",
     "uncategorized": "Uncategorized",
@@ -1002,7 +1004,7 @@
     "investmentLabel": "Investments",
     "lastUpdated": "Updated {{date}}",
     "notUpdated": "Not updated yet",
-    "staleRatesWarning": "Couldn't fetch exchange rates for {{currencies}} — those balances are shown unconverted, so the total may be off.",
+    "staleRatesWarning": "Combined net worth is unavailable until exchange rates for {{currencies}} load. Account balances remain in their own currencies.",
     "archive": "Archive",
     "archiveTitle": "Archive account",
     "archiveConfirmation": "Archive \"{{name}}\"? It will be hidden from net worth and won't affect past totals.",
@@ -1095,6 +1097,7 @@
       "range3m": "3M",
       "range1y": "1Y",
       "rangeAll": "All",
+      "historyRatesUnavailable": "Net worth history is unavailable until exchange rates for {{currencies}} load.",
       "debtConstantNote": "Debt history isn't tracked per day, so today's debt is subtracted from every point — the trend here is your assets."
     },
     "allocation": {
@@ -1114,6 +1117,8 @@
     "chartSummary": "Net worth from {{first}} to {{last}}, moving from {{from}} to {{to}}."
   },
   "debts": {
+    "mixedCurrencies": "Multiple currencies",
+    "mixedCurrencyNote": "Balances and minimums are shown by currency. A combined payoff projection needs debts in one currency.",
     "addDebt": "Add debt",
     "totalLabel": "Total balance",
     "monthlyMinimumsLabel": "Monthly minimums",
@@ -1239,6 +1244,8 @@
     "review": {
       "title": "This month in brief",
       "noSpending": "Nothing has been logged this month yet.",
+      "refundOffset": "Refunds have offset this month's spending so far.",
+      "noBaseline": "Last month's refunds exceeded spending, so there is no positive spending baseline to compare.",
       "firstMonth": "{{amount}} logged so far — this is your first month to compare.",
       "moreThanLast": "You have spent {{amount}} more than last month so far.",
       "lessThanLast": "You have spent {{amount}} less than last month so far.",

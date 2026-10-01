@@ -15,6 +15,7 @@ import { useDataConfig } from '@/common/contexts/DataContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
 import { countsAsSpending } from '@/constants/spending';
+import { sumAmounts } from '@/constants/money';
 
 type CategoryDrillDownProps = {
   isOpen: boolean;
@@ -52,7 +53,7 @@ export const CategoryDrillDown = ({
       if (!countsAsSpending(expense)) {
         continue;
       }
-      byMonth.set(key, (byMonth.get(key) ?? 0) + expense.amount);
+      byMonth.set(key, sumAmounts([byMonth.get(key) ?? 0, expense.amount]));
     }
 
     return Array.from(byMonth.entries())

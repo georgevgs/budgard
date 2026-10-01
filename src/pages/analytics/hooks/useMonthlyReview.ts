@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { formatCurrency } from '@/constants/utils';
+import { sumAmounts } from '@/constants/money';
 import type { MonthComparison } from '@/pages/analytics/hooks/useAnalyticsData';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
@@ -40,7 +41,7 @@ export const useMonthlyReview = ({
       (expense) => expense.date.slice(0, 7) === monthKey,
     );
     const items: MonthlyReviewItem[] = [
-      buildComparison(comparison, currency, t),
+      buildComparison(comparison, current.length, currency, t),
     ];
     const category = findTopCategory(current, categories, t);
     if (category) {
@@ -79,13 +80,20 @@ export const useMonthlyReview = ({
 
 const buildComparison = (
   comparison: MonthComparison,
+  currentCount: number,
   currency: string,
   t: TranslateFunction,
 ): MonthlyReviewItem => {
-  if (comparison.thisMonthAmount === 0) {
+  if (currentCount === 0) {
     return { id: 'comparison', text: t('analytics.review.noSpending') };
   }
-  if (comparison.lastMonthAmount === 0) {
+  if (comparison.thisMonthAmount <= 0) {
+    return { id: 'comparison', text: t('analytics.review.refundOffset') };
+  }
+  if (comparison.lastMonthAmount < 0) {
+    return { id: 'comparison', text: t('analytics.review.noBaseline') };
+  }
+  if (comparison.lastMonthAmount <= 0) {
     return {
       id: 'comparison',
       text: t('analytics.review.firstMonth', {
@@ -146,11 +154,15 @@ const findTopCategory = (
   const totals = new Map<string, number>();
   for (const expense of expenses) {
     const id = expense.category_id ?? 'uncategorized';
-    totals.set(id, (totals.get(id) ?? 0) + expense.amount);
+    totals.set(id, sumAmounts([totals.get(id) ?? 0, expense.amount]));
   }
-  const [topId, amount] = [...totals.entries()].sort(
-    (left, right) => right[1] - left[1],
-  )[0];
+  const ranked = [...totals.entries()]
+    .filter(([, amount]) => amount > 0)
+    .sort((left, right) => right[1] - left[1]);
+  if (ranked.length === 0) {
+    return null;
+  }
+  const [topId, amount] = ranked[0];
   const category = categories.find((candidate) => candidate.id === topId);
   let name = t('analytics.drillDown.uncategorized');
   if (category) {

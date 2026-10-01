@@ -14,7 +14,9 @@ type CategoryBreakdownSectionProps = {
   onCategoryClick: (category: CategoryRow) => void;
 };
 
-export const CategoryBreakdownSection = (props: CategoryBreakdownSectionProps) => {
+export const CategoryBreakdownSection = (
+  props: CategoryBreakdownSectionProps,
+) => {
   const { t } = useTranslation();
 
   return (
@@ -27,7 +29,10 @@ export const CategoryBreakdownSection = (props: CategoryBreakdownSectionProps) =
   );
 };
 
-const renderBreakdown = (props: CategoryBreakdownSectionProps, t: TranslateFunction) => {
+const renderBreakdown = (
+  props: CategoryBreakdownSectionProps,
+  t: TranslateFunction,
+) => {
   if (props.breakdown.length === 0) {
     return (
       <p className="px-4 py-8 text-center text-sm text-muted-foreground">
@@ -36,21 +41,28 @@ const renderBreakdown = (props: CategoryBreakdownSectionProps, t: TranslateFunct
     );
   }
 
+  const canShowPercentage = props.breakdown.every((row) => row.amount >= 0);
+
   return (
     <div className="tile overflow-hidden">
       <div className="divide-y divide-border/40 p-0">
         {props.breakdown.map((category) =>
-          renderCategoryRow(category, props, t),
+          renderCategoryRow(category, props, t, canShowPercentage),
         )}
       </div>
     </div>
   );
 };
 
-const renderCategoryRow = (category: CategoryRow, props: CategoryBreakdownSectionProps, t: TranslateFunction) => {
-  let percentage = 0;
-  if (props.totalSpent > 0) {
-    percentage = (category.amount / props.totalSpent) * 100;
+const renderCategoryRow = (
+  category: CategoryRow,
+  props: CategoryBreakdownSectionProps,
+  t: TranslateFunction,
+  canShowPercentage: boolean,
+) => {
+  let percentage = '—';
+  if (canShowPercentage && props.totalSpent > 0) {
+    percentage = `${Math.round((category.amount / props.totalSpent) * 100)}%`;
   }
 
   return (
@@ -75,7 +87,7 @@ const renderCategoryRow = (category: CategoryRow, props: CategoryBreakdownSectio
         {formatCurrency(category.amount, props.currency)}
       </span>
       <span className="hidden w-8 shrink-0 text-right text-xs tabular-nums text-muted-foreground md:block">
-        {Math.round(percentage)}%
+        {percentage}
       </span>
     </button>
   );

@@ -14,10 +14,14 @@ type NetWorthHeaderProps = {
   defaultCurrency: string;
 };
 
-export const NetWorthHeader = ({ summary, defaultCurrency }: NetWorthHeaderProps) => {
+export const NetWorthHeader = ({
+  summary,
+  defaultCurrency,
+}: NetWorthHeaderProps) => {
   const { t } = useTranslation();
   const animatedTotal = useAnimatedNumber(summary.total);
   const isPositive = summary.total >= 0;
+  const hasStaleRates = summary.staleCurrencies.length > 0;
 
   return (
     <SurfaceCard className="p-5 space-y-3">
@@ -31,7 +35,7 @@ export const NetWorthHeader = ({ summary, defaultCurrency }: NetWorthHeaderProps
           !isPositive && 'text-destructive-ink',
         )}
       >
-        {formatCurrency(animatedTotal, defaultCurrency)}
+        {formatReliableAmount(animatedTotal, defaultCurrency, hasStaleRates)}
       </p>
 
       <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border/40">
@@ -41,7 +45,11 @@ export const NetWorthHeader = ({ summary, defaultCurrency }: NetWorthHeaderProps
             {t('networth.assetsLabel')}
           </div>
           <p className="text-base font-semibold tabular-nums mt-0.5">
-            {formatCurrency(summary.assets, defaultCurrency)}
+            {formatReliableAmount(
+              summary.assets,
+              defaultCurrency,
+              hasStaleRates,
+            )}
           </p>
         </div>
         <div>
@@ -50,7 +58,11 @@ export const NetWorthHeader = ({ summary, defaultCurrency }: NetWorthHeaderProps
             {t('networth.liabilitiesLabel')}
           </div>
           <p className="text-base font-semibold tabular-nums mt-0.5">
-            {formatCurrency(summary.liabilities, defaultCurrency)}
+            {formatReliableAmount(
+              summary.liabilities,
+              defaultCurrency,
+              hasStaleRates,
+            )}
           </p>
         </div>
       </div>
@@ -59,6 +71,18 @@ export const NetWorthHeader = ({ summary, defaultCurrency }: NetWorthHeaderProps
       {renderStaleRatesWarning(summary.staleCurrencies, t)}
     </SurfaceCard>
   );
+};
+
+const formatReliableAmount = (
+  amount: number,
+  currency: string,
+  hasStaleRates: boolean,
+): string => {
+  if (hasStaleRates) {
+    return '—';
+  }
+
+  return formatCurrency(amount, currency);
 };
 
 const renderSignPrefix = (isPositive: boolean) => {
@@ -94,6 +118,9 @@ const renderInvestmentRow = (
   defaultCurrency: string,
   t: TranslateFunction,
 ) => {
+  if (summary.staleCurrencies.length > 0) {
+    return null;
+  }
   if (summary.investmentValue === 0 && summary.investmentCostBasis === 0) {
     return null;
   }

@@ -7,7 +7,6 @@ import type { TranslateFunction } from '@/constants/translate';
 
 type WhereItWentTileProps = {
   breakdown: CategoryRow[];
-  totalSpent: number;
   onCategoryClick: (category: CategoryRow) => void;
 };
 
@@ -15,10 +14,15 @@ const TOP = 3;
 
 // The year's spending as one bar and its three biggest names. The full list is
 // one level deeper — this is the answer most people came for.
-export const WhereItWentTile = ({ breakdown, totalSpent, onCategoryClick }: WhereItWentTileProps) => {
+export const WhereItWentTile = ({
+  breakdown,
+  onCategoryClick,
+}: WhereItWentTileProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
-  const leaders = breakdown.slice(0, TOP);
+  const positive = breakdown.filter((row) => row.amount > 0);
+  const leaders = positive.slice(0, TOP);
+  const positiveTotal = positive.reduce((total, row) => total + row.amount, 0);
 
   if (leaders.length === 0) {
     return null;
@@ -28,7 +32,7 @@ export const WhereItWentTile = ({ breakdown, totalSpent, onCategoryClick }: Wher
     <BentoTile isWide className="px-4.5 py-4">
       <TileLabel>{t('analytics.tile.whereItWent')}</TileLabel>
       <div className="mt-3 flex h-2.5 gap-0.5" aria-hidden="true">
-        {leaders.map((row) => renderSegment(row, totalSpent))}
+        {leaders.map((row) => renderSegment(row, positiveTotal))}
         <span className="flex-1 rounded-full bg-border/70" />
       </div>
       <div className="mt-3.5 flex flex-col gap-2.5">

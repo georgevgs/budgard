@@ -3,7 +3,11 @@ import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Account } from '@/types/Account';
 
-const state = vi.hoisted(() => ({ isComputing: true }));
+const state = vi.hoisted(() => ({
+  isComputing: true,
+  staleCurrencies: [] as string[],
+  missingHistoryCurrencies: [] as string[],
+}));
 
 const account = {
   id: 'account-1',
@@ -20,9 +24,10 @@ vi.mock('@/common/contexts/DataContext', () => ({
 
 vi.mock('@/common/hooks/useNetWorth', () => ({
   useNetWorth: () => ({
-    summary: { total: 100, debts: 0 },
+    summary: { total: 100, debts: 0, staleCurrencies: state.staleCurrencies },
     series: [],
     isComputing: state.isComputing,
+    missingHistoryCurrencies: state.missingHistoryCurrencies,
   }),
 }));
 
@@ -47,7 +52,7 @@ vi.mock('@/pages/networth/components/NetWorthHeader', () => ({
 }));
 
 vi.mock('@/pages/networth/components/NetWorthChart', () => ({
-  NetWorthChart: () => null,
+  NetWorthChart: () => <div>net-worth-chart</div>,
 }));
 
 vi.mock('@/pages/networth/components/AccountGroup', () => ({
@@ -63,6 +68,8 @@ import NetWorthView from '@/pages/networth/NetWorthView';
 describe('NetWorthView', () => {
   beforeEach(() => {
     state.isComputing = true;
+    state.staleCurrencies = [];
+    state.missingHistoryCurrencies = [];
   });
 
   it('withholds the headline until currency conversion is complete', () => {
@@ -75,5 +82,30 @@ describe('NetWorthView', () => {
     view.rerender(<NetWorthView />);
 
     expect(screen.getByText('net-worth-headline')).toBeInTheDocument();
+  });
+
+  it('hides a chart built from missing exchange rates', () => {
+    state.isComputing = false;
+    state.staleCurrencies = ['JPY'];
+    const view = render(<NetWorthView />);
+
+    expect(screen.queryByText('net-worth-chart')).not.toBeInTheDocument();
+
+    state.staleCurrencies = [];
+    view.rerender(<NetWorthView />);
+    expect(screen.getByText('net-worth-chart')).toBeInTheDocument();
+  });
+
+  it('explains when a historical rate is missing but the current rate is available', () => {
+    state.isComputing = false;
+    state.missingHistoryCurrencies = ['USD'];
+
+    render(<NetWorthView />);
+
+    expect(screen.getByText('net-worth-headline')).toBeInTheDocument();
+    expect(screen.queryByText('net-worth-chart')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('networth.chart.historyRatesUnavailable'),
+    ).toBeInTheDocument();
   });
 });

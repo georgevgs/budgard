@@ -433,8 +433,8 @@ const renderMonthDetailSelect = (
         <option value="" disabled>
           {t('analytics.chooseMonth')}
         </option>
-        {data.map((point, index) => (
-          <option key={point.fullMonth} value={index}>
+        {data.map((point) => (
+          <option key={point.fullMonth} value={point.monthIndex}>
             {point.fullMonth} — {formatCurrency(point.amount, currency)}
           </option>
         ))}

@@ -35,6 +35,7 @@ const TrendsDeepDiveView = () => {
   const drillDown = useAnalyticsDrillDown(
     analytics.yearExpenses,
     analytics.selectedYear,
+    categories,
   );
   const isReady = isAnalyticsReady({
     isInitialized,

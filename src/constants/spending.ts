@@ -1,5 +1,6 @@
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
+import { sumAmounts } from '@/constants/money';
 
 /**
  * Whether a transaction counts towards what you have spent.
@@ -54,13 +55,9 @@ export const onlySpending = (expenses: Expense[]): Expense[] => {
 
 /** Sums the spending in a list, ignoring anything that does not count. */
 export const sumSpending = (expenses: Expense[]): number => {
-  return expenses.reduce((sum, expense) => {
-    if (!countsAsSpending(expense)) {
-      return sum;
-    }
-
-    return sum + expense.amount;
-  }, 0);
+  return sumAmounts(
+    expenses.filter(countsAsSpending).map((expense) => expense.amount),
+  );
 };
 
 /**
