@@ -5,7 +5,7 @@ import {
   isDefaultLayout,
   isWideTodayTile,
   moveTile,
-  readStoredLayout,
+  readStoredLayoutSnapshot,
   writeStoredLayout,
   type TodayLayout,
   clearTodayLayoutSyncPending,
@@ -20,13 +20,15 @@ describe('normalizing a stored Today layout', () => {
   const load = (stored: unknown): TodayLayout => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
 
-    return readStoredLayout(USER_ID);
+    return readStoredLayoutSnapshot(USER_ID).layout;
   };
 
   it('gives a first-time user the defaults', () => {
     localStorage.clear();
 
-    expect(readStoredLayout(USER_ID).visible).toEqual(DEFAULT_VISIBLE);
+    expect(readStoredLayoutSnapshot(USER_ID).layout.visible).toEqual(
+      DEFAULT_VISIBLE,
+    );
   });
 
   // The reason both lists are stored rather than just `visible`: a tile in
@@ -75,14 +77,16 @@ describe('normalizing a stored Today layout', () => {
   it('survives unreadable storage', () => {
     localStorage.setItem(STORAGE_KEY, 'not json');
 
-    expect(readStoredLayout(USER_ID).visible).toEqual(DEFAULT_VISIBLE);
+    expect(readStoredLayoutSnapshot(USER_ID).layout.visible).toEqual(
+      DEFAULT_VISIBLE,
+    );
   });
 
   it('round-trips through storage', () => {
     const layout: TodayLayout = { visible: ['insight'], hidden: [] };
     expect(writeStoredLayout(USER_ID, layout)).toBe(true);
 
-    expect(readStoredLayout(USER_ID).visible[0]).toBe('insight');
+    expect(readStoredLayoutSnapshot(USER_ID).layout.visible[0]).toBe('insight');
   });
 
   it('reports when the browser refuses to persist a change', () => {
@@ -101,7 +105,9 @@ describe('normalizing a stored Today layout', () => {
     const layout: TodayLayout = { visible: ['insight'], hidden: [] };
     writeStoredLayout(USER_ID, layout);
 
-    expect(readStoredLayout('another-user').visible).toEqual(DEFAULT_VISIBLE);
+    expect(readStoredLayoutSnapshot('another-user').layout.visible).toEqual(
+      DEFAULT_VISIBLE,
+    );
   });
 
   it('recognizes only the complete default layout', () => {

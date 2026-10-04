@@ -5,7 +5,7 @@ import Bell from 'lucide-react/dist/esm/icons/bell';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 import CircleUserRound from 'lucide-react/dist/esm/icons/circle-user-round';
 import Database from 'lucide-react/dist/esm/icons/database';
-import Landmark from 'lucide-react/dist/esm/icons/landmark';
+import Upload from 'lucide-react/dist/esm/icons/upload';
 import Palette from 'lucide-react/dist/esm/icons/palette';
 import UsersRound from 'lucide-react/dist/esm/icons/users-round';
 import { useAuth } from '@/common/contexts/AuthContext';
@@ -25,20 +25,19 @@ import { OnDemandData } from '@/common/components/onDemandData/OnDemandData';
 import { ProfileSection } from '@/pages/settings/components/ProfileSection';
 import { SecuritySection } from '@/pages/settings/components/SecuritySection';
 import { HouseholdSection } from '@/pages/settings/components/HouseholdSection';
-import { ConnectionsSection } from '@/pages/settings/components/ConnectionsSection';
+import { ImportsSection } from '@/pages/settings/components/ImportsSection';
 import type { TranslateFunction } from '@/constants/translate';
 
 type SettingsSection =
   | 'account'
   | 'household'
-  | 'connections'
+  | 'imports'
   | 'preferences'
   | 'notifications'
   | 'data';
 
-// Settings is an index first. Low-frequency controls live on named routes, so
-// a person scans four decisions instead of nine full sections and each group
-// has its own history entry, page title and reliable way back.
+// Settings starts with an index. Controls live on named routes, with each
+// group owning its own history entry, page title and reliable way back.
 const SettingsView = () => {
   const { t } = useTranslation();
   const auth = useAuth();
@@ -85,13 +84,16 @@ type Group = {
 const GROUPS: Group[] = [
   { section: 'account', icon: CircleUserRound },
   { section: 'household', icon: UsersRound },
-  { section: 'connections', icon: Landmark },
+  { section: 'imports', icon: Upload },
   { section: 'preferences', icon: Palette },
   { section: 'notifications', icon: Bell },
   { section: 'data', icon: Database },
 ];
 
 const resolveSection = (value: string): SettingsSection | null => {
+  if (value === 'connections') {
+    return 'imports';
+  }
   const match = GROUPS.find((group) => group.section === value);
   if (!match) {
     return null;
@@ -133,8 +135,8 @@ const renderContent = (section: SettingsSection | null, data: SettingsData) => {
   if (section === 'household') {
     return <HouseholdSection />;
   }
-  if (section === 'connections') {
-    return <ConnectionsSection />;
+  if (section === 'imports') {
+    return <ImportsSection />;
   }
 
   return renderData(data);

@@ -4,7 +4,7 @@
      Regenerate with `npm run docs:schema`. -->
 
 An index from each database object to the migrations that touch it, built by
-scanning `supabase/migrations`. Covers 97 migrations: 54 functions, 30 triggers, 27 tables, 88 policies, 58 indexes.
+scanning `supabase/migrations`. Covers 98 migrations: 55 functions, 30 triggers, 27 tables, 88 policies, 59 indexes.
 
 This is a **map, not a schema definition**. Migrations are append-only history
 and the live schema is what you get by replaying them, so nothing here states
@@ -168,6 +168,7 @@ First defined in `20260913165741_add_product_events.sql`.
 
 - creates — `20260913165741_add_product_events.sql`
 - alters — `20260913165741_add_product_events.sql`
+- alters — `20261004171713_product_event_retention_and_usage.sql`
 
 ### `push_subscriptions`
 
@@ -582,6 +583,14 @@ First defined in `20260831171142_add_financial_connection_boundary.sql`.
 
 - defines — `20260831171142_add_financial_connection_boundary.sql`
 - revokes on — `20260831171142_add_financial_connection_boundary.sql`
+
+### `private.prune_product_events`
+
+First defined in `20261004171713_product_event_retention_and_usage.sql`.
+
+- defines — `20261004171713_product_event_retention_and_usage.sql`
+- grants on — `20261004171713_product_event_retention_and_usage.sql`
+- revokes on — `20261004171713_product_event_retention_and_usage.sql`
 
 ### `private.receipt_quota_available`
 
@@ -1298,6 +1307,12 @@ First defined in `20250104165613_remote_schema.sql`.
 First defined in `20260913165741_add_product_events.sql`.
 
 - defines — `20260913165741_add_product_events.sql`
+
+### `product_events_occurred_idx`
+
+First defined in `20261004171713_product_event_retention_and_usage.sql`.
+
+- defines — `20261004171713_product_event_retention_and_usage.sql`
 
 ### `product_events_user_occurred_idx`
 

@@ -1,5 +1,5 @@
 import { supabase } from '@/config/supabase';
-import { done, row, rows } from '@/common/api/supabaseCrud';
+import { row, rows } from '@/common/api/supabaseCrud';
 
 type Dismissal = {
   user_id: string;
@@ -37,16 +37,6 @@ export const recurringSuggestionService = {
   async reconcile(ownerId: string) {
     return row<number>(
       supabase.rpc('reconcile_recurring_imports', { p_owner_id: ownerId }),
-    );
-  },
-
-  async clearDismissal(fingerprint: string, ownerId: string) {
-    await done(
-      supabase
-        .from('recurring_suggestion_dismissals')
-        .delete()
-        .eq('user_id', ownerId)
-        .eq('fingerprint', fingerprint),
     );
   },
 };

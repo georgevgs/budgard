@@ -41,8 +41,14 @@ export const transactionRuleService = {
     return saved;
   },
 
-  async deleteRule(ruleId: string) {
-    await done(supabase.from('transaction_rules').delete().eq('id', ruleId));
+  async deleteRule(ruleId: string, ownerId: string) {
+    await done(
+      supabase
+        .from('transaction_rules')
+        .delete()
+        .eq('user_id', ownerId)
+        .eq('id', ruleId),
+    );
   },
 
   async markReviewed(transactionIds: string[], ownerId: string) {

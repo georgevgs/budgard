@@ -23,6 +23,29 @@ beforeEach(() => {
 });
 
 describe('useProductMetrics', () => {
+  it('records ready feature visits once per navigation without route parameters', () => {
+    const { rerender } = renderHook(
+      ({ path, ready }) => useProductMetrics(path, ready),
+      { initialProps: { path: '/goals', ready: false } },
+    );
+    expect(track).not.toHaveBeenCalledWith({ name: 'goals_opened' });
+    rerender({ path: '/goals', ready: true });
+    rerender({ path: '/goals', ready: true });
+    rerender({ path: '/goals/private-id', ready: true });
+    rerender({ path: '/goals', ready: true });
+
+    expect(
+      track.mock.calls.filter(([event]) => event.name === 'goals_opened'),
+    ).toHaveLength(2);
+    expect(
+      track.mock.calls.every(([event]) =>
+        Object.keys(event).every((key) =>
+          ['name', 'durationMs', 'loadKind'].includes(key),
+        ),
+      ),
+    ).toBe(true);
+  });
+
   it('measures a cold initial Today load once it is ready', () => {
     const clock = vi.spyOn(performance, 'now').mockReturnValue(812.6);
     const { rerender } = renderHook(

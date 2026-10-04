@@ -702,9 +702,9 @@
         "title": "Household",
         "description": "Share your finances with your partner"
       },
-      "connections": {
-        "title": "Connections & imports",
-        "description": "Bank statements, sync status and review automation"
+      "imports": {
+        "title": "Imports and rules",
+        "description": "Import statements and manage matching rules"
       },
       "preferences": {
         "title": "Appearance & preferences",
@@ -753,22 +753,6 @@
       "acceptFailed": "Couldn't accept the household invitation",
       "removeFailed": "Couldn't update household access",
       "removed": "Household access removed"
-    },
-    "connections": {
-      "title": "Bank data",
-      "notConfigured": "Direct connections are not available yet",
-      "notConfiguredDescription": "The secure sync boundary is ready, but Budgard will not ask for bank access until a regulated data provider is configured. Statement imports already apply your rules, detect recurring payments and wait in Review.",
-      "importDescription": "Import a CSV, OFX, QFX or QIF statement. Every row waits in Review so automation stays under your control.",
-      "importAction": "Import bank statement",
-      "loadFailed": "Couldn't load connection status.",
-      "lastSynced": "Last synced {{date}}",
-      "status": {
-        "pending": "Pending",
-        "active": "Connected",
-        "reauth_required": "Reconnect",
-        "error": "Needs attention",
-        "disconnected": "Disconnected"
-      }
     },
     "appearance": {
       "title": "Appearance",
@@ -877,6 +861,34 @@
       "title": "About",
       "version": "Version",
       "madeWith": "Made in the EU"
+    },
+    "imports": {
+      "title": "Import a statement",
+      "description": "Bring in CSV, OFX, QFX or QIF files, then review the imported transactions.",
+      "action": "Import statement"
+    },
+    "rules": {
+      "title": "Transaction rules",
+      "description": "Rules apply to matching imports. Deleting a rule stops future matches and keeps transactions already saved.",
+      "empty": "No rules yet. Import a statement, then create a rule while reviewing a transaction.",
+      "reviewAction": "Review transactions",
+      "loadFailed": "Could not load rules. Try again.",
+      "deleteLabel": "Delete rule for {{match}}",
+      "deleteTitle": "Delete this rule?",
+      "deleteDescription": "Future imports will stop using this rule. Transactions already saved keep their details.",
+      "deleteFailed": "Could not delete the rule. Try again.",
+      "deleted": "Rule deleted",
+      "rename": "Rename to {{name}}",
+      "paused": "Paused",
+      "match": {
+        "exact": "Exact match",
+        "contains": "Contains text"
+      },
+      "appliesTo": {
+        "any": "Expenses and income",
+        "expense": "Expenses",
+        "income": "Income"
+      }
     }
   },
   "navigation": {

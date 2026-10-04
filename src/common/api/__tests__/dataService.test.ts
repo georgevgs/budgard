@@ -417,28 +417,6 @@ describe('dataService', () => {
     expect(result).toEqual(budget);
   });
 
-  // --- getUser ---
-  it('returns the current authenticated user', async () => {
-    vi.mocked(supabase.auth.getUser).mockResolvedValue({
-      data: { user: { id: 'user-1', email: 'test@test.com' } },
-      error: null,
-    } as never);
-
-    const user = await dataService.getUser();
-    expect(user).toEqual({ id: 'user-1', email: 'test@test.com' });
-  });
-
-  it('throws when getUser fails', async () => {
-    vi.mocked(supabase.auth.getUser).mockResolvedValue({
-      data: { user: null },
-      error: { message: 'not authenticated' },
-    } as never);
-
-    await expect(dataService.getUser()).rejects.toEqual({
-      message: 'not authenticated',
-    });
-  });
-
   // --- deleteAccount ---
   it('calls the delete-account edge function with the auth token', async () => {
     vi.mocked(supabase.auth.getSession).mockResolvedValue({
@@ -605,17 +583,5 @@ describe('dataService', () => {
     expect(supabase.from).toHaveBeenCalledWith('expenses');
     expect(chain.eq).toHaveBeenCalledWith('debt_id', 'd1');
     expect(result).toEqual(payments);
-  });
-
-  // --- getDebtById ---
-  it('fetches a single debt by id', async () => {
-    const debt = { id: 'd1', name: 'Card' };
-    const chain = mockChain(debt);
-    vi.mocked(supabase.from).mockReturnValue(chain as never);
-
-    const result = await dataService.getDebtById('d1');
-    expect(chain.eq).toHaveBeenCalledWith('id', 'd1');
-    expect(chain.single).toHaveBeenCalled();
-    expect(result).toEqual(debt);
   });
 });

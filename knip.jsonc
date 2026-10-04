@@ -5,30 +5,45 @@
   // files" that are all live, and a report nobody can read is a report nobody
   // reads — real dead code hid in that noise until Sep 2026.
   "entry": [
-    "index.html",
+    "index.html!",
+    // Vite plugins generate the head script, service-worker navigation and
+    // token assets. Their imports are real production build consumers.
+    "plugins/**/*.ts!",
+    // Imported by vite.config.ts; Knip's production mode omits the config
+    // plugin's dev-only graph even when the config itself is an entry.
+    "src/boot/pwaNavigation.ts!",
     // Registered by workbox at build time, never imported.
-    "public/push-sw.js",
+    "public/push-sw.js!",
     // The recovery page behind the /reset Netlify redirect. See bootGuard.ts.
-    "public/reset.js",
+    "public/reset.js!",
     // Reached only through the vite.config.ts alias, which knip does not follow.
-    "src/config/realtimeStub.ts",
+    "src/config/realtimeStub.ts!",
     // Deployed to Deno by the Supabase CLI, not bundled by vite.
-    "supabase/functions/*/index.ts",
-    "scripts/**/*.mjs",
+    "supabase/functions/*/index.ts!",
+    // Build and maintenance scripts are production entry points too. Tests
+    // stay outside this set so test-only imports cannot hide dead app code.
+    "scripts/**/*.mjs!",
+    "!scripts/**/*.test.mjs",
     "e2e/**/*.spec.ts",
-    "*.config.{ts,js}"
+    "*.config.{ts,js}!",
   ],
 
   "project": [
-    "src/**/*.{ts,tsx}",
-    "supabase/functions/**/*.ts",
-    "scripts/**/*.mjs"
+    "src/**/*.{ts,tsx}!",
+    "plugins/**/*.ts!",
+    "supabase/functions/**/*.ts!",
+    "scripts/**/*.mjs!",
   ],
 
   // The stub deliberately mirrors the real package surface, named export and
   // default both, so an incidental import of either still resolves. That is a
   // duplicate export on purpose; the reasoning is at the top of the file.
-  "ignore": ["src/config/realtimeStub.ts"],
+  "ignore": [
+    "src/config/realtimeStub.ts",
+    // Contrast calculations validate token pairs in tests; they are not
+    // browser code. Keep this independent validation implementation.
+    "src/design/contrast.ts",
+  ],
 
   "ignoreDependencies": [
     // scripts/edgeDependencies.mjs spawns the pinned local Deno executable.
@@ -42,11 +57,11 @@
     "@supabase/realtime-js",
     // Deno's `npm:web-push` specifier in an edge function, which knip's Node
     // resolver reads as a package called "npm".
-    "npm"
+    "npm",
   ],
 
   // An export used inside its own file is a scoping choice, not dead code.
   // src/types/* exports a domain vocabulary on purpose, and a shadcn primitive
   // keeps whatever upstream ships.
-  "ignoreExportsUsedInFile": true
+  "ignoreExportsUsedInFile": true,
 }

@@ -1,3 +1,4 @@
+import { trackProductEvent } from '@/common/api/productEventService';
 import { useState, useCallback, useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCategoriesData } from '@/common/contexts/DataContext';
@@ -125,6 +126,7 @@ export const useCsvImportFlow = (onClose: () => void) => {
 
     try {
       const count = await writeImportedRows(state.validRows, writers);
+      trackProductEvent({ name: 'statement_import_completed' });
 
       toast({
         title: t('common.success'),

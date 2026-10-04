@@ -20,6 +20,7 @@ import {
 import { downloadObject, sameObjects } from './backup/storage.mjs';
 import { loadLocalDefaults } from './backup/local.mjs';
 import { createArchive } from './backup/archive.mjs';
+import { recordBackupRun } from './backup/status.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -148,23 +149,26 @@ const main = async () => {
   process.umask(0o077);
   await loadLocalDefaults();
   const config = await configuration();
-  for (const tool of ['psql', 'pg_dump', 'pg_dumpall', 'pg_restore']) {
-    await run(executable(tool), ['--version']);
-  }
-  await run('gpg', [
-    '--no-options',
-    '--batch',
-    '--list-keys',
-    config.recipient,
-  ]);
   await mkdir(config.directory, { recursive: true, mode: 0o700 });
   await assertPrivatePath(config.directory);
+  const startedAt = new Date().toISOString();
+  await recordBackupRun(config.directory, 'running', startedAt);
   const name = `${new Date().toISOString().replace(/[:.]/g, '-')}-${randomUUID()}`;
-  const stage = await mkdtemp(join(config.directory, '.incomplete-'));
-  const directory = join(stage, 'backup');
-  await mkdir(directory, { mode: 0o700 });
+  let stage;
   let snapshot;
   try {
+    stage = await mkdtemp(join(config.directory, '.incomplete-'));
+    const directory = join(stage, 'backup');
+    await mkdir(directory, { mode: 0o700 });
+    for (const tool of ['psql', 'pg_dump', 'pg_dumpall', 'pg_restore']) {
+      await run(executable(tool), ['--version']);
+    }
+    await run('gpg', [
+      '--no-options',
+      '--batch',
+      '--list-keys',
+      config.recipient,
+    ]);
     console.log(
       'Backing up all users: database, roles, storage and application source.',
     );
@@ -232,6 +236,7 @@ const main = async () => {
       `${JSON.stringify(manifest, null, 2)}\n`,
     );
     const result = await createArchive(stage, directory, config, name);
+    await recordBackupRun(config.directory, 'complete', startedAt);
     console.log(
       JSON.stringify({
         status: 'complete',
@@ -240,9 +245,14 @@ const main = async () => {
         ...result,
       }),
     );
+  } catch (error) {
+    await recordBackupRun(config.directory, 'failed', startedAt);
+    throw error;
   } finally {
     snapshot?.close();
-    await rm(stage, { recursive: true, force: true });
+    if (stage) {
+      await rm(stage, { recursive: true, force: true });
+    }
   }
 };
 

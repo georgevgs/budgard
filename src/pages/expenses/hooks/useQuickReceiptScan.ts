@@ -1,3 +1,4 @@
+import { trackProductEvent } from '@/common/api/productEventService';
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProGate } from '@/common/hooks/useProGate';
@@ -120,6 +121,7 @@ export const useQuickReceiptScan = ({
         return;
       }
 
+      trackProductEvent({ name: 'receipt_scan_completed' });
       const count = prefill(text, targetRef.current);
       if (count === 0) {
         toast({ description: t('receipt.scanNoData') });

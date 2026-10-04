@@ -1,3 +1,4 @@
+import { trackProductEvent } from '@/common/api/productEventService';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
@@ -48,6 +49,7 @@ export const useAnnualPdfExport = (
         t,
       );
       await generateAnnualPdfReport(input);
+      trackProductEvent({ name: 'annual_pdf_export_completed' });
       toast({
         title: t('annualExport.exportedTitle'),
         description: t('annualExport.exportedPdfDescription', {

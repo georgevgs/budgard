@@ -317,8 +317,7 @@ writes is one file:
 - `pages/<feature>/<feature>Api.ts` — debts, expenses, goals, income, networth,
   plan, recurring, settings, today
 - `pages/plan/budgetApi.ts` — overall and per-category budgets
-- `pages/settings/settingsApi.ts` also owns push-subscription persistence and
-  the non-secret financial-connection status read
+- `pages/settings/settingsApi.ts` also owns push-subscription persistence
 - `pages/today/todayApi.ts` — owner-scoped Today layout sync
 - `pages/expenses/utils/ocr.ts` — Tesseract receipt scanning (Pro)
 
@@ -351,7 +350,24 @@ never access tokens or raw provider payloads. A server-side provider adapter
 must normalize data and call the service-role-only
 `ingest_connected_transactions` RPC. Until an adapter and regulated provider
 are configured, the app truthfully offers statement import rather than a fake
-"connect bank" action.
+"connect bank" action. Settings → Imports and rules opens statement import
+and lists owner-scoped transaction rules. Deletion uses `useTransactionRuleOps`
+and the shared mutation runner; failure restores the removed row. The old
+`/settings/connections` URL still resolves to this section. The frontend no
+longer queries inactive connection status; the database ingestion boundary
+and its security guards remain for a future adapter.
+
+## Product usage lifecycle
+
+`productEventService` appends best-effort events with a fixed vocabulary. Feature
+visits and completed OCR/import/export actions record no route parameters,
+financial values, receipt text or free-form payloads. Clients cannot read the log.
+The daily `prune-product-events-daily` cron deletes events older than 90 days via
+the invoker-only private function. `bun run usage:report --project-ref <ref>`
+returns rolling 30-day aggregates from `docs/product-usage-query.sql`.
+Missing events and zero surviving rows are not proof a feature was unused:
+offline writes can be dropped, automatic recurring writes count as transactions,
+and custom-layout counts omit accounts that kept the defaults.
 
 ## Goals and investable surplus
 
@@ -570,6 +586,11 @@ not float to a new SDK release independently.
 The hosted project uses email OTP rather than app passwords. Supabase's leaked
 password check remains a useful defense-in-depth setting if password auth is
 ever introduced, but it is available only on Supabase Pro and above.
+
+The remaining CSP hardening task is to replace `https://*.sentry.io` in
+`netlify.toml` with the exact ingest host from the configured Sentry DSN. The
+host depends on deployment configuration; keep Sentry delivery working when
+narrowing it.
 
 The data provider boots with a bounded 12-month transaction window. Activity
 requests the older tail for all-time search or an older selected month; Pro

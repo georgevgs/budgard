@@ -113,9 +113,6 @@ export const readStoredLayoutSnapshot = (
   }
 };
 
-export const readStoredLayout = (userId: string): TodayLayout =>
-  readStoredLayoutSnapshot(userId).layout;
-
 export const writeStoredLayout = (
   userId: string,
   layout: TodayLayout,

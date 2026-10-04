@@ -12,7 +12,7 @@ import { useTodayLayout } from '@/pages/today/hooks/useTodayLayout';
 import {
   DEFAULT_VISIBLE,
   TODAY_TILES,
-  readStoredLayout,
+  readStoredLayoutSnapshot,
   type TodayTileId,
 } from '@/pages/today/utils/bentoLayout';
 
@@ -40,10 +40,9 @@ describe('TodayArrange', () => {
 
     fireEvent.click(getMoveControl('safeToSpend', 'moveDown'));
 
-    expect(readStoredLayout(USER_ID).visible.slice(0, 2)).toEqual([
-      'budgetUsed',
-      'safeToSpend',
-    ]);
+    expect(
+      readStoredLayoutSnapshot(USER_ID).layout.visible.slice(0, 2),
+    ).toEqual(['budgetUsed', 'safeToSpend']);
     expect(
       screen.getByText('today.arrange.movedAnnouncement'),
     ).toBeInTheDocument();
@@ -75,7 +74,9 @@ describe('TodayArrange', () => {
 
     fireEvent.click(reset);
 
-    expect(readStoredLayout(USER_ID).visible).toEqual(DEFAULT_VISIBLE);
+    expect(readStoredLayoutSnapshot(USER_ID).layout.visible).toEqual(
+      DEFAULT_VISIBLE,
+    );
     expect(
       screen.getByText('today.arrange.resetAnnouncement'),
     ).toBeInTheDocument();
@@ -130,10 +131,9 @@ describe('TodayArrange', () => {
       clientY: 220,
     });
 
-    expect(readStoredLayout(USER_ID).visible.slice(0, 2)).toEqual([
-      'budgetUsed',
-      'safeToSpend',
-    ]);
+    expect(
+      readStoredLayoutSnapshot(USER_ID).layout.visible.slice(0, 2),
+    ).toEqual(['budgetUsed', 'safeToSpend']);
     expect(
       screen.getByText('today.arrange.droppedAnnouncement'),
     ).toBeInTheDocument();

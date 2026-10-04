@@ -1,7 +1,10 @@
 import { createClient } from 'supabase';
 import webpush from 'npm:web-push@3.6.7';
 import { corsHeadersFor } from '../_shared/cors.ts';
-import { deliverPush, PUSH_SUBSCRIPTION_LIMIT } from '../_shared/pushDelivery.ts';
+import {
+  deliverPush,
+  PUSH_SUBSCRIPTION_LIMIT,
+} from '../_shared/pushDelivery.ts';
 
 type RecurringDue = {
   user_id: string;
@@ -57,10 +60,7 @@ type NotificationPayload = {
 
 // Mirrors the client-side type in src/types/Budget.ts.
 type NotificationPreferenceKey =
-  | 'bill_reminders'
-  | 'budget_warning'
-  | 'budget_exceeded'
-  | 'debt_payment';
+  'bill_reminders' | 'budget_warning' | 'budget_exceeded' | 'debt_payment';
 
 type PreferencesByUser = Map<string, Record<string, boolean>>;
 
@@ -164,6 +164,31 @@ Deno.serve(async (req) => {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Keep the hourly schedule ready for the next opt-in without evaluating
+    // every reminder and budget when nobody can receive a notification.
+    const { data: recipients, error: recipientError } = await adminClient
+      .from('push_subscriptions')
+      .select('id')
+      .limit(1);
+    if (recipientError) {
+      throw recipientError;
+    }
+    if (!recipients?.length) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          sent: 0,
+          failed: 0,
+          stale_cleaned: 0,
+          notifications_evaluated: 0,
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      );
     }
 
     const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!;

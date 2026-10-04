@@ -11,7 +11,20 @@ export type ProductEventName =
   | 'monthly_budget_saved'
   | 'recurring_expense_created'
   | 'quick_add_opened'
-  | 'quick_add_submitted';
+  | 'quick_add_submitted'
+  | 'activity_opened'
+  | 'trends_opened'
+  | 'plan_opened'
+  | 'accounts_opened'
+  | 'goals_opened'
+  | 'debts_opened'
+  | 'review_opened'
+  | 'settings_opened'
+  | 'receipt_scan_completed'
+  | 'statement_import_completed'
+  | 'csv_export_completed'
+  | 'annual_pdf_export_completed'
+  | 'data_export_completed';
 
 export type ProductEventInput = {
   name: ProductEventName;

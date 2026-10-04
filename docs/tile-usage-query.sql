@@ -75,8 +75,7 @@ ORDER BY tiles_kept;
 WITH prefs AS (SELECT today_hidden FROM public.user_ui_preferences),
 defaults AS (
   SELECT unnest(ARRAY[
-    'safeToSpend', 'budgetUsed', 'monthPace', 'upcoming',
-    'topCategory', 'insight', 'recentActivity'
+    'safeToSpend', 'upcoming', 'insight', 'recentActivity'
   ]) AS tile
 )
 SELECT d.tile, count(*) AS turned_off_by
@@ -86,11 +85,12 @@ GROUP BY d.tile
 ORDER BY turned_off_by DESC;
 
 
--- 6. Tiles switched ON despite being off by default (weeklyRecap, netWorth,
---    debts). Demand for something the default hides.
+-- 6. Tiles switched ON despite being off by default. Demand for something
+--    the current four-tile default hides. Older saved layouts had seven tiles;
+--    their presence does not prove a deliberate opt-in under today's defaults.
 WITH prefs AS (SELECT today_visible FROM public.user_ui_preferences),
 off_by_default AS (
-  SELECT unnest(ARRAY['weeklyRecap', 'netWorth', 'debts']) AS tile
+  SELECT unnest(ARRAY['budgetUsed', 'monthPace', 'topCategory', 'weeklyRecap', 'netWorth', 'debts']) AS tile
 )
 SELECT o.tile, count(*) AS turned_on_by
 FROM off_by_default o

@@ -3,7 +3,9 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { assertPrivatePath } from './io.mjs';
 
-export const loadLocalDefaults = async () => {
+export const loadLocalDefaults = async ({
+  includeStorageCredentials = true,
+} = {}) => {
   const path = join(homedir(), '.config/budgard/backup-local.json');
   let local;
   try {
@@ -27,7 +29,11 @@ export const loadLocalDefaults = async () => {
       process.env[name] = local[name];
     }
   }
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY && local.storageKeyFile) {
+  if (
+    includeStorageCredentials &&
+    !process.env.SUPABASE_SERVICE_ROLE_KEY &&
+    local.storageKeyFile
+  ) {
     await assertPrivatePath(local.storageKeyFile);
     process.env.SUPABASE_SERVICE_ROLE_KEY = (
       await readFile(local.storageKeyFile, 'utf8')

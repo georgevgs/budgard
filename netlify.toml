@@ -166,11 +166,6 @@
   [headers.values]
     Cache-Control = "public, max-age=2592000"
 
-[[headers]]
-  for = "/icons/*"
-  [headers.values]
-    Cache-Control = "public, max-age=2592000"
-
 # Every other static path here declares its own policy, so these two do too
 # rather than inheriting a default from Netlify and Cloudflare in turn. One
 # hour: long enough that a crawler re-fetching them costs nothing, short

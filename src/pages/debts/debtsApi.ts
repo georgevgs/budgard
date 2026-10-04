@@ -36,15 +36,6 @@ export const debtsApi = {
     return rows<Debt>(query);
   },
 
-  async getDebtById(debtId: string, signal?: AbortSignal) {
-    let query = supabase.from('debts').select('*').eq('id', debtId);
-    if (signal) {
-      query = query.abortSignal(signal);
-    }
-
-    return row<Debt>(query.single());
-  },
-
   async createDebt(debtData: Partial<Debt>, ownerId: string) {
     // Most users only know what they currently owe, not the original loan
     // amount. We treat the entered current_balance as both original_principal

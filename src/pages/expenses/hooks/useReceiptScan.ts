@@ -1,3 +1,4 @@
+import { trackProductEvent } from '@/common/api/productEventService';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isSameDay } from 'date-fns';
@@ -65,6 +66,7 @@ export const useReceiptScan = ({ form, receiptFile }: UseReceiptScanArgs) => {
         return;
       }
 
+      trackProductEvent({ name: 'receipt_scan_completed' });
       const filledCount = prefillFields(form, text);
 
       if (filledCount === 0) {

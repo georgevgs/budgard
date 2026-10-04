@@ -1,3 +1,4 @@
+import { trackProductEvent } from '@/common/api/productEventService';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { captureException } from '@/config/sentry';
@@ -9,8 +10,8 @@ import { todayIso } from '@/constants/dates';
 import { downloadBlob } from '@/constants/download';
 
 // Full-account JSON export (data portability). Fetches everything fresh from
-// the server so the file is complete even before the background history
-// stream has finished. Receipt images live in storage and are not included.
+// the server so the file is complete even when the UI has only loaded recent
+// history. Receipt images live in storage and are not included.
 export const useDataExport = () => {
   const { activeOwnerId } = useFinancialSpace();
   const { t } = useTranslation();
@@ -71,6 +72,7 @@ export const useDataExport = () => {
       };
 
       downloadJson(buildFileName(), payload);
+      trackProductEvent({ name: 'data_export_completed' });
       toast({
         variant: 'success',
         title: t('settings.data.exportReady'),

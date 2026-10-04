@@ -5,7 +5,7 @@
 A personal expense tracker that actually fits in your pocket.
 
 [![Live App](https://img.shields.io/badge/Live-budgard.com-black?style=flat-square)](https://budgard.com)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=flat-square)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue?style=flat-square)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square)](https://reactjs.org/)
 [![License](https://img.shields.io/badge/License-Proprietary-red?style=flat-square)](#license)
 
@@ -22,6 +22,7 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 ## What it does
 
 **Expenses**
+
 - Log expenses with amount, description, date, category, tag, and currency
 - Attach receipt photos with drag-and-drop or tap-to-upload (compressed to WebP)
 - Save expense templates for quick re-entry of frequent purchases
@@ -30,17 +31,20 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Sort by date or amount, search across all months
 - CSV import and export (export is Pro)
 - Merchant normalization, reusable transaction rules, and an import review queue
+- Statement imports and rule listing/deletion in Settings → Imports and rules
 - Multi-currency support with live exchange rates
 - Animated number transitions on totals
 
 **Recurring Expenses**
+
 - Set up recurring expenses (weekly, biweekly, monthly, quarterly, yearly) with start/end dates — 3 on the free plan, unlimited with Pro
-- Automatic expense generation via Supabase Edge Function
+- Automatic expense generation via the daily Postgres cron job
 - Track next occurrence and overdue status
 - Toggle active/inactive without deleting
 - Preview estimated monthly cost
 
 **Income**
+
 - Log one-off and recurring income alongside expenses
 - Net cash flow card (income − expenses) with savings rate
 - 50/30/20 ring (needs / wants / savings) computed live from your data
@@ -48,6 +52,7 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Stored in a single transactions table with a `type` discriminator
 
 **Analytics**
+
 - Monthly spending snapshot with month-over-month comparison
 - Interactive area chart with clickable month drill-down — last 3 months free, full history with Pro
 - Category breakdown with sparkline trends and drill-down details
@@ -56,12 +61,14 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Cash flow trends and annual CSV export (Pro)
 
 **Budget**
+
 - Set a monthly total budget target
 - Per-category budgets with their own 80% / 100% alerts (Pro)
 - Real-time progress tracking with color-coded alerts at 80% and 100%
 - Budget reference line on analytics chart
 
 **Savings Goals** (Pro)
+
 - Create goals with a target amount and optional deadline
 - Link a goal to an investment account so progress is backed by its real balance
 - Invest yesterday's unspent daily allowance directly from Today
@@ -69,6 +76,7 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Edit or delete from a single goal card
 
 **Net Worth**
+
 - Manual accounts (checking, savings, cash, investment, other)
 - Snapshot-based balance history per account, with verb-style actions (Add money, Withdraw, Update value)
 - Net worth chart with month-over-month delta
@@ -77,29 +85,34 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Recurring expenses can target an investment account so contributions roll into the balance automatically
 
 **Debt Tracker**
+
 - Track debts with balance, APR, and minimum payment
 - Snowball or avalanche payoff plan with payoff date estimate
 - Log payments as linked expenses; balance auto-updates via DB trigger
 - Per-debt progress bar and detail sheet
 
 **Categories and Tags**
+
 - Custom categories with user-chosen colors and emoji icons
 - Categories can be tagged as Need, Want, or Savings to feed the 50/30/20 ring
 - Tags for finer-grained expense grouping
 - Filter by category or tag in the expense list
 
 **Household Sharing** (Pro)
+
 - Invite one partner into a shared financial space
 - Switch between personal and shared finances without sharing logins
 - Keep billing, notifications, push subscriptions, and security settings personal
 
 **Imports and Automation**
+
 - Import CSV, OFX, QFX, and QIF bank statements
 - Review every imported row before trusting the automation
 - Teach merchant/category/tag rules and apply them to matching history
 - Detect recurring patterns and confirm suggestions instead of silently guessing
 
 **Notifications**
+
 - Bill reminders for recurring expenses due tomorrow
 - Debt-payment reminders the day before they're due
 - Budget warning when monthly or per-category spend crosses 80%
@@ -109,12 +122,14 @@ It's a PWA so it installs on your phone like a native app, syncs across devices,
 - Per-type toggles in settings; works across mobile and desktop
 
 **Customization**
+
 - Three themes: dark, light, and Barbie
 - Seven accent colors: Sunset, Ocean, Lavender, Mint, Coral, Gold, Slate
 - English and Greek (auto-detected from browser)
 - Default currency setting
 
 **Other**
+
 - Guided onboarding for new users
 - Offline support with sync on reconnect
 - PWA update detection with in-app prompt
@@ -131,20 +146,20 @@ Payments run through Stripe as merchant of record; subscriptions are managed or 
 
 ## Tech
 
-React 19 + TypeScript + Vite on the frontend. Supabase handles auth (email OTP), the Postgres database, file storage for receipts, and Edge Functions for recurring expense generation, push notifications, and Stripe billing (checkout, webhook, customer portal, live prices). Deployed on Netlify.
+React 19 + TypeScript + Vite on the frontend. Supabase handles auth (email OTP), the Postgres database, file storage for receipts, daily Postgres cron for recurring generation, and Edge Functions for push notifications, account deletion, and Stripe billing (checkout, webhook, customer portal, live prices). Deployed on Netlify.
 
-UI components from shadcn/ui, charts hand-rolled as inline SVG in `components/charts/` (no charting library), forms from react-hook-form + Zod. State lives in React Context with optimistic updates (custom rollback pattern) so the UI never feels slow. Cloudflare Turnstile protects the auth flow. Errors are monitored with Sentry. Push notifications use the Web Push API with VAPID authentication.
+UI components from shadcn/ui, charts hand-rolled as inline SVG in `src/common/components/charts/` (no charting library), forms from react-hook-form + Zod. State lives in React Context with optimistic updates (custom rollback pattern) so the UI never feels slow. Cloudflare Turnstile protects the auth flow. Errors are monitored with Sentry. Push notifications use the Web Push API with VAPID authentication.
 
 ### Key architecture
 
 - **State**: Context API — `AuthContext` for sessions, `FinancialSpaceContext` for owner/household scope, and narrow `DataContext` slices so consumers don't re-render on unrelated mutations
-- **Data**: All Supabase calls go through `services/*`; transactions load in two stages (last 12 months first, full history streams in)
-- **Mutations**: Optimistic updates with rollback, one domain hook per table in `hooks/dataOps/*` (`useExpenseOps`, `useCategoryOps`, …) — called directly, there is no composed wrapper
-- **Validation**: Zod schemas in `lib/validations.ts`, react-hook-form for forms
+- **Data**: Supabase queries live at feature-root `*Api.ts` modules or `src/common/api/`; the last 12 months load first, with older history fetched on demand
+- **Mutations**: Operation hooks in `src/common/hooks/dataOps/*` share `useMutationRunner` for guards, optimistic updates, rollback and retries
+- **Validation**: Feature-local Zod schemas in `validations.ts`, shared primitives in `src/constants/validations.ts`, react-hook-form for forms
 - **Routing**: Lazy-loaded routes with `PrivateRoute` / `PublicRoute` guards
 - **Path alias**: `@/*` maps to `./src/*`
 - **i18n**: i18next with browser language detection
-- **Offline**: Queued mutations with automatic sync on reconnect
+- **Offline**: Expenses and incomes queue offline with automatic sync on reconnect
 
 ## Scripts
 
@@ -157,20 +172,22 @@ bun install           # install (respects the lockfile)
 
 bun run dev           # dev server
 bun run build         # TypeScript compile + Vite production build
-bun run typecheck     # TypeScript check without emit
+bun run typecheck     # TypeScript project-reference check (`tsc -b`)
 bun run lint          # ESLint
 bun run lint:fix      # ESLint with auto-fix
 bun run test          # unit tests (Vitest)
 bun run test:watch    # watch mode
 bun run test:coverage # with coverage report
 bun run test:e2e      # end-to-end tests (Playwright)
+bun run knip:production # production reachability, excluding test-only usage
+bun run backup:health # encrypted backup freshness and integrity
+bun run usage:report  # linked-project aggregate usage over the last 30 days
 bun run budget        # bundle-size budgets (reads dist/, run after build)
 bun run sync:agents   # regenerate AGENTS.md from CLAUDE.md
 ```
 
-`bun run format` reformats all of `src`, and the repo is not Prettier-clean at
-baseline — running it repo-wide produces a diff of unrelated files. Format only
-what you touched.
+`bun run format` reformats all of `src`. Format only the files you touched and
+use `bun run format:check` to verify the full source tree.
 
 ## License
 

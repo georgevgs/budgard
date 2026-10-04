@@ -139,19 +139,6 @@ export const networthApi = {
     });
   },
 
-  async createAccountBalance(
-    snapshot: Partial<AccountBalance>,
-    ownerId: string,
-  ) {
-    return row<AccountBalance>(
-      supabase
-        .from('account_balances')
-        .insert({ ...snapshot, user_id: ownerId })
-        .select()
-        .single(),
-    );
-  },
-
   async upsertAccountBalance(snapshot: Partial<AccountBalance>) {
     // Atomic upsert via Postgres function — preserves a same-day
     // contribution_delta when the caller didn't supply one. Replaces an

@@ -6,6 +6,10 @@ const migration = readFileSync(
   'utf8',
 );
 const service = readFileSync('src/common/api/productEventService.ts', 'utf8');
+const vocabularyMigration = readFileSync(
+  'supabase/migrations/20261004171713_product_event_retention_and_usage.sql',
+  'utf8',
+);
 
 describe('product event privacy boundary', () => {
   it('keeps the event log append-only for authenticated clients', () => {
@@ -38,10 +42,13 @@ describe('product event privacy boundary', () => {
 
   it('keeps the client vocabulary in lock-step with the database check', () => {
     const sqlNames = Array.from(
-      migration
+      vocabularyMigration
         .slice(
-          migration.indexOf('event_name IN ('),
-          migration.indexOf('  )),', migration.indexOf('event_name IN (')),
+          vocabularyMigration.indexOf('event_name IN ('),
+          vocabularyMigration.indexOf(
+            '  ));',
+            vocabularyMigration.indexOf('event_name IN ('),
+          ),
         )
         .matchAll(/'([^']+)'/g),
       (match) => match[1],

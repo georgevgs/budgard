@@ -48,6 +48,12 @@ jobs:
       - name: Backup safety tests
         run: bun run test:backup
 
+      - name: Production reachability
+        run: bun run knip:production
+
+      - name: API member usage
+        run: bun run audit:api
+
       - name: Build
         # Typechecking already ran above; build would run tsc -b again.
         run: bun run vite build

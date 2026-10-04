@@ -9,7 +9,8 @@ import vitest from '@vitest/eslint-plugin';
 // in this file that can be checked mechanically is checked here rather than
 // written down somewhere, because a rule nobody runs is a rule that drifts.
 export default tseslint.config(
-  { ignores: ['dist', 'coverage'] },
+  // Generated browser artifacts can be recreated while lint walks the tree.
+  { ignores: ['dist', 'coverage', 'test-results', 'playwright-report'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
@@ -126,5 +127,5 @@ export default tseslint.config(
       'no-empty-pattern': 'off',
       'react-hooks/rules-of-hooks': 'off',
     },
-  }
+  },
 );

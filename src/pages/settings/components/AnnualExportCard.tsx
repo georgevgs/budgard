@@ -19,6 +19,7 @@ import {
   downloadCsv,
 } from '@/constants/csvExport';
 import type { Expense } from '@/types/Expense';
+import { trackProductEvent } from '@/common/api/productEventService';
 
 type AnnualExportCardProps = {
   selectedYear: number;
@@ -50,6 +51,7 @@ export const AnnualExportCard = ({
   const handleExportTransactions = () => {
     const csv = buildTransactionsCsv(yearTransactions, categories, tags, t);
     downloadCsv(`budgard-${selectedYear}-transactions.csv`, csv);
+    trackProductEvent({ name: 'csv_export_completed' });
     toast({
       title: t('annualExport.exportedTitle'),
       description: t('annualExport.exportedDescription', {
@@ -62,6 +64,7 @@ export const AnnualExportCard = ({
   const handleExportSummary = () => {
     const csv = buildCategorySummaryCsv(yearTransactions, categories, t);
     downloadCsv(`budgard-${selectedYear}-summary.csv`, csv);
+    trackProductEvent({ name: 'csv_export_completed' });
     toast({
       title: t('annualExport.exportedTitle'),
       description: t('annualExport.exportedSummaryDescription', {

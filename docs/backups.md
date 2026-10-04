@@ -131,7 +131,24 @@ A scheduler's existence does not prove backups are running. Inspect the
 last successful archive timestamp and verify copies at the destination.
 Do not upload plaintext staging or use public Git repositories as storage.
 
-The Mac LaunchAgent `com.budgard.backup` runs this backup weekly, on Sunday at
+`bun run backup:health` implements the local freshness and integrity check.
+It reads the newest published dated folder, verifies the ciphertext checksum,
+and checks `last-run.json` for failed or stalled attempts. It needs no database
+or Storage credentials and never decrypts archives. It exits 1 when monitoring
+should alert; an incomplete folder cannot count as a successful copy. To inspect
+a different destination or policy, use `bun run backup:health /path/to/copies 26`.
+The backup runner atomically records running/complete/failed status in the
+owner-only output directory. A job that cannot read its initial configuration
+still exits 1 before it can record status there; monitor the runner's exit code.
+
+The repository does not currently configure an independent destination or
+cloud schedule. Those require a private destination and runner credentials;
+GitHub had no repository secrets configured at the October 2026 audit. The
+local monitor can check copied dated folders too, but it cannot establish
+that a remote copy exists. Daily independent coverage remains a setup task
+until a destination and runner are configured.
+
+At the audit, the Mac LaunchAgent `com.budgard.backup` ran weekly, on Sunday at
 12:00, through `~/Scripts/budgard-backup.sh`. That script is a launcher and
 nothing else: it sets `PATH` — launchd gives a job `/usr/bin:/bin:/usr/sbin:/sbin`,
 which has neither node nor gpg on it — and runs `scripts/backup.mjs`, which
@@ -144,6 +161,17 @@ shut down overnight. It had produced nothing since it was installed in May.
 Keep the hour inside the working day: a LaunchAgent cannot wake the machine,
 and a missed weekly slot is a week with no backup. Check `backup.log` and the
 newest dated folder rather than trusting the schedule.
+
+`node scripts/installBackupMonitoring.mjs` prepares validated LaunchAgent
+files in `/tmp/budgard-backup-jobs` for review. `bun run backup:monitor:install`
+installs a daily noon backup and an hourly health check with a macOS desktop
+notification on failure. It saves any prior plist in `~/Library/Logs/Budgard`
+before replacing it, and refuses to change a job that is currently running.
+The daily job replaces the weekly `com.budgard.backup` schedule. Both jobs run
+the repository scripts directly with an explicit tool PATH. Logs are in
+`~/Library/Logs/Budgard`; the old launcher remains available for manual use.
+Desktop notifications require macOS notification permissions. A sleeping or
+offline Mac still cannot provide independent daily backup coverage.
 
 Nothing prunes `BACKUP_DIR`; each run adds roughly 17 MB. A local source
 script alone does not activate a cloud scheduler or provision backup storage.

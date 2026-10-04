@@ -1,3 +1,4 @@
+import { trackProductEvent } from '@/common/api/productEventService';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCategoriesData, useTagsData } from '@/common/contexts/DataContext';
@@ -26,6 +27,7 @@ export const useActivityCsvExport = (
 
     const csv = buildTransactionsCsv(transactions, categories, tags, t);
     downloadCsv(`budgard-${exportScope}-activity.csv`, csv);
+    trackProductEvent({ name: 'csv_export_completed' });
     toast({
       variant: 'success',
       title: t('activity.exportedTitle'),
