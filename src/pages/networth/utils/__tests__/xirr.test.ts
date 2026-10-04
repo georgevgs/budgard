@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { xirr, computeAccountXirr, type Cashflow } from '@/pages/networth/utils/xirr';
+import {
+  xirr,
+  computeAccountXirr,
+  type Cashflow,
+} from '@/pages/networth/utils/xirr';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { detectStatementFormat, parseStatement } from '@/common/components/csvImport/utils/statementImport';
+import {
+  detectStatementFormat,
+  parseStatement,
+} from '@/common/components/csvImport/utils/statementImport';
 
 const OFX = `OFXHEADER:100
 DATA:OFXSGML

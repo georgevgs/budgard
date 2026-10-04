@@ -2,8 +2,12 @@ import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useDialogDirty } from '@/common/hooks/useDialogDirty';
 import { useFeedbackOps } from '@/common/hooks/dataOps/useFeedbackOps';
-import { feedbackFormSchema, type FeedbackFormData } from '@/pages/settings/validations';
+import {
+  feedbackFormSchema,
+  type FeedbackFormData,
+} from '@/pages/settings/validations';
 import type { FeedbackKind } from '@/common/api/feedbackService';
 
 type Params = {
@@ -17,9 +21,11 @@ export const useFeedbackForm = ({ kind, onSubmitted }: Params) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<FeedbackFormData>({
     resolver: zodResolver(feedbackFormSchema),
-    mode: 'onChange',
+    mode: 'onTouched',
     defaultValues: { message: '' },
   });
+
+  useDialogDirty(form.formState.isDirty);
 
   const submit = form.handleSubmit(async (values) => {
     setIsSubmitting(true);

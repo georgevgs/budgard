@@ -2,7 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 
 const mockToast = vi.fn();
-vi.mock('@/common/hooks/useToast', () => ({ useToast: () => ({ toast: mockToast }) }));
+vi.mock('@/common/hooks/useToast', () => ({
+  useToast: () => ({ toast: mockToast }),
+}));
 
 const mockShowErrorToast = vi.fn();
 vi.mock('@/common/hooks/dataOps/useShowErrorToast', () => ({

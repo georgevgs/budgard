@@ -131,7 +131,11 @@ describe('buildMoneyTimeline, rest of the month', () => {
   });
 
   it('nets income against expenses over the window', () => {
-    const rent = schedule({ id: 'rent', amount: 800, start_date: '2026-09-10' });
+    const rent = schedule({
+      id: 'rent',
+      amount: 800,
+      start_date: '2026-09-10',
+    });
     const salary = schedule({
       id: 'salary',
       amount: 2000,
@@ -171,12 +175,33 @@ describe('buildMoneyTimeline, rest of the month', () => {
     // the same window from the same schedules, so the list adds up to the
     // number that opened it. Break either walk and this fails.
     const items = [
-      schedule({ id: 'weekly', amount: 12, frequency: 'weekly', start_date: '2026-09-02' }),
+      schedule({
+        id: 'weekly',
+        amount: 12,
+        frequency: 'weekly',
+        start_date: '2026-09-02',
+      }),
       schedule({ id: 'today', amount: 40, start_date: '2026-09-01' }),
-      schedule({ id: 'quarterly', amount: 90, frequency: 'quarterly', start_date: '2026-06-18' }),
-      schedule({ id: 'ending', amount: 25, frequency: 'weekly', start_date: '2026-09-03', end_date: '2026-09-17' }),
+      schedule({
+        id: 'quarterly',
+        amount: 90,
+        frequency: 'quarterly',
+        start_date: '2026-06-18',
+      }),
+      schedule({
+        id: 'ending',
+        amount: 25,
+        frequency: 'weekly',
+        start_date: '2026-09-03',
+        end_date: '2026-09-17',
+      }),
       schedule({ id: 'inactive', amount: 500, active: false }),
-      schedule({ id: 'lagging', amount: 30, start_date: '2026-01-20', last_generated_date: '2026-06-20' }),
+      schedule({
+        id: 'lagging',
+        amount: 30,
+        start_date: '2026-01-20',
+        last_generated_date: '2026-06-20',
+      }),
       schedule({ id: 'next-month', amount: 60, start_date: '2026-10-04' }),
     ];
 

@@ -16,7 +16,11 @@ type TemplateDeleteDialogProps = {
   onConfirm: () => void;
 };
 
-export const TemplateDeleteDialog = ({ open, onCancel, onConfirm }: TemplateDeleteDialogProps) => {
+export const TemplateDeleteDialog = ({
+  open,
+  onCancel,
+  onConfirm,
+}: TemplateDeleteDialogProps) => {
   const { t } = useTranslation();
 
   return (

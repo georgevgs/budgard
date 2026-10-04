@@ -18,7 +18,9 @@ vi.mock('@/common/components/layout/SpeedDial', () => ({
 vi.mock('@/common/components/layout/FormsManager', () => ({
   FormsManager: () => <div data-testid="expense-form" />,
 }));
-vi.mock('@/pages/expenses/components/QuickAddSheet', () => ({ QuickAddSheet: () => null }));
+vi.mock('@/pages/expenses/components/QuickAddSheet', () => ({
+  QuickAddSheet: () => null,
+}));
 vi.mock('@/pages/income/components/IncomeFormDialog', () => ({
   IncomeFormDialog: () => <div data-testid="income-form" />,
 }));

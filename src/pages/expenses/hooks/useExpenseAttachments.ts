@@ -20,7 +20,8 @@ export const useExpenseAttachments = (
   const [receiptFile, setReceiptFile] = useState<File | null>(
     draftReceiptFile ?? null,
   );
-  const [shouldRemoveExistingReceipt, setShouldRemoveExistingReceipt] = useState(false);
+  const [shouldRemoveExistingReceipt, setShouldRemoveExistingReceipt] =
+    useState(false);
   // An expense that already carries a tag or a receipt opens with the drawer
   // down, so the thing the user came back to edit is on screen.
   const [shouldShowDetails, setShouldShowDetails] = useState(() =>

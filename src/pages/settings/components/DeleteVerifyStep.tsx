@@ -8,11 +8,7 @@ import {
   AlertDialogTitle,
 } from '@/common/ui/alert-dialog';
 import { Button } from '@/common/ui/button';
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from '@/common/ui/input-otp';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/common/ui/input-otp';
 
 type DeleteVerifyStepProps = {
   email: string;
@@ -82,7 +78,10 @@ export const DeleteVerifyStep = ({
   );
 };
 
-const resolveVerifyLabel = (isDeleting: boolean, t: TranslateFunction): string => {
+const resolveVerifyLabel = (
+  isDeleting: boolean,
+  t: TranslateFunction,
+): string => {
   if (isDeleting) {
     return t('auth.verifying');
   }

@@ -5,7 +5,6 @@ import type { Goal } from '@/types/Goal';
 // Supabase queries for goals, at the feature root so an audit of what
 // this feature reads and writes is one file.
 export const goalsApi = {
-
   async getGoals(ownerId: string, signal?: AbortSignal) {
     let query = supabase
       .from('goals')

@@ -18,7 +18,10 @@ type DebtNumbersFieldsProps = {
   selectedCurrency: string;
 };
 
-export const DebtNumbersFields = ({ form, selectedCurrency }: DebtNumbersFieldsProps) => {
+export const DebtNumbersFields = ({
+  form,
+  selectedCurrency,
+}: DebtNumbersFieldsProps) => {
   const { t } = useTranslation();
 
   return (

@@ -1,13 +1,17 @@
 import { supabase } from '@/config/supabase';
 import { done, row, rows } from '@/common/api/supabaseCrud';
-import { SELECT_WITH_CATEGORY, SUPABASE_PAGE_SIZE, fetchAllPages, transactionCursorFilter } from '@/common/api/dataAccess';
+import {
+  SELECT_WITH_CATEGORY,
+  SUPABASE_PAGE_SIZE,
+  fetchAllPages,
+  transactionCursorFilter,
+} from '@/common/api/dataAccess';
 import type { Debt } from '@/types/Debt';
 import type { Expense } from '@/types/Expense';
 
 // Supabase queries for debts, at the feature root so an audit of what
 // this feature reads and writes is one file.
 export const debtsApi = {
-
   // Interest accrues every day, but recompute_debt_balance only ran when a
   // payment row moved — so a debt untouched for months carried a balance
   // months out of date, and that figure feeds net worth and the payoff

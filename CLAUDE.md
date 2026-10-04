@@ -23,7 +23,7 @@ is **bun**.
   retryable error toast that every mutation shares. Never hand-roll that shell
   again; the optimistic shapes (`prependOptimistic` / `patchOptimistic` /
   `removeOptimistic` / `setScalarOptimistic`) live in `dataOps/helpers.ts`.
-  Ten of these hooks have a single feature calling them, and the style guide
+  Some of these hooks have a single feature calling them, and the style guide
   would push each into that feature's `hooks/`; they stay here on purpose,
   because the shared runner and rollback contract are what make this one layer
   rather than twenty. That departure is recorded in `docs/style-guide.md`.
@@ -191,7 +191,9 @@ constrain new work:
 - **Tests**: a test asserts behaviour or pins a regression. Before committing a
   new one, break the line it covers and watch it fail — a test that passes
   against broken code is worse than no test.
-- Run `npm run lint`, `npm run test` and `npm run build`.
+- Run `npm run lint`, `npm run test`, `npm run build` and
+  `npm run format:check`. Format only the files being changed; vendored UI and
+  generated token CSS are excluded by `.prettierignore`.
 - **Adding or changing an Edge Function dependency needs `npm run edge:lock`.**
   Each function is its own Deno project with a frozen `deno.lock`, so a new
   import fails `npm run edge:check` until the lock is regenerated and committed.

@@ -8,7 +8,12 @@ type SectionShellProps = {
   className?: string;
 };
 
-export const SectionShell = ({ id, tone = 'default', children, className }: SectionShellProps) => {
+export const SectionShell = ({
+  id,
+  tone = 'default',
+  children,
+  className,
+}: SectionShellProps) => {
   return (
     <section id={id} className={cn(toneClass(tone), className)}>
       <div className="landing-gutter mx-auto max-w-6xl py-20 sm:py-28">

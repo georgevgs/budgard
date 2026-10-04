@@ -5,7 +5,10 @@ import { useToast } from '@/common/hooks/useToast';
 import type { ReceiptOptions } from '@/common/hooks/dataOps/useExpenseOps';
 import { toIsoDate, todayIso } from '@/constants/dates';
 import { parseReceiptText } from '@/pages/expenses/utils/receiptParse';
-import { RECEIPT_ALLOWED_TYPES, RECEIPT_MAX_FILE_SIZE } from '@/constants/validations';
+import {
+  RECEIPT_ALLOWED_TYPES,
+  RECEIPT_MAX_FILE_SIZE,
+} from '@/constants/validations';
 import type { TranslateFunction } from '@/constants/translate';
 import {
   resolveOcrLanguages,

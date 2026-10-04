@@ -27,7 +27,11 @@ type RefundExpenseDialogProps = {
 // totals, budgets and analytics all net out without special cases. The row
 // carries refunded_expense_id, which is both the audit trail back to the
 // charge and what makes "how much is still refundable" answerable.
-export const RefundExpenseDialog = ({ expense, open, onOpenChange }: RefundExpenseDialogProps) => {
+export const RefundExpenseDialog = ({
+  expense,
+  open,
+  onOpenChange,
+}: RefundExpenseDialogProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();

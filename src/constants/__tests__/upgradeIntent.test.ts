@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { consumeUpgradeIntent, saveUpgradeIntent } from '@/constants/upgradeIntent';
+import {
+  consumeUpgradeIntent,
+  saveUpgradeIntent,
+} from '@/constants/upgradeIntent';
 
 const INTENT_KEY = 'budgard-upgrade-intent';
 

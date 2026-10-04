@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { getCurrencySymbol, SUPPORTED_CURRENCIES } from '@/constants/currencies';
+import {
+  getCurrencySymbol,
+  SUPPORTED_CURRENCIES,
+} from '@/constants/currencies';
 
 describe('SUPPORTED_CURRENCIES', () => {
   it('has EUR as the first entry', () => {

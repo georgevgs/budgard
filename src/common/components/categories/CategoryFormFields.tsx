@@ -11,7 +11,8 @@ import {
 } from '@/common/ui/form';
 import { CategoryColorPicker } from '@/common/components/categories/CategoryColorPicker';
 import { CategoryIconPicker } from '@/common/components/categories/CategoryIconPicker';
-import { CategoryKindSelector,
+import {
+  CategoryKindSelector,
   type SelectableCategoryKind,
 } from '@/common/components/categories/CategoryKindSelector';
 import type { CategoryFormData } from '@/common/components/categories/validations';
@@ -22,7 +23,11 @@ type CategoryFormFieldsProps = {
   isDisabled: boolean;
 };
 
-export const CategoryFormFields = ({ form, isIncomeCategory, isDisabled }: CategoryFormFieldsProps) => {
+export const CategoryFormFields = ({
+  form,
+  isIncomeCategory,
+  isDisabled,
+}: CategoryFormFieldsProps) => {
   const { t } = useTranslation();
 
   return (

@@ -14,7 +14,7 @@ const SCROLLABLE_DIALOGS = [
   'src/pages/landing/components/LoginModal.tsx',
   'src/pages/plan/components/BudgetForm.tsx',
   'src/pages/landing/components/IosInstallModal.tsx',
-  'src/pages/onboarding/OnboardingFlow.tsx',
+  'src/common/components/onboarding/OnboardingFlow.tsx',
   'src/pages/settings/components/SetPinDialog.tsx',
 ] as const;
 
@@ -106,7 +106,9 @@ describe('modal viewport safety', () => {
   );
 
   it('keeps secondary tasks inside their parent sheet', () => {
-    const accountSheet = read('src/pages/networth/components/AccountDetailSheet.tsx');
+    const accountSheet = read(
+      'src/pages/networth/components/AccountDetailSheet.tsx',
+    );
     const debtSheet = read('src/pages/debts/components/DebtDetailSheet.tsx');
     const incomeForm = read('src/pages/income/components/IncomeForm.tsx');
     const expenseCategory = read(

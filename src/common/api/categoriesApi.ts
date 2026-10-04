@@ -5,7 +5,6 @@ import type { Category } from '@/types/Category';
 // Supabase queries for categories, at the feature root so an audit of what
 // this feature reads and writes is one file.
 export const categoriesApi = {
-
   async getCategories(ownerId: string, signal?: AbortSignal) {
     let query = supabase
       .from('categories')

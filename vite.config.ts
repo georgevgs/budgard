@@ -12,6 +12,13 @@ import { brandAssets, BRAND_ASSET_REVISION } from "./plugins/brandAssets.ts";
 import { designTokens } from "./plugins/designTokens.ts";
 import { PWA_NAVIGATION_DENYLIST } from "./src/boot/pwaNavigation.ts";
 
+// These suites need Node's WebCrypto or a replaceable window.location,
+// which jsdom's VM context does not provide. Keep their process isolation.
+const BROWSER_GLOBAL_TEST_FILES = [
+  'src/constants/__tests__/appLock.test.ts',
+  'src/common/components/pro/__tests__/UpgradeDialog.test.tsx',
+];
+
 // Function-form manualChunks: the previous array form only captured each
 // package's entry module, so secondary entry points (e.g. react-dom/client's
 // actual implementation, ~170 KB min) leaked into the app entry chunk and got
@@ -483,7 +490,27 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
-    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'unit',
+          // Load jsdom once per worker, with a fresh window and module
+          // context per file. Disabling isolation would leak mocks/state.
+          pool: 'vmThreads',
+          include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+          exclude: BROWSER_GLOBAL_TEST_FILES,
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'browser-globals',
+          pool: 'forks',
+          include: BROWSER_GLOBAL_TEST_FILES,
+        },
+      },
+    ],
     coverage: {
       provider: 'v8',
       include: ['src/pages/**', 'src/common/**', 'src/constants/**', 'src/config/**'],

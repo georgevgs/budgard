@@ -95,10 +95,7 @@ const buildRoutes = (): RouteObject[] => [
       },
       {
         path: '/recurring',
-        element: withFallback(
-          <RecurringExpensesList />,
-          <RecurringLoading />,
-        ),
+        element: withFallback(<RecurringExpensesList />, <RecurringLoading />),
       },
       {
         path: '/goals',

@@ -70,7 +70,7 @@ describe('section dividers', () => {
 describe('the translate function', () => {
   it('is typed once, not re-declared at the call site', () => {
     const offenders = linesMatching(
-      /\bt\??:\s*\((?:key|_key)\s*:\s*string/,
+      /\bt\??:\s*\(/,
       // The i18next mock has to state the shape it is standing in for.
       (file) => file === path.join(SRC, 'test', 'setup.ts'),
     );

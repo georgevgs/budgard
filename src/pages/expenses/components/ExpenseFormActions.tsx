@@ -9,7 +9,11 @@ type ExpenseFormActionsProps = {
   onClose: () => void;
 };
 
-export const ExpenseFormActions = ({ isValid, isSubmitting, onClose }: ExpenseFormActionsProps) => {
+export const ExpenseFormActions = ({
+  isValid,
+  isSubmitting,
+  onClose,
+}: ExpenseFormActionsProps) => {
   const { t } = useTranslation();
 
   return (

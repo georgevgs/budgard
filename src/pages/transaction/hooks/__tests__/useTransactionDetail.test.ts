@@ -19,7 +19,9 @@ const ops = vi.hoisted(() => ({
   handleExpenseSubmit: vi.fn(),
   handleExpenseDelete: vi.fn(),
 }));
-vi.mock('@/common/hooks/dataOps/useExpenseOps', () => ({ useExpenseOps: () => ops }));
+vi.mock('@/common/hooks/dataOps/useExpenseOps', () => ({
+  useExpenseOps: () => ops,
+}));
 
 import { useTransactionDetail } from '@/pages/transaction/hooks/useTransactionDetail';
 

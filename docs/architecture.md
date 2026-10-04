@@ -45,9 +45,9 @@ guards, lazy-module declarations and the keep-alive tab layout live under
 ### Route Guards
 
 - `PrivateRoute`
-    - Redirects unauthenticated users → `/`
+  - Redirects unauthenticated users → `/`
 - `PublicRoute`
-    - Redirects authenticated users → `/expenses`
+  - Redirects authenticated users → `/today`
 
 ### Routes
 
@@ -55,27 +55,27 @@ The four main tabs live in `src/constants/routes.ts` (`MAIN_TAB_PATHS`) because 
 than one place has to know exactly which routes are tabs. `MainTabsLayout`
 mounts each tab when first visited and hides inactive tabs. It lives in
 `AuthenticatedLayout` beside the route outlet, so opening a secondary screen
-also preserves tab filters and loaded rows. `useRouteScrollRestoration` records
+also preserves tab filters and loaded rows. `common/components/routing/hooks/useRouteScrollRestoration` records
 scroll positions while each route is visible and restores them on navigation.
 `getOwningTab` in `src/constants/routes.ts` supplies both the dock's active section
 and the Back button's fallback when a secondary screen is opened directly.
 
-| Route | Component | Access |
-|------|----------|--------|
-| `/` | LandingPage | Public |
-| `/privacy`, `/terms`, `/contact` | legal pages | Public |
-| `/today` | TodayView | Protected (tab) |
-| `/activity` | ActivityView | Protected (tab) |
-| `/plan` | PlanView | Protected (tab) |
-| `/trends` | AnalyticsView | Protected (tab) |
-| `/t/:id` | TransactionDetailView | Protected |
-| `/review` | ReviewQueueView | Protected |
-| `/recurring` | RecurringExpensesList | Protected |
-| `/goals` | GoalsList | Protected |
-| `/networth` | NetWorthView | Protected |
-| `/debts` | DebtsView | Protected (Pro) |
-| `/settings` | SettingsView | Protected |
-| `/join?token=…` | JoinHouseholdView | Public link, authenticated acceptance |
+| Route                            | Component             | Access                                |
+| -------------------------------- | --------------------- | ------------------------------------- |
+| `/`                              | LandingPage           | Public                                |
+| `/privacy`, `/terms`, `/contact` | legal pages           | Public                                |
+| `/today`                         | TodayView             | Protected (tab)                       |
+| `/activity`                      | ActivityView          | Protected (tab)                       |
+| `/plan`                          | PlanView              | Protected (tab)                       |
+| `/trends`                        | AnalyticsView         | Protected (tab)                       |
+| `/t/:id`                         | TransactionDetailView | Protected                             |
+| `/review`                        | ReviewQueueView       | Protected                             |
+| `/recurring`                     | RecurringExpensesList | Protected                             |
+| `/goals`                         | GoalsList             | Protected                             |
+| `/networth`                      | NetWorthView          | Protected                             |
+| `/debts`                         | DebtsView             | Protected (Pro)                       |
+| `/settings`                      | SettingsView          | Protected                             |
+| `/join?token=…`                  | JoinHouseholdView     | Public link, authenticated acceptance |
 
 `/expenses`, `/income` and `/analytics` are the pre-redesign paths. They stay
 as permanent `LegacyRedirect`s to `/today`, `/activity` and `/trends` — old
@@ -109,7 +109,7 @@ downloads or evaluates the data layer.
 
 ---
 
-### AuthProvider (`contexts/AuthProvider.tsx`)
+### AuthProvider (`common/contexts/AuthProvider.tsx`)
 
 Responsible for:
 
@@ -119,7 +119,7 @@ Responsible for:
 
 ---
 
-### DataProvider (`contexts/DataProvider.tsx`)
+### DataProvider (`common/contexts/DataProvider.tsx`)
 
 Holds global app state and fetches it after login. Every read is explicitly
 scoped to `FinancialSpaceProvider.activeOwnerId`; the owner/member space key
@@ -190,14 +190,15 @@ slice they need so an unrelated data mutation does not re-render them.
 All mutations go through the domain operation hooks in:
 
 ```
-hooks/dataOps/
+common/hooks/dataOps/
 ```
 
 One hook per domain — `useExpenseOps`, `useIncomeOps`, `useCategoryOps`,
 `useTagOps`, `useBudgetOps`, `useGoalOps`, `useDebtOps`, `useAccountOps`,
 `useRecurringExpenseOps`, `useRecurringIncomeOps`, `useTemplateOps`,
 `useNoSpendOps`, `useSettingsOps`, `useHouseholdOps`,
-`useTransactionReviewOps`, `useSurplusInvestmentOps`, `useFeedbackOps`. Call the domain hook you
+`useTransactionReviewOps`, `useSurplusInvestmentOps`, `useTodayOps`,
+`useFeedbackOps`. Call the domain hook you
 need directly; there is no composed `useDataOperations`.
 
 ### Responsibilities
@@ -215,15 +216,15 @@ need directly; there is no composed `useDataOperations`.
 ### The shared shell: `useMutationRunner`
 
 Every one of those writes is the same sequence, so it lives in one place —
-`hooks/dataOps/useMutationRunner.ts` — and the domain hooks describe only what
+`common/hooks/dataOps/useMutationRunner.ts` — and the domain hooks describe only what
 differs. A mutation is declared, not spelled out:
 
 ```ts
 runMutation({
-  operation: 'createGoal',        // Sentry tag
-  skip,                           // the isInitialized guard
-  errorMessage: t('...'),         // shown with a "Try again" action
-  successMessage: t('...'),       // omit for writes that shouldn't announce
+  operation: 'createGoal', // Sentry tag
+  shouldSkip: !isInitialized, // the initialization guard
+  errorMessage: t('...'), // shown with a "Try again" action
+  successMessage: t('...'), // omit for writes that shouldn't announce
   optimistic: () => prependOptimistic(setGoals, optimisticGoal), // returns its undo
   perform: () => dataService.createGoal(goalData),
   commit: (saved) => setGoals((prev) => replaceById(prev, temp.id, saved)),
@@ -239,7 +240,7 @@ Options that exist because real call sites need them:
 
 - `successHaptic: 'none'` — settings scalars don't buzz; the control moving is
   the confirmation
-- `retryable: false` — deleting an account or splitting an expense must not
+- `isRetryable: false` — deleting an account or splitting an expense must not
   offer a one-tap re-run
 - `offlineFallback` — return `true` to say the failure was handled (queued),
   so the runner resolves quietly instead of rolling back
@@ -247,8 +248,18 @@ Options that exist because real call sites need them:
 
 The three optimistic shapes — `prependOptimistic`, `patchOptimistic`,
 `removeOptimistic` — plus `setScalarOptimistic` live in `dataOps/helpers.ts`.
-They read the previous list from **inside** the updater, which is what keeps a
-rollback correct when two writes overlap.
+They capture the previous list **inside** the updater. Reducer updaters are
+lazy, so rollback reads that captured value when its own updater runs.
+
+Bulk imports use the runner with `isRetryable: false`. The import flow tracks
+which expense/income half landed and owns the retry, so it cannot duplicate
+rows from a successful half. Reconciliation failures are reported separately
+and do not turn a completed insert into a failed import.
+
+Today layout saves also use the runner. Their durable local copy stays pending
+after a connectivity failure; they are not part of the financial offline queue.
+A toast retry reads the latest arrangement. Only a response for the current
+arrangement may change its persistence status.
 
 `useFeedbackOps` deliberately sits outside the runner: it reports with a plain
 destructive toast, offers no retry, and carries an extra Sentry tag.
@@ -256,7 +267,7 @@ destructive toast, offers no retry, and carries an extra Sentry tag.
 ### Offline writes
 
 When offline (or the server is down), writes are queued in IndexedDB and
-reconciled on reconnect — see `lib/offlineQueue.ts`.
+reconciled on reconnect — see `constants/offlineQueue.ts`.
 
 **Only expenses and incomes are queued.** `MutationType` in `offlineQueue.ts`
 and the cases in `useOfflineSync` must stay in lock-step — a type queued with
@@ -271,7 +282,7 @@ assets. Supabase requests are always network-only: REST, Auth, Storage and Edge
 Function responses can contain private, mutable data and Cache Storage is not
 the source of truth for offline reads.
 
-Offline data comes from the app-owned snapshot in `lib/dataCache.ts`, which is
+Offline data comes from the app-owned snapshot in `constants/dataCache.ts`, which is
 scoped to the authenticated user. Never add a service-worker fallback for an
 authorized API response; extend the user-scoped data cache instead.
 
@@ -298,17 +309,18 @@ Sitewide, in `src/common/api/`:
 - `goalFundingService.ts` — atomic surplus-to-investment transfers
 - `supabaseCrud.ts` — `rows` / `row` / `maybeRow` / `done`
 - `keysetPagination.ts` — cursor paging for the transaction reads
+- `categoriesApi.ts`, `tagsApi.ts`, `proApi.ts` — shared-module queries
 
 At a feature root, one file per feature so an audit of what it reads and
 writes is one file:
 
-- `pages/<feature>/<feature>Api.ts` — budget, categories, debts, expenses,
-  goals, income, networth, plan, recurring, settings, tags, today
+- `pages/<feature>/<feature>Api.ts` — debts, expenses, goals, income, networth,
+  plan, recurring, settings, today
+- `pages/plan/budgetApi.ts` — overall and per-category budgets
 - `pages/settings/settingsApi.ts` also owns push-subscription persistence and
   the non-secret financial-connection status read
 - `pages/today/todayApi.ts` — owner-scoped Today layout sync
 - `pages/expenses/utils/ocr.ts` — Tesseract receipt scanning (Pro)
-- `pages/pro/proApi.ts` — live Pro prices
 
 ### Rules
 
@@ -358,10 +370,10 @@ category rollover or an imaginary balance.
 3. `DataProvider` fetches the bounded boot dataset in parallel
 4. Components consume state through the narrow slice contexts
 5. User triggers mutation
-6. The domain hook in `hooks/dataOps/`:
-    - optimistic update
-    - API call via service
-    - rollback on failure
+6. The domain hook in `common/hooks/dataOps/`:
+   - optimistic update
+   - API call via service
+   - rollback on failure
 
 ---
 
@@ -369,30 +381,26 @@ category rollover or an imaginary balance.
 
 ```
 src/
+  ├── assets/fonts/      # self-hosted woff2 faces
   ├── boot/              # pre-React guards + the inline head script
-  ├── components/
-  │     ├── ui/          # shadcn primitives (do not modify)
-  │     ├── bento/       # BentoGrid / BentoTile / TileLabel — the grid language
-  │     ├── charts/      # hand-rolled SVG charts (no charting library)
-  │     ├── common/
-  │     ├── today/       # + today/tiles/    the Today bento modules
-  │     ├── activity/  plan/
-  │     ├── analytics/   # + analytics/tiles/  the Trends bento modules
-  │     ├── expenses/  income/  categories/  tags/  budget/
-  │     ├── recurring/  goals/  debts/  networth/
-  │     ├── auth/  security/  onboarding/  pro/  settings/
-  │     ├── layout/  landing/  recap/  transaction/
-  │     ├── routing/          # route tree, guards, shell and lazy modules
-  │
-  ├── contexts/          # *Provider.tsx + *Context.tsx pairs
-  ├── design/            # tokens.ts, palette.ts, generate.ts
-  ├── hooks/             # feature subfolders + dataOps/
-  ├── lib/               # pure helpers, validations, i18n
+  ├── common/
+  │   ├── api/           # dataService, query helpers, shared-module APIs
+  │   ├── components/    # shared modules, each with private hooks/ and utils/
+  │   │   ├── bento/     # BentoGrid / BentoTile / TileLabel
+  │   │   ├── charts/  categories/  csvImport/  pro/
+  │   │   ├── layout/   # dock and shell controls
+  │   │   ├── routing/  # routes, guards, tab persistence and shell hooks
+  │   │   └── onboarding/  security/  # shell-owned flows, not routes
+  │   ├── contexts/     # Provider / Context pairs
+  │   ├── hooks/        # shared hooks, data/ and dataOps/
+  │   └── ui/           # vendored shadcn primitives
+  ├── config/            # external integrations
+  ├── constants/         # shared utilities and primitives
+  ├── design/            # tokens, palette and generated styles
   ├── locales/           # en/ and el/ translation.json
-  ├── pages/             # LandingPage + legal/
-  ├── services/
+  ├── pages/<feature>/   # view, components/, hooks/, utils/, validations, API
   ├── test/invariants/   # repo-wide guard tests
-  ├── types/
+  ├── types/             # domain models
   ├── App.tsx            # public routes
   └── AuthenticatedApp.tsx
 ```
@@ -419,12 +427,12 @@ Use aliases for all internal imports.
 ### Component Types
 
 - **UI primitives**
-    - Located in `components/ui/`
-    - Generated via shadcn
-    - Do not modify unless necessary
+  - Located in `common/ui/`
+  - Generated via shadcn
+  - Do not modify
 
 - **Feature components**
-    - Grouped by domain (expenses, categories, etc.)
+  - Grouped by domain (expenses, categories, etc.)
 
 ---
 
@@ -448,7 +456,8 @@ Use aliases for all internal imports.
 
 ## Forms & Validation
 
-- Schemas: `src/constants/validations.ts` (Zod)
+- Schemas: `<feature>/validations.ts` or a shared module's `validations.ts`
+- Shared primitives: `src/constants/validations.ts`
 - Forms: `react-hook-form`
 - Validation: `@hookform/resolvers/zod`
 
@@ -456,6 +465,9 @@ Use aliases for all internal imports.
 
 - All forms must use Zod schemas
 - Validation happens at input boundaries only
+- RHF forms use `mode: 'onTouched'` and disable submit while invalid or submitting
+- Dialog forms register `useDialogDirty` from inside `DialogContent`, which
+  provides the context that protects drafts on implicit dismissal
 
 ---
 
@@ -498,7 +510,9 @@ Ask through `useProGate`, never by reading `isPro` and hand-rolling the upsell:
 ```ts
 const { allow } = useProGate();
 
-if (!allow('accounts', accounts.length)) return;   // toasts + opens upgrade
+if (!allow('accounts', accounts.length)) {
+  return;
+}
 ```
 
 `allow` returns true when the action may proceed. When it may not, it explains

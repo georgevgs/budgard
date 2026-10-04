@@ -86,7 +86,10 @@ const renderCategoryName = (transaction: Expense, t: TranslateFunction) => {
   return t('activity.uncategorized');
 };
 
-const renderActions = (props: ActivityTransactionRowProps, isIncome: boolean) => {
+const renderActions = (
+  props: ActivityTransactionRowProps,
+  isIncome: boolean,
+) => {
   if (isIncome) {
     return (
       <IncomeCardActions

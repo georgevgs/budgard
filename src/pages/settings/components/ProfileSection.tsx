@@ -20,7 +20,11 @@ type ProfileSectionProps = {
   t: TranslateFunction;
 };
 
-export const ProfileSection = ({ email, onSignOut, t }: ProfileSectionProps) => {
+export const ProfileSection = ({
+  email,
+  onSignOut,
+  t,
+}: ProfileSectionProps) => {
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
 
   return (
@@ -47,7 +51,10 @@ export const ProfileSection = ({ email, onSignOut, t }: ProfileSectionProps) => 
         </div>
       </SurfaceCard>
 
-      <AlertDialog open={isSignOutDialogOpen} onOpenChange={setIsSignOutDialogOpen}>
+      <AlertDialog
+        open={isSignOutDialogOpen}
+        onOpenChange={setIsSignOutDialogOpen}
+      >
         <AlertDialogContent
           className="sm:max-w-[425px]"
           onOpenChange={setIsSignOutDialogOpen}

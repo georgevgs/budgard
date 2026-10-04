@@ -18,7 +18,11 @@ type QuickAddCategoriesProps = {
 // the browser waits to see whether a drag is horizontal or vertical, and the
 // vertical reading dismisses the sheet — so a slightly diagonal flick pulled
 // the whole sheet down instead of moving the strip.
-export const QuickAddCategories = ({ categories, selectedId, onSelect }: QuickAddCategoriesProps) => {
+export const QuickAddCategories = ({
+  categories,
+  selectedId,
+  onSelect,
+}: QuickAddCategoriesProps) => {
   const { t } = useTranslation();
 
   if (categories.length === 0) {

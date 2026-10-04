@@ -17,7 +17,11 @@ type GoalCardActionsProps = {
   onDelete: (id: string) => void;
 };
 
-export const GoalCardActions = ({ goal, onEdit, onDelete }: GoalCardActionsProps) => {
+export const GoalCardActions = ({
+  goal,
+  onEdit,
+  onDelete,
+}: GoalCardActionsProps) => {
   const { t } = useTranslation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

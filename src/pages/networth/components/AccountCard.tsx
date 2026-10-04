@@ -22,7 +22,11 @@ type AccountCardProps = {
   onClick: (account: Account) => void;
 };
 
-export const AccountCard = ({ account, latestSnapshot, onClick }: AccountCardProps) => {
+export const AccountCard = ({
+  account,
+  latestSnapshot,
+  onClick,
+}: AccountCardProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const isLiabilityAccount = isLiability(account.kind);

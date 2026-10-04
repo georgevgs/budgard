@@ -9,7 +9,11 @@ export type IncomeFormDialogProps = {
   onClose: () => void;
 };
 
-export const IncomeFormDialog = ({ open, income, onClose }: IncomeFormDialogProps) => {
+export const IncomeFormDialog = ({
+  open,
+  income,
+  onClose,
+}: IncomeFormDialogProps) => {
   const { t } = useTranslation();
 
   return (

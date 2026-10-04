@@ -18,7 +18,11 @@ type OnboardingFirstExpenseStepProps = {
   onSkip: () => void;
 };
 
-export const OnboardingFirstExpenseStep = ({ draft, onBack, onSkip }: OnboardingFirstExpenseStepProps) => {
+export const OnboardingFirstExpenseStep = ({
+  draft,
+  onBack,
+  onSkip,
+}: OnboardingFirstExpenseStepProps) => {
   const { t } = useTranslation();
 
   return (

@@ -126,16 +126,21 @@ export const useIncomeOps = () => {
     // The insert returns the created rows with their embeds, so merging them
     // into state replaces a full-history re-download.
     const handleBulkIncomeImport = async (incomesData: BulkIncomeRow[]) => {
-      if (shouldSkip) {
-        return;
-      }
-
-      const created = await dataService.createIncomesBulk(
-        incomesData,
-        activeOwnerId,
-      );
-      setIncomes((prev) => mergeUniqueById(prev, created));
-      await reconcileImportedRows(activeOwnerId, refreshIncomes);
+      await runMutation({
+        operation: 'importIncomes',
+        shouldSkip,
+        errorMessage: t('import.importError'),
+        // The import flow owns retries because one half may already be saved.
+        isRetryable: false,
+        perform: async () => {
+          const created = await dataService.createIncomesBulk(
+            incomesData,
+            activeOwnerId,
+          );
+          setIncomes((prev) => mergeUniqueById(prev, created));
+          await reconcileImportedRows(activeOwnerId, refreshIncomes);
+        },
+      });
     };
 
     return { handleIncomeSubmit, handleIncomeDelete, handleBulkIncomeImport };

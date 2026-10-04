@@ -16,7 +16,10 @@ type SnapshotMetaFieldsProps = {
   dateLocale: Locale | undefined;
 };
 
-export const SnapshotMetaFields = ({ form, dateLocale }: SnapshotMetaFieldsProps) => {
+export const SnapshotMetaFields = ({
+  form,
+  dateLocale,
+}: SnapshotMetaFieldsProps) => {
   const { t } = useTranslation();
 
   return (

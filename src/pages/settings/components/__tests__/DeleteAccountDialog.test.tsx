@@ -94,7 +94,10 @@ describe('DeleteAccountDialog', () => {
 
     await advanceToVerifyStep();
 
-    expect(authApi.requestOTP).toHaveBeenCalledWith('me@test.com', 'turnstile-token');
+    expect(authApi.requestOTP).toHaveBeenCalledWith(
+      'me@test.com',
+      'turnstile-token',
+    );
   });
 
   it('shows an error and keeps the account when the code is wrong', async () => {
@@ -130,7 +133,9 @@ describe('DeleteAccountDialog', () => {
   it('deletes the account and closes after a valid code', async () => {
     const onConfirmDelete = vi.fn().mockResolvedValue(undefined);
     const onOpenChange = vi.fn();
-    vi.mocked(authApi.signInWithOTP).mockResolvedValue({ error: null } as never);
+    vi.mocked(authApi.signInWithOTP).mockResolvedValue({
+      error: null,
+    } as never);
 
     render(
       <DeleteAccountDialog
@@ -153,7 +158,10 @@ describe('DeleteAccountDialog', () => {
     );
 
     await waitFor(() => {
-      expect(authApi.signInWithOTP).toHaveBeenCalledWith('me@test.com', '123456');
+      expect(authApi.signInWithOTP).toHaveBeenCalledWith(
+        'me@test.com',
+        '123456',
+      );
       expect(onConfirmDelete).toHaveBeenCalled();
       expect(onOpenChange).toHaveBeenCalledWith(false);
     });

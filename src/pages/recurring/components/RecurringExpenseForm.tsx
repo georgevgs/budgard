@@ -16,7 +16,10 @@ import { RecurringExpenseFields } from '@/pages/recurring/components/RecurringEx
 import { RecurringScheduleFields } from '@/pages/recurring/components/RecurringScheduleFields';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { amountToInput } from '@/constants/utils';
-import { recurringExpenseSchema, type RecurringExpenseFormData } from '@/pages/recurring/validations';
+import {
+  recurringExpenseSchema,
+  type RecurringExpenseFormData,
+} from '@/pages/recurring/validations';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { Category } from '@/types/Category';
 import type { Account } from '@/types/Account';

@@ -7,13 +7,17 @@ import {
 } from '@/common/hooks/usePullToRefresh';
 import { haptics } from '@/constants/haptics';
 
+export type UsePageRefreshReturn = UsePullToRefreshReturn;
+
 // Wires the pull gesture to a real refetch. Kept separate from
 // usePullToRefresh so that hook stays a pure gesture and can be pointed at
 // anything — a page, a list, an account detail sheet.
 //
 // Mounted once in the app shell rather than per view, so exactly one set of
 // document listeners exists no matter how many tabs are alive behind it.
-export const usePageRefresh = (isEnabledRoute: boolean): UsePullToRefreshReturn => {
+export const usePageRefresh = (
+  isEnabledRoute: boolean,
+): UsePageRefreshReturn => {
   const { refreshData } = useDataActions();
   // Pointer-driven layouts have no pull gesture, and enabling it there would
   // put a non-passive touchmove listener on every desktop session for nothing.

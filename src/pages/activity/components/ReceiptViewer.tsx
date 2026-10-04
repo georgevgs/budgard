@@ -17,9 +17,17 @@ type ReceiptViewerProps = {
   onClose: () => void;
 };
 
-export const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps) => {
+export const ReceiptViewer = ({
+  receiptPath,
+  open,
+  onClose,
+}: ReceiptViewerProps) => {
   const { t } = useTranslation();
-  const { url, isLoading, hasError: hasUrlError } = useReceiptUrl(receiptPath, open);
+  const {
+    url,
+    isLoading,
+    hasError: hasUrlError,
+  } = useReceiptUrl(receiptPath, open);
   const [hasImageFailed, setHasImageFailed] = useState(false);
   const hasError = hasUrlError || hasImageFailed;
 
@@ -48,7 +56,12 @@ export const ReceiptViewer = ({ receiptPath, open, onClose }: ReceiptViewerProps
           <div className="flex items-center justify-center min-h-[200px] mt-4">
             {renderLoadingState(isLoading, t)}
             {renderErrorState(hasError, t)}
-            {renderReceiptImage(url, hasError, () => setHasImageFailed(true), t)}
+            {renderReceiptImage(
+              url,
+              hasError,
+              () => setHasImageFailed(true),
+              t,
+            )}
           </div>
         </div>
       </DialogContent>

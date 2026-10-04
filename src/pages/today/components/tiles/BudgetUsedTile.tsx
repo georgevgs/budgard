@@ -21,7 +21,11 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 // display face's cap height — the old `y="47"` guessed low and left the number
 // sitting a few pixels above the middle of the circle. Flex centring a span
 // over the square is exact and stays exact if the face or the size changes.
-export const BudgetUsedTile = ({ spentThisMonth, monthlyBudget, currency }: BudgetUsedTileProps) => {
+export const BudgetUsedTile = ({
+  spentThisMonth,
+  monthlyBudget,
+  currency,
+}: BudgetUsedTileProps) => {
   const { t } = useTranslation();
   const percent = resolvePercent(spentThisMonth, monthlyBudget);
 

@@ -1,5 +1,8 @@
 import { useCallback, useState } from 'react';
-import { FORM_TYPES, type FormType } from '@/common/components/layout/formTypes';
+import {
+  FORM_TYPES,
+  type FormType,
+} from '@/common/components/layout/formTypes';
 import type { Expense } from '@/types/Expense';
 import type { ExpenseWritePayload } from '@/common/api/dataService';
 

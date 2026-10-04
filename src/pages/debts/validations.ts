@@ -1,6 +1,10 @@
 import * as z from 'zod';
 import { parseCurrencyInput } from '@/constants/utils';
-import { AMOUNT_PATTERN, HEX_COLOR, SAFE_STRING } from '@/constants/validations';
+import {
+  AMOUNT_PATTERN,
+  HEX_COLOR,
+  SAFE_STRING,
+} from '@/constants/validations';
 
 // Debt validation schema. current_balance becomes original_principal in the DB
 // at create time (most users only know what they owe today, not what they

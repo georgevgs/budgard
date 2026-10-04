@@ -7,13 +7,20 @@ import {
   pointScale,
   bandScale,
 } from '@/common/components/charts/chartScales';
-import { XAxis, YAxis, ReferenceLine } from '@/common/components/charts/ChartAxes';
+import {
+  XAxis,
+  YAxis,
+  ReferenceLine,
+} from '@/common/components/charts/ChartAxes';
 import { renderSeries } from '@/common/components/charts/ChartSeries';
 import { ChartLegend } from '@/common/components/charts/ChartLegend';
 import { ChartHoverCard } from '@/common/components/charts/ChartHoverCard';
 import { useChartSize } from '@/common/components/charts/hooks/useChartSize';
 import { useChartInteraction } from '@/common/components/charts/hooks/useChartInteraction';
-import { buildPlot, seriesExtent } from '@/common/components/charts/chartLayout';
+import {
+  buildPlot,
+  seriesExtent,
+} from '@/common/components/charts/chartLayout';
 import type { CartesianChartProps } from '@/common/components/charts/chartTypes';
 
 const DEFAULT_HEIGHT = 260;
@@ -61,7 +68,11 @@ const buildLayout = (
   width: number,
   height: number,
 ) => {
-  const extent = seriesExtent(props.data, props.series, props.shouldAllowNegative);
+  const extent = seriesExtent(
+    props.data,
+    props.series,
+    props.shouldAllowNegative,
+  );
   const top = props.yMax ?? niceMax(extent.max);
   const plot = buildPlot(width, height, props.formatY, top);
   const y = linearScale(extent.min, top, plot.top + plot.height, plot.top);

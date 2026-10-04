@@ -2,7 +2,10 @@ import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { formatCurrency } from '@/constants/utils';
-import type { UpcomingBills, UpcomingEntry } from '@/pages/today/utils/upcomingBills';
+import type {
+  UpcomingBills,
+  UpcomingEntry,
+} from '@/pages/today/utils/upcomingBills';
 import { BentoTile, TileLabel } from '@/common/components/bento';
 
 type UpcomingTileProps = {

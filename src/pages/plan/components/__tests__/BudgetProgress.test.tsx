@@ -2,14 +2,16 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BudgetProgress } from '@/pages/plan/components/BudgetProgress';
 
-vi.mock('@/pages/plan/components/BudgetForm', () => ({ BudgetForm: ({ isOpen }: { isOpen: boolean }) => {
+vi.mock('@/pages/plan/components/BudgetForm', () => ({
+  BudgetForm: ({ isOpen }: { isOpen: boolean }) => {
     if (!isOpen) return null;
 
     return <div data-testid="budget-form" />;
   },
 }));
 
-vi.mock('@/pages/plan/components/CategoryBudgetsManager', () => ({ CategoryBudgetsManager: ({ isOpen }: { isOpen: boolean }) => {
+vi.mock('@/pages/plan/components/CategoryBudgetsManager', () => ({
+  CategoryBudgetsManager: ({ isOpen }: { isOpen: boolean }) => {
     if (!isOpen) return null;
 
     return <div data-testid="category-budgets-manager" />;

@@ -22,7 +22,12 @@ type AccountDetailSheetProps = {
   onEdit: (account: Account) => void;
 };
 
-export const AccountDetailSheet = ({ account, open, onClose, onEdit }: AccountDetailSheetProps) => {
+export const AccountDetailSheet = ({
+  account,
+  open,
+  onClose,
+  onEdit,
+}: AccountDetailSheetProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const { snapshots, isLoading, hasError, retry, removeSnapshot } =

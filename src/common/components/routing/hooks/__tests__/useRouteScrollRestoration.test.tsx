@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { useRouteScrollRestoration } from '@/common/hooks/useRouteScrollRestoration';
+import { useRouteScrollRestoration } from '@/common/components/routing/hooks/useRouteScrollRestoration';
 
 const RouteHarness = () => {
   const navigate = useNavigate();

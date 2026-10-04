@@ -14,7 +14,9 @@ type IncomeDescriptionFieldProps = {
   form: UseFormReturn<IncomeFormData>;
 };
 
-export const IncomeDescriptionField = ({ form }: IncomeDescriptionFieldProps) => {
+export const IncomeDescriptionField = ({
+  form,
+}: IncomeDescriptionFieldProps) => {
   const { t } = useTranslation();
 
   return (

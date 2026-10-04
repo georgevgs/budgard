@@ -57,7 +57,9 @@ export const CsvMappingStep = ({
           label={t('import.dateColumn')}
           value={columnMapping.dateColumn.toString()}
           headers={headers}
-          onChange={(value) => updateColumnMapping('dateColumn', parseInt(value))}
+          onChange={(value) =>
+            updateColumnMapping('dateColumn', parseInt(value))
+          }
           t={t}
         />
         <ColumnSelect
@@ -87,7 +89,10 @@ export const CsvMappingStep = ({
           headers={headers}
           noneLabel={t('import.noCategory')}
           onChange={(value) =>
-            updateColumnMapping('categoryColumn', parseCategoryColumnValue(value))
+            updateColumnMapping(
+              'categoryColumn',
+              parseCategoryColumnValue(value),
+            )
           }
           t={t}
         />
@@ -100,10 +105,17 @@ export const CsvMappingStep = ({
             {t('import.skipIncomeDescription')}
           </p>
         </div>
-        <Switch checked={shouldSkipIncome} onCheckedChange={setShouldSkipIncome} />
+        <Switch
+          checked={shouldSkipIncome}
+          onCheckedChange={setShouldSkipIncome}
+        />
       </div>
 
-      <SampleTable csvPreview={csvPreview} columnMapping={columnMapping} t={t} />
+      <SampleTable
+        csvPreview={csvPreview}
+        columnMapping={columnMapping}
+        t={t}
+      />
 
       <div className="flex gap-2 justify-end pt-2 border-t">
         <Button variant="outline" onClick={onBack}>
@@ -204,7 +216,7 @@ const SampleTable = ({ csvPreview, columnMapping, t }: SampleTableProps) => {
                     className={cn(
                       'px-2 py-1 truncate max-w-[120px]',
                       isMappedColumn(cellIndex, columnMapping) &&
-                        'bg-primary/10',
+                        'bg-muted/50 font-medium text-primary-ink',
                     )}
                   >
                     {cell}

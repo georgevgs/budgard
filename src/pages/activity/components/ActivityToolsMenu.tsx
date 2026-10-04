@@ -31,7 +31,10 @@ type ActivityToolsMenuProps = {
 // Import, export and tag management are things you do a handful of times a
 // year. They used to be pinned above a list opened every day; an overflow menu
 // on the page header is the right weight for them.
-export const ActivityToolsMenu = ({ isExportDisabled, onExport }: ActivityToolsMenuProps) => {
+export const ActivityToolsMenu = ({
+  isExportDisabled,
+  onExport,
+}: ActivityToolsMenuProps) => {
   const { t } = useTranslation();
   const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);

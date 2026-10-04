@@ -4,7 +4,7 @@ import { renderHook, act } from '@testing-library/react';
 const mockIsLockEnabled = vi.hoisted(() => vi.fn());
 vi.mock('@/constants/appLock', () => ({ isLockEnabled: mockIsLockEnabled }));
 
-import { useAppLock } from '@/common/hooks/useAppLock';
+import { useAppLock } from '@/common/components/security/hooks/useAppLock';
 
 const AUTO_LOCK_MS = 60_000;
 

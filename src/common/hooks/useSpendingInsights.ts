@@ -9,7 +9,10 @@ import { useTranslation } from 'react-i18next';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import { formatCurrency } from '@/constants/utils';
-import { buildWeeklyRecap, type WeeklyAnomaly } from '@/constants/weeklyAnomalies';
+import {
+  buildWeeklyRecap,
+  type WeeklyAnomaly,
+} from '@/constants/weeklyAnomalies';
 import type { TranslateFunction } from '@/constants/translate';
 
 export type Insight = {

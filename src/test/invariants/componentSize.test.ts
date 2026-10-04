@@ -9,10 +9,7 @@ import {
 // test is what keeps them there, because drift is invisible in review: a
 // component grows six lines at a time.
 describe('component line cap', () => {
-  const components = measureComponents([
-    'src/pages',
-    'src/common',
-  ]);
+  const components = measureComponents(['src/pages', 'src/common']);
 
   it('finds the components to measure', () => {
     expect(components.length).toBeGreaterThan(150);

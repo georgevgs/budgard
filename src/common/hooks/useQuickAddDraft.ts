@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCategoriesData, useDataConfig } from '@/common/contexts/DataContext';
+import {
+  useCategoriesData,
+  useDataConfig,
+} from '@/common/contexts/DataContext';
 import { useExpensesData } from '@/common/contexts/DataContext';
 import { useAmountPad } from '@/common/hooks/useAmountPad';
 import { toIsoDate, todayIso } from '@/constants/dates';

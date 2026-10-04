@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { RECEIPT_ALLOWED_TYPES, RECEIPT_MAX_FILE_SIZE, emailSchema } from '@/constants/validations';
+import {
+  RECEIPT_ALLOWED_TYPES,
+  RECEIPT_MAX_FILE_SIZE,
+  emailSchema,
+} from '@/constants/validations';
 import { budgetSchema } from '@/pages/plan/validations';
 import { categorySchema } from '@/common/components/categories/validations';
 import { expenseSchema } from '@/pages/expenses/validations';

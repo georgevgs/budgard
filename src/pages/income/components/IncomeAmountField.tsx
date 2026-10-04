@@ -10,7 +10,10 @@ type IncomeAmountFieldProps = {
   conversion: UseCurrencyConversionCoreReturn;
 };
 
-export const IncomeAmountField = ({ form, conversion }: IncomeAmountFieldProps) => {
+export const IncomeAmountField = ({
+  form,
+  conversion,
+}: IncomeAmountFieldProps) => {
   const { t } = useTranslation();
 
   return (

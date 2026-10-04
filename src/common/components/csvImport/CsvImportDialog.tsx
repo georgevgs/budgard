@@ -142,7 +142,7 @@ const renderUploadStep = (
     <div
       className={cn(
         'border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-colors mb-4',
-        isDragging && 'border-primary-ink bg-primary/5',
+        isDragging && 'border-primary-ink bg-muted/40',
         !isDragging && 'border-muted-foreground/25',
       )}
       onDragOver={(e) => {
@@ -375,7 +375,7 @@ const renderImportErrorBanner = (error: string | null) => {
   }
 
   return (
-    <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 border border-destructive/20">
+    <div className="flex items-center gap-2 p-3 rounded-md bg-tile border border-tile-ring">
       <AlertCircle className="h-4 w-4 text-destructive-ink shrink-0" />
       <p className="text-sm text-destructive-ink">{error}</p>
     </div>

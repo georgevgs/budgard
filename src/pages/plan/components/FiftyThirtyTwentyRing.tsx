@@ -59,7 +59,9 @@ const BUCKETS: BucketConfig[] = [
   },
 ];
 
-export const FiftyThirtyTwentyRing = ({ selectedMonth }: FiftyThirtyTwentyRingProps) => {
+export const FiftyThirtyTwentyRing = ({
+  selectedMonth,
+}: FiftyThirtyTwentyRingProps) => {
   const { t } = useTranslation();
   const expenses = useExpensesData();
   const incomes = useIncomesData();

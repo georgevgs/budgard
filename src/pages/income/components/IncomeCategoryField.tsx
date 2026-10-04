@@ -7,11 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/common/ui/form';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/common/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/common/ui/popover';
 import { Button } from '@/common/ui/button';
 import { Input } from '@/common/ui/input';
 import { cn } from '@/constants/utils';
@@ -28,7 +24,10 @@ type IncomeCategoryFieldProps = {
   picker: UseIncomeCategoryPickerReturn;
 };
 
-export const IncomeCategoryField = ({ form, picker }: IncomeCategoryFieldProps) => {
+export const IncomeCategoryField = ({
+  form,
+  picker,
+}: IncomeCategoryFieldProps) => {
   const { t } = useTranslation();
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -37,7 +36,10 @@ export const IncomeCategoryField = ({ form, picker }: IncomeCategoryFieldProps) 
     }
 
     e.preventDefault();
-    if (picker.filteredCategories.length === 1 && !picker.shouldShowCreateOption) {
+    if (
+      picker.filteredCategories.length === 1 &&
+      !picker.shouldShowCreateOption
+    ) {
       picker.handleCategorySelect(picker.filteredCategories[0].id);
     } else if (picker.shouldShowCreateOption) {
       picker.handleCategoryCreateInline();

@@ -7,13 +7,17 @@ const mockT = vi.hoisted(() => vi.fn((key: string) => key));
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: mockT, i18n: { language: 'en' } }),
 }));
-vi.mock('@/common/hooks/useToast', () => ({ useToast: () => ({ toast: mockToast }) }));
+vi.mock('@/common/hooks/useToast', () => ({
+  useToast: () => ({ toast: mockToast }),
+}));
 
 const ops = vi.hoisted(() => ({
   handleCategoryBudgetUpsert: vi.fn(),
   handleCategoryBudgetDelete: vi.fn(),
 }));
-vi.mock('@/common/hooks/dataOps/useBudgetOps', () => ({ useBudgetOps: () => ops }));
+vi.mock('@/common/hooks/dataOps/useBudgetOps', () => ({
+  useBudgetOps: () => ops,
+}));
 
 const data = vi.hoisted(() => ({
   expenseCategories: [] as unknown[],

@@ -13,7 +13,9 @@ type PullToRefreshIndicatorProps = {
 // Everything it does visually is driven by --pull-progress and the data-pull
 // stage that usePullToRefresh writes onto the document element (see the
 // pull-to-refresh block in index.css), so a drag never re-renders this tree.
-export const PullToRefreshIndicator = ({ state }: PullToRefreshIndicatorProps) => {
+export const PullToRefreshIndicator = ({
+  state,
+}: PullToRefreshIndicatorProps) => {
   if (!state.isEnabled) {
     return null;
   }

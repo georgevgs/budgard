@@ -20,7 +20,10 @@ type ExpensesMonthlySelectorProps = {
   onMonthChange: (month: string) => void;
 };
 
-export const ExpensesMonthlySelector = ({ selectedMonth, onMonthChange }: ExpensesMonthlySelectorProps) => {
+export const ExpensesMonthlySelector = ({
+  selectedMonth,
+  onMonthChange,
+}: ExpensesMonthlySelectorProps) => {
   const { t } = useTranslation();
   const selectedDate = parseISO(`${selectedMonth}-01`);
   const dateLocale = useDateLocale();

@@ -18,7 +18,8 @@ vi.mock('@/common/contexts/DataContext', () => ({
 // Mocks render DialogTitle/DialogDescription (sr-only) so Radix's runtime
 // a11y check inside DialogContent finds them — the real components include
 // these in their DialogHeader, so this keeps the mock contract aligned.
-vi.mock('@/pages/expenses/components/ExpensesForm', () => ({ ExpensesForm: ({ expense }: { expense?: Expense }) => (
+vi.mock('@/pages/expenses/components/ExpensesForm', () => ({
+  ExpensesForm: ({ expense }: { expense?: Expense }) => (
     <>
       <DialogTitle className="sr-only">Expense form</DialogTitle>
       <DialogDescription className="sr-only">Expense form</DialogDescription>

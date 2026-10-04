@@ -17,7 +17,10 @@ import { haptics } from '@/constants/haptics';
 import { prefersReducedMotion } from '@/constants/motion';
 import { cn } from '@/constants/utils';
 import type { UseTodayLayoutReturn } from '@/pages/today/hooks/useTodayLayout';
-import { isWideTodayTile, type TodayTileId } from '@/pages/today/utils/bentoLayout';
+import {
+  isWideTodayTile,
+  type TodayTileId,
+} from '@/pages/today/utils/bentoLayout';
 
 type TodayArrangeProps = {
   layout: UseTodayLayoutReturn;

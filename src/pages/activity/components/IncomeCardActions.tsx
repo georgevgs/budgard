@@ -21,7 +21,11 @@ type IncomeCardActionsProps = {
   onDelete: (id: string) => void;
 };
 
-export const IncomeCardActions = ({ income, onEdit, onDelete }: IncomeCardActionsProps) => {
+export const IncomeCardActions = ({
+  income,
+  onEdit,
+  onDelete,
+}: IncomeCardActionsProps) => {
   const { t } = useTranslation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);

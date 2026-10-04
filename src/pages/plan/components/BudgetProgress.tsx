@@ -8,7 +8,8 @@ import { formatCurrency, cn } from '@/constants/utils';
 import { BudgetForm } from '@/pages/plan/components/BudgetForm';
 import { CategoryBudgetsManager } from '@/pages/plan/components/CategoryBudgetsManager';
 import type { TranslateFunction } from '@/constants/translate';
-import { BudgetCategorySection,
+import {
+  BudgetCategorySection,
   WARNING_THRESHOLD,
   EXCEEDED_THRESHOLD,
   type BudgetCategoryRow,

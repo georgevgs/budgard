@@ -170,10 +170,7 @@ const renderToggleIcon = (isOpen: boolean) => {
   return <Plus className="h-6 w-6" />;
 };
 
-const getToggleLabel = (
-  isOpen: boolean,
-  t: TranslateFunction,
-): string => {
+const getToggleLabel = (isOpen: boolean, t: TranslateFunction): string => {
   if (isOpen) {
     return t('speedDial.close');
   }

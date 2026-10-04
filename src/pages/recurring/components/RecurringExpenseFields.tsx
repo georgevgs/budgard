@@ -25,7 +25,10 @@ type RecurringExpenseFieldsProps = {
   categories: Category[];
 };
 
-export const RecurringExpenseFields = ({ form, categories }: RecurringExpenseFieldsProps) => {
+export const RecurringExpenseFields = ({
+  form,
+  categories,
+}: RecurringExpenseFieldsProps) => {
   const { t } = useTranslation();
 
   return (

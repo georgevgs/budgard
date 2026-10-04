@@ -18,7 +18,10 @@ import {
   SelectValue,
 } from '@/common/ui/select';
 import { CurrencyInput } from '@/common/ui/currency-input';
-import { useCategoriesData, useDataConfig } from '@/common/contexts/DataContext';
+import {
+  useCategoriesData,
+  useDataConfig,
+} from '@/common/contexts/DataContext';
 import {
   isSettled,
   useExpenseSplit,
@@ -35,7 +38,11 @@ type SplitExpenseDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-export const SplitExpenseDialog = ({ expense, open, onOpenChange }: SplitExpenseDialogProps) => {
+export const SplitExpenseDialog = ({
+  expense,
+  open,
+  onOpenChange,
+}: SplitExpenseDialogProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const { expenseCategories } = useCategoriesData();
@@ -184,7 +191,11 @@ const renderAddPartButton = (
   );
 };
 
-const renderRemaining = (remaining: number, currency: string, t: TranslateFunction) => {
+const renderRemaining = (
+  remaining: number,
+  currency: string,
+  t: TranslateFunction,
+) => {
   const settled = isSettled(remaining);
 
   return (

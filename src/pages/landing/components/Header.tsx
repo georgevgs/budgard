@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { BrandMark } from '@/common/components/common/BrandMark';
 import { Button } from '@/common/ui/button';
 import { cn } from '@/constants/utils';
+import type { TranslateFunction } from '@/constants/translate';
 
 type HeaderProps = {
   onSignIn: () => void;
@@ -51,7 +52,7 @@ const getHeaderClassName = (hasScrolled: boolean) => {
   );
 };
 
-const renderNav = (t: (k: string) => string) => (
+const renderNav = (t: TranslateFunction) => (
   <nav className="hidden items-center gap-8 text-sm text-foreground md:flex">
     <a href="#features" className="transition-opacity hover:opacity-65">
       {t('landing.nav.features')}
@@ -65,7 +66,7 @@ const renderNav = (t: (k: string) => string) => (
   </nav>
 );
 
-const renderActions = (t: (k: string) => string, onSignIn: () => void) => (
+const renderActions = (t: TranslateFunction, onSignIn: () => void) => (
   <div className="flex items-center gap-2">
     <Button
       variant="ghost"

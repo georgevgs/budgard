@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Faq } from '@/pages/landing/components/Faq';
 
-vi.mock('@/pages/landing/components/Reveal', () => ({ Reveal: ({ children }: { children: ReactNode }) => children,
+vi.mock('@/pages/landing/components/Reveal', () => ({
+  Reveal: ({ children }: { children: ReactNode }) => children,
 }));
 
 describe('Faq', () => {

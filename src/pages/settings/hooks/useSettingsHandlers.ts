@@ -2,7 +2,10 @@ import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSettingsOps } from '@/common/hooks/dataOps/useSettingsOps';
 import { useTheme, type Theme } from '@/common/hooks/useTheme';
-import { useAccentColor, type AccentColorKey } from '@/pages/settings/hooks/useAccentColor';
+import {
+  useAccentColor,
+  type AccentColorKey,
+} from '@/pages/settings/hooks/useAccentColor';
 import { authApi } from '@/common/api/authApi';
 import { useToast } from '@/common/hooks/useToast';
 import { haptics, hapticsSettings } from '@/constants/haptics';

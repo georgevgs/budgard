@@ -7,11 +7,7 @@ import {
   FormItem,
   FormMessage,
 } from '@/common/ui/form';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/common/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/common/ui/popover';
 import { Button } from '@/common/ui/button';
 import { Input } from '@/common/ui/input';
 import { cn } from '@/constants/utils';
@@ -120,7 +116,10 @@ const renderSelectedTagChips = (tagPicker: UseTagPickerReturn) => {
   );
 };
 
-const renderTagOptions = (tagPicker: UseTagPickerReturn, nav: UseTagListboxNavReturn) =>
+const renderTagOptions = (
+  tagPicker: UseTagPickerReturn,
+  nav: UseTagListboxNavReturn,
+) =>
   tagPicker.filteredTags.map((tag, index) => (
     <button
       key={tag.id}

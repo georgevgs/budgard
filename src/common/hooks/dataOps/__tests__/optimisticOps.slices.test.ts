@@ -6,7 +6,9 @@ import { renderHook, act } from '@testing-library/react';
 import type { Category } from '@/types/Category';
 
 const mockToast = vi.fn();
-vi.mock('@/common/hooks/useToast', () => ({ useToast: () => ({ toast: mockToast }) }));
+vi.mock('@/common/hooks/useToast', () => ({
+  useToast: () => ({ toast: mockToast }),
+}));
 
 vi.mock('@/common/contexts/FinancialSpaceContext', () => ({
   useFinancialSpace: () => ({ activeOwnerId: 'u1' }),

@@ -7,7 +7,9 @@ import type { Tag } from '@/types/Tag';
 import type { Debt } from '@/types/Debt';
 
 const mockToast = vi.fn();
-vi.mock('@/common/hooks/useToast', () => ({ useToast: () => ({ toast: mockToast }) }));
+vi.mock('@/common/hooks/useToast', () => ({
+  useToast: () => ({ toast: mockToast }),
+}));
 
 vi.mock('@/common/contexts/FinancialSpaceContext', () => ({
   useFinancialSpace: () => ({ activeOwnerId: 'u1' }),

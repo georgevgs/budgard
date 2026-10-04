@@ -4,7 +4,7 @@ import { MilestoneWatcher } from '@/common/components/common/MilestoneWatcher';
 import { PullToRefreshIndicator } from '@/common/components/common/PullToRefreshIndicator';
 import { NavTabs } from '@/common/components/layout/NavTabs';
 import { TopScrim } from '@/common/components/layout/TopScrim';
-import { OnboardingGate } from '@/pages/onboarding/components/OnboardingGate';
+import { OnboardingGate } from '@/common/components/onboarding/OnboardingGate';
 import { MainTabsLayout } from '@/common/components/routing/MainTabsLayout';
 import { UpgradeDialog } from '@/common/components/pro/UpgradeDialog';
 import {
@@ -13,17 +13,17 @@ import {
 } from '@/common/components/routing/lazyRouteModules';
 import { QuickAddProvider } from '@/common/contexts/QuickAddProvider';
 import { formPrefetches } from '@/common/components/layout/lazyFormModules';
-import { useAppLock } from '@/common/hooks/useAppLock';
+import { useAppLock } from '@/common/components/security/hooks/useAppLock';
 import { useOfflineSync } from '@/common/hooks/useOfflineSync';
-import { usePageRefresh } from '@/common/hooks/usePageRefresh';
-import { useCheckoutReturn } from '@/common/hooks/useCheckoutReturn';
-import { useRouteScrollRestoration } from '@/common/hooks/useRouteScrollRestoration';
+import { usePageRefresh } from '@/common/components/routing/hooks/usePageRefresh';
+import { useCheckoutReturn } from '@/common/components/routing/hooks/useCheckoutReturn';
+import { useRouteScrollRestoration } from '@/common/components/routing/hooks/useRouteScrollRestoration';
 import { authApi } from '@/common/api/authApi';
 import { isMainTabPath } from '@/constants/routes';
 import { scheduleBackgroundWork } from '@/constants/backgroundWork';
 import { SkipToContentLink } from '@/common/components/routing/SkipToContentLink';
 import { useDataConfig } from '@/common/contexts/DataContext';
-import { useProductMetrics } from '@/common/hooks/useProductMetrics';
+import { useProductMetrics } from '@/common/components/routing/hooks/useProductMetrics';
 
 export const AuthenticatedLayout = () => {
   const { pathname } = useLocation();

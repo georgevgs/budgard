@@ -138,7 +138,7 @@ const renderUnpayableCallout = (isUnpayable: boolean, t: TranslateFunction) => {
   }
 
   return (
-    <div className="flex items-start gap-2 mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+    <div className="flex items-start gap-2 mt-3 p-3 rounded-lg bg-tile border border-tile-ring">
       <AlertTriangle className="h-4 w-4 text-destructive-ink shrink-0 mt-0.5" />
       <div className="text-xs">
         <p className="font-medium text-destructive-ink">

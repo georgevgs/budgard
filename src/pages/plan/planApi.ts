@@ -5,7 +5,6 @@ import type { NoSpendDay } from '@/types/NoSpendDay';
 // Supabase queries for plan, at the feature root so an audit of what
 // this feature reads and writes is one file.
 export const planApi = {
-
   async getNoSpendDays(ownerId: string, signal?: AbortSignal) {
     let query = supabase
       .from('no_spend_days')

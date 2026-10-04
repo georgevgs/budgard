@@ -101,7 +101,11 @@ const measureFile = (file: string, declaration: RegExp): ComponentSize[] => {
 // inside a string, template literal or comment. The declaration ends on the
 // line where depth first returns to zero.
 const findDeclarationEnd = (lines: string[], start: number): number | null => {
-  const state: ScanState = { depth: 0, isInBlockComment: false, isOpened: false };
+  const state: ScanState = {
+    depth: 0,
+    isInBlockComment: false,
+    isOpened: false,
+  };
 
   for (let index = start; index < lines.length; index += 1) {
     scanLine(lines[index], state);

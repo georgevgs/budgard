@@ -1,13 +1,16 @@
 import { supabase } from '@/config/supabase';
 import { done, row, rows } from '@/common/api/supabaseCrud';
-import { SUPABASE_PAGE_SIZE, accountBalanceCursorFilter, fetchAllPages } from '@/common/api/dataAccess';
+import {
+  SUPABASE_PAGE_SIZE,
+  accountBalanceCursorFilter,
+  fetchAllPages,
+} from '@/common/api/dataAccess';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 
 // Supabase queries for networth, at the feature root so an audit of what
 // this feature reads and writes is one file.
 export const networthApi = {
-
   async getAccounts(ownerId: string, signal?: AbortSignal) {
     let query = supabase
       .from('accounts')

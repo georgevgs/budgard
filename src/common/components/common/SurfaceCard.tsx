@@ -10,7 +10,11 @@ type SurfaceCardProps = HTMLAttributes<HTMLDivElement> & {
 // primitive carries its own `rounded-2xl bg-card shadow-sm` utilities, which
 // outrank anything the .surface-card component class can say, so the tint and
 // radius would silently never apply.
-export const SurfaceCard = ({ isFlush = false, className, ...props }: SurfaceCardProps) => {
+export const SurfaceCard = ({
+  isFlush = false,
+  className,
+  ...props
+}: SurfaceCardProps) => {
   return <div className={cn(getSurfaceClass(isFlush), className)} {...props} />;
 };
 

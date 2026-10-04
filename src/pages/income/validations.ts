@@ -1,6 +1,10 @@
 import * as z from 'zod';
 import { parseCurrencyInput } from '@/constants/utils';
-import { AMOUNT_PATTERN, SAFE_STRING, isNotFutureDated } from '@/constants/validations';
+import {
+  AMOUNT_PATTERN,
+  SAFE_STRING,
+  isNotFutureDated,
+} from '@/constants/validations';
 
 // Income validation schema — same shape as expense for now
 export const incomeSchema = z.object({

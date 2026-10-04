@@ -12,7 +12,10 @@ type TopCategoryTileProps = {
 // The grid's one inverted tile. It is the loudest thing here that costs no
 // colour, which is why there is exactly one — a second would flatten the
 // first, and the slab has to stay the only thing shouting.
-export const TopCategoryTile = ({ category, currency }: TopCategoryTileProps) => {
+export const TopCategoryTile = ({
+  category,
+  currency,
+}: TopCategoryTileProps) => {
   const { t } = useTranslation();
 
   if (category === null) {

@@ -1,6 +1,10 @@
 import { supabase } from '@/config/supabase';
 import { done, maybeRow, row, rows } from '@/common/api/supabaseCrud';
-import type { Budget, NotificationPreferences, NotificationSettings } from '@/types/Budget';
+import type {
+  Budget,
+  NotificationPreferences,
+  NotificationSettings,
+} from '@/types/Budget';
 import type { FinancialConnection } from '@/pages/settings/settingsTypes';
 
 export type PushSubscriptionPayload = {

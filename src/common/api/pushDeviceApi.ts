@@ -41,23 +41,22 @@ export const pushDeviceApi = {
   },
 };
 
-const getDeviceSubscription =
-  async (): Promise<PushSubscription | null> => {
-    if (!('serviceWorker' in navigator)) {
+const getDeviceSubscription = async (): Promise<PushSubscription | null> => {
+  if (!('serviceWorker' in navigator)) {
+    return null;
+  }
+
+  try {
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (!registration) {
       return null;
     }
 
-    try {
-      const registration = await navigator.serviceWorker.getRegistration();
-      if (!registration) {
-        return null;
-      }
-
-      return await registration.pushManager.getSubscription();
-    } catch {
-      return null;
-    }
-  };
+    return await registration.pushManager.getSubscription();
+  } catch {
+    return null;
+  }
+};
 
 export const unsubscribeQuietly = async (
   subscription: PushSubscription | null,

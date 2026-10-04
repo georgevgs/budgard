@@ -26,7 +26,11 @@ type CategoryGlyphProps = {
 // screen: `TransactionHero` draws the same disc at 64px and shares this
 // element's `viewTransitionName`, so tapping a row morphs one into the other.
 // While this was a bare glyph that transition had nothing to morph from.
-export const CategoryGlyph = ({ transaction, className, style }: CategoryGlyphProps) => {
+export const CategoryGlyph = ({
+  transaction,
+  className,
+  style,
+}: CategoryGlyphProps) => {
   return (
     <span
       aria-hidden="true"

@@ -86,7 +86,12 @@ export const RecurringScheduleFields = ({
         )}
       />
 
-      {renderLinkedAccountField(form, shouldShowLinkedAccount, investmentAccounts, t)}
+      {renderLinkedAccountField(
+        form,
+        shouldShowLinkedAccount,
+        investmentAccounts,
+        t,
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField

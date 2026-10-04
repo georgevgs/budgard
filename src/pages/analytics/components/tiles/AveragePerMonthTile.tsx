@@ -16,7 +16,10 @@ type AveragePerMonthTileProps = {
 // one drawn from twelve — and it gives this tile the same label / figure /
 // caption shape as the Biggest month tile beside it, which is what puts the
 // two numbers on one line instead of half a caption apart.
-export const AveragePerMonthTile = ({ monthlyAverage, monthsElapsed }: AveragePerMonthTileProps) => {
+export const AveragePerMonthTile = ({
+  monthlyAverage,
+  monthsElapsed,
+}: AveragePerMonthTileProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
 

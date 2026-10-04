@@ -111,7 +111,7 @@ const getPlanCardClass = (isSelected: boolean): string => {
     'focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background',
   );
   if (isSelected) {
-    return cn(base, 'border-primary-ink bg-primary/5 ring-1 ring-primary');
+    return cn(base, 'border-primary-ink ring-1 ring-primary');
   }
 
   return cn(base, 'border-border/60 hover:border-border');

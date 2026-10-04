@@ -17,7 +17,11 @@ type RecurringExpenseCardActionsProps = {
   onDelete: (id: string) => void;
 };
 
-export const RecurringExpenseCardActions = ({ expense, onEdit, onDelete }: RecurringExpenseCardActionsProps) => {
+export const RecurringExpenseCardActions = ({
+  expense,
+  onEdit,
+  onDelete,
+}: RecurringExpenseCardActionsProps) => {
   const { t } = useTranslation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

@@ -1,7 +1,10 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
-import { DonutChart, type DonutSlice } from '@/pages/networth/components/DonutChart';
+import {
+  DonutChart,
+  type DonutSlice,
+} from '@/pages/networth/components/DonutChart';
 import { formatCurrency, formatPercent } from '@/constants/utils';
 import type { Account } from '@/types/Account';
 
@@ -15,7 +18,9 @@ type Slice = DonutSlice & {
   pct: number;
 };
 
-export const InvestmentAllocationCard = ({ accounts }: InvestmentAllocationCardProps) => {
+export const InvestmentAllocationCard = ({
+  accounts,
+}: InvestmentAllocationCardProps) => {
   const { t } = useTranslation();
 
   const slices = useMemo<Slice[]>(() => {

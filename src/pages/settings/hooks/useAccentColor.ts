@@ -59,14 +59,16 @@ const applyAccentToDocument = (key: AccentColorKey): void => {
   }
 
   const isDark = root.classList.contains('dark');
-  let increasedContrast = false;
+  let hasIncreasedContrast = false;
   if (window.matchMedia) {
-    increasedContrast = window.matchMedia('(prefers-contrast: more)').matches;
+    hasIncreasedContrast = window.matchMedia(
+      '(prefers-contrast: more)',
+    ).matches;
   }
   const values = accentValues(
     findAccent(key).swatch,
     isDark,
-    increasedContrast,
+    hasIncreasedContrast,
   );
 
   ACCENT_PROPERTIES.forEach((property, index) => {
@@ -74,20 +76,13 @@ const applyAccentToDocument = (key: AccentColorKey): void => {
   });
 };
 
-export const useAccentColor = (): {
+export type UseAccentColorReturn = {
   accent: AccentColorKey;
   setAccent: (key: AccentColorKey) => void;
-} => {
-  const [accent, setAccentState] = useState<AccentColorKey>(getInitialKey);
+};
 
-  const setAccent = (key: AccentColorKey): void => {
-    setAccentState(key);
-    try {
-      localStorage.setItem(STORAGE_KEY, key);
-    } catch {
-      // localStorage may be unavailable
-    }
-  };
+export const useAccentColor = (): UseAccentColorReturn => {
+  const [accent, setAccentState] = useState<AccentColorKey>(getInitialKey);
 
   useEffect(() => {
     applyAccentToDocument(accent);
@@ -118,6 +113,15 @@ export const useAccentColor = (): {
 
     return () => contrast.removeEventListener('change', reapplyAccent);
   }, [accent]);
+
+  const setAccent = (key: AccentColorKey): void => {
+    setAccentState(key);
+    try {
+      localStorage.setItem(STORAGE_KEY, key);
+    } catch {
+      // localStorage may be unavailable
+    }
+  };
 
   return { accent, setAccent };
 };

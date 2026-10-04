@@ -76,7 +76,7 @@ const renderShortfall = (
   }
 
   return (
-    <p className="rounded-xl bg-warning/14 px-4 py-3 text-sm font-medium text-warning-ink">
+    <p className="rounded-xl border border-tile-ring bg-tile px-4 py-3 text-sm font-medium text-warning-ink">
       {t('analytics.forecast.shortfall', {
         month: forecast.shortfall.label,
         amount: formatCurrency(

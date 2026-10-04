@@ -7,11 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/common/ui/form';
-import {
-  Popover,
-  PopoverAnchor,
-  PopoverContent,
-} from '@/common/ui/popover';
+import { Popover, PopoverAnchor, PopoverContent } from '@/common/ui/popover';
 import { Input } from '@/common/ui/input';
 import { renderSuggestionMeta } from '@/constants/expensesFormHelpers';
 import type { UseDescriptionSuggestionsReturn } from '@/pages/expenses/hooks/useDescriptionSuggestions';
@@ -22,7 +18,10 @@ type ExpenseDescriptionFieldProps = {
   suggestions: UseDescriptionSuggestionsReturn;
 };
 
-export const ExpenseDescriptionField = ({ form, suggestions }: ExpenseDescriptionFieldProps) => {
+export const ExpenseDescriptionField = ({
+  form,
+  suggestions,
+}: ExpenseDescriptionFieldProps) => {
   const { t } = useTranslation();
 
   return (

@@ -15,7 +15,7 @@ vi.mock('@/common/contexts/FinancialSpaceContext', () => ({
   useFinancialSpace: () => ({ activeOwnerId: 'user-1' }),
 }));
 
-import { useProductMetrics } from '@/common/hooks/useProductMetrics';
+import { useProductMetrics } from '@/common/components/routing/hooks/useProductMetrics';
 
 beforeEach(() => {
   vi.clearAllMocks();

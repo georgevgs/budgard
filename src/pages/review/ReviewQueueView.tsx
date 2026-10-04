@@ -8,7 +8,10 @@ import { Button } from '@/common/ui/button';
 import { PageHeader } from '@/common/components/common/PageHeader';
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { TransactionRuleDialog } from '@/pages/review/components/TransactionRuleDialog';
-import { useCategoriesData, useDataConfig } from '@/common/contexts/DataContext';
+import {
+  useCategoriesData,
+  useDataConfig,
+} from '@/common/contexts/DataContext';
 import { useTransactionReviewOps } from '@/common/hooks/dataOps/useTransactionReviewOps';
 import { formatCurrency } from '@/constants/utils';
 import type { Expense } from '@/types/Expense';

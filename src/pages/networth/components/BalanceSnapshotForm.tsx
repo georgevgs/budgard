@@ -23,7 +23,10 @@ import { useSnapshotSubmit } from '@/pages/networth/hooks/useSnapshotSubmit';
 import { SnapshotMetaFields } from '@/pages/networth/components/SnapshotMetaFields';
 import { amountToInput } from '@/constants/utils';
 import { getCurrencySymbol } from '@/constants/currencies';
-import { accountBalanceSchema, type AccountBalanceFormData } from '@/pages/networth/validations';
+import {
+  accountBalanceSchema,
+  type AccountBalanceFormData,
+} from '@/pages/networth/validations';
 import type { Account } from '@/types/Account';
 
 export type SnapshotMode = 'value' | 'contribution' | 'withdrawal';
@@ -34,7 +37,11 @@ type BalanceSnapshotFormProps = {
   mode?: SnapshotMode;
 };
 
-export const BalanceSnapshotForm = ({ account, onClose, mode = 'value' }: BalanceSnapshotFormProps) => {
+export const BalanceSnapshotForm = ({
+  account,
+  onClose,
+  mode = 'value',
+}: BalanceSnapshotFormProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const isInvestment = account.kind === 'investment';

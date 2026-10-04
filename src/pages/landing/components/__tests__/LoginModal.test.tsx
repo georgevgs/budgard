@@ -3,7 +3,8 @@ import { render, screen } from '@testing-library/react';
 
 let capturedOnSuccess: (() => void) | null = null;
 
-vi.mock('@/pages/landing/components/OtpForm', () => ({ OtpForm: ({ onSuccess }: { onSuccess: () => void }) => {
+vi.mock('@/pages/landing/components/OtpForm', () => ({
+  OtpForm: ({ onSuccess }: { onSuccess: () => void }) => {
     capturedOnSuccess = onSuccess;
 
     return <div data-testid="otp-form" />;

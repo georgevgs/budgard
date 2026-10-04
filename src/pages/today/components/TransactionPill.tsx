@@ -18,7 +18,13 @@ type TransactionPillProps = {
 // card. The bento redesign makes every list a stack of these: a row that is
 // its own shape can be tapped, swiped and reordered without the divider above
 // it having to mean something.
-export const TransactionPill = ({ transaction, kind, currency, meta, to }: TransactionPillProps) => {
+export const TransactionPill = ({
+  transaction,
+  kind,
+  currency,
+  meta,
+  to,
+}: TransactionPillProps) => {
   const { t } = useTranslation();
   const amount = describeAmount(transaction.amount, kind, currency);
 

@@ -10,7 +10,10 @@ type ReceiptScanButtonProps = {
   isVisible: boolean;
 };
 
-export const ReceiptScanButton = ({ scan, isVisible }: ReceiptScanButtonProps) => {
+export const ReceiptScanButton = ({
+  scan,
+  isVisible,
+}: ReceiptScanButtonProps) => {
   const { t } = useTranslation();
 
   if (!isVisible) {

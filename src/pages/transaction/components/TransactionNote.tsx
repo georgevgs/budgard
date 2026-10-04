@@ -15,7 +15,12 @@ type TransactionNoteProps = {
 // field made the detail screen look unfinished and pushed the useful context
 // below it; the summary keeps that space proportional to what is actually in
 // the transaction.
-export const TransactionNote = ({ value, isDirty, onChange, onSave }: TransactionNoteProps) => {
+export const TransactionNote = ({
+  value,
+  isDirty,
+  onChange,
+  onSave,
+}: TransactionNoteProps) => {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
 
@@ -59,7 +64,11 @@ export const TransactionNote = ({ value, isDirty, onChange, onSave }: Transactio
   );
 };
 
-const renderSummary = (value: string, onEdit: () => void, t: TranslateFunction) => {
+const renderSummary = (
+  value: string,
+  onEdit: () => void,
+  t: TranslateFunction,
+) => {
   return (
     <section className="space-y-2">
       <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">

@@ -24,7 +24,10 @@ const VIEW = { width: 330, height: 120 };
 // The screen's headline: what this month has cost, how that compares, and the
 // shape of the months behind it. One tile because those are one thought — the
 // figure means nothing without the curve and the curve means nothing unlabelled.
-export const SpentThisMonthTile = ({ monthComparison, rhythmMonths }: SpentThisMonthTileProps) => {
+export const SpentThisMonthTile = ({
+  monthComparison,
+  rhythmMonths,
+}: SpentThisMonthTileProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const animated = useAnimatedNumber(monthComparison.thisMonthAmount);
@@ -125,7 +128,10 @@ const getAxisToneClassName = (index: number, total: number): string => {
   return '';
 };
 
-const renderMonthComparison = (comparison: MonthComparison, t: TranslateFunction) => {
+const renderMonthComparison = (
+  comparison: MonthComparison,
+  t: TranslateFunction,
+) => {
   if (comparison.percentChange === null) {
     return null;
   }

@@ -2,7 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 
 const mockToast = vi.hoisted(() => vi.fn());
-vi.mock('@/common/hooks/useToast', () => ({ useToast: () => ({ toast: mockToast }) }));
+vi.mock('@/common/hooks/useToast', () => ({
+  useToast: () => ({ toast: mockToast }),
+}));
 
 const data = vi.hoisted(() => ({ categories: [] as unknown[] }));
 vi.mock('@/common/contexts/DataContext', () => ({

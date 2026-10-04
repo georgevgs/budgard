@@ -11,8 +11,7 @@ class FakeResizeObserver {
 
 const makeToolbar = (height: number): HTMLDivElement => {
   const element = document.createElement('div');
-  element.getBoundingClientRect = () =>
-    ({ height }) as DOMRect;
+  element.getBoundingClientRect = () => ({ height }) as DOMRect;
 
   return element;
 };

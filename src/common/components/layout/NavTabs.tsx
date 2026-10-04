@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/constants/utils';
 import { haptics } from '@/constants/haptics';
-import { useNavAutoHide } from '@/common/hooks/useNavAutoHide';
+import { useNavAutoHide } from '@/common/components/layout/hooks/useNavAutoHide';
 import { getOwningTab } from '@/constants/routes';
 import House from 'lucide-react/dist/esm/icons/house';
 import List from 'lucide-react/dist/esm/icons/list';

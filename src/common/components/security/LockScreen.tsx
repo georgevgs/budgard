@@ -3,7 +3,7 @@ import Fingerprint from 'lucide-react/dist/esm/icons/fingerprint-pattern';
 import { Button } from '@/common/ui/button';
 import { BrandMark } from '@/common/components/common/BrandMark';
 import { PinPad } from '@/common/components/common/PinPad';
-import { useLockScreen } from '@/pages/security/hooks/useLockScreen';
+import { useLockScreen } from '@/common/components/security/hooks/useLockScreen';
 import { PIN_LENGTH } from '@/constants/appLock';
 import { cn } from '@/constants/utils';
 import type { TranslateFunction } from '@/constants/translate';

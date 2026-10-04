@@ -4,11 +4,7 @@ import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { Button } from '@/common/ui/button';
 import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 import type { TranslateFunction } from '@/constants/translate';
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from '@/common/ui/input-otp';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/common/ui/input-otp';
 import FormSubmitButton from '@/common/ui/form-submit-button';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useResendCooldown } from '@/pages/landing/hooks/useResendCooldown';

@@ -10,7 +10,10 @@ type ExpenseAmountFieldProps = {
   conversion: UseCurrencyConversionCoreReturn;
 };
 
-export const ExpenseAmountField = ({ form, conversion }: ExpenseAmountFieldProps) => {
+export const ExpenseAmountField = ({
+  form,
+  conversion,
+}: ExpenseAmountFieldProps) => {
   const { t } = useTranslation();
 
   return (

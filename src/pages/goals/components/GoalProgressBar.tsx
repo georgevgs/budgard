@@ -9,7 +9,10 @@ type GoalProgressBarProps = {
   currency: string;
 };
 
-export const GoalProgressBar = ({ progress, currency }: GoalProgressBarProps) => {
+export const GoalProgressBar = ({
+  progress,
+  currency,
+}: GoalProgressBarProps) => {
   const { t } = useTranslation();
   const percentLabel = Math.round(progress.percent * 100);
   const indicatorClass = pickIndicatorClass(progress);

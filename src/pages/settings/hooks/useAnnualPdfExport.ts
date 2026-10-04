@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 import type { Locale } from 'date-fns';
-import { useCategoriesData, useDataConfig } from '@/common/contexts/DataContext';
+import {
+  useCategoriesData,
+  useDataConfig,
+} from '@/common/contexts/DataContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { useToast } from '@/common/hooks/useToast';
 import { generateAnnualPdfReport } from '@/pages/settings/utils/pdfReport';
@@ -101,7 +104,10 @@ const buildReportInput = (
   };
 };
 
-const buildLabels = (t: TranslateFunction, dateLocale: Locale): PdfReportLabels => {
+const buildLabels = (
+  t: TranslateFunction,
+  dateLocale: Locale,
+): PdfReportLabels => {
   const generatedDate = format(new Date(), 'PPP', { locale: dateLocale });
 
   return {

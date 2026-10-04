@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { BudgetCategorySection,
+import {
+  BudgetCategorySection,
   type BudgetCategoryRow,
 } from '@/pages/plan/components/BudgetCategorySection';
 

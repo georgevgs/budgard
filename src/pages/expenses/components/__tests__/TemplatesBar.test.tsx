@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { TemplatesBar } from '@/pages/expenses/components/TemplatesBar';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 
-vi.mock('@/pages/expenses/components/TemplateDeleteDialog', () => ({ TemplateDeleteDialog: () => null,
+vi.mock('@/pages/expenses/components/TemplateDeleteDialog', () => ({
+  TemplateDeleteDialog: () => null,
 }));
 
 const template: ExpenseTemplate = {

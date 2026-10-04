@@ -2,7 +2,9 @@ import { useRef } from 'react';
 import type { ComponentProps, PointerEvent } from 'react';
 import { DropdownMenuTrigger } from '@/common/ui/dropdown-menu';
 
-type ScrollSafeDropdownMenuTriggerProps = ComponentProps<typeof DropdownMenuTrigger> & {
+type ScrollSafeDropdownMenuTriggerProps = ComponentProps<
+  typeof DropdownMenuTrigger
+> & {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
 };

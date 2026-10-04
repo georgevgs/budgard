@@ -15,7 +15,11 @@ type TransactionHeroProps = {
 // The top of the detail screen: what it was, and how much. Carries the
 // view-transition name that pairs it with the row it was opened from, so the
 // mark and the amount travel between the two screens instead of cross-fading.
-export const TransactionHero = ({ transaction, currency, isIncome }: TransactionHeroProps) => {
+export const TransactionHero = ({
+  transaction,
+  currency,
+  isIncome,
+}: TransactionHeroProps) => {
   const dateLocale = useDateLocale();
   const amount = describeAmount(
     transaction.amount,

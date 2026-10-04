@@ -2,7 +2,10 @@ import { useTranslation } from 'react-i18next';
 import { InsightIcon } from '@/common/components/common/InsightIcon';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
-import { useSpendingInsights, type Insight } from '@/common/hooks/useSpendingInsights';
+import {
+  useSpendingInsights,
+  type Insight,
+} from '@/common/hooks/useSpendingInsights';
 
 type SpendingInsightsProps = {
   expenses: Expense[];

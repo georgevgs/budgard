@@ -44,10 +44,12 @@ vi.mock('@/pages/landing/LandingPage', () => ({
   default: () => <div>public landing page</div>,
 }));
 
-vi.mock('@/common/components/common/RouteMetadata', () => ({ RouteMetadata: () => null,
+vi.mock('@/common/components/common/RouteMetadata', () => ({
+  RouteMetadata: () => null,
 }));
 
-vi.mock('@/common/components/common/OfflineBanner', () => ({ OfflineBanner: () => null,
+vi.mock('@/common/components/common/OfflineBanner', () => ({
+  OfflineBanner: () => null,
 }));
 
 vi.mock('@/common/ui/toaster', () => ({
@@ -62,7 +64,8 @@ vi.mock('@/common/components/common/AppLoadingSkeleton', () => ({
   AppLoadingSkeleton: () => <div>authenticated loading</div>,
 }));
 
-vi.mock('@/pages/landing/components/LandingLoading', () => ({ LandingLoading: () => <div>public loading</div>,
+vi.mock('@/pages/landing/components/LandingLoading', () => ({
+  LandingLoading: () => <div>public loading</div>,
 }));
 
 describe('App boundary', () => {

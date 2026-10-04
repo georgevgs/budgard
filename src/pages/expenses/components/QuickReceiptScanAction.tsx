@@ -13,7 +13,9 @@ type QuickReceiptScanActionProps = {
   scan: UseQuickReceiptScanReturn;
 };
 
-export const QuickReceiptScanAction = ({ scan }: QuickReceiptScanActionProps) => {
+export const QuickReceiptScanAction = ({
+  scan,
+}: QuickReceiptScanActionProps) => {
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
 

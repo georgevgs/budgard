@@ -25,7 +25,7 @@ const mockHaptics = vi.hoisted(() => ({
 }));
 vi.mock('@/constants/haptics', () => ({ haptics: mockHaptics }));
 
-import { useLockScreen } from '@/pages/security/hooks/useLockScreen';
+import { useLockScreen } from '@/common/components/security/hooks/useLockScreen';
 
 const ERROR_HOLD_MS = 700;
 

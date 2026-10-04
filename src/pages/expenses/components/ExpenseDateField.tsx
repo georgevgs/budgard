@@ -16,7 +16,10 @@ type ExpenseDateFieldProps = {
   dateLocale: Locale | undefined;
 };
 
-export const ExpenseDateField = ({ form, dateLocale }: ExpenseDateFieldProps) => {
+export const ExpenseDateField = ({
+  form,
+  dateLocale,
+}: ExpenseDateFieldProps) => {
   const { t } = useTranslation();
 
   return (

@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from '@/common/ui/dialog';
 import { cn } from '@/constants/utils';
-import { PRESET_CATEGORIES } from '@/pages/onboarding/components/presetCategories';
+import { PRESET_CATEGORIES } from '@/common/components/onboarding/utils/presetCategories';
 
 type OnboardingCategoriesStepProps = {
   isSubmitting: boolean;
@@ -66,8 +66,7 @@ export const OnboardingCategoriesStep = ({
               onClick={() => handleCategoryToggle(index)}
               className={cn(
                 'flex items-center gap-2.5 rounded-xl px-3 py-3 text-sm font-medium transition-all border',
-                isSelected &&
-                  'border-primary-ink bg-primary/10 text-foreground',
+                isSelected && 'border-primary-ink bg-card text-foreground',
                 !isSelected &&
                   'border-border/50 bg-card text-muted-foreground hover:border-border',
               )}

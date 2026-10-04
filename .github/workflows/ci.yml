@@ -49,7 +49,8 @@ jobs:
         run: bun run test:backup
 
       - name: Build
-        run: bun run build
+        # Typechecking already ran above; build would run tsc -b again.
+        run: bun run vite build
 
       # Reads dist/, so it has to follow the build.
       - name: Bundle budgets

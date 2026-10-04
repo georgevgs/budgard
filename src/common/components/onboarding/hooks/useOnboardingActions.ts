@@ -10,8 +10,8 @@ import {
   readOnboardingStep,
   saveOnboardingStep,
   startOnboarding,
-} from '@/pages/onboarding/utils/onboarding';
-import { PRESET_CATEGORIES } from '@/pages/onboarding/components/presetCategories';
+} from '@/common/components/onboarding/utils/onboarding';
+import { PRESET_CATEGORIES } from '@/common/components/onboarding/utils/presetCategories';
 import { trackProductEvent } from '@/common/api/productEventService';
 
 type UseOnboardingActionsArgs = {

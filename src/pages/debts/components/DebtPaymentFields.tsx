@@ -18,7 +18,11 @@ type DebtPaymentFieldsProps = {
   dateLocale: Locale | undefined;
 };
 
-export const DebtPaymentFields = ({ form, currency, dateLocale }: DebtPaymentFieldsProps) => {
+export const DebtPaymentFields = ({
+  form,
+  currency,
+  dateLocale,
+}: DebtPaymentFieldsProps) => {
   const { t } = useTranslation();
 
   return (

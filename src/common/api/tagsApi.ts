@@ -5,7 +5,6 @@ import type { Tag } from '@/types/Tag';
 // Supabase queries for tags, at the feature root so an audit of what
 // this feature reads and writes is one file.
 export const tagsApi = {
-
   async getTags(ownerId: string, signal?: AbortSignal) {
     let query = supabase
       .from('tags')

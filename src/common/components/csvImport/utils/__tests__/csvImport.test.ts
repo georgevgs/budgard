@@ -8,9 +8,7 @@ import {
   mapRowsToIncomes,
   parseExpensesCsv,
 } from '@/common/components/csvImport/utils/csvImport';
-import {
-  getCsvPreviewData,
-} from '@/common/components/csvImport/utils/csvText';
+import { getCsvPreviewData } from '@/common/components/csvImport/utils/csvText';
 import type { Category } from '@/types/Category';
 
 const categories: Category[] = [

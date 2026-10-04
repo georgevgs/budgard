@@ -52,7 +52,14 @@ export const PlanTimeline = ({
       </div>
       {renderRangeTabs(timeline.range, onRangeChange, t)}
       {renderSummary(timeline, currency, dateLocale, t)}
-      {renderBody(timeline, hasSchedules, currency, dateLocale, onRangeChange, t)}
+      {renderBody(
+        timeline,
+        hasSchedules,
+        currency,
+        dateLocale,
+        onRangeChange,
+        t,
+      )}
     </section>
   );
 };

@@ -4,8 +4,14 @@ import type { Category } from '@/types/Category';
 import type { ExpenseWritePayload } from '@/common/api/dataService';
 import type { ReceiptOptions } from '@/common/hooks/dataOps/useExpenseOps';
 import { ExpensesForm } from '@/pages/expenses/components/ExpensesForm';
-import { useCategoriesData, useDataConfig } from '@/common/contexts/DataContext';
-import { FORM_TYPES, type FormType } from '@/common/components/layout/formTypes';
+import {
+  useCategoriesData,
+  useDataConfig,
+} from '@/common/contexts/DataContext';
+import {
+  FORM_TYPES,
+  type FormType,
+} from '@/common/components/layout/formTypes';
 
 export type FormsManagerProps = {
   formType: FormType;

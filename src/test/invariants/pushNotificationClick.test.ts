@@ -27,10 +27,11 @@ const tapNotification = async (url: unknown): Promise<unknown> => {
     skipWaiting: vi.fn(),
   };
 
-  runInNewContext(
-    readFileSync(path.join(ROOT, 'public/push-sw.js'), 'utf8'),
-    { self: scope, caches: { delete: vi.fn() }, URL },
-  );
+  runInNewContext(readFileSync(path.join(ROOT, 'public/push-sw.js'), 'utf8'), {
+    self: scope,
+    caches: { delete: vi.fn() },
+    URL,
+  });
 
   let task: Promise<unknown> | null = null;
   listeners.get('notificationclick')?.({

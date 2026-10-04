@@ -16,7 +16,10 @@ const BOLD_COMPONENTS = {
   strong: <span className="font-semibold text-foreground" />,
 };
 
-export const IosInstallModal = ({ open, onOpenChange }: IosInstallModalProps) => {
+export const IosInstallModal = ({
+  open,
+  onOpenChange,
+}: IosInstallModalProps) => {
   const { t } = useTranslation();
 
   return (

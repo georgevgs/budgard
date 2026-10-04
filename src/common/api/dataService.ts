@@ -8,6 +8,7 @@ import { networthApi } from '@/pages/networth/networthApi';
 import { planApi } from '@/pages/plan/planApi';
 import { recurringApi } from '@/pages/recurring/recurringApi';
 import { settingsApi } from '@/pages/settings/settingsApi';
+import { todayApi } from '@/pages/today/todayApi';
 import { tagsApi } from '@/common/api/tagsApi';
 
 export type { ExpenseWritePayload } from '@/common/api/dataAccess';
@@ -26,4 +27,5 @@ export const dataService = {
   ...recurringApi,
   ...settingsApi,
   ...tagsApi,
+  ...todayApi,
 };

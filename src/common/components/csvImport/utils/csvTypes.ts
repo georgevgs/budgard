@@ -1,4 +1,3 @@
-
 export type ParsedExpenseRow = {
   date: string;
   description: string;

@@ -31,7 +31,10 @@ type GoalSourceFieldsProps = {
   sourceType: GoalSourceType;
 };
 
-export const GoalSourceFields = ({ form, sourceType }: GoalSourceFieldsProps) => {
+export const GoalSourceFields = ({
+  form,
+  sourceType,
+}: GoalSourceFieldsProps) => {
   const { t } = useTranslation();
   const { expenseCategories } = useCategoriesData();
   const tags = useTagsData();

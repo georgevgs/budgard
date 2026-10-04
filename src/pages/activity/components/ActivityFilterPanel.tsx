@@ -86,7 +86,11 @@ export const ActivityFilterPanel = (props: ActivityFilterPanelProps) => {
   );
 };
 
-const renderTrigger = (activeCount: number, onOpen: () => void, t: TranslateFunction) => (
+const renderTrigger = (
+  activeCount: number,
+  onOpen: () => void,
+  t: TranslateFunction,
+) => (
   <Button
     type="button"
     variant="outline"
@@ -139,7 +143,10 @@ const renderPanel = (
   </DialogContent>
 );
 
-const renderKindControl = (props: ActivityFilterPanelProps, t: TranslateFunction) => (
+const renderKindControl = (
+  props: ActivityFilterPanelProps,
+  t: TranslateFunction,
+) => (
   <section aria-labelledby="activity-kind-label">
     <p
       id="activity-kind-label"
@@ -159,7 +166,10 @@ const renderKindControl = (props: ActivityFilterPanelProps, t: TranslateFunction
   </section>
 );
 
-const renderPeriodControl = (props: ActivityFilterPanelProps, t: TranslateFunction) => (
+const renderPeriodControl = (
+  props: ActivityFilterPanelProps,
+  t: TranslateFunction,
+) => (
   <section aria-labelledby="activity-period-label">
     <p
       id="activity-period-label"
@@ -221,7 +231,11 @@ const countActive = (
   return count;
 };
 
-const renderKindButton = (value: ActivityKind, props: ActivityFilterPanelProps, t: TranslateFunction) => {
+const renderKindButton = (
+  value: ActivityKind,
+  props: ActivityFilterPanelProps,
+  t: TranslateFunction,
+) => {
   const isActive = props.kind === value;
 
   return (

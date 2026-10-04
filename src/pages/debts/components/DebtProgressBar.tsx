@@ -9,7 +9,10 @@ type DebtProgressBarProps = {
   currency: string;
 };
 
-export const DebtProgressBar = ({ progress, currency }: DebtProgressBarProps) => {
+export const DebtProgressBar = ({
+  progress,
+  currency,
+}: DebtProgressBarProps) => {
   const { t } = useTranslation();
   // Bar fills 0..100 only — negative progress (balance grew) reads as empty.
   const barValue = Math.max(0, Math.round(progress.percentPaid * 100));

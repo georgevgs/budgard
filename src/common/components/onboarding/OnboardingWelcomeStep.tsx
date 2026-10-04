@@ -12,7 +12,9 @@ type OnboardingWelcomeStepProps = {
   onNext: () => void;
 };
 
-export const OnboardingWelcomeStep = ({ onNext }: OnboardingWelcomeStepProps) => {
+export const OnboardingWelcomeStep = ({
+  onNext,
+}: OnboardingWelcomeStepProps) => {
   const { t } = useTranslation();
 
   return (

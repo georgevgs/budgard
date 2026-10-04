@@ -25,7 +25,12 @@ type DebtDetailSheetProps = {
   onEdit: (debt: Debt) => void;
 };
 
-export const DebtDetailSheet = ({ debt, open, onClose, onEdit }: DebtDetailSheetProps) => {
+export const DebtDetailSheet = ({
+  debt,
+  open,
+  onClose,
+  onEdit,
+}: DebtDetailSheetProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const progress = useDebtProgress(debt);

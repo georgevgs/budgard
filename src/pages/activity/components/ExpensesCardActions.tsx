@@ -120,7 +120,9 @@ export const ExpensesCardActions = ({
         onConfirm={handleConfirmDelete}
       />
 
-      {renderReceiptViewer(expense, isReceiptVisible, () => setIsReceiptVisible(false))}
+      {renderReceiptViewer(expense, isReceiptVisible, () =>
+        setIsReceiptVisible(false),
+      )}
       {renderSplitDialog(expense, isSplitVisible, setIsSplitVisible)}
       {renderRefundDialog(expense, isRefundVisible, setIsRefundVisible)}
     </>

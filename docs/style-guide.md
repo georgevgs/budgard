@@ -48,7 +48,7 @@
 - **Barrel files.** The guide recommends them for grouping related exports and
   then lists the cases to avoid them in. Here every candidate folder hits one of
   those cases, so there is exactly one barrel,
-  `common/components/bento/index.ts` — see *Barrel files* below.
+  `common/components/bento/index.ts` — see _Barrel files_ below.
 - **Tests live in a `__tests__/` folder** beside the code they cover:
   `pages/expenses/components/__tests__/ExpensesForm.test.tsx`. Mocks go in
   `__tests__/__mocks__/` named `{name}Mock.ts`. The cross-cutting invariant
@@ -67,7 +67,7 @@
   components is the exception — `ChartAxes.tsx` (`XAxis` / `YAxis` /
   `ReferenceLine`), `ChartSeries.tsx`, `ChartTooltip.tsx`, `AppToaster.tsx`,
   `DataContext.tsx` and `RouteGuards.tsx` — which the guide permits as grouped
-  related exports. A module of *helpers* is not that exception: it goes in the
+  related exports. A module of _helpers_ is not that exception: it goes in the
   feature's `utils/` under a camelCase name (`utils/expensesFormHelpers.tsx`),
   never beside the component under a dotted name.
 - **Named exports for components.** `export const Foo = () => {}`, no
@@ -86,10 +86,10 @@
 - **Blank line before `return`.** **[enforced]**
 - **A guard clause keeps its braces.** The guide asks for the brace-less
   `if (isLoading) return <Loading />`; this repo writes the block.
-  **[enforced]** — `curly`. See *Where this repo differs* below.
+  **[enforced]** — `curly`. See _Where this repo differs_ below.
 - **A component body keeps its `return`**, even with no logic — not the guide's
   implicit `() => <section>…`. **[enforced]** — `componentReturn.test.ts`.
-  See *Where this repo differs* below.
+  See _Where this repo differs_ below.
 - **PascalCase** components, **camelCase** functions.
 - **Loading components mirror** the structure of what they stand in for.
 - **Move to `common/` only when genuinely reused.**
@@ -101,7 +101,7 @@
 - **A blank line before every `return`.** **[enforced]** —
   `padding-line-between-statements`. This is the guide's own ✅ example, which
   puts a blank line between the guard clause and the final return. Its "do not
-  add an extra blank line before the final return" bans a *second* one, not the
+  add an extra blank line before the final return" bans a _second_ one, not the
   first. A `return` that is the function's only statement has nothing above it
   to separate, so the rule does not fire.
 
@@ -109,7 +109,7 @@
 
 - **`type` for everything, props included.** This is the one place Budgard
   departs from the guide, which asks for `interface` on component props — see
-  *Where this repo differs* below.
+  _Where this repo differs_ below.
 - **Props type is named `{ComponentName}Props`** — `ExpensesFormProps`, not a
   bare `Props`.
 - **A hook's return type is named `Use{HookName}Return`** when the hook
@@ -118,7 +118,7 @@
   `TagPickerApi`. A hook returning a primitive (`boolean`, `void`, `Date`)
   needs no named type, and a shared domain model keeps its own name —
   `SavingsRhythm` and `GoalProgress` are models the app passes around, not
-  hook plumbing. An *internal* state shape is not a return type: `OtpState`
+  hook plumbing. An _internal_ state shape is not a return type: `OtpState`
   and `AlertState` are named for what they hold.
 - **`t` is typed once.** A helper that renders a string takes
   `t: TranslateFunction` from `@/constants/translate`. Do not re-declare the
@@ -165,7 +165,7 @@ Four rules on the site the repo knowingly does not follow.
 
 **Props are `type`, not `interface`.** The guide asks for `interface` on
 component props. Budgard uses `type ExpensesFormProps = { … }` instead, for one
-consistent way to declare a shape rather than two. The guide's *naming* is kept
+consistent way to declare a shape rather than two. The guide's _naming_ is kept
 — `{ComponentName}Props` — only the keyword differs. `src/common/ui/` is
 vendored shadcn and keeps whatever upstream ships.
 
@@ -207,16 +207,16 @@ was only written down, and it had drifted the same way `curly` did: sixteen
 components had taken the implicit form, nine of them not exported and so
 invisible to a grep anchored on `export const`. The sweep to the braced form
 ran on 7 Sep 2026 and the test now holds the line. The rule is about
-*components* — a lowercase render helper passed to `.map()` keeps the implicit
+_components_ — a lowercase render helper passed to `.map()` keeps the implicit
 form, which is why `renderSection` and `renderDot` are untouched.
 
-**`dataOps/` stays whole.** Ten of the twenty operation hooks in
+**`dataOps/` stays whole.** Some operation hooks in
 `common/hooks/dataOps/` are called by exactly one feature, and the guide would
 send each of them into that feature's `hooks/`. They stay: `dataOps` is the
 mutation layer, and `useMutationRunner`, the optimistic-shape helpers and the
 rollback contract are what make it one layer rather than twenty. Splitting it
 by consumer would trade a rule the architecture depends on for a rule about
-where files sit. See CLAUDE.md's *Data flow* section.
+where files sit. See CLAUDE.md's _Data flow_ section.
 
 ## Where this repo is stricter
 
@@ -237,7 +237,7 @@ set, a frequently-updated file, and the tree-shaking cost. Every candidate
 folder here trips one of those, so `common/components/bento/index.ts` is the
 only barrel:
 
-- `common/hooks/dataOps/` is twenty modules that change most weeks — the
+- `common/hooks/dataOps/` holds modules that change most weeks — the
   guide's "frequently updated" case exactly.
 - `common/components/charts/` and the dialog folders hold components that are
   deliberately `React.lazy`-loaded. A barrel over either would pull the whole

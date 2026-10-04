@@ -17,7 +17,11 @@ type YearPillProps = {
 // to sit halfway down beside the chart, which made it look like the chart's
 // control rather than the screen's — every figure on Trends moves when this
 // changes, so it belongs where the screen names itself.
-export const YearPill = ({ selectedYear, availableYears, onYearChange }: YearPillProps) => {
+export const YearPill = ({
+  selectedYear,
+  availableYears,
+  onYearChange,
+}: YearPillProps) => {
   const { t } = useTranslation();
 
   return (

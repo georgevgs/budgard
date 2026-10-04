@@ -27,7 +27,10 @@ type CategoryBudgetsManagerProps = {
   onClose: () => void;
 };
 
-export const CategoryBudgetsManager = ({ isOpen, onClose }: CategoryBudgetsManagerProps) => {
+export const CategoryBudgetsManager = ({
+  isOpen,
+  onClose,
+}: CategoryBudgetsManagerProps) => {
   const { t } = useTranslation();
   const manager = useCategoryBudgetDrafts(isOpen, onClose);
 
@@ -147,7 +150,8 @@ const renderTotalsBar = (
     return null;
   }
 
-  const isOverGlobal = monthlyBudget !== null && totals.allocated > monthlyBudget;
+  const isOverGlobal =
+    monthlyBudget !== null && totals.allocated > monthlyBudget;
 
   return (
     <div className="px-6 pb-2 shrink-0">

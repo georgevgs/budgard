@@ -1,6 +1,4 @@
-import type {
-  ParsedExpenseRow,
-} from '@/common/components/csvImport/utils/csvTypes';
+import type { ParsedExpenseRow } from '@/common/components/csvImport/utils/csvTypes';
 
 // Two formats every bank can export but almost no budgeting app reads, which
 // is why "download a CSV and map the columns by hand" is still the norm.

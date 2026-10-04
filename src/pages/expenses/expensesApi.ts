@@ -1,6 +1,14 @@
 import { supabase } from '@/config/supabase';
 import { done, isDuplicateOf, row, rows } from '@/common/api/supabaseCrud';
-import { SELECT_TEMPLATE, SELECT_WITH_CATEGORY_AND_TAG, SUPABASE_PAGE_SIZE, buildBulkExpense, fetchAllPages, flattenExtraTags, transactionCursorFilter } from '@/common/api/dataAccess';
+import {
+  SELECT_TEMPLATE,
+  SELECT_WITH_CATEGORY_AND_TAG,
+  SUPABASE_PAGE_SIZE,
+  buildBulkExpense,
+  fetchAllPages,
+  flattenExtraTags,
+  transactionCursorFilter,
+} from '@/common/api/dataAccess';
 import type { ExpenseWritePayload } from '@/common/api/dataAccess';
 import type { Expense } from '@/types/Expense';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
@@ -8,7 +16,6 @@ import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
 // Supabase queries for expenses, at the feature root so an audit of what
 // this feature reads and writes is one file.
 export const expensesApi = {
-
   async getExpenses(
     ownerId: string,
     signal?: AbortSignal,

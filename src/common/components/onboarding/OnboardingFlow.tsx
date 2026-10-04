@@ -7,11 +7,11 @@ import { getCurrencySymbol } from '@/constants/currencies';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useQuickAdd } from '@/common/contexts/QuickAddContext';
 import { useQuickAddDraft } from '@/common/hooks/useQuickAddDraft';
-import { useOnboardingActions } from '@/pages/onboarding/hooks/useOnboardingActions';
-import { OnboardingWelcomeStep } from '@/pages/onboarding/components/OnboardingWelcomeStep';
-import { OnboardingBudgetStep } from '@/pages/onboarding/components/OnboardingBudgetStep';
-import { OnboardingCategoriesStep } from '@/pages/onboarding/components/OnboardingCategoriesStep';
-import { OnboardingFirstExpenseStep } from '@/pages/onboarding/components/OnboardingFirstExpenseStep';
+import { useOnboardingActions } from '@/common/components/onboarding/hooks/useOnboardingActions';
+import { OnboardingWelcomeStep } from '@/common/components/onboarding/OnboardingWelcomeStep';
+import { OnboardingBudgetStep } from '@/common/components/onboarding/OnboardingBudgetStep';
+import { OnboardingCategoriesStep } from '@/common/components/onboarding/OnboardingCategoriesStep';
+import { OnboardingFirstExpenseStep } from '@/common/components/onboarding/OnboardingFirstExpenseStep';
 import type { TranslateFunction } from '@/constants/translate';
 import { trackProductEvent } from '@/common/api/productEventService';
 

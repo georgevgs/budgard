@@ -13,7 +13,8 @@ import {
   type TodayLayout,
   type TodayTileId,
 } from '@/pages/today/utils/bentoLayout';
-import { todayApi } from '@/pages/today/todayApi';
+import { dataService } from '@/common/api/dataService';
+import { useTodayOps } from '@/common/hooks/dataOps/useTodayOps';
 
 export type UseTodayLayoutReturn = TodayLayout & {
   isHydrated: boolean;
@@ -33,6 +34,7 @@ export type UseTodayLayoutReturn = TodayLayout & {
  */
 export const useTodayLayout = (): UseTodayLayoutReturn => {
   const { session } = useAuth();
+  const { saveLayout } = useTodayOps();
   const userId = session?.user.id ?? '';
   const [initial] = useState(() => readStoredLayoutSnapshot(userId));
   const [layout, setLayout] = useState<TodayLayout>(initial.layout);
@@ -41,32 +43,30 @@ export const useTodayLayout = (): UseTodayLayoutReturn => {
   const [isArranging, setArranging] = useState(false);
   const [isPersisted, setIsPersisted] = useState(initial.isStored);
   const hasCommittedRef = useRef(false);
-  const persistVersionRef = useRef(0);
 
   const persist = useCallback(
     (next: TodayLayout) => {
-      const version = persistVersionRef.current + 1;
-      persistVersionRef.current = version;
       setIsPersisted(writeStoredLayout(userId, next));
       markTodayLayoutSyncPending(userId);
 
-      void todayApi
-        .saveLayout(next)
-        .then(() => {
-          if (persistVersionRef.current !== version) {
+      void saveLayout({
+        getLayout: () => layoutRef.current,
+        onSaved: (saved) => {
+          if (layoutRef.current !== saved) {
             return;
           }
 
           clearTodayLayoutSyncPending(userId);
           setIsPersisted(true);
-        })
-        .catch(() => {
-          if (persistVersionRef.current === version) {
+        },
+        onPending: (failed) => {
+          if (layoutRef.current === failed) {
             setIsPersisted(false);
           }
-        });
+        },
+      }).catch(() => undefined);
     },
-    [userId],
+    [saveLayout, userId],
   );
 
   useEffect(() => {
@@ -203,7 +203,7 @@ const hydrateFromServer = async (
   }: HydrateDeps,
 ): Promise<void> => {
   try {
-    const remote = await todayApi.getLayout();
+    const remote = await dataService.getLayout();
     if (!run.active) {
       return;
     }

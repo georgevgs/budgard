@@ -1,7 +1,20 @@
 import type { Category } from '@/types/Category';
-import { detectDelimiter, isHeaderRow, parseCsvLine } from '@/common/components/csvImport/utils/csvText';
-import type { ColumnMapping, CsvParseError, CsvParseResult, ParsedExpenseRow } from '@/common/components/csvImport/utils/csvTypes';
-import { parseAmount, parseDate, validateDescription } from '@/common/components/csvImport/utils/csvValues';
+import {
+  detectDelimiter,
+  isHeaderRow,
+  parseCsvLine,
+} from '@/common/components/csvImport/utils/csvText';
+import type {
+  ColumnMapping,
+  CsvParseError,
+  CsvParseResult,
+  ParsedExpenseRow,
+} from '@/common/components/csvImport/utils/csvTypes';
+import {
+  parseAmount,
+  parseDate,
+  validateDescription,
+} from '@/common/components/csvImport/utils/csvValues';
 
 /**
  * Parses a CSV string into expense data using column mapping
@@ -212,7 +225,10 @@ const processRow = (
   }
   const trimmedDescription = description.trim();
 
-  const { amount, isIncome } = parseAmount(amountStr.trim(), hasSignedConvention);
+  const { amount, isIncome } = parseAmount(
+    amountStr.trim(),
+    hasSignedConvention,
+  );
 
   if (shouldSkipIncomeTransactions && isIncome) {
     return { kind: 'income' };

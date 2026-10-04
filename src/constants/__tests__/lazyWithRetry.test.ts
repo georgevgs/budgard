@@ -1,15 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { lazyWithRetry } from '@/constants/lazyWithRetry';
 
 describe('lazyWithRetry', () => {
-  beforeEach(() => {
-    Object.defineProperty(window, 'location', {
-      value: { pathname: '/expenses', replace: vi.fn() },
-      writable: true,
-      configurable: true,
-    });
-  });
-
   it('returns a lazy component', () => {
     const FakeComponent = () => null;
     const result = lazyWithRetry(() =>

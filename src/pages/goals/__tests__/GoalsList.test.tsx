@@ -44,8 +44,7 @@ vi.mock('@/common/hooks/dataOps/useGoalOps', () => ({
 }));
 
 // Stub out the form so we don't have to wire up react-hook-form internals.
-vi.mock('@/pages/goals/components/GoalForm', () => ({ GoalForm: () => null,
-}));
+vi.mock('@/pages/goals/components/GoalForm', () => ({ GoalForm: () => null }));
 
 import GoalsList from '@/pages/goals/GoalsList';
 

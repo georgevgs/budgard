@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { describeAmount } from '@/constants/transactionAmount';
 import type { Expense } from '@/types/Expense';
+import { captureException } from '@/config/sentry';
 
 // --- Mocks ---
 
@@ -35,6 +36,7 @@ const mockDataService = vi.hoisted(() => ({
   updateExpense: vi.fn(),
   deleteExpense: vi.fn(),
   createExpensesBulk: vi.fn(),
+  createIncomesBulk: vi.fn(),
 }));
 vi.mock('@/common/api/dataService', () => ({
   dataService: mockDataService,
@@ -69,6 +71,8 @@ vi.mock('@/common/contexts/DataContext', () => ({
   useDataConfig: () => ({ isInitialized: true, defaultCurrency: 'EUR' }),
   useDataActions: () => ({
     setExpenses: mockSetExpenses,
+    setIncomes: mockSetExpenses,
+    refreshIncomes: mockRefreshExpenses,
     refreshDebts: mockRefreshDebts,
     refreshExpenses: mockRefreshExpenses,
     expensesRef,
@@ -76,6 +80,7 @@ vi.mock('@/common/contexts/DataContext', () => ({
 }));
 
 import { useExpenseOps } from '@/common/hooks/dataOps/useExpenseOps';
+import { useIncomeOps } from '@/common/hooks/dataOps/useIncomeOps';
 
 // --- Fixtures ---
 
@@ -607,4 +612,48 @@ describe('handleExpenseSplit', () => {
 
     expect(mockDataService.createExpensesBulk).not.toHaveBeenCalled();
   });
+});
+
+describe('bulk import failures', () => {
+  it.each(['expense', 'income'] as const)(
+    'reports a failed %s insert and leaves retries to the import flow',
+    async (kind) => {
+      const error = new Error('insert denied');
+      let importRows: ReturnType<
+        typeof useExpenseOps
+      >['handleBulkExpenseImport'];
+      let operation = 'importExpenses';
+      if (kind === 'expense') {
+        mockDataService.createExpensesBulk.mockRejectedValueOnce(error);
+        importRows = renderHook(() => useExpenseOps()).result.current
+          .handleBulkExpenseImport;
+      } else {
+        mockDataService.createIncomesBulk.mockRejectedValueOnce(error);
+        importRows = renderHook(() => useIncomeOps()).result.current
+          .handleBulkIncomeImport;
+        operation = 'importIncomes';
+      }
+
+      await act(async () => {
+        await expect(
+          importRows([
+            {
+              date: '2026-10-04',
+              description: 'Coffee',
+              amount: 3.5,
+              category_id: null,
+            },
+          ]),
+        ).rejects.toThrow('insert denied');
+      });
+
+      expect(captureException).toHaveBeenCalledWith(error, {
+        tags: { operation },
+      });
+      expect(mockShowErrorToast).toHaveBeenCalledExactlyOnceWith(
+        'import.importError',
+      );
+      expect(mockHaptics.error).toHaveBeenCalledTimes(1);
+    },
+  );
 });

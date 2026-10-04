@@ -16,7 +16,10 @@ type Locale = ReturnType<typeof useDateLocale>;
 
 // What already happened, as its own group of pills rather than one card. The
 // module has no ground of its own — see the `bare` tone in BentoTile.
-export const RecentActivityTile = ({ items, currency }: RecentActivityTileProps) => {
+export const RecentActivityTile = ({
+  items,
+  currency,
+}: RecentActivityTileProps) => {
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
 

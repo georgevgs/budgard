@@ -1,6 +1,9 @@
 import { supabase } from '@/config/supabase';
 import { done, maybeRow } from '@/common/api/supabaseCrud';
-import { normalizeLayout, type TodayLayout } from '@/pages/today/utils/bentoLayout';
+import {
+  normalizeLayout,
+  type TodayLayout,
+} from '@/pages/today/utils/bentoLayout';
 
 type LayoutRow = {
   today_visible: string[];

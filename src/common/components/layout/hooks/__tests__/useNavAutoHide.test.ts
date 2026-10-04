@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useNavAutoHide } from '@/common/hooks/useNavAutoHide';
+import { useNavAutoHide } from '@/common/components/layout/hooks/useNavAutoHide';
 
 const isHidden = () => document.body.hasAttribute('data-nav-hidden');
 

@@ -7,17 +7,20 @@ import type { EmbeddedTag } from '@/types/Tag';
 // EmbeddedTag): a full categories(*)/tags(*) embed roughly doubles every
 // transaction row, which inflates history fetches and the localStorage
 // snapshot for no benefit.
-export const CATEGORY_EMBED = 'category:categories(id, name, color, icon, type, kind)';
+export const CATEGORY_EMBED =
+  'category:categories(id, name, color, icon, type, kind)';
 // Every tag embed names its FK explicitly. The bare `tags` embed name turned
 // ambiguous for expenses when expense_tags landed (two relationships →
 // PGRST201, HTTP 300) and broke months-stale PWA bundles that still sent it;
 // 20260731165831_restore_legacy_tags_embed.sql shims those legacy clients
 // with a computed relationship. Naming the FK keeps today's bundles immune
 // if a second relationship path to tags ever appears on these tables.
-export const EXPENSE_TAG_EMBED = 'tag:tags!expenses_tag_id_fkey(id, name, color)';
+export const EXPENSE_TAG_EMBED =
+  'tag:tags!expenses_tag_id_fkey(id, name, color)';
 export const TEMPLATE_TAG_EMBED =
   'tag:tags!expense_templates_tag_id_fkey(id, name, color)';
-export const EXTRA_TAGS_EMBED = 'extra_tags:expense_tags(tag:tags(id, name, color))';
+export const EXTRA_TAGS_EMBED =
+  'extra_tags:expense_tags(tag:tags(id, name, color))';
 export const SELECT_WITH_CATEGORY_AND_TAG = `*, ${CATEGORY_EMBED}, ${EXPENSE_TAG_EMBED}, ${EXTRA_TAGS_EMBED}`;
 export const SELECT_WITH_CATEGORY = `*, ${CATEGORY_EMBED}`;
 // Templates embed category+tag but NOT extra_tags — expense_tags references
@@ -126,4 +129,3 @@ export const fetchAllPages = async <T>(
 
   return rows;
 };
-

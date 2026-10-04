@@ -1,6 +1,9 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getNextRefreshDelay, useCurrentDate } from '@/common/hooks/useCurrentDate';
+import {
+  getNextRefreshDelay,
+  useCurrentDate,
+} from '@/common/hooks/useCurrentDate';
 
 describe('useCurrentDate', () => {
   beforeEach(() => {

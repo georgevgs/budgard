@@ -20,7 +20,7 @@ export const NetWorthView = lazyWithRetry(
 );
 export const DebtsView = lazyWithRetry(() => import('@/pages/debts/DebtsView'));
 export const LockScreen = lazyWithRetry(
-  () => import('@/pages/security/LockScreen'),
+  () => import('@/common/components/security/LockScreen'),
 );
 export const TransactionDetailView = lazyWithRetry(
   () => import('@/pages/transaction/TransactionDetailView'),
@@ -45,7 +45,7 @@ export const ContactPage = lazyWithRetry(
   () => import('@/pages/legal/ContactPage'),
 );
 export const OnboardingFlow = lazyWithRetry(
-  () => import('@/pages/onboarding/OnboardingFlow'),
+  () => import('@/common/components/onboarding/OnboardingFlow'),
 );
 
 export const mainTabPrefetches = [

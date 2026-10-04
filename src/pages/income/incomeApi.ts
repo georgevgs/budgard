@@ -1,12 +1,16 @@
 import { supabase } from '@/config/supabase';
 import { done, isDuplicateOf, row, rows } from '@/common/api/supabaseCrud';
-import { SELECT_WITH_CATEGORY, SUPABASE_PAGE_SIZE, fetchAllPages, transactionCursorFilter } from '@/common/api/dataAccess';
+import {
+  SELECT_WITH_CATEGORY,
+  SUPABASE_PAGE_SIZE,
+  fetchAllPages,
+  transactionCursorFilter,
+} from '@/common/api/dataAccess';
 import type { Expense } from '@/types/Expense';
 
 // Supabase queries for income, at the feature root so an audit of what
 // this feature reads and writes is one file.
 export const incomeApi = {
-
   async getIncomes(
     ownerId: string,
     signal?: AbortSignal,

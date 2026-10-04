@@ -41,8 +41,7 @@ const toast = ({
   const hasDescription = Boolean(title && description);
   const isActionable = variant === 'destructive' || Boolean(action);
   const opts: ExternalToast = {
-    duration:
-      duration ?? resolveDuration(hasDescription, isActionable),
+    duration: duration ?? resolveDuration(hasDescription, isActionable),
   };
   if (hasDescription) {
     opts.description = description;

@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
@@ -10,21 +9,34 @@ vi.mock('@/common/hooks/dataOps/useFeedbackOps', () => ({
   useFeedbackOps: () => ({ submitFeedback: mockSubmitFeedback }),
 }));
 
-vi.mock('@/common/ui/dialog', () => ({
-  Dialog: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  DialogContent: ({ children }: { children: ReactNode }) => (
-    <div>{children}</div>
-  ),
-  DialogHeader: ({ children }: { children: ReactNode }) => (
-    <div>{children}</div>
-  ),
-  DialogTitle: ({ children }: { children: ReactNode }) => <h2>{children}</h2>,
-  DialogDescription: ({ children }: { children: ReactNode }) => (
-    <p>{children}</p>
-  ),
-}));
-
 describe('FeedbackSection', () => {
+  it('keeps a draft until discarding is confirmed', async () => {
+    render(
+      <MemoryRouter initialEntries={['/settings']}>
+        <FeedbackSection />
+      </MemoryRouter>,
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'settings.feedback.reportProblem' }),
+    );
+    const message = screen.getByRole('textbox', {
+      name: 'settings.feedback.messageLabel',
+    });
+    fireEvent.change(message, { target: { value: 'Please keep this draft.' } });
+    fireEvent.blur(message);
+    fireEvent.click(screen.getByRole('button', { name: 'common.close' }));
+
+    expect(await screen.findByRole('alertdialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'common.cancel' }));
+    expect(message).toHaveValue('Please keep this draft.');
+
+    fireEvent.click(screen.getByRole('button', { name: 'common.close' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'common.discardConfirm' }),
+    );
+    await waitFor(() => expect(screen.queryByRole('textbox')).toBeNull());
+  });
+
   it('submits a problem report with the current route', async () => {
     mockSubmitFeedback.mockResolvedValue(undefined);
     render(
@@ -39,6 +51,9 @@ describe('FeedbackSection', () => {
     fireEvent.change(
       screen.getByRole('textbox', { name: 'settings.feedback.messageLabel' }),
       { target: { value: 'The save button stopped responding.' } },
+    );
+    fireEvent.blur(
+      screen.getByRole('textbox', { name: 'settings.feedback.messageLabel' }),
     );
     await waitFor(() => {
       expect(

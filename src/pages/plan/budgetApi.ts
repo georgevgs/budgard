@@ -6,7 +6,6 @@ import type { CategoryBudget } from '@/types/CategoryBudget';
 // Supabase queries for budget, at the feature root so an audit of what
 // this feature reads and writes is one file.
 export const budgetApi = {
-
   async getBudget(ownerId: string, signal?: AbortSignal) {
     let query = supabase
       .from('user_budgets')

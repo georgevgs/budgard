@@ -9,7 +9,10 @@ type AnalyticsEmptyProps = {
   subtitle?: string;
 };
 
-export const AnalyticsEmpty = ({ title: titleOverride, subtitle }: AnalyticsEmptyProps) => {
+export const AnalyticsEmpty = ({
+  title: titleOverride,
+  subtitle,
+}: AnalyticsEmptyProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   let title = t('navigation.trends');

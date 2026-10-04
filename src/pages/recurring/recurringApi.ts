@@ -6,7 +6,6 @@ import type { RecurringExpense } from '@/types/RecurringExpense';
 // Supabase queries for recurring, at the feature root so an audit of what
 // this feature reads and writes is one file.
 export const recurringApi = {
-
   async getRecurringExpenses(ownerId: string, signal?: AbortSignal) {
     let query = supabase
       .from('recurring_expenses')

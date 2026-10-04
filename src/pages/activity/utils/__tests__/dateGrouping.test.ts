@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { enUS, el } from 'date-fns/locale';
-import { getDateLabel, groupExpensesByDate } from '@/pages/activity/utils/dateGrouping';
+import {
+  getDateLabel,
+  groupExpensesByDate,
+} from '@/pages/activity/utils/dateGrouping';
 import type { Expense } from '@/types/Expense';
 
 const t = (key: string) => key;

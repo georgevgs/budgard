@@ -136,11 +136,14 @@ export const useExpenseOps = () => {
     };
 
     const handleBulkExpenseImport = async (expensesData: BulkExpenseRow[]) => {
-      if (shouldSkip) {
-        return;
-      }
-
-      await importExpenseRows(expensesData, deps, refreshExpenses);
+      await runMutation({
+        operation: 'importExpenses',
+        shouldSkip,
+        errorMessage: t('import.importError'),
+        // The import flow owns retries because one half may already be saved.
+        isRetryable: false,
+        perform: () => importExpenseRows(expensesData, deps, refreshExpenses),
+      });
     };
 
     // Splits one expense into several: the original row keeps its receipt and

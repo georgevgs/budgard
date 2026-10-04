@@ -1,4 +1,7 @@
-import type { ColumnMapping, CsvPreviewData } from '@/common/components/csvImport/utils/csvTypes';
+import type {
+  ColumnMapping,
+  CsvPreviewData,
+} from '@/common/components/csvImport/utils/csvTypes';
 
 // A cell is a negative number, not merely a string that starts with a dash.
 export const isNegativeCell = (cell: string): boolean => {

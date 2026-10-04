@@ -26,7 +26,10 @@ type AnnualExportCardProps = {
   action?: ReactNode;
 };
 
-export const AnnualExportCard = ({ selectedYear, action }: AnnualExportCardProps) => {
+export const AnnualExportCard = ({
+  selectedYear,
+  action,
+}: AnnualExportCardProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const expenses = useExpensesData();
@@ -125,7 +128,10 @@ export const AnnualExportCard = ({ selectedYear, action }: AnnualExportCardProps
 
 // The pdfmake chunk (~1 MB with its Greek-capable Roboto vfs) loads on the
 // first click — the button says so instead of silently stalling.
-const renderPdfButtonLabel = (isGenerating: boolean, t: TranslateFunction): string => {
+const renderPdfButtonLabel = (
+  isGenerating: boolean,
+  t: TranslateFunction,
+): string => {
   if (isGenerating) {
     return t('annualExport.generatingPdf');
   }

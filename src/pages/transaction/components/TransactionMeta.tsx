@@ -11,7 +11,10 @@ type TransactionMetaProps = {
 };
 
 // The chips under the amount: what it was filed as, and whether it counts.
-export const TransactionMeta = ({ transaction, isExcluded }: TransactionMetaProps) => {
+export const TransactionMeta = ({
+  transaction,
+  isExcluded,
+}: TransactionMetaProps) => {
   const { t } = useTranslation();
 
   return (

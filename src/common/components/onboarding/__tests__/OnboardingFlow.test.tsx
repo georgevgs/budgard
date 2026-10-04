@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { swatch } from '@/design/palette';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import OnboardingFlow from '@/pages/onboarding/OnboardingFlow';
+import OnboardingFlow from '@/common/components/onboarding/OnboardingFlow';
 import {
   readOnboardingStep,
   shouldShowOnboarding,
-} from '@/pages/onboarding/utils/onboarding';
+} from '@/common/components/onboarding/utils/onboarding';
 
 // Mock useAuth
 const USER_ID = 'user-123';

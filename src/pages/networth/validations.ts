@@ -1,6 +1,10 @@
 import * as z from 'zod';
 import { parseCurrencyInput } from '@/constants/utils';
-import { AMOUNT_PATTERN, HEX_COLOR, SAFE_STRING } from '@/constants/validations';
+import {
+  AMOUNT_PATTERN,
+  HEX_COLOR,
+  SAFE_STRING,
+} from '@/constants/validations';
 
 // Account validation schema
 export const accountSchema = z.object({

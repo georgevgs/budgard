@@ -1,5 +1,8 @@
 import { useMemo } from 'react';
-import { simulatePayoff, minimumCoversInterest } from '@/pages/debts/utils/debtPayoff';
+import {
+  simulatePayoff,
+  minimumCoversInterest,
+} from '@/pages/debts/utils/debtPayoff';
 import type { Debt } from '@/types/Debt';
 
 export type DebtProgress = {
