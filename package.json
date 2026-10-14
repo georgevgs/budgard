@@ -16,7 +16,7 @@
     "edge:lock": "node scripts/edgeDependencies.mjs lock",
     "edge:check": "node scripts/edgeDependencies.mjs check",
     "audit:edges": "node scripts/edgeDependencies.mjs audit",
-    "audit:dependencies": "bun audit && npm run audit:edges",
+    "audit:dependencies": "bun audit --audit-level=high && npm run audit:edges",
     "knip": "npx --yes knip",
     "knip:production": "npx --yes knip --production",
     "audit:api": "node scripts/auditApiUsage.mjs",

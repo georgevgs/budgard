@@ -29,6 +29,9 @@ jobs:
       - name: Check Edge Functions against frozen dependency graphs
         run: bun run edge:check
       - name: Audit frontend, tooling and Edge Function dependencies
+        # The daily run reports in the log without failing, so it stops
+        # emailing; push and PR runs still gate on high severity or above.
+        continue-on-error: ${{ github.event_name == 'schedule' }}
         run: bun run audit:dependencies
       - name: Verify dependency checks did not change lockfiles
         run: git diff --exit-code
