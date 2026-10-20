@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { copyFile, mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { checkBackupHealth } from './health.mjs';
+import { checkBackupHealth, hasHealthyBackup } from './health.mjs';
 import { recordBackupRun } from './status.mjs';
 
 const now = Date.parse('2026-10-04T12:00:00.000Z');
@@ -100,4 +100,20 @@ test('a stalled run is visible without treating normal in-flight work as failed'
   );
   await recordBackupRun(directory, 'running', new Date(now).toISOString());
   assert.equal((await checkBackupHealth(directory, { now })).status, 'healthy');
+});
+test('the hourly gate skips only while a healthy backup is younger than its window', async () => {
+  const { directory } = await fixture(21);
+  assert.equal(
+    await hasHealthyBackup(directory, { now, maxAgeHours: 22 }),
+    true,
+  );
+  assert.equal(
+    await hasHealthyBackup(directory, { now, maxAgeHours: 20 }),
+    false,
+  );
+  await recordBackupRun(directory, 'failed', new Date(now).toISOString());
+  assert.equal(
+    await hasHealthyBackup(directory, { now, maxAgeHours: 22 }),
+    false,
+  );
 });

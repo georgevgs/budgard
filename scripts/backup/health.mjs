@@ -57,6 +57,19 @@ export const checkBackupHealth = async (
   };
 };
 
+// The scheduler fires hourly and asks this before each run. Anything the
+// monitor would alert on — stale, damaged, a failed or stalled attempt — is a
+// reason to back up now rather than wait for the next day.
+export const hasHealthyBackup = async (directory, options) => {
+  try {
+    await checkBackupHealth(directory, options);
+  } catch {
+    return false;
+  }
+
+  return true;
+};
+
 const checkLastRun = async (directory, now) => {
   const path = join(directory, 'last-run.json');
   let run;

@@ -33,12 +33,16 @@ const jobs = [
   {
     label: 'com.budgard.backup',
     script: 'backup.mjs',
-    schedule:
-      '<key>StartCalendarInterval</key><dict><key>Hour</key><integer>12</integer><key>Minute</key><integer>0</integer></dict>',
+    // A fixed daily slot is simply skipped when the Mac is shut down at that
+    // hour. Checking hourly and backing up once the newest copy is 22 hours
+    // old catches up within an hour of boot, inside the monitor's 26 hours.
+    args: ['--if-older-than=22'],
+    schedule: '<key>StartInterval</key><integer>3600</integer>',
   },
   {
     label: 'com.budgard.backup.health',
     script: 'backupMonitor.mjs',
+    args: [],
     schedule:
       '<key>StartInterval</key><integer>3600</integer><key>RunAtLoad</key><true/>',
   },
@@ -49,7 +53,7 @@ for (const job of jobs) {
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
 <key>Label</key><string>${job.label}</string>
-<key>ProgramArguments</key><array><string>${xml(runtime)}</string><string>${xml(join(root, 'scripts', job.script))}</string></array>
+<key>ProgramArguments</key><array><string>${xml(runtime)}</string><string>${xml(join(root, 'scripts', job.script))}</string>${job.args.map((arg) => `<string>${xml(arg)}</string>`).join('')}</array>
 <key>WorkingDirectory</key><string>${xml(root)}</string>
 <key>EnvironmentVariables</key><dict><key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string></dict>
 ${job.schedule}

@@ -164,14 +164,23 @@ newest dated folder rather than trusting the schedule.
 
 `node scripts/installBackupMonitoring.mjs` prepares validated LaunchAgent
 files in `/tmp/budgard-backup-jobs` for review. `bun run backup:monitor:install`
-installs a daily noon backup and an hourly health check with a macOS desktop
+installs an hourly backup check and an hourly health check with a macOS desktop
 notification on failure. It saves any prior plist in `~/Library/Logs/Budgard`
 before replacing it, and refuses to change a job that is currently running.
-The daily job replaces the weekly `com.budgard.backup` schedule. Both jobs run
+
+The backup job runs `scripts/backup.mjs --if-older-than=22`: each hour it skips
+while the newest backup is healthy and under 22 hours old, and backs up
+otherwise — so roughly once a day, within an hour of the Mac starting after a
+missed day, and an hour after a failed attempt. It replaced a fixed noon slot
+in October 2026: launchd runs a calendar job missed during sleep on wake, but
+skips one missed while the Mac is shut down, and a Mac off at noon on one day
+tripped the 26-hour alert the next. Run `bun run backup` without the flag to
+force a backup. Both jobs run
 the repository scripts directly with an explicit tool PATH. Logs are in
 `~/Library/Logs/Budgard`; the old launcher remains available for manual use.
-Desktop notifications require macOS notification permissions. A sleeping or
-offline Mac still cannot provide independent daily backup coverage.
+Desktop notifications require macOS notification permissions. A Mac that
+stays shut down for more than a day still cannot provide independent daily
+backup coverage; the monitor will alert until the first hourly check after boot.
 
 Nothing prunes `BACKUP_DIR`; each run adds roughly 17 MB. A local source
 script alone does not activate a cloud scheduler or provision backup storage.

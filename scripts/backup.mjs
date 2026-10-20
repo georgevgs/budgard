@@ -21,6 +21,7 @@ import { downloadObject, sameObjects } from './backup/storage.mjs';
 import { loadLocalDefaults } from './backup/local.mjs';
 import { createArchive } from './backup/archive.mjs';
 import { recordBackupRun } from './backup/status.mjs';
+import { hasHealthyBackup } from './backup/health.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -77,6 +78,21 @@ const configuration = async () => {
     key:
       process.env.SUPABASE_SERVICE_ROLE_KEY || saved.SUPABASE_SERVICE_ROLE_KEY,
   };
+};
+
+// The LaunchAgent fires hourly so a Mac that was off at the usual time catches
+// up within an hour of starting; this keeps it to roughly one backup a day.
+const freshnessGate = () => {
+  const flag = process.argv.find((arg) => arg.startsWith('--if-older-than='));
+  if (!flag) {
+    return undefined;
+  }
+  const hours = Number(flag.slice('--if-older-than='.length));
+  if (!Number.isFinite(hours) || hours <= 0) {
+    throw new Error('--if-older-than must be a positive number of hours');
+  }
+
+  return hours;
 };
 
 const dumpDatabase = async (directory, config, snapshot) => {
@@ -151,6 +167,17 @@ const main = async () => {
   const config = await configuration();
   await mkdir(config.directory, { recursive: true, mode: 0o700 });
   await assertPrivatePath(config.directory);
+  const maxAgeHours = freshnessGate();
+  if (
+    maxAgeHours &&
+    (await hasHealthyBackup(config.directory, { maxAgeHours }))
+  ) {
+    console.log(
+      `Backup skipped: a healthy backup is under ${maxAgeHours} hours old.`,
+    );
+
+    return;
+  }
   const startedAt = new Date().toISOString();
   await recordBackupRun(config.directory, 'running', startedAt);
   const name = `${new Date().toISOString().replace(/[:.]/g, '-')}-${randomUUID()}`;
@@ -263,6 +290,8 @@ Required: BACKUP_GPG_RECIPIENT (public encryption key fingerprint).
 Database credentials: ~/.config/budgard/backup.env, or BACKUP_ENV_FILE.
 Storage: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY when objects exist.
 Optional: BACKUP_DIR, BACKUP_PG_BIN (directory of matching Postgres tools).
+Optional: --if-older-than=<hours> skips the run while the newest backup is
+  younger than that and healthy (the hourly LaunchAgent passes 22).
 Output: a dated folder containing backup.tar.gz.gpg and its SHA-256 checksum.
 See docs/backups.md for setup, scheduling, recovery and coverage limits.`);
 } else {
