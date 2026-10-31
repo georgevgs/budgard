@@ -22,7 +22,7 @@ const action = process.argv[2];
 const commands = {
   lock: ['install', '--entrypoint', '--frozen-lockfile=false', 'index.ts'],
   check: ['check', '--frozen-lockfile', 'index.ts'],
-  audit: ['audit', '--frozen-lockfile', '--lock=deno.lock'],
+  audit: ['audit', '--frozen-lockfile', '--lock=deno.lock', '--level=high'],
 };
 
 if (!Object.hasOwn(commands, action)) {
