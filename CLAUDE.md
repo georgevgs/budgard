@@ -198,9 +198,11 @@ constrain new work:
   Each function is its own Deno project with a frozen `deno.lock`, so a new
   import fails `npm run edge:check` until the lock is regenerated and committed.
   `npm run audit:dependencies` covers the frontend and all six backend graphs;
-  `.github/workflows/security.yml` runs both daily and fails if either rewrites
-  a lockfile. Deploys upload `deno.json` but not `deno.lock` — what pins the
-  hosted runtime is the exact version in each import map, so keep them exact.
+  `.github/workflows/security.yml` runs both on every push to main and every
+  pull request, fails on high or critical advisories, and fails if either
+  rewrites a lockfile. Deploys upload `deno.json` but not `deno.lock` — what
+  pins the hosted runtime is the exact version in each import map, so keep
+  them exact.
 - `npm run knip` finds dead code, and its config is what makes it
   readable: ten live files (the service worker, the recovery page, the
   Deno edge functions, the realtime stub behind a vite alias) are

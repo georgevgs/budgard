@@ -4,8 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
-  schedule:
-    - cron: '23 6 * * *'
+  # No schedule: a daily run fails on advisories whose fix is still inside
+  # bunfig.toml's 7-day minimumReleaseAge, so it can only email noise. New
+  # advisories are picked up by the weekly cross-repo security report; run
+  # this by hand when one needs checking now.
   workflow_dispatch:
 
 permissions:
