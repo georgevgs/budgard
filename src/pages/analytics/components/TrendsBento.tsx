@@ -29,14 +29,46 @@ export const TrendsBento = (props: TrendsBentoProps) => {
         monthComparison={props.monthComparison}
         rhythmMonths={props.rhythmMonths}
       />
-      <AveragePerMonthTile
+      <TrendsBenchmarks
+        isVisible={1 < props.monthsElapsed}
+        monthlyData={props.monthlyData}
         monthlyAverage={props.monthlyAverage}
         monthsElapsed={props.monthsElapsed}
-      />
-      <BiggestMonthTile
-        monthlyData={props.monthlyData}
         onMonthClick={props.onMonthClick}
       />
     </BentoGrid>
   );
+};
+
+// An average and a biggest month need a second month to mean anything, with
+// one month both repeat the figure above.
+const TrendsBenchmarks = ({
+  isVisible,
+  monthlyData,
+  monthlyAverage,
+  monthsElapsed,
+  onMonthClick,
+}: {
+  isVisible: boolean;
+  monthlyData: MonthlyDatum[];
+  monthlyAverage: number;
+  monthsElapsed: number;
+  onMonthClick: (index: number) => void;
+}) => {
+  if (isVisible) {
+    return (
+      <>
+        <AveragePerMonthTile
+          monthlyAverage={monthlyAverage}
+          monthsElapsed={monthsElapsed}
+        />
+        <BiggestMonthTile
+          monthlyData={monthlyData}
+          onMonthClick={onMonthClick}
+        />
+      </>
+    );
+  } else {
+    return null;
+  }
 };

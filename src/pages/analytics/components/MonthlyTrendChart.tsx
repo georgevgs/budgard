@@ -125,7 +125,7 @@ const renderCashFlowTooltip = (
         <span className="tabular-nums">{formatCurrency(income, currency)}</span>
       </p>
       <p className="flex items-center justify-between gap-3 text-xs">
-        <span className="text-destructive-ink">{t('expenses.title')}</span>
+        <span className="text-foreground">{t('expenses.title')}</span>
         <span className="tabular-nums">
           {formatCurrency(expense, currency)}
         </span>

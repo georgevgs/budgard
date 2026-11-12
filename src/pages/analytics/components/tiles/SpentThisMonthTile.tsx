@@ -49,7 +49,7 @@ export const SpentThisMonthTile = ({
         {renderMonthComparison(monthComparison, t)}
       </div>
       {renderChart(path)}
-      {renderAxis(months)}
+      <TrendAxis isVisible={1 < months.length} months={months} />
     </BentoTile>
   );
 };
@@ -102,22 +102,32 @@ const renderChart = (path: ReturnType<typeof buildSparkline>) => {
 // The current month is the one the figure above belongs to, so it is the one
 // month named in the accent — the axis is a legend for the curve, and the
 // curve's right-hand end is where the eye already is.
-const renderAxis = (months: RhythmMonth[]) => {
-  return (
-    <div
-      aria-hidden="true"
-      className="mt-1 flex justify-between text-[0.6875rem] font-medium uppercase leading-none tracking-[0.1em] text-muted-foreground"
-    >
-      {months.map((month, index) => (
-        <span
-          key={month.month}
-          className={getAxisToneClassName(index, months.length)}
-        >
-          {month.month}
-        </span>
-      ))}
-    </div>
-  );
+const TrendAxis = ({
+  isVisible,
+  months,
+}: {
+  isVisible: boolean;
+  months: RhythmMonth[];
+}) => {
+  if (isVisible) {
+    return (
+      <div
+        aria-hidden="true"
+        className="mt-1 flex justify-between text-[0.6875rem] font-medium uppercase leading-none tracking-[0.1em] text-muted-foreground"
+      >
+        {months.map((month, index) => (
+          <span
+            key={month.month}
+            className={getAxisToneClassName(index, months.length)}
+          >
+            {month.month}
+          </span>
+        ))}
+      </div>
+    );
+  } else {
+    return null;
+  }
 };
 
 const getAxisToneClassName = (index: number, total: number): string => {

@@ -1,4 +1,4 @@
-import { Suspense, type ChangeEvent, useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useAnimatedNumber } from '@/common/hooks/useAnimatedNumber';
@@ -12,6 +12,13 @@ import { useCurrentDate } from '@/common/hooks/useCurrentDate';
 import { formatCurrency, cn } from '@/constants/utils';
 import { getCurrencySymbol } from '@/constants/currencies';
 import { lazyWithRetry } from '@/constants/lazyWithRetry';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/common/ui/select';
 
 const MonthlyTrendChart = lazyWithRetry(async () => {
   const module = await import('@/pages/analytics/components/MonthlyTrendChart');
@@ -100,7 +107,6 @@ export const CashFlowSection = ({
             isPro,
             onMonthClick,
             resolveYAxisMax(isPro, yAxisMax),
-            t,
           )}
           {renderFlow(view, flow, defaultCurrency)}
         </div>
@@ -263,7 +269,7 @@ const renderYearStats = (
         t('cashFlow.totalExpense'),
         yearTotals.totalExpense,
         currency,
-        'text-destructive-ink',
+        'text-foreground',
       )}
     </div>
     {renderAvgNet(yearTotals.avgNet, currency, t)}
@@ -317,7 +323,7 @@ const renderFlowStats = (
         t('expenses.title'),
         flow.totalExpenses,
         currency,
-        'text-destructive-ink',
+        'text-foreground',
       )}
     </div>
   </div>
@@ -373,7 +379,6 @@ const renderTrend = (
   isPro: boolean,
   onMonthClick: (index: number) => void,
   yAxisMax: number | undefined,
-  t: TranslateFunction,
 ) => {
   if (view === 'flow') {
     return null;
@@ -381,64 +386,65 @@ const renderTrend = (
 
   return (
     <div className="border-t border-border/40 pt-4">
-      <div className="tile overflow-hidden">
-        <div className="p-4">
-          <Suspense fallback={<div className="h-[280px]" aria-hidden />}>
-            <MonthlyTrendChart
-              data={data}
-              monthlyBudget={monthlyBudget}
-              defaultCurrency={currency}
-              currencySymbol={currencySymbol}
-              yAxisMax={yAxisMax}
-              onMonthClick={onMonthClick}
-              shouldShowCashFlow={isPro}
-            />
-          </Suspense>
-          {renderMonthDetailSelect(data, onMonthClick, currency, t)}
-        </div>
+      <div className="overflow-hidden">
+        <Suspense fallback={<div className="h-[280px]" aria-hidden />}>
+          <MonthlyTrendChart
+            data={data}
+            monthlyBudget={monthlyBudget}
+            defaultCurrency={currency}
+            currencySymbol={currencySymbol}
+            yAxisMax={yAxisMax}
+            onMonthClick={onMonthClick}
+            shouldShowCashFlow={isPro}
+          />
+        </Suspense>
       </div>
+      <MonthDetailSelect
+        data={data}
+        currency={currency}
+        onMonthClick={onMonthClick}
+      />
     </div>
   );
 };
 
-const renderMonthDetailSelect = (
-  data: MonthlyDatum[],
-  onMonthClick: (index: number) => void,
-  currency: string,
-  t: TranslateFunction,
-) => {
-  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const monthIndex = Number(event.target.value);
-    if (!Number.isInteger(monthIndex)) {
-      return;
-    }
-
-    onMonthClick(monthIndex);
-  };
+const MonthDetailSelect = ({
+  data,
+  currency,
+  onMonthClick,
+}: {
+  data: MonthlyDatum[];
+  currency: string;
+  onMonthClick: (index: number) => void;
+}) => {
+  const { t } = useTranslation();
 
   return (
     <div className="mt-3 flex flex-col gap-2 border-t border-border/40 pt-3 sm:flex-row sm:items-center sm:justify-between">
-      <label
-        htmlFor="analytics-month-details"
-        className="text-xs font-medium text-muted-foreground"
-      >
+      <p className="text-xs font-medium text-muted-foreground">
         {t('analytics.viewMonthDetails')}
-      </label>
-      <select
-        id="analytics-month-details"
+      </p>
+      <Select
         value=""
-        onChange={handleChange}
-        className="h-11 w-full rounded-xl border border-border/60 bg-card px-3 text-base text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-56 sm:text-sm"
+        onValueChange={(value) => onMonthClick(Number.parseInt(value, 10))}
       >
-        <option value="" disabled>
-          {t('analytics.chooseMonth')}
-        </option>
-        {data.map((point) => (
-          <option key={point.fullMonth} value={point.monthIndex}>
-            {point.fullMonth} — {formatCurrency(point.amount, currency)}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger
+          className="h-11 rounded-full border-0 bg-tile px-4 shadow-[inset_0_0_0_1px_hsl(var(--tile-ring))] sm:w-56"
+          aria-label={t('analytics.viewMonthDetails')}
+        >
+          <SelectValue placeholder={t('analytics.chooseMonth')} />
+        </SelectTrigger>
+        <SelectContent>
+          {data.map((point) => (
+            <SelectItem
+              key={point.fullMonth}
+              value={point.monthIndex.toString()}
+            >
+              {point.fullMonth} — {formatCurrency(point.amount, currency)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 };

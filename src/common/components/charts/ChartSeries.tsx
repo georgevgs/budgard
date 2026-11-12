@@ -105,6 +105,11 @@ const renderCurve = (series: Series, context: Context) => {
           strokeDasharray={dashFor(series.isDashed)}
         />
       ))}
+      {runs
+        .filter((run) => 1 === run.length)
+        .map(([[x, y]]) => (
+          <circle key={`lone-${x}`} cx={x} cy={y} r={4} fill={color} />
+        ))}
       {renderActiveDot(values, activeIndex, xAt, y, color)}
     </g>
   );

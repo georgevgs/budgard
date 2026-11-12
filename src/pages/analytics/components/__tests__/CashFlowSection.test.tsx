@@ -49,8 +49,10 @@ describe('CashFlowSection', () => {
       />,
     );
 
-    fireEvent.change(screen.getByRole('combobox'), {
-      target: { value: '3' },
+    Element.prototype.scrollIntoView = vi.fn();
+    fireEvent.keyDown(screen.getByRole('combobox'), { key: 'Enter' });
+    fireEvent.keyDown(screen.getByRole('option', { name: /April 2026/ }), {
+      key: 'Enter',
     });
     expect(onMonthClick).toHaveBeenCalledWith(3);
   });
