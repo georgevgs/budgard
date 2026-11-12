@@ -19,17 +19,27 @@ const FUNCTION_HARDENING_MIGRATION = readFileSync(
   'utf8',
 );
 
+const PINNED_CLI_MAJOR = Number(
+  (
+    JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8')) as {
+      devDependencies: Record<string, string>;
+    }
+  ).devDependencies.supabase.split('.')[0],
+);
+
 describe('Supabase maintenance configuration', () => {
-  // The local email service is [inbucket]. A previous pass renamed it to
-  // [local_smtp] and pinned that here, which made config.toml unparseable —
-  // every `supabase` command failed with "'config.config' has invalid keys"
-  // from 4 Sep until it was noticed. The CLI's own config schema has no
-  // local_smtp key at all, `supabase init` emits [inbucket], and so do the
-  // docs. This assertion is the way round that keeps the CLI working.
-  it('matches production Postgres and current local email configuration', () => {
+  // The local email section's name depends on the CLI reading it, and the two
+  // have broken each other both ways. On 4 Sep a rename to [local_smtp] made
+  // every command fail under a CLI that predated the key; CLI v3 refuses
+  // [inbucket] outright. So the section and the repo's pinned CLI major are
+  // asserted together: bump one without the other and this fails. Run the CLI
+  // through `npx supabase` — a global install on another version is exactly
+  // the drift this cannot see.
+  it("matches production Postgres and the pinned CLI's local email section", () => {
     expect(CONFIG).toContain('major_version = 17');
-    expect(CONFIG).toContain('[inbucket]');
-    expect(CONFIG).not.toContain('[local_smtp]');
+    expect(PINNED_CLI_MAJOR).toBe(3);
+    expect(CONFIG).toContain('[local_smtp]');
+    expect(CONFIG).not.toContain('[inbucket]');
   });
 
   it('keeps household JWT lookup in an RLS initplan', () => {

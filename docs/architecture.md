@@ -363,8 +363,9 @@ and its security guards remain for a future adapter.
 visits and completed OCR/import/export actions record no route parameters,
 financial values, receipt text or free-form payloads. Clients cannot read the log.
 The daily `prune-product-events-daily` cron deletes events older than 90 days via
-the invoker-only private function. `bun run usage:report --project-ref <ref>`
-returns rolling 30-day aggregates from `docs/product-usage-query.sql`.
+the invoker-only private function. `bun run usage:report` (linked project)
+returns rolling 30-day aggregates from `docs/product-usage-query.sql`; from an
+unlinked checkout run the same query with `npx supabase db query --remote=<ref>`.
 Missing events and zero surviving rows are not proof a feature was unused:
 offline writes can be dropped, automatic recurring writes count as transactions,
 and custom-layout counts omit accounts that kept the defaults.
@@ -558,7 +559,7 @@ Supabase PostgreSQL. Every table is RLS-protected and owner-scoped.
   `user_ui_preferences`, `feedback_reports`, `product_events`
 
 Migrations are in `supabase/migrations/` and are append-only history — never
-edit an applied one. Run `supabase migration list --linked` to see what is
+edit an applied one. Run `supabase migration list --remote` to see what is
 applied.
 
 Security-definer functions use an empty `search_path` with schema-qualified
@@ -570,7 +571,11 @@ than silently ignored.
 ## Edge Functions
 
 In `supabase/functions/`. Netlify only ships the frontend, so these must be
-deployed by hand (`supabase functions deploy <name>`).
+deployed by hand with the repo's pinned CLI:
+`npx supabase functions deploy <name> --remote=<ref> --use-api`. `--use-api`
+bundles server-side, so no Docker is needed; CLI v3 asks before every hosted
+change and Enter answers No. Inside an agent session (Claude Code's `!`
+included) it cannot ask and refuses instead, so add `--yes` there.
 
 - `stripe-checkout`, `stripe-portal`, `stripe-prices`, `stripe-webhook` — Pro
   billing

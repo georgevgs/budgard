@@ -9,7 +9,7 @@ scanning `supabase/migrations`. Covers 98 migrations: 55 functions, 30 triggers,
 This is a **map, not a schema definition**. Migrations are append-only history
 and the live schema is what you get by replaying them, so nothing here states
 a table's current columns — it states where to look. For the current shape of
-the database, query it (`supabase migration list --linked` shows what is
+the database, query it (`supabase migration list --remote` shows what is
 applied); for how the tables relate, see `docs/architecture.md`.
 
 ## Tables
