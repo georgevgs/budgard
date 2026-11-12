@@ -63,3 +63,60 @@ export const deliverPush = async (
     return 'failed';
   }
 };
+
+// PostgREST caps every response at this many rows (max_rows in config.toml).
+// A read that can outgrow it pages until a short page arrives, otherwise the
+// rows past the cap vanish without an error.
+const PAGE_SIZE = 1000;
+
+type PageResult<Row> = { data: Row[] | null; error: unknown };
+
+type ReadPage<Row> = (from: number, to: number) => PromiseLike<PageResult<Row>>;
+
+// The query behind readPage must carry a stable order, range pagination over
+// an unordered result can repeat or skip rows between pages.
+export const readAllPages = <Row>(
+  label: string,
+  readPage: ReadPage<Row>,
+): Promise<PageResult<Row>> => {
+  return collectPages(label, readPage, []);
+};
+
+// Runs the tasks with at most `size` in flight and keeps the input order.
+// Every worker pulls from one shared iterator, so no item is taken twice.
+export const runPool = async <Item, Result>(
+  items: Item[],
+  size: number,
+  run: (item: Item) => Promise<Result>,
+): Promise<Result[]> => {
+  const results = new Array<Result>(items.length);
+  const entries = items.entries();
+  const work = async (): Promise<void> => {
+    for (const [index, item] of entries) {
+      results[index] = await run(item);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(size, items.length) }, work));
+
+  return results;
+};
+
+const collectPages = async <Row>(
+  label: string,
+  readPage: ReadPage<Row>,
+  collected: Row[],
+): Promise<PageResult<Row>> => {
+  const { data, error } = await readPage(
+    collected.length,
+    collected.length + PAGE_SIZE - 1,
+  );
+  if (null !== error || null === data) {
+    console.error(`push batch: reading ${label} failed:`, error);
+
+    return { data: null, error };
+  } else if (data.length < PAGE_SIZE) {
+    return { data: [...collected, ...data], error: null };
+  } else {
+    return collectPages(label, readPage, [...collected, ...data]);
+  }
+};

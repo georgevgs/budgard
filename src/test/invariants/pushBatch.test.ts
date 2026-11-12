@@ -3,6 +3,8 @@ import { loadEdgeHandler } from './edgeFunctionHarness';
 import {
   deliverPush,
   PUSH_SUBSCRIPTION_LIMIT,
+  readAllPages,
+  runPool,
 } from '../../../supabase/functions/_shared/pushDelivery.ts';
 
 const request = (isAuthorized = true) => {
@@ -12,6 +14,19 @@ const request = (isAuthorized = true) => {
   }
 
   return { method: 'POST', headers } as Request;
+};
+
+// A paged read ends in .order(...).range(from, to), whatever came before it.
+const pagedQuery = (rows: unknown[]) => {
+  const chain = {
+    eq: vi.fn(),
+    order: vi.fn(),
+    range: vi.fn().mockResolvedValue({ data: rows, error: null }),
+  };
+  chain.eq.mockReturnValue(chain);
+  chain.order.mockReturnValue(chain);
+
+  return chain;
 };
 
 const setup = (rows: unknown[], error: unknown = null) => {
@@ -29,6 +44,8 @@ const setup = (rows: unknown[], error: unknown = null) => {
     webpush,
     deliverPush,
     PUSH_SUBSCRIPTION_LIMIT,
+    readAllPages,
+    runPool,
     corsHeadersFor: () => ({}),
   });
 
@@ -87,27 +104,21 @@ describe('push batch audience', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-10-04T08:00:00Z'));
     const { handler, from, rpc, webpush } = setup([{ id: 'device-1' }]);
-    rpc.mockImplementation(async (name: string) => {
-      if (name === 'push_cron_secret_matches') {
-        return { data: true, error: null };
-      }
-      if (name === 'get_recurring_due_on') {
-        return {
-          data: [
-            {
-              user_id: 'u1',
-              recurring_expense_id: 'r1',
-              description: 'Bill',
-              amount: 10,
-              default_currency: 'EUR',
-            },
-          ],
-          error: null,
-        };
-      }
-
-      return { data: [], error: null };
-    });
+    const rpcResults: Record<string, unknown> = {
+      push_cron_secret_matches: Promise.resolve({ data: true, error: null }),
+      get_recurring_due_on: pagedQuery([
+        {
+          user_id: 'u1',
+          recurring_expense_id: 'r1',
+          description: 'Bill',
+          amount: 10,
+          default_currency: 'EUR',
+        },
+      ]),
+    };
+    rpc.mockImplementation(
+      (name: string) => rpcResults[name] ?? pagedQuery([]),
+    );
     const subscription = {
       endpoint: 'https://web.push.apple.com/test',
       p256dh: 'B'.repeat(87),
@@ -135,10 +146,8 @@ describe('push batch audience', () => {
 
         return { select: vi.fn(() => chain) };
       }
-      const chain = { data: [], error: null, eq: vi.fn() };
-      chain.eq.mockReturnValue(chain);
 
-      return { select: vi.fn(() => chain) };
+      return { select: vi.fn(() => pagedQuery([])) };
     });
     const response = await handler(request());
     expect(response.status).toBe(200);
@@ -148,5 +157,95 @@ describe('push batch audience', () => {
     });
     expect(deliveryLimit).toHaveBeenCalledWith(PUSH_SUBSCRIPTION_LIMIT);
     expect(webpush.sendNotification).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('push batch scaling', () => {
+  it('keeps reading past the 1000-row response cap', async () => {
+    const firstPage = Array.from({ length: 1000 }, (_, index) => index);
+    const readPage = vi
+      .fn()
+      .mockResolvedValueOnce({ data: firstPage, error: null })
+      .mockResolvedValueOnce({ data: [1000, 1001], error: null });
+
+    const { data, error } = await readAllPages('rows', readPage);
+
+    expect(error).toBeNull();
+    expect(data).toHaveLength(1002);
+    expect(readPage).toHaveBeenNthCalledWith(1, 0, 999);
+    expect(readPage).toHaveBeenNthCalledWith(2, 1000, 1999);
+  });
+
+  it('reports a failed page instead of returning a partial list', async () => {
+    const failure = new Error('database unavailable');
+    const firstPage = Array.from({ length: 1000 }, (_, index) => index);
+    const readPage = vi
+      .fn()
+      .mockResolvedValueOnce({ data: firstPage, error: null })
+      .mockResolvedValueOnce({ data: null, error: failure });
+    const log = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      expect(await readAllPages('rows', readPage)).toEqual({
+        data: null,
+        error: failure,
+      });
+      expect(log).toHaveBeenCalledTimes(1);
+    } finally {
+      log.mockRestore();
+    }
+  });
+
+  it('ends the run when the opt-out settings cannot be read', async () => {
+    const { handler, from, rpc, webpush } = setup([{ id: 'device-1' }]);
+    const rpcResults: Record<string, unknown> = {
+      push_cron_secret_matches: Promise.resolve({ data: true, error: null }),
+    };
+    rpc.mockImplementation(
+      (name: string) => rpcResults[name] ?? pagedQuery([]),
+    );
+    const failing = pagedQuery([]);
+    failing.range.mockResolvedValue({
+      data: null,
+      error: new Error('database unavailable'),
+    });
+    const audience = {
+      limit: vi
+        .fn()
+        .mockResolvedValue({ data: [{ id: 'device-1' }], error: null }),
+    };
+    // Only the settings read fails. Every other read answers, so a 500 can
+    // only come from the settings failure itself.
+    const queries: Record<string, unknown> = {
+      push_subscriptions: audience,
+      'user_id, notification_preferences, daily_reminder_hour': failing,
+    };
+    from.mockImplementation((table = '') => ({
+      select: vi.fn(
+        (columns: string) =>
+          queries[table] ?? queries[columns] ?? pagedQuery([]),
+      ),
+    }));
+    const log = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      expect((await handler(request())).status).toBe(500);
+      expect(webpush.sendNotification).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+    }
+  });
+
+  it('never runs more tasks at once than the pool allows, and keeps order', async () => {
+    const running = { now: 0, peak: 0 };
+    const results = await runPool([1, 2, 3, 4, 5, 6, 7], 3, async (item) => {
+      running.now += 1;
+      running.peak = Math.max(running.peak, running.now);
+      await Promise.resolve();
+      running.now -= 1;
+
+      return item * 2;
+    });
+
+    expect(results).toEqual([2, 4, 6, 8, 10, 12, 14]);
+    expect(running.peak).toBe(3);
   });
 });

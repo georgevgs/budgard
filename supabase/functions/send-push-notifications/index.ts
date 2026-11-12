@@ -4,6 +4,8 @@ import { corsHeadersFor } from '../_shared/cors.ts';
 import {
   deliverPush,
   PUSH_SUBSCRIPTION_LIMIT,
+  readAllPages,
+  runPool,
 } from '../_shared/pushDelivery.ts';
 
 type RecurringDue = {
@@ -63,6 +65,12 @@ type NotificationPreferenceKey =
   'bill_reminders' | 'budget_warning' | 'budget_exceeded' | 'debt_payment';
 
 type PreferencesByUser = Map<string, Record<string, boolean>>;
+
+// How many device lookups and how many pushes are in flight at once. Enough
+// to finish a busy hour inside the function's wall clock, small enough not
+// to flood the database pool or a push service.
+const DEVICE_LOOKUP_CONCURRENCY = 10;
+const PUSH_SEND_CONCURRENCY = 20;
 
 // Default UTC hour for users who haven't picked a daily-reminder time.
 // Matches the historical batch hour so existing users see no shift.
@@ -213,9 +221,20 @@ Deno.serve(async (req) => {
     const prefsByUser: PreferencesByUser = new Map();
     const preferredHourByUser = new Map<string, number>();
     {
-      const { data: budgetRows } = await adminClient
-        .from('user_notification_settings')
-        .select('user_id, notification_preferences, daily_reminder_hour');
+      const { data: budgetRows, error: settingsError } = await readAllPages(
+        'notification settings',
+        (from, to) =>
+          adminClient
+            .from('user_notification_settings')
+            .select('user_id, notification_preferences, daily_reminder_hour')
+            .order('user_id')
+            .range(from, to),
+      );
+      // Sending without the settings would ignore every opt-out and every
+      // chosen hour, so a failed read ends the run instead.
+      if (null !== settingsError) {
+        throw settingsError;
+      }
 
       if (budgetRows) {
         for (const row of budgetRows as Array<{
@@ -249,9 +268,14 @@ Deno.serve(async (req) => {
 
     const BILL_BUNDLE_THRESHOLD = 3;
 
-    const { data: recurringDue, error: recurringError } = await adminClient.rpc(
+    const { data: recurringDue, error: recurringError } = await readAllPages(
       'get_recurring_due_on',
-      { p_target_date: tomorrowStr },
+      (from, to) =>
+        adminClient
+          .rpc('get_recurring_due_on', { p_target_date: tomorrowStr })
+          .order('user_id')
+          .order('recurring_expense_id')
+          .range(from, to),
     );
 
     if (!recurringError && recurringDue) {
@@ -303,9 +327,14 @@ Deno.serve(async (req) => {
 
     // ── Debt payment due tomorrow ────────────────────────────────────────
 
-    const { data: debtsDue, error: debtsDueError } = await adminClient.rpc(
+    const { data: debtsDue, error: debtsDueError } = await readAllPages(
       'get_debt_payments_due_on',
-      { p_target_date: tomorrowStr },
+      (from, to) =>
+        adminClient
+          .rpc('get_debt_payments_due_on', { p_target_date: tomorrowStr })
+          .order('user_id')
+          .order('debt_id')
+          .range(from, to),
     );
 
     if (!debtsDueError && debtsDue) {
@@ -336,9 +365,16 @@ Deno.serve(async (req) => {
 
     const usersWithMonthlyCrossed = new Set<string>();
 
-    const { data: budgetCrossed, error: budgetError } = await adminClient.rpc(
+    const { data: budgetCrossed, error: budgetError } = await readAllPages(
       'get_users_crossed_budget',
-      { p_today: todayStr, p_yesterday: yesterdayStr },
+      (from, to) =>
+        adminClient
+          .rpc('get_users_crossed_budget', {
+            p_today: todayStr,
+            p_yesterday: yesterdayStr,
+          })
+          .order('user_id')
+          .range(from, to),
     );
 
     if (!budgetError && budgetCrossed) {
@@ -373,10 +409,16 @@ Deno.serve(async (req) => {
     // simultaneous pushes at month-end.
 
     const { data: catBudgetCrossed, error: catBudgetError } =
-      await adminClient.rpc('get_users_crossed_category_budget', {
-        p_today: todayStr,
-        p_yesterday: yesterdayStr,
-      });
+      await readAllPages('get_users_crossed_category_budget', (from, to) =>
+        adminClient
+          .rpc('get_users_crossed_category_budget', {
+            p_today: todayStr,
+            p_yesterday: yesterdayStr,
+          })
+          .order('user_id')
+          .order('category_id')
+          .range(from, to),
+      );
 
     if (!catBudgetError && catBudgetCrossed) {
       for (const row of catBudgetCrossed as CategoryBudgetCrossedUser[]) {
@@ -409,10 +451,15 @@ Deno.serve(async (req) => {
     // above wins and we don't double-ping.
 
     const { data: budgetApproaching, error: budgetApproachingError } =
-      await adminClient.rpc('get_users_approaching_budget', {
-        p_today: todayStr,
-        p_yesterday: yesterdayStr,
-      });
+      await readAllPages('get_users_approaching_budget', (from, to) =>
+        adminClient
+          .rpc('get_users_approaching_budget', {
+            p_today: todayStr,
+            p_yesterday: yesterdayStr,
+          })
+          .order('user_id')
+          .range(from, to),
+      );
 
     if (!budgetApproachingError && budgetApproaching) {
       for (const row of budgetApproaching as BudgetCrossedUser[]) {
@@ -441,10 +488,16 @@ Deno.serve(async (req) => {
     // ── Category budget approaching 80% ──────────────────────────────────
 
     const { data: catBudgetApproaching, error: catBudgetApproachingError } =
-      await adminClient.rpc('get_users_approaching_category_budget', {
-        p_today: todayStr,
-        p_yesterday: yesterdayStr,
-      });
+      await readAllPages('get_users_approaching_category_budget', (from, to) =>
+        adminClient
+          .rpc('get_users_approaching_category_budget', {
+            p_today: todayStr,
+            p_yesterday: yesterdayStr,
+          })
+          .order('user_id')
+          .order('category_id')
+          .range(from, to),
+      );
 
     if (!catBudgetApproachingError && catBudgetApproaching) {
       for (const row of catBudgetApproaching as CategoryBudgetCrossedUser[]) {
@@ -474,17 +527,23 @@ Deno.serve(async (req) => {
     // Only fires if no other notification is already queued for this user
     // this run — keeps the engagement nudge from layering on top of bills.
 
-    const { data: reminderUsers, error: reminderError } = await adminClient
-      .from('user_notification_settings')
-      .select('user_id')
-      .eq('daily_reminder_hour', currentUtcHour);
+    const { data: reminderUsers, error: reminderError } = await readAllPages(
+      'daily reminder users',
+      (from, to) =>
+        adminClient
+          .from('user_notification_settings')
+          .select('user_id')
+          .eq('daily_reminder_hour', currentUtcHour)
+          .order('user_id')
+          .range(from, to),
+    );
 
     if (!reminderError && reminderUsers) {
+      const queuedUserIds = new Set(
+        notifications.map((notification) => notification.user_id),
+      );
       for (const user of reminderUsers as DailyReminderUser[]) {
-        const alreadyQueued = notifications.some(
-          (n) => n.user_id === user.user_id,
-        );
-        if (alreadyQueued) continue;
+        if (queuedUserIds.has(user.user_id)) continue;
 
         notifications.push({
           user_id: user.user_id,
@@ -503,39 +562,51 @@ Deno.serve(async (req) => {
     // notifications from the same origin in the tray; distinct tags keep
     // each item separately tappable to its own destination.
 
-    let sent = 0;
-    let failed = 0;
-    const staleEndpoints: string[] = [];
+    // Devices are read once per user, then every push goes out through a
+    // bounded pool. One slow push service no longer holds the whole batch
+    // behind its timeout.
+    const userIds = [
+      ...new Set(notifications.map((notification) => notification.user_id)),
+    ];
+    const devicesByUser = new Map(
+      await runPool(userIds, DEVICE_LOOKUP_CONCURRENCY, async (userId) => {
+        const { data: subscriptions } = await adminClient
+          .from('push_subscriptions')
+          .select('endpoint, p256dh, auth')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(PUSH_SUBSCRIPTION_LIMIT);
+        const devices: PushSubscription[] = subscriptions ?? [];
 
-    for (const notification of notifications) {
-      const { data: subscriptions } = await adminClient
-        .from('push_subscriptions')
-        .select('endpoint, p256dh, auth')
-        .eq('user_id', notification.user_id)
-        .order('created_at', { ascending: false })
-        .limit(PUSH_SUBSCRIPTION_LIMIT);
+        return [userId, devices] as const;
+      }),
+    );
+    const deliveries = notifications.flatMap((notification) => {
+      const devices = devicesByUser.get(notification.user_id) ?? [];
 
-      if (!subscriptions || subscriptions.length === 0) continue;
-
-      for (const sub of subscriptions as PushSubscription[]) {
-        const result = await deliverPush(
-          sub,
-          JSON.stringify(notification.payload),
-          webpush.sendNotification.bind(webpush),
-        );
-
-        if (result === 'sent') {
-          sent++;
-
-          continue;
-        }
-
-        if (result === 'stale') {
-          staleEndpoints.push(sub.endpoint);
-        }
-        failed++;
-      }
-    }
+      return devices.map((device) => ({
+        device,
+        payload: JSON.stringify(notification.payload),
+      }));
+    });
+    const sendNotification = webpush.sendNotification.bind(webpush);
+    const results = await runPool(
+      deliveries,
+      PUSH_SEND_CONCURRENCY,
+      async (delivery) => ({
+        endpoint: delivery.device.endpoint,
+        outcome: await deliverPush(
+          delivery.device,
+          delivery.payload,
+          sendNotification,
+        ),
+      }),
+    );
+    const sent = results.filter((result) => 'sent' === result.outcome).length;
+    const failed = results.length - sent;
+    const staleEndpoints = results
+      .filter((result) => 'stale' === result.outcome)
+      .map((result) => result.endpoint);
 
     // Clean up stale subscriptions
     if (staleEndpoints.length > 0) {
