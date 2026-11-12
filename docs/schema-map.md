@@ -4,7 +4,7 @@
      Regenerate with `npm run docs:schema`. -->
 
 An index from each database object to the migrations that touch it, built by
-scanning `supabase/migrations`. Covers 98 migrations: 55 functions, 30 triggers, 27 tables, 88 policies, 59 indexes.
+scanning `supabase/migrations`. Covers 101 migrations: 56 functions, 30 triggers, 27 tables, 88 policies, 59 indexes.
 
 This is a **map, not a schema definition**. Migrations are append-only history
 and the live schema is what you get by replaying them, so nothing here states
@@ -523,6 +523,14 @@ First defined in `20260831140000_add_merge_category.sql`.
 - revokes on — `20260831140000_add_merge_category.sql`
 - defines — `20260831151127_add_secure_household_spaces.sql`
 
+### `private.accessible_financial_space_ids`
+
+First defined in `20261112110000_hoist_financial_space_policy_check.sql`.
+
+- defines — `20261112110000_hoist_financial_space_policy_check.sql`
+- grants on — `20261112110000_hoist_financial_space_policy_check.sql`
+- revokes on — `20261112110000_hoist_financial_space_policy_check.sql`
+
 ### `private.apply_transaction_rules`
 
 First defined in `20260831161403_add_transaction_review_and_rules.sql`.
@@ -540,6 +548,9 @@ First defined in `20260831151127_add_secure_household_spaces.sql`.
 - defines — `20260925100000_reject_password_sessions.sql`
 - grants on — `20260925100000_reject_password_sessions.sql`
 - revokes on — `20260925100000_reject_password_sessions.sql`
+- defines — `20261112110000_hoist_financial_space_policy_check.sql`
+- grants on — `20261112110000_hoist_financial_space_policy_check.sql`
+- revokes on — `20261112110000_hoist_financial_space_policy_check.sql`
 
 ### `private.enforce_push_subscription_limit`
 
@@ -669,6 +680,9 @@ First defined in `20250104165613_remote_schema.sql`.
 - defines — `20260904170059_harden_advisor_functions.sql`
 - grants on — `20260904170059_harden_advisor_functions.sql`
 - revokes on — `20260904170059_harden_advisor_functions.sql`
+- defines — `20261112100000_guard_remaining_password_session_paths.sql`
+- grants on — `20261112100000_guard_remaining_password_session_paths.sql`
+- revokes on — `20261112100000_guard_remaining_password_session_paths.sql`
 
 ### `push_cron_secret_matches`
 
