@@ -46,12 +46,7 @@ const renderCard = ({
           <p className="font-medium">{title}</p>
           <p className="text-sm text-muted-foreground">{description}</p>
         </div>
-        <Button
-          onClick={onAction}
-          variant="outline"
-          size="sm"
-          className="mt-2 max-w-full"
-        >
+        <Button onClick={onAction} size="sm" className="mt-2 max-w-full">
           <Plus className="h-4 w-4 mr-2 shrink-0" />
           <span className="truncate">{actionLabel}</span>
         </Button>
@@ -74,7 +69,7 @@ const renderPage = ({
       <p className="text-sm text-muted-foreground mb-6 max-w-[260px]">
         {description}
       </p>
-      <Button onClick={onAction} variant="outline" size="sm">
+      <Button onClick={onAction} size="sm">
         <Plus className="h-4 w-4 mr-2" />
         {actionLabel}
       </Button>
