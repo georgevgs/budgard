@@ -1,8 +1,10 @@
 # CLAUDE.md
 
-**Code style is <https://react-typescript-style-guide.com/>**, condensed in-repo
-at `docs/style-guide.md`. It is the authority for structure, naming, types,
-comments and file layout — this file no longer restates any of it.
+**Code style comes from the owner's global rules in `~/.agents/AGENTS.md`.**
+They win wherever any doc in this repo disagrees. What they leave open comes
+from <https://react-typescript-style-guide.com/>, condensed in-repo at
+`docs/style-guide.md`, which already defers to the global rules. This file no
+longer restates either of them.
 
 What follows is only what the guide cannot know: the things that are load-bearing
 in *this* repo and will break something real if you get them wrong.
