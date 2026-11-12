@@ -52,6 +52,8 @@ describe('password sessions on the paths outside the finance predicate', () => {
 
   it('keeps the receipts bucket private and image-only', () => {
     expect(sql).toMatch(/ON CONFLICT \(id\) DO UPDATE\s+SET public = false/);
-    expect(sql).toContain("ARRAY['image/webp', 'image/jpeg', 'image/png']");
+    expect(sql).toContain(
+      "ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']",
+    );
   });
 });

@@ -155,9 +155,9 @@ ALTER POLICY "Users can submit their own product events"
     AND (SELECT auth.uid()) = user_id
   );
 
--- The app has only ever uploaded WebP (receiptService compresses to it before
--- upload). JPEG and PNG stay allowed so a direct image upload is not refused
--- for its format alone; everything that is not an image is. 10 MiB is the
+-- These are the values the hosted bucket already had on 12 Nov 2026, written
+-- down so a rebuild from migrations gets the same bucket. The app itself only
+-- uploads WebP (receiptService compresses to it before upload). 10 MiB is the
 -- per-object limit private.receipt_quota_available already assumes.
 INSERT INTO storage.buckets (
   id,
@@ -171,7 +171,7 @@ VALUES (
   'receipts',
   false,
   10485760,
-  ARRAY['image/webp', 'image/jpeg', 'image/png']
+  ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
 )
 ON CONFLICT (id) DO UPDATE
 SET public = false,
