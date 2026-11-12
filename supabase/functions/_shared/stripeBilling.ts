@@ -131,7 +131,98 @@ export const listLiveStripeSubscriptions = async ({
   return liveIds;
 };
 
+type PriorSubscriptionArgs = {
+  email: string;
+  secretKey: string;
+  fetcher?: StripeFetch;
+};
+
+// Deleting an account removes its subscriptions row, so the row cannot say
+// whether this person already had a trial. Stripe keeps the customer, and a
+// customer with any subscription in its history has had one. Stripe matches
+// the email exactly, the same spelling Checkout was given as customer_email.
+export const hasPriorStripeSubscription = async ({
+  email,
+  secretKey,
+  fetcher = fetch,
+}: PriorSubscriptionArgs): Promise<boolean> => {
+  const customers = await readStripeList(
+    await fetcher(
+      `${STRIPE_API_BASE}/customers?${new URLSearchParams({ email, limit: '100' })}`,
+      { method: 'GET', headers: stripeHeaders(secretKey) },
+    ),
+    'customer',
+  );
+  const histories = await Promise.all(
+    customers
+      .filter(isStripeCustomer)
+      .map((customer) =>
+        customerHasSubscription(customer.id, secretKey, fetcher),
+      ),
+  );
+
+  return histories.includes(true);
+};
+
 // --- Helpers ---
+
+const customerHasSubscription = async (
+  customerId: string,
+  secretKey: string,
+  fetcher: StripeFetch,
+): Promise<boolean> => {
+  const params = new URLSearchParams({
+    customer: customerId,
+    status: 'all',
+    limit: '1',
+  });
+  const subscriptions = await readStripeList(
+    await fetcher(`${STRIPE_API_BASE}/subscriptions?${params}`, {
+      method: 'GET',
+      headers: stripeHeaders(secretKey),
+    }),
+    'subscription',
+  );
+
+  return 0 < subscriptions.length;
+};
+
+const readStripeList = async (
+  response: Response,
+  label: string,
+): Promise<unknown[]> => {
+  if (false === response.ok) {
+    throw new Error(
+      `Stripe ${label} lookup failed with status ${response.status}`,
+    );
+  }
+
+  const body = await response.json();
+  if (false === isStripeList(body)) {
+    throw new Error(`Unexpected Stripe ${label} list payload`);
+  }
+
+  return body.data;
+};
+
+const isStripeList = (value: unknown): value is { data: unknown[] } => {
+  return (
+    'object' === typeof value &&
+    null !== value &&
+    'data' in value &&
+    Array.isArray(value.data)
+  );
+};
+
+const isStripeCustomer = (value: unknown): value is { id: string } => {
+  return (
+    'object' === typeof value &&
+    null !== value &&
+    'id' in value &&
+    'string' === typeof value.id &&
+    value.id.startsWith('cus_')
+  );
+};
 
 type ListedSubscription = { id: string; status: string };
 

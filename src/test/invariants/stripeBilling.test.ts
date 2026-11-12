@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   cancelStripeSubscription,
+  hasPriorStripeSubscription,
   listLiveStripeSubscriptions,
   resolveStripeCustomerReference,
   shouldCancelStripeSubscription,
@@ -193,5 +194,64 @@ describe('listing live Stripe subscriptions', () => {
         fetcher,
       }),
     ).rejects.toThrow('Stripe subscription listing failed with status 503');
+  });
+});
+
+describe('trial history lookup', () => {
+  it('finds a subscription on a customer left behind by a deleted account', async () => {
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({ data: [{ id: 'cus_old' }, { id: 'cus_new' }] }),
+      )
+      .mockResolvedValueOnce(Response.json({ data: [] }))
+      .mockResolvedValueOnce(Response.json({ data: [{ id: 'sub_1' }] }));
+
+    await expect(
+      hasPriorStripeSubscription({
+        email: 'person@example.com',
+        secretKey: SECRET_KEY,
+        fetcher,
+      }),
+    ).resolves.toBe(true);
+    expect(fetcher).toHaveBeenNthCalledWith(
+      1,
+      'https://api.stripe.com/v1/customers?email=person%40example.com&limit=100',
+      expect.objectContaining({ method: 'GET' }),
+    );
+    expect(fetcher).toHaveBeenNthCalledWith(
+      3,
+      'https://api.stripe.com/v1/subscriptions?customer=cus_new&status=all&limit=1',
+      expect.objectContaining({ method: 'GET' }),
+    );
+  });
+
+  it('reports no history for an email Stripe has never billed', async () => {
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ data: [{ id: 'cus_1' }] }))
+      .mockResolvedValueOnce(Response.json({ data: [] }));
+
+    await expect(
+      hasPriorStripeSubscription({
+        email: 'new@example.com',
+        secretKey: SECRET_KEY,
+        fetcher,
+      }),
+    ).resolves.toBe(false);
+  });
+
+  it('throws when Stripe refuses the lookup, so the caller decides', async () => {
+    const fetcher = vi
+      .fn()
+      .mockResolvedValue(new Response(null, { status: 403 }));
+
+    await expect(
+      hasPriorStripeSubscription({
+        email: 'person@example.com',
+        secretKey: SECRET_KEY,
+        fetcher,
+      }),
+    ).rejects.toThrow('Stripe customer lookup failed with status 403');
   });
 });

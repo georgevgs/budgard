@@ -2,6 +2,7 @@ import { createClient } from 'supabase';
 import { corsHeadersFor, jsonResponder } from '../_shared/cors.ts';
 import { isPasswordlessSession } from '../_shared/sessionAssurance.ts';
 import {
+  hasPriorStripeSubscription,
   resolveStripeCustomerReference,
   type StripeCustomerReference,
 } from '../_shared/stripeBilling.ts';
@@ -123,11 +124,6 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Unable to verify subscription' }, 503);
     }
 
-    // No row at all means this user has never subscribed — they get the
-    // trial. Query failures returned above, so this decision is made only
-    // from a successful read.
-    const trialEligible = !existing;
-
     const priceId = getPriceId(plan);
     const secretKey = Deno.env.get('STRIPE_SECRET_KEY');
     if (!priceId || !secretKey) {
@@ -135,6 +131,11 @@ Deno.serve(async (req) => {
 
       return jsonResponse({ error: 'Server misconfigured' }, 500);
     }
+
+    // Query failures returned above, so this decision is made only from a
+    // successful read of the subscriptions row.
+    const trialEligible =
+      null === existing && (await hasNoStripeHistory(user.email, secretKey));
 
     const stripeResponse = await fetch(STRIPE_API_URL, {
       method: 'POST',
@@ -178,6 +179,29 @@ Deno.serve(async (req) => {
 });
 
 // --- Helpers ---
+
+// No subscriptions row means this account has never subscribed. The Stripe
+// lookup covers the same person on an account they deleted and registered
+// again. It fails open, refusing the trial on a Stripe hiccup would charge a
+// new subscriber on the spot, which is worse than one repeated trial.
+const hasNoStripeHistory = async (
+  email: string | undefined,
+  secretKey: string,
+): Promise<boolean> => {
+  if (undefined === email) {
+    return true;
+  }
+
+  try {
+    const hasHistory = await hasPriorStripeSubscription({ email, secretKey });
+
+    return false === hasHistory;
+  } catch (error) {
+    console.error('stripe-checkout: trial history lookup failed:', error);
+
+    return true;
+  }
+};
 
 const readPlan = async (req: Request): Promise<Plan | null> => {
   try {
