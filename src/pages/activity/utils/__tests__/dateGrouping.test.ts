@@ -35,15 +35,15 @@ describe('getDateLabel', () => {
 
   it('returns formatted date for older dates', () => {
     const label = getDateLabel('2026-03-10', enUS, t);
-    expect(label).toBe('Tuesday, Mar 10');
+    expect(label).toBe('Tuesday, 10 Mar');
   });
 
   it('skips today/yesterday labels when showFullDate is true', () => {
     const todayLabel = getDateLabel('2026-03-15', enUS, t, true);
-    expect(todayLabel).toBe('Sunday, Mar 15');
+    expect(todayLabel).toBe('Sunday, 15 Mar');
 
     const yesterdayLabel = getDateLabel('2026-03-14', enUS, t, true);
-    expect(yesterdayLabel).toBe('Saturday, Mar 14');
+    expect(yesterdayLabel).toBe('Saturday, 14 Mar');
   });
 
   it('formats with Greek locale', () => {
@@ -115,6 +115,6 @@ describe('groupExpensesByDate', () => {
 
     const groups = groupExpensesByDate(expenses, enUS, t, true);
 
-    expect(groups[0].label).toBe('Sunday, Mar 15');
+    expect(groups[0].label).toBe('Sunday, 15 Mar');
   });
 });

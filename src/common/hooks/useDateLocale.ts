@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { el, enUS } from 'date-fns/locale';
+import { el, enGB } from 'date-fns/locale';
 import type { Locale } from 'date-fns';
 
 export const useDateLocale = (): Locale => {
@@ -9,5 +9,5 @@ export const useDateLocale = (): Locale => {
     return el;
   }
 
-  return enUS;
+  return enGB;
 };

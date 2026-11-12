@@ -198,7 +198,7 @@ const renderTopExpenses = (
                 </p>
               </div>
               <p className="text-xs text-muted-foreground ml-4">
-                {format(parseISO(expense.date), 'MMM d', {
+                {format(parseISO(expense.date), 'd MMM', {
                   locale: dateLocale,
                 })}
                 {renderCategoryName(expense)}

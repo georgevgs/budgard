@@ -33,7 +33,7 @@ export const NetWorthChart = ({
     () =>
       series.map((point) => ({
         ...point,
-        label: format(parseISO(point.date), 'MMM d', { locale: dateLocale }),
+        label: format(parseISO(point.date), 'd MMM', { locale: dateLocale }),
         fullDate: format(parseISO(point.date), 'PPP', { locale: dateLocale }),
       })),
     [series, dateLocale],

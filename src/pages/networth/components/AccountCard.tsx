@@ -88,7 +88,7 @@ const getLastUpdatedLabel = (
   }
 
   return t('networth.lastUpdated', {
-    date: format(parseISO(latestSnapshot.recorded_at), 'MMM d', {
+    date: format(parseISO(latestSnapshot.recorded_at), 'd MMM', {
       locale: dateLocale,
     }),
   });

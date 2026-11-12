@@ -92,7 +92,7 @@ const buildPoints = (
 
     return {
       date: snap.recorded_at,
-      label: format(parseISO(snap.recorded_at), 'MMM d', {
+      label: format(parseISO(snap.recorded_at), 'd MMM', {
         locale: dateLocale,
       }),
       fullDate: format(parseISO(snap.recorded_at), 'PPP', {

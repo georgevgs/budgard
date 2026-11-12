@@ -28,7 +28,7 @@ export const getDateLabel = (
     }
   }
 
-  return format(parsed, 'EEEE, MMM d', { locale: dateLocale });
+  return format(parsed, 'EEEE, d MMM', { locale: dateLocale });
 };
 
 export const groupExpensesByDate = (
