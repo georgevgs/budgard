@@ -48,6 +48,9 @@ jobs:
       - name: Backup safety tests
         run: bun run test:backup
 
+      - name: Dependency audit triage tests
+        run: bun run test:audit
+
       - name: Production reachability
         run: bun run knip:production
 

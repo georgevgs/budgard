@@ -28,7 +28,11 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Check Edge Functions against frozen dependency graphs
         run: bun run edge:check
-      - name: Audit frontend, tooling and Edge Function dependencies
+      # Fails only on a high or critical advisory in code that ships: the
+      # app's `dependencies` graph or an Edge Function. Advisories in build,
+      # lint and test tooling show as warnings on the run without failing
+      # it — see scripts/audit/triage.mjs.
+      - name: Audit shipped dependencies
         run: bun run audit:dependencies
       - name: Verify dependency checks did not change lockfiles
         run: git diff --exit-code

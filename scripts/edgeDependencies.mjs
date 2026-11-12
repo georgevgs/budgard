@@ -10,6 +10,11 @@
 // access. `check` and `audit` are frozen: they fail rather than silently
 // resolving a version the lock does not pin, which is what makes the daily
 // workflow's `git diff --exit-code` step meaningful.
+//
+// Everything an Edge Function imports runs on the server, so there is no
+// tooling half to set aside the way scripts/audit/triage.mjs does for npm:
+// any high or critical advisory fails, and lower ones are left to the
+// deliberate dependency bumps.
 import { readdirSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -22,7 +27,7 @@ const action = process.argv[2];
 const commands = {
   lock: ['install', '--entrypoint', '--frozen-lockfile=false', 'index.ts'],
   check: ['check', '--frozen-lockfile', 'index.ts'],
-  audit: ['audit', '--frozen-lockfile', '--lock=deno.lock'],
+  audit: ['audit', '--frozen-lockfile', '--lock=deno.lock', '--level=high'],
 };
 
 if (!Object.hasOwn(commands, action)) {

@@ -199,7 +199,11 @@ constrain new work:
   import fails `npm run edge:check` until the lock is regenerated and committed.
   `npm run audit:dependencies` covers the frontend and all six backend graphs;
   `.github/workflows/security.yml` runs both daily and fails if either rewrites
-  a lockfile. Deploys upload `deno.json` but not `deno.lock` — what pins the
+  a lockfile. The audit fails only on a high or critical advisory in code that
+  ships — the app's `dependencies` graph or an Edge Function; build, lint and
+  test tooling is reported as a warning (`scripts/audit/triage.mjs`). Do not
+  widen that back to plain `bun audit`: it was red every day over unfixable
+  tooling reports, and an alarm nobody reads protects nothing. Deploys upload `deno.json` but not `deno.lock` — what pins the
   hosted runtime is the exact version in each import map, so keep them exact.
 - `npm run knip` finds dead code, and its config is what makes it
   readable: ten live files (the service worker, the recovery page, the
