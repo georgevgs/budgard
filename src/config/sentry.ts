@@ -56,9 +56,9 @@ export const setUser = (...args: Parameters<SentrySdk['setUser']>): void => {
 
 /**
  * Dynamically imports the SDK, runs init, then flushes the queue in order.
- * Init uses only the lightweight tracing integration — Session Replay and
- * Profiling do non-trivial setup, so they're added later via the separate
- * `sentryHeavy` chunk (see src/main.tsx).
+ * Init uses only the lightweight tracing integration. Session Replay does
+ * non-trivial setup, so it is added later via the separate `sentryHeavy`
+ * chunk (see src/main.tsx).
  *
  * Never throws: Sentry is best-effort and a failed load must not surface.
  * Resolves `true` only when the SDK is ready.

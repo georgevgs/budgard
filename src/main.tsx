@@ -63,8 +63,8 @@ const scheduleIdleWork = (cb: () => void) => {
 // The whole Sentry SDK stays off the critical path: `loadSentry` dynamically
 // imports it at idle, runs init (lightweight tracing integration only), then
 // flushes calls buffered by the facade. Session Replay (DOM observers,
-// mutation buffering) and Profiling (sampling worker) do non-trivial setup,
-// so they chain after init via their own chunk.
+// mutation buffering) does non-trivial setup, so it chains after init via
+// its own chunk.
 scheduleIdleWork(() => {
   if (!import.meta.env.PROD || !import.meta.env.VITE_SENTRY_DSN) {
     return;

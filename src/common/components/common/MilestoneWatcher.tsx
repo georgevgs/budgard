@@ -9,6 +9,7 @@ import {
 } from '@/common/contexts/DataContext';
 import { useAllGoalProgress } from '@/common/hooks/useGoalProgress';
 import { useSavingsRhythm } from '@/common/hooks/useSavingsRhythm';
+import { useCurrentDate } from '@/common/hooks/useCurrentDate';
 import { useCompletionCelebration } from '@/common/hooks/useCompletionCelebration';
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
 import { celebrate } from '@/constants/confetti';
@@ -27,7 +28,7 @@ export const MilestoneWatcher = () => {
   const goals = useGoalsData();
   const debts = useDebtsData();
   const goalProgress = useAllGoalProgress();
-  const rhythm = useSavingsRhythm(useExpensesData());
+  const rhythm = useSavingsRhythm(useExpensesData(), useCurrentDate());
 
   // Only arm once the full dataset has loaded — the two-stage fetch and cache
   // hydration would otherwise look like fresh completions.
