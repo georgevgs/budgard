@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { getDaysInMonth } from 'date-fns';
+import { format, getDaysInMonth } from 'date-fns';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import Wallet from 'lucide-react/dist/esm/icons/wallet';
@@ -14,6 +14,12 @@ import {
   type WeeklyAnomaly,
 } from '@/constants/weeklyAnomalies';
 import type { TranslateFunction } from '@/constants/translate';
+import { sumAmounts } from '@/constants/money';
+import {
+  buildSavingsCategoryIds,
+  countsAsEverydaySpending,
+  sumSpending,
+} from '@/constants/spending';
 
 export type Insight = {
   id: string;
@@ -27,6 +33,8 @@ export type SpendingInsightsParams = {
   monthlyBudget: number | null;
   safeToSpend: number | null;
   monthComparison: { thisMonthAmount: number; lastMonthAmount: number };
+  upcomingThisMonth: number;
+  loanCostsThisMonth: number;
   categories: Category[];
   defaultCurrency: string;
 };
@@ -41,6 +49,8 @@ export const useSpendingInsights = (
     monthlyBudget,
     safeToSpend,
     monthComparison,
+    upcomingThisMonth,
+    loanCostsThisMonth,
     categories,
     defaultCurrency,
   } = params;
@@ -52,6 +62,7 @@ export const useSpendingInsights = (
     const daysInMonth = getDaysInMonth(now);
     const recap = buildWeeklyRecap({ now, expenses, categories });
     const topAnomaly = recap?.anomalies[0] ?? null;
+    const pace = buildMonthPace(expenses, categories, now);
 
     const insights: (Insight | null)[] = [
       weeklyAnomalyInsight({ anomaly: topAnomaly, t }),
@@ -64,13 +75,17 @@ export const useSpendingInsights = (
       }),
       spendingPaceInsight({
         monthlyBudget,
-        thisMonthAmount: monthComparison.thisMonthAmount,
+        everydaySpent: pace.everydaySpent,
+        fixedCosts:
+          pace.recurringSpent + upcomingThisMonth + loanCostsThisMonth,
         dayOfMonth,
         daysInMonth,
         t,
       }),
       monthProjectionInsight({
         thisMonthAmount: monthComparison.thisMonthAmount,
+        everydaySpent: pace.everydaySpent,
+        upcomingThisMonth,
         dayOfMonth,
         daysInMonth,
         defaultCurrency,
@@ -85,9 +100,42 @@ export const useSpendingInsights = (
     monthlyBudget,
     safeToSpend,
     monthComparison,
+    upcomingThisMonth,
+    loanCostsThisMonth,
     defaultCurrency,
     t,
   ]);
+};
+
+// Pace is everyday spending, the same split Today's status uses. A bill that
+// lands on the 1st was planned, it says nothing about how fast the month goes.
+const buildMonthPace = (
+  expenses: Expense[],
+  categories: Category[],
+  now: Date,
+): { everydaySpent: number; recurringSpent: number } => {
+  const monthKey = format(now, 'yyyy-MM');
+  const savingsCategoryIds = buildSavingsCategoryIds(categories);
+  const monthRows = expenses.filter(
+    (expense) => monthKey === expense.date.slice(0, 7),
+  );
+
+  return {
+    everydaySpent: sumAmounts(
+      monthRows
+        .filter((expense) =>
+          countsAsEverydaySpending(expense, savingsCategoryIds),
+        )
+        .map((expense) => expense.amount),
+    ),
+    recurringSpent: sumSpending(
+      monthRows.filter(
+        (expense) =>
+          null !== expense.recurring_expense_id &&
+          undefined !== expense.recurring_expense_id,
+      ),
+    ),
+  };
 };
 
 // ─── Insight builders ───────────────────────────────────────────────────────
@@ -175,88 +223,117 @@ const dailyBudgetRemainingInsight = (args: DailyArgs): Insight | null => {
 
 type PaceArgs = {
   monthlyBudget: number | null;
-  thisMonthAmount: number;
+  everydaySpent: number;
+  fixedCosts: number;
   dayOfMonth: number;
   daysInMonth: number;
   t: TranslateFunction;
 };
 
+// Measured against the everyday budget, what is left once this month's bills
+// are set aside. Measured against the whole budget, rent on the 1st read as
+// "60% used, 3% through the month" for a fortnight of spending nothing.
 const spendingPaceInsight = (args: PaceArgs): Insight | null => {
-  const { monthlyBudget, thisMonthAmount, dayOfMonth, daysInMonth, t } = args;
-  if (monthlyBudget === null || monthlyBudget === 0) {
-    return null;
-  }
-  if (dayOfMonth < MIN_DAYS_FOR_TRENDS) {
-    return null;
-  }
-  if (thisMonthAmount === 0) {
+  const { monthlyBudget, everydaySpent, fixedCosts, dayOfMonth, daysInMonth } =
+    args;
+  if (null === monthlyBudget) {
     return null;
   }
 
+  const everydayBudget = monthlyBudget - fixedCosts;
   const timeProgress = (dayOfMonth / daysInMonth) * 100;
-  const budgetProgress = (thisMonthAmount / monthlyBudget) * 100;
-  const difference = budgetProgress - timeProgress;
+  const isMeasurable =
+    0 < everydayBudget &&
+    MIN_DAYS_FOR_TRENDS <= dayOfMonth &&
+    0 < everydaySpent;
 
-  if (Math.abs(difference) < 5) {
+  if (isMeasurable) {
+    return paceInsightOrNull(
+      (everydaySpent / everydayBudget) * 100,
+      timeProgress,
+      args.t,
+    );
+  } else {
     return null;
   }
+};
 
-  if (difference > 0) {
+const paceInsightOrNull = (
+  budgetProgress: number,
+  timeProgress: number,
+  t: TranslateFunction,
+): Insight | null => {
+  const difference = budgetProgress - timeProgress;
+  const percents = {
+    budgetPercent: Math.round(budgetProgress),
+    timePercent: Math.round(timeProgress),
+  };
+
+  if (5 <= difference) {
     return {
       id: 'spendingPace',
       icon: Gauge,
-      text: t('analytics.insights.spendingPaceAhead', {
-        budgetPercent: Math.round(budgetProgress),
-        timePercent: Math.round(timeProgress),
-      }),
+      text: t('analytics.insights.spendingPaceAhead', percents),
       variant: 'warning',
     };
+  } else if (difference <= -5) {
+    return {
+      id: 'spendingPace',
+      icon: Gauge,
+      text: t('analytics.insights.spendingPaceBehind', percents),
+      variant: 'positive',
+    };
+  } else {
+    return null;
   }
-
-  return {
-    id: 'spendingPace',
-    icon: Gauge,
-    text: t('analytics.insights.spendingPaceBehind', {
-      budgetPercent: Math.round(budgetProgress),
-      timePercent: Math.round(timeProgress),
-    }),
-    variant: 'positive',
-  };
 };
 
 type ProjectionArgs = {
   thisMonthAmount: number;
+  everydaySpent: number;
+  upcomingThisMonth: number;
   dayOfMonth: number;
   daysInMonth: number;
   defaultCurrency: string;
   t: TranslateFunction;
 };
 
+// Month-end estimate: what is already spent, the bills still due, and everyday
+// spending carried on at its own daily rate. Extrapolating the whole total
+// multiplied a rent paid once by every remaining day of the month.
 const monthProjectionInsight = (args: ProjectionArgs): Insight | null => {
   const { thisMonthAmount, dayOfMonth, daysInMonth, defaultCurrency, t } = args;
-  if (thisMonthAmount === 0) {
-    return null;
-  }
-  if (dayOfMonth < MIN_DAYS_FOR_TRENDS) {
-    return null;
-  }
-  if (dayOfMonth >= daysInMonth - 1) {
-    return null;
-  }
+  const isProjectable =
+    0 !== thisMonthAmount &&
+    MIN_DAYS_FOR_TRENDS <= dayOfMonth &&
+    dayOfMonth < daysInMonth - 1;
+  const projected = projectMonthEnd(args);
 
-  const dailyRate = thisMonthAmount / dayOfMonth;
-  const projected = Math.round(dailyRate * daysInMonth);
-
-  if (projected <= thisMonthAmount * 1.05) {
+  if (isProjectable && thisMonthAmount * 1.05 < projected) {
+    return {
+      id: 'monthProjection',
+      icon: TrendingUp,
+      text: t('analytics.insights.monthProjection', {
+        amount: formatCurrency(projected, defaultCurrency),
+      }),
+      variant: 'warning',
+    };
+  } else {
     return null;
   }
+};
 
-  return {
-    id: 'monthProjection',
-    icon: TrendingUp,
-    text: t('analytics.insights.monthProjection', {
-      amount: formatCurrency(projected, defaultCurrency),
-    }),
-    variant: 'warning',
-  };
+export const projectMonthEnd = (args: {
+  thisMonthAmount: number;
+  everydaySpent: number;
+  upcomingThisMonth: number;
+  dayOfMonth: number;
+  daysInMonth: number;
+}): number => {
+  const everydayPerDay = Math.max(args.everydaySpent, 0) / args.dayOfMonth;
+  const daysLeft = args.daysInMonth - args.dayOfMonth;
+
+  return Math.round(
+    args.thisMonthAmount + args.upcomingThisMonth + everydayPerDay * daysLeft,
+  );
 };

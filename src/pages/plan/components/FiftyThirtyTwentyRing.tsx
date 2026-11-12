@@ -7,7 +7,9 @@ import {
   useIncomesData,
   useCategoriesData,
   useDataConfig,
+  useDebtsData,
 } from '@/common/contexts/DataContext';
+import { splitLoanPaymentsInMonth } from '@/constants/debtOutflow';
 import { formatCurrency } from '@/constants/utils';
 import { countsAsSpending, countsInTotals } from '@/constants/spending';
 import type { Expense } from '@/types/Expense';
@@ -67,13 +69,14 @@ export const FiftyThirtyTwentyRing = ({
   const incomes = useIncomesData();
   const { categories } = useCategoriesData();
   const { defaultCurrency } = useDataConfig();
+  const debts = useDebtsData();
 
   // Every arc here is a share of the total, so a single excluded transfer
   // moves all three percentages — including the two it was never filed under.
   const monthExpenses = useMemo(() => {
     return expenses.filter(
       (e: Expense) =>
-        countsAsSpending(e) &&
+        (countsAsSpending(e) || isInvestedSetAside(e)) &&
         format(parseISO(e.date), 'yyyy-MM') === selectedMonth,
     );
   }, [expenses, selectedMonth]);
@@ -86,7 +89,9 @@ export const FiftyThirtyTwentyRing = ({
       const category = expense.category as Category | undefined;
       const kind = category?.kind;
 
-      if (kind === 'need' || kind === 'want' || kind === 'savings') {
+      if (isInvestedSetAside(expense)) {
+        totals.savings += expense.amount;
+      } else if ('need' === kind || 'want' === kind || 'savings' === kind) {
         totals[kind] += expense.amount;
       } else {
         unclassifiedTotal += expense.amount;
@@ -108,8 +113,18 @@ export const FiftyThirtyTwentyRing = ({
       }
     }
 
+    // The rule files a loan's minimum under needs and anything paid above it
+    // under savings, with the rest of debt repayment.
+    const loans = splitLoanPaymentsInMonth(
+      debts,
+      defaultCurrency,
+      selectedMonth,
+    );
+    totals.need += loans.minimums;
+    totals.savings += loans.extra;
+
     return { totals, unclassifiedTotal };
-  }, [monthExpenses, incomes, selectedMonth]);
+  }, [monthExpenses, incomes, selectedMonth, debts, defaultCurrency]);
 
   const total =
     totalsByBucket.totals.need +
@@ -155,6 +170,16 @@ export const FiftyThirtyTwentyRing = ({
     </div>
   );
 };
+// Money moved into an investment goal is written as excluded from spending,
+// so the spending filter alone dropped it and someone investing every month
+// read as saving nothing. It is the clearest saving there is.
+const isInvestedSetAside = (expense: Expense): boolean =>
+  true === expense.is_excluded &&
+  'income' !== expense.type &&
+  'debt_payment' !== expense.type &&
+  null !== expense.goal_id &&
+  undefined !== expense.goal_id;
+
 type BucketRowProps = {
   bucket: BucketConfig;
   actual: number;

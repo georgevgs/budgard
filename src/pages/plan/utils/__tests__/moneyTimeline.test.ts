@@ -9,8 +9,20 @@ const NOW = new Date(2026, 8, 1, 12); // 1 Sep 2026, local
 // case the month window exists to answer.
 const LATE = new Date(2026, 8, 20, 12); // 20 Sep 2026, local
 
-const days = { range: 'days', rows: [], withinDays: 30, limit: 8 } as const;
-const month = { range: 'month', rows: [], withinDays: 30, limit: 8 } as const;
+const days = {
+  range: 'days',
+  rows: [],
+  loanMinimums: [],
+  withinDays: 30,
+  limit: 8,
+} as const;
+const month = {
+  range: 'month',
+  rows: [],
+  loanMinimums: [],
+  withinDays: 30,
+  limit: 8,
+} as const;
 
 describe('buildMoneyTimeline', () => {
   it('expands, sorts and totals income and expense occurrences', () => {
@@ -211,6 +223,25 @@ describe('buildMoneyTimeline, rest of the month', () => {
       computeUpcomingRecurringThisMonth(items, NOW, []),
     );
     expect(timeline.expenseTotal).toBeGreaterThan(0);
+  });
+
+  // Safe-to-spend holds an unpaid loan minimum back as Due, so the list that
+  // figure opens has to show it and total it.
+  it('lists an unpaid loan minimum in the month range only', () => {
+    const loanMinimums = [
+      {
+        id: 'd1',
+        description: 'Car loan',
+        amount: 400,
+        date: new Date(2026, 8, 25),
+      },
+    ];
+    const inMonth = buildMoneyTimeline([], [], NOW, { ...month, loanMinimums });
+    const rolling = buildMoneyTimeline([], [], NOW, { ...days, loanMinimums });
+
+    expect(inMonth.items.map((entry) => entry.id)).toEqual(['loan:d1']);
+    expect(inMonth.expenseTotal).toBe(400);
+    expect(rolling.items).toEqual([]);
   });
 });
 

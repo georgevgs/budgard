@@ -37,11 +37,14 @@ const buildExpense = (overrides: Partial<Expense>): Expense => ({
   ...overrides,
 });
 
+const NO_LOANS = { restOfMonth: 0, months: new Array<number>(12).fill(0) };
+
 const emptyProjectionInput = (now: Date) => ({
   expenses: [] as Expense[],
   incomes: [] as Expense[],
   recurringExpenses: [] as RecurringExpense[],
   recurringIncomes: [] as RecurringExpense[],
+  loanOutflow: NO_LOANS,
   now,
 });
 
@@ -209,13 +212,32 @@ describe('computeTwelveMonthProjection', () => {
     }
   });
 
-  it('converts weekly recurring items to a monthly equivalent', () => {
+  it('counts the charges a weekly item really makes in each month', () => {
     const result = computeTwelveMonthProjection({
       ...emptyProjectionInput(JULY_15_2026),
       recurringExpenses: [buildRecurring({ frequency: 'weekly' })],
     });
 
-    expect(result[0].projectedExpenses).toBeCloseTo(43.3);
+    // Weekly from Thu 1 Jan 2026: August has four Thursdays, October five.
+    expect(result[0].projectedExpenses).toBe(40);
+    expect(result[2].projectedExpenses).toBe(50);
+  });
+
+  it('puts a yearly charge in the month it falls, not a twelfth in each', () => {
+    const result = computeTwelveMonthProjection({
+      ...emptyProjectionInput(JULY_15_2026),
+      recurringExpenses: [
+        buildRecurring({
+          amount: 1200,
+          frequency: 'yearly',
+          start_date: '2025-11-10',
+        }),
+      ],
+    });
+
+    expect(result[0].projectedExpenses).toBe(0);
+    expect(result[3].monthKey).toBe('2026-11');
+    expect(result[3].projectedExpenses).toBe(1200);
   });
 
   it('averages non-recurring expenses over the last 6 full months', () => {
@@ -485,6 +507,7 @@ describe('projected balance', () => {
       incomes: [],
       recurringExpenses: [],
       recurringIncomes: [],
+      loanOutflow: NO_LOANS,
       now: NOW,
       openingBalance,
     });
@@ -502,6 +525,7 @@ describe('projected balance', () => {
       incomes: [],
       recurringExpenses: [],
       recurringIncomes: [],
+      loanOutflow: NO_LOANS,
       now: NOW,
       openingBalance: 1000,
     });
@@ -509,6 +533,66 @@ describe('projected balance', () => {
     // With no activity at all the balance simply holds.
     expect(months[0].projectedBalance).toBe(1000);
     expect(months[11].projectedBalance).toBe(1000);
+  });
+
+  // Today's balance is not next month's opening balance: the rest of this
+  // month still has a bill to pay, pay to arrive and everyday spending.
+  it('moves the opening balance through the rest of this month first', () => {
+    const now = new Date(2026, 7, 16, 12, 0, 0);
+    const months = computeTwelveMonthProjection({
+      // 310 a month of everyday spending, over a 31-day August: 10 a day.
+      expenses: [buildExpense({ date: '2026-07-10', amount: 310 })],
+      incomes: [],
+      recurringExpenses: [
+        buildRecurring({ amount: 200, start_date: '2026-01-20' }),
+      ],
+      recurringIncomes: [
+        buildRecurring({
+          id: 'pay',
+          amount: 1000,
+          type: 'income',
+          start_date: '2026-01-25',
+        }),
+      ],
+      loanOutflow: NO_LOANS,
+      now,
+      openingBalance: 500,
+    });
+
+    // 500 + 1000 pay - 200 bill - 15 days at 10 = 1150 on 31 August, then
+    // September adds 1000 - 200 - 310.
+    expect(months[0].projectedBalance).toBe(1640);
+  });
+
+  it('does not expect variable income that has already arrived', () => {
+    const now = new Date(2026, 7, 16, 12, 0, 0);
+    const firstBalanceOrNull = (incomes: Expense[]) =>
+      computeTwelveMonthProjection({
+        expenses: [],
+        incomes,
+        recurringExpenses: [],
+        recurringIncomes: [],
+        loanOutflow: NO_LOANS,
+        now,
+        openingBalance: 0,
+      })[0].projectedBalance;
+    const july = buildExpense({
+      id: 'i-jul',
+      date: '2026-07-25',
+      amount: 900,
+      type: 'income',
+    });
+    const august = buildExpense({
+      id: 'i-aug',
+      date: '2026-08-05',
+      amount: 900,
+      type: 'income',
+    });
+
+    // Still to arrive this month, then September's.
+    expect(firstBalanceOrNull([july])).toBe(1800);
+    // Already in the opening balance, so only September's is added.
+    expect(firstBalanceOrNull([july, august])).toBe(900);
   });
 
   it('finds nothing to warn about when the balance stays positive', () => {
@@ -526,4 +610,21 @@ describe('projected balance', () => {
 
     expect(findFirstShortfall(months)?.monthKey).toBe('2026-10');
   });
+
+  // A loan instalment is cash out like any bill. Left out, a 400 a month loan
+  // put the year-end balance 4,800 too high.
+  it('takes loan minimums out of the balance, this month and after', () => {
+    const months = computeTwelveMonthProjection({
+      ...emptyProjectionInput(new Date(2026, 7, 16, 12, 0, 0)),
+      loanOutflow: { restOfMonth: 400, months: [400, 400, 150, ...NO_REST] },
+      openingBalance: 2000,
+    });
+
+    expect(months[0].projectedExpenses).toBe(400);
+    expect(months[0].projectedBalance).toBe(1200);
+    expect(months[2].projectedBalance).toBe(650);
+    expect(months[11].projectedBalance).toBe(650);
+  });
 });
+
+const NO_REST = new Array<number>(9).fill(0);

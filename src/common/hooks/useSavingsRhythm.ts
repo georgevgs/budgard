@@ -4,10 +4,12 @@ import {
   useCategoriesData,
   useAccountsData,
   useDataConfig,
+  useDebtsData,
   useGoalsData,
   useNoSpendDaysData,
   useRecurringData,
 } from '@/common/contexts/DataContext';
+import { sumLoanCostsInMonth } from '@/constants/debtOutflow';
 import { computeUpcomingRecurringThisMonth } from '@/constants/forecast';
 import type { Expense } from '@/types/Expense';
 import {
@@ -72,7 +74,8 @@ export const useSavingsRhythm = (
   const noSpendDays = useNoSpendDaysData();
   const { recurringExpenses } = useRecurringData();
   const { expenseCategories } = useCategoriesData();
-  const { monthlyBudget } = useDataConfig();
+  const { monthlyBudget, defaultCurrency } = useDataConfig();
+  const debts = useDebtsData();
 
   return useMemo(() => {
     if (monthlyBudget === null || monthlyBudget <= 0) {
@@ -101,6 +104,7 @@ export const useSavingsRhythm = (
           now,
           true,
           expenses,
+          sumLoanCostsInMonth(debts, defaultCurrency, now, true),
         ),
       ],
       [
@@ -112,6 +116,7 @@ export const useSavingsRhythm = (
           subMonths(now, 1),
           false,
           expenses,
+          sumLoanCostsInMonth(debts, defaultCurrency, subMonths(now, 1), false),
         ),
       ],
     ]);
@@ -154,6 +159,8 @@ export const useSavingsRhythm = (
       ...buildMilestone(setAside),
     };
   }, [
+    debts,
+    defaultCurrency,
     expenses,
     expenseCategories,
     monthlyBudget,
@@ -358,6 +365,7 @@ const computeAllowance = (
   reference: Date,
   isCurrentMonth: boolean,
   allRows: Expense[],
+  loanCosts: number,
 ): number => {
   const monthKey = format(reference, 'yyyy-MM');
   const recurringSpent = sumSpending(
@@ -379,7 +387,7 @@ const computeAllowance = (
     );
   }
 
-  const everydayBudget = monthlyBudget - recurringSpent - upcoming;
+  const everydayBudget = monthlyBudget - recurringSpent - upcoming - loanCosts;
   if (everydayBudget <= 0) {
     return 0;
   }

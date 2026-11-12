@@ -12,6 +12,13 @@ export type DebtKind =
 
 export type PayoffStrategy = 'snowball' | 'avalanche';
 
+// A payment as the debt list carries it: enough to total a month, no more.
+// The amount is in the debt's own currency, like its balance.
+export type DebtPayment = {
+  amount: number;
+  date: string;
+};
+
 export type Debt = {
   id: string;
   user_id: string;
@@ -31,6 +38,8 @@ export type Debt = {
   completed_at?: string | null;
   created_at: string;
   updated_at: string;
+  // Absent on rows cached before payments were embedded.
+  payments?: DebtPayment[];
 };
 
 export const DEBT_KINDS: ReadonlyArray<DebtKind> = [

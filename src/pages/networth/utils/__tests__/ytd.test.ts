@@ -71,14 +71,41 @@ describe('computeAccountYtd', () => {
         contribution_delta: 400,
       }),
     ];
-    // current=1500, baseline=1000, contributions=400 → growth = 100, pct = 10%
+    // current=1500, baseline=1000, contributions=400 → growth = 100. The 400
+    // was invested for 63 of the 122 days to 3 May, so the average capital is
+    // 1000 + 400 * 63/122.
     const result = computeAccountYtd(
       makeAccount({ current_balance: 1500 }),
       snapshots,
       NOW,
     );
-    expect(result!.growth).toBeCloseTo(100, 5);
-    expect(result!.pct).toBeCloseTo(10, 5);
+    const { growth, pct } = result ?? { growth: 0, pct: 0 };
+    expect(growth).toBeCloseTo(100, 5);
+    expect(pct).toBeCloseTo((100 / (1000 + (400 * 63) / 122)) * 100, 5);
+  });
+
+  // 1,000 at New Year, 10,000 added on 2 January, worth 11,550 in May: the
+  // account made 550 on about 11,000, roughly 5%. Dividing by the baseline
+  // alone called that 55%.
+  it('weights a large deposit into the return instead of ignoring it', () => {
+    const snapshots = [
+      makeSnapshot({ recorded_at: '2025-12-31', balance: 1000 }),
+      makeSnapshot({
+        recorded_at: '2026-01-02',
+        balance: 11000,
+        contribution_delta: 10000,
+      }),
+    ];
+    const result = computeAccountYtd(
+      makeAccount({ current_balance: 11550 }),
+      snapshots,
+      NOW,
+    );
+
+    const { growth, pct } = result ?? { growth: 0, pct: 0 };
+    expect(growth).toBeCloseTo(550, 5);
+    expect(pct).toBeGreaterThan(4.9);
+    expect(pct).toBeLessThan(5.2);
   });
 
   it('uses the latest snapshot before Jan 1 as the baseline', () => {

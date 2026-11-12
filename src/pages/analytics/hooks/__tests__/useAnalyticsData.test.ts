@@ -191,6 +191,21 @@ describe('month comparison', () => {
     expect(r.current.monthComparison.percentChange).toBe(50);
   });
 
+  // NOW is the 15th. A part-month against the whole of last month would say
+  // "down 40%" here, when spending is level with the same point last month.
+  it('compares against last month up to the same day, not the whole month', () => {
+    data.expenses = [
+      expense('2026-08-10', 150),
+      expense('2026-07-10', 150),
+      expense('2026-07-28', 100),
+    ];
+    const comparison = render().current.monthComparison;
+
+    expect(comparison.lastMonthAmount).toBe(250);
+    expect(comparison.delta).toBe(0);
+    expect(comparison.percentChange).toBe(0);
+  });
+
   it('leaves percent change null when last month had no spending', () => {
     // Dividing by zero would render as Infinity%.
     data.expenses = [expense('2026-08-01', 150)];
@@ -238,14 +253,16 @@ describe('yearly stats', () => {
     expect(food?.monthlyAmounts[11]).toBe(0);
   });
 
-  it('averages over months elapsed, not twelve', () => {
-    // 450 spent over Jan–Aug is ~56/month, not 450/12.
-    const { totalSpent, monthlyAverage, monthsElapsed } =
+  it('averages over the full months elapsed, not twelve', () => {
+    // 450 spent over January to July is ~64/month, not 450/12. August is in progress
+    // on the 15th, so it is observed but not averaged.
+    const { totalSpent, monthlyAverage, monthsElapsed, averagedMonths } =
       render().current.yearlyStats;
 
     expect(totalSpent).toBe(450);
     expect(monthsElapsed).toBe(8);
-    expect(monthlyAverage).toBeCloseTo(450 / 8, 5);
+    expect(averagedMonths).toBe(7);
+    expect(monthlyAverage).toBeCloseTo(450 / 7, 5);
   });
 
   it('does not count months before the first tracked expense as zeroes', () => {

@@ -54,6 +54,7 @@ const PlanView = () => {
     recurringExpenses,
     recurringIncomes,
     transactions,
+    loanMinimums: monthly.loanMinimumsDue,
     range: timelineRange,
     now,
   });

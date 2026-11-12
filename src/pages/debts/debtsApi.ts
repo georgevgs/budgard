@@ -9,6 +9,12 @@ import {
 import type { Debt } from '@/types/Debt';
 import type { Expense } from '@/types/Expense';
 
+// The payments ride along with the debts so the budget, the cash flow and the
+// forecast can count a loan payment as money out. They are not in the expenses
+// slice, which holds spending only. The FK is named, as every embed must be.
+const SELECT_WITH_PAYMENTS =
+  '*, payments:expenses!expenses_debt_id_fkey(amount, date)';
+
 // Supabase queries for debts, at the feature root so an audit of what
 // this feature reads and writes is one file.
 export const debtsApi = {
@@ -25,7 +31,7 @@ export const debtsApi = {
   async getDebts(ownerId: string, signal?: AbortSignal) {
     let query = supabase
       .from('debts')
-      .select('*')
+      .select(SELECT_WITH_PAYMENTS)
       .eq('user_id', ownerId)
       .eq('is_archived', false)
       .order('created_at', { ascending: true });
@@ -49,20 +55,26 @@ export const debtsApi = {
           user_id: ownerId,
           original_principal: debtData.current_balance,
         })
-        .select()
+        .select(SELECT_WITH_PAYMENTS)
         .single(),
     );
   },
 
   async updateDebt(debtId: string, debtData: Partial<Debt>) {
-    const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = debtData;
+    const {
+      user_id: _u,
+      id: _i,
+      created_at: _c,
+      payments: _payments,
+      ...safeUpdate
+    } = debtData;
 
     return row<Debt>(
       supabase
         .from('debts')
         .update(safeUpdate)
         .eq('id', debtId)
-        .select()
+        .select(SELECT_WITH_PAYMENTS)
         .single(),
     );
   },
@@ -73,7 +85,7 @@ export const debtsApi = {
         .from('debts')
         .update({ is_archived: true })
         .eq('id', debtId)
-        .select()
+        .select(SELECT_WITH_PAYMENTS)
         .single(),
     );
   },

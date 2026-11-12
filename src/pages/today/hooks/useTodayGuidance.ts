@@ -37,7 +37,7 @@ export const useTodayGuidance = (
   const { expenseCategories } = useCategoriesData();
   const { recurringExpenses } = useRecurringData();
   const { monthlyBudget, defaultCurrency } = useDataConfig();
-  const { position } = useMonthlyPosition(expenses, now);
+  const { position, loanCosts } = useMonthlyPosition(expenses, now);
   const dateLocale = useDateLocale();
   const monthKey = format(now, 'yyyy-MM');
   const previousMonthKey = format(
@@ -103,7 +103,7 @@ export const useTodayGuidance = (
     );
     const everydayBudget = computeEverydayBudget(
       monthlyBudget,
-      recurringSpentThisMonth + upcomingThisMonth,
+      recurringSpentThisMonth + upcomingThisMonth + loanCosts,
     );
     const everydayProgress = computeBudgetProgress(
       everydaySpent,
@@ -147,6 +147,7 @@ export const useTodayGuidance = (
     expenseCategories,
     expenses,
     incomes,
+    loanCosts,
     monthKey,
     monthlyBudget,
     now,
@@ -164,6 +165,8 @@ export const useTodayGuidance = (
       thisMonthAmount: model.spentThisMonth,
       lastMonthAmount: model.spentLastMonth,
     },
+    upcomingThisMonth: model.upcomingThisMonth,
+    loanCostsThisMonth: loanCosts,
     categories: expenseCategories,
     defaultCurrency,
   });

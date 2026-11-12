@@ -62,6 +62,8 @@ describe('useSpendingInsights', () => {
         monthlyBudget: null,
         safeToSpend: null,
         monthComparison: { thisMonthAmount: 0, lastMonthAmount: 0 },
+        upcomingThisMonth: 0,
+        loanCostsThisMonth: 0,
         categories,
         defaultCurrency: 'EUR',
         ...overrides,
@@ -144,7 +146,50 @@ describe('useSpendingInsights', () => {
     expect(insight!.variant).toBe('positive');
   });
 
+  // Rent is 60% of the budget and lands on the 1st. Held against the whole
+  // budget that read as "ahead of pace" all month with nothing else spent.
+  it('does not read a recurring bill as running ahead of pace', () => {
+    const rent = {
+      ...makeExpense('2026-03-01', 600),
+      recurring_expense_id: 'r-rent',
+    };
+    const { result } = render({
+      expenses: [rent, makeExpense('2026-03-10', 150)],
+      monthlyBudget: 1000,
+      monthComparison: { thisMonthAmount: 750, lastMonthAmount: 0 },
+    });
+
+    // 150 of the 400 everyday budget is 38%, against 48% of the month.
+    const insight = result.current.find((entry) => 'spendingPace' === entry.id);
+    expect(insight).toMatchObject({
+      variant: 'positive',
+      text: expect.stringContaining('"budgetPercent":38'),
+    });
+  });
+
   // --- Month Projection ---
+
+  // Day 15 of 31: 600 rent paid, 150 everyday, 80 still due. Everyday carries
+  // on at 10 a day for 16 days: 750 + 80 + 160. Extrapolating the whole total
+  // gave 1,550, as if rent were paid again every fortnight.
+  it('projects month-end from everyday pace plus the bills still due', () => {
+    const rent = {
+      ...makeExpense('2026-03-01', 600),
+      recurring_expense_id: 'r-rent',
+    };
+    const { result } = render({
+      expenses: [rent, makeExpense('2026-03-10', 150)],
+      monthComparison: { thisMonthAmount: 750, lastMonthAmount: 0 },
+      upcomingThisMonth: 80,
+    });
+
+    const insight = result.current.find(
+      (entry) => 'monthProjection' === entry.id,
+    );
+    expect(insight).toMatchObject({
+      text: expect.stringContaining('990,00'),
+    });
+  });
 
   it('shows month projection when daily rate implies overshoot', () => {
     const { result } = render({

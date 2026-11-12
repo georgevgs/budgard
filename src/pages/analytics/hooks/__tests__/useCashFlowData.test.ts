@@ -5,11 +5,14 @@ import type { Expense } from '@/types/Expense';
 const data = vi.hoisted(() => ({
   expenses: [] as unknown[],
   incomes: [] as unknown[],
+  debts: [] as unknown[],
 }));
 
 vi.mock('@/common/contexts/DataContext', () => ({
   useExpensesData: () => data.expenses,
   useIncomesData: () => data.incomes,
+  useDebtsData: () => data.debts,
+  useDataConfig: () => ({ defaultCurrency: 'EUR' }),
 }));
 vi.mock('@/common/hooks/useDateLocale', () => ({
   useDateLocale: () => undefined,
@@ -55,5 +58,28 @@ describe('useCashFlowData', () => {
         net: 0.1,
       }),
     );
+  });
+
+  // Cash out, though not spending. Without it the net claimed 400 that had
+  // gone to the bank.
+  it('counts a loan payment in the outflow and the net', () => {
+    data.expenses = [row(100, 'expense')];
+    data.incomes = [row(1000, 'income')];
+    data.debts = [
+      {
+        kind: 'personal_loan',
+        currency: 'EUR',
+        payments: [
+          { amount: 400, date: '2026-08-03' },
+          { amount: 400, date: '2025-08-03' },
+        ],
+      },
+    ];
+
+    const { result } = renderHook(() => useCashFlowData(2026));
+    expect(result.current.monthlyData[7]).toEqual(
+      expect.objectContaining({ income: 1000, expense: -500, net: 500 }),
+    );
+    expect(result.current.yearTotals.net).toBe(500);
   });
 });

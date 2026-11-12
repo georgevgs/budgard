@@ -17,6 +17,7 @@ import { getFreeAnalyticsCutoff } from '@/constants/proLimits';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 import {
+  averageOverCompleteMonths,
   countObservedMonths,
   getObservedMonthRange,
 } from '@/constants/observedMonths';
@@ -208,26 +209,13 @@ const compareMonths = (
   const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const lastMonthKey = format(lastMonthDate, 'yyyy-MM');
 
-  const thisMonthRows: number[] = [];
-  const lastMonthRows: number[] = [];
-  for (const expense of expenses) {
-    const key = expense.date.slice(0, 7);
-    if (key === thisMonthKey) {
-      thisMonthRows.push(expense.amount);
-    } else if (key === lastMonthKey) {
-      lastMonthRows.push(expense.amount);
-    }
-  }
-
-  const thisMonthAmount = sumAmounts(thisMonthRows);
-  const lastMonthAmount = sumAmounts(lastMonthRows);
-  const delta = sumAmounts([thisMonthAmount, -lastMonthAmount]);
-
-  // No previous spending means no percentage to state — not a 100% rise.
-  let percentChange: number | null = null;
-  if (lastMonthAmount > 0) {
-    percentChange = (delta / lastMonthAmount) * 100;
-  }
+  const thisMonthAmount = sumMonth(expenses, thisMonthKey, LAST_DAY);
+  const lastMonthAmount = sumMonth(expenses, lastMonthKey, LAST_DAY);
+  // Same day-of-month cut, as Today does. A part-month held against a whole
+  // one reads as "spending is down" on every day but the last.
+  const lastMonthToDateAmount = sumMonth(expenses, lastMonthKey, now.getDate());
+  const delta = sumAmounts([thisMonthAmount, -lastMonthToDateAmount]);
+  const percentChange = percentChangeOrNull(delta, lastMonthToDateAmount);
 
   return {
     thisMonthLabel: format(now, 'LLLL yyyy', { locale: dateLocale }),
@@ -237,6 +225,32 @@ const compareMonths = (
     delta,
     percentChange,
   };
+};
+
+const LAST_DAY = 31;
+
+const sumMonth = (
+  expenses: Expense[],
+  monthKey: string,
+  throughDay: number,
+): number =>
+  sumAmounts(
+    expenses
+      .filter(
+        (expense) =>
+          monthKey === expense.date.slice(0, 7) &&
+          Number(expense.date.slice(8, 10)) <= throughDay,
+      )
+      .map((expense) => expense.amount),
+  );
+
+// No previous spending means no percentage to state, not a 100% rise.
+const percentChangeOrNull = (delta: number, base: number): number | null => {
+  if (0 < base) {
+    return (delta / base) * 100;
+  } else {
+    return null;
+  }
 };
 
 type CategoryBucket = { total: number; monthly: number[] };
@@ -275,10 +289,8 @@ const summariseYear = (
   const totalSpent = sumAmounts(yearExpenses.map((expense) => expense.amount));
 
   const monthsElapsed = countObservedMonths(yearExpenses, year, now);
-  let monthlyAverage = 0;
-  if (monthsElapsed > 0) {
-    monthlyAverage = totalSpent / monthsElapsed;
-  }
+  const { average: monthlyAverage, months: averagedMonths } =
+    averageOverCompleteMonths(yearExpenses, year, now);
 
   const categoryBreakdown: CategoryRow[] = categories
     .map((category) => toCategoryRow(category, byCategory.get(category.id)))
@@ -296,7 +308,13 @@ const summariseYear = (
   }
   categoryBreakdown.sort((a, b) => b.amount - a.amount);
 
-  return { totalSpent, monthlyAverage, categoryBreakdown, monthsElapsed };
+  return {
+    totalSpent,
+    monthlyAverage,
+    averagedMonths,
+    categoryBreakdown,
+    monthsElapsed,
+  };
 };
 
 const toCategoryRow = (

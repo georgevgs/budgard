@@ -19,6 +19,8 @@ const baseProps = {
   monthlyBudget: null,
   safeToSpend: null,
   monthComparison: { thisMonthAmount: 0, lastMonthAmount: 0 },
+  upcomingThisMonth: 0,
+  loanCostsThisMonth: 0,
   categories: [],
   defaultCurrency: 'EUR',
 };

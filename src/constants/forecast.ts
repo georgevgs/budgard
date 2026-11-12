@@ -5,7 +5,7 @@
 // `recurring_expenses` (migration 20250104165613_remote_schema.sql inserts
 // generated rows with that FK set, for both expense and income types). So a
 // projected month is:
-//   monthly-equivalent total of active recurring items live that month
+//   every charge the active recurring items make inside that month
 //   + average of NON-recurring-generated rows over the last 6 full months
 //     (fewer when history is shorter).
 // Splitting on the FK keeps recurring charges out of the variable average,
@@ -17,17 +17,18 @@ import {
   addMonths,
   endOfMonth,
   format,
-  parseISO,
+  getDaysInMonth,
   startOfMonth,
 } from 'date-fns';
 import {
   buildGeneratedCharges,
+  collectOccurrences,
   collectPendingOccurrences,
-  getMonthlyAmount,
   restOfMonthWindow,
 } from '@/constants/recurring';
 import { sumAmounts } from '@/constants/money';
 import { countsInTotals } from '@/constants/spending';
+import type { LoanOutflow } from '@/constants/debtOutflow';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
@@ -47,6 +48,9 @@ export type ProjectionInput = {
   incomes: Expense[];
   recurringExpenses: RecurringExpense[];
   recurringIncomes: RecurringExpense[];
+  // Loan minimums still to be paid. Cash out like any bill, though no row in
+  // `expenses` stands for them.
+  loanOutflow: LoanOutflow;
   now: Date;
   // Locale-aware labels are injected by the caller so this module stays free
   // of i18n dependencies. Defaults to e.g. "Aug 2026".
@@ -84,9 +88,11 @@ export const computeUpcomingRecurringThisMonth = (
   return sumAmounts(due);
 };
 
-// 12 months starting the month after `now`. Each month sums the
-// monthly-equivalent recurring total (items live during that month) and the
-// flat variable average (see module comment).
+// 12 months starting the month after `now`. Each month sums the charges the
+// recurring items really make in it and the flat variable average (see module
+// comment). Real charges, not monthly equivalents: the balance line names the
+// month money runs out, and a yearly premium smoothed into twelfths moved that
+// month.
 export const computeTwelveMonthProjection = (
   input: ProjectionInput,
 ): ProjectionMonth[] => {
@@ -95,35 +101,107 @@ export const computeTwelveMonthProjection = (
 
   const variableExpenseAvg = computeVariableMonthlyAverage(expenses, now);
   const variableIncomeAvg = computeVariableMonthlyAverage(incomes, now);
-  const months: ProjectionMonth[] = [];
-
-  const opening = input.openingBalance ?? null;
-  let running = opening;
-
-  for (let offset = 1; offset <= 12; offset += 1) {
-    const monthStart = addMonths(startOfMonth(now), offset);
+  const flows = Array.from({ length: 12 }, (_, index) => {
+    const monthStart = addMonths(startOfMonth(now), index + 1);
     const projectedExpenses =
-      sumRecurringForMonth(recurringExpenses, monthStart) + variableExpenseAvg;
+      sumRecurringForMonth(recurringExpenses, monthStart) +
+      variableExpenseAvg +
+      input.loanOutflow.months[index];
     const projectedIncome =
       sumRecurringForMonth(recurringIncomes, monthStart) + variableIncomeAvg;
-    const projectedNet = projectedIncome - projectedExpenses;
 
-    if (running !== null) {
-      running += projectedNet;
-    }
-
-    months.push({
+    return {
       monthKey: format(monthStart, 'yyyy-MM'),
       label: formatMonthLabel(monthStart),
       projectedExpenses,
       projectedIncome,
-      projectedNet,
-      projectedBalance: running,
-    });
+      projectedNet: projectedIncome - projectedExpenses,
+    };
+  });
+  const balances = runBalances(
+    openingForNextMonthOrNull(input, variableExpenseAvg, variableIncomeAvg),
+    flows.map((month) => month.projectedNet),
+  );
+
+  return flows.map((month, index) => ({
+    ...month,
+    projectedBalance: balances[index],
+  }));
+};
+
+// The balance each month ends on, or all null when no opening balance is known.
+const runBalances = (
+  opening: number | null,
+  nets: number[],
+): (number | null)[] => {
+  if (null === opening) {
+    return nets.map(() => null);
   }
 
-  return months;
+  return nets.reduce<number[]>((balances, net, index) => {
+    const previous = balances[index - 1] ?? opening;
+
+    return [...balances, previous + net];
+  }, []);
 };
+
+// The opening balance is what the accounts hold today, and the first projected
+// month starts on the 1st. The days in between still move money: bills due,
+// pay still to arrive, everyday spending. Skipping them carried today's
+// balance into next month untouched, so a forecast read on the 3rd ignored
+// nearly a whole month of spending.
+const openingForNextMonthOrNull = (
+  input: ProjectionInput,
+  variableExpenseAvg: number,
+  variableIncomeAvg: number,
+): number | null => {
+  const opening = input.openingBalance ?? null;
+  if (null === opening) {
+    return null;
+  }
+
+  const { now } = input;
+  const daysInMonth = getDaysInMonth(now);
+  const expensesLeft =
+    computeUpcomingRecurringThisMonth(
+      input.recurringExpenses,
+      now,
+      input.expenses,
+    ) +
+    (variableExpenseAvg * (daysInMonth - now.getDate())) / daysInMonth +
+    input.loanOutflow.restOfMonth;
+  // Income is lumpy where spending is steady, so it is not spread over days.
+  // A usual month's variable income is expected once, less what has arrived.
+  const incomeLeft =
+    computeUpcomingRecurringThisMonth(
+      input.recurringIncomes,
+      now,
+      input.incomes,
+    ) +
+    Math.max(
+      variableIncomeAvg - sumVariableInMonth(input.incomes, currentKey(now)),
+      0,
+    );
+
+  return opening + incomeLeft - expensesLeft;
+};
+
+const currentKey = (now: Date): string => format(now, 'yyyy-MM');
+
+const sumVariableInMonth = (rows: Expense[], monthKey: string): number =>
+  sumAmounts(
+    rows
+      .filter(
+        (row) =>
+          monthKey === row.date.slice(0, 7) &&
+          isVariableRow(row) &&
+          countsInTotals(row),
+      )
+      .map((row) => row.amount),
+  );
+
+const isVariableRow = (row: Expense): boolean =>
+  null === row.recurring_expense_id || undefined === row.recurring_expense_id;
 
 // The first month the running balance is projected to go negative, or null if
 // it never does within the window.
@@ -245,28 +323,21 @@ const computeVariableMonthlyAverage = (rows: Expense[], now: Date): number => {
   return sumAmounts(counted) / windowKeys.size;
 };
 
-// Monthly-equivalent total of the recurring items live during the given
-// month: active, started on or before the month's end, and not ended before
-// the month's start.
+// What the recurring items charge inside the given month, charge by charge.
+// The occurrence walker already honours active, start_date and end_date.
 const sumRecurringForMonth = (
   items: RecurringExpense[],
   monthStart: Date,
 ): number => {
-  const monthEnd = endOfMonth(monthStart);
-  const live: number[] = [];
+  const window = {
+    from: monthStart,
+    to: endOfMonth(monthStart),
+    includeFrom: true,
+  };
 
-  for (const item of items) {
-    if (!item.active) {
-      continue;
-    }
-    if (parseISO(item.start_date) > monthEnd) {
-      continue;
-    }
-    if (item.end_date && parseISO(item.end_date) < monthStart) {
-      continue;
-    }
-    live.push(getMonthlyAmount(item));
-  }
-
-  return sumAmounts(live);
+  return sumAmounts(
+    items.flatMap((item) =>
+      collectOccurrences(item, window).map(() => item.amount),
+    ),
+  );
 };

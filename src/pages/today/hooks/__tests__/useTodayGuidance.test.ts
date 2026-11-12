@@ -15,6 +15,7 @@ vi.mock('@/common/contexts/DataContext', () => ({
   useGoalsData: () => [],
   useAccountsData: () => ({ accounts: [] }),
   useNoSpendDaysData: () => [],
+  useDebtsData: () => [],
   useRecurringData: () => ({ recurringExpenses: [] }),
   useDataConfig: () => ({
     monthlyBudget,

@@ -252,4 +252,44 @@ describe('buildWeeklyRecap', () => {
     // The lumpy one has weeks like this all the time, so it is not news.
     expect(flagged).not.toContain('lumpy');
   });
+
+  // Three weeks of history is not a usual week. Dividing it by the whole
+  // baseline window made a level week read as four times the average.
+  it('makes no comparison before four weeks of history exist', () => {
+    const weekly = [1, 8, 15, 22].map((daysBack) =>
+      expense({
+        amount: 100,
+        category_id: 'cat-groc',
+        date: format(subDays(NOW, daysBack), 'yyyy-MM-dd'),
+      }),
+    );
+    const recap = buildWeeklyRecap({
+      now: NOW,
+      expenses: weekly,
+      categories: [category('cat-groc', 'Groceries')],
+    });
+
+    expect(recap).toMatchObject({ weekTotal: 100, totalRatio: null });
+  });
+
+  it('averages a short history over the weeks it covers', () => {
+    const weekly = [1, 8, 15, 22, 29, 36].map((daysBack) =>
+      expense({
+        amount: 100,
+        category_id: 'cat-groc',
+        date: format(subDays(NOW, daysBack), 'yyyy-MM-dd'),
+      }),
+    );
+    const recap = buildWeeklyRecap({
+      now: NOW,
+      expenses: weekly,
+      categories: [category('cat-groc', 'Groceries')],
+    });
+
+    expect(recap).toMatchObject({
+      baselineWeeklyAverage: 100,
+      totalRatio: 1,
+      anomalies: [],
+    });
+  });
 });

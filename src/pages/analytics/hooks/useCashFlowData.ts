@@ -1,17 +1,34 @@
 import { useMemo } from 'react';
 import { format } from 'date-fns';
-import { useExpensesData, useIncomesData } from '@/common/contexts/DataContext';
+import {
+  useDataConfig,
+  useDebtsData,
+  useExpensesData,
+  useIncomesData,
+} from '@/common/contexts/DataContext';
+import { collectLoanPayments } from '@/constants/debtOutflow';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import { countsInTotals } from '@/constants/spending';
 import { sumAmounts } from '@/constants/money';
-import { countObservedMonths } from '@/constants/observedMonths';
+import { averageOverCompleteMonths } from '@/constants/observedMonths';
 import { useCurrentDate } from '@/common/hooks/useCurrentDate';
 
 export const useCashFlowData = (selectedYear: number) => {
   const expenses = useExpensesData();
   const incomes = useIncomesData();
+  const debts = useDebtsData();
+  const { defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();
   const now = useCurrentDate();
+  // Cash out, though not spending: a loan payment belongs in the outflow bar
+  // or the net overstates what the year left behind.
+  const loanPayments = useMemo(
+    () =>
+      collectLoanPayments(debts, defaultCurrency).filter(
+        (payment) => selectedYear === Number(payment.date.slice(0, 4)),
+      ),
+    [debts, defaultCurrency, selectedYear],
+  );
 
   const monthlyData = useMemo(() => {
     const expByMonth = new Array(12).fill(0);
@@ -33,6 +50,11 @@ export const useCashFlowData = (selectedYear: number) => {
       }
       const month = Number(e.date.slice(5, 7)) - 1;
       expByMonth[month] = sumAmounts([expByMonth[month], e.amount]);
+    }
+
+    for (const payment of loanPayments) {
+      const month = Number(payment.date.slice(5, 7)) - 1;
+      expByMonth[month] = sumAmounts([expByMonth[month], payment.amount]);
     }
 
     for (const i of incomes) {
@@ -59,24 +81,31 @@ export const useCashFlowData = (selectedYear: number) => {
         net: sumAmounts([incomeTotal, -expenseTotal]),
       };
     });
-  }, [expenses, incomes, selectedYear, dateLocale]);
+  }, [expenses, incomes, loanPayments, selectedYear, dateLocale]);
 
   const yearTotals = useMemo(() => {
     const totalIncome = sumAmounts(monthlyData.map((m) => m.income));
     const totalExpense = sumAmounts(monthlyData.map((m) => -m.expense));
 
-    const observedRows = [...expenses, ...incomes].filter((row) => {
-      if (!countsInTotals(row)) {
-        return false;
-      }
-
-      return Number(row.date.slice(0, 4)) === selectedYear;
-    });
-    const monthsElapsed = countObservedMonths(observedRows, selectedYear, now);
-    let avgNet = 0;
-    if (monthsElapsed > 0) {
-      avgNet = sumAmounts([totalIncome, -totalExpense]) / monthsElapsed;
-    }
+    const isInYear = (row: (typeof expenses)[number]): boolean =>
+      countsInTotals(row) && selectedYear === Number(row.date.slice(0, 4));
+    const signedRows = [
+      ...incomes
+        .filter(isInYear)
+        .map((row) => ({ date: row.date, amount: row.amount })),
+      ...expenses
+        .filter(isInYear)
+        .map((row) => ({ date: row.date, amount: -row.amount })),
+      ...loanPayments.map((payment) => ({
+        date: payment.date,
+        amount: -payment.amount,
+      })),
+    ];
+    const avgNet = averageOverCompleteMonths(
+      signedRows,
+      selectedYear,
+      now,
+    ).average;
 
     return {
       totalIncome,
@@ -84,7 +113,7 @@ export const useCashFlowData = (selectedYear: number) => {
       net: sumAmounts([totalIncome, -totalExpense]),
       avgNet,
     };
-  }, [expenses, incomes, monthlyData, now, selectedYear]);
+  }, [expenses, incomes, loanPayments, monthlyData, now, selectedYear]);
 
   const noData = yearTotals.totalIncome === 0 && yearTotals.totalExpense === 0;
 

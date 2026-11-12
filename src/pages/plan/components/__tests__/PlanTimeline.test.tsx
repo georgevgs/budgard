@@ -80,6 +80,7 @@ const renderTimeline = (options: Options = {}) => {
   const timeline = buildMoneyTimeline(expenses, incomes, NOW, {
     range: 'month',
     rows: [],
+    loanMinimums: [],
     withinDays: 30,
     limit: 8,
   });

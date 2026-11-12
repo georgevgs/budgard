@@ -1,10 +1,13 @@
 import { useMemo } from 'react';
 import { format } from 'date-fns';
 import {
+  useDataConfig,
+  useDebtsData,
   useExpensesData,
   useIncomesData,
   useRecurringData,
 } from '@/common/contexts/DataContext';
+import { projectLoanOutflow } from '@/constants/debtOutflow';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import {
   computeTwelveMonthProjection,
@@ -21,6 +24,8 @@ export const useForecastData = () => {
   const expenses = useExpensesData();
   const incomes = useIncomesData();
   const { recurringExpenses, recurringIncomes } = useRecurringData();
+  const debts = useDebtsData();
+  const { defaultCurrency } = useDataConfig();
   // Balances only — no snapshot history is needed for an opening balance.
   const { summary } = useNetWorth(false);
   const dateLocale = useDateLocale();
@@ -38,6 +43,7 @@ export const useForecastData = () => {
       incomes,
       recurringExpenses,
       recurringIncomes,
+      loanOutflow: projectLoanOutflow(debts, defaultCurrency, now),
       now,
       openingBalance,
       formatMonthLabel: (monthStart) =>
@@ -58,6 +64,8 @@ export const useForecastData = () => {
       shortfall: findFirstShortfall(projection),
     };
   }, [
+    debts,
+    defaultCurrency,
     expenses,
     incomes,
     recurringExpenses,

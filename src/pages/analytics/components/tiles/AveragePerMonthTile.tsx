@@ -5,7 +5,7 @@ import { BentoTile, TileLabel } from '@/common/components/bento';
 
 type AveragePerMonthTileProps = {
   monthlyAverage: number;
-  monthsElapsed: number;
+  averagedMonths: number;
 };
 
 // Trends' one inverted tile — the figure every other number on the screen is
@@ -18,12 +18,12 @@ type AveragePerMonthTileProps = {
 // two numbers on one line instead of half a caption apart.
 export const AveragePerMonthTile = ({
   monthlyAverage,
-  monthsElapsed,
+  averagedMonths,
 }: AveragePerMonthTileProps) => {
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
 
-  if (monthsElapsed === 0) {
+  if (0 === averagedMonths) {
     return null;
   }
 
@@ -38,7 +38,7 @@ export const AveragePerMonthTile = ({
           {formatCurrency(monthlyAverage, defaultCurrency)}
         </p>
         <p className="mt-1.5 whitespace-normal break-normal text-[0.72rem] leading-snug opacity-70">
-          {t('analytics.tile.acrossMonths', { count: monthsElapsed })}
+          {t('analytics.tile.acrossMonths', { count: averagedMonths })}
         </p>
       </div>
     </BentoTile>

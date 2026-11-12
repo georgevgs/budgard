@@ -12,12 +12,16 @@ import { countsAsSpending } from '@/constants/spending';
 
 // "This week" is the last completed Mon–Sun window before `now`. The recap is
 // surfaced on Mondays, so on a Monday the window is the week that just ended
-// yesterday. Baseline is the 90 days immediately preceding that window. We
+// yesterday. Baseline is the 13 whole weeks immediately preceding that window,
+// so every baseline week runs Monday to Sunday like the one it is held against. We
 // compare each category's current week against its average week over that
 // baseline.
 const WEEK_DAYS = 7;
-const BASELINE_DAYS = 90;
-const BASELINE_WEEKS = BASELINE_DAYS / WEEK_DAYS;
+const BASELINE_WEEKS = 13;
+const BASELINE_DAYS = BASELINE_WEEKS * WEEK_DAYS;
+
+// Below this many weeks of history there is no usual week to compare with.
+const MIN_OBSERVED_WEEKS = 4;
 
 // A category must have enough baseline signal to compare against — otherwise
 // ratios explode on noise (one €40 expense 80 days ago vs €20 this week
@@ -90,18 +94,20 @@ export const buildWeeklyRecap = ({
 
   const weekTotal = sumAmount(weekExpenses);
   const baselineTotal = sumAmount(baselineExpenses);
-  const baselineWeeklyAverage = baselineTotal / BASELINE_WEEKS;
-
-  let totalRatio: number | null = null;
-  if (baselineWeeklyAverage > 0) {
-    totalRatio = weekTotal / baselineWeeklyAverage;
-  }
+  const observedWeeks = countObservedWeeks(spendable, baselineStartDate);
+  const baselineWeeklyAverage = averageOrZero(baselineTotal, observedWeeks);
+  const totalRatio = ratioOrNull(
+    weekTotal,
+    baselineWeeklyAverage,
+    observedWeeks,
+  );
 
   const anomalies = computeAnomalies(
     weekExpenses,
     baselineExpenses,
     categories,
     baselineStartDate,
+    observedWeeks,
   );
 
   return {
@@ -113,6 +119,54 @@ export const buildWeeklyRecap = ({
     totalRatio,
     anomalies,
   };
+};
+
+// The baseline weeks the user was already tracking in. Weeks before their first
+// expense are unknown, not zero: dividing three weeks of history by thirteen
+// made an ordinary week read as several times the usual one.
+const countObservedWeeks = (
+  spendable: Expense[],
+  baselineStart: Date,
+): number => {
+  const earliest = spendable
+    .map((row) => row.date)
+    .reduce((first, date) => minDate(first, date), LATEST_DATE);
+  const missedWeeks = Math.floor(
+    differenceInCalendarDays(parseISO(earliest), baselineStart) / WEEK_DAYS,
+  );
+
+  return Math.min(Math.max(BASELINE_WEEKS - missedWeeks, 0), BASELINE_WEEKS);
+};
+
+// Later than any stored date, so no rows at all reads as no weeks observed.
+const LATEST_DATE = '9999-12-31';
+
+const minDate = (first: string, second: string): string => {
+  if (second < first) {
+    return second;
+  } else {
+    return first;
+  }
+};
+
+const averageOrZero = (total: number, weeks: number): number => {
+  if (0 < weeks) {
+    return total / weeks;
+  } else {
+    return 0;
+  }
+};
+
+const ratioOrNull = (
+  weekTotal: number,
+  weeklyAverage: number,
+  observedWeeks: number,
+): number | null => {
+  if (MIN_OBSERVED_WEEKS <= observedWeeks && 0 < weeklyAverage) {
+    return weekTotal / weeklyAverage;
+  } else {
+    return null;
+  }
 };
 
 // Was `type !== 'debt_payment'` — now the same decision the rest of the app
@@ -196,6 +250,7 @@ const computeAnomalies = (
   baselineRows: Expense[],
   categories: Category[],
   baselineStart: Date,
+  observedWeeks: number,
 ): WeeklyAnomaly[] => {
   const weekByCat = bucketByCategory(weekRows);
   const baselineByCat = bucketByCategory(baselineRows);
@@ -210,7 +265,7 @@ const computeAnomalies = (
       continue;
     }
 
-    const baselineWeeklyAvg = baseline.total / BASELINE_WEEKS;
+    const baselineWeeklyAvg = averageOrZero(baseline.total, observedWeeks);
     if (baselineWeeklyAvg < MIN_BASELINE_WEEKLY_AVG) {
       continue;
     }
@@ -219,7 +274,9 @@ const computeAnomalies = (
     }
 
     const thisWeek = weekByCat.get(categoryId)?.total ?? 0;
-    const model = buildBaseline(weeklyByCat.get(categoryId) ?? []);
+    const model = buildBaseline(
+      (weeklyByCat.get(categoryId) ?? []).slice(BASELINE_WEEKS - observedWeeks),
+    );
     const comparison = compareToBaseline(thisWeek, model);
 
     // The model decides whether this is worth saying at all. A category whose

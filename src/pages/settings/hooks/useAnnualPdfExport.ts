@@ -17,7 +17,8 @@ import type {
   PdfMonthlyTotal,
   PdfReportLabels,
 } from '@/pages/settings/utils/pdfReport';
-import { formatCurrency, monthsElapsedInYear } from '@/constants/utils';
+import { formatCurrency } from '@/constants/utils';
+import { averageOverCompleteMonths } from '@/constants/observedMonths';
 import type { Category } from '@/types/Category';
 import type { Expense } from '@/types/Expense';
 import { countsAsSpending, sumSpending } from '@/constants/spending';
@@ -81,12 +82,12 @@ const buildReportInput = (
   const yearExpenses = yearTransactions.filter(isExpenseTransaction);
   const yearIncomes = yearTransactions.filter(isIncomeTransaction);
   const totalSpent = sumSpending(yearExpenses);
-  const monthsElapsed = monthsElapsedInYear(year);
-
-  let monthlyAverage = 0;
-  if (monthsElapsed > 0) {
-    monthlyAverage = totalSpent / monthsElapsed;
-  }
+  // The same average Trends shows: full months since tracking began.
+  const monthlyAverage = averageOverCompleteMonths(
+    yearExpenses.filter(countsAsSpending),
+    year,
+    new Date(),
+  ).average;
 
   return {
     year,

@@ -8,6 +8,7 @@ import {
   restOfMonthWindow,
   type OccurrenceWindow,
 } from '@/constants/recurring';
+import type { LoanMinimumDue } from '@/constants/debtOutflow';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
@@ -31,7 +32,7 @@ export type TimelineRange = 'month' | 'days';
 
 export type MoneyTimelineEntry = {
   id: string;
-  item: RecurringExpense;
+  item: Pick<RecurringExpense, 'description' | 'amount'>;
   date: Date;
   kind: MoneyTimelineKind;
 };
@@ -54,6 +55,9 @@ type Options = {
   /** The transactions already loaded. In the `month` range a charge that
    *  already has its row is spent, not still to move. */
   rows: ReadonlyArray<Pick<Expense, 'recurring_expense_id' | 'date'>>;
+  /** Loan minimums not yet paid this month. Safe-to-spend holds them back, so
+   *  the `month` range lists them. Ignored when the range is `days`. */
+  loanMinimums: ReadonlyArray<LoanMinimumDue>;
   /** Length of the rolling window. Ignored when the range is `month`. */
   withinDays: number;
   limit: number;
@@ -67,12 +71,10 @@ export const buildMoneyTimeline = (
 ): MoneyTimeline => {
   const window = resolveWindow(options, now);
   const pending = resolvePending(options);
-  const expenses = expandSchedules(
-    recurringExpenses,
-    'expense',
-    window,
-    pending,
-  );
+  const expenses = [
+    ...expandSchedules(recurringExpenses, 'expense', window, pending),
+    ...loanEntries(options),
+  ];
   const incomes = expandSchedules(recurringIncomes, 'income', window, pending);
   const entries = [...expenses, ...incomes].sort(compareEntries);
   const limit = Math.max(0, options.limit);
@@ -90,6 +92,19 @@ export const buildMoneyTimeline = (
     net: sumAmounts([incomeTotal, -expenseTotal]),
     endsOn: window.to,
   };
+};
+
+const loanEntries = (options: Options): MoneyTimelineEntry[] => {
+  if ('month' === options.range) {
+    return options.loanMinimums.map((due) => ({
+      id: `loan:${due.id}`,
+      item: { description: due.description, amount: due.amount },
+      date: due.date,
+      kind: 'expense',
+    }));
+  } else {
+    return [];
+  }
 };
 
 const resolveWindow = (options: Options, now: Date): OccurrenceWindow => {

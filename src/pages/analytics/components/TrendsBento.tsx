@@ -17,6 +17,7 @@ type TrendsBentoProps = {
   monthlyData: MonthlyDatum[];
   monthlyAverage: number;
   monthsElapsed: number;
+  averagedMonths: number;
   onMonthClick: (index: number) => void;
 };
 
@@ -33,7 +34,7 @@ export const TrendsBento = (props: TrendsBentoProps) => {
         isVisible={1 < props.monthsElapsed}
         monthlyData={props.monthlyData}
         monthlyAverage={props.monthlyAverage}
-        monthsElapsed={props.monthsElapsed}
+        averagedMonths={props.averagedMonths}
         onMonthClick={props.onMonthClick}
       />
     </BentoGrid>
@@ -46,13 +47,13 @@ const TrendsBenchmarks = ({
   isVisible,
   monthlyData,
   monthlyAverage,
-  monthsElapsed,
+  averagedMonths,
   onMonthClick,
 }: {
   isVisible: boolean;
   monthlyData: MonthlyDatum[];
   monthlyAverage: number;
-  monthsElapsed: number;
+  averagedMonths: number;
   onMonthClick: (index: number) => void;
 }) => {
   if (isVisible) {
@@ -60,7 +61,7 @@ const TrendsBenchmarks = ({
       <>
         <AveragePerMonthTile
           monthlyAverage={monthlyAverage}
-          monthsElapsed={monthsElapsed}
+          averagedMonths={averagedMonths}
         />
         <BiggestMonthTile
           monthlyData={monthlyData}

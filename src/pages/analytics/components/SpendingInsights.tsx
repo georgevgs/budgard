@@ -12,6 +12,8 @@ type SpendingInsightsProps = {
   monthlyBudget: number | null;
   safeToSpend: number | null;
   monthComparison: { thisMonthAmount: number; lastMonthAmount: number };
+  upcomingThisMonth: number;
+  loanCostsThisMonth: number;
   categories: Category[];
   defaultCurrency: string;
 };

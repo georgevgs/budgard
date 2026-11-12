@@ -7,6 +7,7 @@ import type { NoSpendDay } from '@/types/NoSpendDay';
 
 let monthlyBudget: number | null = 3100;
 let noSpendDays: NoSpendDay[] = [];
+const loans = { debts: [] as unknown[] };
 
 const SAVINGS_CATEGORY: Category = {
   id: 'savings-cat',
@@ -24,7 +25,8 @@ vi.mock('@/common/contexts/DataContext', () => ({
   useRecurringData: () => ({ recurringExpenses: [] }),
   useCategoriesData: () => ({ expenseCategories: [SAVINGS_CATEGORY] }),
   useGoalsData: () => [],
-  useDataConfig: () => ({ monthlyBudget }),
+  useDebtsData: () => loans.debts,
+  useDataConfig: () => ({ monthlyBudget, defaultCurrency: 'EUR' }),
 }));
 
 // August 2026 has 31 days. A 3100 budget with no recurring bills gives a flat
@@ -62,6 +64,7 @@ describe('useSavingsRhythm', () => {
   beforeEach(() => {
     monthlyBudget = 3100;
     noSpendDays = [];
+    loans.debts = [];
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-08-10T12:00:00Z'));
   });
@@ -92,6 +95,24 @@ describe('useSavingsRhythm', () => {
       );
 
       expect(outcomeFor(result.current, '2026-08-03')).toBe('over');
+    });
+
+    // Half the 3100 budget went to a loan this month, so a day's allowance is
+    // 50, not 100. The same 80 that was under is now over.
+    it('takes a loan payment out of the allowance, like a bill', () => {
+      const rows = [spend('2026-08-03', 80)];
+      const before = renderHook(() => useSavingsRhythm(rows)).result.current;
+      loans.debts = [
+        {
+          kind: 'auto_loan',
+          currency: 'EUR',
+          payments: [{ amount: 1550, date: '2026-08-02' }],
+        },
+      ];
+      const after = renderHook(() => useSavingsRhythm(rows)).result.current;
+
+      expect(outcomeFor(before, '2026-08-03')).toBe('under');
+      expect(outcomeFor(after, '2026-08-03')).toBe('over');
     });
 
     // The core objection this card exists to answer: a day with no expenses is

@@ -15,6 +15,8 @@ type TrendsSectionsProps = {
   categories: Category[];
   monthlyBudget: number | null;
   safeToSpend: number | null;
+  upcomingThisMonth: number;
+  loanCostsThisMonth: number;
   defaultCurrency: string;
   onCategoryClick: (category: CategoryRow) => void;
 };
@@ -27,6 +29,8 @@ export const TrendsSections = ({
   categories,
   monthlyBudget,
   safeToSpend,
+  upcomingThisMonth,
+  loanCostsThisMonth,
   defaultCurrency,
   onCategoryClick,
 }: TrendsSectionsProps) => {
@@ -39,6 +43,8 @@ export const TrendsSections = ({
         monthlyBudget={monthlyBudget}
         safeToSpend={safeToSpend}
         monthComparison={analytics.monthComparison}
+        upcomingThisMonth={upcomingThisMonth}
+        loanCostsThisMonth={loanCostsThisMonth}
         categories={categories}
         defaultCurrency={defaultCurrency}
       />

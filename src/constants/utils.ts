@@ -171,24 +171,3 @@ const isDotDecimal = (value: string, lastDot: number): boolean => {
 
   return fraction.length > 0 && fraction.length <= 2;
 };
-
-// Calendar months elapsed within the given year, relative to `now`.
-// Past years return 12, the current year returns the current month (1–12),
-// future years return 0. Used as the denominator for year-view "average per month"
-// metrics so partial years aren't smeared across 12 calendar months.
-export const monthsElapsedInYear = (
-  year: number,
-  now: Date = new Date(),
-): number => {
-  const currentYear = now.getFullYear();
-
-  if (year < currentYear) {
-    return 12;
-  }
-
-  if (year > currentYear) {
-    return 0;
-  }
-
-  return now.getMonth() + 1;
-};

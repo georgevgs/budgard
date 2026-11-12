@@ -33,7 +33,10 @@ const TrendsDeepDiveView = () => {
   const allExpenses = useExpensesData();
   const now = useCurrentDate();
   const analytics = useAnalyticsData(now);
-  const { position } = useMonthlyPosition(allExpenses, now);
+  const { position, upcomingBills, loanCosts } = useMonthlyPosition(
+    allExpenses,
+    now,
+  );
   const drillDown = useAnalyticsDrillDown(
     analytics.yearExpenses,
     analytics.selectedYear,
@@ -79,6 +82,7 @@ const TrendsDeepDiveView = () => {
         monthlyData={analytics.monthlyData}
         monthlyAverage={analytics.yearlyStats.monthlyAverage}
         monthsElapsed={analytics.yearlyStats.monthsElapsed}
+        averagedMonths={analytics.yearlyStats.averagedMonths}
         onMonthClick={drillDown.handleMonthClick}
       />
       <TrendsSections
@@ -87,6 +91,8 @@ const TrendsDeepDiveView = () => {
         categories={categories}
         monthlyBudget={monthlyBudget}
         safeToSpend={position.available}
+        upcomingThisMonth={upcomingBills}
+        loanCostsThisMonth={loanCosts}
         defaultCurrency={defaultCurrency}
         onCategoryClick={drillDown.handleCategoryClick}
       />

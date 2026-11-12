@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  averageOverCompleteMonths,
   countObservedMonths,
   getObservedMonthRange,
 } from '@/constants/observedMonths';
@@ -27,5 +28,47 @@ describe('observed month boundaries', () => {
 
   it('has no observed span without rows', () => {
     expect(getObservedMonthRange([], 2026, now)).toBeNull();
+  });
+});
+
+describe('average over complete months', () => {
+  // On 15 August, August is half a month. Counted as a whole one it pulled the
+  // average down to 250.
+  it('leaves the month in progress out of the average', () => {
+    const rows = [
+      { date: '2026-06-04', amount: 300 },
+      { date: '2026-07-09', amount: 300 },
+      { date: '2026-08-01', amount: 150 },
+    ];
+
+    expect(averageOverCompleteMonths(rows, 2026, now)).toEqual({
+      average: 300,
+      months: 2,
+    });
+  });
+
+  it('uses the month in progress when it is the only one', () => {
+    const rows = [{ date: '2026-08-01', amount: 150 }];
+
+    expect(averageOverCompleteMonths(rows, 2026, now)).toEqual({
+      average: 150,
+      months: 1,
+    });
+  });
+
+  it('averages a past year over every observed month', () => {
+    const rows = [{ date: '2025-10-01', amount: 90 }];
+
+    expect(averageOverCompleteMonths(rows, 2025, now)).toEqual({
+      average: 30,
+      months: 3,
+    });
+  });
+
+  it('has no average without rows', () => {
+    expect(averageOverCompleteMonths([], 2026, now)).toEqual({
+      average: 0,
+      months: 0,
+    });
   });
 });

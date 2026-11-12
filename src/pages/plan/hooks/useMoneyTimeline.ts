@@ -4,6 +4,7 @@ import {
   buildMoneyTimeline,
   type TimelineRange,
 } from '@/pages/plan/utils/moneyTimeline';
+import type { LoanMinimumDue } from '@/constants/debtOutflow';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 
@@ -13,6 +14,7 @@ type Input = {
   // Every loaded expense and income, so the month range can drop charges that
   // have already been written.
   transactions: Expense[];
+  loanMinimums: LoanMinimumDue[];
   range: TimelineRange;
   now: Date;
 };
@@ -23,6 +25,7 @@ export const useMoneyTimeline = ({
   recurringExpenses,
   recurringIncomes,
   transactions,
+  loanMinimums,
   range,
   now,
 }: Input) => {
@@ -34,6 +37,7 @@ export const useMoneyTimeline = ({
       {
         range,
         rows: transactions,
+        loanMinimums,
         withinDays: TIMELINE_DAYS,
         limit: TIMELINE_LIMIT,
       },
@@ -47,5 +51,12 @@ export const useMoneyTimeline = ({
     );
 
     return { timeline, hasSchedules };
-  }, [now, range, recurringExpenses, recurringIncomes, transactions]);
+  }, [
+    loanMinimums,
+    now,
+    range,
+    recurringExpenses,
+    recurringIncomes,
+    transactions,
+  ]);
 };

@@ -1,8 +1,11 @@
+import { differenceInCalendarDays } from 'date-fns';
+import { parseIsoDate } from '@/constants/dates';
 import type { Account } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 
 // Year-to-date growth, stripping out contributions made this year so deposits
-// don't masquerade as performance. Returns null when there's no baseline
+// do not masquerade as performance. The percentage is money-weighted (Modified
+// Dietz): each contribution counts for the share of the year it was invested. Returns null when there's no baseline
 // snapshot before Jan 1 (account too young to have a meaningful YTD).
 export type YtdResult = {
   growth: number;
@@ -39,12 +42,33 @@ export const computeAccountYtd = (
     return null;
   }
 
-  const ytdContributions = snapshots
-    .filter((s) => s.recorded_at >= yearStartStr)
-    .reduce((sum, s) => sum + (s.contribution_delta ?? 0), 0);
-
+  const yearStart = parseIsoDate(yearStartStr);
+  const periodDays = Math.max(differenceInCalendarDays(now, yearStart), 1);
+  const flows = snapshots
+    .filter((snapshot) => snapshot.recorded_at >= yearStartStr)
+    .map((snapshot) => ({
+      amount: snapshot.contribution_delta ?? 0,
+      // The share of the period the money was invested for.
+      weight:
+        (periodDays -
+          differenceInCalendarDays(
+            parseIsoDate(snapshot.recorded_at.slice(0, 10)),
+            yearStart,
+          )) /
+        periodDays,
+    }));
+  const ytdContributions = flows.reduce((sum, flow) => sum + flow.amount, 0);
+  // Modified Dietz. Growth over the baseline alone credited this year's
+  // deposits with nothing in the denominator, so a small account that received
+  // a large deposit showed a return many times its real one.
+  const averageCapital =
+    baseline.balance +
+    flows.reduce((sum, flow) => sum + flow.amount * flow.weight, 0);
   const growth = account.current_balance - baseline.balance - ytdContributions;
-  const pct = (growth / baseline.balance) * 100;
 
-  return { growth, pct };
+  if (0 < averageCapital) {
+    return { growth, pct: (growth / averageCapital) * 100 };
+  } else {
+    return null;
+  }
 };
