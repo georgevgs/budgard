@@ -25,6 +25,7 @@ export type Insight = {
 export type SpendingInsightsParams = {
   expenses: Expense[];
   monthlyBudget: number | null;
+  safeToSpend: number | null;
   monthComparison: { thisMonthAmount: number; lastMonthAmount: number };
   categories: Category[];
   defaultCurrency: string;
@@ -38,6 +39,7 @@ export const useSpendingInsights = (
   const {
     expenses,
     monthlyBudget,
+    safeToSpend,
     monthComparison,
     categories,
     defaultCurrency,
@@ -54,8 +56,7 @@ export const useSpendingInsights = (
     const insights: (Insight | null)[] = [
       weeklyAnomalyInsight({ anomaly: topAnomaly, t }),
       dailyBudgetRemainingInsight({
-        monthlyBudget,
-        thisMonthAmount: monthComparison.thisMonthAmount,
+        safeToSpend,
         dayOfMonth,
         daysInMonth,
         defaultCurrency,
@@ -82,6 +83,7 @@ export const useSpendingInsights = (
     expenses,
     categories,
     monthlyBudget,
+    safeToSpend,
     monthComparison,
     defaultCurrency,
     t,
@@ -127,8 +129,7 @@ const weeklyAnomalyInsight = (args: WeeklyAnomalyArgs): Insight | null => {
 };
 
 type DailyArgs = {
-  monthlyBudget: number | null;
-  thisMonthAmount: number;
+  safeToSpend: number | null;
   dayOfMonth: number;
   daysInMonth: number;
   defaultCurrency: string;
@@ -136,37 +137,25 @@ type DailyArgs = {
 };
 
 const dailyBudgetRemainingInsight = (args: DailyArgs): Insight | null => {
-  const {
-    monthlyBudget,
-    thisMonthAmount,
-    dayOfMonth,
-    daysInMonth,
-    defaultCurrency,
-    t,
-  } = args;
-  if (monthlyBudget === null || monthlyBudget === 0) {
+  const { safeToSpend, dayOfMonth, daysInMonth, defaultCurrency, t } = args;
+  if (null === safeToSpend) {
     return null;
   }
 
-  const daysRemaining = daysInMonth - dayOfMonth;
-  if (daysRemaining <= 0) {
-    return null;
-  }
+  const daysRemaining = daysInMonth - dayOfMonth + 1;
 
-  const remaining = monthlyBudget - thisMonthAmount;
-
-  if (remaining <= 0) {
+  if (safeToSpend <= 0) {
     return {
       id: 'dailyBudgetRemaining',
       icon: Wallet,
       text: t('analytics.insights.budgetExceeded', {
-        amount: formatCurrency(Math.abs(remaining), defaultCurrency),
+        amount: formatCurrency(Math.abs(safeToSpend), defaultCurrency),
       }),
       variant: 'warning',
     };
   }
 
-  const dailyAllowance = remaining / daysRemaining;
+  const dailyAllowance = safeToSpend / daysRemaining;
 
   let variant: Insight['variant'] = 'positive';
   if (dailyAllowance < 10) {

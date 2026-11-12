@@ -18,11 +18,12 @@ export const InsightTile = ({ insight }: InsightTileProps) => {
   return (
     <BentoTile
       tone="accent"
+      isWide
       to="/trends"
       ariaLabel={insight.text}
-      className="flex min-h-26 flex-col justify-between p-4"
+      className="flex items-center gap-3 p-4"
     >
-      <InsightIcon icon={insight.icon} className="h-4.5 w-4.5" />
+      <InsightIcon icon={insight.icon} className="h-4.5 w-4.5 shrink-0" />
       <p className="text-[0.78rem] leading-snug text-foreground">
         {insight.text}
       </p>

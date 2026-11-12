@@ -168,6 +168,7 @@ describe('Today tile spans', () => {
     expect(isWideTodayTile('upcoming')).toBe(true);
     expect(isWideTodayTile('recentActivity')).toBe(true);
     expect(isWideTodayTile('weeklyRecap')).toBe(true);
+    expect(isWideTodayTile('insight')).toBe(true);
     expect(isWideTodayTile('budgetUsed')).toBe(false);
   });
 });

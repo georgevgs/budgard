@@ -10,6 +10,7 @@ import {
 type SpendingInsightsProps = {
   expenses: Expense[];
   monthlyBudget: number | null;
+  safeToSpend: number | null;
   monthComparison: { thisMonthAmount: number; lastMonthAmount: number };
   categories: Category[];
   defaultCurrency: string;

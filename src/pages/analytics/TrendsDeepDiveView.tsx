@@ -14,6 +14,7 @@ import {
 import { useSubscription } from '@/common/contexts/SubscriptionContext';
 import { useAnalyticsData } from '@/pages/analytics/hooks/useAnalyticsData';
 import { useAnalyticsDrillDown } from '@/pages/analytics/hooks/useAnalyticsDrillDown';
+import { useMonthlyPosition } from '@/common/hooks/useMonthlyPosition';
 import { useCurrentDate } from '@/common/hooks/useCurrentDate';
 import { useDelayedLoading } from '@/common/hooks/useDelayedLoading';
 import { isAnalyticsReady } from '@/pages/analytics/utils/readiness';
@@ -32,6 +33,7 @@ const TrendsDeepDiveView = () => {
   const allExpenses = useExpensesData();
   const now = useCurrentDate();
   const analytics = useAnalyticsData(now);
+  const { position } = useMonthlyPosition(allExpenses, now);
   const drillDown = useAnalyticsDrillDown(
     analytics.yearExpenses,
     analytics.selectedYear,
@@ -84,6 +86,7 @@ const TrendsDeepDiveView = () => {
         isPro={isPro}
         categories={categories}
         monthlyBudget={monthlyBudget}
+        safeToSpend={position.available}
         defaultCurrency={defaultCurrency}
         onCategoryClick={drillDown.handleCategoryClick}
       />

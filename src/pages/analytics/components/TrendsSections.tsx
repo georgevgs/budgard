@@ -14,6 +14,7 @@ type TrendsSectionsProps = {
   isPro: boolean;
   categories: Category[];
   monthlyBudget: number | null;
+  safeToSpend: number | null;
   defaultCurrency: string;
   onCategoryClick: (category: CategoryRow) => void;
 };
@@ -25,6 +26,7 @@ export const TrendsSections = ({
   isPro,
   categories,
   monthlyBudget,
+  safeToSpend,
   defaultCurrency,
   onCategoryClick,
 }: TrendsSectionsProps) => {
@@ -35,6 +37,7 @@ export const TrendsSections = ({
       <SpendingInsights
         expenses={analytics.expenses}
         monthlyBudget={monthlyBudget}
+        safeToSpend={safeToSpend}
         monthComparison={analytics.monthComparison}
         categories={categories}
         defaultCurrency={defaultCurrency}

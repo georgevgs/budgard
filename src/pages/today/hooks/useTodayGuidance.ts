@@ -159,6 +159,7 @@ export const useTodayGuidance = (
   const insights = useSpendingInsights({
     expenses,
     monthlyBudget,
+    safeToSpend: model.safeToSpend,
     monthComparison: {
       thisMonthAmount: model.spentThisMonth,
       lastMonthAmount: model.spentLastMonth,

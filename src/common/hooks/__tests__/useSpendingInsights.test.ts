@@ -5,6 +5,14 @@ import { useSpendingInsights } from '@/common/hooks/useSpendingInsights';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
 
+// The shared mock returns the bare key, the figures only show up when the
+// params ride along.
+vi.mock('react-i18next', () => {
+  const t = (...parts: unknown[]) => JSON.stringify(parts);
+
+  return { useTranslation: () => ({ t }) };
+});
+
 const categories: Category[] = [
   {
     id: 'cat-1',
@@ -52,6 +60,7 @@ describe('useSpendingInsights', () => {
       useSpendingInsights({
         expenses: [],
         monthlyBudget: null,
+        safeToSpend: null,
         monthComparison: { thisMonthAmount: 0, lastMonthAmount: 0 },
         categories,
         defaultCurrency: 'EUR',
@@ -70,6 +79,7 @@ describe('useSpendingInsights', () => {
     const { result } = render({
       expenses: [makeExpense('2026-03-01', 100)],
       monthlyBudget: 500,
+      safeToSpend: 340,
       monthComparison: { thisMonthAmount: 100, lastMonthAmount: 0 },
     });
     const insight = result.current.find((i) => i.id === 'dailyBudgetRemaining');
@@ -77,10 +87,21 @@ describe('useSpendingInsights', () => {
     expect(insight!.variant).toBe('positive');
   });
 
+  it('quotes the same allowance as the Today slab, counting today', () => {
+    // 15 March leaves 17 days with today, 340 / 17 = 20 a day.
+    const { result } = render({ monthlyBudget: 500, safeToSpend: 340 });
+    const texts = result.current
+      .filter((insight) => 'dailyBudgetRemaining' === insight.id)
+      .map((insight) => insight.text);
+    expect(texts[0]).toContain('20,00');
+    expect(texts[0]).toContain('"days":17');
+  });
+
   it('flags budget exceeded when spending overshoots the cap', () => {
     const { result } = render({
       expenses: [makeExpense('2026-03-01', 600)],
       monthlyBudget: 500,
+      safeToSpend: -100,
       monthComparison: { thisMonthAmount: 600, lastMonthAmount: 0 },
     });
     const insight = result.current.find((i) => i.id === 'dailyBudgetRemaining');

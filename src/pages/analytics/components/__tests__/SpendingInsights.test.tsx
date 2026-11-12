@@ -17,6 +17,7 @@ const Icon = (props: React.SVGProps<SVGSVGElement>) => (
 const baseProps = {
   expenses: [],
   monthlyBudget: null,
+  safeToSpend: null,
   monthComparison: { thisMonthAmount: 0, lastMonthAmount: 0 },
   categories: [],
   defaultCurrency: 'EUR',

@@ -38,6 +38,7 @@ export const DEFAULT_VISIBLE: TodayTileId[] = [
 const WIDE_TILES: readonly TodayTileId[] = [
   'safeToSpend',
   'upcoming',
+  'insight',
   'recentActivity',
   'weeklyRecap',
 ];
