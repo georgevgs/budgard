@@ -2,6 +2,7 @@ import type { ReactElement, CSSProperties } from 'react';
 import { cn } from '@/constants/utils.ts';
 import type { EmbeddedCategory } from '@/types/Category.ts';
 import { getColorTint } from '@/constants/categoryColor';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 
 type CategoryBadgeProps = {
   category: EmbeddedCategory;
@@ -18,7 +19,7 @@ type CategoryBadgeProps = {
 // the app got a different answer depending on which of twenty-four swatches the
 // user had picked.
 //
-// The emoji comes with it, because that is what identifies a category at a
+// The icon comes with it, because that is what identifies a category at a
 // glance everywhere else now — the rows, the breakdown, the hero.
 export const CategoryBadge = ({
   category,
@@ -32,7 +33,7 @@ export const CategoryBadge = ({
       )}
       style={getBadgeStyle(category.color)}
     >
-      {renderIcon(category.icon)}
+      <CategoryIcon icon={category.icon} className="h-3.5 w-3.5" />
       {category.name}
     </div>
   );
@@ -40,16 +41,4 @@ export const CategoryBadge = ({
 
 const getBadgeStyle = (color: string): CSSProperties => {
   return { backgroundColor: getColorTint(color) };
-};
-
-const renderIcon = (icon: string | null) => {
-  if (!icon) {
-    return null;
-  }
-
-  return (
-    <span aria-hidden="true" className="leading-none">
-      {icon}
-    </span>
-  );
 };

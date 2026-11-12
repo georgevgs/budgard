@@ -1,3 +1,4 @@
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/constants/utils';
 import { getColorTint } from '@/constants/categoryColor';
@@ -52,7 +53,7 @@ export const QuickAddCategories = ({
           )}
           style={chipStyle(category, category.id === selectedId)}
         >
-          <span aria-hidden="true">{category.icon ?? '•'}</span>
+          <CategoryIcon icon={category.icon} />
           {category.name}
         </button>
       ))}

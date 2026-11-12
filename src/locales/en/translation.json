@@ -270,8 +270,8 @@
       "label": {
         "noBudget": "Next move",
         "shortfall": "Gap to close",
-        "save": "Flexible now",
-        "ready": "Flexible now"
+        "save": "Safe to spend",
+        "ready": "Safe to spend"
       },
       "start": "Start here",
       "body": {

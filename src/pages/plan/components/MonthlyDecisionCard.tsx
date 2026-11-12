@@ -169,5 +169,9 @@ const renderAction = (
     );
   }
 
-  return <span className={className}>{t('plan.decision.action.steady')}</span>;
+  return (
+    <p className="mt-4 text-[0.8rem] font-medium text-muted-foreground">
+      {t('plan.decision.action.steady')}
+    </p>
+  );
 };

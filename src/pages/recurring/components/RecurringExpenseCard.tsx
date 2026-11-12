@@ -7,6 +7,7 @@ import { CategoryBadge } from '@/pages/recurring/components/CategoryBadge';
 import { format } from 'date-fns';
 import type { Locale } from 'date-fns';
 import { cn, formatCurrency } from '@/constants/utils';
+import { startOfToday } from '@/constants/dates';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { RecurringExpense } from '@/types/RecurringExpense';
@@ -33,6 +34,7 @@ export const RecurringExpenseCard = ({
   const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();
+  const isDueBadgeVisible = isOverdue && expense.active;
 
   return (
     <SurfaceCard
@@ -52,7 +54,10 @@ export const RecurringExpenseCard = ({
                   defaultValue: expense.frequency,
                 })}
               </Badge>
-              {renderOverdueBadge(expense, isOverdue, t)}
+              <DueBadge
+                isVisible={isDueBadgeVisible}
+                isLate={isPastDue(nextOccurrence)}
+              />
             </div>
             <p className="text-base font-bold mt-1">
               {formatCurrency(expense.amount, defaultCurrency)}
@@ -87,20 +92,40 @@ const renderCategoryBadge = (expense: RecurringExpense) => {
   return <CategoryBadge category={expense.category} />;
 };
 
-const renderOverdueBadge = (
-  expense: RecurringExpense,
-  isOverdue: boolean,
-  t: TranslateFunction,
-) => {
-  if (!isOverdue || !expense.active) {
+const DueBadge = ({
+  isVisible,
+  isLate,
+}: {
+  isVisible: boolean;
+  isLate: boolean;
+}) => {
+  const { t } = useTranslation();
+
+  if (isVisible) {
+    return (
+      <span
+        className={cn(
+          'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold',
+          getDueToneClassName(isLate),
+        )}
+      >
+        {t('recurring.due')}
+      </span>
+    );
+  } else {
     return null;
   }
+};
 
-  return (
-    <span className="inline-flex items-center rounded-full bg-destructive/12 px-2.5 py-0.5 text-xs font-semibold text-destructive-ink">
-      {t('recurring.due')}
-    </span>
-  );
+const isPastDue = (nextOccurrence: Date | null): boolean =>
+  null !== nextOccurrence && nextOccurrence < startOfToday();
+
+const getDueToneClassName = (isLate: boolean): string => {
+  if (isLate) {
+    return 'bg-destructive/12 text-destructive-ink';
+  } else {
+    return 'bg-secondary text-secondary-foreground';
+  }
 };
 
 const renderNextOccurrence = (
