@@ -2,7 +2,7 @@
 -- Drives the net-worth view. Liabilities are derived from kind in app code, not stored.
 -- current_balance and cost_basis are denormalized caches kept in sync by triggers
 -- on account_balances so the net-worth list query stays a single SELECT.
-CREATE TABLE accounts (
+CREATE TABLE IF NOT EXISTS accounts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -19,30 +19,35 @@ CREATE TABLE accounts (
 
 ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own accounts" ON accounts;
 CREATE POLICY "Users can view their own accounts"
   ON accounts FOR SELECT
   TO authenticated
   USING ((SELECT auth.uid()) = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own accounts" ON accounts;
 CREATE POLICY "Users can insert their own accounts"
   ON accounts FOR INSERT
   TO authenticated
   WITH CHECK ((SELECT auth.uid()) = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own accounts" ON accounts;
 CREATE POLICY "Users can update their own accounts"
   ON accounts FOR UPDATE
   TO authenticated
   USING ((SELECT auth.uid()) = user_id)
   WITH CHECK ((SELECT auth.uid()) = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own accounts" ON accounts;
 CREATE POLICY "Users can delete their own accounts"
   ON accounts FOR DELETE
   TO authenticated
   USING ((SELECT auth.uid()) = user_id);
 
-CREATE INDEX accounts_user_id_idx ON accounts(user_id);
-CREATE INDEX accounts_user_active_idx ON accounts(user_id, is_archived) WHERE is_archived = false;
+CREATE INDEX IF NOT EXISTS accounts_user_id_idx ON accounts(user_id);
+CREATE INDEX IF NOT EXISTS accounts_user_active_idx ON accounts(user_id, is_archived) WHERE is_archived = false;
 
+DROP TRIGGER IF EXISTS accounts_set_updated_at ON accounts;
 CREATE TRIGGER accounts_set_updated_at
   BEFORE UPDATE ON accounts
   FOR EACH ROW
@@ -54,7 +59,7 @@ CREATE TRIGGER accounts_set_updated_at
 -- original_amount/original_currency/exchange_rate alongside (mirrors expenses).
 -- contribution_delta is the signed amount added/withdrawn since the last
 -- snapshot for investment accounts; null/0 for other kinds.
-CREATE TABLE account_balances (
+CREATE TABLE IF NOT EXISTS account_balances (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
   user_id UUID NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -71,29 +76,33 @@ CREATE TABLE account_balances (
 
 ALTER TABLE account_balances ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own account balances" ON account_balances;
 CREATE POLICY "Users can view their own account balances"
   ON account_balances FOR SELECT
   TO authenticated
   USING ((SELECT auth.uid()) = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own account balances" ON account_balances;
 CREATE POLICY "Users can insert their own account balances"
   ON account_balances FOR INSERT
   TO authenticated
   WITH CHECK ((SELECT auth.uid()) = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own account balances" ON account_balances;
 CREATE POLICY "Users can update their own account balances"
   ON account_balances FOR UPDATE
   TO authenticated
   USING ((SELECT auth.uid()) = user_id)
   WITH CHECK ((SELECT auth.uid()) = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own account balances" ON account_balances;
 CREATE POLICY "Users can delete their own account balances"
   ON account_balances FOR DELETE
   TO authenticated
   USING ((SELECT auth.uid()) = user_id);
 
-CREATE INDEX account_balances_account_idx ON account_balances(account_id, recorded_at DESC);
-CREATE INDEX account_balances_user_idx ON account_balances(user_id);
+CREATE INDEX IF NOT EXISTS account_balances_account_idx ON account_balances(account_id, recorded_at DESC);
+CREATE INDEX IF NOT EXISTS account_balances_user_idx ON account_balances(user_id);
 
 
 -- Sync trigger: after any change to account_balances, refresh the parent
@@ -149,6 +158,7 @@ $$;
 
 REVOKE ALL ON FUNCTION public.sync_account_from_balances() FROM PUBLIC;
 
+DROP TRIGGER IF EXISTS account_balances_sync ON account_balances;
 CREATE TRIGGER account_balances_sync
   AFTER INSERT OR UPDATE OR DELETE ON account_balances
   FOR EACH ROW

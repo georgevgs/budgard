@@ -112,8 +112,11 @@ $function$;
 REVOKE EXECUTE ON FUNCTION public.process_all_recurring_expenses(DATE) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.process_all_recurring_expenses(DATE) TO service_role;
 
--- Repoint the daily cron at the new function.
+-- Repoint the daily cron at the new function. The job exists only on the
+-- hosted project, so a fresh local database alters nothing.
 SELECT cron.alter_job(
-  job_id := (SELECT jobid FROM cron.job WHERE jobname = 'process-recurring-expenses-daily'),
+  job_id := job.jobid,
   command := 'SELECT process_all_recurring_expenses(CURRENT_DATE)'
-);
+)
+FROM cron.job AS job
+WHERE job.jobname = 'process-recurring-expenses-daily';

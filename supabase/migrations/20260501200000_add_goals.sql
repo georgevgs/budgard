@@ -4,7 +4,7 @@
 --   'category'  → sum of expenses in category_id since start_date
 --   'tag'       → sum of expenses tagged with tag_id since start_date
 --   'net_delta' → (income - expenses) since start_date
-CREATE TABLE goals (
+CREATE TABLE IF NOT EXISTS goals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -25,32 +25,37 @@ CREATE TABLE goals (
 
 ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own goals" ON goals;
 CREATE POLICY "Users can view their own goals"
   ON goals FOR SELECT
   TO authenticated
   USING ((SELECT auth.uid()) = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own goals" ON goals;
 CREATE POLICY "Users can insert their own goals"
   ON goals FOR INSERT
   TO authenticated
   WITH CHECK ((SELECT auth.uid()) = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own goals" ON goals;
 CREATE POLICY "Users can update their own goals"
   ON goals FOR UPDATE
   TO authenticated
   USING ((SELECT auth.uid()) = user_id)
   WITH CHECK ((SELECT auth.uid()) = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own goals" ON goals;
 CREATE POLICY "Users can delete their own goals"
   ON goals FOR DELETE
   TO authenticated
   USING ((SELECT auth.uid()) = user_id);
 
-CREATE INDEX goals_user_id_idx ON goals(user_id);
-CREATE INDEX goals_category_id_idx ON goals(category_id) WHERE category_id IS NOT NULL;
-CREATE INDEX goals_tag_id_idx ON goals(tag_id) WHERE tag_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS goals_user_id_idx ON goals(user_id);
+CREATE INDEX IF NOT EXISTS goals_category_id_idx ON goals(category_id) WHERE category_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS goals_tag_id_idx ON goals(tag_id) WHERE tag_id IS NOT NULL;
 
 -- Auto-bump updated_at on every UPDATE (function already exists in this project).
+DROP TRIGGER IF EXISTS goals_set_updated_at ON goals;
 CREATE TRIGGER goals_set_updated_at
   BEFORE UPDATE ON goals
   FOR EACH ROW

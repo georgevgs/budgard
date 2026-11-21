@@ -9,7 +9,7 @@
 -- daily simple interest accrual (matches consumer-grade payoff calculators;
 -- we deliberately don't model per-cycle compounding since we don't store
 -- statement dates).
-CREATE TABLE debts (
+CREATE TABLE IF NOT EXISTS debts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -32,30 +32,35 @@ CREATE TABLE debts (
 
 ALTER TABLE debts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own debts" ON debts;
 CREATE POLICY "Users can view their own debts"
   ON debts FOR SELECT
   TO authenticated
   USING ((SELECT auth.uid()) = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own debts" ON debts;
 CREATE POLICY "Users can insert their own debts"
   ON debts FOR INSERT
   TO authenticated
   WITH CHECK ((SELECT auth.uid()) = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own debts" ON debts;
 CREATE POLICY "Users can update their own debts"
   ON debts FOR UPDATE
   TO authenticated
   USING ((SELECT auth.uid()) = user_id)
   WITH CHECK ((SELECT auth.uid()) = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own debts" ON debts;
 CREATE POLICY "Users can delete their own debts"
   ON debts FOR DELETE
   TO authenticated
   USING ((SELECT auth.uid()) = user_id);
 
-CREATE INDEX debts_user_id_idx ON debts(user_id);
-CREATE INDEX debts_user_active_idx ON debts(user_id, is_archived) WHERE is_archived = false;
+CREATE INDEX IF NOT EXISTS debts_user_id_idx ON debts(user_id);
+CREATE INDEX IF NOT EXISTS debts_user_active_idx ON debts(user_id, is_archived) WHERE is_archived = false;
 
+DROP TRIGGER IF EXISTS debts_set_updated_at ON debts;
 CREATE TRIGGER debts_set_updated_at
   BEFORE UPDATE ON debts
   FOR EACH ROW
@@ -65,9 +70,9 @@ CREATE TRIGGER debts_set_updated_at
 -- Link payments to debts. ON DELETE SET NULL keeps the expense in transaction
 -- history if the debt is later removed (don't lose the spending record).
 ALTER TABLE expenses
-  ADD COLUMN debt_id UUID REFERENCES debts(id) ON DELETE SET NULL;
+  ADD COLUMN IF NOT EXISTS debt_id UUID REFERENCES debts(id) ON DELETE SET NULL;
 
-CREATE INDEX expenses_debt_id_idx ON expenses(debt_id) WHERE debt_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS expenses_debt_id_idx ON expenses(debt_id) WHERE debt_id IS NOT NULL;
 
 
 CREATE OR REPLACE FUNCTION public.recompute_debt_balance(p_debt_id UUID)
@@ -167,6 +172,7 @@ $$;
 
 REVOKE ALL ON FUNCTION public.sync_debt_from_expenses() FROM PUBLIC;
 
+DROP TRIGGER IF EXISTS expenses_sync_debt ON expenses;
 CREATE TRIGGER expenses_sync_debt
   AFTER INSERT OR UPDATE OR DELETE ON expenses
   FOR EACH ROW

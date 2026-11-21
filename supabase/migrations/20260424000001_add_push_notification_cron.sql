@@ -1,5 +1,7 @@
 -- Enable pg_net for HTTP requests from SQL.
--- pg_cron is already enabled on this project.
+-- pg_cron is already enabled on this project. Enabling it here too lets
+-- the migrations replay on a fresh local database.
+CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
 CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
 
 -- Daily push notification cron job at 08:00 UTC.

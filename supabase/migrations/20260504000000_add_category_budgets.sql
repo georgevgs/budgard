@@ -3,7 +3,7 @@
 -- the overall monthly limit; this table layers on optional sub-limits for
 -- specific categories. Spending is derived client-side from existing expenses
 -- (no precomputed aggregate stored here).
-CREATE TABLE category_budgets (
+CREATE TABLE IF NOT EXISTS category_budgets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
   category_id UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
@@ -15,30 +15,35 @@ CREATE TABLE category_budgets (
 
 ALTER TABLE category_budgets ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own category budgets" ON category_budgets;
 CREATE POLICY "Users can view their own category budgets"
   ON category_budgets FOR SELECT
   TO authenticated
   USING ((SELECT auth.uid()) = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own category budgets" ON category_budgets;
 CREATE POLICY "Users can insert their own category budgets"
   ON category_budgets FOR INSERT
   TO authenticated
   WITH CHECK ((SELECT auth.uid()) = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own category budgets" ON category_budgets;
 CREATE POLICY "Users can update their own category budgets"
   ON category_budgets FOR UPDATE
   TO authenticated
   USING ((SELECT auth.uid()) = user_id)
   WITH CHECK ((SELECT auth.uid()) = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own category budgets" ON category_budgets;
 CREATE POLICY "Users can delete their own category budgets"
   ON category_budgets FOR DELETE
   TO authenticated
   USING ((SELECT auth.uid()) = user_id);
 
-CREATE INDEX category_budgets_user_id_idx ON category_budgets(user_id);
-CREATE INDEX category_budgets_category_id_idx ON category_budgets(category_id);
+CREATE INDEX IF NOT EXISTS category_budgets_user_id_idx ON category_budgets(user_id);
+CREATE INDEX IF NOT EXISTS category_budgets_category_id_idx ON category_budgets(category_id);
 
+DROP TRIGGER IF EXISTS category_budgets_set_updated_at ON category_budgets;
 CREATE TRIGGER category_budgets_set_updated_at
   BEFORE UPDATE ON category_budgets
   FOR EACH ROW

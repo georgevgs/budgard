@@ -4,6 +4,7 @@
 -- templates. Add the standard owner-scoped UPDATE policy so the row state
 -- before AND after the update both stay under the caller.
 
+DROP POLICY IF EXISTS "Users can update their own templates" ON expense_templates;
 CREATE POLICY "Users can update their own templates" ON expense_templates
   FOR UPDATE TO authenticated
   USING ((SELECT auth.uid()) = user_id)

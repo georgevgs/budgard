@@ -8,9 +8,9 @@
 -- created it (the daily cron, the user-callable processor, manual entry).
 
 ALTER TABLE recurring_expenses
-  ADD COLUMN linked_account_id UUID REFERENCES accounts(id) ON DELETE SET NULL;
+  ADD COLUMN IF NOT EXISTS linked_account_id UUID REFERENCES accounts(id) ON DELETE SET NULL;
 
-CREATE INDEX recurring_expenses_linked_account_idx
+CREATE INDEX IF NOT EXISTS recurring_expenses_linked_account_idx
   ON recurring_expenses(linked_account_id)
   WHERE linked_account_id IS NOT NULL;
 
@@ -79,6 +79,7 @@ $$;
 
 REVOKE ALL ON FUNCTION public.sync_linked_investment_contribution() FROM PUBLIC;
 
+DROP TRIGGER IF EXISTS expenses_sync_linked_investment ON expenses;
 CREATE TRIGGER expenses_sync_linked_investment
   AFTER INSERT ON expenses
   FOR EACH ROW

@@ -1,5 +1,5 @@
 -- Expense templates: save frequently-used expense configurations for one-tap reuse
-CREATE TABLE expense_templates (
+CREATE TABLE IF NOT EXISTS expense_templates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
   amount NUMERIC NOT NULL,
@@ -14,16 +14,19 @@ CREATE TABLE expense_templates (
 ALTER TABLE expense_templates ENABLE ROW LEVEL SECURITY;
 
 -- RLS policies (same pattern as tags/categories)
+DROP POLICY IF EXISTS "Users can view their own templates" ON expense_templates;
 CREATE POLICY "Users can view their own templates"
   ON expense_templates FOR SELECT
   TO authenticated
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own templates" ON expense_templates;
 CREATE POLICY "Users can insert their own templates"
   ON expense_templates FOR INSERT
   TO authenticated
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own templates" ON expense_templates;
 CREATE POLICY "Users can delete their own templates"
   ON expense_templates FOR DELETE
   TO authenticated

@@ -139,8 +139,8 @@ CREATE TABLE IF NOT EXISTS public.user_budgets (
   user_id              uuid NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   monthly_amount       numeric NOT NULL
                        CHECK (monthly_amount > 0 AND monthly_amount <= 10000000),
-  daily_reminder_hour  smallint
-                       CHECK (daily_reminder_hour IS NULL OR (daily_reminder_hour >= 0 AND daily_reminder_hour <= 23)),
+  -- The range check is valid_reminder_hour, from 20260423211108.
+  daily_reminder_hour  smallint,
   default_savings_pct  numeric
                        CHECK (default_savings_pct IS NULL OR (default_savings_pct >= 0 AND default_savings_pct <= 100)),
   default_currency     text NOT NULL DEFAULT 'EUR',

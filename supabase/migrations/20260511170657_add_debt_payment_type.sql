@@ -19,6 +19,7 @@ update public.expenses
 
 -- Invariant: debt-linked rows must be typed as debt_payment, and debt_payment
 -- rows must reference a debt. Keeps the two representations in lockstep.
+alter table public.expenses drop constraint if exists expenses_debt_payment_consistency;
 alter table public.expenses add constraint expenses_debt_payment_consistency
   check (
     (debt_id is null and type <> 'debt_payment')
