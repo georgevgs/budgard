@@ -80,7 +80,7 @@ export const useExpenseOps = () => {
           t('expenses.toasts.addFailed'),
         ),
         offlineFallback: (error) =>
-          saveExpenseOffline(deps, writeData, expenseId, error),
+          saveExpenseOffline(deps, writeData, expenseId, receiptOptions, error),
         perform: () =>
           performExpenseSave(
             writeData,
@@ -221,6 +221,7 @@ const saveExpenseOffline = async (
   deps: ExpenseOpDeps,
   expenseData: ExpenseWritePayload,
   expenseId: string | undefined,
+  receiptOptions: ReceiptOptions | undefined,
   error: unknown,
 ): Promise<boolean> => {
   if (!isOfflineError(error)) {
@@ -237,10 +238,29 @@ const saveExpenseOffline = async (
   deps.toast({
     variant: 'success',
     title: deps.t('offline.savedOffline'),
-    description: deps.t('offline.willSync'),
+    description: describeOfflineSave(deps.t, receiptOptions),
   });
 
   return true;
+};
+
+const describeOfflineSave = (
+  t: TranslateFunction,
+  receiptOptions: ReceiptOptions | undefined,
+): string => {
+  if (hasReceiptChange(receiptOptions)) {
+    return t('offline.receiptNotSaved');
+  } else {
+    return t('offline.willSync');
+  }
+};
+
+const hasReceiptChange = (options: ReceiptOptions | undefined): boolean => {
+  if (undefined === options) {
+    return false;
+  }
+
+  return null !== options.receiptFile || options.shouldRemoveExistingReceipt;
 };
 
 const performExpenseSave = async (

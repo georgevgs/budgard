@@ -1440,6 +1440,7 @@
     "savedOffline": "Saved offline",
     "deleteSavedOffline": "Delete saved offline",
     "willSync": "We'll sync it when you're back online",
+    "receiptNotSaved": "It will sync when you are back online. The receipt was not kept, attach it again then.",
     "pending": "{{count}} change(s) pending sync"
   },
   "pwa": {

@@ -456,6 +456,59 @@ describe('handleExpenseSubmit offline', () => {
     ).toBe('Patched');
   });
 
+  it('warns that the receipt was dropped when an offline create had one', async () => {
+    offline = true;
+    mockDataService.createExpense.mockRejectedValue(new Error('offline'));
+    mockEnqueue.mockResolvedValue(undefined);
+
+    const ops = renderOps();
+    await act(async () => {
+      await ops.current.handleExpenseSubmit({ amount: 9 } as never, undefined, {
+        receiptFile: new File(['x'], 'r.jpg'),
+        shouldRemoveExistingReceipt: false,
+        existingReceiptPath: null,
+      });
+    });
+
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'offline.receiptNotSaved' }),
+    );
+  });
+
+  it('warns that the removal was dropped when an offline edit removed a receipt', async () => {
+    offline = true;
+    mockDataService.updateExpense.mockRejectedValue(new Error('offline'));
+    mockEnqueue.mockResolvedValue(undefined);
+
+    const ops = renderOps();
+    await act(async () => {
+      await ops.current.handleExpenseSubmit({ amount: 9 } as never, 'e1', {
+        receiptFile: null,
+        shouldRemoveExistingReceipt: true,
+        existingReceiptPath: 'old/p.jpg',
+      });
+    });
+
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'offline.receiptNotSaved' }),
+    );
+  });
+
+  it('keeps the plain sync message when the offline save has no receipt change', async () => {
+    offline = true;
+    mockDataService.createExpense.mockRejectedValue(new Error('offline'));
+    mockEnqueue.mockResolvedValue(undefined);
+
+    const ops = renderOps();
+    await act(async () => {
+      await ops.current.handleExpenseSubmit({ amount: 9 } as never);
+    });
+
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'offline.willSync' }),
+    );
+  });
+
   // A create the server saved but never answered (the 15s client timeout)
   // is retried from the toast. The retry has to name the same row, so the
   // create can answer with it rather than inserting a second one.
