@@ -213,8 +213,8 @@ constrain new work:
   entry points knip cannot infer, and five dependencies are declared in
   `netlify.toml` or CSS rather than imported. Every ignore in
   `knip.jsonc` says why it is there — add the reason with the entry, or
-  the report goes back to being noise nobody reads. knip itself is not a
-  declared dependency; the script runs it through `npx`.
+  the report goes back to being noise nobody reads. knip is an exact dev
+  dependency, so CI runs the reviewed version from `bun.lock`.
 - `npm run typecheck` runs `tsc -b`, and it has to stay that way. The root
   `tsconfig.json` is `"files": []` plus project references, so a plain
   `tsc --noEmit` compiles **nothing** and exits 0 on a codebase full of
