@@ -170,6 +170,8 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Failed to create checkout' }, 502);
     }
 
+    await replaceOpenSession(user.id, session.id, secretKey);
+
     return jsonResponse({ url: session.url }, 200);
   } catch (err) {
     console.error('stripe-checkout error:', err);
@@ -203,6 +205,78 @@ const hasNoStripeHistory = async (
   }
 };
 
+// Expires the user's previous open Checkout Session once a new one exists, so
+// a monthly and a yearly session can never both be paid. It never throws, a
+// failure here is logged and the new session's URL still goes back.
+const replaceOpenSession = async (
+  userId: string,
+  sessionId: string,
+  secretKey: string,
+): Promise<void> => {
+  try {
+    const adminClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    );
+    const { data: stored, error: readError } = await adminClient
+      .from('open_checkout_sessions')
+      .select('stripe_session_id')
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (null !== readError) {
+      console.error('stripe-checkout: open session lookup failed:', readError);
+    }
+
+    const previousSessionId = storedSessionIdOrNull(stored);
+    if (null !== previousSessionId && sessionId !== previousSessionId) {
+      await expireSession(previousSessionId, secretKey);
+    }
+
+    const { error: storeError } = await adminClient
+      .from('open_checkout_sessions')
+      .upsert({ user_id: userId, stripe_session_id: sessionId });
+    if (null !== storeError) {
+      console.error(
+        'stripe-checkout: storing open session failed:',
+        storeError,
+      );
+    }
+  } catch (error) {
+    console.error('stripe-checkout: replacing open session failed:', error);
+  }
+};
+
+const storedSessionIdOrNull = (
+  stored: { stripe_session_id: string } | null,
+): string | null => {
+  if (null === stored) {
+    return null;
+  }
+
+  return stored.stripe_session_id;
+};
+
+// Stripe refuses to expire a session that is already complete or expired.
+// That is logged and left alone, only an open session needs closing.
+const expireSession = async (
+  sessionId: string,
+  secretKey: string,
+): Promise<void> => {
+  const response = await fetch(`${STRIPE_API_URL}/${sessionId}/expire`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${secretKey}`,
+      'Stripe-Version': STRIPE_API_VERSION,
+    },
+  });
+  if (false === response.ok) {
+    const errorBody = await response.text();
+    console.error(
+      `stripe-checkout: expiring the previous session returned ${response.status}: ${errorBody}`,
+    );
+  }
+};
+
 const readPlan = async (req: Request): Promise<Plan | null> => {
   try {
     const body = await req.json();
@@ -231,6 +305,9 @@ const readPlan = async (req: Request): Promise<Plan | null> => {
  * to start over is not pinned to a spent Session for the full 24 hours Stripe
  * retains a key. The race being closed lasts seconds, so a request landing
  * either side of a bucket boundary is not a meaningful hole.
+ *
+ * The plan is in the key, so a session for the other plan is a new one. Once
+ * it opens, replaceOpenSession expires the previous session.
  */
 const IDEMPOTENCY_WINDOW_MS = 30 * 60 * 1000;
 

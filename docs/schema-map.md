@@ -4,7 +4,7 @@
      Regenerate with `npm run docs:schema`. -->
 
 An index from each database object to the migrations that touch it, built by
-scanning `supabase/migrations`. Covers 103 migrations: 56 functions, 30 triggers, 27 tables, 88 policies, 59 indexes.
+scanning `supabase/migrations`. Covers 104 migrations: 56 functions, 30 triggers, 28 tables, 88 policies, 59 indexes.
 
 This is a **map, not a schema definition**. Migrations are append-only history
 and the live schema is what you get by replaying them, so nothing here states
@@ -161,6 +161,13 @@ First defined in `20260807120000_add_no_spend_days.sql`.
 
 - creates — `20260807120000_add_no_spend_days.sql`
 - alters — `20260807120000_add_no_spend_days.sql`
+
+### `open_checkout_sessions`
+
+First defined in `20261121110000_track_open_checkout_session.sql`.
+
+- creates — `20261121110000_track_open_checkout_session.sql`
+- alters — `20261121110000_track_open_checkout_session.sql`
 
 ### `product_events`
 
