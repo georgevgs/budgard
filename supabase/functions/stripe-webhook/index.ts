@@ -112,17 +112,34 @@ Deno.serve(async (req) => {
     buildEventParams(userId, subscription, event.created),
   );
 
-  if (error) {
+  return storeResultResponse(error, event.type, subscription.id);
+});
+
+// --- Helpers ---
+
+// A deleted account cancels billing first, so the final event can name a user
+// that is gone. Postgres 23503 is the foreign key failure, retrying it never
+// succeeds, so it is acknowledged.
+const storeResultResponse = (
+  error: { code?: string } | null,
+  eventType: string,
+  subscriptionId: string,
+) => {
+  if (null === error) {
+    return jsonResponse({ received: true }, 200);
+  } else if ('23503' === error.code) {
+    console.error(
+      `stripe-webhook: ${eventType} for ${subscriptionId} names a user that no longer exists`,
+    );
+
+    return jsonResponse({ received: true }, 200);
+  } else {
     console.error('stripe-webhook: apply_subscription_event failed:', error);
 
     // Non-200 makes Stripe retry the delivery.
     return jsonResponse({ error: 'Failed to store subscription' }, 500);
   }
-
-  return jsonResponse({ received: true }, 200);
-});
-
-// --- Helpers ---
+};
 
 const jsonResponse = (body: Record<string, unknown>, status: number) =>
   new Response(JSON.stringify(body), {

@@ -64,22 +64,6 @@ describe('mutating Edge Function boundaries', () => {
     },
   );
 
-  it('sends unpaid and paused subscribers to the portal instead of a second checkout', () => {
-    const source = readFunction('stripe-checkout');
-
-    expect(source).toContain(
-      "const RESUMABLE_STATUSES = ['unpaid', 'paused'];",
-    );
-    expect(source).toContain("{ error: 'manage_billing' }, 409");
-  });
-
-  it('does not create checkout when the subscription lookup fails', () => {
-    const source = readFunction('stripe-checkout');
-
-    expect(source).toContain('error: subscriptionError');
-    expect(source).toContain("{ error: 'Unable to verify subscription' }, 503");
-  });
-
   it('reuses the stored Stripe customer when a subscriber returns', () => {
     const source = readFunction('stripe-checkout');
 

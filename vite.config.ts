@@ -17,6 +17,7 @@ import { PWA_NAVIGATION_DENYLIST } from "./src/boot/pwaNavigation.ts";
 const BROWSER_GLOBAL_TEST_FILES = [
   'src/constants/__tests__/appLock.test.ts',
   'src/common/components/pro/__tests__/UpgradeDialog.test.tsx',
+  'src/test/invariants/stripeWebhookHandler.test.ts',
 ];
 
 // Function-form manualChunks: the previous array form only captured each
