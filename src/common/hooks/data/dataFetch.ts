@@ -7,6 +7,7 @@ import {
   isAbortError,
   isExpiredJwtError,
 } from '@/common/contexts/dataContextHelpers';
+import { withLocalWrites } from '@/common/hooks/data/localWrites';
 import { readPendingWrites } from '@/constants/offlineQueue';
 import { getRecentCutoff } from '@/constants/dataCache';
 import { fetchDeferredData } from '@/common/hooks/data/dataDeferred';
@@ -72,6 +73,7 @@ const performFetch = async (
     });
   }
 
+  const writeMark = session.localWrites.mark();
   try {
     const { expenses, incomes, ...values } = await fetchEssentialData(
       session.ownerId,
@@ -91,22 +93,46 @@ const performFetch = async (
         keepPendingWrites(
           prev,
           replaceRecentWindow(prev, expenses, recentCutoff),
-          pending,
+          withLocalWrites(
+            pending,
+            session.localWrites.idsSince(writeMark),
+            prev,
+          ),
         ),
       );
       session.setters.setIncomes((prev) =>
         keepPendingWrites(
           prev,
           replaceRecentWindow(prev, incomes, recentCutoff),
-          pending,
+          withLocalWrites(
+            pending,
+            session.localWrites.idsSince(writeMark),
+            prev,
+          ),
         ),
       );
     } else {
       session.setters.setExpenses((prev) =>
-        keepPendingWrites(prev, expenses, pending),
+        keepPendingWrites(
+          prev,
+          expenses,
+          withLocalWrites(
+            pending,
+            session.localWrites.idsSince(writeMark),
+            prev,
+          ),
+        ),
       );
       session.setters.setIncomes((prev) =>
-        keepPendingWrites(prev, incomes, pending),
+        keepPendingWrites(
+          prev,
+          incomes,
+          withLocalWrites(
+            pending,
+            session.localWrites.idsSince(writeMark),
+            prev,
+          ),
+        ),
       );
     }
     session.isHydratedFromCache = false;

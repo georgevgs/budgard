@@ -1,6 +1,7 @@
 import type { DataAction, DataSetters } from '@/common/hooks/data/dataReducer';
 import type { TranslateFunction } from '@/constants/translate';
 import type { useToast } from '@/common/hooks/useToast';
+import type { LocalWriteLog } from '@/common/hooks/data/localWrites';
 import { hasDataSnapshot } from '@/constants/dataCache';
 import type {
   OnDemandDomain,
@@ -20,6 +21,7 @@ export type DataSession = {
   setters: DataSetters;
   dispatch: (action: DataAction) => void;
   getFeedback: () => DataFeedback;
+  localWrites: LocalWriteLog;
   isActive: boolean;
   controller: AbortController | null;
   isFetching: boolean;
@@ -41,12 +43,14 @@ export const createDataSession = (
   setters: DataSetters,
   dispatch: (action: DataAction) => void,
   getFeedback: () => DataFeedback,
+  localWrites: LocalWriteLog,
 ): DataSession => ({
   ownerId,
   spaceKey,
   setters,
   dispatch,
   getFeedback,
+  localWrites,
   isActive: true,
   controller: null,
   isFetching: false,

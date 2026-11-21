@@ -98,6 +98,79 @@ const stage2Calls = (mock: typeof svc.getExpenses) =>
 const olderExpenses = [{ id: 'e-old', date: '2025-03-01' }];
 const olderIncomes = [{ id: 'i-old', date: '2025-03-01' }];
 
+describe('useDataLayer writes during a fetch', () => {
+  const startRefetch = async (
+    result: { current: ReturnType<typeof useDataLayer> },
+    rows: unknown[],
+  ) => {
+    const pending = deferred<Awaited<ReturnType<typeof svc.getExpenses>>>();
+    svc.getExpenses.mockImplementationOnce(() => pending.promise);
+    const refreshing = { current: Promise.resolve() };
+    await act(async () => {
+      refreshing.current = result.current.actions.refreshData();
+    });
+
+    return async () => {
+      await act(async () => {
+        pending.resolve(rows as never);
+        await refreshing.current;
+      });
+    };
+  };
+
+  it('keeps an expense added while a refetch is in flight', async () => {
+    const { result } = renderHook(() => useDataLayer());
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+    const land = await startRefetch(result, [
+      { id: 'e-recent', date: '2026-08-01' },
+    ]);
+    act(() =>
+      result.current.actions.setExpenses((previous) => [
+        { id: 'e-new', date: '2026-08-02' } as (typeof previous)[number],
+        ...previous,
+      ]),
+    );
+    await land();
+
+    const ids = result.current.expenses.map((row) => row.id);
+    expect(ids).toContain('e-new');
+    expect(ids).toContain('e-recent');
+  });
+
+  it('keeps an expense deleted while a refetch is in flight', async () => {
+    const { result } = renderHook(() => useDataLayer());
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+    const land = await startRefetch(result, [
+      { id: 'e-recent', date: '2026-08-01' },
+    ]);
+    act(() =>
+      result.current.actions.setExpenses((previous) =>
+        previous.filter((row) => 'e-recent' !== row.id),
+      ),
+    );
+    await land();
+
+    expect(result.current.expenses.map((row) => row.id)).not.toContain(
+      'e-recent',
+    );
+  });
+
+  it('drops a row the user did not touch when the server no longer has it', async () => {
+    const { result } = renderHook(() => useDataLayer());
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+    const land = await startRefetch(result, []);
+    await land();
+
+    expect(result.current.expenses).toEqual([]);
+  });
+});
+
 // getExpenses serves the recent window on a `sinceDate` call and the tail on a
 // `beforeDate` call, which is how the real on-demand fetch is shaped.
 const twoStageExpenses = () =>

@@ -5,6 +5,7 @@ import {
   keepPendingWrites,
   replaceRecentWindow,
 } from '@/common/contexts/dataContextHelpers';
+import { withLocalWrites } from '@/common/hooks/data/localWrites';
 import { readPendingWrites } from '@/constants/offlineQueue';
 import { getRecentCutoff } from '@/constants/dataCache';
 import { loadOptionalData } from '@/common/hooks/data/dataOptional';
@@ -26,13 +27,24 @@ export const refreshTransactions = (
       getRows = dataService.getIncomes;
       setRows = session.setters.setIncomes;
     }
+    const writeMark = session.localWrites.mark();
     const rows = await getRows(session.ownerId, undefined, sinceDate);
     const pending = await readPendingWrites();
     if (!session.isActive) {
       return;
     }
     if (includesFullHistory) {
-      setRows((prev) => keepPendingWrites(prev, rows, pending));
+      setRows((previous) =>
+        keepPendingWrites(
+          previous,
+          rows,
+          withLocalWrites(
+            pending,
+            session.localWrites.idsSince(writeMark),
+            previous,
+          ),
+        ),
+      );
 
       return;
     }
@@ -40,7 +52,7 @@ export const refreshTransactions = (
       keepPendingWrites(
         prev,
         replaceRecentWindow(prev, rows, recentCutoff),
-        pending,
+        withLocalWrites(pending, session.localWrites.idsSince(writeMark), prev),
       ),
     );
   });

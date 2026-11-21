@@ -8,6 +8,7 @@ import {
   disposeDataSession,
   type DataSession,
 } from '@/common/hooks/data/dataSession';
+import type { LocalWriteLog } from '@/common/hooks/data/localWrites';
 import { fetchData } from '@/common/hooks/data/dataFetch';
 import { loadHistory } from '@/common/hooks/data/dataHistory';
 import {
@@ -30,6 +31,7 @@ export const useDataLifecycle = (
   isAuthLoading: boolean,
   setters: DataSetters,
   dispatch: (action: DataAction) => void,
+  writeLog: LocalWriteLog,
 ) => {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -55,6 +57,7 @@ export const useDataLifecycle = (
       setters,
       dispatch,
       () => feedbackRef.current,
+      writeLog,
     );
     sessionRef.current = session;
     void fetchData(session);
@@ -63,7 +66,7 @@ export const useDataLifecycle = (
       disposeDataSession(session);
       sessionRef.current = null;
     };
-  }, [isAuthLoading, ownerId, spaceKey, setters, dispatch]);
+  }, [isAuthLoading, ownerId, spaceKey, setters, dispatch, writeLog]);
 
   useEffect(() => {
     const onVisibilityChange = () => {

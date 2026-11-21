@@ -7,6 +7,10 @@ import {
   createSetters,
 } from '@/common/hooks/data/dataReducer';
 import { useDataLifecycle } from '@/common/hooks/data/useDataLifecycle';
+import {
+  createLocalWriteLog,
+  trackWrites,
+} from '@/common/hooks/data/localWrites';
 import { useDataSnapshot } from '@/common/hooks/data/useDataSnapshot';
 import { useDataSlices } from '@/common/hooks/data/useDataSlices';
 import type { DataActions } from '@/common/contexts/DataContext.types';
@@ -19,6 +23,7 @@ export const useDataLayer = () => {
   const [data, dispatch] = useReducer(dataReducer, EMPTY_DATA);
   const [bootedSpaceKey, setBootedSpaceKey] = useState<string | null>(null);
   const setters = useMemo(() => createSetters(dispatch), []);
+  const [writeLog] = useState(() => createLocalWriteLog());
   const expensesRef = useRef(data.expenses);
   const incomesRef = useRef(data.incomes);
   const refreshers = useDataLifecycle(
@@ -27,6 +32,7 @@ export const useDataLayer = () => {
     isAuthLoading,
     setters,
     dispatch,
+    writeLog,
   );
   useDataSnapshot(data, spaceKey);
   const slices = useDataSlices(data);
@@ -54,10 +60,12 @@ export const useDataLayer = () => {
     () => ({
       ...refreshers,
       ...setters,
+      setExpenses: (value) => setters.setExpenses(trackWrites(writeLog, value)),
+      setIncomes: (value) => setters.setIncomes(trackWrites(writeLog, value)),
       expensesRef,
       incomesRef,
     }),
-    [refreshers, setters],
+    [refreshers, setters, writeLog],
   );
 
   return {

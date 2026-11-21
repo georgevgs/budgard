@@ -87,7 +87,7 @@ export const EMPTY_DATA: DataState = {
 // A value or an updater, matching what a useState setter accepts — the
 // dataOps hooks pass functional updates for optimistic writes and must keep
 // being able to.
-type Updater<T> = T | ((previous: T) => T);
+export type Updater<T> = T | ((previous: T) => T);
 
 // A union over the keys rather than `key: keyof DataState`, so the value is
 // checked against the field it is being written to. Without this every setter
