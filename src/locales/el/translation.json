@@ -797,7 +797,6 @@
       "prefBudgetExceededDescription": "Ειδοποίηση την ημέρα που ξεπερνάτε ένα όριο",
       "prefDebtPaymentLabel": "Πληρωμές χρεών",
       "prefDebtPaymentDescription": "Υπενθύμιση την ημέρα πριν από μια ελάχιστη πληρωμή",
-      "preferenceUpdateFailed": "Αποτυχία ενημέρωσης προτίμησης",
       "preferencesUpdateFailed": "Αποτυχία ενημέρωσης προτιμήσεων ειδοποιήσεων",
       "swUnavailable": "Το service worker δεν είναι διαθέσιμο. Δοκιμάστε να φορτώσετε ξανά την εφαρμογή.",
       "enableFailed": "Αποτυχία ενεργοποίησης ειδοποιήσεων. Παρακαλώ δοκιμάστε ξανά.",

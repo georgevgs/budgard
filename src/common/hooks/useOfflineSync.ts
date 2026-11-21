@@ -16,7 +16,7 @@ const MAX_RETRIES = 5;
 
 export const useOfflineSync = (): void => {
   const { t } = useTranslation();
-  const { refreshExpenses, refreshIncomes } = useDataActions();
+  const { refreshExpenses, refreshIncomes, refreshDebts } = useDataActions();
   const isSyncing = useRef(false);
 
   const reportSync = useCallback(
@@ -37,6 +37,11 @@ export const useOfflineSync = (): void => {
             tags: { operation: 'refreshIncomes', context: 'afterOfflineSync' },
           });
         });
+        refreshDebts().catch((error) => {
+          captureException(error, {
+            tags: { operation: 'refreshDebts', context: 'afterOfflineSync' },
+          });
+        });
       }
 
       if (failCount > 0) {
@@ -46,7 +51,7 @@ export const useOfflineSync = (): void => {
         });
       }
     },
-    [refreshExpenses, refreshIncomes, t],
+    [refreshExpenses, refreshIncomes, refreshDebts, t],
   );
 
   const syncQueue = useCallback(async () => {

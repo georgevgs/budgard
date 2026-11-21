@@ -5,10 +5,12 @@ import { useOfflineSync } from '@/common/hooks/useOfflineSync';
 // Mock dependencies
 const mockRefreshExpenses = vi.fn().mockResolvedValue(undefined);
 const mockRefreshIncomes = vi.fn().mockResolvedValue(undefined);
+const mockRefreshDebts = vi.fn().mockResolvedValue(undefined);
 vi.mock('@/common/contexts/DataContext', () => ({
   useDataActions: () => ({
     refreshExpenses: mockRefreshExpenses,
     refreshIncomes: mockRefreshIncomes,
+    refreshDebts: mockRefreshDebts,
   }),
 }));
 
@@ -97,6 +99,40 @@ describe('useOfflineSync', () => {
       expect.objectContaining({ variant: 'success' }),
     );
     expect(mockRefreshExpenses).toHaveBeenCalled();
+  });
+
+  it('refreshes debts once after a successful sync', async () => {
+    mockGetAll.mockResolvedValue([
+      {
+        id: 20,
+        type: 'createExpense',
+        payload: { amount: 10, user_id: 'owner-1', type: 'debt_payment' },
+        createdAt: '',
+      },
+    ]);
+    mockCreateExpense.mockResolvedValue({});
+
+    renderHook(() => useOfflineSync());
+    await act(async () => {});
+
+    expect(mockRefreshDebts).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not refresh debts when every entry failed', async () => {
+    mockGetAll.mockResolvedValue([
+      {
+        id: 21,
+        type: 'createExpense',
+        payload: { amount: 10, user_id: 'owner-1' },
+        createdAt: '',
+      },
+    ]);
+    mockCreateExpense.mockRejectedValue(new Error('permanent rejection'));
+
+    renderHook(() => useOfflineSync());
+    await act(async () => {});
+
+    expect(mockRefreshDebts).not.toHaveBeenCalled();
   });
 
   it('processes updateExpense mutations', async () => {

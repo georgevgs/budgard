@@ -53,46 +53,27 @@ export const useSettingsHandlers = () => {
         utcHour = localToUtcHour(9);
       }
 
-      try {
-        await handleDailyReminderHourUpdate(utcHour);
-      } catch {
-        toast({
-          variant: 'destructive',
-          description: t('settings.notifications.dailyReminderFailed'),
-        });
-      }
+      await handleDailyReminderHourUpdate(utcHour).catch(() => undefined);
     },
-    [handleDailyReminderHourUpdate, toast, t],
+    [handleDailyReminderHourUpdate],
   );
 
   const handleDailyReminderTimeChange = useCallback(
     async (localHour: number) => {
       const utcHour = localToUtcHour(localHour);
 
-      try {
-        await handleDailyReminderHourUpdate(utcHour);
-      } catch {
-        toast({
-          variant: 'destructive',
-          description: t('settings.notifications.dailyReminderFailed'),
-        });
-      }
+      await handleDailyReminderHourUpdate(utcHour).catch(() => undefined);
     },
-    [handleDailyReminderHourUpdate, toast, t],
+    [handleDailyReminderHourUpdate],
   );
 
   const handlePreferenceToggle = useCallback(
     async (key: NotificationPreferenceKey, isEnabled: boolean) => {
-      try {
-        await handleNotificationPreferenceUpdate(key, isEnabled);
-      } catch {
-        toast({
-          variant: 'destructive',
-          description: t('settings.notifications.preferenceUpdateFailed'),
-        });
-      }
+      await handleNotificationPreferenceUpdate(key, isEnabled).catch(
+        () => undefined,
+      );
     },
-    [handleNotificationPreferenceUpdate, toast, t],
+    [handleNotificationPreferenceUpdate],
   );
 
   const handleSignOut = async () => {

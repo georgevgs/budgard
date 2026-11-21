@@ -82,27 +82,27 @@ export const useMutationRunner = () => {
 
           return saved;
         } catch (error) {
-          if (spec.offlineFallback) {
-            const handled = await spec.offlineFallback(error);
-            if (handled) {
-              return undefined;
-            }
-          }
-
-          haptics.error();
-          rollback?.();
-          captureException(error, {
-            tags: { operation: spec.operation },
-          });
-          if (spec.isRetryable === false) {
-            showErrorToast(spec.errorMessage);
+          const isQueued = await isHandledOffline(spec, error);
+          if (isQueued) {
+            return undefined;
           } else {
-            showErrorToast(spec.errorMessage, () => {
-              void run().catch(() => undefined);
+            haptics.error();
+            if (undefined !== rollback) {
+              rollback();
+            }
+            captureException(error, {
+              tags: { operation: spec.operation },
             });
-          }
+            if (false === spec.isRetryable) {
+              showErrorToast(spec.errorMessage);
+            } else {
+              showErrorToast(spec.errorMessage, () => {
+                void run().catch(() => undefined);
+              });
+            }
 
-          throw error;
+            throw error;
+          }
         }
       };
 
@@ -110,6 +110,25 @@ export const useMutationRunner = () => {
     },
     [showErrorToast, toast],
   );
+};
+
+const isHandledOffline = async <TSaved>(
+  spec: MutationSpec<TSaved>,
+  error: unknown,
+): Promise<boolean> => {
+  if (undefined === spec.offlineFallback) {
+    return false;
+  }
+
+  try {
+    return await spec.offlineFallback(error);
+  } catch (fallbackError) {
+    captureException(fallbackError, {
+      tags: { operation: spec.operation, context: 'offlineFallback' },
+    });
+
+    return false;
+  }
 };
 
 const fireSuccessHaptic = (

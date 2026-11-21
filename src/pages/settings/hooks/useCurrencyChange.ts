@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { useSettingsOps } from '@/common/hooks/dataOps/useSettingsOps';
-import { useToast } from '@/common/hooks/useToast';
 
 /**
  * Gates the default-currency change behind a confirmation.
@@ -14,10 +12,8 @@ import { useToast } from '@/common/hooks/useToast';
  * on a tap is not. The user confirms, knowing what does and does not change.
  */
 export const useCurrencyChange = () => {
-  const { t } = useTranslation();
   const { defaultCurrency } = useDataConfig();
   const { handleCurrencyUpdate } = useSettingsOps();
-  const { toast } = useToast();
   const [pending, setPending] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -46,13 +42,7 @@ export const useCurrencyChange = () => {
     setPending(null);
     setIsUpdating(true);
     try {
-      await handleCurrencyUpdate(currency);
-      toast({ title: t('settings.currency.updated') });
-    } catch {
-      toast({
-        title: t('settings.currency.updateFailed'),
-        variant: 'destructive',
-      });
+      await handleCurrencyUpdate(currency).catch(() => undefined);
     } finally {
       setIsUpdating(false);
     }

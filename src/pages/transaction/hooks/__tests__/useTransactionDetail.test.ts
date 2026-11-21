@@ -23,6 +23,14 @@ vi.mock('@/common/hooks/dataOps/useExpenseOps', () => ({
   useExpenseOps: () => ops,
 }));
 
+const incomeOps = vi.hoisted(() => ({
+  handleIncomeSubmit: vi.fn(),
+  handleIncomeDelete: vi.fn(),
+}));
+vi.mock('@/common/hooks/dataOps/useIncomeOps', () => ({
+  useIncomeOps: () => incomeOps,
+}));
+
 import { useTransactionDetail } from '@/pages/transaction/hooks/useTransactionDetail';
 
 // --- Fixtures ---
@@ -47,6 +55,8 @@ beforeEach(() => {
   data.incomes = [];
   ops.handleExpenseSubmit.mockResolvedValue(undefined);
   ops.handleExpenseDelete.mockResolvedValue(undefined);
+  incomeOps.handleIncomeSubmit.mockResolvedValue(null);
+  incomeOps.handleIncomeDelete.mockResolvedValue(undefined);
 });
 
 describe('finding the transaction', () => {
@@ -243,5 +253,51 @@ describe('exclusion and delete', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
     expect(ops.handleExpenseDelete).not.toHaveBeenCalled();
     expect(ops.handleExpenseSubmit).not.toHaveBeenCalled();
+  });
+});
+
+describe('an income', () => {
+  beforeEach(() => {
+    data.incomes = [row({ id: 'i1', type: 'income', description: 'Salary' })];
+  });
+
+  it('saves its note through the income operations', async () => {
+    const result = render('i1');
+
+    act(() => result.current.setNote('March pay'));
+    await act(async () => {
+      await result.current.saveNote();
+    });
+
+    expect(incomeOps.handleIncomeSubmit).toHaveBeenCalledWith(
+      { note: 'March pay' },
+      'i1',
+    );
+    expect(ops.handleExpenseSubmit).not.toHaveBeenCalled();
+  });
+
+  it('flips the exclusion flag through the income operations', async () => {
+    const result = render('i1');
+
+    await act(async () => {
+      await result.current.toggleExcluded();
+    });
+
+    expect(incomeOps.handleIncomeSubmit).toHaveBeenCalledWith(
+      { is_excluded: true },
+      'i1',
+    );
+    expect(ops.handleExpenseSubmit).not.toHaveBeenCalled();
+  });
+
+  it('deletes through the income operations', async () => {
+    const result = render('i1');
+
+    await act(async () => {
+      await result.current.remove();
+    });
+
+    expect(incomeOps.handleIncomeDelete).toHaveBeenCalledWith('i1');
+    expect(ops.handleExpenseDelete).not.toHaveBeenCalled();
   });
 });

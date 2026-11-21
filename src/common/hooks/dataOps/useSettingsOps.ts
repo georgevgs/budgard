@@ -33,6 +33,7 @@ export const useSettingsOps = () => {
       runMutation({
         operation: 'updateDefaultCurrency',
         errorMessage: t('settings.currency.updateFailed'),
+        successMessage: t('settings.currency.updated'),
         successHaptic: 'none',
         optimistic: () =>
           setScalarOptimistic(setDefaultCurrency, defaultCurrency, currency),

@@ -323,6 +323,43 @@ describe('useMutationRunner', () => {
     expect(mockShowErrorToast).toHaveBeenCalled();
   });
 
+  it('reports both errors and takes the failure path when the fallback itself throws', async () => {
+    const rollback = vi.fn();
+    const writeError = new Error('offline');
+    const fallbackError = new Error('indexeddb lost');
+    const runner = renderRunner();
+
+    await act(async () => {
+      await expect(
+        runner.current({
+          operation: 'createThing',
+          errorMessage: 'could not save',
+          optimistic: () => rollback,
+          offlineFallback: async () => {
+            throw fallbackError;
+          },
+          perform: async () => {
+            throw writeError;
+          },
+        }),
+      ).rejects.toBe(writeError);
+    });
+
+    expect(rollback).toHaveBeenCalled();
+    expect(mockHaptics.error).toHaveBeenCalled();
+    expect(mockShowErrorToast).toHaveBeenCalledWith(
+      'could not save',
+      expect.any(Function),
+    );
+    expect(mockSentry.captureException).toHaveBeenCalledTimes(2);
+    expect(mockSentry.captureException).toHaveBeenCalledWith(fallbackError, {
+      tags: { operation: 'createThing', context: 'offlineFallback' },
+    });
+    expect(mockSentry.captureException).toHaveBeenCalledWith(writeError, {
+      tags: { operation: 'createThing' },
+    });
+  });
+
   it('works with no optimistic pass at all (server-first writes)', async () => {
     const runner = renderRunner();
 

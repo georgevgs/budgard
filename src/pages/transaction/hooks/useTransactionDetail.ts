@@ -6,6 +6,7 @@ import {
   useDataConfig,
 } from '@/common/contexts/DataContext';
 import { useExpenseOps } from '@/common/hooks/dataOps/useExpenseOps';
+import { useIncomeOps } from '@/common/hooks/dataOps/useIncomeOps';
 import { countsAsSpending } from '@/constants/spending';
 import type { Expense } from '@/types/Expense';
 
@@ -40,6 +41,7 @@ export const useTransactionDetail = (
   const incomes = useIncomesData();
   const { defaultCurrency } = useDataConfig();
   const { handleExpenseSubmit, handleExpenseDelete } = useExpenseOps();
+  const { handleIncomeSubmit, handleIncomeDelete } = useIncomeOps();
   const navigate = useNavigate();
 
   const transaction = useMemo(
@@ -57,11 +59,30 @@ export const useTransactionDetail = (
   const savedNote = transaction?.note ?? '';
   const note = noteDraft ?? savedNote;
 
+  const submitPatch = async (
+    row: Expense,
+    patch: Partial<Expense>,
+  ): Promise<void> => {
+    if ('income' === row.type) {
+      await handleIncomeSubmit(patch, row.id);
+    } else {
+      await handleExpenseSubmit(patch, row.id);
+    }
+  };
+
+  const deleteRow = async (row: Expense): Promise<void> => {
+    if ('income' === row.type) {
+      await handleIncomeDelete(row.id);
+    } else {
+      await handleExpenseDelete(row.id);
+    }
+  };
+
   const saveNote = async () => {
     if (!transaction || note === savedNote) {
       return;
     }
-    await handleExpenseSubmit({ note: note.trim() || null }, transaction.id);
+    await submitPatch(transaction, { note: noteOrNull(note) });
     setNoteDraft(null);
   };
 
@@ -69,10 +90,9 @@ export const useTransactionDetail = (
     if (!transaction) {
       return;
     }
-    await handleExpenseSubmit(
-      { is_excluded: !transaction.is_excluded },
-      transaction.id,
-    );
+    await submitPatch(transaction, {
+      is_excluded: true !== transaction.is_excluded,
+    });
   };
 
   const remove = async () => {
@@ -82,7 +102,7 @@ export const useTransactionDetail = (
     // Leave before the row disappears from under the screen, or the detail
     // view renders its own not-found state for a frame on the way out.
     navigate(-1);
-    await handleExpenseDelete(transaction.id);
+    await deleteRow(transaction);
   };
 
   return {
@@ -147,3 +167,12 @@ const buildStats = (
 // there is a real merchant field to match on.
 const normalise = (description: string): string =>
   description.trim().toLowerCase();
+
+const noteOrNull = (note: string): string | null => {
+  const trimmed = note.trim();
+  if ('' === trimmed) {
+    return null;
+  } else {
+    return trimmed;
+  }
+};

@@ -119,13 +119,11 @@ export const useCategoryOps = () => {
         shouldSkip,
         errorMessage: t('categories.toasts.bulkCreateFailed'),
         perform: () =>
-          Promise.all(
-            categoriesData.map((category) =>
-              dataService.createCategory(category, activeOwnerId),
-            ),
-          ),
+          dataService.createCategories(categoriesData, activeOwnerId),
         commit: (created) =>
-          setCategories((prev) => sortByName([...prev, ...created])),
+          setCategories((previous) =>
+            sortByName(appendNewById(previous, created)),
+          ),
       });
 
     return {
@@ -305,6 +303,17 @@ const removeCategoryAndBudgets = (
 
 const sortByName = <T extends { name: string }>(items: T[]): T[] =>
   [...items].sort((a, b) => a.name.localeCompare(b.name));
+
+const appendNewById = (
+  previous: Category[],
+  created: Category[],
+): Category[] => [
+  ...previous,
+  ...created.filter(
+    (category) =>
+      false === previous.some((existing) => existing.id === category.id),
+  ),
+];
 
 const mergeCategoryPatch = (
   row: Expense,

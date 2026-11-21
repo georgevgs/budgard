@@ -28,6 +28,21 @@ export const categoriesApi = {
     );
   },
 
+  async createCategories(categoriesData: Partial<Category>[], ownerId: string) {
+    return rows<Category>(
+      supabase
+        .from('categories')
+        .upsert(
+          categoriesData.map((category) => ({
+            ...category,
+            user_id: ownerId,
+          })),
+          { onConflict: 'user_id,name', ignoreDuplicates: true },
+        )
+        .select(),
+    );
+  },
+
   async updateCategory(categoryId: string, categoryData: Partial<Category>) {
     const { user_id: _u, id: _i, created_at: _c, ...safeUpdate } = categoryData;
 

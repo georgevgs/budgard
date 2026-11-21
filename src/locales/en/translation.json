@@ -797,7 +797,6 @@
       "prefBudgetExceededDescription": "Alert the day you cross a budget cap",
       "prefDebtPaymentLabel": "Debt payments",
       "prefDebtPaymentDescription": "Reminder the day before a minimum payment is due",
-      "preferenceUpdateFailed": "Failed to update preference",
       "preferencesUpdateFailed": "Failed to update notification preferences",
       "swUnavailable": "Service worker not available. Try reloading the app.",
       "enableFailed": "Failed to enable notifications. Please try again.",
