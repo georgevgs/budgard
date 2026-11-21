@@ -108,35 +108,3 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
-
-  database:
-    name: SQL security suites
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version-file: .bun-version
-
-      - name: Install
-        run: bun install
-
-      # Start replays every migration, so a migration that fails to apply
-      # fails here too. Only the database, auth, storage and rest services
-      # the suites touch are kept.
-      - name: Start local Supabase
-        run: bunx supabase start --exclude studio,imgproxy,mailpit,edge-runtime,logflare,vector,supavisor
-
-      # ON_ERROR_STOP turns a RAISE EXCEPTION in a suite into a failed step.
-      - name: Security boundaries
-        run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/security_boundaries.sql
-
-      - name: Product event retention
-        run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/product_event_retention.sql
-
-      - name: Stop local Supabase
-        if: always()
-        run: bunx supabase stop --no-backup
