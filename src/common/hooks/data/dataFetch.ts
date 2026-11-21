@@ -43,10 +43,8 @@ const performFetch = async (
   session.controller = controller;
   session.isFetching = true;
   const recentCutoff = getRecentCutoff();
-  let sinceDate: string | undefined = recentCutoff;
-  if (session.isHistoryLoaded) {
-    sinceDate = undefined;
-  }
+  const isFullRead = isForced && session.isHistoryLoaded;
+  const sinceDate = readWindowStart(isFullRead, recentCutoff);
 
   const deferred = fetchDeferredData(
     session,
@@ -148,6 +146,17 @@ const performFetch = async (
     if (session.controller === controller) {
       session.isFetching = false;
     }
+  }
+};
+
+const readWindowStart = (
+  isFullRead: boolean,
+  recentCutoff: string,
+): string | undefined => {
+  if (isFullRead) {
+    return undefined;
+  } else {
+    return recentCutoff;
   }
 };
 

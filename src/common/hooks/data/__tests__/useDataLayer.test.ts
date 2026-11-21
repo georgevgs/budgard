@@ -1010,6 +1010,29 @@ describe('useDataLayer foreground and snapshots', () => {
     ]);
   });
 
+  it('refetches only the recent window on resume once history has loaded', async () => {
+    const now = vi.spyOn(Date, 'now').mockReturnValue(100_000);
+    const { result } = renderHook(() => useDataLayer());
+    await waitFor(() =>
+      expect(result.current.config.isSecondaryLoaded).toBe(true),
+    );
+    await act(async () => {
+      await result.current.actions.loadHistory();
+    });
+    svc.getExpenses.mockClear();
+    setVisibility('hidden');
+    now.mockReturnValue(130_000);
+    setVisibility('visible');
+    await act(async () => {});
+
+    expect(svc.getExpenses).toHaveBeenCalledWith(
+      'u1',
+      expect.any(AbortSignal),
+      '2026-01-01',
+    );
+    expect(result.current.expenses.map((row) => row.id)).toContain('e-old');
+  });
+
   it.each(['refreshExpenses', 'refreshIncomes'] as const)(
     '%s reconciles the full history once the tail is loaded',
     async (action) => {
