@@ -1,8 +1,10 @@
 import { useCallback } from 'react';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
+import { useDataConfig } from '@/common/contexts/DataContext';
 import { useExpenseOps } from '@/common/hooks/dataOps/useExpenseOps';
 import { useSurplusInvestmentOps } from '@/common/hooks/dataOps/useSurplusInvestmentOps';
+import { roundMoney } from '@/constants/money';
 import type { Goal } from '@/types/Goal';
 
 // Moves a finished day's surplus into the real investment account linked to a
@@ -12,10 +14,11 @@ export const useSetAside = () => {
   const { handleExpenseSubmit } = useExpenseOps();
   const { investSurplus } = useSurplusInvestmentOps();
   const { t } = useTranslation();
+  const { defaultCurrency } = useDataConfig();
 
   return useCallback(
     async (goal: Goal, amount: number) => {
-      const roundedAmount = roundToCents(amount);
+      const roundedAmount = roundMoney(amount, defaultCurrency);
       const today = format(new Date(), 'yyyy-MM-dd');
       if (goal.source_type === 'account') {
         await investSurplus(goal.id, roundedAmount, today);
@@ -30,10 +33,6 @@ export const useSetAside = () => {
         date: today,
       });
     },
-    [handleExpenseSubmit, investSurplus, t],
+    [handleExpenseSubmit, investSurplus, t, defaultCurrency],
   );
 };
-
-// The surplus is an allowance division, so it arrives with a long tail of
-// decimals. Money in the ledger has two.
-const roundToCents = (amount: number): number => Math.round(amount * 100) / 100;

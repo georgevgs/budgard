@@ -5,6 +5,8 @@
 // dates) and receipt text needs keyword-driven heuristics that CSV cells
 // don't — sharing them would couple two unrelated formats.
 
+import { roundMoney } from '@/constants/money';
+
 export type ParsedReceipt = {
   amount: number | null;
   date: Date | null;
@@ -110,7 +112,7 @@ const parseMoneyToken = (token: string): number | null => {
     return null;
   }
 
-  return Math.round(value * 100) / 100;
+  return roundMoney(value);
 };
 
 const DATE_LABEL = /ΗΜΕΡΟΜΗΝΙΑ|ΗΜ\/ΝΙΑ|DATE/;

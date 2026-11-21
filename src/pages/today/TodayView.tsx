@@ -37,7 +37,7 @@ const TodayView = () => {
   useExpenseAlerts({
     selectedMonth: currentMonth,
     currentMonth,
-    monthlyTotal: guidance.spentThisMonth,
+    monthlyTotal: guidance.budgetSpent,
   });
 
   if (isLoading) {

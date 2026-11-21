@@ -4,8 +4,11 @@ import {
   useExpensesData,
   useIncomesData,
   useCategoriesData,
+  useDataConfig,
+  useDebtsData,
 } from '@/common/contexts/DataContext';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
+import { sumLoanPaymentsInMonth } from '@/constants/debtOutflow';
 import { countsInTotals } from '@/constants/spending';
 import { sumAmounts } from '@/constants/money';
 import { swatch } from '@/design/palette';
@@ -15,6 +18,7 @@ import type { Category } from '@/types/Category';
 // Monarch's demo data, so it needs a place in the flow rather than vanishing
 // from the total.
 export const UNCATEGORIZED_ID = '__uncategorized__';
+export const LOAN_PAYMENTS_ID = '__loan_payments__';
 
 // Any category past this rank folds into a single "Other" row. Real accounts
 // can carry a dozen-plus categories; a branch per one of them stops reading
@@ -48,6 +52,8 @@ export const useMoneyFlowData = (now: Date = new Date()): MoneyFlowData => {
   const expenses = useExpensesData();
   const incomes = useIncomesData();
   const { expenseCategories: categories } = useCategoriesData();
+  const debts = useDebtsData();
+  const { defaultCurrency } = useDataConfig();
   const dateLocale = useDateLocale();
   const monthKey = format(now, 'yyyy-MM');
 
@@ -81,12 +87,18 @@ export const useMoneyFlowData = (now: Date = new Date()): MoneyFlowData => {
       );
     }
 
+    const loanPayments = sumLoanPaymentsInMonth(
+      debts,
+      defaultCurrency,
+      monthKey,
+    );
     const categoryRows = buildCategoryRows(
       categories,
       byCategory,
       uncategorized,
+      loanPayments,
     );
-    const totalExpenses = sumAmounts(countedExpenses);
+    const totalExpenses = sumAmounts([...countedExpenses, loanPayments]);
     const savings = sumAmounts([income, -totalExpenses]);
 
     return {
@@ -96,15 +108,26 @@ export const useMoneyFlowData = (now: Date = new Date()): MoneyFlowData => {
       savings,
       categories: categoryRows,
       isDeficit: savings < 0,
-      hasData: countedIncomes.length > 0 || hasExpenseRows,
+      hasData:
+        countedIncomes.length > 0 || hasExpenseRows || 0 !== loanPayments,
     };
-  }, [expenses, incomes, categories, monthKey, now, dateLocale]);
+  }, [
+    expenses,
+    incomes,
+    categories,
+    debts,
+    defaultCurrency,
+    monthKey,
+    now,
+    dateLocale,
+  ]);
 };
 
 const buildCategoryRows = (
   categories: Category[],
   byCategory: Map<string, number>,
   uncategorized: number,
+  loanPayments: number,
 ): MoneyFlowCategory[] => {
   const rows: MoneyFlowCategory[] = categories
     .map((category) => ({
@@ -123,6 +146,16 @@ const buildCategoryRows = (
       icon: null,
       color: FOLD_COLOR,
       amount: uncategorized,
+    });
+  }
+
+  if (0 !== loanPayments) {
+    rows.push({
+      id: LOAN_PAYMENTS_ID,
+      name: '',
+      icon: null,
+      color: FOLD_COLOR,
+      amount: loanPayments,
     });
   }
 

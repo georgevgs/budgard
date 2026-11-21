@@ -140,9 +140,20 @@ const buildChartData = (
 
   return monthlyData.map((point) => ({
     ...point,
+    amount: cashFlowExpense(cashFlowMonthly[point.monthIndex]),
     income: cashFlowMonthly[point.monthIndex]?.income ?? 0,
     net: cashFlowMonthly[point.monthIndex]?.net ?? 0,
   }));
+};
+
+const cashFlowExpense = (
+  month: ReturnType<typeof useCashFlowData>['monthlyData'][number] | undefined,
+): number => {
+  if (undefined === month) {
+    return 0;
+  }
+
+  return -month.expense;
 };
 
 const getNetClass = (net: number): string => {

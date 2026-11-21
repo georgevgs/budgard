@@ -1,18 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { swatch } from '@/design/palette';
+import type { Debt } from '@/types/Debt';
 import type { Expense } from '@/types/Expense';
 
 const data = vi.hoisted(() => ({
   expenses: [] as unknown[],
   incomes: [] as unknown[],
   categories: [] as unknown[],
+  debts: [] as Debt[],
 }));
 
 vi.mock('@/common/contexts/DataContext', () => ({
   useExpensesData: () => data.expenses,
   useIncomesData: () => data.incomes,
   useCategoriesData: () => ({ expenseCategories: data.categories }),
+  useDebtsData: () => data.debts,
+  useDataConfig: () => ({ defaultCurrency: 'EUR' }),
 }));
 
 vi.mock('@/common/hooks/useDateLocale', () => ({
@@ -22,6 +26,7 @@ vi.mock('@/common/hooks/useDateLocale', () => ({
 import {
   useMoneyFlowData,
   UNCATEGORIZED_ID,
+  LOAN_PAYMENTS_ID,
   OTHER_ID,
 } from '@/pages/analytics/hooks/useMoneyFlowData';
 
@@ -52,11 +57,33 @@ const category = (id: string, name: string) => ({
   icon: null,
 });
 
+const debt = (overrides: Partial<Debt>): Debt => ({
+  id: 'd1',
+  user_id: 'u1',
+  name: 'Car loan',
+  kind: 'auto_loan',
+  original_principal: 5000,
+  current_balance: 5000,
+  apr: 0,
+  minimum_payment: 400,
+  currency: 'EUR',
+  start_date: '2026-01-01',
+  icon: 'car',
+  color: '#000',
+  is_archived: false,
+  is_completed: false,
+  created_at: '2026-01-01',
+  updated_at: '2026-01-01',
+  payments: [],
+  ...overrides,
+});
+
 const render = () => renderHook(() => useMoneyFlowData(NOW)).result;
 
 beforeEach(() => {
   data.expenses = [];
   data.incomes = [];
+  data.debts = [];
   data.categories = [category('cat-groceries', 'Groceries')];
 });
 
@@ -189,5 +216,49 @@ describe('useMoneyFlowData', () => {
 
     expect(r.current.hasData).toBe(false);
     expect(r.current.categories).toEqual([]);
+  });
+
+  it('counts a loan payment as money out, as its own row', () => {
+    data.incomes = [row('2026-08-01', 1000, { type: 'income' })];
+    data.expenses = [row('2026-08-05', 100, { category_id: 'cat-groceries' })];
+    data.debts = [debt({ payments: [{ amount: 300, date: '2026-08-03' }] })];
+
+    const result = render();
+
+    expect(result.current.totalExpenses).toBe(400);
+    expect(result.current.savings).toBe(600);
+    expect(result.current.categories).toContainEqual({
+      id: LOAN_PAYMENTS_ID,
+      name: '',
+      icon: null,
+      color: swatch.steel,
+      amount: 300,
+    });
+  });
+
+  it('adds no row for a credit card payment', () => {
+    data.incomes = [row('2026-08-01', 1000, { type: 'income' })];
+    data.debts = [
+      debt({
+        kind: 'credit_card',
+        payments: [{ amount: 300, date: '2026-08-03' }],
+      }),
+    ];
+
+    const result = render();
+
+    expect(result.current.totalExpenses).toBe(0);
+    expect(result.current.savings).toBe(1000);
+    expect(result.current.categories).toEqual([]);
+  });
+
+  it('adds nothing for a loan payment from another month', () => {
+    data.incomes = [row('2026-08-01', 1000, { type: 'income' })];
+    data.debts = [debt({ payments: [{ amount: 300, date: '2026-07-03' }] })];
+
+    const result = render();
+
+    expect(result.current.totalExpenses).toBe(0);
+    expect(result.current.categories).toEqual([]);
   });
 });

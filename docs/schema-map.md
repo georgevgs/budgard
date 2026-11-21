@@ -4,7 +4,7 @@
      Regenerate with `npm run docs:schema`. -->
 
 An index from each database object to the migrations that touch it, built by
-scanning `supabase/migrations`. Covers 101 migrations: 56 functions, 30 triggers, 27 tables, 88 policies, 59 indexes.
+scanning `supabase/migrations`. Covers 102 migrations: 56 functions, 30 triggers, 27 tables, 88 policies, 59 indexes.
 
 This is a **map, not a schema definition**. Migrations are append-only history
 and the live schema is what you get by replaying them, so nothing here states
@@ -441,6 +441,9 @@ First defined in `20260516164859_add_budget_80pct_and_debt_due_helpers.sql`.
 - defines — `20260822000000_fix_recurring_anchor_and_exclusions.sql`
 - grants on — `20260822000000_fix_recurring_anchor_and_exclusions.sql`
 - revokes on — `20260822000000_fix_recurring_anchor_and_exclusions.sql`
+- defines — `20261112130000_count_loan_payments_in_budget_alerts.sql`
+- grants on — `20261112130000_count_loan_payments_in_budget_alerts.sql`
+- revokes on — `20261112130000_count_loan_payments_in_budget_alerts.sql`
 
 ### `get_users_approaching_category_budget`
 
@@ -463,6 +466,9 @@ First defined in `20260517000001_add_budget_alert_helpers.sql`.
 - defines — `20260822000000_fix_recurring_anchor_and_exclusions.sql`
 - grants on — `20260822000000_fix_recurring_anchor_and_exclusions.sql`
 - revokes on — `20260822000000_fix_recurring_anchor_and_exclusions.sql`
+- defines — `20261112130000_count_loan_payments_in_budget_alerts.sql`
+- grants on — `20261112130000_count_loan_payments_in_budget_alerts.sql`
+- revokes on — `20261112130000_count_loan_payments_in_budget_alerts.sql`
 
 ### `get_users_crossed_category_budget`
 

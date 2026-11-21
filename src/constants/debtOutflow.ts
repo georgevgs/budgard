@@ -117,12 +117,11 @@ export type LoanMinimumDue = {
 };
 
 /**
- * This month's minimum for each loan that has not been paid this month, on the
- * day it falls due.
+ * What is left of this month's minimum for each loan, on the day it falls due.
  *
  * The due day is the day of the month the debt started on, clamped to short
- * months, and a payment logged any day of the month settles it. Both are the
- * rule get_debt_payments_due_on already sends the reminder by.
+ * months. A loan is settled once its payments this month reach the minimum.
+ * The push reminder keeps its own rule, any payment this month stops it.
  */
 export const collectLoanMinimumsDue = (
   debts: Debt[],
@@ -132,11 +131,11 @@ export const collectLoanMinimumsDue = (
   const monthKey = toMonthKey(now);
 
   return trackedLoans(debts, defaultCurrency)
-    .filter((debt) => false === isPaidInMonth(debt, monthKey))
+    .filter((debt) => false === isSettledInMonth(debt, monthKey))
     .map((debt) => ({
       id: debt.id,
       description: debt.name,
-      amount: scheduleMinimums(debt, now, true).restOfMonth,
+      amount: remainingMinimum(debt, now, monthKey),
       date: dueDateIn(debt, now),
     }))
     .filter((due) => 0 < due.amount);
@@ -151,12 +150,15 @@ export const projectLoanOutflow = (
   now: Date,
 ): LoanOutflow => {
   const monthKey = toMonthKey(now);
-  const schedules = trackedLoans(debts, defaultCurrency).map((debt) =>
-    scheduleMinimums(debt, now, false === isPaidInMonth(debt, monthKey)),
+  const loans = trackedLoans(debts, defaultCurrency);
+  const schedules = loans.map((debt) =>
+    scheduleMinimums(debt, now, false === isSettledInMonth(debt, monthKey)),
   );
 
   return {
-    restOfMonth: sumAmounts(schedules.map((schedule) => schedule.restOfMonth)),
+    restOfMonth: sumAmounts(
+      loans.map((debt) => remainingMinimum(debt, now, monthKey)),
+    ),
     months: Array.from({ length: PROJECTED_MONTHS }, (_, index) =>
       sumAmounts(schedules.map((schedule) => schedule.months[index])),
     ),
@@ -176,8 +178,24 @@ const trackedLoans = (debts: Debt[], defaultCurrency: string): Debt[] =>
       0 < paymentsOf(debt).length,
   );
 
-const isPaidInMonth = (debt: Debt, monthKey: string): boolean =>
-  paymentsOf(debt).some((payment) => monthKey === payment.date.slice(0, 7));
+const paidInMonth = (debt: Debt, monthKey: string): number =>
+  sumAmounts(
+    paymentsOf(debt)
+      .filter((payment) => monthKey === payment.date.slice(0, 7))
+      .map((payment) => payment.amount),
+  );
+
+const isSettledInMonth = (debt: Debt, monthKey: string): boolean =>
+  Math.max(debt.minimum_payment, 0) <= paidInMonth(debt, monthKey);
+
+const remainingMinimum = (debt: Debt, now: Date, monthKey: string): number =>
+  roundMoney(
+    Math.max(
+      scheduleMinimums(debt, now, true).restOfMonth -
+        paidInMonth(debt, monthKey),
+      0,
+    ),
+  );
 
 const dueDateIn = (debt: Debt, now: Date): Date =>
   new Date(

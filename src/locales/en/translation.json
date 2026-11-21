@@ -507,6 +507,7 @@
     "income": "Income",
     "savings": "Savings",
     "uncategorized": "Uncategorized",
+    "loanPayments": "Loan payments",
     "other": "Other",
     "emptyTitle": "Nothing to show yet",
     "emptyDescription": "Log an income or an expense this month to see how it flows.",
@@ -567,7 +568,7 @@
       "warning": "Your spending pace is picking up",
       "warningDescription": "You've used {{percent}}% of the plan, with {{remaining}} left.",
       "exceeded": "This month is tighter than planned",
-      "exceededDescription": "You've spent {{spent}} against a {{budget}} monthly plan."
+      "exceededDescription": "You've used {{spent}} of a {{budget}} monthly plan."
     },
     "categoryBudgets": {
       "title": "Category budgets",

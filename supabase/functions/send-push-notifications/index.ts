@@ -394,7 +394,7 @@ Deno.serve(async (req) => {
           user_id: row.user_id,
           payload: {
             title: 'Monthly budget reached',
-            body: `${spent} spent — you've passed your ${cap} cap.`,
+            body: `${spent} used — you've passed your ${cap} cap.`,
             tag: `budget-${monthKey}`,
             data: { url: '/expenses' },
           },
@@ -477,7 +477,7 @@ Deno.serve(async (req) => {
           user_id: row.user_id,
           payload: {
             title: 'Monthly budget at 80%',
-            body: `${spent} of your ${cap} cap spent — still some month to go.`,
+            body: `${spent} of your ${cap} cap used — still some month to go.`,
             tag: `budget-warning-${monthKey}`,
             data: { url: '/expenses' },
           },

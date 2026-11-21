@@ -170,12 +170,39 @@ describe('loan minimums due this month', () => {
     ]);
   });
 
-  it('is settled by any payment logged this month', () => {
-    const paid = debt({
+  it('counts only what is left of the minimum', () => {
+    const partlyPaid = debt({
       payments: [july, { amount: 50, date: '2026-08-02' }],
     });
 
+    expect(collectLoanMinimumsDue([partlyPaid], 'EUR', NOW)).toEqual([
+      {
+        id: 'd1',
+        description: 'Car loan',
+        amount: 350,
+        date: new Date(2026, 7, 1),
+      },
+    ]);
+  });
+
+  it('is settled once the payments reach the minimum', () => {
+    const paid = debt({
+      payments: [
+        july,
+        { amount: 200, date: '2026-08-02' },
+        { amount: 200, date: '2026-08-09' },
+      ],
+    });
+
     expect(collectLoanMinimumsDue([paid], 'EUR', NOW)).toEqual([]);
+  });
+
+  it('the forecast takes out the same remainder', () => {
+    const partlyPaid = debt({
+      payments: [july, { amount: 50, date: '2026-08-02' }],
+    });
+
+    expect(projectLoanOutflow([partlyPaid], 'EUR', NOW).restOfMonth).toBe(350);
   });
 
   it('never asks for more than is still owed', () => {

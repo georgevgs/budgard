@@ -1,5 +1,6 @@
 import { addDays, addMonths, differenceInCalendarDays } from 'date-fns';
 import { parseIsoDate, toIsoDate } from '@/constants/dates';
+import { roundMoney } from '@/constants/money';
 import type { Expense } from '@/types/Expense';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import type { RecurringSuggestion } from '@/pages/recurring/recurringTypes';
@@ -166,7 +167,7 @@ const averageAmount = (transactions: Expense[]): number => {
     0,
   );
 
-  return Math.round((total / transactions.length) * 100) / 100;
+  return roundMoney(total / transactions.length);
 };
 
 const calculateNextDate = (

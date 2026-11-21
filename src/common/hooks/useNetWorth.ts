@@ -6,6 +6,7 @@ import {
   useDataConfig,
   useDebtsData,
 } from '@/common/contexts/DataContext';
+import { convertMoney } from '@/constants/money';
 import { fetchExchangeRate } from '@/common/api/exchangeRateService';
 import { type Account, type AccountKind, isLiability } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
@@ -104,7 +105,7 @@ const convertOrNull = (
     return null;
   }
 
-  return account.current_balance * rate;
+  return convertMoney(account.current_balance, rate, defaultCurrency);
 };
 
 const isLiveDebt = (d: Debt): boolean =>
@@ -352,7 +353,11 @@ const buildSummary = (
       failedKeys,
       staleCurrencies,
     });
-    const balance = account.current_balance * rate;
+    const balance = convertMoney(
+      account.current_balance,
+      rate,
+      defaultCurrency,
+    );
 
     if (isLiability(account.kind)) {
       liabilities += balance;
@@ -363,7 +368,11 @@ const buildSummary = (
 
     if (account.kind === 'investment') {
       investmentValue += balance;
-      investmentCostBasis += account.cost_basis * rate;
+      investmentCostBasis += convertMoney(
+        account.cost_basis,
+        rate,
+        defaultCurrency,
+      );
     }
   });
 
@@ -379,7 +388,11 @@ const buildSummary = (
       failedKeys,
       staleCurrencies,
     });
-    debtsTotal += Number(debt.current_balance) * rate;
+    debtsTotal += convertMoney(
+      Number(debt.current_balance),
+      rate,
+      defaultCurrency,
+    );
   });
 
   liabilities += debtsTotal;
@@ -420,7 +433,7 @@ const todaysDebtTotal = (
     if (debt.currency !== defaultCurrency) {
       rate = rates.get(RATE_KEY(debt.currency, today)) ?? 1;
     }
-    total += Number(debt.current_balance) * rate;
+    total += convertMoney(Number(debt.current_balance), rate, defaultCurrency);
   });
 
   return total;

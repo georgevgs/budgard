@@ -7,6 +7,7 @@ import type { FlowNode } from '@/pages/analytics/components/FlowChart';
 import type { TranslateFunction } from '@/constants/translate';
 import {
   UNCATEGORIZED_ID,
+  LOAN_PAYMENTS_ID,
   OTHER_ID,
   type MoneyFlowData,
   type MoneyFlowCategory,
@@ -90,14 +91,15 @@ const categoryLabel = (
   category: MoneyFlowCategory,
   t: TranslateFunction,
 ): string => {
-  if (category.id === UNCATEGORIZED_ID) {
+  if (UNCATEGORIZED_ID === category.id) {
     return t('moneyFlow.uncategorized');
-  }
-  if (category.id === OTHER_ID) {
+  } else if (LOAN_PAYMENTS_ID === category.id) {
+    return t('moneyFlow.loanPayments');
+  } else if (OTHER_ID === category.id) {
     return t('moneyFlow.other');
+  } else {
+    return category.name;
   }
-
-  return category.name;
 };
 
 const buildNodes = (flow: MoneyFlowData, t: TranslateFunction): FlowNode[] => {
