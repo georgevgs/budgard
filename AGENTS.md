@@ -85,7 +85,7 @@ src/common/api/          dataService composition, query helpers, shared-module A
 src/config/              external integrations only: supabase, sentry, i18n, sw
 src/constants/           app-wide utilities and constants
 src/assets/fonts/        the self-hosted woff2 faces
-supabase/tests/          SQL suites run against the linked project by hand
+supabase/tests/          SQL suites, run in CI against a fresh local database
 src/design/              tokens and palette
 ```
 
