@@ -4,7 +4,7 @@
      Regenerate with `npm run docs:schema`. -->
 
 An index from each database object to the migrations that touch it, built by
-scanning `supabase/migrations`. Covers 102 migrations: 56 functions, 30 triggers, 27 tables, 88 policies, 59 indexes.
+scanning `supabase/migrations`. Covers 103 migrations: 56 functions, 30 triggers, 27 tables, 88 policies, 59 indexes.
 
 This is a **map, not a schema definition**. Migrations are append-only history
 and the live schema is what you get by replaying them, so nothing here states
@@ -315,6 +315,9 @@ First defined in `20260720090000_add_checkout_rate_limit.sql`.
 - defines — `20260904120958_optimize_household_policy_and_checkout_window.sql`
 - grants on — `20260904120958_optimize_household_policy_and_checkout_window.sql`
 - revokes on — `20260904120958_optimize_household_policy_and_checkout_window.sql`
+- defines — `20261121100000_canonical_receipt_folders.sql`
+- grants on — `20261121100000_canonical_receipt_folders.sql`
+- revokes on — `20261121100000_canonical_receipt_folders.sql`
 
 ### `create_default_categories_for_user` — dropped
 
@@ -1407,6 +1410,7 @@ First defined in `20260904113851_share_household_receipts.sql`.
 
 - defines — `20260904113851_share_household_receipts.sql`
 - defines — `20260925110000_bound_client_writes.sql`
+- defines — `20261121100000_canonical_receipt_folders.sql`
 
 ### `Household can manage account balances`
 
@@ -1515,6 +1519,7 @@ First defined in `20260831151127_add_secure_household_spaces.sql`.
 First defined in `20260904113851_share_household_receipts.sql`.
 
 - defines — `20260904113851_share_household_receipts.sql`
+- defines — `20261121100000_canonical_receipt_folders.sql`
 
 ### `Household can view expenses`
 
