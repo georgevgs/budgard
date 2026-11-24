@@ -1,7 +1,6 @@
 import {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -22,26 +21,16 @@ export const FinancialSpaceProvider = ({
   children,
 }: FinancialSpaceProviderProps) => {
   const { session } = useAuth();
-  const userId = session?.user.id ?? '';
-  const email = session?.user.email ?? '';
+  const user = getSpaceUser(session);
+  const userId = user.id;
+  const email = user.email ?? '';
   const state = useFinancialSpaceState(userId, email);
-
-  const value = useMemo<FinancialSpaceContextValue>(() => {
-    const operations = buildOperations(state.refreshShares);
-
-    return {
-      activeOwnerId: state.activeOwnerId,
-      activeSpace: findActiveSpace(state.spaces, state.activeOwnerId),
-      spaces: state.spaces,
-      shares: state.shares,
-      pendingInvites: findPendingInvites(userId, state.shares),
-      isLoading: state.isLoading,
-      error: state.error,
-      selectSpace: state.selectSpace,
-      refreshShares: state.refreshShares,
-      ...operations,
-    };
-  }, [state, userId]);
+  const value: FinancialSpaceContextValue = {
+    ...state,
+    activeSpace: findActiveSpace(state.spaces, state.activeOwnerId),
+    pendingInvites: findPendingInvites(userId, state.shares),
+    ...buildOperations(state.refreshShares),
+  };
 
   return (
     <FinancialSpaceContext.Provider value={value}>
@@ -52,42 +41,36 @@ export const FinancialSpaceProvider = ({
 
 const STORAGE_PREFIX = 'budgard-active-financial-space';
 
-type FinancialSpaceState = {
-  spaces: FinancialSpace[];
-  shares: HouseholdShare[];
-  activeOwnerId: string;
-  isLoading: boolean;
-  error: Error | null;
-  selectSpace: (ownerId: string) => void;
-  refreshShares: () => Promise<void>;
+const getSpaceUser = (session: ReturnType<typeof useAuth>['session']) => {
+  if (null === session) {
+    return { id: '', email: '' };
+  }
+
+  return session.user;
 };
 
-// Owns the shares/activeOwnerId/isLoading/error state and the effect that
-// loads it. Split out of the component so the component itself stays under
-// the CLAUDE.md line cap.
-const useFinancialSpaceState = (
-  userId: string,
-  email: string,
-): FinancialSpaceState => {
+type ShareLoadState =
+  | { status: 'loading' | 'ready'; error: null }
+  | { status: 'error'; error: Error };
+
+const useFinancialSpaceState = (userId: string, email: string) => {
   const [shares, setShares] = useState<HouseholdShare[]>([]);
   const [activeOwnerId, setActiveOwnerId] = useState(() =>
     loadStoredOwner(userId),
   );
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [shareLoad, setShareLoad] = useState<ShareLoadState>({
+    status: 'loading',
+    error: null,
+  });
   const request = useRef<AbortController | null>(null);
   const [stateUserId, setStateUserId] = useState(userId);
   if (stateUserId !== userId) {
     setStateUserId(userId);
     setShares([]);
     setActiveOwnerId(loadStoredOwner(userId));
-    setIsLoading(true);
-    setError(null);
+    setShareLoad({ status: 'loading', error: null });
   }
-  const spaces = useMemo(
-    () => buildSpaces(userId, email, shares),
-    [userId, email, shares],
-  );
+  const spaces = buildSpaces(userId, email, shares);
 
   const refreshShares = useCallback(() => {
     if ('' !== userId) {
@@ -100,23 +83,18 @@ const useFinancialSpaceState = (
 
       return householdService
         .getVisibleShares(controller.signal)
-        .then((next) => {
+        .then((nextShares) => {
           if (false === controller.signal.aborted) {
-            setShares(next);
-            setError(null);
+            setShares(nextShares);
             setActiveOwnerId((current) =>
-              resolveActiveOwner(userId, current, next),
+              resolveActiveOwner(userId, current, nextShares),
             );
+            setShareLoad({ status: 'ready', error: null });
           }
         })
         .catch((caught: unknown) => {
           if (false === controller.signal.aborted) {
-            setError(toError(caught));
-          }
-        })
-        .finally(() => {
-          if (false === controller.signal.aborted) {
-            setIsLoading(false);
+            setShareLoad({ status: 'error', error: toError(caught) });
           }
         });
     } else {
@@ -137,23 +115,19 @@ const useFinancialSpaceState = (
     };
   }, [refreshShares]);
 
-  const selectSpace = useCallback(
-    (ownerId: string) => {
-      if (!spaces.some((space) => space.ownerId === ownerId)) {
-        return;
-      }
+  const selectSpace = (ownerId: string) => {
+    if (spaces.some((space) => space.ownerId === ownerId)) {
       setActiveOwnerId(ownerId);
       storeOwner(userId, ownerId);
-    },
-    [spaces, userId],
-  );
+    }
+  };
 
   return {
     spaces,
     shares,
     activeOwnerId,
-    isLoading,
-    error,
+    isLoading: 'loading' === shareLoad.status,
+    error: shareLoad.error,
     selectSpace,
     refreshShares,
   };

@@ -5,152 +5,105 @@ import { mergeUniqueById } from '@/common/contexts/dataContextHelpers';
 import type { Expense } from '@/types/Expense';
 
 type QueueState = {
-  ownerId: string;
   status: 'loading' | 'error' | 'ready' | 'loadingMore' | 'moreError';
   items: Expense[];
   count: number;
   nextCursor: Expense | null;
 };
 
-type QueueRequest = { ownerId: string; controller: AbortController | null };
-
-const initialState = (ownerId: string): QueueState => ({
-  ownerId,
+const INITIAL_STATE: QueueState = {
   status: 'loading',
   items: [],
   count: 0,
   nextCursor: null,
-});
+};
 
 export const useReviewQueue = () => {
   const { activeOwnerId } = useFinancialSpace();
-  const [state, setState] = useState(() => initialState(activeOwnerId));
-  const request = useRef<QueueRequest | null>(null);
+  const [state, setState] = useState(INITIAL_STATE);
+  const request = useRef<AbortController | null>(null);
 
   const loadPage = useCallback(
     (cursor: Expense | null) => {
-      const scope = request.current;
-      if (null !== scope && activeOwnerId === scope.ownerId) {
-        abortRequest(scope);
-        const controller = new AbortController();
-        scope.controller = controller;
-
-        return readQueue(activeOwnerId, cursor, controller.signal)
-          .then((page) => {
-            if (false === controller.signal.aborted) {
-              setState((current) => applyPage(current, activeOwnerId, page));
-            }
-          })
-          .catch(() => {
-            if (false === controller.signal.aborted) {
-              setState((current) => queueError(current, activeOwnerId, cursor));
-            }
-          });
-      } else {
-        return Promise.resolve();
+      const previous = request.current;
+      if (null !== previous) {
+        previous.abort();
       }
+      const controller = new AbortController();
+      request.current = controller;
+      const { signal } = controller;
+
+      return Promise.all([
+        dataService.getPendingReviewPage(activeOwnerId, cursor, signal),
+        getPageCountOrNull(activeOwnerId, cursor, signal),
+      ])
+        .then(([page, count]) => {
+          if (false === signal.aborted) {
+            setState((current) => {
+              if (null !== count) {
+                return { ...page, count, status: 'ready' };
+              } else {
+                return {
+                  ...page,
+                  count: current.count,
+                  items: mergeUniqueById(current.items, page.items),
+                  status: 'ready',
+                };
+              }
+            });
+          }
+        })
+        .catch(() => {
+          if (false === signal.aborted) {
+            setState((current) => {
+              if (null === cursor) {
+                return { ...INITIAL_STATE, status: 'error' };
+              } else {
+                return { ...current, status: 'moreError' };
+              }
+            });
+          }
+        });
     },
     [activeOwnerId],
   );
+  const refresh = useCallback(async () => {
+    if (null !== request.current) {
+      setState(INITIAL_STATE);
+      await loadPage(null);
+    }
+  }, [loadPage]);
 
   useEffect(() => {
-    const scope: QueueRequest = { ownerId: activeOwnerId, controller: null };
-    request.current = scope;
     void loadPage(null);
 
     return () => {
-      abortRequest(scope);
+      const controller = request.current;
+      if (null !== controller) {
+        controller.abort();
+      }
       request.current = null;
     };
-  }, [activeOwnerId, loadPage]);
-
-  const refresh = useCallback(() => {
-    const scope = request.current;
-    if (null !== scope && activeOwnerId === scope.ownerId) {
-      setState(initialState(activeOwnerId));
-
-      return loadPage(null);
-    } else {
-      return Promise.resolve();
-    }
-  }, [activeOwnerId, loadPage]);
+  }, [loadPage]);
 
   const loadMore = () => {
-    if (
-      activeOwnerId === state.ownerId &&
-      null !== state.nextCursor &&
-      'loadingMore' !== state.status
-    ) {
-      setState({ ...state, status: 'loadingMore' });
+    if (null !== state.nextCursor && 'loadingMore' !== state.status) {
+      setState((current) => ({ ...current, status: 'loadingMore' }));
       void loadPage(state.nextCursor);
     }
   };
 
-  return { ...getActiveQueue(state, activeOwnerId), refresh, loadMore };
+  return { ...state, refresh, loadMore };
 };
 
-const getActiveQueue = (state: QueueState, ownerId: string): QueueState => {
-  if (ownerId === state.ownerId) {
-    return state;
-  } else {
-    return initialState(ownerId);
-  }
-};
-
-const readQueue = async (
+const getPageCountOrNull = async (
   ownerId: string,
   cursor: Expense | null,
   signal: AbortSignal,
-) => {
+): Promise<number | null> => {
   if (null === cursor) {
-    const [page, count] = await Promise.all([
-      dataService.getPendingReviewPage(ownerId, null, signal),
-      dataService.getPendingReviewCount(ownerId, signal),
-    ]);
-
-    return { ...page, count };
+    return dataService.getPendingReviewCount(ownerId, signal);
   } else {
-    const page = await dataService.getPendingReviewPage(
-      ownerId,
-      cursor,
-      signal,
-    );
-
-    return { ...page, count: null };
-  }
-};
-
-const applyPage = (
-  state: QueueState,
-  ownerId: string,
-  page: Awaited<ReturnType<typeof readQueue>>,
-): QueueState => {
-  if (null !== page.count) {
-    return { ...page, ownerId, status: 'ready', count: page.count };
-  } else {
-    return {
-      ...state,
-      status: 'ready',
-      items: mergeUniqueById(state.items, page.items),
-      nextCursor: page.nextCursor,
-    };
-  }
-};
-
-const abortRequest = ({ controller }: QueueRequest): void => {
-  if (null !== controller) {
-    controller.abort();
-  }
-};
-
-const queueError = (
-  state: QueueState,
-  ownerId: string,
-  cursor: Expense | null,
-): QueueState => {
-  if (null === cursor) {
-    return { ...initialState(ownerId), status: 'error' };
-  } else {
-    return { ...state, status: 'moreError' };
+    return null;
   }
 };

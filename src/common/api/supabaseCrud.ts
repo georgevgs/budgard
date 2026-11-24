@@ -22,6 +22,19 @@ export const rows = async <T>(query: PostgrestResult): Promise<T[]> => {
   return data as T[];
 };
 
+export const countRows = async (
+  query: PromiseLike<{ count: number | null; error: unknown }>,
+): Promise<number> => {
+  const { count, error } = await query;
+  if (null !== error) {
+    throw error;
+  } else if (null === count) {
+    throw new Error('Missing row count');
+  } else {
+    return count;
+  }
+};
+
 // The single row a query returned. Use with `.single()` — a query that may
 // legitimately match nothing wants `maybeRow` instead.
 export const row = async <T>(query: PostgrestResult): Promise<T> => {

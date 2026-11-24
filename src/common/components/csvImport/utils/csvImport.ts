@@ -42,66 +42,55 @@ export const parseExpensesCsv = (
   hasSignedConvention: boolean = false,
 ): CsvParseResult => {
   const lines = csvContent.trim().split(/\r?\n/);
-  const validRows: ParsedExpenseRow[] = [];
-  const errors: CsvParseError[] = [];
-  const unmatchedCategoriesSet = new Set<string>();
-  let skippedIncomeCount = 0;
-
-  const categoryMap = new Map(
-    categories.map((cat) => [cat.name.toLowerCase(), cat]),
+  const result: CsvParseResult = {
+    validRows: [],
+    errors: [],
+    unmatchedCategories: [],
+    skippedIncomeCount: 0,
+  };
+  const unmatchedCategories = new Set<string>();
+  const categoryNames = new Set(
+    categories.map((category) => category.name.toLowerCase()),
   );
-  let delimiter = ',';
-  if (lines.length > 0) {
-    delimiter = detectDelimiter(lines[0]);
-  }
-
+  const delimiter = detectDelimiter(lines[0]);
   const format = getBudgardCsvFormatOrNull(parseCsvLine(lines[0], delimiter));
-  const startIndex = Number(null !== format || isHeaderRow(lines[0]));
+  const hasHeader = null !== format || isHeaderRow(lines[0]);
+  const firstDataIndex = Number(hasHeader);
   const { dateColumn, descriptionColumn, amountColumn, categoryColumn } =
     columnMapping;
   const minColumns =
     Math.max(dateColumn, descriptionColumn, amountColumn, categoryColumn ?? 0) +
     1;
 
-  for (let i = startIndex; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) {
-      continue;
-    }
+  for (const [index, rawLine] of lines.slice(firstDataIndex).entries()) {
+    const line = rawLine.trim();
+    if ('' !== line) {
+      const outcome = processRow({
+        fields: parseCsvLine(line, delimiter),
+        line,
+        rowNumber: index + firstDataIndex + 1,
+        columnMapping,
+        minColumns,
+        categoryNames,
+        hasSignedConvention,
+        shouldSkipIncomeTransactions,
+        format,
+      });
 
-    const rowNumber = i + 1;
-    const fields = parseCsvLine(line, delimiter);
-    const outcome = processRow(
-      fields,
-      line,
-      rowNumber,
-      columnMapping,
-      minColumns,
-      categoryMap,
-      hasSignedConvention,
-      shouldSkipIncomeTransactions,
-      format,
-    );
-
-    if (outcome.kind === 'income') {
-      skippedIncomeCount++;
-    } else if (outcome.kind === 'error') {
-      errors.push(outcome.error);
-    } else if (outcome.kind === 'valid') {
-      if (outcome.unmatchedCategory) {
-        unmatchedCategoriesSet.add(outcome.unmatchedCategory);
+      if ('income' === outcome.kind) {
+        result.skippedIncomeCount++;
+      } else if ('error' === outcome.kind) {
+        result.errors.push(outcome.error);
+      } else if ('valid' === outcome.kind) {
+        result.validRows.push(outcome.row);
+        if (null !== outcome.unmatchedCategory) {
+          unmatchedCategories.add(outcome.unmatchedCategory);
+        }
       }
-      validRows.push(outcome.row);
     }
-    // 'empty' → do nothing
   }
 
-  return {
-    validRows,
-    errors,
-    unmatchedCategories: Array.from(unmatchedCategoriesSet),
-    skippedIncomeCount,
-  };
+  return { ...result, unmatchedCategories: [...unmatchedCategories] };
 };
 
 /**
@@ -173,21 +162,25 @@ type RowOutcome =
   | { kind: 'empty' }
   | { kind: 'income' };
 
-const processRow = (
-  fields: string[],
-  rawLine: string,
-  rowNumber: number,
-  columnMapping: ColumnMapping,
-  minColumns: number,
-  categoryMap: Map<string, Category>,
-  hasSignedConvention: boolean,
-  shouldSkipIncomeTransactions: boolean,
-  format: BudgardCsvFormat | null,
-): RowOutcome => {
-  const { dateColumn, descriptionColumn, amountColumn, categoryColumn } =
-    columnMapping;
+type RowOptions = {
+  fields: string[];
+  line: string;
+  rowNumber: number;
+  columnMapping: ColumnMapping;
+  minColumns: number;
+  categoryNames: ReadonlySet<string>;
+  hasSignedConvention: boolean;
+  shouldSkipIncomeTransactions: boolean;
+  format: BudgardCsvFormat | null;
+};
 
-  if (fields.length < minColumns) {
+const processRow = (options: RowOptions): RowOutcome => {
+  const { fields, line, rowNumber, minColumns, columnMapping } = options;
+  const { dateColumn, descriptionColumn } = columnMapping;
+  const rawDate = fields[dateColumn] ?? '';
+  const trimmedDate = rawDate.trim().replace(/^["']+|["']+$/g, '');
+
+  if (minColumns > fields.length) {
     return {
       kind: 'error',
       error: {
@@ -195,107 +188,150 @@ const processRow = (
         field: 'row',
         messageKey: 'import.rowErrors.tooFewColumns',
         messageParams: { count: minColumns },
-        rawValue: rawLine,
+        rawValue: line,
       },
     };
-  }
-
-  const dateStr = fields[dateColumn];
-  const description = fields[descriptionColumn];
-  const amountStr = fields[amountColumn];
-  let categoryName = '';
-  if (categoryColumn !== null) {
-    categoryName = fields[categoryColumn];
-  }
-
-  // Skip empty/metadata rows (common at end of bank exports)
-  const trimmedDate = dateStr.trim().replace(/^["']+|["']+$/g, '');
-  if (!trimmedDate) {
+  } else if ('' === trimmedDate) {
     return { kind: 'empty' };
-  }
+  } else {
+    const date = parseDate(trimmedDate);
+    const description = fields[descriptionColumn];
 
-  const date = parseDate(trimmedDate);
-  if (!date) {
-    return {
-      kind: 'error',
-      error: {
-        rowNumber,
-        field: 'date',
-        messageKey: 'import.rowErrors.invalidDate',
-        rawValue: dateStr,
-      },
-    };
+    if (null !== date) {
+      const descriptionError = validateDescription(description, rowNumber);
+      if (null !== descriptionError) {
+        return { kind: 'error', error: descriptionError };
+      } else {
+        return processTransaction(options, date, description.trim());
+      }
+    } else {
+      return {
+        kind: 'error',
+        error: {
+          rowNumber,
+          field: 'date',
+          messageKey: 'import.rowErrors.invalidDate',
+          rawValue: rawDate,
+        },
+      };
+    }
   }
+};
 
-  const descriptionError = validateDescription(description, rowNumber);
-  if (descriptionError) {
-    return { kind: 'error', error: descriptionError };
-  }
-  const trimmedDescription = description.trim();
+const MAX_AMOUNT = 1_000_000;
 
+const processTransaction = (
+  options: RowOptions,
+  date: string,
+  description: string,
+): RowOutcome => {
+  const {
+    fields,
+    rowNumber,
+    columnMapping,
+    categoryNames,
+    hasSignedConvention,
+    shouldSkipIncomeTransactions,
+    format,
+  } = options;
+  const rawAmount = fields[columnMapping.amountColumn];
   const rawType = fields[BUDGARD_CSV_TYPE_COLUMN] ?? '';
   const transactionType = getBudgardCsvTypeOrNull(rawType, format);
-  const hasInvalidType = null !== format && null === transactionType;
 
-  const { amount, isIncome } = parseTransactionAmount(
-    amountStr.trim(),
-    hasSignedConvention,
-    transactionType,
-  );
-
-  if (false === hasInvalidType && shouldSkipIncomeTransactions && isIncome) {
-    return { kind: 'income' };
-  }
-
-  // Zero is not a transaction; a negative expense is a refund and is legal.
-  if (hasInvalidType || null === amount || 0 === amount) {
-    return {
-      kind: 'error',
-      error: getTransactionError(rowNumber, hasInvalidType, rawType, amountStr),
-    };
-  }
-
-  const MAX_AMOUNT = 1_000_000;
-  if (amount > MAX_AMOUNT) {
+  if (null !== format && null === transactionType) {
     return {
       kind: 'error',
       error: {
         rowNumber,
-        field: 'amount',
-        messageKey: 'import.rowErrors.amountTooLarge',
-        rawValue: amountStr,
+        field: 'type',
+        messageKey: 'import.rowErrors.invalidType',
+        rawValue: rawType,
       },
     };
+  } else {
+    const { amount, isIncome } = parseTransactionAmount(
+      rawAmount.trim(),
+      hasSignedConvention,
+      transactionType,
+    );
+    if (shouldSkipIncomeTransactions && isIncome) {
+      return { kind: 'income' };
+    } else if (null === amount || 0 === amount) {
+      return {
+        kind: 'error',
+        error: {
+          rowNumber,
+          field: 'amount',
+          messageKey: 'import.rowErrors.invalidAmount',
+          rawValue: rawAmount,
+        },
+      };
+    } else if (MAX_AMOUNT < amount) {
+      return {
+        kind: 'error',
+        error: {
+          rowNumber,
+          field: 'amount',
+          messageKey: 'import.rowErrors.amountTooLarge',
+          rawValue: rawAmount,
+        },
+      };
+    } else {
+      const categoryName = getCategoryName(
+        fields,
+        columnMapping.categoryColumn,
+        format,
+      );
+      const row = {
+        date,
+        description,
+        categoryName,
+        amount,
+        rowNumber,
+        isIncome,
+      };
+
+      return {
+        kind: 'valid',
+        row,
+        unmatchedCategory: getUnmatchedCategoryOrNull(
+          categoryName,
+          categoryNames,
+        ),
+      };
+    }
+  }
+};
+
+const getCategoryName = (
+  fields: string[],
+  categoryColumn: number | null,
+  format: BudgardCsvFormat | null,
+): string => {
+  if (null === categoryColumn) {
+    return '';
   }
 
-  const trimmedCategory = categoryName.trim();
-  const isUncategorized =
-    '' === trimmedCategory ||
-    'uncategorized' === trimmedCategory.toLowerCase() ||
-    isBudgardCsvUncategorized(trimmedCategory, format);
-
-  let unmatchedCategory: string | null = null;
-  if (!isUncategorized && !categoryMap.has(trimmedCategory.toLowerCase())) {
-    unmatchedCategory = trimmedCategory;
+  const name = fields[categoryColumn].trim();
+  if (
+    'uncategorized' === name.toLowerCase() ||
+    isBudgardCsvUncategorized(name, format)
+  ) {
+    return '';
+  } else {
+    return name;
   }
+};
 
-  let rowCategoryName = trimmedCategory;
-  if (isUncategorized) {
-    rowCategoryName = '';
+const getUnmatchedCategoryOrNull = (
+  name: string,
+  categoryNames: ReadonlySet<string>,
+): string | null => {
+  if ('' !== name && false === categoryNames.has(name.toLowerCase())) {
+    return name;
+  } else {
+    return null;
   }
-
-  return {
-    kind: 'valid',
-    row: {
-      date,
-      description: trimmedDescription,
-      categoryName: rowCategoryName,
-      amount,
-      rowNumber,
-      isIncome,
-    },
-    unmatchedCategory,
-  };
 };
 
 const parseTransactionAmount = (
@@ -312,28 +348,5 @@ const parseTransactionAmount = (
     return { amount: -amount, isIncome: false };
   } else {
     return { amount, isIncome: 'income' === transactionType };
-  }
-};
-
-const getTransactionError = (
-  rowNumber: number,
-  hasInvalidType: boolean,
-  rawType: string,
-  rawAmount: string,
-): CsvParseError => {
-  if (hasInvalidType) {
-    return {
-      rowNumber,
-      field: 'type',
-      messageKey: 'import.rowErrors.invalidType',
-      rawValue: rawType,
-    };
-  } else {
-    return {
-      rowNumber,
-      field: 'amount',
-      messageKey: 'import.rowErrors.invalidAmount',
-      rawValue: rawAmount,
-    };
   }
 };

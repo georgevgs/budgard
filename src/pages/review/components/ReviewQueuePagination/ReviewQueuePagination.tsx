@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/common/ui/button';
 
-export default function ReviewQueuePagination({
+const ReviewQueuePagination = ({
   hasNextPage,
   isLoading,
   hasError,
@@ -13,7 +13,7 @@ export default function ReviewQueuePagination({
   hasError: boolean;
   isReviewing: boolean;
   onLoadMore: () => void;
-}) {
+}) => {
   const { t } = useTranslation();
 
   if (hasNextPage && hasError) {
@@ -48,4 +48,6 @@ export default function ReviewQueuePagination({
   } else {
     return null;
   }
-}
+};
+
+export default ReviewQueuePagination;

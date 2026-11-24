@@ -1,26 +1,20 @@
 import { supabase } from '@/config/supabase';
-import { rows } from '@/common/api/supabaseCrud';
+import { countRows, rows } from '@/common/api/supabaseCrud';
 import { transactionCursorFilter } from '@/common/api/dataAccess';
 import type { Expense } from '@/types/Expense';
 
 const REVIEW_PAGE_SIZE = 50;
 
 export const reviewApi = {
-  async getPendingReviewCount(ownerId: string, signal: AbortSignal) {
-    const { count, error } = await supabase
-      .from('expenses')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', ownerId)
-      .eq('review_status', 'pending')
-      .abortSignal(signal);
-    if (null !== error) {
-      throw error;
-    }
-    if (null === count) {
-      throw new Error('Missing pending review count');
-    }
-
-    return count;
+  getPendingReviewCount(ownerId: string, signal: AbortSignal) {
+    return countRows(
+      supabase
+        .from('expenses')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', ownerId)
+        .eq('review_status', 'pending')
+        .abortSignal(signal),
+    );
   },
 
   async getPendingReviewPage(

@@ -12,15 +12,8 @@ import { AnnualExportCard } from '@/pages/settings/components/AnnualExportCard';
 import { ProUpsellCard } from '@/common/components/pro/ProUpsellCard';
 import { useOnDemandHistory } from '@/common/hooks/data/useOnDemandHistory';
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
-import { Button } from '@/common/ui/button';
+import RetryCard from '@/common/components/common/RetryCard/RetryCard';
 
-// An export utility, not a trend — it used to sit at the bottom of the
-// Trends scroll for no reason but proximity. It owns its own year picker
-// here since Settings has no shared "selected year" the way Trends does.
-//
-// Pro-only: useExpensesData/useIncomesData return full history regardless of
-// tier (the free-tier 3-month window is applied per-consumer, not in
-// DataContext), so this card must gate itself rather than inherit a limit.
 export const AnnualExportSection = () => {
   const { t } = useTranslation();
   const { isPro } = useSubscription();
@@ -31,16 +24,16 @@ export const AnnualExportSection = () => {
   const incomes = useIncomesData();
   useOnDemandHistory(isPro);
   const availableYears = useAvailableYears(expenses, incomes);
-  const [selectedYear, setSelectedYear] = useState(() => availableYears[0]);
-
-  // Data can still be loading on first mount, when availableYears is empty
-  // and the lazy initializer above has nothing to pick — catch up once it
-  // arrives, the same adjust-during-render pattern useAnalyticsData uses.
-  if (availableYears.length > 0 && !availableYears.includes(selectedYear)) {
-    setSelectedYear(availableYears[0]);
+  const latestYear = availableYears[0] ?? null;
+  const [selectedYear, setSelectedYear] = useState(latestYear);
+  if (
+    null !== latestYear &&
+    (null === selectedYear || false === availableYears.includes(selectedYear))
+  ) {
+    setSelectedYear(latestYear);
   }
 
-  if (!isPro) {
+  if (false === isPro) {
     return (
       <ProUpsellCard
         title={t('pro.gate.annualExportTitle')}
@@ -49,16 +42,10 @@ export const AnnualExportSection = () => {
     );
   } else if (hasHistoryLoadError) {
     return (
-      <SurfaceCard role="alert" className="space-y-3 p-4">
-        <p className="text-sm">{t('annualExport.historyLoadFailed')}</p>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => void loadHistory()}
-        >
-          {t('common.tryAgain')}
-        </Button>
-      </SurfaceCard>
+      <RetryCard
+        message={t('annualExport.historyLoadFailed')}
+        onRetry={loadHistory}
+      />
     );
   } else if (false === isInitialized || false === isHistoryLoaded) {
     return (
@@ -66,7 +53,7 @@ export const AnnualExportSection = () => {
         {t('annualExport.loadingHistory')}
       </SurfaceCard>
     );
-  } else if (0 === availableYears.length) {
+  } else if (null === selectedYear || null === latestYear) {
     return null;
   } else {
     return (

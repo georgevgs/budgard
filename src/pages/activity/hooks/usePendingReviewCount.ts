@@ -6,20 +6,18 @@ import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
 import { useOnlineStatus } from '@/common/hooks/useOnlineStatus';
 import type { Expense } from '@/types/Expense';
 
-type PendingCount =
-  | { status: 'loading' | 'error'; ownerId: string }
-  | { status: 'ready'; ownerId: string; count: number };
+type UsePendingReviewCountReturn =
+  { status: 'loading' | 'error' } | { status: 'ready'; count: number };
 
-export const usePendingReviewCount = (): PendingCount => {
+export const usePendingReviewCount = (): UsePendingReviewCountReturn => {
   const { pathname } = useLocation();
   const { activeOwnerId } = useFinancialSpace();
   const expenses = useExpensesData();
   const incomes = useIncomesData();
   const isOnline = useOnlineStatus();
   const isActivityVisible = '/activity' === pathname;
-  const [result, setResult] = useState<PendingCount>({
+  const [result, setResult] = useState<UsePendingReviewCountReturn>({
     status: 'loading',
-    ownerId: activeOwnerId,
   });
   const localPendingCount = useMemo(
     () => countPending(expenses) + countPending(incomes),
@@ -33,12 +31,12 @@ export const usePendingReviewCount = (): PendingCount => {
         .getPendingReviewCount(activeOwnerId, controller.signal)
         .then((count) => {
           if (false === controller.signal.aborted) {
-            setResult({ status: 'ready', ownerId: activeOwnerId, count });
+            setResult({ status: 'ready', count });
           }
         })
         .catch(() => {
           if (false === controller.signal.aborted) {
-            setResult({ status: 'error', ownerId: activeOwnerId });
+            setResult({ status: 'error' });
           }
         });
     }
@@ -46,11 +44,7 @@ export const usePendingReviewCount = (): PendingCount => {
     return () => controller.abort();
   }, [activeOwnerId, isActivityVisible, isOnline, localPendingCount]);
 
-  if (activeOwnerId === result.ownerId) {
-    return result;
-  } else {
-    return { status: 'loading', ownerId: activeOwnerId };
-  }
+  return result;
 };
 
 const countPending = (transactions: Expense[]): number =>

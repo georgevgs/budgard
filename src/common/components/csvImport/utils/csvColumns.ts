@@ -43,9 +43,7 @@ const MAX_CATEGORY_LENGTH = 30;
 export const suggestColumnMapping = (
   preview: CsvPreviewData,
 ): ColumnMapping => {
-  const { headers } = preview;
-
-  if (null !== getBudgardCsvFormatOrNull(headers)) {
+  if (null !== getBudgardCsvFormatOrNull(preview.headers)) {
     return {
       dateColumn: 0,
       amountColumn: 2,
@@ -72,18 +70,13 @@ const suggestStatementMapping = (preview: CsvPreviewData): ColumnMapping => {
     headers.length - 1,
   );
 
-  const byHeader = matchHeader(headers, HEADER_KEYWORDS.category, null);
-  let categoryColumn = byHeader;
-
-  // No category header — fall back to looking for a column that behaves like
-  // one, skipping the three already spoken for.
-  if (categoryColumn === null) {
-    categoryColumn = detectCategoryByContent(preview, [
+  const categoryColumn =
+    matchHeader(headers, HEADER_KEYWORDS.category, null) ??
+    detectCategoryByContent(preview, [
       dateColumn,
       descriptionColumn,
       amountColumn,
     ]);
-  }
 
   return {
     dateColumn,

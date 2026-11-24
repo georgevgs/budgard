@@ -18,6 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/common/ui/alert-dialog';
+import RetryCard from '@/common/components/common/RetryCard/RetryCard';
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useHouseholdOps } from '@/common/hooks/dataOps/useHouseholdOps';
@@ -65,16 +66,10 @@ export const HouseholdSection = () => {
     );
   } else if (null !== error) {
     return (
-      <SurfaceCard role="alert" className="space-y-3 p-4">
-        <p className="text-sm">{t('settings.household.loadFailed')}</p>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => void refreshShares()}
-        >
-          {t('common.tryAgain')}
-        </Button>
-      </SurfaceCard>
+      <RetryCard
+        message={t('settings.household.loadFailed')}
+        onRetry={refreshShares}
+      />
     );
   } else {
     return content;

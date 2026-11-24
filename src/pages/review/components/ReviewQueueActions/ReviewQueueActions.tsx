@@ -3,7 +3,7 @@ import CheckCheck from 'lucide-react/dist/esm/icons/check-check';
 import ListChecks from 'lucide-react/dist/esm/icons/list-checks';
 import { Button } from '@/common/ui/button';
 
-export default function ReviewQueueActions({
+const ReviewQueueActions = ({
   isVisible,
   hasNextPage,
   isReviewing,
@@ -17,7 +17,7 @@ export default function ReviewQueueActions({
   selectedIds: ReadonlySet<string>;
   onSelectAll: () => void;
   onReview: (ids: string[]) => Promise<void>;
-}) {
+}) => {
   const { t } = useTranslation();
   if (isVisible) {
     return (
@@ -46,7 +46,9 @@ export default function ReviewQueueActions({
   } else {
     return null;
   }
-}
+};
+
+export default ReviewQueueActions;
 
 const getSelectLabelKey = (hasNextPage: boolean): string => {
   if (hasNextPage) {

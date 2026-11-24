@@ -55,11 +55,7 @@ export const splitLoanPaymentsInMonth = (
   const perDebt = debts
     .filter((debt) => countsAsOutflow(debt, defaultCurrency))
     .map((debt) => {
-      const paid = sumAmounts(
-        paymentsOf(debt)
-          .filter((payment) => monthKey === payment.date.slice(0, 7))
-          .map((payment) => payment.amount),
-      );
+      const paid = paidInMonth(debt, monthKey);
       const minimum = Math.min(paid, Math.max(debt.minimum_payment, 0));
 
       return { minimum, extra: Math.max(paid - minimum, 0) };
@@ -210,6 +206,7 @@ const scheduleMinimums = (
   monthKey: string,
 ): LoanOutflow => {
   const current = currentLoanPayment(debt, now, monthKey);
+  const minimum = Math.max(debt.minimum_payment, 0);
   const offsets = Array.from(
     { length: PROJECTED_MONTHS },
     (_, index) => index + 1,
@@ -217,12 +214,7 @@ const scheduleMinimums = (
   const walked = offsets.reduce<Step>(
     (step, offset) => {
       const month = new Date(now.getFullYear(), now.getMonth() + offset, 1);
-      const payment = applyMinimumPayment(
-        debt,
-        step.balance,
-        month,
-        Math.max(debt.minimum_payment, 0),
-      );
+      const payment = applyMinimumPayment(debt, step.balance, month, minimum);
 
       return {
         balance: payment.balance,

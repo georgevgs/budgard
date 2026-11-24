@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useDataActions } from '@/common/contexts/DataContext';
 import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
 import { transactionRuleService } from '@/common/api/transactionRuleService';
+import { pickFields } from '@/common/hooks/dataOps/helpers';
 import { useMutationRunner } from '@/common/hooks/dataOps/useMutationRunner';
 import type { Expense } from '@/types/Expense';
 import type { TransactionRuleDraft } from '@/types/TransactionRule';
@@ -54,9 +55,7 @@ export const useTransactionReviewOps = (
             clearSelection();
             await refreshQueue();
           },
-        });
-      } catch {
-        // useMutationRunner restored the rows and reported the error.
+        }).catch(() => undefined);
       } finally {
         setIsReviewing(false);
       }
@@ -97,12 +96,10 @@ export const useTransactionReviewOps = (
   };
 
   return {
-    pending,
     isReviewing,
     selectedIds,
     toggleSelected,
     selectAll,
-    clearSelection,
     markReviewed,
     teachRule,
   };
@@ -122,56 +119,33 @@ const toggleId = (
   return next;
 };
 
-// The undo puts back the review fields of these rows only, inside updaters, so
-// an expense added or edited while the write was in flight survives a failure
-// here — restoring a snapshot of both lists used to undo it too.
 const createReviewPatch = (ids: string[]) => {
   const idSet = new Set(ids);
-  const previous = new Map<string, ReviewFields>();
-  const patch = (transactions: Expense[]) =>
-    transactions.map((transaction) => {
-      if (idSet.has(transaction.id)) {
-        previous.set(transaction.id, pickReviewFields(transaction));
-      }
-
-      return markOneReviewed(transaction, idSet);
-    });
-  const restore = (transactions: Expense[]) =>
-    transactions.map((transaction) => {
-      const fields = previous.get(transaction.id);
-      if (!fields) {
-        return transaction;
-      }
-
-      return { ...transaction, ...fields };
-    });
-
-  return { patch, restore };
-};
-
-type ReviewFields = Pick<
-  Expense,
-  'review_status' | 'review_reason' | 'reviewed_at'
->;
-
-const pickReviewFields = (transaction: Expense): ReviewFields => ({
-  review_status: transaction.review_status,
-  review_reason: transaction.review_reason,
-  reviewed_at: transaction.reviewed_at,
-});
-
-const markOneReviewed = (
-  transaction: Expense,
-  ids: ReadonlySet<string>,
-): Expense => {
-  if (!ids.has(transaction.id)) {
-    return transaction;
-  }
-
-  return {
-    ...transaction,
+  const fields = {
     review_status: 'reviewed',
     review_reason: null,
     reviewed_at: new Date().toISOString(),
-  };
+  } satisfies Partial<Expense>;
+  const previous = new Map<string, Partial<Expense>>();
+  const patch = (transactions: Expense[]) =>
+    transactions.map((transaction) => {
+      if (idSet.has(transaction.id)) {
+        previous.set(transaction.id, pickFields<Expense>(transaction, fields));
+
+        return { ...transaction, ...fields };
+      } else {
+        return transaction;
+      }
+    });
+  const restore = (transactions: Expense[]) =>
+    transactions.map((transaction) => {
+      const original = previous.get(transaction.id);
+      if (undefined !== original) {
+        return { ...transaction, ...original };
+      } else {
+        return transaction;
+      }
+    });
+
+  return { patch, restore };
 };
