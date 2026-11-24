@@ -6,8 +6,14 @@ const state = vi.hoisted(() => ({
   subscriptionLoading: true,
   spaceLoading: false,
   spaceError: null as Error | null,
+  activeOwnerId: 'owner-1',
 }));
 const refreshShares = vi.hoisted(() => vi.fn());
+const selectSpace = vi.hoisted(() => vi.fn());
+
+vi.mock('@/common/contexts/AuthContext', () => ({
+  useAuth: () => ({ session: { user: { id: 'personal' } } }),
+}));
 
 vi.mock('@/common/contexts/SubscriptionProvider', () => ({
   SubscriptionProvider: ({ children }: { children: ReactNode }) => children,
@@ -23,10 +29,11 @@ vi.mock('@/common/contexts/FinancialSpaceProvider', () => ({
 
 vi.mock('@/common/contexts/FinancialSpaceContext', () => ({
   useFinancialSpace: () => ({
-    activeOwnerId: 'owner-1',
+    activeOwnerId: state.activeOwnerId,
     isLoading: state.spaceLoading,
     error: state.spaceError,
     refreshShares,
+    selectSpace,
   }),
 }));
 
@@ -58,7 +65,9 @@ describe('AuthenticatedProviders', () => {
     state.subscriptionLoading = true;
     state.spaceLoading = false;
     state.spaceError = null;
+    state.activeOwnerId = 'owner-1';
     refreshShares.mockReset();
+    selectSpace.mockReset();
   });
 
   it('loads data in parallel without rendering routes against an unknown plan', () => {
@@ -96,10 +105,29 @@ describe('AuthenticatedProviders', () => {
     renderProviders();
 
     expect(screen.getByRole('alert')).toHaveTextContent(
-      'common.loadDataFailed',
+      'settings.household.loadFailed',
     );
     expect(screen.queryByTestId('data-provider')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'common.tryAgain' }));
     expect(refreshShares).toHaveBeenCalledOnce();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'settings.household.openPersonal' }),
+    );
+    expect(selectSpace).toHaveBeenCalledWith('personal');
   });
+
+  it.each([true, false])(
+    'opens personal routes while the household lookup is unavailable (loading: %s)',
+    (isLoading) => {
+      state.subscriptionLoading = false;
+      state.activeOwnerId = 'personal';
+      state.spaceLoading = isLoading;
+      state.spaceError = new Error('network unavailable');
+
+      renderProviders();
+
+      expect(screen.getByText('private-route')).toBeInTheDocument();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    },
+  );
 });

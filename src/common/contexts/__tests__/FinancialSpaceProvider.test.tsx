@@ -106,4 +106,23 @@ describe('FinancialSpaceProvider', () => {
     });
     expect(householdService.getVisibleShares).toHaveBeenCalledTimes(2);
   });
+
+  it('loads shares on reconnect without switching the personal ledger', async () => {
+    vi.mocked(householdService.getVisibleShares)
+      .mockRejectedValueOnce(new Error('network unavailable'))
+      .mockResolvedValueOnce([sharedSpace]);
+
+    render(
+      <FinancialSpaceProvider>
+        <Consumer />
+      </FinancialSpaceProvider>,
+    );
+
+    await screen.findByText('space-error');
+    fireEvent(window, new Event('online'));
+
+    expect(await screen.findByText('space-ready')).toBeInTheDocument();
+    expect(screen.getByText(`${USER_ID}:false`)).toBeInTheDocument();
+    expect(householdService.getVisibleShares).toHaveBeenCalledTimes(2);
+  });
 });

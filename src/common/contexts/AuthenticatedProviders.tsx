@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/common/contexts/AuthContext';
 import { SubscriptionProvider } from '@/common/contexts/SubscriptionProvider';
 import { UpgradeDialogProvider } from '@/common/contexts/UpgradeDialogProvider';
 import { DataProvider } from '@/common/contexts/DataProvider';
@@ -32,37 +33,48 @@ export const AuthenticatedProviders = ({
 
 const SpaceDataProvider = ({ children }: AuthenticatedProvidersProps) => {
   const { t } = useTranslation();
-  const { activeOwnerId, isLoading, error, refreshShares } =
+  const { session } = useAuth();
+  const { activeOwnerId, isLoading, error, refreshShares, selectSpace } =
     useFinancialSpace();
+  const personalOwnerId = getPersonalOwnerId(session);
+  const isPersonal = personalOwnerId === activeOwnerId;
 
-  // A stored shared owner must be validated before it is allowed to choose a
-  // data session. If the share was revoked, starting its requests early would
-  // create avoidable RLS failures and error toasts before the provider can
-  // fall back to the user's own space.
-  if (isLoading) {
+  if (isPersonal || (false === isLoading && null === error)) {
+    return (
+      <DataProvider key={activeOwnerId}>
+        <SubscriptionReadinessGate>{children}</SubscriptionReadinessGate>
+      </DataProvider>
+    );
+  } else if (isLoading) {
     return <AppLoadingSkeleton />;
-  }
-  if (error) {
+  } else {
     return (
       <main
         role="alert"
         className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-background px-6 text-center"
       >
         <p className="text-sm text-muted-foreground">
-          {t('common.loadDataFailed')}
+          {t('settings.household.loadFailed')}
         </p>
+        <Button onClick={() => selectSpace(personalOwnerId)}>
+          {t('settings.household.openPersonal')}
+        </Button>
         <Button variant="outline" onClick={() => void refreshShares()}>
           {t('common.tryAgain')}
         </Button>
       </main>
     );
   }
+};
 
-  return (
-    <DataProvider key={activeOwnerId}>
-      <SubscriptionReadinessGate>{children}</SubscriptionReadinessGate>
-    </DataProvider>
-  );
+const getPersonalOwnerId = (
+  session: ReturnType<typeof useAuth>['session'],
+): string => {
+  if (null === session) {
+    return '';
+  }
+
+  return session.user.id;
 };
 
 // Keep the data provider mounted so its fetch can run alongside the

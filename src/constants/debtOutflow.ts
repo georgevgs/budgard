@@ -131,11 +131,10 @@ export const collectLoanMinimumsDue = (
   const monthKey = toMonthKey(now);
 
   return trackedLoans(debts, defaultCurrency)
-    .filter((debt) => false === isSettledInMonth(debt, monthKey))
     .map((debt) => ({
       id: debt.id,
       description: debt.name,
-      amount: remainingMinimum(debt, now, monthKey),
+      amount: currentLoanPayment(debt, now, monthKey).amount,
       date: dueDateIn(debt, now),
     }))
     .filter((due) => 0 < due.amount);
@@ -150,15 +149,12 @@ export const projectLoanOutflow = (
   now: Date,
 ): LoanOutflow => {
   const monthKey = toMonthKey(now);
-  const loans = trackedLoans(debts, defaultCurrency);
-  const schedules = loans.map((debt) =>
-    scheduleMinimums(debt, now, false === isSettledInMonth(debt, monthKey)),
+  const schedules = trackedLoans(debts, defaultCurrency).map((debt) =>
+    scheduleMinimums(debt, now, monthKey),
   );
 
   return {
-    restOfMonth: sumAmounts(
-      loans.map((debt) => remainingMinimum(debt, now, monthKey)),
-    ),
+    restOfMonth: sumAmounts(schedules.map((schedule) => schedule.restOfMonth)),
     months: Array.from({ length: PROJECTED_MONTHS }, (_, index) =>
       sumAmounts(schedules.map((schedule) => schedule.months[index])),
     ),
@@ -185,17 +181,17 @@ const paidInMonth = (debt: Debt, monthKey: string): number =>
       .map((payment) => payment.amount),
   );
 
-const isSettledInMonth = (debt: Debt, monthKey: string): boolean =>
-  Math.max(debt.minimum_payment, 0) <= paidInMonth(debt, monthKey);
-
-const remainingMinimum = (debt: Debt, now: Date, monthKey: string): number =>
-  roundMoney(
-    Math.max(
-      scheduleMinimums(debt, now, true).restOfMonth -
-        paidInMonth(debt, monthKey),
-      0,
-    ),
+const currentLoanPayment = (debt: Debt, now: Date, monthKey: string) => {
+  const unpaidMinimum = Math.max(
+    debt.minimum_payment - paidInMonth(debt, monthKey),
+    0,
   );
+  if (0 < unpaidMinimum) {
+    return applyMinimumPayment(debt, debt.current_balance, now, unpaidMinimum);
+  } else {
+    return { amount: 0, balance: debt.current_balance };
+  }
+};
 
 const dueDateIn = (debt: Debt, now: Date): Date =>
   new Date(
@@ -211,41 +207,46 @@ type Step = { balance: number; payments: number[] };
 const scheduleMinimums = (
   debt: Debt,
   now: Date,
-  isDueThisMonth: boolean,
+  monthKey: string,
 ): LoanOutflow => {
-  const firstOffset = firstOffsetFor(isDueThisMonth);
+  const current = currentLoanPayment(debt, now, monthKey);
   const offsets = Array.from(
-    { length: PROJECTED_MONTHS + 1 - firstOffset },
-    (_, index) => firstOffset + index,
+    { length: PROJECTED_MONTHS },
+    (_, index) => index + 1,
   );
   const walked = offsets.reduce<Step>(
     (step, offset) => {
       const month = new Date(now.getFullYear(), now.getMonth() + offset, 1);
-      const owed = roundMoney(
-        step.balance +
-          (step.balance * debt.apr * getDaysInMonth(month)) / 100 / 365,
+      const payment = applyMinimumPayment(
+        debt,
+        step.balance,
+        month,
+        Math.max(debt.minimum_payment, 0),
       );
-      const payment = Math.min(Math.max(debt.minimum_payment, 0), owed);
 
       return {
-        balance: roundMoney(owed - payment),
-        payments: [...step.payments, payment],
+        balance: payment.balance,
+        payments: [...step.payments, payment.amount],
       };
     },
-    { balance: debt.current_balance, payments: [] },
+    { balance: current.balance, payments: [] },
   );
-  const leading = Array.from({ length: firstOffset }, () => 0);
-  const [restOfMonth, ...months] = [...leading, ...walked.payments];
 
-  return { restOfMonth, months };
+  return { restOfMonth: current.amount, months: walked.payments };
 };
 
-const firstOffsetFor = (isDueThisMonth: boolean): number => {
-  if (isDueThisMonth) {
-    return 0;
-  } else {
-    return 1;
-  }
+const applyMinimumPayment = (
+  debt: Debt,
+  balance: number,
+  month: Date,
+  minimum: number,
+) => {
+  const owed = roundMoney(
+    balance + (balance * debt.apr * getDaysInMonth(month)) / 100 / 365,
+  );
+  const amount = roundMoney(Math.min(minimum, owed));
+
+  return { amount, balance: roundMoney(owed - amount) };
 };
 
 const toMonthKey = (date: Date): string =>

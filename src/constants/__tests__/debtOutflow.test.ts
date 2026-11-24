@@ -205,6 +205,30 @@ describe('loan minimums due this month', () => {
     expect(projectLoanOutflow([partlyPaid], 'EUR', NOW).restOfMonth).toBe(350);
   });
 
+  it('caps the unpaid installment at the remaining balance', () => {
+    const partlyPaid = debt({
+      current_balance: 120,
+      payments: [{ amount: 50, date: '2026-08-02' }],
+    });
+
+    expect(collectLoanMinimumsDue([partlyPaid], 'EUR', NOW)[0].amount).toBe(
+      120,
+    );
+    expect(projectLoanOutflow([partlyPaid], 'EUR', NOW).restOfMonth).toBe(120);
+  });
+
+  it('deducts only the unpaid installment before projecting next month', () => {
+    const partlyPaid = debt({
+      current_balance: 600,
+      payments: [{ amount: 50, date: '2026-08-02' }],
+    });
+
+    const projected = projectLoanOutflow([partlyPaid], 'EUR', NOW);
+
+    expect(projected.restOfMonth).toBe(350);
+    expect(projected.months.slice(0, 2)).toEqual([250, 0]);
+  });
+
   it('never asks for more than is still owed', () => {
     const nearlyDone = debt({ current_balance: 120, payments: [july] });
 

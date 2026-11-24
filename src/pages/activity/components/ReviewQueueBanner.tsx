@@ -2,14 +2,16 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 import ListChecks from 'lucide-react/dist/esm/icons/list-checks';
-import { useExpensesData, useIncomesData } from '@/common/contexts/DataContext';
+import { usePendingReviewCount } from '@/pages/activity/hooks/usePendingReviewCount';
+import type { TranslateFunction } from '@/constants/translate';
 
 export const ReviewQueueBanner = () => {
   const { t } = useTranslation();
-  const expenses = useExpensesData();
-  const incomes = useIncomesData();
-  const pendingCount = countPending(expenses) + countPending(incomes);
-  if (pendingCount === 0) {
+  const pending = usePendingReviewCount();
+  if (
+    'loading' === pending.status ||
+    ('ready' === pending.status && 0 === pending.count)
+  ) {
     return null;
   }
 
@@ -24,7 +26,7 @@ export const ReviewQueueBanner = () => {
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-semibold">
-          {t('review.bannerTitle', { count: pendingCount })}
+          {getTitle(pending, t)}
         </span>
         <span className="block text-xs text-muted-foreground">
           {t('review.bannerDescription')}
@@ -35,6 +37,13 @@ export const ReviewQueueBanner = () => {
   );
 };
 
-const countPending = (transactions: { review_status?: string }[]): number =>
-  transactions.filter((transaction) => transaction.review_status === 'pending')
-    .length;
+const getTitle = (
+  pending: ReturnType<typeof usePendingReviewCount>,
+  t: TranslateFunction,
+): string => {
+  if ('ready' === pending.status) {
+    return t('review.bannerTitle', { count: pending.count });
+  } else {
+    return t('review.title');
+  }
+};

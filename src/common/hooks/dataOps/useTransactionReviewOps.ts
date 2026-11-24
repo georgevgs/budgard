@@ -1,19 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  useDataActions,
-  useExpensesData,
-  useIncomesData,
-} from '@/common/contexts/DataContext';
+import { useDataActions } from '@/common/contexts/DataContext';
 import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
 import { transactionRuleService } from '@/common/api/transactionRuleService';
 import { useMutationRunner } from '@/common/hooks/dataOps/useMutationRunner';
 import type { Expense } from '@/types/Expense';
 import type { TransactionRuleDraft } from '@/types/TransactionRule';
 
-export const useTransactionReviewOps = () => {
-  const expenses = useExpensesData();
-  const incomes = useIncomesData();
+export const useTransactionReviewOps = (
+  pending: Expense[],
+  refreshQueue: () => Promise<void>,
+) => {
   const { setExpenses, setIncomes, refreshData } = useDataActions();
   const { activeOwnerId } = useFinancialSpace();
   const runMutation = useMutationRunner();
@@ -21,10 +18,7 @@ export const useTransactionReviewOps = () => {
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
-  const pending = useMemo(
-    () => sortPending([...expenses, ...incomes]),
-    [expenses, incomes],
-  );
+  const [isReviewing, setIsReviewing] = useState(false);
 
   const toggleSelected = (transactionId: string): void => {
     setSelectedIds((current) => toggleId(current, transactionId));
@@ -37,19 +31,36 @@ export const useTransactionReviewOps = () => {
   const clearSelection = (): void => setSelectedIds(new Set());
 
   const markReviewed = async (ids: string[]): Promise<void> => {
-    if (ids.length === 0) {
-      return;
-    }
+    if (0 < ids.length && false === isReviewing) {
+      setIsReviewing(true);
+      try {
+        await runMutation({
+          operation: 'markTransactionsReviewed',
+          errorMessage: t('review.toasts.reviewFailed'),
+          successMessage: t('review.toasts.reviewed', { count: ids.length }),
+          optimistic: () => {
+            const { patch, restore } = createReviewPatch(ids);
+            setExpenses(patch);
+            setIncomes(patch);
 
-    await runMutation({
-      operation: 'markTransactionsReviewed',
-      errorMessage: t('review.toasts.reviewFailed'),
-      successMessage: t('review.toasts.reviewed', { count: ids.length }),
-      optimistic: () =>
-        markReviewedOptimistically(ids, setExpenses, setIncomes),
-      perform: () => transactionRuleService.markReviewed(ids, activeOwnerId),
-      commit: clearSelection,
-    });
+            return () => {
+              setExpenses(restore);
+              setIncomes(restore);
+            };
+          },
+          perform: () =>
+            transactionRuleService.markReviewed(ids, activeOwnerId),
+          commit: async () => {
+            clearSelection();
+            await refreshQueue();
+          },
+        });
+      } catch {
+        // useMutationRunner restored the rows and reported the error.
+      } finally {
+        setIsReviewing(false);
+      }
+    }
   };
 
   const teachRule = async (
@@ -73,7 +84,10 @@ export const useTransactionReviewOps = () => {
 
           return rule;
         },
-        commit: refreshData,
+        commit: async () => {
+          clearSelection();
+          await Promise.all([refreshData(), refreshQueue()]);
+        },
       });
 
       return true;
@@ -84,6 +98,7 @@ export const useTransactionReviewOps = () => {
 
   return {
     pending,
+    isReviewing,
     selectedIds,
     toggleSelected,
     selectAll,
@@ -92,15 +107,6 @@ export const useTransactionReviewOps = () => {
     teachRule,
   };
 };
-
-type ExpenseSetter = (
-  value: Expense[] | ((current: Expense[]) => Expense[]),
-) => void;
-
-const sortPending = (transactions: Expense[]): Expense[] =>
-  transactions
-    .filter((transaction) => transaction.review_status === 'pending')
-    .sort((a, b) => b.date.localeCompare(a.date));
 
 const toggleId = (
   current: ReadonlySet<string>,
@@ -119,11 +125,7 @@ const toggleId = (
 // The undo puts back the review fields of these rows only, inside updaters, so
 // an expense added or edited while the write was in flight survives a failure
 // here — restoring a snapshot of both lists used to undo it too.
-const markReviewedOptimistically = (
-  ids: string[],
-  setExpenses: ExpenseSetter,
-  setIncomes: ExpenseSetter,
-) => {
+const createReviewPatch = (ids: string[]) => {
   const idSet = new Set(ids);
   const previous = new Map<string, ReviewFields>();
   const patch = (transactions: Expense[]) =>
@@ -143,13 +145,8 @@ const markReviewedOptimistically = (
 
       return { ...transaction, ...fields };
     });
-  setExpenses(patch);
-  setIncomes(patch);
 
-  return () => {
-    setExpenses(restore);
-    setIncomes(restore);
-  };
+  return { patch, restore };
 };
 
 type ReviewFields = Pick<

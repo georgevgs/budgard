@@ -9,7 +9,11 @@ import {
   parseExpensesCsv,
 } from '@/common/components/csvImport/utils/csvImport';
 import { getCsvPreviewData } from '@/common/components/csvImport/utils/csvText';
+import { buildTransactionsCsv } from '@/constants/csvExport';
+import english from '@/locales/en/translation.json';
+import greek from '@/locales/el/translation.json';
 import type { Category } from '@/types/Category';
+import type { Expense } from '@/types/Expense';
 
 const categories: Category[] = [
   {
@@ -29,6 +33,88 @@ const categories: Category[] = [
     created_at: '',
   },
 ];
+
+const exportedTransaction = (type: 'expense' | 'income', amount: number) => {
+  return {
+    id: 'transaction',
+    user_id: 'u1',
+    date: '2026-08-01',
+    created_at: '2026-08-01',
+    description: 'Test transaction',
+    type,
+    amount,
+  } satisfies Expense;
+};
+
+const parseExport = (csv: string, skipIncome: boolean) => {
+  const preview = getCsvPreviewData(csv);
+  const mapping = suggestColumnMapping(preview);
+
+  return parseExpensesCsv(
+    csv,
+    categories,
+    mapping,
+    skipIncome,
+    usesSignedAmountConvention(preview, mapping.amountColumn),
+  );
+};
+
+describe.each([english, greek])('Budgard transaction export', (locale) => {
+  const labels = locale.annualExport.csv;
+  const makeCsv = (transactions: Expense[]) =>
+    buildTransactionsCsv(transactions, [], [], (key) => {
+      const label = key.slice(
+        'annualExport.csv.'.length,
+      ) as keyof typeof labels;
+
+      return labels[label];
+    });
+
+  it('keeps charges, refunds and income in the same ledger positions', () => {
+    const csv = makeCsv([
+      exportedTransaction('expense', 40),
+      exportedTransaction('expense', -10),
+      exportedTransaction('income', 100),
+    ]);
+    const { validRows, errors } = parseExport(csv, false);
+
+    expect(errors).toEqual([]);
+    expect(validRows).toMatchObject([
+      { isIncome: false, amount: 40 },
+      { isIncome: false, amount: -10 },
+      { isIncome: true, amount: 100 },
+    ]);
+    expect(parseExport(csv, true).validRows).toMatchObject([
+      { isIncome: false, amount: 40 },
+      { isIncome: false, amount: -10 },
+    ]);
+  });
+
+  it('reads one-sided files with no negative ledger amounts', () => {
+    const income = makeCsv([exportedTransaction('income', 100)]);
+    const refund = makeCsv([exportedTransaction('expense', -10)]);
+
+    expect(parseExport(income, false).validRows).toMatchObject([
+      { isIncome: true, amount: 100 },
+    ]);
+    expect(parseExport(refund, true).validRows).toMatchObject([
+      { isIncome: false, amount: -10 },
+    ]);
+  });
+
+  it('reports an unknown transaction type in a Budgard file', () => {
+    const csv = makeCsv([exportedTransaction('income', 100)]).replace(
+      `,${labels.income},`,
+      ',Transfer,',
+    );
+    const { validRows, errors } = parseExport(`\uFEFF${csv}`, false);
+
+    expect(validRows).toEqual([]);
+    expect(errors).toMatchObject([
+      { rowNumber: 2, field: 'type', rawValue: 'Transfer' },
+    ]);
+  });
+});
 
 // --- getCsvPreviewData ---
 

@@ -1,5 +1,13 @@
 import type { Category } from '@/types/Category';
 import {
+  BUDGARD_CSV_TYPE_COLUMN,
+  getBudgardCsvFormatOrNull,
+  getBudgardCsvTypeOrNull,
+  isBudgardCsvUncategorized,
+  type BudgardCsvFormat,
+  type BudgardCsvType,
+} from '@/common/components/csvImport/utils/budgardCsv';
+import {
   detectDelimiter,
   isHeaderRow,
   parseCsvLine,
@@ -47,10 +55,8 @@ export const parseExpensesCsv = (
     delimiter = detectDelimiter(lines[0]);
   }
 
-  let startIndex = 0;
-  if (isHeaderRow(lines[0])) {
-    startIndex = 1;
-  }
+  const format = getBudgardCsvFormatOrNull(parseCsvLine(lines[0], delimiter));
+  const startIndex = Number(null !== format || isHeaderRow(lines[0]));
   const { dateColumn, descriptionColumn, amountColumn, categoryColumn } =
     columnMapping;
   const minColumns =
@@ -74,6 +80,7 @@ export const parseExpensesCsv = (
       categoryMap,
       hasSignedConvention,
       shouldSkipIncomeTransactions,
+      format,
     );
 
     if (outcome.kind === 'income') {
@@ -175,6 +182,7 @@ const processRow = (
   categoryMap: Map<string, Category>,
   hasSignedConvention: boolean,
   shouldSkipIncomeTransactions: boolean,
+  format: BudgardCsvFormat | null,
 ): RowOutcome => {
   const { dateColumn, descriptionColumn, amountColumn, categoryColumn } =
     columnMapping;
@@ -225,25 +233,25 @@ const processRow = (
   }
   const trimmedDescription = description.trim();
 
-  const { amount, isIncome } = parseAmount(
+  const rawType = fields[BUDGARD_CSV_TYPE_COLUMN] ?? '';
+  const transactionType = getBudgardCsvTypeOrNull(rawType, format);
+  const hasInvalidType = null !== format && null === transactionType;
+
+  const { amount, isIncome } = parseTransactionAmount(
     amountStr.trim(),
     hasSignedConvention,
+    transactionType,
   );
 
-  if (shouldSkipIncomeTransactions && isIncome) {
+  if (false === hasInvalidType && shouldSkipIncomeTransactions && isIncome) {
     return { kind: 'income' };
   }
 
   // Zero is not a transaction; a negative expense is a refund and is legal.
-  if (amount === null || amount === 0) {
+  if (hasInvalidType || null === amount || 0 === amount) {
     return {
       kind: 'error',
-      error: {
-        rowNumber,
-        field: 'amount',
-        messageKey: 'import.rowErrors.invalidAmount',
-        rawValue: amountStr,
-      },
+      error: getTransactionError(rowNumber, hasInvalidType, rawType, amountStr),
     };
   }
 
@@ -262,7 +270,9 @@ const processRow = (
 
   const trimmedCategory = categoryName.trim();
   const isUncategorized =
-    !trimmedCategory || trimmedCategory.toLowerCase() === 'uncategorized';
+    '' === trimmedCategory ||
+    'uncategorized' === trimmedCategory.toLowerCase() ||
+    isBudgardCsvUncategorized(trimmedCategory, format);
 
   let unmatchedCategory: string | null = null;
   if (!isUncategorized && !categoryMap.has(trimmedCategory.toLowerCase())) {
@@ -286,4 +296,44 @@ const processRow = (
     },
     unmatchedCategory,
   };
+};
+
+const parseTransactionAmount = (
+  value: string,
+  hasSignedConvention: boolean,
+  transactionType: BudgardCsvType | null,
+) => {
+  if (null === transactionType) {
+    return parseAmount(value, hasSignedConvention);
+  }
+
+  const { amount } = parseAmount(value, false);
+  if ('expense' === transactionType && null !== amount) {
+    return { amount: -amount, isIncome: false };
+  } else {
+    return { amount, isIncome: 'income' === transactionType };
+  }
+};
+
+const getTransactionError = (
+  rowNumber: number,
+  hasInvalidType: boolean,
+  rawType: string,
+  rawAmount: string,
+): CsvParseError => {
+  if (hasInvalidType) {
+    return {
+      rowNumber,
+      field: 'type',
+      messageKey: 'import.rowErrors.invalidType',
+      rawValue: rawType,
+    };
+  } else {
+    return {
+      rowNumber,
+      field: 'amount',
+      messageKey: 'import.rowErrors.invalidAmount',
+      rawValue: rawAmount,
+    };
+  }
 };

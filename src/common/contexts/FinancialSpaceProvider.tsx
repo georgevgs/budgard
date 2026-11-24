@@ -2,6 +2,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -74,6 +75,7 @@ const useFinancialSpaceState = (
   );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const request = useRef<AbortController | null>(null);
   const [stateUserId, setStateUserId] = useState(userId);
   if (stateUserId !== userId) {
     setStateUserId(userId);
@@ -87,51 +89,53 @@ const useFinancialSpaceState = (
     [userId, email, shares],
   );
 
-  const refreshShares = useCallback(async () => {
-    if (!userId) {
-      setShares([]);
-      setIsLoading(false);
+  const refreshShares = useCallback(() => {
+    if ('' !== userId) {
+      const previous = request.current;
+      if (null !== previous) {
+        previous.abort();
+      }
+      const controller = new AbortController();
+      request.current = controller;
 
-      return;
-    }
-
-    try {
-      const next = await householdService.getVisibleShares();
-      setShares(next);
-      setError(null);
-      setActiveOwnerId((current) => resolveActiveOwner(userId, current, next));
-    } catch (caught) {
-      setError(toError(caught));
-    } finally {
-      setIsLoading(false);
+      return householdService
+        .getVisibleShares(controller.signal)
+        .then((next) => {
+          if (false === controller.signal.aborted) {
+            setShares(next);
+            setError(null);
+            setActiveOwnerId((current) =>
+              resolveActiveOwner(userId, current, next),
+            );
+          }
+        })
+        .catch((caught: unknown) => {
+          if (false === controller.signal.aborted) {
+            setError(toError(caught));
+          }
+        })
+        .finally(() => {
+          if (false === controller.signal.aborted) {
+            setIsLoading(false);
+          }
+        });
+    } else {
+      return Promise.resolve();
     }
   }, [userId]);
 
   useEffect(() => {
-    const controller = new AbortController();
-    void householdService
-      .getVisibleShares(controller.signal)
-      .then((next) => {
-        if (controller.signal.aborted) {
-          return;
-        }
-        setShares(next);
-        setError(null);
-        setActiveOwnerId((current) =>
-          resolveActiveOwner(userId, current, next),
-        );
-        setIsLoading(false);
-      })
-      .catch((caught: unknown) => {
-        if (controller.signal.aborted) {
-          return;
-        }
-        setError(toError(caught));
-        setIsLoading(false);
-      });
+    void refreshShares();
+    window.addEventListener('online', refreshShares);
 
-    return () => controller.abort();
-  }, [userId]);
+    return () => {
+      window.removeEventListener('online', refreshShares);
+      const controller = request.current;
+      if (null !== controller) {
+        controller.abort();
+      }
+    };
+  }, [refreshShares]);
 
   const selectSpace = useCallback(
     (ownerId: string) => {

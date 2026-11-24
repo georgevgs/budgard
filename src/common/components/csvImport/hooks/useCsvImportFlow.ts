@@ -5,6 +5,7 @@ import { useCategoriesData } from '@/common/contexts/DataContext';
 import { useToast } from '@/common/hooks/useToast';
 import { useExpenseOps } from '@/common/hooks/dataOps/useExpenseOps';
 import { useIncomeOps } from '@/common/hooks/dataOps/useIncomeOps';
+import { getBudgardCsvFormatOrNull } from '@/common/components/csvImport/utils/budgardCsv';
 import {
   suggestColumnMapping,
   usesSignedAmountConvention,
@@ -310,6 +311,7 @@ const readImportFile = async (
       content,
       preview,
       mapping: suggestColumnMapping(preview),
+      shouldSkipIncome: null === getBudgardCsvFormatOrNull(preview.headers),
     },
     skipped: 0,
   };

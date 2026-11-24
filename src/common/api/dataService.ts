@@ -7,6 +7,7 @@ import { incomeApi } from '@/pages/income/incomeApi';
 import { networthApi } from '@/pages/networth/networthApi';
 import { planApi } from '@/pages/plan/planApi';
 import { recurringApi } from '@/pages/recurring/recurringApi';
+import { reviewApi } from '@/pages/review/reviewApi';
 import { settingsApi } from '@/pages/settings/settingsApi';
 import { todayApi } from '@/pages/today/todayApi';
 import { tagsApi } from '@/common/api/tagsApi';
@@ -25,6 +26,7 @@ export const dataService = {
   ...networthApi,
   ...planApi,
   ...recurringApi,
+  ...reviewApi,
   ...settingsApi,
   ...tagsApi,
   ...todayApi,

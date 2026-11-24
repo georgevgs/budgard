@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import CheckCheck from 'lucide-react/dist/esm/icons/check-check';
-import ListChecks from 'lucide-react/dist/esm/icons/list-checks';
 import WandSparkles from 'lucide-react/dist/esm/icons/wand-sparkles';
 import { Button } from '@/common/ui/button';
 import { PageHeader } from '@/common/components/common/PageHeader';
@@ -13,6 +12,9 @@ import {
   useDataConfig,
 } from '@/common/contexts/DataContext';
 import { useTransactionReviewOps } from '@/common/hooks/dataOps/useTransactionReviewOps';
+import { useReviewQueue } from '@/pages/review/hooks/useReviewQueue';
+import ReviewQueuePagination from '@/pages/review/components/ReviewQueuePagination/ReviewQueuePagination';
+import ReviewQueueActions from '@/pages/review/components/ReviewQueueActions/ReviewQueueActions';
 import { formatCurrency } from '@/constants/utils';
 import type { Expense } from '@/types/Expense';
 import type { TranslateFunction } from '@/constants/translate';
@@ -20,20 +22,35 @@ import type { TranslateFunction } from '@/constants/translate';
 const ReviewQueueView = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { defaultCurrency } = useDataConfig();
+  const { defaultCurrency, isInitialized } = useDataConfig();
   const { categories } = useCategoriesData();
-  const review = useTransactionReviewOps();
+  const queue = useReviewQueue();
+  const review = useTransactionReviewOps(queue.items, queue.refresh);
   const [ruleTransaction, setRuleTransaction] = useState<Expense | null>(null);
 
-  return (
+  const content = (
     <div className="page-shell pb-12">
       <PageHeader
         title={t('review.title')}
-        subtitle={t('review.subtitle', { count: review.pending.length })}
+        subtitle={t('review.subtitle', { count: queue.count })}
       />
-      <div className="mt-6 space-y-3">
-        {renderQueueActions(review, t)}
+      <div className="mt-6 space-y-3" aria-busy={review.isReviewing}>
+        <ReviewQueueActions
+          isVisible={0 < queue.items.length}
+          hasNextPage={null !== queue.nextCursor}
+          isReviewing={review.isReviewing}
+          selectedIds={review.selectedIds}
+          onSelectAll={review.selectAll}
+          onReview={review.markReviewed}
+        />
         {renderQueue(review, defaultCurrency, setRuleTransaction, navigate, t)}
+        <ReviewQueuePagination
+          hasNextPage={null !== queue.nextCursor}
+          isLoading={'loadingMore' === queue.status}
+          hasError={'moreError' === queue.status}
+          isReviewing={review.isReviewing}
+          onLoadMore={queue.loadMore}
+        />
       </div>
       {renderRuleDialog(
         ruleTransaction,
@@ -43,6 +60,38 @@ const ReviewQueueView = () => {
       )}
     </div>
   );
+
+  if ('error' === queue.status) {
+    return (
+      <div className="page-shell pb-12">
+        <PageHeader title={t('review.title')} />
+        <SurfaceCard role="alert" className="mt-6 space-y-3 p-4">
+          <p className="text-sm">{t('review.loadFailed')}</p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void queue.refresh()}
+          >
+            {t('common.tryAgain')}
+          </Button>
+        </SurfaceCard>
+      </div>
+    );
+  } else if ('loading' === queue.status || false === isInitialized) {
+    return (
+      <div className="page-shell pb-12">
+        <PageHeader title={t('review.title')} />
+        <SurfaceCard
+          role="status"
+          className="mt-6 p-4 text-sm text-muted-foreground"
+        >
+          {t('review.loading')}
+        </SurfaceCard>
+      </div>
+    );
+  } else {
+    return content;
+  }
 };
 
 export default ReviewQueueView;
@@ -50,35 +99,6 @@ export default ReviewQueueView;
 type Review = ReturnType<typeof useTransactionReviewOps>;
 type Navigate = ReturnType<typeof useNavigate>;
 type CategoryList = ReturnType<typeof useCategoriesData>['categories'];
-
-const renderQueueActions = (review: Review, t: TranslateFunction) => {
-  if (review.pending.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-2">
-      <Button
-        type="button"
-        size="sm"
-        variant="ghost"
-        onClick={review.selectAll}
-      >
-        <ListChecks className="mr-2 h-4 w-4" />
-        {t('review.selectAll')}
-      </Button>
-      <Button
-        type="button"
-        size="sm"
-        disabled={review.selectedIds.size === 0}
-        onClick={() => void review.markReviewed([...review.selectedIds])}
-      >
-        <CheckCheck className="mr-2 h-4 w-4" />
-        {t('review.reviewSelected', { count: review.selectedIds.size })}
-      </Button>
-    </div>
-  );
-};
 
 const renderQueue = (
   review: Review,
@@ -142,6 +162,7 @@ const renderTransactionRow = (
           type="checkbox"
           className="mt-1 h-4 w-4 rounded border-border accent-primary"
           checked={isChecked}
+          disabled={review.isReviewing}
           aria-label={t('review.selectTransaction', {
             merchant: getMerchant(transaction),
           })}
@@ -167,6 +188,7 @@ const renderTransactionRow = (
           type="button"
           size="sm"
           variant="ghost"
+          disabled={review.isReviewing}
           onClick={() => void review.markReviewed([transaction.id])}
         >
           {t('review.looksRight')}
@@ -175,6 +197,7 @@ const renderTransactionRow = (
           type="button"
           size="sm"
           variant="outline"
+          disabled={review.isReviewing}
           onClick={() => setRuleTransaction(transaction)}
         >
           <WandSparkles className="mr-2 h-4 w-4" />

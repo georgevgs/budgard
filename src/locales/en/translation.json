@@ -449,6 +449,8 @@
     "unclassified": "{{amount}} from {{count}} unclassified categories — tag them as Need, Want, or Savings to include them."
   },
   "annualExport": {
+    "loadingHistory": "Loading your transaction history…",
+    "historyLoadFailed": "Couldn't load all transactions for your annual export.",
     "title": "Export {{year}}",
     "description": "Download a CSV with every {{year}} transaction — handy for tax season or keeping personal records.",
     "transactionCount_one": "{{count}} transaction logged in {{year}}",
@@ -729,6 +731,8 @@
     },
     "household": {
       "title": "Household sharing",
+      "loadFailed": "Couldn't load household sharing.",
+      "openPersonal": "Open personal ledger",
       "shareTogether": "One plan, two people",
       "description": "Invite one partner to view and manage the same transactions, accounts, goals and recurring items. Your login, notifications and security settings stay personal.",
       "email": "Partner's email",
@@ -1330,6 +1334,11 @@
   },
   "review": {
     "title": "Review transactions",
+    "loading": "Loading transactions to review…",
+    "loadFailed": "Couldn't load transactions to review.",
+    "loadMore": "Load more transactions",
+    "loadMoreFailed": "Couldn't load more transactions.",
+    "selectLoaded": "Select loaded transactions",
     "subtitle": "{{count}} imported transaction(s) waiting for a quick check.",
     "bannerTitle": "{{count}} transaction(s) to review",
     "bannerDescription": "Confirm them once, or teach Budgard what to do next time.",
@@ -1407,6 +1416,7 @@
       "tooFewColumns": "Row must have at least {{count}} columns",
       "invalidDate": "Invalid date format. Expected yyyy-MM-dd or dd/MM/yyyy",
       "invalidAmount": "Invalid amount. Must be a positive number",
+      "invalidType": "Transaction type must be Expense or Income",
       "amountTooLarge": "Amount must be less than 1.000.000",
       "descriptionRequired": "Description is required",
       "descriptionTooLong": "Description must be less than 100 characters",

@@ -205,15 +205,19 @@ const handleRest = async (route: Route, dataset: Dataset) => {
     'vnd.pgrst.object',
   );
 
-  if (method === 'GET') {
-    return respond(
+  const isReviewRead =
+    'expenses' === table && 'eq.pending' === url.searchParams.get('review_status');
+  if ('GET' === method || ('HEAD' === method && isReviewRead)) {
+    return respondToRead({
       route,
-      embedRelations(applyFilters(rows, url.searchParams), url, dataset),
+      rows,
+      url,
+      dataset,
+      method,
+      isReviewRead,
       wantsObject,
-    );
-  }
-
-  if (method === 'POST') {
+    });
+  } else if ('POST' === method) {
     const payload = toArray(request.postDataJSON());
     const created = payload.map((item, index) => ({
       id: `${table}-${nextId(table, index)}`,
@@ -227,24 +231,62 @@ const handleRest = async (route: Route, dataset: Dataset) => {
     created.forEach((item) => upsertRow(rows, item));
 
     return respond(route, created, wantsObject, 201);
-  }
-
-  if (method === 'PATCH') {
+  } else if ('PATCH' === method) {
     const patch = request.postDataJSON() as Record<string, unknown>;
     const matched = applyFilters(rows, url.searchParams);
     matched.forEach((item) => Object.assign(item, patch));
 
     return respond(route, matched, wantsObject);
-  }
-
-  if (method === 'DELETE') {
+  } else if ('DELETE' === method) {
     const matched = applyFilters(rows, url.searchParams);
     dataset[table] = rows.filter((item) => !matched.includes(item));
 
     return respond(route, matched, wantsObject);
+  } else {
+    return json(route, {});
   }
+};
 
-  return json(route, {});
+const respondToRead = ({
+  route,
+  rows,
+  url,
+  dataset,
+  method,
+  isReviewRead,
+  wantsObject,
+}: {
+  route: Route;
+  rows: Record<string, unknown>[];
+  url: URL;
+  dataset: Dataset;
+  method: string;
+  isReviewRead: boolean;
+  wantsObject: boolean;
+}) => {
+  if (isReviewRead && 'HEAD' === method) {
+    const count = applyFilters(rows, url.searchParams).length;
+
+    return route.fulfill({
+      status: 200,
+      headers: {
+        'access-control-allow-origin': '*',
+        'access-control-expose-headers': 'content-range',
+        'content-range': `*/${count}`,
+      },
+    });
+  } else if (isReviewRead) {
+    return json(
+      route,
+      embedRelations(reviewPage(rows, url.searchParams), url, dataset),
+    );
+  } else {
+    return respond(
+      route,
+      embedRelations(applyFilters(rows, url.searchParams), url, dataset),
+      wantsObject,
+    );
+  }
 };
 
 let idCounter = 0;
@@ -290,7 +332,7 @@ const upsertRow = (
 // "Uncategorized" — which is exactly the state the row design is NOT built
 // around. Only the category embed is modelled, because it is the only one the
 // listing queries ask for.
-const EMBED_PATTERN = /\bcategory:categories\(/;
+const EMBED_PATTERN = /\bcategory:categories(?:!expenses_category_id_fkey)?\(/;
 
 const embedRelations = (
   rows: Record<string, unknown>[],
@@ -344,7 +386,7 @@ const applyFilters = (
   let result = [...rows];
 
   for (const [key, raw] of params.entries()) {
-    if (['select', 'order', 'limit', 'offset', 'on_conflict'].includes(key)) {
+    if (['select', 'order', 'limit', 'offset', 'on_conflict', 'or'].includes(key)) {
       continue;
     }
     const [op, ...rest] = raw.split('.');
@@ -354,6 +396,45 @@ const applyFilters = (
 
   return result;
 };
+
+const reviewPage = (
+  rows: Record<string, unknown>[],
+  params: URLSearchParams,
+) => {
+  const cursor = params.get('or');
+  const limit = Number(params.get('limit'));
+  const ordered = applyFilters(rows, params).sort(compareReviewRows);
+  if (null !== cursor) {
+    return ordered
+      .filter((row) => matchesReviewCursor(row, cursor))
+      .slice(0, limit);
+  } else {
+    return ordered.slice(0, limit);
+  }
+};
+
+const compareReviewRows = (
+  left: Record<string, unknown>,
+  right: Record<string, unknown>,
+): number =>
+  String(right.date).localeCompare(String(left.date)) ||
+  String(right.created_at).localeCompare(String(left.created_at)) ||
+  String(right.id).localeCompare(String(left.id));
+
+const matchesReviewCursor = (
+  row: Record<string, unknown>,
+  cursor: string,
+): boolean =>
+  cursor
+    .slice(1, -1)
+    .split(/,(?![^()]*\))/)
+    .some((alternative) =>
+      alternative.replace(/^and\(|\)$/g, '').split(',').every((clause) => {
+        const [column, operator, ...value] = clause.split('.');
+
+        return matches(row[column], operator, value.join('.'));
+      }),
+    );
 
 const matches = (actual: unknown, op: string, value: string): boolean => {
   if (op === 'eq') {

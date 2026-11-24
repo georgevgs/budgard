@@ -4,6 +4,23 @@ import { test, expect, setBackendReachable } from './fixtures/test';
 // user it did, and go up on its own when the network returns. This is the
 // journey most likely to break silently, because nothing errors when it does.
 test.describe('offline writes', () => {
+  test('opens the cached personal ledger when relaunched offline', async ({
+    app,
+  }) => {
+    await app.goto('/today');
+    await expect(app.getByText('Weekly shop')).toBeVisible();
+    await expect
+      .poll(() => app.evaluate(() => localStorage.getItem('budgard-data-snapshot')))
+      .toContain('Weekly shop');
+
+    setBackendReachable(false);
+    await app.reload();
+
+    await expect(app.getByText('Weekly shop')).toBeVisible({
+      timeout: 15_000,
+    });
+  });
+
   test('queues an expense saved with no server, then syncs it', async ({
     app,
     data,

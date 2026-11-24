@@ -21,6 +21,7 @@ import {
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useHouseholdOps } from '@/common/hooks/dataOps/useHouseholdOps';
+import { useFinancialSpace } from '@/common/contexts/FinancialSpaceContext';
 import type { HouseholdShare } from '@/types/Household';
 
 type Removal = {
@@ -34,11 +35,12 @@ export const HouseholdSection = () => {
   const { session } = useAuth();
   const userId = session?.user.id ?? '';
   const ops = useHouseholdOps();
+  const { isLoading, error, refreshShares } = useFinancialSpace();
   const [removal, setRemoval] = useState<Removal | null>(null);
   const ownedShare = findOwnedShare(userId, ops.shares);
   const joinedShare = findJoinedShare(userId, ops.shares);
 
-  return (
+  const content = (
     <section className="space-y-2">
       <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
         {t('settings.household.title')}
@@ -54,6 +56,29 @@ export const HouseholdSection = () => {
       {renderRemovalDialog(removal, setRemoval, ops, t)}
     </section>
   );
+
+  if (isLoading) {
+    return (
+      <SurfaceCard role="status" className="p-4 text-sm text-muted-foreground">
+        {t('common.loading')}
+      </SurfaceCard>
+    );
+  } else if (null !== error) {
+    return (
+      <SurfaceCard role="alert" className="space-y-3 p-4">
+        <p className="text-sm">{t('settings.household.loadFailed')}</p>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => void refreshShares()}
+        >
+          {t('common.tryAgain')}
+        </Button>
+      </SurfaceCard>
+    );
+  } else {
+    return content;
+  }
 };
 
 type Ops = ReturnType<typeof useHouseholdOps>;

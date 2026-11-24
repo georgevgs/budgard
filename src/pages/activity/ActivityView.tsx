@@ -76,6 +76,9 @@ const ActivityView = () => {
     return (
       <div className="page-shell">
         <PageHeader title={t('activity.title')} action={toolsMenu} />
+        <div className="mt-3">
+          <ReviewQueueBanner />
+        </div>
         <div className="mt-8">
           <ActivityHistoryError onRetry={() => void loadHistory()} />
         </div>

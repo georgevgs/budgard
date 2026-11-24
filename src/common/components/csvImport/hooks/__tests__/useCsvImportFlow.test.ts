@@ -179,6 +179,40 @@ describe('importing', () => {
     return r;
   };
 
+  it('includes income by default for Budgard exports and sends refunds to expense import', async () => {
+    const flow = render();
+    const csv = [
+      'Date,Type,Amount,Category,Description,Tags',
+      '2026-08-01,Income,100.00,,Paycheck,',
+      '2026-08-02,Expense,10.00,Food,Refund,',
+    ].join('\n');
+    await dropFile(flow, 'budgard.csv', csv);
+    await waitFor(() => expect(flow.current.step).toBe('mapping'));
+
+    expect(flow.current.shouldSkipIncome).toBe(false);
+    act(() => flow.current.handleProceedToPreview());
+    await act(async () => {
+      await flow.current.handleImport();
+    });
+
+    expect(expenseOps.handleBulkExpenseImport).toHaveBeenCalledWith([
+      {
+        date: '2026-08-02',
+        description: 'Refund',
+        amount: -10,
+        category_id: 'c1',
+      },
+    ]);
+    expect(incomeOps.handleBulkIncomeImport).toHaveBeenCalledWith([
+      {
+        date: '2026-08-01',
+        description: 'Paycheck',
+        amount: 100,
+        category_id: null,
+      },
+    ]);
+  });
+
   it('writes the rows and closes on success', async () => {
     const r = await reachPreview();
 

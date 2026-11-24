@@ -112,9 +112,8 @@ type AmountParseResult = {
  * Sign. Negative expenses are legal now (refunds, adjustments), so a minus no
  * longer just means "expense, take the magnitude". In a bank statement the
  * sign encodes direction, and a magnitude is what should be stored. In any
- * other file the sign is part of the amount, so Budgard's own export
- * round-trips: a -3,50 refund comes back as a -3,50 refund rather than as a
- * +3,50 charge.
+ * other file the sign is part of the amount. Budgard exports additionally
+ * use an explicit Type column and encode expense amounts with inverted sign.
  *
  * @param amountStr - The amount string to parse
  * @param signedConvention - True when the mapped amount column uses the

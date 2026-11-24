@@ -2,6 +2,7 @@ import type {
   ColumnMapping,
   CsvPreviewData,
 } from '@/common/components/csvImport/utils/csvTypes';
+import { getBudgardCsvFormatOrNull } from '@/common/components/csvImport/utils/budgardCsv';
 
 // A cell is a negative number, not merely a string that starts with a dash.
 export const isNegativeCell = (cell: string): boolean => {
@@ -42,6 +43,21 @@ const MAX_CATEGORY_LENGTH = 30;
 export const suggestColumnMapping = (
   preview: CsvPreviewData,
 ): ColumnMapping => {
+  const { headers } = preview;
+
+  if (null !== getBudgardCsvFormatOrNull(headers)) {
+    return {
+      dateColumn: 0,
+      amountColumn: 2,
+      categoryColumn: 3,
+      descriptionColumn: 4,
+    };
+  } else {
+    return suggestStatementMapping(preview);
+  }
+};
+
+const suggestStatementMapping = (preview: CsvPreviewData): ColumnMapping => {
   const { headers } = preview;
 
   const dateColumn = matchHeader(headers, HEADER_KEYWORDS.date, 0);

@@ -60,6 +60,7 @@ export type ImportAction =
       content: string;
       preview: CsvPreviewData;
       mapping: ColumnMapping;
+      shouldSkipIncome: boolean;
     }
   | {
       type: 'statementLoaded';
@@ -108,6 +109,7 @@ export const importReducer = (
         csvContent: action.content,
         csvPreview: action.preview,
         columnMapping: action.mapping,
+        shouldSkipIncome: action.shouldSkipIncome,
       };
 
     // A statement describes its own fields, so it lands on preview with no
