@@ -21,6 +21,14 @@ const ROUTES = [
   ['trends', '/trends'],
 ] as const;
 
+// What onboarding would have saved for someone who set the app up in Greek.
+// The mock backend ships English names, and they are user data, not i18n.
+const GREEK_CATEGORY_NAMES: Record<string, string> = {
+  'cat-groceries': 'Σούπερ μάρκετ',
+  'cat-transport': 'Μεταφορές',
+  'cat-salary': 'Μισθός',
+};
+
 test.use({
   viewport: { width: 393, height: 852 },
   isMobile: true,
@@ -47,7 +55,7 @@ for (const rootFontSize of ROOT_FONT_SIZES) {
 
     for (const [name, path] of ROUTES) {
       test(`screenshot ${name}`, async ({ app, data }) => {
-        seed(data);
+        seedInGreek(data);
         await app.goto(path);
         await app.waitForTimeout(2500);
         await app.screenshot({
@@ -58,7 +66,7 @@ for (const rootFontSize of ROOT_FONT_SIZES) {
     }
 
     test('screenshot quick-add', async ({ app, data }) => {
-      seed(data);
+      seedInGreek(data);
       await app.goto('/today');
       await app.waitForTimeout(2000);
       await app
@@ -72,3 +80,13 @@ for (const rootFontSize of ROOT_FONT_SIZES) {
     });
   });
 }
+
+const seedInGreek = (data: Record<string, Record<string, unknown>[]>) => {
+  seed(data);
+  data.categories.forEach((category) => {
+    const greekName = GREEK_CATEGORY_NAMES[category.id as string];
+    if (undefined !== greekName) {
+      category.name = greekName;
+    }
+  });
+};
