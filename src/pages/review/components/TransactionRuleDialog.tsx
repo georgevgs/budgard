@@ -57,7 +57,7 @@ export const TransactionRuleDialog = ({
           {renderActionFields(form, categories, t)}
           {renderFormError(form.formState.errors.rename_to?.message, t)}
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="secondary" onClick={onClose}>
               {t('common.cancel')}
             </Button>
             <Button

@@ -57,7 +57,7 @@ export const TagRenameForm = ({ tag, onClose }: TagRenameFormProps) => {
       <div className="flex gap-3 justify-end pt-2">
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           onClick={onClose}
           disabled={isSaving}
         >

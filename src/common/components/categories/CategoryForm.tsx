@@ -107,7 +107,7 @@ export const CategoryForm = ({
             <div className="flex gap-3 justify-end pt-2 pb-2">
               <Button
                 type="button"
-                variant="outline"
+                variant="secondary"
                 onClick={onBack}
                 disabled={isDisabled}
               >

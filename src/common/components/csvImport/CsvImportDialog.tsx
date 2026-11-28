@@ -166,7 +166,7 @@ const renderUploadStep = (
           onChange={onFileInput}
           className="hidden"
         />
-        <Button variant="outline" asChild>
+        <Button variant="secondary" asChild>
           <span>{t('import.selectFile')}</span>
         </Button>
       </label>
@@ -423,7 +423,7 @@ const renderPreviewStep = (
       {renderValidRowsTable(validRows, t, currency)}
       {renderErrorsList(errors, t)}
       <div className="flex gap-2 justify-end pt-2 border-t">
-        <Button variant="outline" onClick={onBack}>
+        <Button variant="secondary" onClick={onBack}>
           {t('import.back')}
         </Button>
         <Button onClick={onImport} disabled={validRows.length === 0}>

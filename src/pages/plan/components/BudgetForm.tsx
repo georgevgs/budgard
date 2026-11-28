@@ -69,7 +69,7 @@ export const BudgetForm = ({
             {renderAmountField(form, currencyCode, t)}
 
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="secondary" onClick={onClose}>
                 {t('common.cancel')}
               </Button>
               <Button

@@ -20,7 +20,7 @@ export const ExpenseFormActions = ({
     <div className="flex shrink-0 flex-col gap-2 border-t border-border/50 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-3">
       {renderSaveHint(isValid, t)}
       <div className="flex flex-nowrap justify-end gap-3">
-        <Button type="button" variant="outline" onClick={onClose}>
+        <Button type="button" variant="secondary" onClick={onClose}>
           {t('common.cancel')}
         </Button>
         <Button type="submit" disabled={isSubmitting || !isValid}>

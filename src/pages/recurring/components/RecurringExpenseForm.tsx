@@ -129,7 +129,7 @@ const renderActions = (
   t: TranslateFunction,
 ) => (
   <div className="flex shrink-0 justify-end gap-2 border-t border-border/50 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-3">
-    <Button type="button" variant="outline" onClick={onClose}>
+    <Button type="button" variant="secondary" onClick={onClose}>
       {t('common.cancel')}
     </Button>
     <Button type="submit" disabled={isSubmitting || !isValid}>

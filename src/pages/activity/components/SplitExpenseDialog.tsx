@@ -83,7 +83,7 @@ export const SplitExpenseDialog = ({
         <div className="flex shrink-0 justify-end gap-3 border-t border-border/50 pt-4">
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             onClick={() => onOpenChange(false)}
             disabled={split.isSaving}
           >

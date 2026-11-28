@@ -118,7 +118,7 @@ export const CsvMappingStep = ({
       />
 
       <div className="flex gap-2 justify-end pt-2 border-t">
-        <Button variant="outline" onClick={onBack}>
+        <Button variant="secondary" onClick={onBack}>
           {t('import.back')}
         </Button>
         <Button onClick={onContinue}>
