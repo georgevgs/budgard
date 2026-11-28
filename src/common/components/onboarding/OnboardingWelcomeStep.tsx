@@ -19,7 +19,7 @@ export const OnboardingWelcomeStep = ({
 
   return (
     <div className="space-y-6 text-center">
-      <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+      <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center">
         <Wallet className="h-8 w-8 text-primary-ink" />
       </div>
 

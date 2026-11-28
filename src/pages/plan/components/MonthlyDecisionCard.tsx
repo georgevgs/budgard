@@ -142,7 +142,7 @@ const renderAction = (
   t: TranslateFunction,
 ) => {
   const className =
-    'mt-4 inline-flex min-h-10 items-center gap-1.5 rounded-full bg-primary/10 px-3 text-[0.8rem] font-semibold leading-none text-primary-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+    'mt-4 inline-flex min-h-10 items-center gap-1.5 rounded-full bg-muted px-3 text-[0.8rem] font-semibold leading-none text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 
   if (state === 'noBudget') {
     return (

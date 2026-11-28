@@ -412,7 +412,7 @@ const renderInvestmentEmpty = (
   t: TranslateFunction,
 ) => (
   <div className="flex flex-col items-center text-center gap-3 py-6 px-2">
-    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
       <Sparkles className="h-5 w-5 text-primary-ink" />
     </div>
     <div>
@@ -471,7 +471,7 @@ const renderActivityIcon = (s: AccountBalance) => {
   }
 
   return (
-    <div className={cn(wrap, 'bg-primary/10 text-primary-ink')}>
+    <div className={cn(wrap, 'bg-muted text-foreground')}>
       <TrendingUp className="h-4 w-4" />
     </div>
   );

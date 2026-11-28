@@ -42,7 +42,7 @@ export const PaywallFeatures = () => {
 
 const renderFeature = ({ key, Icon }: Feature, label: string) => (
   <li key={key} className="flex items-center gap-3">
-    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary-ink">
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
       <Icon className="h-4 w-4" />
     </span>
     <span className="text-sm text-foreground/90">{label}</span>

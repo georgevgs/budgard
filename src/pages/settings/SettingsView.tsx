@@ -164,7 +164,7 @@ const renderGroupLink = (group: Group, t: TranslateFunction) => {
       viewTransition
       className="group flex min-h-20 items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary-ink">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
         <Icon className="h-4 w-4" />
       </span>
       <span className="min-w-0 flex-1">

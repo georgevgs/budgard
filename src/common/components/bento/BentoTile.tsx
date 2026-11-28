@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { cn } from '@/constants/utils';
 
 /** How loud the module is allowed to be. See `.tile-*` in index.css. */
-type BentoTone = 'plain' | 'slab' | 'ink' | 'accent' | 'ghost' | 'bare';
+type BentoTone = 'plain' | 'slab' | 'ink' | 'ghost' | 'bare';
 
 type BentoTileProps = {
   children: ReactNode;
@@ -110,9 +110,6 @@ const getToneClassName = (tone: BentoTone): string => {
   }
   if (tone === 'ink') {
     return 'tile-ink';
-  }
-  if (tone === 'accent') {
-    return 'tile-accent';
   }
   if (tone === 'ghost') {
     return 'tile-ghost';

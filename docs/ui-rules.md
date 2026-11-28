@@ -59,7 +59,7 @@ Two rules hold it together:
   while it exits and the backdrop owns the fade.
 - Today and Trends are bento grids: `BentoGrid` + `BentoTile`, two columns,
   one full-span slab, half tiles under it. Tones are `plain` / `slab` / `ink` /
-  `accent` / `ghost` / `bare` — at most one `ink` and one `slab` per screen.
+  `ghost` / `bare` — at most one `ink` and one `slab` per screen.
 - Today's grid is the user's: order and visibility live in `useTodayLayout`
   (localStorage for the instant/offline copy, synchronized through the
   owner-scoped `user_ui_preferences` row). A tile with nothing to say returns

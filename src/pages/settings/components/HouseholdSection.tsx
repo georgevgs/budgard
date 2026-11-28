@@ -78,7 +78,7 @@ type Ops = ReturnType<typeof useHouseholdOps>;
 
 const renderIntro = (t: TranslateFunction) => (
   <div className="flex gap-3">
-    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary-ink">
+    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
       <UsersRound className="h-4 w-4" />
     </span>
     <div>

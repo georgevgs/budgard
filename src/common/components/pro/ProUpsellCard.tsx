@@ -21,7 +21,7 @@ export const ProUpsellCard = ({ title, description }: ProUpsellCardProps) => {
   return (
     <SurfaceCard className="p-6">
       <div className="flex flex-col items-start gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/12 text-primary-ink">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-foreground">
           <Sparkles className="h-5 w-5" />
         </span>
         <div>

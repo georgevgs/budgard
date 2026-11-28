@@ -163,7 +163,7 @@ constrain new work:
   a way out by forgetting to pass one. `TopScrim` keeps the status-bar strip
   legible while content scrolls under it.
 - Today and Trends are bento grids: two columns, one full-span slab, half tiles
-  below. Tones: `plain` / `slab` / `ink` / `accent` / `ghost` / `bare`. At most
+  below. Tones: `plain` / `slab` / `ink` / `ghost` / `bare`. At most
   one `slab` and one `ink` per screen — a second of either flattens the first.
 - **Today's order and visible set belong to the user** (`useTodayLayout`,
   localStorage plus the owner-scoped `user_ui_preferences` row). A tile with

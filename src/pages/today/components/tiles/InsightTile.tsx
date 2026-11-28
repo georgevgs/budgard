@@ -6,10 +6,8 @@ type InsightTileProps = {
   insight: Insight | null;
 };
 
-// One thing worth noticing, in a tinted tile rather than an ink one — an
-// observation is not a number, and it should not compete with the ones around
-// it for the eye. A tint, so everything on it is ink and never a fill label.
-//
+// One thing worth noticing, on a plain tile. An observation is not a number,
+// so it should not compete with the ones around it for the eye.
 export const InsightTile = ({ insight }: InsightTileProps) => {
   if (insight === null) {
     return null;
@@ -17,7 +15,6 @@ export const InsightTile = ({ insight }: InsightTileProps) => {
 
   return (
     <BentoTile
-      tone="accent"
       isWide
       to="/trends"
       ariaLabel={insight.text}

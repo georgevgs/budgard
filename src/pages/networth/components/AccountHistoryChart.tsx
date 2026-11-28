@@ -135,10 +135,10 @@ const renderRangeTabs = (
 
 const getRangeButtonClass = (isActive: boolean): string => {
   if (isActive) {
-    return 'bg-primary/10 text-primary-ink';
+    return 'bg-foreground text-background';
+  } else {
+    return 'text-muted-foreground hover:bg-muted/60';
   }
-
-  return 'text-muted-foreground hover:bg-muted/60';
 };
 
 const filterByRange = (data: Point[], range: RangeKey): Point[] => {

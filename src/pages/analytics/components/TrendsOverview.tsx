@@ -51,7 +51,7 @@ export const TrendsOverview = (props: TrendsOverviewProps) => {
         viewTransition
         className="surface-card group flex min-h-20 items-center gap-3.5 p-4 transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary-ink">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
           <ChartSpline className="h-4.5 w-4.5" aria-hidden="true" />
         </span>
         <span className="min-w-0 flex-1">

@@ -49,7 +49,7 @@ const ReviewQueueList = ({
     return (
       <SurfaceCard>
         <div className="p-8 text-center">
-          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/12 text-primary-ink">
+          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-foreground">
             <CheckCheck className="h-5 w-5" />
           </span>
           <p className="mt-4 text-sm font-semibold">{t('review.empty')}</p>
