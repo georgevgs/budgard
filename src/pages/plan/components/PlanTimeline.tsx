@@ -44,10 +44,9 @@ export const PlanTimeline = ({
         <Link
           to={buildManageLink(timeline)}
           viewTransition
-          className="inline-flex min-h-11 shrink-0 items-center gap-1 text-sm font-semibold text-primary-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex min-h-11 shrink-0 items-center rounded-full text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {t('plan.timeline.manage')}
-          <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
       {renderRangeTabs(timeline.range, onRangeChange, t)}

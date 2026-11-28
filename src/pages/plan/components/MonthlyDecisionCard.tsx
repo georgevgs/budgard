@@ -123,15 +123,18 @@ const renderCommitted = (
     })}
     className={cn(
       ALLOCATION_CELL,
-      'block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+      'block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
     )}
   >
     <TileLabel className="truncate text-[0.65rem] opacity-75">
       {t('plan.decision.committed')}
     </TileLabel>
-    <p className="mt-1 flex items-center gap-0.5 text-sm font-semibold tabular-nums text-primary-ink">
+    <p className="mt-1 flex items-center gap-0.5 text-sm font-semibold tabular-nums">
       <span className="truncate">{formatCurrency(committed, currency)}</span>
-      <ChevronRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+      <ChevronRight
+        className="h-3.5 w-3.5 shrink-0 text-muted-foreground"
+        aria-hidden="true"
+      />
     </p>
   </a>
 );

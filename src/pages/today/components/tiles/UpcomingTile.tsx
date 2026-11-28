@@ -35,7 +35,7 @@ export const UpcomingTile = ({ upcoming, currency }: UpcomingTileProps) => {
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <TileLabel>{t('today.tiles.upcoming')}</TileLabel>
-        <span className="text-xs font-medium text-primary-ink">
+        <span className="text-xs font-semibold tabular-nums text-foreground">
           {t('today.tile.billsSummary', {
             amount: formatCurrency(upcoming.total, currency),
             count: upcoming.count,

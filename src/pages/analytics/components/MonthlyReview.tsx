@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import type { MonthlyReviewItem } from '@/pages/analytics/hooks/useMonthlyReview';
 
@@ -28,10 +28,13 @@ export const MonthlyReview = ({ label, items }: MonthlyReviewProps) => {
           <Link
             to="/activity"
             viewTransition
-            className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-primary-ink transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+            className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
           >
             {t('analytics.review.openActivity')}
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            <ChevronRight
+              className="h-4 w-4 text-muted-foreground/70"
+              aria-hidden="true"
+            />
           </Link>
         </div>
       </SurfaceCard>

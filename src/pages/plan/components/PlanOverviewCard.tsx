@@ -1,4 +1,4 @@
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 import { Link } from 'react-router-dom';
 import ObjectTile from '@/common/components/common/ObjectTile/ObjectTile';
 
@@ -38,8 +38,8 @@ export const PlanOverviewCard = ({
         </span>
       </span>
       {renderValue(value, setupLabel)}
-      <ArrowRight
-        className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+      <ChevronRight
+        className="h-4 w-4 shrink-0 text-muted-foreground/70"
         aria-hidden="true"
       />
     </Link>
@@ -49,7 +49,7 @@ export const PlanOverviewCard = ({
 const renderValue = (value: string | null, setupLabel: string) => {
   if (!value) {
     return (
-      <span className="shrink-0 text-xs font-semibold text-primary-ink">
+      <span className="shrink-0 text-xs font-medium text-muted-foreground">
         {setupLabel}
       </span>
     );

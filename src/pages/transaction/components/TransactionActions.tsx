@@ -38,17 +38,17 @@ export const TransactionActions = (props: TransactionActionsProps) => {
       <div className="flex gap-3">
         <Button
           type="button"
-          variant="outline"
-          className="flex-1 rounded-full"
+          variant="secondary"
+          className="h-12 flex-1 rounded-full bg-tile text-foreground hover:bg-accent"
           onClick={props.onEdit}
         >
-          <Pencil className="mr-2 h-4 w-4" />
+          <Pencil className="h-4 w-4" />
           {t('common.edit')}
         </Button>
         <Button
           type="button"
-          variant="outline"
-          className="rounded-full text-destructive-ink"
+          variant="secondary"
+          className="h-12 w-12 rounded-full bg-tile text-destructive-ink hover:bg-accent"
           onClick={() => setIsConfirmingDelete(true)}
           aria-label={t('common.delete')}
         >

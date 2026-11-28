@@ -95,11 +95,11 @@ const resolveSummary = (value: string, t: TranslateFunction): string => {
 };
 
 const resolveSummaryClass = (value: string): string => {
-  if (value.trim().length === 0) {
-    return 'text-sm font-medium text-primary-ink';
+  if (0 === value.trim().length) {
+    return 'text-sm text-muted-foreground';
+  } else {
+    return 'line-clamp-2 text-sm leading-relaxed';
   }
-
-  return 'line-clamp-2 text-sm leading-relaxed';
 };
 
 const renderHint = (isDirty: boolean, t: TranslateFunction) => {
