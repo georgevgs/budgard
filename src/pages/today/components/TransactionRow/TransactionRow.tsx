@@ -5,7 +5,7 @@ import { cn } from '@/constants/utils';
 import { describeAmount } from '@/constants/transactionAmount';
 import type { Expense } from '@/types/Expense';
 
-type TransactionPillProps = {
+type TransactionRowProps = {
   transaction: Expense;
   kind: 'expense' | 'income';
   currency: string;
@@ -14,17 +14,15 @@ type TransactionPillProps = {
   to: string;
 };
 
-// One transaction, as its own rounded object rather than a row inside a list
-// card. The bento redesign makes every list a stack of these: a row that is
-// its own shape can be tapped, swiped and reordered without the divider above
-// it having to mean something.
-export const TransactionPill = ({
+// One transaction, as a row inside the recent-activity card. Rows share one
+// surface with no rules between them, the grouped list every banking app uses.
+const TransactionRow = ({
   transaction,
   kind,
   currency,
   meta,
   to,
-}: TransactionPillProps) => {
+}: TransactionRowProps) => {
   const { t } = useTranslation();
   const amount = describeAmount(transaction.amount, kind, currency);
 
@@ -35,15 +33,15 @@ export const TransactionPill = ({
       aria-label={t('activity.openTransaction', {
         description: transaction.description,
       })}
-      className="tile flex w-full cursor-pointer items-center gap-3.5 px-4 py-3.5 text-left transition-colors hover:bg-accent/40 active:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+      className="flex w-full cursor-pointer items-center gap-3.5 px-4 py-3 text-left transition-colors hover:bg-foreground/4 active:bg-foreground/7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
     >
-      <CategoryGlyph transaction={transaction} />
+      <CategoryGlyph transaction={transaction} className="h-10 w-10" />
       <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3.5 gap-y-1">
         <span className="min-w-0 flex-[1_1_6rem]">
           <span className="block truncate text-[0.9rem] font-medium leading-tight">
             {transaction.description}
           </span>
-          <span className="mt-0.5 block truncate text-[0.72rem] leading-tight text-foreground">
+          <span className="mt-0.5 block truncate text-[0.75rem] leading-tight text-muted-foreground">
             {meta}
           </span>
         </span>
@@ -59,3 +57,5 @@ export const TransactionPill = ({
     </Link>
   );
 };
+
+export default TransactionRow;

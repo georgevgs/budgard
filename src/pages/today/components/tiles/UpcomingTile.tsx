@@ -62,7 +62,7 @@ const renderEntry = (
 
   return (
     <div key={entry.item.id} className="flex items-center gap-3">
-      <span className="w-8.5 shrink-0 text-[0.6875rem] font-semibold uppercase leading-none tracking-[0.1em] text-muted-foreground">
+      <span className="w-8.5 shrink-0 text-[0.75rem] font-semibold leading-none text-muted-foreground">
         {format(entry.nextDate, 'EEE', { locale: dateLocale })}
       </span>
       <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">

@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BudgetUsedTile } from '@/pages/today/components/tiles/BudgetUsedTile';
 import { DebtsTile } from '@/pages/today/components/tiles/DebtsTile';
@@ -9,6 +10,7 @@ import { SafeToSpendTile } from '@/pages/today/components/tiles/SafeToSpendTile'
 import { TopCategoryTile } from '@/pages/today/components/tiles/TopCategoryTile';
 import { UpcomingTile } from '@/pages/today/components/tiles/UpcomingTile';
 import { WeeklyRecapTile } from '@/pages/today/components/tiles/WeeklyRecapTile';
+import TodayActions from '@/pages/today/components/TodayActions/TodayActions';
 import type { DailyPace } from '@/pages/today/hooks/useDailyPace';
 import type { TopCategory } from '@/pages/today/hooks/useTopCategory';
 import type { useTodayGuidance } from '@/pages/today/hooks/useTodayGuidance';
@@ -97,18 +99,22 @@ const renderTileOrNull = (
 ) => {
   const { guidance } = props;
 
+  // The actions travel with the headline figure, the way a bank's buttons sit
+  // under its balance.
   if ('safeToSpend' === id) {
     return (
-      <SafeToSpendTile
-        key={id}
-        status={guidance.status}
-        safeToSpend={guidance.safeToSpend}
-        spentThisMonth={guidance.spentThisMonth}
-        dailyAllowance={guidance.dailyAllowance}
-        typicalDay={guidance.typicalDay}
-        daysRemaining={guidance.daysRemaining}
-        currency={guidance.currency}
-      />
+      <Fragment key={id}>
+        <SafeToSpendTile
+          status={guidance.status}
+          safeToSpend={guidance.safeToSpend}
+          spentThisMonth={guidance.spentThisMonth}
+          dailyAllowance={guidance.dailyAllowance}
+          typicalDay={guidance.typicalDay}
+          daysRemaining={guidance.daysRemaining}
+          currency={guidance.currency}
+        />
+        <TodayActions />
+      </Fragment>
     );
   } else if ('budgetUsed' === id) {
     return (

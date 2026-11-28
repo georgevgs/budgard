@@ -153,6 +153,11 @@
       "allShown": "Every module is already on your grid.",
       "emptyTitle": "Your grid is empty",
       "emptyBody": "You've hidden every module. Bring the ones you want back from Arrange."
+    },
+    "actions": {
+      "ariaLabel": "Quick actions",
+      "expense": "Expense",
+      "income": "Income"
     }
   },
   "activity": {

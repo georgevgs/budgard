@@ -87,6 +87,8 @@ export const QuickAddProvider = ({ children }: QuickAddProviderProps) => {
       handleUseTemplate: expenseActions.handleUseTemplate,
       handleIncomeEdit: incomeForm.handleIncomeEdit,
       handleIncomeDelete,
+      openExpenseEntry: expenseForm.openNewExpenseForm,
+      openIncomeEntry: incomeForm.handleAddClick,
     }),
     [
       expenseActions.optimisticExpenses,
@@ -97,6 +99,8 @@ export const QuickAddProvider = ({ children }: QuickAddProviderProps) => {
       expenseForm.handleExpenseEdit,
       incomeForm.handleIncomeEdit,
       handleIncomeDelete,
+      expenseForm.openNewExpenseForm,
+      incomeForm.handleAddClick,
     ],
   );
 

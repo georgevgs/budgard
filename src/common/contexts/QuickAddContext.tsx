@@ -18,6 +18,8 @@ export type QuickAddValue = {
   handleUseTemplate: (template: ExpenseTemplate) => void;
   handleIncomeEdit: (income: Expense) => void;
   handleIncomeDelete: (id: string) => void;
+  openExpenseEntry: () => void;
+  openIncomeEntry: () => void;
 };
 
 export const QuickAddContext = createContext<QuickAddValue | null>(null);

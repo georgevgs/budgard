@@ -2,7 +2,7 @@ import { format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import { Link } from 'react-router-dom';
-import { TransactionPill } from '@/pages/today/components/TransactionPill';
+import TransactionRow from '@/pages/today/components/TransactionRow/TransactionRow';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { RecentActivityItem } from '@/pages/today/hooks/useTodayGuidance';
 import { BentoTile, TileLabel } from '@/common/components/bento';
@@ -14,8 +14,9 @@ type RecentActivityTileProps = {
 
 type Locale = ReturnType<typeof useDateLocale>;
 
-// What already happened, as its own group of pills rather than one card. The
-// module has no ground of its own — see the `bare` tone in BentoTile.
+// What already happened, as one grouped card under its caption. The caption
+// sits outside the card, so the module itself has no ground, see the `bare`
+// tone in BentoTile.
 export const RecentActivityTile = ({
   items,
   currency,
@@ -40,27 +41,19 @@ export const RecentActivityTile = ({
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
-      <div className="flex flex-col gap-2">
-        {items.map((item) => renderPill(item, currency, dateLocale))}
+      <div className="tile-flush py-1.5">
+        {items.map((item) => (
+          <TransactionRow
+            key={`${item.kind}-${item.transaction.id}`}
+            transaction={item.transaction}
+            kind={item.kind}
+            currency={currency}
+            meta={buildMeta(item, dateLocale)}
+            to={`/t/${item.transaction.id}`}
+          />
+        ))}
       </div>
     </BentoTile>
-  );
-};
-
-const renderPill = (
-  item: RecentActivityItem,
-  currency: string,
-  dateLocale: Locale,
-) => {
-  return (
-    <TransactionPill
-      key={`${item.kind}-${item.transaction.id}`}
-      transaction={item.transaction}
-      kind={item.kind}
-      currency={currency}
-      meta={buildMeta(item, dateLocale)}
-      to={`/t/${item.transaction.id}`}
-    />
   );
 };
 

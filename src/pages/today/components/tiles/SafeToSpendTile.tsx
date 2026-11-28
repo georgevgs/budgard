@@ -101,7 +101,7 @@ const renderChip = (props: SafeToSpendTileProps, t: TranslateFunction) => {
   }
 
   return (
-    <span className="inline-flex items-center rounded-full bg-current/14 px-2.5 py-1.5 text-[0.6875rem] font-semibold uppercase leading-none tracking-[0.1em]">
+    <span className="inline-flex items-center rounded-full bg-current/14 px-3 py-1.5 text-[0.8125rem] font-semibold leading-none">
       {t(`today.chip.${props.status}`)}
     </span>
   );
