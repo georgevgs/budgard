@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
-import Wallet from 'lucide-react/dist/esm/icons/wallet';
+import Emoji3D from '@/common/components/common/Emoji3D/Emoji3D';
 import { Button } from '@/common/ui/button';
 import {
   DialogDescription,
@@ -19,9 +19,7 @@ export const OnboardingWelcomeStep = ({
 
   return (
     <div className="space-y-6 text-center">
-      <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-        <Wallet className="h-8 w-8 text-primary-ink" />
-      </div>
+      <Emoji3D emoji="👛" className="mx-auto h-16 w-16" />
 
       <DialogHeader>
         <DialogTitle className="text-xl">

@@ -1,8 +1,8 @@
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import { useTranslation } from 'react-i18next';
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Button } from '@/common/ui/button';
 import { useUpgradeDialog } from '@/common/contexts/UpgradeDialogContext';
+import ObjectTile from '@/common/components/common/ObjectTile/ObjectTile';
 
 type ProUpsellCardProps = {
   title: string;
@@ -21,9 +21,7 @@ export const ProUpsellCard = ({ title, description }: ProUpsellCardProps) => {
   return (
     <SurfaceCard className="p-6">
       <div className="flex flex-col items-start gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-foreground">
-          <Sparkles className="h-5 w-5" />
-        </span>
+        <ObjectTile emoji="💎" />
         <div>
           <h2 className="type-heading">{title}</h2>
           <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
