@@ -138,9 +138,7 @@ const renderCategoryBreakdown = (
 
   return (
     <div>
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
-        {t('analytics.drillDown.byCategory')}
-      </p>
+      <p className="tile-label mb-2">{t('analytics.drillDown.byCategory')}</p>
       <div className="space-y-2">
         {breakdown.map((cat) => {
           let pct = 0;
@@ -181,9 +179,7 @@ const renderTopExpenses = (
 
   return (
     <div className="mt-5">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
-        {t('analytics.drillDown.topExpenses')}
-      </p>
+      <p className="tile-label mb-2">{t('analytics.drillDown.topExpenses')}</p>
       <div className="space-y-1">
         {expenses.map((expense) => (
           <div

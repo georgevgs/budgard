@@ -15,17 +15,17 @@ The display face is named in exactly one place: the `.type-*` scale in
 `src/index.css`. A component never writes `font-display`, and
 `src/test/invariants/typeScale.test.ts` fails the build if one does.
 
-| class             | for                                          | size      | weight |
-| ----------------- | -------------------------------------------- | --------- | ------ |
-| `.type-slab`      | the figure a screen exists to answer          | 3.5rem    | 800    |
-| `.type-figure-xl` | an amount being entered or inspected          | 2.75rem   | 780    |
-| `.type-figure-lg` | the headline figure of a section              | 2rem      | 760    |
-| `.type-figure`    | a number inside a module                      | 1.5rem    | 720    |
-| `.type-figure-sm` | a number inside a row or a small tile         | 1.25rem   | 700    |
-| `.type-title`     | a screen's own name (`PageHeader`)            | 1.375rem  | 720    |
-| `.type-heading`   | a section's name                              | 1.0625rem | 700    |
-| `.type-wordmark`  | the Budgard logotype                          | 0.9375rem | 700    |
-| `.tile-label`     | an eyebrow over a figure (use `TileLabel`)    | 0.625rem  | 700    |
+| class             | for                                        | size      | weight |
+| ----------------- | ------------------------------------------ | --------- | ------ |
+| `.type-slab`      | the figure a screen exists to answer       | 3.5rem    | 800    |
+| `.type-figure-xl` | an amount being entered or inspected       | 2.75rem   | 780    |
+| `.type-figure-lg` | the headline figure of a section           | 2rem      | 760    |
+| `.type-figure`    | a number inside a module                   | 1.5rem    | 720    |
+| `.type-figure-sm` | a number inside a row or a small tile      | 1.25rem   | 700    |
+| `.type-title`     | a screen's own name (`PageHeader`)         | 1.375rem  | 720    |
+| `.type-heading`   | a section's name                           | 1.0625rem | 700    |
+| `.type-wordmark`  | the Budgard logotype                       | 0.9375rem | 700    |
+| `.tile-label`     | an eyebrow over a figure (use `TileLabel`) | 0.8125rem | 600    |
 
 Two rules hold it together:
 
@@ -34,9 +34,11 @@ Two rules hold it together:
   overridden where a screen genuinely needs a different one — the landing hero,
   the transaction hero — and the weight and tracking come along.
 - **Tracking is optical and already set.** It tightens as the scale climbs
-  (-0.055em at the top, -0.022em at the bottom) and opens right up for the
-  eyebrow, where 10px small caps would otherwise set solid. Never put a
-  `tracking-[…]` next to a `.type-*` class.
+  (-0.055em at the top, -0.022em at the bottom). Never put a `tracking-[…]`
+  next to a `.type-*` class.
+- **Eyebrows are sentence case.** A section or module caption is `TileLabel`
+  (or `.tile-label`): a grey 13px caption at 600. No `uppercase`, no
+  letterspacing, those read as a template.
 
 ---
 
@@ -141,15 +143,16 @@ Every user action must provide feedback:
   gold, lime, mint, income, warning — resolves it to the app's near-black, and
   that is measured rather than chosen:
 
-  | fill | white | near-black |
-  | --- | --- | --- |
-  | `--income` light `#00c27b` | 2.34:1 | **7.67:1** |
-  | `--income` dark `#00eb95` | 1.58:1 | **11.33:1** |
-  | `--warning` light `#dba100` | 2.31:1 | **7.78:1** |
-  | lime dark `#beff0a` | 1.20:1 | **14.94:1** |
+  | fill                        | white  | near-black  |
+  | --------------------------- | ------ | ----------- |
+  | `--income` light `#00c27b`  | 2.34:1 | **7.67:1**  |
+  | `--income` dark `#00eb95`   | 1.58:1 | **11.33:1** |
+  | `--warning` light `#dba100` | 2.31:1 | **7.78:1**  |
+  | lime dark `#beff0a`         | 1.20:1 | **14.94:1** |
 
   White on those is not a bolder choice, it is an unreadable one.
   `tokens.test.ts` holds every pairing at 2.3:1 minimum.
+
 - Everything riding an accent fill is `text-primary-foreground`, at every
   size — a button label, a chip, and the slab's whole contents alike. On the
   brand orange that is white at 2.46:1, the deliberate drinks-can trade the

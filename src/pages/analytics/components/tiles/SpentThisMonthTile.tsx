@@ -113,7 +113,7 @@ const TrendAxis = ({
     return (
       <div
         aria-hidden="true"
-        className="mt-1 flex justify-between text-[0.6875rem] font-medium uppercase leading-none tracking-[0.1em] text-muted-foreground"
+        className="mt-1 flex justify-between text-[0.6875rem] font-medium leading-none text-muted-foreground"
       >
         {months.map((month, index) => (
           <span

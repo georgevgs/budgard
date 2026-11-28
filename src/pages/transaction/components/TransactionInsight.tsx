@@ -26,10 +26,7 @@ export const TransactionInsight = (props: TransactionInsightProps) => {
 
   return (
     <section className="surface-card p-4" aria-labelledby="tx-insight-title">
-      <h2
-        id="tx-insight-title"
-        className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground"
-      >
+      <h2 id="tx-insight-title" className="tile-label">
         {t('transaction.insight.title')}
       </h2>
       <p className="mt-2 type-heading">

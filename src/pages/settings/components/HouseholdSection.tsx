@@ -43,9 +43,7 @@ export const HouseholdSection = () => {
 
   const content = (
     <section className="space-y-2">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-        {t('settings.household.title')}
-      </p>
+      <p className="tile-label">{t('settings.household.title')}</p>
       <SurfaceCard>
         <div className="space-y-5 p-4">
           {renderIntro(t)}

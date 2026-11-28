@@ -44,7 +44,7 @@ export const BudgetCategorySection = ({
   return (
     <div className="pt-3 mt-1 border-t border-border/50 space-y-2.5">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        <span className="tile-label">
           {t('budget.categoryBudgets.sectionTitle')}
         </span>
         <Button

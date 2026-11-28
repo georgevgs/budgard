@@ -105,7 +105,7 @@ describe('NavTabs', () => {
       const tab = screen.getByRole('link', { name: label });
 
       expect(tab).toHaveAttribute('aria-current', 'page');
-      expect(screen.getByText(label)).toHaveClass('text-primary-ink');
+      expect(screen.getByText(label)).toHaveClass('text-foreground');
     },
   );
 

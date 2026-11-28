@@ -45,9 +45,7 @@ export const NotificationsSection = ({
 }: NotificationsSectionProps) => {
   return (
     <section className="space-y-2">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-        {t('settings.notifications.title')}
-      </p>
+      <p className="tile-label">{t('settings.notifications.title')}</p>
       <SurfaceCard>
         <div className="p-4 space-y-4">
           {renderNotificationToggle(

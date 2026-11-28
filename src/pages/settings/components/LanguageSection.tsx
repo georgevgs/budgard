@@ -19,9 +19,7 @@ export const LanguageSection = () => {
 
   return (
     <section className="space-y-2">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-        {t('settings.language.title')}
-      </p>
+      <p className="tile-label">{t('settings.language.title')}</p>
       <SurfaceCard>
         <div className="p-4">
           <Select

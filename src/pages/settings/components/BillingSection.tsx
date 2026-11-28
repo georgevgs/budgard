@@ -41,9 +41,7 @@ export const BillingSection = () => {
 
   return (
     <section className="space-y-2">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-        {t('settings.billing.title')}
-      </p>
+      <p className="tile-label">{t('settings.billing.title')}</p>
       <SurfaceCard>
         <div className="p-4 space-y-3">
           {renderContent(

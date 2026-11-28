@@ -83,9 +83,7 @@ const renderTotal = (
   return (
     <div>
       <div className="mb-2 flex items-baseline justify-between gap-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.08em] opacity-60">
-          {t('today.rhythm.setAside.total')}
-        </p>
+        <p className="tile-label">{t('today.rhythm.setAside.total')}</p>
         <p className="type-figure-sm">
           {formatCurrency(rhythm.setAside, currency)}
         </p>

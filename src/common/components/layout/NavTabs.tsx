@@ -128,8 +128,8 @@ const currentPage = (isActive: boolean): 'page' | undefined => {
 
 const getTabToneClassName = (isActive: boolean): string => {
   if (isActive) {
-    return 'text-primary-ink';
+    return 'text-foreground';
+  } else {
+    return 'text-muted-foreground';
   }
-
-  return 'text-muted-foreground';
 };

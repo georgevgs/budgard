@@ -14,9 +14,7 @@ export const SecuritySection = () => {
 
   return (
     <section className="space-y-2">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-        {t('security.title')}
-      </p>
+      <p className="tile-label">{t('security.title')}</p>
       <SurfaceCard>
         <div className="space-y-4 p-4">
           <div className="flex items-start justify-between gap-4">

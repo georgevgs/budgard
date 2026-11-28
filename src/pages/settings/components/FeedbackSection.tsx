@@ -13,9 +13,7 @@ export const FeedbackSection = () => {
 
   return (
     <section className="space-y-2">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-        {t('settings.feedback.title')}
-      </p>
+      <p className="tile-label">{t('settings.feedback.title')}</p>
       <SurfaceCard>
         <div className="space-y-4 p-4">
           <p className="text-sm leading-relaxed text-muted-foreground">

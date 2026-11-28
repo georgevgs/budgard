@@ -29,9 +29,7 @@ export const ProfileSection = ({
 
   return (
     <section className="space-y-2">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-        {t('settings.profile.title')}
-      </p>
+      <p className="tile-label">{t('settings.profile.title')}</p>
       <SurfaceCard>
         <div className="p-4 space-y-3">
           <div className="flex items-center justify-between">

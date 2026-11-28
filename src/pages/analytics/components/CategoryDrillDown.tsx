@@ -91,7 +91,7 @@ export const CategoryDrillDown = ({
             defaultCurrency,
           )}
 
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground mt-5 mb-2">
+          <p className="tile-label mt-5 mb-2">
             {t('analytics.drillDown.allExpenses')}
           </p>
           <div className="space-y-1">
@@ -119,9 +119,7 @@ const renderMonthlyBreakdown = (
 
   return (
     <div>
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">
-        {t('analytics.drillDown.monthlyTrend')}
-      </p>
+      <p className="tile-label mb-2">{t('analytics.drillDown.monthlyTrend')}</p>
       <div className="space-y-1.5">
         {months.map((month) => {
           let width = 0;

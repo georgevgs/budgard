@@ -34,10 +34,7 @@ export const TransactionNote = ({
 
   return (
     <section className="space-y-2">
-      <label
-        htmlFor="tx-note"
-        className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground"
-      >
+      <label htmlFor="tx-note" className="tile-label">
         {t('transaction.note.label')}
       </label>
       <Textarea
@@ -71,9 +68,7 @@ const renderSummary = (
 ) => {
   return (
     <section className="space-y-2">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-        {t('transaction.note.label')}
-      </p>
+      <p className="tile-label">{t('transaction.note.label')}</p>
       <button
         type="button"
         onClick={onEdit}

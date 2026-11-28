@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { cn } from '@/constants/utils';
-import { getColorTint } from '@/constants/categoryColor';
+import { getColorFill, getColorFillInk } from '@/constants/categoryColor';
 import type { Expense } from '@/types/Expense';
 
 type CategoryGlyphProps = {
@@ -11,7 +11,8 @@ type CategoryGlyphProps = {
 };
 
 // What identifies a transaction's category at the head of a row: a consistent
-// SVG mark on a disc tinted with the category's own colour.
+// SVG mark on a solid disc of the category's own colour. The mark picks white or
+// near-black from the hue, so a light citron still carries a readable icon.
 //
 // The colour goes HERE and not on the description. A category's hue is one of
 // twenty-four the user picked and none of them is contrast-checked as text —
@@ -20,7 +21,7 @@ type CategoryGlyphProps = {
 // them. It would also compete with the amount, which is the one thing in the
 // row that legitimately changes colour. Tinting the disc gives the list the
 // same scannable left rail Monzo and Revolut have while every piece of text
-// stays ink.
+// stays ink. The disc used to be a 22% tint, which read as a pastel wash.
 //
 // The size is the only thing that changes between here and the transaction
 // screen: `TransactionHero` draws the same disc at 64px and shares this
@@ -39,14 +40,28 @@ export const CategoryGlyph = ({
         className,
       )}
       style={{
-        backgroundColor: getColorTint(transaction.category?.color),
+        backgroundColor: getColorFill(getCategoryColorOrNull(transaction)),
+        color: getColorFillInk(getCategoryColorOrNull(transaction)),
         ...style,
       }}
     >
-      <CategoryIcon
-        icon={transaction.category?.icon}
-        className="text-foreground/75"
-      />
+      <CategoryIcon icon={getCategoryIconOrNull(transaction)} />
     </span>
   );
+};
+
+const getCategoryColorOrNull = (transaction: Expense): string | null => {
+  if (undefined === transaction.category) {
+    return null;
+  }
+
+  return transaction.category.color;
+};
+
+const getCategoryIconOrNull = (transaction: Expense): string | null => {
+  if (undefined === transaction.category) {
+    return null;
+  }
+
+  return transaction.category.icon;
 };
