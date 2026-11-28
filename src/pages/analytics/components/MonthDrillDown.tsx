@@ -17,7 +17,7 @@ import type { Expense } from '@/types/Expense';
 import { countsAsSpending, sumSpending } from '@/constants/spending';
 import { sumAmounts } from '@/constants/money';
 import type { Category } from '@/types/Category';
-import { getColorTone } from '@/constants/categoryColor';
+import { getColorFill } from '@/constants/categoryColor';
 
 type MonthDrillDownProps = {
   isOpen: boolean;
@@ -151,7 +151,7 @@ const renderCategoryBreakdown = (
             <div key={cat.id} className="flex items-center gap-3">
               <div
                 className="w-2.5 h-2.5 rounded-full shrink-0"
-                style={{ backgroundColor: getColorTone(cat.color) }}
+                style={{ backgroundColor: getColorFill(cat.color) }}
               />
               <span className="text-sm flex-1 truncate">{cat.name}</span>
               <span className="text-sm font-semibold tabular-nums shrink-0">
@@ -219,7 +219,7 @@ const renderCategoryDot = (expense: Expense) => {
   return (
     <div
       className="w-2 h-2 rounded-full shrink-0"
-      style={{ backgroundColor: getColorTone(expense.category.color) }}
+      style={{ backgroundColor: getColorFill(expense.category.color) }}
     />
   );
 };

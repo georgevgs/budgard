@@ -26,7 +26,7 @@ import type {
 } from '@/pages/activity/hooks/useActivityFeed';
 import type { Category } from '@/types/Category';
 import type { Tag } from '@/types/Tag';
-import { getColorTone } from '@/constants/categoryColor';
+import { getColorFill } from '@/constants/categoryColor';
 
 type ActivityFilterPanelProps = {
   categories: Category[];
@@ -281,7 +281,7 @@ const renderTagOption = (tag: Tag) => (
     <span className="flex items-center gap-2">
       <span
         className="h-2.5 w-2.5 rounded-full"
-        style={{ backgroundColor: getColorTone(tag.color) }}
+        style={{ backgroundColor: getColorFill(tag.color) }}
         aria-hidden="true"
       />
       {tag.name}

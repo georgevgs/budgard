@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Badge } from '@/common/ui/badge';
-import Target from 'lucide-react/dist/esm/icons/target';
 import Calendar from 'lucide-react/dist/esm/icons/calendar';
 import { GoalProgressBar } from '@/pages/goals/components/GoalProgressBar';
 import { GoalCardActions } from '@/pages/goals/components/GoalCardActions';
@@ -18,7 +17,8 @@ import type { Goal } from '@/types/Goal';
 import { format, parseISO } from 'date-fns';
 import type { Locale } from 'date-fns';
 import type { GoalProgress } from '@/common/hooks/useGoalProgress';
-import { getColorDiscStyle } from '@/constants/categoryColor';
+import { getColorTileStyle } from '@/constants/categoryColor';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 
 type GoalCardProps = {
   goal: Goal;
@@ -40,10 +40,10 @@ export const GoalCard = ({ goal, onEdit, onDelete }: GoalCardProps) => {
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <div
-              className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
-              style={getColorDiscStyle(goal.color)}
+              className="h-10 w-10 rounded-[32%] flex items-center justify-center shrink-0"
+              style={getColorTileStyle(goal.color)}
             >
-              <Target className="h-5 w-5" />
+              <CategoryIcon icon="🎯" className="h-[68%] w-[68%]" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="font-medium truncate">{goal.name}</p>

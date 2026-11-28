@@ -3,7 +3,7 @@ import Check from 'lucide-react/dist/esm/icons/check';
 import { Input } from '@/common/ui/input';
 import { dataColors } from '@/design/palette';
 import { cn } from '@/constants/utils';
-import { getColorTone } from '@/constants/categoryColor';
+import { getColorFill } from '@/constants/categoryColor';
 
 const HEX_PATTERN = /^#[0-9A-Fa-f]{0,6}$/;
 
@@ -42,7 +42,7 @@ export const CategoryColorPicker = ({
               'w-9 h-9 rounded-full transition-all duration-150 flex items-center justify-center',
               renderColorButtonState(value === color),
             )}
-            style={{ backgroundColor: getColorTone(color) }}
+            style={{ backgroundColor: getColorFill(color) }}
           >
             {renderSwatchCheck(value === color)}
           </button>
@@ -52,7 +52,7 @@ export const CategoryColorPicker = ({
       <div className="flex items-center gap-2 pt-2">
         <div
           className="w-5 h-5 rounded-full shrink-0 transition-colors duration-150"
-          style={{ backgroundColor: getColorTone(value) }}
+          style={{ backgroundColor: getColorFill(value) }}
           aria-hidden="true"
         />
         <Input

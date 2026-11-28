@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { getColorTone } from '@/constants/categoryColor';
+import { getColorFill } from '@/constants/categoryColor';
 
 export type DonutSlice = {
   id: string;
@@ -53,7 +53,7 @@ export const DonutChart = ({
             <path
               key={slice.id}
               d={arcPath(radius, inner, start, end)}
-              fill={getColorTone(slice.color)}
+              fill={getColorFill(slice.color)}
               stroke="hsl(var(--background))"
               strokeWidth={2}
               opacity={sliceOpacity(activeId, slice.id)}

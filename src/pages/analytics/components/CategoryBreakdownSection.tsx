@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { CategorySparkline } from '@/pages/analytics/components/CategorySparkline';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { formatCurrency } from '@/constants/utils';
-import { getColorDiscStyle, getColorTone } from '@/constants/categoryColor';
+import { getColorFill, getColorTileStyle } from '@/constants/categoryColor';
 import type { CategoryRow } from '@/pages/analytics/hooks/useAnalyticsData';
 import type { TranslateFunction } from '@/constants/translate';
 
@@ -80,7 +80,7 @@ const renderCategoryRow = (
       <div className="hidden w-16 shrink-0 sm:block">
         <CategorySparkline
           values={category.monthlyAmounts}
-          color={getColorTone(category.color)}
+          color={getColorFill(category.color)}
         />
       </div>
       <span className="shrink-0 text-sm font-semibold tabular-nums">
@@ -95,9 +95,9 @@ const renderCategoryRow = (
 
 const renderCategoryIcon = (category: CategoryRow) => (
   <span
-    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-    style={getColorDiscStyle(category.color)}
+    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[32%]"
+    style={getColorTileStyle(category.color)}
   >
-    <CategoryIcon icon={category.icon} className="h-3.5 w-3.5" />
+    <CategoryIcon icon={category.icon} className="h-[68%] w-[68%]" />
   </span>
 );

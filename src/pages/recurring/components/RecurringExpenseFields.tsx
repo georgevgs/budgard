@@ -19,7 +19,7 @@ import {
 } from '@/common/ui/select';
 import type { RecurringExpenseFormData } from '@/pages/recurring/validations';
 import type { Category } from '@/types/Category';
-import { getColorTone } from '@/constants/categoryColor';
+import { getColorFill } from '@/constants/categoryColor';
 
 type RecurringExpenseFieldsProps = {
   form: UseFormReturn<RecurringExpenseFormData>;
@@ -115,7 +115,7 @@ const renderCategoryIcon = (category: {
   return (
     <div
       className="w-3 h-3 rounded-full shrink-0"
-      style={{ backgroundColor: getColorTone(category.color) }}
+      style={{ backgroundColor: getColorFill(category.color) }}
     />
   );
 };

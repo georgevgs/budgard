@@ -3,9 +3,26 @@ import type { CSSProperties } from 'react';
 // Category, tag, goal, debt and account colours are user-picked hues stored as
 // raw hex, so they are the one part of the UI the design tokens cannot own.
 //
-// What gets drawn is the stored hue at the most saturated colour sRGB has
-// that still carries a white mark, flat, the way iOS system colours and
-// Revolut's category icons do it. Most swatches come out as themselves. The
+// Two ways to draw one. A tile under a 3D object, a chart mark, a bar, a dot
+// or a picker swatch carries nothing that has to be read on it, so it gets the
+// stored neon exactly as picked. A chip with a white label on it cannot, so it
+// gets a tone of the same hue that still carries white, see below.
+export const getColorFill = (color: string | null | undefined): string => {
+  if (undefined !== color && null !== color && '' !== color) {
+    return color;
+  } else {
+    return NEUTRAL_TONE;
+  }
+};
+
+export const getColorTileStyle = (
+  color: string | null | undefined,
+): CSSProperties => {
+  return { backgroundColor: getColorFill(color) };
+};
+
+// The chip tone: the stored hue at the most saturated colour sRGB has that
+// still carries a white label, flat. Most swatches come out as themselves. The
 // yellow-green band cannot be vivid under white, it turns mustard and olive,
 // so its hues lean a little warmer or a little greener and its floor drops to
 // 2.15:1, the same drinks-can trade as white on the brand orange.
@@ -15,9 +32,7 @@ export const getColorDiscStyle = (
   return { backgroundColor: getColorTone(color), color: WHITE_INK };
 };
 
-// The same colour for anything that is not a disc: a chart mark, a progress
-// bar, a legend dot, a picker swatch, so each matches the circle beside it. A
-// value that is not a stored hex, such as a design token, passes through.
+// A value that is not a stored hex, such as a design token, passes through.
 export const getColorTone = (color: string | null | undefined): string => {
   if (isHexColor(color)) {
     return getCachedTone(color.toLowerCase());

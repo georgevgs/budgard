@@ -1,5 +1,5 @@
 import { useChartSize } from '@/common/components/charts/hooks/useChartSize';
-import { getColorTone } from '@/constants/categoryColor';
+import { getColorFill } from '@/constants/categoryColor';
 
 // A two-stage flow diagram: one source bar splits into several destination
 // bars, connected by ribbons whose width is proportional to each node's
@@ -161,7 +161,7 @@ const renderRibbon = (
     <path
       key={destination.id}
       d={ribbonPath(x0, sourceSlice, x1, destination)}
-      fill={getColorTone(destination.color)}
+      fill={getColorFill(destination.color)}
       fillOpacity={0.45}
     />
   );
@@ -205,7 +205,7 @@ const renderDestination = (destination: LaidOutNode, rightX: number) => {
         width={NODE_WIDTH}
         height={destination.bottom - destination.top}
         rx={2}
-        fill={getColorTone(destination.color)}
+        fill={getColorFill(destination.color)}
       />
       <text
         x={rightX - 10}

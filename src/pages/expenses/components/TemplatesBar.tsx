@@ -7,7 +7,7 @@ import X from 'lucide-react/dist/esm/icons/x';
 import { cn, formatCurrency } from '@/constants/utils';
 import type { TranslateFunction } from '@/constants/translate';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
-import { getColorTone } from '@/constants/categoryColor';
+import { getColorFill } from '@/constants/categoryColor';
 
 type TemplatesBarProps = {
   templates: ExpenseTemplate[];
@@ -157,7 +157,7 @@ const renderCategoryIndicator = (template: ExpenseTemplate) => {
   return (
     <div
       className="w-2.5 h-2.5 rounded-full shrink-0"
-      style={{ backgroundColor: getColorTone(template.category.color) }}
+      style={{ backgroundColor: getColorFill(template.category.color) }}
       aria-hidden="true"
     />
   );

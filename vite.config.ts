@@ -292,7 +292,9 @@ export default defineConfig({
         // caches see new artwork. The active worker may still satisfy them
         // from its revisioned precache, which preserves offline app chrome.
         ignoreURLParametersMatching: [/^utm_/, /^fbclid$/, /^v$/],
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,json}"],
+        // webp is the 3D category icons, about 140 KB in all. They head every
+        // transaction row, so an offline session has to have them.
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,json,webp}"],
         // Fonts are deliberately NOT precached. Each face ships as four
         // unicode-range subsets and the browser fetches only the ones a
         // session actually needs — precaching them all would put ~290 KB of

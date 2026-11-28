@@ -3,17 +3,12 @@ import { format, parseISO } from 'date-fns';
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { cn, formatCurrency } from '@/constants/utils';
 import { type Account, isLiability } from '@/types/Account';
-import Wallet from 'lucide-react/dist/esm/icons/wallet';
-import Landmark from 'lucide-react/dist/esm/icons/landmark';
-import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
-import Banknote from 'lucide-react/dist/esm/icons/banknote';
-import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
-import type { LucideIcon } from 'lucide-react';
 import type { Locale } from 'date-fns';
 import type { AccountKind } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
-import { getColorDiscStyle } from '@/constants/categoryColor';
+import { getColorTileStyle } from '@/constants/categoryColor';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import type { TranslateFunction } from '@/constants/translate';
 
 type AccountCardProps = {
@@ -30,7 +25,6 @@ export const AccountCard = ({
   const { t } = useTranslation();
   const dateLocale = useDateLocale();
   const isLiabilityAccount = isLiability(account.kind);
-  const Icon = ICON_BY_KIND[account.kind];
 
   const lastUpdatedLabel = getLastUpdatedLabel(latestSnapshot, dateLocale, t);
 
@@ -49,10 +43,13 @@ export const AccountCard = ({
     >
       <div className="p-4 flex items-center gap-3">
         <div
-          className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
-          style={getColorDiscStyle(account.color)}
+          className="h-10 w-10 rounded-[32%] flex items-center justify-center shrink-0"
+          style={getColorTileStyle(account.color)}
         >
-          <Icon className="h-5 w-5" />
+          <CategoryIcon
+            icon={EMOJI_BY_KIND[account.kind]}
+            className="h-[68%] w-[68%]"
+          />
         </div>
         <div className="min-w-0 flex-1">
           <p className="font-medium truncate">{account.name}</p>
@@ -99,11 +96,11 @@ const renderLiabilityPrefix = (isLiabilityAccount: boolean) => {
   return '';
 };
 
-const ICON_BY_KIND: Record<AccountKind, LucideIcon> = {
-  cash: Banknote,
-  bank: Landmark,
-  credit_card: CreditCard,
-  loan: CreditCard,
-  investment: TrendingUp,
-  other: Wallet,
+const EMOJI_BY_KIND: Record<AccountKind, string> = {
+  cash: '💶',
+  bank: '🏦',
+  credit_card: '💳',
+  loan: '💳',
+  investment: '📈',
+  other: '👛',
 };

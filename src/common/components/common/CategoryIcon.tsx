@@ -1,32 +1,38 @@
-import { createElement } from 'react';
-import type { LucideIcon } from 'lucide-react';
-import Baby from 'lucide-react/dist/esm/icons/baby';
-import Beer from 'lucide-react/dist/esm/icons/beer';
-import BookOpen from 'lucide-react/dist/esm/icons/book-open';
-import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
-import BrushCleaning from 'lucide-react/dist/esm/icons/brush-cleaning';
-import Car from 'lucide-react/dist/esm/icons/car';
-import ChartNoAxesCombined from 'lucide-react/dist/esm/icons/chart-no-axes-combined';
-import Clapperboard from 'lucide-react/dist/esm/icons/clapperboard';
-import Coffee from 'lucide-react/dist/esm/icons/coffee';
-import Dumbbell from 'lucide-react/dist/esm/icons/dumbbell';
-import Gamepad2 from 'lucide-react/dist/esm/icons/gamepad-2';
-import Gift from 'lucide-react/dist/esm/icons/gift';
-import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
-import House from 'lucide-react/dist/esm/icons/house';
-import Laptop from 'lucide-react/dist/esm/icons/laptop';
-import Lightbulb from 'lucide-react/dist/esm/icons/lightbulb';
-import Music from 'lucide-react/dist/esm/icons/music';
-import PawPrint from 'lucide-react/dist/esm/icons/paw-print';
-import Pill from 'lucide-react/dist/esm/icons/pill';
-import Plane from 'lucide-react/dist/esm/icons/plane';
-import Scissors from 'lucide-react/dist/esm/icons/scissors';
-import Shirt from 'lucide-react/dist/esm/icons/shirt';
-import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
-import Smartphone from 'lucide-react/dist/esm/icons/smartphone';
-import Tag from 'lucide-react/dist/esm/icons/tag';
-import Undo2 from 'lucide-react/dist/esm/icons/undo-2';
-import Utensils from 'lucide-react/dist/esm/icons/utensils';
+import airplane from '@/assets/emoji3d/airplane.webp?no-inline';
+import arrowBack from '@/assets/emoji3d/arrow-back.webp?no-inline';
+import automobile from '@/assets/emoji3d/automobile.webp?no-inline';
+import baby from '@/assets/emoji3d/baby.webp?no-inline';
+import bank from '@/assets/emoji3d/bank.webp?no-inline';
+import beerMug from '@/assets/emoji3d/beer-mug.webp?no-inline';
+import books from '@/assets/emoji3d/books.webp?no-inline';
+import briefcase from '@/assets/emoji3d/briefcase.webp?no-inline';
+import broom from '@/assets/emoji3d/broom.webp?no-inline';
+import chartIncreasing from '@/assets/emoji3d/chart-increasing.webp?no-inline';
+import clapperBoard from '@/assets/emoji3d/clapper-board.webp?no-inline';
+import creditCard from '@/assets/emoji3d/credit-card.webp?no-inline';
+import directHit from '@/assets/emoji3d/direct-hit.webp?no-inline';
+import euroBanknote from '@/assets/emoji3d/euro-banknote.webp?no-inline';
+import graduationCap from '@/assets/emoji3d/graduation-cap.webp?no-inline';
+import haircut from '@/assets/emoji3d/haircut.webp?no-inline';
+import hamburger from '@/assets/emoji3d/hamburger.webp?no-inline';
+import hotBeverage from '@/assets/emoji3d/hot-beverage.webp?no-inline';
+import house from '@/assets/emoji3d/house.webp?no-inline';
+import label from '@/assets/emoji3d/label.webp?no-inline';
+import laptop from '@/assets/emoji3d/laptop.webp?no-inline';
+import liftingWeights from '@/assets/emoji3d/lifting-weights.webp?no-inline';
+import lightBulb from '@/assets/emoji3d/light-bulb.webp?no-inline';
+import mobilePhone from '@/assets/emoji3d/mobile-phone.webp?no-inline';
+import moneyBag from '@/assets/emoji3d/money-bag.webp?no-inline';
+import musicalNote from '@/assets/emoji3d/musical-note.webp?no-inline';
+import pawPrints from '@/assets/emoji3d/paw-prints.webp?no-inline';
+import pill from '@/assets/emoji3d/pill.webp?no-inline';
+import pizza from '@/assets/emoji3d/pizza.webp?no-inline';
+import purse from '@/assets/emoji3d/purse.webp?no-inline';
+import redHeart from '@/assets/emoji3d/red-heart.webp?no-inline';
+import shoppingCart from '@/assets/emoji3d/shopping-cart.webp?no-inline';
+import tShirt from '@/assets/emoji3d/t-shirt.webp?no-inline';
+import videoGame from '@/assets/emoji3d/video-game.webp?no-inline';
+import wrappedGift from '@/assets/emoji3d/wrapped-gift.webp?no-inline';
 import { cn } from '@/constants/utils';
 
 type CategoryIconProps = {
@@ -34,51 +40,65 @@ type CategoryIconProps = {
   className?: string;
 };
 
-// Categories are still stored as the user's existing emoji value, but they
-// render through one coherent SVG family. This keeps old data compatible while
-// avoiding platform-dependent emoji weight, alignment and colour.
+// Categories are stored as the user's emoji, and each one is drawn as the
+// matching 3D object from Microsoft's Fluent emoji set (MIT, see
+// assets/emoji3d/LICENSE), so the mark looks the same on every platform
+// instead of taking the phone's own emoji font. An emoji outside the set falls
+// back to a label.
 export const CategoryIcon = ({ icon, className }: CategoryIconProps) => {
-  return createElement(resolveIcon(icon), {
-    'aria-hidden': true,
-    className: cn('h-4 w-4 shrink-0', className),
-    strokeWidth: 1.8,
-  });
+  return (
+    <img
+      src={resolveIconSource(icon)}
+      alt=""
+      aria-hidden="true"
+      draggable={false}
+      decoding="async"
+      className={cn('h-4 w-4 shrink-0 select-none', className)}
+    />
+  );
 };
 
-const ICONS_BY_VALUE: Record<string, LucideIcon> = {
-  '🍔': Utensils,
-  '🛒': ShoppingCart,
-  '🏠': House,
-  '🚗': Car,
-  '🎬': Clapperboard,
-  '💊': Pill,
-  '👕': Shirt,
-  '💡': Lightbulb,
-  '🎮': Gamepad2,
-  '✈️': Plane,
-  '📱': Smartphone,
-  '🎓': GraduationCap,
-  '💇': Scissors,
-  '🐾': PawPrint,
-  '🎁': Gift,
-  '☕': Coffee,
-  '🍕': Utensils,
-  '🍺': Beer,
-  '🏋️': Dumbbell,
-  '💼': Briefcase,
-  '🎵': Music,
-  '📚': BookOpen,
-  '🧹': BrushCleaning,
-  '👶': Baby,
-  '💻': Laptop,
-  '↩️': Undo2,
-  '📈': ChartNoAxesCombined,
+const SOURCES_BY_EMOJI: Record<string, string> = {
+  '🍔': hamburger,
+  '🛒': shoppingCart,
+  '🏠': house,
+  '🚗': automobile,
+  '🎬': clapperBoard,
+  '💊': pill,
+  '👕': tShirt,
+  '💡': lightBulb,
+  '🎮': videoGame,
+  '✈️': airplane,
+  '📱': mobilePhone,
+  '🎓': graduationCap,
+  '💇': haircut,
+  '🐾': pawPrints,
+  '🎁': wrappedGift,
+  '☕': hotBeverage,
+  '🍕': pizza,
+  '🍺': beerMug,
+  '🏋️': liftingWeights,
+  '💼': briefcase,
+  '🎵': musicalNote,
+  '📚': books,
+  '🧹': broom,
+  '👶': baby,
+  '💻': laptop,
+  '↩️': arrowBack,
+  '📈': chartIncreasing,
+  '🎯': directHit,
+  '💳': creditCard,
+  '💰': moneyBag,
+  '❤️': redHeart,
+  '👛': purse,
+  '💶': euroBanknote,
+  '🏦': bank,
 };
 
-const resolveIcon = (icon: string | null | undefined): LucideIcon => {
-  if (!icon) {
-    return Tag;
+const resolveIconSource = (icon: string | null | undefined): string => {
+  if (undefined !== icon && null !== icon && icon in SOURCES_BY_EMOJI) {
+    return SOURCES_BY_EMOJI[icon];
+  } else {
+    return label;
   }
-
-  return ICONS_BY_VALUE[icon] ?? Tag;
 };

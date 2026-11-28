@@ -2,18 +2,29 @@ import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/react';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 
-describe('CategoryIcon', () => {
-  it('renders a semantic SVG for a stored category emoji', () => {
-    const { container } = render(<CategoryIcon icon="🍔" />);
+const sourceOf = (icon: string): string => {
+  const { container } = render(<CategoryIcon icon={icon} />);
+  const image = container.querySelector('img');
+  if (null === image) {
+    throw new Error('CategoryIcon rendered no image');
+  }
 
-    expect(container.querySelector('svg')).not.toBeNull();
-    expect(container).not.toHaveTextContent('🍔');
+  return image.getAttribute('src') ?? '';
+};
+
+describe('CategoryIcon', () => {
+  it('draws a stored category emoji as its 3D object', () => {
+    expect(sourceOf('🍔')).toContain('hamburger');
   });
 
-  it('renders a stable SVG fallback for a custom icon', () => {
-    const { container } = render(<CategoryIcon icon="🪴" />);
+  it('falls back to a label for an emoji outside the set', () => {
+    expect(sourceOf('🪴')).toContain('label');
+  });
 
-    expect(container.querySelector('svg')).not.toBeNull();
-    expect(container).not.toHaveTextContent('🪴');
+  it('is decorative, never announced or shown as text', () => {
+    const { container } = render(<CategoryIcon icon="🍔" />);
+
+    expect(container.querySelector('img')).toHaveAttribute('alt', '');
+    expect(container).not.toHaveTextContent('🍔');
   });
 });

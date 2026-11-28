@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { cn } from '@/constants/utils';
-import { getColorDiscStyle } from '@/constants/categoryColor';
+import { getColorTileStyle } from '@/constants/categoryColor';
 import type { Expense } from '@/types/Expense';
 
 type CategoryGlyphProps = {
@@ -11,8 +11,8 @@ type CategoryGlyphProps = {
 };
 
 // What identifies a transaction's category at the head of a row: a consistent
-// white SVG mark on a flat disc of the category's own hue, drawn at the most
-// vivid tone that still carries white, see `getColorDiscStyle`.
+// 3D object on a flat rounded tile in the category's own neon, exactly as the
+// user picked it. The object carries its own colour, so the tile needs no ink.
 //
 // The colour goes HERE and not on the description. A category's hue is one of
 // twenty-four the user picked and none of them is contrast-checked as text —
@@ -36,15 +36,18 @@ export const CategoryGlyph = ({
     <span
       aria-hidden="true"
       className={cn(
-        'flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
+        'flex h-9 w-9 shrink-0 items-center justify-center rounded-[32%]',
         className,
       )}
       style={{
-        ...getColorDiscStyle(getCategoryColorOrNull(transaction)),
+        ...getColorTileStyle(getCategoryColorOrNull(transaction)),
         ...style,
       }}
     >
-      <CategoryIcon icon={getCategoryIconOrNull(transaction)} />
+      <CategoryIcon
+        icon={getCategoryIconOrNull(transaction)}
+        className="h-[68%] w-[68%]"
+      />
     </span>
   );
 };

@@ -15,7 +15,7 @@ import { useTagsData } from '@/common/contexts/DataContext';
 import { useTagOps } from '@/common/hooks/dataOps/useTagOps';
 import type { Tag } from '@/types/Tag';
 import { TagRenameForm } from '@/pages/activity/components/TagRenameForm';
-import { getColorTone } from '@/constants/categoryColor';
+import { getColorFill } from '@/constants/categoryColor';
 
 type View = { type: 'list' } | { type: 'form'; tag: Tag };
 
@@ -100,7 +100,7 @@ const renderTagList = (
         <div key={tag.id} className="flex items-center gap-2.5 py-2 group">
           <div
             className="w-2.5 h-2.5 rounded-full shrink-0"
-            style={{ backgroundColor: getColorTone(tag.color) }}
+            style={{ backgroundColor: getColorFill(tag.color) }}
             aria-hidden="true"
           />
           <span className="flex-1 text-sm font-medium truncate min-w-0">

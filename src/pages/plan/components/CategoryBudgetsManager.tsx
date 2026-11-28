@@ -20,7 +20,7 @@ import {
   type CategoryBudgetTotals,
 } from '@/pages/plan/hooks/useCategoryBudgetDrafts';
 import type { Category } from '@/types/Category';
-import { getColorDiscStyle, getColorTone } from '@/constants/categoryColor';
+import { getColorFill, getColorTileStyle } from '@/constants/categoryColor';
 
 type CategoryBudgetsManagerProps = {
   isOpen: boolean;
@@ -321,10 +321,10 @@ const renderCategoryIndicator = (category: Category) => {
   if (category.icon) {
     return (
       <div
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-        style={getColorDiscStyle(category.color)}
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[32%]"
+        style={getColorTileStyle(category.color)}
       >
-        <CategoryIcon icon={category.icon} />
+        <CategoryIcon icon={category.icon} className="h-[68%] w-[68%]" />
       </div>
     );
   }
@@ -332,7 +332,7 @@ const renderCategoryIndicator = (category: Category) => {
   return (
     <div
       className="w-2.5 h-2.5 rounded-full shrink-0"
-      style={{ backgroundColor: getColorTone(category.color) }}
+      style={{ backgroundColor: getColorFill(category.color) }}
     />
   );
 };

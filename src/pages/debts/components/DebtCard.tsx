@@ -1,19 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { formatCurrency } from '@/constants/utils';
-import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
-import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
-import Home from 'lucide-react/dist/esm/icons/home';
-import Car from 'lucide-react/dist/esm/icons/car';
-import Heart from 'lucide-react/dist/esm/icons/heart';
-import Wallet from 'lucide-react/dist/esm/icons/wallet';
-import HandCoins from 'lucide-react/dist/esm/icons/hand-coins';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
-import type { LucideIcon } from 'lucide-react';
 import type { Debt, DebtKind } from '@/types/Debt';
 import { useDebtProgress } from '@/pages/debts/hooks/useDebtProgress';
 import { DebtProgressBar } from '@/pages/debts/components/DebtProgressBar';
-import { getColorDiscStyle } from '@/constants/categoryColor';
+import { getColorTileStyle } from '@/constants/categoryColor';
+import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import type { TranslateFunction } from '@/constants/translate';
 
 type DebtCardProps = {
@@ -24,7 +17,6 @@ type DebtCardProps = {
 export const DebtCard = ({ debt, onClick }: DebtCardProps) => {
   const { t } = useTranslation();
   const progress = useDebtProgress(debt);
-  const Icon = ICON_BY_KIND[debt.kind];
 
   return (
     <SurfaceCard
@@ -42,10 +34,13 @@ export const DebtCard = ({ debt, onClick }: DebtCardProps) => {
       <div className="p-4 space-y-3">
         <div className="flex items-center gap-3">
           <div
-            className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
-            style={getColorDiscStyle(debt.color)}
+            className="h-10 w-10 rounded-[32%] flex items-center justify-center shrink-0"
+            style={getColorTileStyle(debt.color)}
           >
-            <Icon className="h-5 w-5" />
+            <CategoryIcon
+              icon={EMOJI_BY_KIND[debt.kind]}
+              className="h-[68%] w-[68%]"
+            />
           </div>
           <div className="min-w-0 flex-1">
             <p className="font-medium truncate">{debt.name}</p>
@@ -67,14 +62,14 @@ export const DebtCard = ({ debt, onClick }: DebtCardProps) => {
   );
 };
 
-const ICON_BY_KIND: Record<DebtKind, LucideIcon> = {
-  credit_card: CreditCard,
-  student_loan: GraduationCap,
-  mortgage: Home,
-  auto_loan: Car,
-  personal_loan: HandCoins,
-  medical: Heart,
-  other: Wallet,
+const EMOJI_BY_KIND: Record<DebtKind, string> = {
+  credit_card: '💳',
+  student_loan: '🎓',
+  mortgage: '🏠',
+  auto_loan: '🚗',
+  personal_loan: '💰',
+  medical: '❤️',
+  other: '👛',
 };
 
 const renderUnpayableHint = (isUnpayable: boolean, t: TranslateFunction) => {
