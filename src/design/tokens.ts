@@ -139,7 +139,9 @@ const light: TokenMap = {
   '--destructive-foreground': status.danger.on,
   '--destructive-ink': status.danger.ink,
   '--tile': neutral[25],
-  '--tile-ring': '0 0% 7% / 0.07',
+  // No rim by default. The fill alone separates a panel, the way Cash App and
+  // Revolut draw theirs. The high-contrast themes below bring the rim back.
+  '--tile-ring': '0 0% 7% / 0',
   // The small tile a 3D object sits on: one step above the panel it is in, so
   // the object reads as an app icon set into the row, not a coloured sticker.
   '--object-tile': neutral[0],
@@ -213,7 +215,7 @@ const dark: TokenMap = {
   // the dock capsule's ground, so the two surfaces that sit above the page
   // agree with each other.
   '--tile': ink[900],
-  '--tile-ring': '0 0% 100% / 0.08',
+  '--tile-ring': '0 0% 100% / 0',
   '--object-tile': ink[800],
   '--border': ink[600],
   '--input': ink[400],

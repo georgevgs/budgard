@@ -24,12 +24,12 @@ export const TransactionsSkeletonBody = () => {
       </div>
 
       <div className="bento mt-4">
-        <Skeleton className="bento-wide h-38 rounded-[1.875rem]" />
-        <Skeleton className="h-44 rounded-[1.625rem]" />
-        <Skeleton className="h-44 rounded-[1.625rem]" />
-        <Skeleton className="bento-wide h-30 rounded-[1.625rem]" />
-        <Skeleton className="h-26 rounded-[1.625rem]" />
-        <Skeleton className="h-26 rounded-[1.625rem]" />
+        <Skeleton className="bento-wide h-38 rounded-[1.625rem]" />
+        <Skeleton className="h-44 rounded-[1.375rem]" />
+        <Skeleton className="h-44 rounded-[1.375rem]" />
+        <Skeleton className="bento-wide h-30 rounded-[1.375rem]" />
+        <Skeleton className="h-26 rounded-[1.375rem]" />
+        <Skeleton className="h-26 rounded-[1.375rem]" />
       </div>
 
       <div className="mt-6 space-y-2">

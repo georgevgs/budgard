@@ -125,10 +125,16 @@ src/design/              tokens and palette
 one. Read `src/design/palette.ts` before changing anything visual. The rules that
 constrain new work:
 
-- **A panel is a surface AND a rule.** It sits 2% off the page (`--tile`) and
-  carries a hairline (`--tile-ring`). `.surface-card` for the single panel around
-  a form or list, `.tile` for a module of a bento grid. A bare `bg-card` with no
-  rule is invisible.
+- **A panel is a surface, not a rule.** It sits 3.5% off the page (`--tile`)
+  with no hairline: a fill with a rim on top read as a form field.
+  `--tile-ring` is transparent except in the high-contrast themes, which bring
+  the rim back. `.surface-card` for the single panel around a form or list,
+  `.tile` for a module of a bento grid. A bare `bg-card` is invisible.
+- **Lists sit on the page.** A feed (Activity) is rows under a day heading,
+  not a card per day. A card holds a module, never a single row.
+- **Links are ink, not accent.** "View all", "Manage", "Set up" are muted
+  text that darkens on hover, with no trailing arrow. Orange is for the slab,
+  the primary action and selection.
 - **No ambient colour.** No washes behind a screen, no coloured glow, no tinted
   section bands. Depth is `.lift` (grey shadow). If you want to add coloured
   light somewhere, the answer is no.

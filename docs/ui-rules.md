@@ -53,8 +53,8 @@ Two rules hold it together:
   `src/assets/emoji3d/`, mapped in `src/constants/emoji3d.ts`. A new object is
   a new file there plus one line in the map.
 - A 3D object carries its own colour, so its tile carries none: `.object-tile`
-  is one step above its panel with the panel's own hairline, like an app icon
-  set into the row. A neon tile under a cartoon object reads as a toy, not a
+  takes the panel fill on the page and steps up to `--object-tile` inside a
+  panel, like an app icon set into the row. A neon tile under a cartoon object reads as a toy, not a
   finance app. The category's own colour lives in charts, dots and chips.
 
 ---
@@ -132,9 +132,13 @@ Every user action must provide feedback:
 
 - Every colour comes from `src/design/tokens.ts`. Use `bg-primary` /
   `text-income`; never a raw hue.
-- A panel sits 2% off the page and carries a hairline: use `.surface-card` for
+- A panel sits 3.5% off the page with no hairline: use `.surface-card` for
   a single panel, `.tile` for a module of the bento grid. Both resolve to the
-  same `--tile` / `--tile-ring` pair. Never a bare `bg-card` — it is invisible.
+  same `--tile` fill. `--tile-ring` is transparent outside the high-contrast
+  themes. Never a bare `bg-card`, it is invisible.
+- A feed sits on the page: rows under a day heading, not a card per day.
+- Links such as "View all" and "Manage" are muted text with no trailing
+  arrow. Orange stays on the slab, the primary action and selection.
 - No ambient colour: no washes, no coloured glow, no tinted section bands.
   Depth is `.lift` (grey shadow). The source design put an orange bloom under
   the Today slab and the FAB; that is the one thing from it we did not take.

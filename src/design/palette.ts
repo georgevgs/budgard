@@ -97,12 +97,13 @@ export const neutral = {
    * to be an object it can pick up, reorder and hide, not a region marked off
    * on the page.
    *
-   * So the tile gets a fill, and it is kept to 2% off the canvas: enough to
-   * make a shape, far too little to read as a tinted panel. Still dead
-   * achromatic, so it costs the app no colour. The plain `.surface-card` is
-   * unchanged and still correct everywhere a single panel stands alone.
+   * So the tile gets a fill, 3.5% off the canvas: enough to make a shape on
+   * its own, with no hairline round it, far too little to read as a tinted
+   * panel. Still dead achromatic, so it costs the app no colour. A fill with
+   * a rim on top read as a form field, which is why the rim went and the
+   * fill stepped down from 98%. `.surface-card` is the same object.
    */
-  25: '0 0% 98%',
+  25: '0 0% 96.5%',
   50: '0 0% 94%',
   100: '0 0% 90%',
   200: '0 0% 83%',
