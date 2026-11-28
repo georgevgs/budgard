@@ -3,7 +3,6 @@ import Plus from 'lucide-react/dist/esm/icons/plus';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import Pencil from 'lucide-react/dist/esm/icons/pencil';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
-import FolderOpen from 'lucide-react/dist/esm/icons/folder-open';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { Button } from '@/common/ui/button';
 import type { TranslateFunction } from '@/constants/translate';
@@ -19,6 +18,7 @@ import { useDataConfig } from '@/common/contexts/DataContext';
 import type { Category, CategoryType } from '@/types/Category';
 import { CategoryForm } from '@/common/components/categories/CategoryForm';
 import { getColorFill } from '@/constants/categoryColor';
+import Emoji3D from '@/common/components/common/Emoji3D/Emoji3D';
 
 type CategoryManagerProps = {
   categoryType?: CategoryType;
@@ -231,10 +231,7 @@ const renderCategoryList = (
 const renderEmptyState = (type: CategoryType, t: TranslateFunction) => {
   return (
     <div className="flex flex-col items-center text-center py-12 px-4">
-      <FolderOpen
-        className="h-12 w-12 text-muted-foreground/50 mb-3"
-        aria-hidden="true"
-      />
+      <Emoji3D emoji="🏷️" className="mb-3 h-16 w-16" />
       <p className="text-sm font-medium">{renderEmptyTitle(type, t)}</p>
       <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
         {renderEmptyHelp(type, t)}

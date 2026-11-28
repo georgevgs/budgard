@@ -109,4 +109,5 @@ const SOURCES_BY_EMOJI: Record<string, string> = {
   '🗃️': cardFileBox,
   '📤': outboxTray,
   '✅': checkMarkButton,
+  '🏷️': label,
 };

@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { EmptyStateCard } from '@/common/ui/empty-state-card';
-import Waves from 'lucide-react/dist/esm/icons/waves';
 import { FlowChart } from '@/pages/analytics/components/FlowChart';
 import type { FlowNode } from '@/pages/analytics/components/FlowChart';
 import type { TranslateFunction } from '@/constants/translate';
@@ -13,6 +12,7 @@ import {
   type MoneyFlowCategory,
 } from '@/pages/analytics/hooks/useMoneyFlowData';
 import { formatCurrency } from '@/constants/utils';
+import Emoji3D from '@/common/components/common/Emoji3D/Emoji3D';
 
 type MoneyFlowPanelProps = {
   flow: MoneyFlowData;
@@ -29,7 +29,7 @@ export const MoneyFlowPanel = ({ flow, currency }: MoneyFlowPanelProps) => {
   if (!flow.hasData) {
     return (
       <EmptyStateCard
-        media={<Waves className="h-10 w-10 text-muted-foreground/50" />}
+        media={<Emoji3D emoji="💶" className="h-14 w-14" />}
         title={t('moneyFlow.emptyTitle')}
         description={t('moneyFlow.emptyDescription')}
         actionLabel={t('expenses.addExpense')}

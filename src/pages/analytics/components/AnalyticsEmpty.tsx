@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import ChartSpline from 'lucide-react/dist/esm/icons/chart-spline';
 import { PageHeader } from '@/common/components/common/PageHeader';
 import { EmptyStateCard } from '@/common/ui/empty-state-card';
+import Emoji3D from '@/common/components/common/Emoji3D/Emoji3D';
 
 type AnalyticsEmptyProps = {
   title?: string;
@@ -26,7 +26,7 @@ export const AnalyticsEmpty = ({
       <div className="mt-8">
         <EmptyStateCard
           variant="page"
-          media={<ChartSpline className="h-12 w-12 text-muted-foreground/50" />}
+          media={<Emoji3D emoji="📊" className="h-16 w-16" />}
           title={t('analytics.emptyTitle')}
           description={t('analytics.emptyDescription')}
           actionLabel={t('expenses.addExpense')}

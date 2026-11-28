@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import ReceiptText from 'lucide-react/dist/esm/icons/receipt-text';
 import { PageHeader } from '@/common/components/common/PageHeader';
 import { EmptyStateCard } from '@/common/ui/empty-state-card';
 import { ActivityHistoryError } from '@/pages/activity/components/ActivityHistoryError';
@@ -29,6 +28,7 @@ import { useCurrentDate } from '@/common/hooks/useCurrentDate';
 import { useOnDemandHistory } from '@/common/hooks/data/useOnDemandHistory';
 import { useSeedIncomeCategories } from '@/pages/activity/hooks/useSeedIncomeCategories';
 import { isMonthPendingHistory } from '@/constants/dataCache';
+import Emoji3D from '@/common/components/common/Emoji3D/Emoji3D';
 
 const ActivityView = () => {
   const { t } = useTranslation();
@@ -93,9 +93,7 @@ const ActivityView = () => {
         <div className="mt-8">
           <EmptyStateCard
             variant="page"
-            media={
-              <ReceiptText className="h-12 w-12 text-muted-foreground/50" />
-            }
+            media={<Emoji3D emoji="🧾" className="h-16 w-16" />}
             title={t('activity.firstUseTitle')}
             description={t('activity.firstUseBody')}
             actionLabel={t('expenses.addExpense')}

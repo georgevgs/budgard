@@ -1,7 +1,6 @@
 import { Button } from '@/common/ui/button';
 import { EmptyStateCard } from '@/common/ui/empty-state-card';
 import Plus from 'lucide-react/dist/esm/icons/plus';
-import Repeat from 'lucide-react/dist/esm/icons/repeat';
 import { Dialog, DialogContent } from '@/common/ui/dialog';
 import type { RecurringExpense } from '@/types/RecurringExpense';
 import { RecurringExpenseForm } from '@/pages/recurring/components/RecurringExpenseForm';
@@ -15,6 +14,7 @@ import { RecurringLoading } from '@/pages/recurring/components/RecurringLoading'
 import { useTranslation } from 'react-i18next';
 import { RecurringSuggestions } from '@/pages/recurring/components/RecurringSuggestions';
 import type { TranslateFunction } from '@/constants/translate';
+import Emoji3D from '@/common/components/common/Emoji3D/Emoji3D';
 
 const RecurringExpensesList = () => {
   const { t } = useTranslation();
@@ -240,7 +240,7 @@ const renderEmptyState = (
 
   return (
     <EmptyStateCard
-      media={<Repeat className="h-12 w-12 text-muted-foreground/50" />}
+      media={<Emoji3D emoji="🗓️" className="h-16 w-16" />}
       title={t(titleKey)}
       description={t(descKey)}
       actionLabel={t(ctaKey)}

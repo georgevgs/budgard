@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
 import { EmptyStateCard } from '@/common/ui/empty-state-card';
+import Emoji3D from '@/common/components/common/Emoji3D/Emoji3D';
 
 type DebtsEmptyProps = {
   onAddClick: () => void;
@@ -11,7 +11,7 @@ export const DebtsEmpty = ({ onAddClick }: DebtsEmptyProps) => {
 
   return (
     <EmptyStateCard
-      media={<CreditCard className="h-12 w-12 text-muted-foreground/50" />}
+      media={<Emoji3D emoji="💳" className="h-16 w-16" />}
       title={t('debts.empty.title')}
       description={t('debts.empty.description')}
       actionLabel={t('debts.empty.cta')}

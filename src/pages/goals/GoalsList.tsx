@@ -4,7 +4,6 @@ import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Button } from '@/common/ui/button';
 import { Dialog, DialogContent } from '@/common/ui/dialog';
 import Plus from 'lucide-react/dist/esm/icons/plus';
-import Target from 'lucide-react/dist/esm/icons/target';
 import { useGoalsData, useDataConfig } from '@/common/contexts/DataContext';
 import { useGoalOps } from '@/common/hooks/dataOps/useGoalOps';
 import { useGoalSubmit } from '@/pages/goals/hooks/useGoalSubmit';
@@ -15,6 +14,7 @@ import { PageHeader } from '@/common/components/common/PageHeader';
 import { GoalsLoading } from '@/pages/goals/components/GoalsLoading';
 import { useDelayedLoading } from '@/common/hooks/useDelayedLoading';
 import type { TranslateFunction } from '@/constants/translate';
+import Emoji3D from '@/common/components/common/Emoji3D/Emoji3D';
 
 const GoalsList = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -143,7 +143,7 @@ const renderEmptyState = (
 ) => (
   <SurfaceCard isFlush className="p-8 text-center">
     <div className="flex flex-col items-center gap-3">
-      <Target className="h-12 w-12 text-muted-foreground/50" />
+      <Emoji3D emoji="🎯" className="h-16 w-16" />
       <div className="max-w-[280px]">
         <p className="font-medium">{t('goals.empty.title')}</p>
         <p className="text-sm text-muted-foreground">

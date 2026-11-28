@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import CheckCheck from 'lucide-react/dist/esm/icons/check-check';
 import { SurfaceCard } from '@/common/components/common/SurfaceCard';
 import { Button } from '@/common/ui/button';
 import ReviewTransactionRow from '@/pages/review/components/ReviewTransactionRow/ReviewTransactionRow';
 import type { Expense } from '@/types/Expense';
+import Emoji3D from '@/common/components/common/Emoji3D/Emoji3D';
 
 type ReviewQueueListProps = {
   items: Expense[];
@@ -49,9 +49,7 @@ const ReviewQueueList = ({
     return (
       <SurfaceCard>
         <div className="p-8 text-center">
-          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-foreground">
-            <CheckCheck className="h-5 w-5" />
-          </span>
+          <Emoji3D emoji="✅" className="mx-auto h-14 w-14" />
           <p className="mt-4 text-sm font-semibold">{t('review.empty')}</p>
           <p className="mt-1 text-xs text-muted-foreground">
             {t('review.emptyDescription')}
