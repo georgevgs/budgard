@@ -46,7 +46,7 @@ export const renderActionBar = (
         </span>
       </Button>
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() => setMode('withdrawal')}
         className="flex-col h-auto py-2.5 gap-1"
       >
@@ -56,7 +56,7 @@ export const renderActionBar = (
         </span>
       </Button>
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() => setMode('value')}
         className="flex-col h-auto py-2.5 gap-1"
       >
@@ -345,7 +345,7 @@ export const renderHistoryList = ({
         <p className="text-center text-sm text-muted-foreground">
           {t('networth.detail.historyLoadFailed')}
         </p>
-        <Button size="sm" variant="outline" onClick={onRetry}>
+        <Button size="sm" variant="secondary" onClick={onRetry}>
           {t('common.tryAgain')}
         </Button>
       </div>
@@ -428,7 +428,7 @@ const renderInvestmentEmpty = (
         <ArrowDownLeft className="h-4 w-4 mr-1.5" />
         {t('networth.detail.investmentEmptyDeposit')}
       </Button>
-      <Button variant="outline" onClick={() => setMode('value')}>
+      <Button variant="secondary" onClick={() => setMode('value')}>
         <TrendingUp className="h-4 w-4 mr-1.5" />
         {t('networth.detail.investmentEmptyValue')}
       </Button>

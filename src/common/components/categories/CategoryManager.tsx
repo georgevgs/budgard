@@ -82,7 +82,7 @@ export const CategoryManager = ({
 
       <div className="shrink-0 border-t border-border/50 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-3">
         <Button
-          variant="outline"
+          variant="secondary"
           size="sm"
           className="w-full"
           onClick={manager.handleAddClick}

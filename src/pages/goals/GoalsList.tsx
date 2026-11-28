@@ -152,7 +152,7 @@ const renderEmptyState = (
       </div>
       <Button
         onClick={() => onOpenForm(true)}
-        variant="outline"
+        variant="secondary"
         size="sm"
         className="mt-2 h-auto min-h-9 max-w-full whitespace-normal py-2.5 text-center leading-snug"
       >

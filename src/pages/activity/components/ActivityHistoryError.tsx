@@ -19,7 +19,7 @@ export const ActivityHistoryError = ({
       </p>
       <Button
         type="button"
-        variant="outline"
+        variant="secondary"
         className="mt-4"
         onClick={onRetry}
       >

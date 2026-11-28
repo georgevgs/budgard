@@ -113,7 +113,7 @@ const renderNoBudgetState = ({
   return (
     <>
       <Button
-        variant="outline"
+        variant="secondary"
         size="sm"
         onClick={onOpen}
         className="w-full justify-start text-muted-foreground"

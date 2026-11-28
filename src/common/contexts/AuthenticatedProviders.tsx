@@ -59,7 +59,7 @@ const SpaceDataProvider = ({ children }: AuthenticatedProvidersProps) => {
         <Button onClick={() => selectSpace(personalOwnerId)}>
           {t('settings.household.openPersonal')}
         </Button>
-        <Button variant="outline" onClick={() => void refreshShares()}>
+        <Button variant="secondary" onClick={() => void refreshShares()}>
           {t('common.tryAgain')}
         </Button>
       </main>

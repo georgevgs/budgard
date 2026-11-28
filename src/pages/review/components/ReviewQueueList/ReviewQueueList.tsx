@@ -56,7 +56,7 @@ const ReviewQueueList = ({
           </p>
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             className="mt-5"
             onClick={() => navigate('/activity', { viewTransition: true })}
           >

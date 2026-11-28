@@ -24,7 +24,7 @@ const ReviewQueuePagination = ({
         </p>
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           disabled={isReviewing}
           onClick={onLoadMore}
         >
@@ -36,7 +36,7 @@ const ReviewQueuePagination = ({
     return (
       <Button
         type="button"
-        variant="outline"
+        variant="secondary"
         className="w-full"
         disabled={isLoading || isReviewing}
         aria-busy={isLoading}

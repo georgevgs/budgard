@@ -26,7 +26,7 @@ export const OnDemandData = ({ domain, children }: OnDemandDataProps) => {
     return (
       <div role="alert" className="space-y-3 py-4">
         <p className="text-sm">{t('common.loadDataFailed')}</p>
-        <Button variant="outline" onClick={retry}>
+        <Button variant="secondary" onClick={retry}>
           {t('common.tryAgain')}
         </Button>
       </div>

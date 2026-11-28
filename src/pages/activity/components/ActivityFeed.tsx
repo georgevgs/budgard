@@ -119,7 +119,7 @@ const renderShowAllAction = (
   return (
     <Button
       type="button"
-      variant="outline"
+      variant="secondary"
       className="mt-4 rounded-full"
       onClick={props.onShowAll}
     >

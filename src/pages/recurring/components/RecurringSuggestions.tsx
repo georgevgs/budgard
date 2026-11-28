@@ -32,7 +32,7 @@ export const RecurringSuggestions = ({
         <p className="text-sm text-muted-foreground">
           {t('common.loadDataFailed')}
         </p>
-        <Button type="button" size="sm" variant="outline" onClick={onRetry}>
+        <Button type="button" size="sm" variant="secondary" onClick={onRetry}>
           {t('common.tryAgain')}
         </Button>
       </div>
@@ -99,7 +99,7 @@ const renderSuggestion = (
       <Button
         type="button"
         size="sm"
-        variant="outline"
+        variant="secondary"
         onClick={() => void onAccept(suggestion)}
       >
         {t('recurring.suggestions.accept')}

@@ -73,7 +73,7 @@ const renderInviteState = (
         </p>
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           className="mt-5"
           onClick={() => navigate('/today', { replace: true })}
         >
@@ -105,7 +105,7 @@ const renderInviteState = (
         </Button>
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           className="flex-1"
           onClick={() => navigate('/today', { replace: true })}
         >

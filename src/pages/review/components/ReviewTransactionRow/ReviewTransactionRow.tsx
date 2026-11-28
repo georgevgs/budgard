@@ -77,7 +77,7 @@ const ReviewTransactionRow = ({
         <Button
           type="button"
           size="sm"
-          variant="outline"
+          variant="secondary"
           disabled={isReviewing}
           onClick={onTeach}
         >

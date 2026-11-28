@@ -14,7 +14,7 @@ const RetryCard = ({
   return (
     <SurfaceCard role="alert" className="space-y-3 p-4">
       <p className="text-sm">{message}</p>
-      <Button type="button" variant="outline" onClick={() => void onRetry()}>
+      <Button type="button" variant="secondary" onClick={() => void onRetry()}>
         {t('common.tryAgain')}
       </Button>
     </SurfaceCard>

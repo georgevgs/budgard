@@ -78,7 +78,7 @@ export const DebtDetailSheet = ({
                   </h3>
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant="secondary"
                     onClick={() => setIsPaymentOpen(true)}
                   >
                     <Plus className="mr-1 h-3.5 w-3.5" />
@@ -186,7 +186,7 @@ const renderHistoryList = (
         <p className="text-center text-sm text-muted-foreground">
           {t('debts.detail.historyLoadFailed')}
         </p>
-        <Button size="sm" variant="outline" onClick={onRetry}>
+        <Button size="sm" variant="secondary" onClick={onRetry}>
           {t('common.tryAgain')}
         </Button>
       </div>

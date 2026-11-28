@@ -125,7 +125,7 @@ const renderDialog = ({
         <div className="flex shrink-0 justify-end gap-2 border-t border-border/50 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-4">
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             onClick={onClose}
             disabled={isSaving}
           >
