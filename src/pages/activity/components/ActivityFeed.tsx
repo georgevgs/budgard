@@ -150,16 +150,19 @@ const renderGroup = (
     className="activity-day-group"
   >
     {/* Dates scroll with their group so they never float over transaction rows. */}
-    <div className="activity-day-header mb-2 flex items-baseline justify-between gap-3 px-1 py-1.5">
-      <h2 id={`activity-${group.date}`} className="tile-label">
+    <div className="activity-day-header mb-1 flex items-baseline justify-between gap-3 px-1 py-1.5">
+      <h2
+        id={`activity-${group.date}`}
+        className="text-sm font-semibold text-foreground"
+      >
         {group.label}
       </h2>
       {renderDayTotal(group, props.currency)}
     </div>
-    {/* One flat surface per day with no rules between rows, the grouped list
-        banking apps use. See the note on SwipeableRow for why each row still
-        needs its own positioning context under this shared one. */}
-    <div className="tile-flush py-1">
+    {/* Rows sit on the page under their day, the list Cash App draws. The
+        negative margin lets a row's press state reach past the gutter while
+        its icon stays in line with the day heading. */}
+    <div className="-mx-3">
       {group.expenses.map((transaction) => (
         <SwipeableRow
           key={transaction.id}

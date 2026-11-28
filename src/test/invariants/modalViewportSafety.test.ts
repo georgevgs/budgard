@@ -122,9 +122,8 @@ describe('modal viewport safety', () => {
   });
 
   // Both flush surfaces put their rim on an ::after so an opaque child cannot
-  // paint over it: `.surface-card-flush` for the lists that are still one
-  // card, `.tile-flush` for an Activity row, which since the bento redesign is
-  // its own pill and has to clip its own swipe-to-delete reveal.
+  // paint over it. Activity rows sit on the page now, so the opaque swipe row
+  // has to be the page colour or it shows as a grey band.
   it('paints flush surface rims above opaque child rows', () => {
     const css = read('src/index.css');
     const swipeableRow = read('src/pages/activity/components/SwipeableRow.tsx');
@@ -133,7 +132,7 @@ describe('modal viewport safety', () => {
     expect(css).toContain('.surface-card-flush::after');
     expect(css).toContain('.tile-flush::after');
     expect(css).toContain('pointer-events: none');
-    expect(swipeableRow).toContain('tile-flush');
+    expect(swipeableRow).toContain('bg-background');
     expect(activityFeed).toContain('border-dashed border-border');
   });
 });

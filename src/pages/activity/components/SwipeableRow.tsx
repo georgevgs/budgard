@@ -17,11 +17,10 @@ type SwipeableRowProps = {
 // itself stays a link, so tapping it still opens the transaction — the swipe
 // only adds a second way in, it does not take the first one away.
 //
-// Flat rather than its own pill: rows inside one day now share a single
-// `tile-flush` surface (see ActivityFeed) with a hairline between them, so
-// this wrapper carries no fill or radius of its own. It still needs its own
-// stacking context, though — each row's Delete reveal is positioned against
-// ITS wrapper, not the shared surface, or every row in the group would
+// Flat rather than its own pill: rows sit straight on the page under their
+// day (see ActivityFeed), so this wrapper carries the page colour and no
+// radius. It still needs its own stacking context, though, each row's Delete
+// reveal is positioned against ITS wrapper, or every row in the group would
 // uncover the same one spot.
 export const SwipeableRow = ({
   children,
@@ -63,7 +62,7 @@ export const SwipeableRow = ({
 
       <div
         {...swipe.handlers}
-        className="relative bg-tile"
+        className="relative bg-background"
         style={{
           // Vertical travel belongs to page scrolling; horizontal travel is
           // reserved for this row's reveal instead of browser navigation.
