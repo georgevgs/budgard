@@ -17,7 +17,8 @@ const TodayActions = () => {
   const { openExpenseEntry, openIncomeEntry } = useQuickAdd();
 
   return (
-    <nav
+    <div
+      role="group"
       aria-label={t('today.actions.ariaLabel')}
       className="bento-wide grid grid-cols-4 gap-2 px-1 pt-1 pb-2"
     >
@@ -37,7 +38,7 @@ const TodayActions = () => {
         to="/recurring"
       />
       <ActionLink icon={Target} label={t('navigation.goals')} to="/goals" />
-    </nav>
+    </div>
   );
 };
 
