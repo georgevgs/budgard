@@ -31,8 +31,8 @@ export const DataManagementSection = ({
               {t('settings.data.exportDescription')}
             </p>
             <Button
-              variant="outline"
-              className="w-full"
+              variant="secondary"
+              className="w-full bg-background hover:bg-background/70"
               onClick={handleExport}
               disabled={isExporting}
             >

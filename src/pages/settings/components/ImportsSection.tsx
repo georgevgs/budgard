@@ -26,7 +26,11 @@ export const ImportsSection = () => {
           <p className="mb-3 text-sm text-muted-foreground">
             {t('settings.imports.description')}
           </p>
-          <Button variant="outline" onClick={() => setIsImportOpen(true)}>
+          <Button
+            variant="secondary"
+            className="bg-background hover:bg-background/70"
+            onClick={() => setIsImportOpen(true)}
+          >
             <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
             {t('settings.imports.action')}
           </Button>

@@ -84,7 +84,11 @@ const renderRules = (
         <p className="text-sm text-destructive-ink">
           {t('settings.rules.loadFailed')}
         </p>
-        <Button variant="outline" onClick={state.retry}>
+        <Button
+          variant="secondary"
+          className="bg-background hover:bg-background/70"
+          onClick={state.retry}
+        >
           {t('common.tryAgain')}
         </Button>
       </div>
@@ -96,7 +100,11 @@ const renderRules = (
         <p className="text-sm text-muted-foreground">
           {t('settings.rules.empty')}
         </p>
-        <Button asChild variant="outline">
+        <Button
+          asChild
+          variant="secondary"
+          className="bg-background hover:bg-background/70"
+        >
           <Link to="/review">{t('settings.rules.reviewAction')}</Link>
         </Button>
       </div>

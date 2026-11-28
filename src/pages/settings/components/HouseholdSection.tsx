@@ -231,8 +231,8 @@ const renderInviteLink = (
     <Button
       type="button"
       size="sm"
-      variant="outline"
-      className="mt-3 w-full"
+      variant="secondary"
+      className="mt-3 w-full bg-background hover:bg-background/70"
       onClick={() => void ops.copyInvite(share.invite_token)}
     >
       <Copy className="mr-2 h-4 w-4" />

@@ -52,8 +52,8 @@ export const SecuritySection = () => {
           </p>
           <Button
             type="button"
-            variant="outline"
-            className="w-full rounded-full"
+            variant="secondary"
+            className="w-full rounded-full bg-background hover:bg-background/70"
             onClick={() => security.setIsConfirmingSignOutAll(true)}
           >
             {t('security.sessions.signOutEverywhere')}
@@ -137,8 +137,8 @@ const renderChangePin = (security: Security, t: TranslateFunction) => {
   return (
     <Button
       type="button"
-      variant="outline"
-      className="w-full rounded-full"
+      variant="secondary"
+      className="w-full rounded-full bg-background hover:bg-background/70"
       onClick={security.openPinDialog}
     >
       {t('security.changePin')}

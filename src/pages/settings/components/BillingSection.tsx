@@ -151,8 +151,8 @@ const renderBillingManagement = (
   return (
     <>
       <Button
-        variant="outline"
-        className="w-full"
+        variant="secondary"
+        className="w-full bg-background hover:bg-background/70"
         onClick={onManage}
         disabled={isOpeningPortal}
       >

@@ -39,8 +39,8 @@ export const ProfileSection = ({
             <span className="text-sm font-medium truncate ml-4">{email}</span>
           </div>
           <Button
-            variant="outline"
-            className="w-full justify-start text-destructive-ink hover:text-destructive-ink hover:bg-destructive/10 focus-visible:ring-destructive"
+            variant="secondary"
+            className="w-full justify-start text-destructive-ink hover:text-destructive-ink hover:bg-destructive/10 focus-visible:ring-destructive bg-background"
             onClick={() => setIsSignOutDialogOpen(true)}
           >
             <LogOut className="h-4 w-4 mr-2" />

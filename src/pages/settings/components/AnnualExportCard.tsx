@@ -98,26 +98,26 @@ export const AnnualExportCard = ({
 
           <div className="flex flex-col sm:flex-row gap-2">
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={handleExportTransactions}
-              className="justify-start sm:justify-center"
+              className="justify-start sm:justify-center bg-background hover:bg-background/70"
             >
               <Download className="h-4 w-4 mr-2" />
               {t('annualExport.exportTransactions')}
             </Button>
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={handleExportSummary}
-              className="justify-start sm:justify-center"
+              className="justify-start sm:justify-center bg-background hover:bg-background/70"
             >
               <Download className="h-4 w-4 mr-2" />
               {t('annualExport.exportSummary')}
             </Button>
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={pdfExport.exportPdf}
               disabled={pdfExport.isGenerating}
-              className="justify-start sm:justify-center"
+              className="justify-start sm:justify-center bg-background hover:bg-background/70"
             >
               <FileText className="h-4 w-4 mr-2" />
               {renderPdfButtonLabel(pdfExport.isGenerating, t)}

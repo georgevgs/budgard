@@ -22,7 +22,8 @@ export const FeedbackSection = () => {
           <div className="grid gap-2 sm:grid-cols-2">
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
+              className="bg-background hover:bg-background/70"
               onClick={() => setKind('feedback')}
             >
               <MessageSquare className="mr-2 h-4 w-4" />
@@ -30,7 +31,8 @@ export const FeedbackSection = () => {
             </Button>
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
+              className="bg-background hover:bg-background/70"
               onClick={() => setKind('bug')}
             >
               <Bug className="mr-2 h-4 w-4" />
