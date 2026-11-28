@@ -10,8 +10,6 @@ import bell from '@/assets/emoji3d/bell.webp?no-inline';
 import books from '@/assets/emoji3d/books.webp?no-inline';
 import briefcase from '@/assets/emoji3d/briefcase.webp?no-inline';
 import broom from '@/assets/emoji3d/broom.webp?no-inline';
-import bust from '@/assets/emoji3d/bust.webp?no-inline';
-import busts from '@/assets/emoji3d/busts.webp?no-inline';
 import cardFileBox from '@/assets/emoji3d/card-file-box.webp?no-inline';
 import chartDecreasing from '@/assets/emoji3d/chart-decreasing.webp?no-inline';
 import chartIncreasing from '@/assets/emoji3d/chart-increasing.webp?no-inline';
@@ -26,6 +24,7 @@ import haircut from '@/assets/emoji3d/haircut.webp?no-inline';
 import hamburger from '@/assets/emoji3d/hamburger.webp?no-inline';
 import hotBeverage from '@/assets/emoji3d/hot-beverage.webp?no-inline';
 import house from '@/assets/emoji3d/house.webp?no-inline';
+import identificationCard from '@/assets/emoji3d/identification-card.webp?no-inline';
 import label from '@/assets/emoji3d/label.webp?no-inline';
 import laptop from '@/assets/emoji3d/laptop.webp?no-inline';
 import liftingWeights from '@/assets/emoji3d/lifting-weights.webp?no-inline';
@@ -104,10 +103,9 @@ const SOURCES_BY_EMOJI: Record<string, string> = {
   '📄': pageFacingUp,
   '🔔': bell,
   '🎨': artistPalette,
-  '👥': busts,
-  '👤': bust,
   '🗃️': cardFileBox,
   '📤': outboxTray,
   '✅': checkMarkButton,
   '🏷️': label,
+  '🪪': identificationCard,
 };

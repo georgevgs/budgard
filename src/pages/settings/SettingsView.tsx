@@ -1,13 +1,6 @@
-import type { ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import Bell from 'lucide-react/dist/esm/icons/bell';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
-import CircleUserRound from 'lucide-react/dist/esm/icons/circle-user-round';
-import Database from 'lucide-react/dist/esm/icons/database';
-import Upload from 'lucide-react/dist/esm/icons/upload';
-import Palette from 'lucide-react/dist/esm/icons/palette';
-import UsersRound from 'lucide-react/dist/esm/icons/users-round';
 import { useAuth } from '@/common/contexts/AuthContext';
 import { useDataConfig } from '@/common/contexts/DataContext';
 import { usePushNotifications } from '@/pages/settings/hooks/usePushNotifications';
@@ -27,6 +20,7 @@ import { SecuritySection } from '@/pages/settings/components/SecuritySection';
 import { HouseholdSection } from '@/pages/settings/components/HouseholdSection';
 import { ImportsSection } from '@/pages/settings/components/ImportsSection';
 import type { TranslateFunction } from '@/constants/translate';
+import ObjectTile from '@/common/components/common/ObjectTile/ObjectTile';
 
 type SettingsSection =
   | 'account'
@@ -78,16 +72,16 @@ type SettingsData = {
 
 type Group = {
   section: SettingsSection;
-  icon: ComponentType<{ className?: string }>;
+  emoji: string;
 };
 
 const GROUPS: Group[] = [
-  { section: 'account', icon: CircleUserRound },
-  { section: 'household', icon: UsersRound },
-  { section: 'imports', icon: Upload },
-  { section: 'preferences', icon: Palette },
-  { section: 'notifications', icon: Bell },
-  { section: 'data', icon: Database },
+  { section: 'account', emoji: '🪪' },
+  { section: 'household', emoji: '🏠' },
+  { section: 'imports', emoji: '📤' },
+  { section: 'preferences', emoji: '🎨' },
+  { section: 'notifications', emoji: '🔔' },
+  { section: 'data', emoji: '🗃️' },
 ];
 
 const resolveSection = (value: string): SettingsSection | null => {
@@ -155,8 +149,6 @@ const renderIndex = (t: TranslateFunction) => (
 );
 
 const renderGroupLink = (group: Group, t: TranslateFunction) => {
-  const Icon = group.icon;
-
   return (
     <Link
       key={group.section}
@@ -164,9 +156,7 @@ const renderGroupLink = (group: Group, t: TranslateFunction) => {
       viewTransition
       className="group flex min-h-20 items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
-        <Icon className="h-4 w-4" />
-      </span>
+      <ObjectTile emoji={group.emoji} />
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-semibold">
           {t(`settings.groups.${group.section}.title`)}
