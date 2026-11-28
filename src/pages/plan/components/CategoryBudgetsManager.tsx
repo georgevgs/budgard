@@ -20,7 +20,7 @@ import {
   type CategoryBudgetTotals,
 } from '@/pages/plan/hooks/useCategoryBudgetDrafts';
 import type { Category } from '@/types/Category';
-import { getColorDiscStyle } from '@/constants/categoryColor';
+import { getColorDiscStyle, getColorTone } from '@/constants/categoryColor';
 
 type CategoryBudgetsManagerProps = {
   isOpen: boolean;
@@ -332,7 +332,7 @@ const renderCategoryIndicator = (category: Category) => {
   return (
     <div
       className="w-2.5 h-2.5 rounded-full shrink-0"
-      style={{ backgroundColor: category.color }}
+      style={{ backgroundColor: getColorTone(category.color) }}
     />
   );
 };

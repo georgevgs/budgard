@@ -23,6 +23,7 @@ import {
 import type { GoalFormData } from '@/pages/goals/validations';
 import type { Account } from '@/types/Account';
 import type { GoalSourceType } from '@/types/Goal';
+import { getColorTone } from '@/constants/categoryColor';
 
 const sourceValues = ['account', 'net_delta', 'category', 'tag'] as const;
 
@@ -127,7 +128,7 @@ const renderCategoryField = (
                   <div className="flex items-center gap-2">
                     <div
                       className="w-3 h-3 rounded-full shrink-0"
-                      style={{ backgroundColor: category.color }}
+                      style={{ backgroundColor: getColorTone(category.color) }}
                     />
                     {category.name}
                   </div>
@@ -171,7 +172,7 @@ const renderTagField = (
                   <div className="flex items-center gap-2">
                     <div
                       className="w-3 h-3 rounded-full shrink-0"
-                      style={{ backgroundColor: tag.color }}
+                      style={{ backgroundColor: getColorTone(tag.color) }}
                     />
                     {tag.name}
                   </div>

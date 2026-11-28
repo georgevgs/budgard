@@ -22,6 +22,7 @@ import {
   type UseTagListboxNavReturn,
 } from '@/pages/expenses/hooks/useTagListboxNav';
 import type { ExpenseFormData } from '@/pages/expenses/validations';
+import { getColorTone } from '@/constants/categoryColor';
 
 type ExpenseTagFieldProps = {
   form: UseFormReturn<ExpenseFormData>;
@@ -135,7 +136,7 @@ const renderTagOptions = (
     >
       <div
         className="w-3 h-3 rounded-full shrink-0"
-        style={{ backgroundColor: tag.color }}
+        style={{ backgroundColor: getColorTone(tag.color) }}
       />
       {tag.name}
     </button>

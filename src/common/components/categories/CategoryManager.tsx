@@ -18,7 +18,7 @@ import { useCategoryManager } from '@/common/components/categories/hooks/useCate
 import { useDataConfig } from '@/common/contexts/DataContext';
 import type { Category, CategoryType } from '@/types/Category';
 import { CategoryForm } from '@/common/components/categories/CategoryForm';
-import { getColorDiscStyle } from '@/constants/categoryColor';
+import { getColorDiscStyle, getColorTone } from '@/constants/categoryColor';
 
 type CategoryManagerProps = {
   categoryType?: CategoryType;
@@ -274,7 +274,7 @@ const renderCategoryIndicator = (category: Category) => {
   return (
     <div
       className="w-2.5 h-2.5 rounded-full shrink-0"
-      style={{ backgroundColor: category.color }}
+      style={{ backgroundColor: getColorTone(category.color) }}
     />
   );
 };

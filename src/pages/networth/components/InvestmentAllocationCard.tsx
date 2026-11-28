@@ -7,6 +7,7 @@ import {
 } from '@/pages/networth/components/DonutChart';
 import { formatCurrency, formatPercent } from '@/constants/utils';
 import type { Account } from '@/types/Account';
+import { getColorTone } from '@/constants/categoryColor';
 
 type InvestmentAllocationCardProps = {
   accounts: Account[];
@@ -72,7 +73,7 @@ export const InvestmentAllocationCard = ({
               <li key={s.id} className="flex items-center gap-2 text-xs">
                 <span
                   className="w-2.5 h-2.5 rounded-full shrink-0"
-                  style={{ backgroundColor: s.color }}
+                  style={{ backgroundColor: getColorTone(s.color) }}
                   aria-hidden
                 />
                 <span className="truncate flex-1">{s.name}</span>

@@ -10,6 +10,7 @@ import {
 } from '@/constants/transactionAmount';
 import type { Expense } from '@/types/Expense';
 import type { Category } from '@/types/Category';
+import { getColorTone } from '@/constants/categoryColor';
 
 export const getInitialAmount = (
   income: Expense | undefined,
@@ -88,7 +89,7 @@ export const renderCategoryDot = (category: Category) => {
   return (
     <div
       className="w-3 h-3 rounded-full shrink-0"
-      style={{ backgroundColor: category.color }}
+      style={{ backgroundColor: getColorTone(category.color) }}
       aria-hidden="true"
     />
   );

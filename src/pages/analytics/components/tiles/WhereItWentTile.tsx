@@ -4,6 +4,7 @@ import { formatCurrency } from '@/constants/utils';
 import type { CategoryRow } from '@/pages/analytics/hooks/useAnalyticsData';
 import { BentoTile, TileLabel } from '@/common/components/bento';
 import type { TranslateFunction } from '@/constants/translate';
+import { getColorTone } from '@/constants/categoryColor';
 
 type WhereItWentTileProps = {
   breakdown: CategoryRow[];
@@ -59,7 +60,7 @@ const renderSegment = (row: CategoryRow, totalSpent: number) => {
       className="rounded-full"
       style={{
         width: `${toShare(row.amount, totalSpent)}%`,
-        backgroundColor: row.color,
+        backgroundColor: getColorTone(row.color),
       }}
     />
   );
@@ -82,7 +83,7 @@ const renderRow = (
       <span
         aria-hidden="true"
         className="h-2 w-2 shrink-0 rounded-full"
-        style={{ backgroundColor: row.color }}
+        style={{ backgroundColor: getColorTone(row.color) }}
       />
       <span className="min-w-0 flex-1 truncate text-sm font-medium">
         {row.name}

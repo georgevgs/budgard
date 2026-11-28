@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TagChip } from '@/pages/expenses/components/TagChip';
+import { getColorTone } from '@/constants/categoryColor';
 
 const tag = { id: 'tag-1', name: 'Groceries', color: '#22c55e' };
 
@@ -11,7 +12,11 @@ describe('TagChip', () => {
     expect(screen.getByText('Groceries')).toBeInTheDocument();
     const dot = document.querySelector('[style*="background-color"]');
     expect(dot).not.toBeNull();
-    expect((dot as HTMLElement).style.backgroundColor).toBe('rgb(34, 197, 94)');
+    const expected = document.createElement('span');
+    expected.style.backgroundColor = getColorTone(tag.color);
+    expect((dot as HTMLElement).style.backgroundColor).toBe(
+      expected.style.backgroundColor,
+    );
   });
 
   it('renders a real remove button (chips live outside the popover trigger)', () => {

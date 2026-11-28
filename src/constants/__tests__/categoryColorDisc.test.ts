@@ -1,12 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { dataColors, swatch } from '@/design/palette';
 import {
-  getColorDiscStops,
+  WHITE_ON_YELLOW_GREEN_FLOOR,
   getColorDiscStyle,
+  getColorTone,
 } from '@/constants/categoryColor';
-
-// The palette's floor for a label riding a fill, see `on` in palette.ts.
-const LABEL_ON_FILL_FLOOR = 2.3;
 
 const toLinear = (channel: number): number => {
   if (channel <= 0.04045) {
@@ -26,26 +24,40 @@ const luminance = (hex: string): number => {
 
 const whiteContrast = (hex: string): number => 1.05 / (luminance(hex) + 0.05);
 
-describe('colour disc', () => {
+describe('colour tone', () => {
   it.each(dataColors)('carries a white mark on %s', (color) => {
-    const stops = getColorDiscStops(color);
-
-    expect(whiteContrast(stops.light)).toBeGreaterThanOrEqual(
-      LABEL_ON_FILL_FLOOR,
+    expect(whiteContrast(getColorTone(color))).toBeGreaterThanOrEqual(
+      WHITE_ON_YELLOW_GREEN_FLOOR,
     );
-    expect(luminance(stops.deep)).toBeLessThan(luminance(stops.light));
   });
 
-  it('keeps a dark swatch dark rather than lifting it into the band', () => {
-    expect(
-      whiteContrast(getColorDiscStops(swatch.slate).light),
-    ).toBeGreaterThan(7);
+  it('keeps a swatch that already carries white as it is', () => {
+    expect(getColorTone(swatch.indigo)).toBe(swatch.indigo);
+    expect(getColorTone(swatch.slate)).toBe(swatch.slate);
   });
 
-  it('draws a grey disc with a white mark when there is no colour', () => {
-    const style = getColorDiscStyle(null);
+  it('lifts gold out of mustard rather than darkening it', () => {
+    expect(luminance(getColorTone(swatch.gold))).toBeGreaterThan(
+      luminance('#c8a000'),
+    );
+  });
 
-    expect(style.color).toBe('hsl(0 0% 100%)');
-    expect(style.backgroundImage).toMatch(/^linear-gradient\(135deg, #/);
+  it('leans lime toward green rather than olive', () => {
+    const tone = getColorTone(swatch.lime);
+    const red = Number.parseInt(tone.slice(1, 3), 16);
+    const green = Number.parseInt(tone.slice(3, 5), 16);
+
+    expect(green - red).toBeGreaterThan(50);
+  });
+
+  it('passes a design token through to a chart untouched', () => {
+    expect(getColorTone('hsl(var(--income))')).toBe('hsl(var(--income))');
+  });
+
+  it('draws a flat fill with a white mark', () => {
+    expect(getColorDiscStyle(swatch.gold)).toEqual({
+      backgroundColor: getColorTone(swatch.gold),
+      color: 'hsl(0 0% 100%)',
+    });
   });
 });

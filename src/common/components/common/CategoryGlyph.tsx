@@ -11,8 +11,8 @@ type CategoryGlyphProps = {
 };
 
 // What identifies a transaction's category at the head of a row: a consistent
-// white SVG mark on a disc of the category's own hue. The disc is drawn in one
-// tone band, see `getColorDiscStyle`, so a light citron still carries it.
+// white SVG mark on a flat disc of the category's own hue, drawn at the most
+// vivid tone that still carries white, see `getColorDiscStyle`.
 //
 // The colour goes HERE and not on the description. A category's hue is one of
 // twenty-four the user picked and none of them is contrast-checked as text —

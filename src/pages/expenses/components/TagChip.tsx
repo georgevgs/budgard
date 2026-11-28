@@ -1,6 +1,7 @@
 import X from 'lucide-react/dist/esm/icons/x';
 import { useTranslation } from 'react-i18next';
 import type { EmbeddedTag } from '@/types/Tag';
+import { getColorTone } from '@/constants/categoryColor';
 
 type TagChipProps = {
   tag: EmbeddedTag;
@@ -15,7 +16,7 @@ export const TagChip = ({ tag, onRemove }: TagChipProps) => {
     <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/50 py-0.5 pl-2 pr-1 text-xs">
       <span
         className="w-2 h-2 rounded-full shrink-0"
-        style={{ backgroundColor: tag.color }}
+        style={{ backgroundColor: getColorTone(tag.color) }}
         aria-hidden="true"
       />
       {tag.name}

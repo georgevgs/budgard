@@ -9,6 +9,7 @@ import {
 } from '@/constants/transactionAmount';
 import type { Expense } from '@/types/Expense';
 import type { Category, EmbeddedCategory } from '@/types/Category';
+import { getColorTone } from '@/constants/categoryColor';
 
 export const getInitialAmount = (
   expense: Expense | undefined,
@@ -145,7 +146,7 @@ const renderSuggestionIcon = (category: EmbeddedCategory) => {
   return (
     <span
       className="w-2 h-2 rounded-full"
-      style={{ backgroundColor: category.color }}
+      style={{ backgroundColor: getColorTone(category.color) }}
     />
   );
 };
@@ -158,7 +159,7 @@ export const renderCategoryIndicator = (category: Category) => {
   return (
     <div
       className="w-3 h-3 rounded-full shrink-0"
-      style={{ backgroundColor: category.color }}
+      style={{ backgroundColor: getColorTone(category.color) }}
       aria-hidden="true"
     />
   );

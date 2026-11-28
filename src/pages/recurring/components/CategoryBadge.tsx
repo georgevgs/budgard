@@ -9,9 +9,9 @@ type CategoryBadgeProps = {
   className?: string;
 };
 
-// A category, as a chip. The fill is the category's own hue in the same toned
-// gradient the rows and the transaction hero use, with a white label that stays
-// readable on every one of the twenty-four swatches.
+// A category, as a chip. The fill is the category's own hue in the same flat,
+// vivid tone the rows and the transaction hero use, with a white label that
+// stays readable on every one of the twenty-four swatches.
 //
 // The icon comes with it, because that is what identifies a category at a
 // glance everywhere else now — the rows, the breakdown, the hero.

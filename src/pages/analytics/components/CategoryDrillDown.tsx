@@ -16,6 +16,7 @@ import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
 import { countsAsSpending } from '@/constants/spending';
 import { sumAmounts } from '@/constants/money';
+import { getColorTone } from '@/constants/categoryColor';
 
 type CategoryDrillDownProps = {
   isOpen: boolean;
@@ -135,7 +136,10 @@ const renderMonthlyBreakdown = (
               <div className="flex-1 h-4 bg-muted/50 rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full transition-[width] duration-500"
-                  style={{ width: `${width}%`, backgroundColor: color }}
+                  style={{
+                    width: `${width}%`,
+                    backgroundColor: getColorTone(color),
+                  }}
                 />
               </div>
               <span className="text-xs font-medium tabular-nums w-20 text-right shrink-0">
