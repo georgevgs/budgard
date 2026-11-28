@@ -13,7 +13,7 @@ import type { Locale } from 'date-fns';
 import type { AccountKind } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
-import { getColorTint } from '@/constants/categoryColor';
+import { getColorFill, getColorFillInk } from '@/constants/categoryColor';
 import type { TranslateFunction } from '@/constants/translate';
 
 type AccountCardProps = {
@@ -51,8 +51,8 @@ export const AccountCard = ({
         <div
           className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
           style={{
-            backgroundColor: getColorTint(account.color),
-            color: account.color,
+            backgroundColor: getColorFill(account.color),
+            color: getColorFillInk(account.color),
           }}
         >
           <Icon className="h-5 w-5" />

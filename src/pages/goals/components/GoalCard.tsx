@@ -18,7 +18,7 @@ import type { Goal } from '@/types/Goal';
 import { format, parseISO } from 'date-fns';
 import type { Locale } from 'date-fns';
 import type { GoalProgress } from '@/common/hooks/useGoalProgress';
-import { getColorTint } from '@/constants/categoryColor';
+import { getColorFill, getColorFillInk } from '@/constants/categoryColor';
 
 type GoalCardProps = {
   goal: Goal;
@@ -42,8 +42,8 @@ export const GoalCard = ({ goal, onEdit, onDelete }: GoalCardProps) => {
             <div
               className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
               style={{
-                backgroundColor: getColorTint(goal.color),
-                color: goal.color,
+                backgroundColor: getColorFill(goal.color),
+                color: getColorFillInk(goal.color),
               }}
             >
               <Target className="h-5 w-5" />
