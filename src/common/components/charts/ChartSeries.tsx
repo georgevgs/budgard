@@ -182,7 +182,12 @@ const BAR_GAP = 0.16;
 const renderBars = (series: Series, seriesIndex: number, context: Context) => {
   const { data, plot, y, activeIndex } = context;
   const scale = bandScale(data.length, plot);
-  const slot = (scale.band * (1 - BAR_GAP)) / Math.max(context.barCount, 1);
+  const barCount = Math.max(context.barCount, 1);
+  const groupWidth = Math.min(
+    scale.band * (1 - BAR_GAP),
+    MAX_BAR_WIDTH * barCount,
+  );
+  const slot = groupWidth / barCount;
   const zero = y.to(0);
   const color = stroke(series.color);
 
@@ -195,8 +200,7 @@ const renderBars = (series: Series, seriesIndex: number, context: Context) => {
         }
         const top = y.to(value);
         const centre = scale.at(index);
-        const x =
-          centre - (scale.band * (1 - BAR_GAP)) / 2 + seriesIndex * slot;
+        const x = centre - groupWidth / 2 + seriesIndex * slot;
 
         return (
           <rect
@@ -205,7 +209,7 @@ const renderBars = (series: Series, seriesIndex: number, context: Context) => {
             y={Math.min(top, zero)}
             width={Math.max(slot - 1, 1)}
             height={Math.max(Math.abs(zero - top), 1)}
-            rx={Math.min(3, slot / 3)}
+            rx={Math.min(6, slot / 3)}
             fill={color}
             opacity={barOpacity(activeIndex, index)}
           />
@@ -214,6 +218,10 @@ const renderBars = (series: Series, seriesIndex: number, context: Context) => {
     </g>
   );
 };
+
+// A month with a sparse year around it stays a slim column instead of
+// stretching into a block across the whole plot.
+const MAX_BAR_WIDTH = 28;
 
 // Hovering one column dims the rest, which reads faster than a cursor line
 // when the marks are solid blocks rather than a thin curve.

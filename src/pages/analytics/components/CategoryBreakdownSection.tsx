@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { CategorySparkline } from '@/pages/analytics/components/CategorySparkline';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { formatCurrency } from '@/constants/utils';
-import { getColorTint } from '@/constants/categoryColor';
+import { getColorFill, getColorFillInk } from '@/constants/categoryColor';
 import type { CategoryRow } from '@/pages/analytics/hooks/useAnalyticsData';
 import type { TranslateFunction } from '@/constants/translate';
 
@@ -96,11 +96,11 @@ const renderCategoryRow = (
 const renderCategoryIcon = (category: CategoryRow) => (
   <span
     className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-    style={{ backgroundColor: getColorTint(category.color) }}
+    style={{
+      backgroundColor: getColorFill(category.color),
+      color: getColorFillInk(category.color),
+    }}
   >
-    <CategoryIcon
-      icon={category.icon}
-      className="h-3.5 w-3.5 text-foreground/75"
-    />
+    <CategoryIcon icon={category.icon} className="h-3.5 w-3.5" />
   </span>
 );

@@ -3,7 +3,7 @@ import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { Button } from '@/common/ui/button';
 import { formatCurrency, cn } from '@/constants/utils';
-import { getColorTint } from '@/constants/categoryColor';
+import { getColorFill, getColorFillInk } from '@/constants/categoryColor';
 import type { TranslateFunction } from '@/constants/translate';
 
 const WARNING_THRESHOLD = 80;
@@ -158,10 +158,13 @@ const renderIndicator = (row: BudgetCategoryRow) => {
     return (
       <span
         className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
-        style={{ backgroundColor: getColorTint(row.color) }}
+        style={{
+          backgroundColor: getColorFill(row.color),
+          color: getColorFillInk(row.color),
+        }}
         aria-hidden="true"
       >
-        <CategoryIcon icon={row.icon} className="h-3 w-3 text-foreground/75" />
+        <CategoryIcon icon={row.icon} className="h-3 w-3" />
       </span>
     );
   }

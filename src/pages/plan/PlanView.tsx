@@ -76,7 +76,7 @@ const PlanView = () => {
 
   return (
     <div className="page-shell">
-      <PageHeader title={t('plan.title')} subtitle={t('plan.subtitle')} />
+      <PageHeader title={t('plan.title')} />
       <MonthlyDecisionCard
         decision={monthly.position}
         currency={config.defaultCurrency}

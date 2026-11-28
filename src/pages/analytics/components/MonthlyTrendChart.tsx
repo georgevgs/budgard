@@ -67,7 +67,7 @@ const buildSeries = (
 ): Series[] => {
   const series: Series[] = [
     {
-      kind: 'area',
+      kind: 'bar',
       key: 'amount',
       label: t('expenses.title'),
       color: '--primary',
