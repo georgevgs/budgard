@@ -24,13 +24,11 @@ const TodayActions = () => {
       <ActionButton
         icon={Receipt}
         label={t('today.actions.expense')}
-        ariaLabel={t('expenses.addExpense')}
         onPress={openExpenseEntry}
       />
       <ActionButton
         icon={TrendingUp}
         label={t('today.actions.income')}
-        ariaLabel={t('income.addIncome')}
         onPress={openIncomeEntry}
       />
       <ActionLink
@@ -57,12 +55,10 @@ const LABEL_CLASS_NAME =
 const ActionButton = ({
   icon: Icon,
   label,
-  ariaLabel,
   onPress,
 }: {
   icon: ActionIcon;
   label: string;
-  ariaLabel: string;
   onPress: () => void;
 }) => {
   const handleClick = () => {
@@ -71,18 +67,11 @@ const ActionButton = ({
   };
 
   return (
-    <button
-      type="button"
-      aria-label={ariaLabel}
-      onClick={handleClick}
-      className={ACTION_CLASS_NAME}
-    >
+    <button type="button" onClick={handleClick} className={ACTION_CLASS_NAME}>
       <span aria-hidden="true" className={DISC_CLASS_NAME}>
         <Icon className="h-5 w-5" />
       </span>
-      <span aria-hidden="true" className={LABEL_CLASS_NAME}>
-        {label}
-      </span>
+      <span className={LABEL_CLASS_NAME}>{label}</span>
     </button>
   );
 };

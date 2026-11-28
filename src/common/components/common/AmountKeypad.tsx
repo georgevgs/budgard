@@ -13,6 +13,9 @@ const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 // carries a decimal key and a locale separator the user has to think about,
 // and it eats half the screen so the category grid below never fits.
 //
+// Bare digits on the sheet, with a round press state, so the amount above is
+// the loudest thing on screen rather than a grid of grey keys.
+//
 // It is named as a keypad rather than as "Amount" — the form's amount field
 // carries that name, and two controls sharing one accessible name is
 // ambiguous to a screen reader as well as to a test.
@@ -63,7 +66,7 @@ const KeypadButton = ({ label, onPress, hasIcon }: KeypadButtonProps) => {
       type="button"
       onClick={onPress}
       aria-label={label}
-      className="flex h-[60px] items-center justify-center rounded-2xl bg-muted/60 type-figure transition-colors active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex h-[60px] items-center justify-center rounded-full type-figure text-[1.75rem] transition-colors active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       {renderFace(label, hasIcon)}
     </button>

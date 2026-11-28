@@ -24,9 +24,11 @@ describe('TodayActions', () => {
     renderActions();
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'expenses.addExpense' }),
+      screen.getByRole('button', { name: 'today.actions.expense' }),
     );
-    fireEvent.click(screen.getByRole('button', { name: 'income.addIncome' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'today.actions.income' }),
+    );
 
     expect(quickAdd.openExpenseEntry).toHaveBeenCalledTimes(1);
     expect(quickAdd.openIncomeEntry).toHaveBeenCalledTimes(1);

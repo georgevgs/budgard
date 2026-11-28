@@ -1131,6 +1131,22 @@
     animation: card-enter 220ms ease-out both;
   }
 
+  /* Each keypress nudges the amount up a step and lets it settle, the way a
+     payment app's keypad answers a tap. Keyed on the value, so it replays. */
+  @keyframes amount-pop {
+    from {
+      transform: scale(1.06);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+
+  .amount-pop {
+    display: inline-block;
+    animation: amount-pop 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
   /* The pull-to-refresh spinner. Its own keyframe rather than Tailwind's
      `spin`, because the class is applied from CSS by stage, not from React. */
   @keyframes pull-spin {

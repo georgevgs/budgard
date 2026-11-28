@@ -72,12 +72,14 @@ export const QuickAddSheet = ({
             <p
               data-draggable-area
               className={cn(
-                'min-w-0 text-center type-figure-xl text-[46px]',
+                'min-w-0 text-center type-figure-xl text-[56px]',
                 amountTone(draft.pad.isEmpty),
               )}
               aria-live="polite"
             >
-              {formatCurrency(draft.pad.amount, draft.currency)}
+              <span key={draft.pad.cents} className="amount-pop">
+                {formatCurrency(draft.pad.amount, draft.currency)}
+              </span>
             </p>
             <QuickReceiptScanAction scan={receiptScan} />
           </div>
@@ -166,7 +168,7 @@ const QuickAddActions = ({
         </Button>
         <Button
           type="button"
-          className="h-[48px] flex-1 rounded-full px-[16px] text-[15px]"
+          className="h-[52px] flex-1 rounded-full px-[16px] text-[16px] disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
           disabled={false === draft.canSave}
           onClick={() => draft.submit(receiptOptions)}
         >

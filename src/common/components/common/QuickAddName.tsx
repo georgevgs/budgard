@@ -36,10 +36,7 @@ export const QuickAddName = ({
 
   return (
     <div>
-      <label
-        htmlFor={inputId}
-        className="mb-1.5 block text-center text-xs font-semibold text-foreground"
-      >
+      <label htmlFor={inputId} className="sr-only">
         {t('expenses.quickAdd.nameLabel')}
       </label>
       <Popover
@@ -63,7 +60,7 @@ export const QuickAddName = ({
             maxLength={100}
             autoComplete="off"
             enterKeyHint="done"
-            className="h-11 rounded-xl text-center"
+            className="h-12 rounded-full text-center"
           />
         </PopoverAnchor>
         <PopoverContent

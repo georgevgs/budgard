@@ -1,7 +1,6 @@
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/constants/utils';
-import { getColorTint } from '@/constants/categoryColor';
 import { haptics } from '@/constants/haptics';
 import type { Category } from '@/types/Category';
 
@@ -51,7 +50,6 @@ export const QuickAddCategories = ({
             'flex min-h-11 shrink-0 snap-start items-center gap-1.5 rounded-full px-3.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
             chipTone(category.id === selectedId),
           )}
-          style={chipStyle(category, category.id === selectedId)}
         >
           <CategoryIcon icon={category.icon} />
           {category.name}
@@ -78,18 +76,11 @@ const select = (
   onSelect(id);
 };
 
+// The chosen category is a solid ink chip, the rest sit on a quiet fill.
 const chipTone = (isSelected: boolean): string => {
   if (isSelected) {
-    return 'ring-2 ring-foreground';
+    return 'bg-foreground text-background';
+  } else {
+    return 'bg-muted text-foreground';
   }
-
-  return 'ring-1 ring-border/50';
-};
-
-const chipStyle = (category: Category, isSelected: boolean) => {
-  if (!isSelected) {
-    return undefined;
-  }
-
-  return { backgroundColor: getColorTint(category.color) };
 };
