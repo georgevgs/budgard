@@ -40,6 +40,21 @@ Two rules hold it together:
   (or `.tile-label`): a grey 13px caption at 600. No `uppercase`, no
   letterspacing, those read as a template.
 
+## Icons
+
+- **3D for things, line for actions.** A thing the user browses, owns or
+  logs (a category, a goal, a debt, an account, a planning tool, an empty
+  state's subject) is a 3D object: `CategoryIcon` for a category's stored
+  emoji, `Emoji3D` for any other, `ObjectTile` to set one on a neon tile in a
+  list. A control that does something (back, menu, add, search, filter,
+  edit, delete, close, chevrons, the tab bar, the keypad) stays a lucide line
+  icon. Airbnb's 2025 app splits its icons the same way.
+- The objects are Microsoft's Fluent 3D emoji (MIT), as 128px WebP in
+  `src/assets/emoji3d/`, mapped in `src/constants/emoji3d.ts`. A new object is
+  a new file there plus one line in the map.
+- A 3D object carries its own colour, so its tile is the stored neon exactly
+  as picked (`getColorTileStyle`), flat, with no gradient or shadow.
+
 ---
 
 ## Layout

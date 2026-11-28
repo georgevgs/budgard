@@ -156,6 +156,12 @@ constrain new work:
 - **Greys stay achromatic.** Every value in the `neutral` and `ink` ramps is
   `0 0%`.
 
+- **3D for things, line for actions.** Categories, goals, debts, accounts,
+  planning tools and empty states draw a Fluent 3D object (`CategoryIcon`,
+  `Emoji3D`, `ObjectTile`, map in `src/constants/emoji3d.ts`) on a flat neon
+  tile. Controls and the tab bar stay lucide line icons. See
+  `docs/ui-rules.md`.
+
 ### Layout
 
 - **There is no persistent header.** Every screen draws its own via `PageHeader`,
