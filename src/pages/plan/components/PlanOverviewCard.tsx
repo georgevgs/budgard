@@ -1,6 +1,6 @@
-import type { ComponentType } from 'react';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import { Link } from 'react-router-dom';
+import ObjectTile from '@/common/components/common/ObjectTile/ObjectTile';
 
 type PlanOverviewCardProps = {
   title: string;
@@ -8,7 +8,8 @@ type PlanOverviewCardProps = {
   description: string;
   setupLabel: string;
   path: string;
-  icon: ComponentType<{ className?: string }>;
+  /** The tool's 3D object. */
+  emoji: string;
 };
 
 // Planning destinations are navigation, not four competing dashboard stats.
@@ -20,7 +21,7 @@ export const PlanOverviewCard = ({
   description,
   setupLabel,
   path,
-  icon: Icon,
+  emoji,
 }: PlanOverviewCardProps) => {
   return (
     <Link
@@ -29,9 +30,7 @@ export const PlanOverviewCard = ({
       aria-label={title}
       className="group flex min-h-18 items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
-        <Icon className="h-4 w-4" />
-      </span>
+      <ObjectTile emoji={emoji} />
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-semibold">{title}</span>
         <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">

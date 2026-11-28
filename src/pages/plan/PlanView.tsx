@@ -1,9 +1,5 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
-import Repeat from 'lucide-react/dist/esm/icons/repeat';
-import Target from 'lucide-react/dist/esm/icons/target';
-import Wallet from 'lucide-react/dist/esm/icons/wallet';
 import { PageHeader } from '@/common/components/common/PageHeader';
 import { TransactionsLoading } from '@/common/components/common/TransactionsLoading';
 import { PlanOverviewCard } from '@/pages/plan/components/PlanOverviewCard';
@@ -136,7 +132,7 @@ const renderPlanningTools = (
         })}
         setupLabel={t('plan.tools.setUp')}
         path="/recurring"
-        icon={Repeat}
+        emoji="🗓️"
       />
       <PlanOverviewCard
         title={t('plan.goals.title')}
@@ -147,7 +143,7 @@ const renderPlanningTools = (
         description={t('plan.goals.description')}
         setupLabel={t('plan.tools.setUp')}
         path="/goals"
-        icon={Target}
+        emoji="🎯"
       />
       <PlanOverviewCard
         title={t('plan.debts.title')}
@@ -158,7 +154,7 @@ const renderPlanningTools = (
         description={t('plan.debts.description')}
         setupLabel={t('plan.tools.setUp')}
         path="/debts"
-        icon={CreditCard}
+        emoji="💳"
       />
       <PlanOverviewCard
         title={t('plan.networth.title')}
@@ -169,7 +165,7 @@ const renderPlanningTools = (
         description={t('plan.networth.description')}
         setupLabel={t('plan.tools.setUp')}
         path="/networth"
-        icon={Wallet}
+        emoji="💰"
       />
     </div>
   </section>

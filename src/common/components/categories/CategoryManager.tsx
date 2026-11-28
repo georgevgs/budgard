@@ -18,7 +18,7 @@ import { useCategoryManager } from '@/common/components/categories/hooks/useCate
 import { useDataConfig } from '@/common/contexts/DataContext';
 import type { Category, CategoryType } from '@/types/Category';
 import { CategoryForm } from '@/common/components/categories/CategoryForm';
-import { getColorFill, getColorTileStyle } from '@/constants/categoryColor';
+import { getColorFill } from '@/constants/categoryColor';
 
 type CategoryManagerProps = {
   categoryType?: CategoryType;
@@ -262,10 +262,7 @@ const renderEmptyHelp = (type: CategoryType, t: TranslateFunction) => {
 const renderCategoryIndicator = (category: Category) => {
   if (category.icon) {
     return (
-      <div
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[32%]"
-        style={getColorTileStyle(category.color)}
-      >
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center object-tile rounded-[32%]">
         <CategoryIcon icon={category.icon} className="h-[68%] w-[68%]" />
       </div>
     );

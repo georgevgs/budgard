@@ -20,7 +20,7 @@ import {
   type CategoryBudgetTotals,
 } from '@/pages/plan/hooks/useCategoryBudgetDrafts';
 import type { Category } from '@/types/Category';
-import { getColorFill, getColorTileStyle } from '@/constants/categoryColor';
+import { getColorFill } from '@/constants/categoryColor';
 
 type CategoryBudgetsManagerProps = {
   isOpen: boolean;
@@ -320,10 +320,7 @@ const renderEmptyState = (t: TranslateFunction) => {
 const renderCategoryIndicator = (category: Category) => {
   if (category.icon) {
     return (
-      <div
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[32%]"
-        style={getColorTileStyle(category.color)}
-      >
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center object-tile rounded-[32%]">
         <CategoryIcon icon={category.icon} className="h-[68%] w-[68%]" />
       </div>
     );

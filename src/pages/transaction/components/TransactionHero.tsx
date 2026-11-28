@@ -2,7 +2,6 @@ import { format, parseISO } from 'date-fns';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { cn } from '@/constants/utils';
 import { describeAmount } from '@/constants/transactionAmount';
-import { getColorTileStyle } from '@/constants/categoryColor';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
 
@@ -30,11 +29,8 @@ export const TransactionHero = ({
   return (
     <header className="flex flex-col items-center gap-3 pt-2 text-center">
       <span
-        className="flex h-16 w-16 items-center justify-center rounded-[32%]"
-        style={{
-          ...getColorTileStyle(getCategoryColorOrNull(transaction)),
-          viewTransitionName: `tx-mark-${transaction.id}`,
-        }}
+        className="object-tile flex h-16 w-16 items-center justify-center rounded-[32%]"
+        style={{ viewTransitionName: `tx-mark-${transaction.id}` }}
         aria-hidden="true"
       >
         <CategoryIcon
@@ -64,14 +60,6 @@ const resolveKind = (isIncome: boolean): 'expense' | 'income' => {
   }
 
   return 'expense';
-};
-
-const getCategoryColorOrNull = (transaction: Expense): string | null => {
-  if (undefined === transaction.category) {
-    return null;
-  }
-
-  return transaction.category.color;
 };
 
 const getCategoryIconOrNull = (transaction: Expense): string | null => {

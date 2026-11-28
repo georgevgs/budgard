@@ -5,7 +5,6 @@ import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import type { Debt, DebtKind } from '@/types/Debt';
 import { useDebtProgress } from '@/pages/debts/hooks/useDebtProgress';
 import { DebtProgressBar } from '@/pages/debts/components/DebtProgressBar';
-import { getColorTileStyle } from '@/constants/categoryColor';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import type { TranslateFunction } from '@/constants/translate';
 
@@ -33,10 +32,7 @@ export const DebtCard = ({ debt, onClick }: DebtCardProps) => {
     >
       <div className="p-4 space-y-3">
         <div className="flex items-center gap-3">
-          <div
-            className="h-10 w-10 rounded-[32%] flex items-center justify-center shrink-0"
-            style={getColorTileStyle(debt.color)}
-          >
+          <div className="h-10 w-10 object-tile rounded-[32%] flex items-center justify-center shrink-0">
             <CategoryIcon
               icon={EMOJI_BY_KIND[debt.kind]}
               className="h-[68%] w-[68%]"

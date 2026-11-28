@@ -17,7 +17,6 @@ import type { Goal } from '@/types/Goal';
 import { format, parseISO } from 'date-fns';
 import type { Locale } from 'date-fns';
 import type { GoalProgress } from '@/common/hooks/useGoalProgress';
-import { getColorTileStyle } from '@/constants/categoryColor';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 
 type GoalCardProps = {
@@ -39,10 +38,7 @@ export const GoalCard = ({ goal, onEdit, onDelete }: GoalCardProps) => {
       <div className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div
-              className="h-10 w-10 rounded-[32%] flex items-center justify-center shrink-0"
-              style={getColorTileStyle(goal.color)}
-            >
+            <div className="h-10 w-10 object-tile rounded-[32%] flex items-center justify-center shrink-0">
               <CategoryIcon icon="🎯" className="h-[68%] w-[68%]" />
             </div>
             <div className="min-w-0 flex-1">

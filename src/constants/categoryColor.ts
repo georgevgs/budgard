@@ -3,22 +3,17 @@ import type { CSSProperties } from 'react';
 // Category, tag, goal, debt and account colours are user-picked hues stored as
 // raw hex, so they are the one part of the UI the design tokens cannot own.
 //
-// Two ways to draw one. A tile under a 3D object, a chart mark, a bar, a dot
-// or a picker swatch carries nothing that has to be read on it, so it gets the
-// stored neon exactly as picked. A chip with a white label on it cannot, so it
-// gets a tone of the same hue that still carries white, see below.
+// Two ways to draw one. A chart mark, a bar, a dot or a picker swatch carries
+// nothing that has to be read on it, so it gets the stored colour exactly as
+// picked. A chip with a white label on it cannot, so it gets a tone of the
+// same hue that still carries white, see below. Icons do not carry it at all:
+// a 3D object brings its own colour and sits on a quiet `.object-tile`.
 export const getColorFill = (color: string | null | undefined): string => {
   if (undefined !== color && null !== color && '' !== color) {
     return color;
   } else {
     return NEUTRAL_TONE;
   }
-};
-
-export const getColorTileStyle = (
-  color: string | null | undefined,
-): CSSProperties => {
-  return { backgroundColor: getColorFill(color) };
 };
 
 // The chip tone: the stored hue at the most saturated colour sRGB has that

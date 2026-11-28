@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
-import ChartSpline from 'lucide-react/dist/esm/icons/chart-spline';
 import { CashFlowSection } from '@/pages/analytics/components/CashFlowSection';
 import { MonthlyReview } from '@/pages/analytics/components/MonthlyReview';
 import { WhereItWentTile } from '@/pages/analytics/components/tiles/WhereItWentTile';
 import type { useAnalyticsData } from '@/pages/analytics/hooks/useAnalyticsData';
 import type { useMonthlyReview } from '@/pages/analytics/hooks/useMonthlyReview';
 import { BentoGrid } from '@/common/components/bento';
+import ObjectTile from '@/common/components/common/ObjectTile/ObjectTile';
 
 type TrendsOverviewProps = {
   analytics: ReturnType<typeof useAnalyticsData>;
@@ -51,9 +51,7 @@ export const TrendsOverview = (props: TrendsOverviewProps) => {
         viewTransition
         className="surface-card group flex min-h-20 items-center gap-3.5 p-4 transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
-          <ChartSpline className="h-4.5 w-4.5" aria-hidden="true" />
-        </span>
+        <ObjectTile emoji="📊" />
         <span className="min-w-0 flex-1">
           <span className="block type-heading">
             {t('analytics.explore.title')}

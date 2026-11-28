@@ -140,6 +140,9 @@ const light: TokenMap = {
   '--destructive-ink': status.danger.ink,
   '--tile': neutral[25],
   '--tile-ring': '0 0% 7% / 0.07',
+  // The small tile a 3D object sits on: one step above the panel it is in, so
+  // the object reads as an app icon set into the row, not a coloured sticker.
+  '--object-tile': neutral[0],
   '--border': neutral[200],
   // A decorative rule can sit below 3:1; a field boundary can't — see the
   // note on `neutral[300]` in palette.ts.
@@ -211,6 +214,7 @@ const dark: TokenMap = {
   // agree with each other.
   '--tile': ink[900],
   '--tile-ring': '0 0% 100% / 0.08',
+  '--object-tile': ink[800],
   '--border': ink[600],
   '--input': ink[400],
   '--ring': accent.orange.inkDark,
@@ -261,6 +265,7 @@ const barbieTheme: TokenMap = {
   // uses, and the rim does the separating — the light theme's recipe inverted.
   '--tile': neutral[0],
   '--tile-ring': `${barbie.rule} / 0.5`,
+  '--object-tile': neutral[0],
   '--border': barbie.rule,
   '--input': barbie.inputRule,
   '--ring': accent.pink.ink,

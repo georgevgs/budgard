@@ -162,9 +162,9 @@ constrain new work:
 
 - **3D for things, line for actions.** Categories, goals, debts, accounts,
   planning tools and empty states draw a Fluent 3D object (`CategoryIcon`,
-  `Emoji3D`, `ObjectTile`, map in `src/constants/emoji3d.ts`) on a flat neon
-  tile. Controls and the tab bar stay lucide line icons. See
-  `docs/ui-rules.md`.
+  `Emoji3D`, `ObjectTile`, map in `src/constants/emoji3d.ts`) on a quiet
+  `.object-tile`, never a coloured one. Controls and the tab bar stay lucide
+  line icons. See `docs/ui-rules.md`.
 
 ### Layout
 

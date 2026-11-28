@@ -1,7 +1,6 @@
 import type { CSSProperties } from 'react';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { cn } from '@/constants/utils';
-import { getColorTileStyle } from '@/constants/categoryColor';
 import type { Expense } from '@/types/Expense';
 
 type CategoryGlyphProps = {
@@ -11,8 +10,8 @@ type CategoryGlyphProps = {
 };
 
 // What identifies a transaction's category at the head of a row: a consistent
-// 3D object on a flat rounded tile in the category's own neon, exactly as the
-// user picked it. The object carries its own colour, so the tile needs no ink.
+// 3D object on a quiet tile, set into the row like an app icon. The object
+// carries the colour, the category's own hue lives in charts and chips.
 //
 // The colour goes HERE and not on the description. A category's hue is one of
 // twenty-four the user picked and none of them is contrast-checked as text —
@@ -36,13 +35,10 @@ export const CategoryGlyph = ({
     <span
       aria-hidden="true"
       className={cn(
-        'flex h-9 w-9 shrink-0 items-center justify-center rounded-[32%]',
+        'object-tile flex h-9 w-9 shrink-0 items-center justify-center rounded-[32%]',
         className,
       )}
-      style={{
-        ...getColorTileStyle(getCategoryColorOrNull(transaction)),
-        ...style,
-      }}
+      style={style}
     >
       <CategoryIcon
         icon={getCategoryIconOrNull(transaction)}
@@ -50,14 +46,6 @@ export const CategoryGlyph = ({
       />
     </span>
   );
-};
-
-const getCategoryColorOrNull = (transaction: Expense): string | null => {
-  if (undefined === transaction.category) {
-    return null;
-  }
-
-  return transaction.category.color;
 };
 
 const getCategoryIconOrNull = (transaction: Expense): string | null => {

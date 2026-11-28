@@ -9,7 +9,6 @@ import {
   SelectValue,
 } from '@/common/ui/select';
 import { UNCATEGORIZED_VALUE } from '@/pages/activity/utils/expenseFilters';
-import { getColorTileStyle } from '@/constants/categoryColor';
 import type { Category } from '@/types/Category';
 
 type ActivityCategorySelectProps = {
@@ -74,8 +73,7 @@ const renderCategoryOption = (category: Category) => (
 const renderCategoryMark = (category: Category) => {
   return (
     <span
-      className="flex h-6 w-6 items-center justify-center rounded-[32%]"
-      style={getColorTileStyle(category.color)}
+      className="flex h-6 w-6 items-center justify-center object-tile rounded-[32%]"
       aria-hidden="true"
     >
       <CategoryIcon icon={category.icon} className="h-[68%] w-[68%]" />

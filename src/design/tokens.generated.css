@@ -40,6 +40,7 @@
     --destructive-ink: 356 85% 45%;
     --tile: 0 0% 98%;
     --tile-ring: 0 0% 7% / 0.07;
+    --object-tile: 0 0% 100%;
     --border: 0 0% 83%;
     --input: 0 0% 57%;
     --ring: 25 100% 33%;
@@ -85,6 +86,7 @@
     --destructive-ink: 4 100% 70%;
     --tile: 0 0% 10%;
     --tile-ring: 0 0% 100% / 0.08;
+    --object-tile: 0 0% 15%;
     --border: 0 0% 27%;
     --input: 0 0% 39%;
     --ring: 33 100% 62%;
@@ -129,6 +131,7 @@
     --destructive-ink: 356 85% 45%;
     --tile: 0 0% 100%;
     --tile-ring: 318 80% 86% / 0.5;
+    --object-tile: 0 0% 100%;
     --border: 318 80% 86%;
     --input: 318 70% 56%;
     --ring: 333 90% 43%;

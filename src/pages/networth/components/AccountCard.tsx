@@ -7,7 +7,6 @@ import type { Locale } from 'date-fns';
 import type { AccountKind } from '@/types/Account';
 import type { AccountBalance } from '@/types/AccountBalance';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
-import { getColorTileStyle } from '@/constants/categoryColor';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import type { TranslateFunction } from '@/constants/translate';
 
@@ -42,10 +41,7 @@ export const AccountCard = ({
       className="cursor-pointer transition-colors hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <div className="p-4 flex items-center gap-3">
-        <div
-          className="h-10 w-10 rounded-[32%] flex items-center justify-center shrink-0"
-          style={getColorTileStyle(account.color)}
-        >
+        <div className="h-10 w-10 object-tile rounded-[32%] flex items-center justify-center shrink-0">
           <CategoryIcon
             icon={EMOJI_BY_KIND[account.kind]}
             className="h-[68%] w-[68%]"
