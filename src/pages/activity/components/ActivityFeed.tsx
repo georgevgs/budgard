@@ -151,18 +151,15 @@ const renderGroup = (
   >
     {/* Dates scroll with their group so they never float over transaction rows. */}
     <div className="activity-day-header mb-2 flex items-baseline justify-between gap-3 px-1 py-1.5">
-      <h2
-        id={`activity-${group.date}`}
-        className="text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
-      >
+      <h2 id={`activity-${group.date}`} className="tile-label">
         {group.label}
       </h2>
       {renderDayTotal(group, props.currency)}
     </div>
-    {/* One flat surface per day rather than a stack of separately-filled
-        capsules — see the note on SwipeableRow for why each row still needs
-        its own positioning context under this shared one. */}
-    <div className="tile-flush divide-y divide-border/40">
+    {/* One flat surface per day with no rules between rows, the grouped list
+        banking apps use. See the note on SwipeableRow for why each row still
+        needs its own positioning context under this shared one. */}
+    <div className="tile-flush py-1">
       {group.expenses.map((transaction) => (
         <SwipeableRow
           key={transaction.id}

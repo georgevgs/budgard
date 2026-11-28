@@ -41,14 +41,14 @@ export const ActivityTransactionRow = (props: ActivityTransactionRowProps) => {
         aria-label={t('activity.openTransaction', {
           description: transaction.description,
         })}
-        className="flex min-w-0 flex-1 items-center gap-3.5 rounded-[1.375rem] py-3 pl-4 pr-2 text-left transition-colors hover:bg-accent/40 active:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+        className="flex min-w-0 flex-1 items-center gap-3.5 rounded-[1.375rem] py-3 pl-4 pr-2 text-left transition-colors hover:bg-foreground/4 active:bg-foreground/7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
       >
         {renderCategoryMark(transaction)}
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[0.9rem] font-medium leading-tight">
             {transaction.description}
           </span>
-          <span className="mt-0.5 block truncate text-[0.72rem] leading-tight text-foreground">
+          <span className="mt-0.5 block truncate text-[0.75rem] leading-tight text-muted-foreground">
             {renderCategoryName(transaction, t)}
           </span>
         </span>
@@ -67,12 +67,13 @@ export const ActivityTransactionRow = (props: ActivityTransactionRowProps) => {
   );
 };
 
-// The category mark is shared with the pills Today draws, so the same
+// The category mark is shared with the rows Today draws, so the same
 // transaction is headed by the same SVG wherever it is listed.
 const renderCategoryMark = (transaction: Expense) => {
   return (
     <CategoryGlyph
       transaction={transaction}
+      className="h-10 w-10"
       style={{ viewTransitionName: `tx-mark-${transaction.id}` }}
     />
   );

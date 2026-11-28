@@ -35,7 +35,10 @@ export const SwipeableRow = ({
     <div className="relative overflow-hidden">
       <div
         className="absolute inset-y-0 right-0 flex items-stretch"
-        style={{ width: SWIPE_ACTION_WIDTH }}
+        style={{
+          width: SWIPE_ACTION_WIDTH,
+          visibility: getActionVisibility(swipe.offset),
+        }}
         aria-hidden={ariaHidden(swipe.isOpen)}
       >
         <button
@@ -76,6 +79,16 @@ export const SwipeableRow = ({
 };
 
 const ariaHidden = (isOpen: boolean): boolean => !isOpen;
+
+// At rest the red layer is hidden, or its edge bleeds through the antialiased
+// corner of the rounded card as a pink sliver beside every row.
+const getActionVisibility = (offset: number): 'hidden' | 'visible' => {
+  if (0 === offset) {
+    return 'hidden';
+  } else {
+    return 'visible';
+  }
+};
 
 const tabIndexFor = (isOpen: boolean): number => {
   if (isOpen) {
