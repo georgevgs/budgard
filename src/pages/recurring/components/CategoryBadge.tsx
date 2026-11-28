@@ -1,7 +1,7 @@
 import type { ReactElement, CSSProperties } from 'react';
 import { cn } from '@/constants/utils.ts';
 import type { EmbeddedCategory } from '@/types/Category.ts';
-import { getColorFill, getColorFillInk } from '@/constants/categoryColor';
+import { getColorDiscStyle } from '@/constants/categoryColor';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 
 type CategoryBadgeProps = {
@@ -9,10 +9,9 @@ type CategoryBadgeProps = {
   className?: string;
 };
 
-// A category, as a chip. The fill is the category's own colour at full
-// strength, the same solid disc the rows and the transaction hero use, and the
-// label picks white or near-black from that hue so it stays readable on every
-// one of the twenty-four swatches.
+// A category, as a chip. The fill is the category's own hue in the same toned
+// gradient the rows and the transaction hero use, with a white label that stays
+// readable on every one of the twenty-four swatches.
 //
 // The icon comes with it, because that is what identifies a category at a
 // glance everywhere else now — the rows, the breakdown, the hero.
@@ -35,8 +34,5 @@ export const CategoryBadge = ({
 };
 
 const getBadgeStyle = (color: string): CSSProperties => {
-  return {
-    backgroundColor: getColorFill(color),
-    color: getColorFillInk(color),
-  };
+  return getColorDiscStyle(color);
 };

@@ -13,7 +13,7 @@ import type { LucideIcon } from 'lucide-react';
 import type { Debt, DebtKind } from '@/types/Debt';
 import { useDebtProgress } from '@/pages/debts/hooks/useDebtProgress';
 import { DebtProgressBar } from '@/pages/debts/components/DebtProgressBar';
-import { getColorFill, getColorFillInk } from '@/constants/categoryColor';
+import { getColorDiscStyle } from '@/constants/categoryColor';
 import type { TranslateFunction } from '@/constants/translate';
 
 type DebtCardProps = {
@@ -43,10 +43,7 @@ export const DebtCard = ({ debt, onClick }: DebtCardProps) => {
         <div className="flex items-center gap-3">
           <div
             className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
-            style={{
-              backgroundColor: getColorFill(debt.color),
-              color: getColorFillInk(debt.color),
-            }}
+            style={getColorDiscStyle(debt.color)}
           >
             <Icon className="h-5 w-5" />
           </div>

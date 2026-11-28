@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { cn } from '@/constants/utils';
-import { getColorFill, getColorFillInk } from '@/constants/categoryColor';
+import { getColorDiscStyle } from '@/constants/categoryColor';
 import type { Expense } from '@/types/Expense';
 
 type CategoryGlyphProps = {
@@ -11,8 +11,8 @@ type CategoryGlyphProps = {
 };
 
 // What identifies a transaction's category at the head of a row: a consistent
-// SVG mark on a solid disc of the category's own colour. The mark picks white or
-// near-black from the hue, so a light citron still carries a readable icon.
+// white SVG mark on a disc of the category's own hue. The disc is drawn in one
+// tone band, see `getColorDiscStyle`, so a light citron still carries it.
 //
 // The colour goes HERE and not on the description. A category's hue is one of
 // twenty-four the user picked and none of them is contrast-checked as text —
@@ -40,8 +40,7 @@ export const CategoryGlyph = ({
         className,
       )}
       style={{
-        backgroundColor: getColorFill(getCategoryColorOrNull(transaction)),
-        color: getColorFillInk(getCategoryColorOrNull(transaction)),
+        ...getColorDiscStyle(getCategoryColorOrNull(transaction)),
         ...style,
       }}
     >

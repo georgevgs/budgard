@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
-import { getColorFill, getColorFillInk } from '@/constants/categoryColor';
+import { getColorDiscStyle } from '@/constants/categoryColor';
 import type { Expense } from '@/types/Expense';
 import type { EmbeddedTag } from '@/types/Tag';
 import type { TranslateFunction } from '@/constants/translate';
@@ -24,10 +24,7 @@ export const TransactionMeta = ({
         <span
           key={tag.id}
           className="rounded-full px-3 py-1 text-xs font-medium"
-          style={{
-            backgroundColor: getColorFill(tag.color),
-            color: getColorFillInk(tag.color),
-          }}
+          style={getColorDiscStyle(tag.color)}
         >
           {tag.name}
         </span>
@@ -67,10 +64,7 @@ const renderCategory = (transaction: Expense, t: TranslateFunction) => {
   return (
     <span
       className="rounded-full px-3 py-1 text-xs font-medium"
-      style={{
-        backgroundColor: getColorFill(getCategoryColorOrNull(transaction)),
-        color: getColorFillInk(getCategoryColorOrNull(transaction)),
-      }}
+      style={getColorDiscStyle(getCategoryColorOrNull(transaction))}
     >
       {name}
     </span>

@@ -2,7 +2,7 @@ import { format, parseISO } from 'date-fns';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 import { cn } from '@/constants/utils';
 import { describeAmount } from '@/constants/transactionAmount';
-import { getColorFill, getColorFillInk } from '@/constants/categoryColor';
+import { getColorDiscStyle } from '@/constants/categoryColor';
 import { useDateLocale } from '@/common/hooks/useDateLocale';
 import type { Expense } from '@/types/Expense';
 
@@ -32,8 +32,7 @@ export const TransactionHero = ({
       <span
         className="flex h-16 w-16 items-center justify-center rounded-full text-2xl"
         style={{
-          backgroundColor: getColorFill(getCategoryColorOrNull(transaction)),
-          color: getColorFillInk(getCategoryColorOrNull(transaction)),
+          ...getColorDiscStyle(getCategoryColorOrNull(transaction)),
           viewTransitionName: `tx-mark-${transaction.id}`,
         }}
         aria-hidden="true"

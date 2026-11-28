@@ -20,7 +20,7 @@ import {
   type CategoryBudgetTotals,
 } from '@/pages/plan/hooks/useCategoryBudgetDrafts';
 import type { Category } from '@/types/Category';
-import { getColorFill, getColorFillInk } from '@/constants/categoryColor';
+import { getColorDiscStyle } from '@/constants/categoryColor';
 
 type CategoryBudgetsManagerProps = {
   isOpen: boolean;
@@ -322,10 +322,7 @@ const renderCategoryIndicator = (category: Category) => {
     return (
       <div
         className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-        style={{
-          backgroundColor: getColorFill(category.color),
-          color: getColorFillInk(category.color),
-        }}
+        style={getColorDiscStyle(category.color)}
       >
         <CategoryIcon icon={category.icon} />
       </div>

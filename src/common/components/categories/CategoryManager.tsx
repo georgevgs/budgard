@@ -18,7 +18,7 @@ import { useCategoryManager } from '@/common/components/categories/hooks/useCate
 import { useDataConfig } from '@/common/contexts/DataContext';
 import type { Category, CategoryType } from '@/types/Category';
 import { CategoryForm } from '@/common/components/categories/CategoryForm';
-import { getColorFill, getColorFillInk } from '@/constants/categoryColor';
+import { getColorDiscStyle } from '@/constants/categoryColor';
 
 type CategoryManagerProps = {
   categoryType?: CategoryType;
@@ -264,10 +264,7 @@ const renderCategoryIndicator = (category: Category) => {
     return (
       <div
         className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-        style={{
-          backgroundColor: getColorFill(category.color),
-          color: getColorFillInk(category.color),
-        }}
+        style={getColorDiscStyle(category.color)}
       >
         <CategoryIcon icon={category.icon} />
       </div>
