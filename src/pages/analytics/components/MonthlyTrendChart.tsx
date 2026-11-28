@@ -85,6 +85,7 @@ const buildSeries = (
       key: 'net',
       label: t('income.netCashFlow'),
       color: '--foreground',
+      isSmooth: false,
     },
   ];
 };

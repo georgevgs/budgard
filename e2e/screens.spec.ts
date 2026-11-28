@@ -221,8 +221,8 @@ test('screenshot settings-data-export', async ({ app, data }) => {
 test('screenshot cashflow-pro-trend', async ({ app, data }) => {
   data.subscriptions.push(PRO_SUBSCRIPTION);
   data.expenses.push(
-    { id: 'ct-1', user_id: E2E_USER_ID, amount: 900, description: 'Rent', date: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 3).toISOString().slice(0, 10), category_id: 'cat-transport', type: 'expense', created_at: new Date().toISOString() },
-    { id: 'ct-2', user_id: E2E_USER_ID, amount: 2600, description: 'Paycheck', date: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toISOString().slice(0, 10), category_id: 'cat-salary', type: 'income', created_at: new Date().toISOString() },
+    { id: 'ct-1', user_id: E2E_USER_ID, amount: 900, description: 'Rent', date: new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth() - 1, 3)).toISOString().slice(0, 10), category_id: 'cat-transport', type: 'expense', created_at: new Date().toISOString() },
+    { id: 'ct-2', user_id: E2E_USER_ID, amount: 2600, description: 'Paycheck', date: new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth() - 1, 1)).toISOString().slice(0, 10), category_id: 'cat-salary', type: 'income', created_at: new Date().toISOString() },
     { id: 'ct-3', user_id: E2E_USER_ID, amount: 2500, description: 'Paycheck', date: new Date().toISOString().slice(0, 10), category_id: 'cat-salary', type: 'income', created_at: new Date().toISOString() },
   );
   await app.goto('/trends');
