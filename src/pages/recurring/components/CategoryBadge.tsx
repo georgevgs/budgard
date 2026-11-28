@@ -1,7 +1,7 @@
 import type { ReactElement, CSSProperties } from 'react';
 import { cn } from '@/constants/utils.ts';
 import type { EmbeddedCategory } from '@/types/Category.ts';
-import { getColorTint } from '@/constants/categoryColor';
+import { getColorFill, getColorFillInk } from '@/constants/categoryColor';
 import { CategoryIcon } from '@/common/components/common/CategoryIcon';
 
 type CategoryBadgeProps = {
@@ -9,15 +9,10 @@ type CategoryBadgeProps = {
   className?: string;
 };
 
-// A category, as a chip. The tint is the category's own colour — the sanctioned
-// way to carry a user-picked hue, same as the transaction hero and the quick-add
-// chips — but the LABEL is ink.
-//
-// It used to be the raw hue: `color: category.color` on a 22% wash of that same
-// hue, which is the bare-fill-as-text mistake the three-role rule exists to
-// stop. On the seeded Transport blue it measured about 2.5:1, and every chip in
-// the app got a different answer depending on which of twenty-four swatches the
-// user had picked.
+// A category, as a chip. The fill is the category's own colour at full
+// strength, the same solid disc the rows and the transaction hero use, and the
+// label picks white or near-black from that hue so it stays readable on every
+// one of the twenty-four swatches.
 //
 // The icon comes with it, because that is what identifies a category at a
 // glance everywhere else now — the rows, the breakdown, the hero.
@@ -28,7 +23,7 @@ export const CategoryBadge = ({
   return (
     <div
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium text-foreground',
+        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium',
         className,
       )}
       style={getBadgeStyle(category.color)}
@@ -40,5 +35,8 @@ export const CategoryBadge = ({
 };
 
 const getBadgeStyle = (color: string): CSSProperties => {
-  return { backgroundColor: getColorTint(color) };
+  return {
+    backgroundColor: getColorFill(color),
+    color: getColorFillInk(color),
+  };
 };

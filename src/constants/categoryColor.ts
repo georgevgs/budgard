@@ -1,21 +1,8 @@
 // Category, tag, goal, debt and account colours are user-picked hues stored as
 // raw hex, so they are the one part of the UI the design tokens cannot own.
-// What they CAN own is how those hues are tinted: every chip used to append
-// `20` to the hex — 12.5% alpha over whatever sat behind it — which lands as a
-// pale wash on a light card and an almost invisible smudge on a dark one.
-// Mixing into the card token instead keeps the tint legible in both themes,
-// because the thing being mixed towards flips with the theme.
-export const getColorTint = (color: string | null | undefined): string => {
-  if (!color) {
-    return 'hsl(var(--muted))';
-  }
-
-  return `color-mix(in oklab, ${color} 22%, hsl(var(--card)))`;
-};
-
-// The solid disc at the head of a transaction row. A user-picked hue at full
-// strength, so the mark on it has to pick its own ink: white on the darker
-// hues, near-black on the light ones, where white measures about 1.2:1.
+// Every disc and chip carries one at full strength, so the mark or label on it
+// picks its own ink: white on the darker hues, near-black on the light ones,
+// where white measures about 1.2:1.
 export const getColorFill = (color: string | null | undefined): string => {
   if (isFilledColor(color)) {
     return color;

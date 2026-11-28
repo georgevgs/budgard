@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from '@/common/ui/select';
 import { UNCATEGORIZED_VALUE } from '@/pages/activity/utils/expenseFilters';
-import { getColorTint } from '@/constants/categoryColor';
+import { getColorFill, getColorFillInk } from '@/constants/categoryColor';
 import type { Category } from '@/types/Category';
 
 type ActivityCategorySelectProps = {
@@ -75,13 +75,13 @@ const renderCategoryMark = (category: Category) => {
   return (
     <span
       className="flex h-6 w-6 items-center justify-center rounded-full"
-      style={{ backgroundColor: getColorTint(category.color) }}
+      style={{
+        backgroundColor: getColorFill(category.color),
+        color: getColorFillInk(category.color),
+      }}
       aria-hidden="true"
     >
-      <CategoryIcon
-        icon={category.icon}
-        className="h-3 w-3 text-foreground/75"
-      />
+      <CategoryIcon icon={category.icon} className="h-3 w-3" />
     </span>
   );
 };

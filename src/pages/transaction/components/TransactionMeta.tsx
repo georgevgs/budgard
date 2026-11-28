@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
-import { getColorTint } from '@/constants/categoryColor';
+import { getColorFill, getColorFillInk } from '@/constants/categoryColor';
 import type { Expense } from '@/types/Expense';
 import type { EmbeddedTag } from '@/types/Tag';
 import type { TranslateFunction } from '@/constants/translate';
@@ -24,7 +24,10 @@ export const TransactionMeta = ({
         <span
           key={tag.id}
           className="rounded-full px-3 py-1 text-xs font-medium"
-          style={{ backgroundColor: getColorTint(tag.color) }}
+          style={{
+            backgroundColor: getColorFill(tag.color),
+            color: getColorFillInk(tag.color),
+          }}
         >
           {tag.name}
         </span>
@@ -64,7 +67,10 @@ const renderCategory = (transaction: Expense, t: TranslateFunction) => {
   return (
     <span
       className="rounded-full px-3 py-1 text-xs font-medium"
-      style={{ backgroundColor: getColorTint(transaction.category?.color) }}
+      style={{
+        backgroundColor: getColorFill(getCategoryColorOrNull(transaction)),
+        color: getColorFillInk(getCategoryColorOrNull(transaction)),
+      }}
     >
       {name}
     </span>
@@ -85,4 +91,12 @@ const renderExcludedBadge = (isExcluded: boolean, t: TranslateFunction) => {
       {t('transaction.excludedBadge')}
     </span>
   );
+};
+
+const getCategoryColorOrNull = (transaction: Expense): string | null => {
+  if (undefined === transaction.category) {
+    return null;
+  }
+
+  return transaction.category.color;
 };
