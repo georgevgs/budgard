@@ -33,7 +33,7 @@ export const UpcomingTile = ({ upcoming, currency }: UpcomingTileProps) => {
       ariaLabel={t('today.upcoming.title')}
       className="px-4.5 py-4"
     >
-      <div className="flex items-baseline justify-between gap-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <TileLabel>{t('today.tiles.upcoming')}</TileLabel>
         <span className="text-xs font-medium text-primary-ink">
           {t('today.tile.billsSummary', {
@@ -65,11 +65,13 @@ const renderEntry = (
       <span className="w-8.5 shrink-0 text-[0.6875rem] font-semibold uppercase leading-none tracking-[0.1em] text-muted-foreground">
         {format(entry.nextDate, 'EEE', { locale: dateLocale })}
       </span>
-      <span className="min-w-0 flex-1 truncate text-sm font-medium">
-        {entry.item.description}
-      </span>
-      <span className="shrink-0 text-sm font-semibold tabular-nums">
-        {formatCurrency(entry.item.amount, currency)}
+      <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
+        <span className="min-w-0 flex-[1_1_6rem] truncate text-sm font-medium">
+          {entry.item.description}
+        </span>
+        <span className="ml-auto shrink-0 text-sm font-semibold tabular-nums">
+          {formatCurrency(entry.item.amount, currency)}
+        </span>
       </span>
     </div>
   );

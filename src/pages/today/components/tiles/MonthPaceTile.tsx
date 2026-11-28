@@ -5,16 +5,18 @@ import { BentoTile, TileLabel } from '@/common/components/bento';
 
 type MonthPaceTileProps = {
   pace: DailyPace;
+  isWide: boolean;
 };
 
 // Seven days, one bar each, the ones that ran hot in the accent. Where the
 // ring next to it answers "how much of the plan is gone", this answers the
 // question that follows: "and was that steady, or was it one bad Saturday".
-export const MonthPaceTile = ({ pace }: MonthPaceTileProps) => {
+export const MonthPaceTile = ({ pace, isWide }: MonthPaceTileProps) => {
   const { t } = useTranslation();
 
   return (
     <BentoTile
+      isWide={isWide}
       to="/trends"
       ariaLabel={t('today.tile.monthPaceAria', {
         day: pace.dayOfMonth,

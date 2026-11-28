@@ -7,13 +7,14 @@ import { BentoTile, TileLabel } from '@/common/components/bento';
 // Off by default: it is the slowest-moving number in the app, and a home
 // screen about this month should not lead with one that changes quarterly.
 // Available to anyone who wants it in the grid, which is what Arrange is for.
-export const NetWorthTile = () => {
+export const NetWorthTile = ({ isWide }: { isWide: boolean }) => {
   const { t } = useTranslation();
   const { summary, isComputing } = useNetWorth(false);
   const { defaultCurrency, isSecondaryLoaded } = useDataConfig();
 
   return (
     <BentoTile
+      isWide={isWide}
       to="/networth"
       ariaLabel={t('today.tiles.netWorth')}
       className="flex min-h-26 flex-col justify-between p-4"

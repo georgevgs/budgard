@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   DEFAULT_VISIBLE,
   TODAY_TILES,
+  findUnpairedHalfTiles,
   isDefaultLayout,
   isWideTodayTile,
   moveTile,
@@ -170,5 +171,37 @@ describe('Today tile spans', () => {
     expect(isWideTodayTile('weeklyRecap')).toBe(true);
     expect(isWideTodayTile('insight')).toBe(true);
     expect(isWideTodayTile('budgetUsed')).toBe(false);
+  });
+});
+
+describe('unpaired half tiles', () => {
+  it('widens a half tile that sits alone before a wide tile', () => {
+    expect(findUnpairedHalfTiles(['budgetUsed', 'safeToSpend'])).toEqual([
+      'budgetUsed',
+    ]);
+  });
+
+  it('leaves a pair alone and widens the third half tile of a run', () => {
+    expect(
+      findUnpairedHalfTiles([
+        'safeToSpend',
+        'budgetUsed',
+        'monthPace',
+        'debts',
+        'upcoming',
+      ]),
+    ).toEqual(['debts']);
+  });
+
+  it('widens a half tile left alone at the end of the grid', () => {
+    expect(
+      findUnpairedHalfTiles(['budgetUsed', 'monthPace', 'upcoming', 'debts']),
+    ).toEqual(['debts']);
+  });
+
+  it('widens nothing when every half tile has a partner', () => {
+    expect(
+      findUnpairedHalfTiles(['safeToSpend', 'budgetUsed', 'monthPace']),
+    ).toEqual([]);
   });
 });

@@ -29,7 +29,7 @@ export const RecentActivityTile = ({
 
   return (
     <BentoTile tone="bare" isWide className="mt-1">
-      <div className="mb-2.5 flex items-baseline justify-between gap-3 px-1">
+      <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 px-1">
         <TileLabel>{t('today.recent.title')}</TileLabel>
         <Link
           to="/activity"

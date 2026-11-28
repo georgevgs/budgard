@@ -216,7 +216,7 @@ const renderFab = (
       <Button
         size="icon"
         onClick={onAddClick}
-        className="lift h-14 w-14 rounded-full"
+        className="lift size-(--dock-height) rounded-full [&_svg]:size-[18px]"
         aria-label={t('debts.addDebt')}
       >
         <Plus className="h-6 w-6" />

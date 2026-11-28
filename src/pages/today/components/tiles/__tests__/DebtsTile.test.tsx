@@ -21,7 +21,7 @@ describe('DebtsTile', () => {
   it('does not present zero-value answers before deferred data arrives', () => {
     render(
       <MemoryRouter>
-        <DebtsTile />
+        <DebtsTile isWide={false} />
       </MemoryRouter>,
     );
 

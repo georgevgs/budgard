@@ -456,9 +456,11 @@
      transaction hero — a `text-[…]` utility after the class still wins, and
      the weight, tracking and numerals come along for free. */
 
+  /* Capped by the width of its container, so a long amount at a large text
+     size still fits on the slab. */
   .type-slab {
     font-family: var(--font-display);
-    font-size: 3.5rem;
+    font-size: min(3.5rem, 20cqi);
     font-weight: 800;
     line-height: 0.92;
     letter-spacing: -0.055em;
@@ -671,6 +673,7 @@
      and on a white page the accent's light IS a tint. Depth here is `.lift`,
      grey, same as every other raised thing. See the note on `.lift` above. */
   .bento {
+    container-type: inline-size;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.625rem;
@@ -680,6 +683,15 @@
   /* A module that needs the full width — the slab, a bill list, a legend. */
   .bento-wide {
     grid-column: 1 / -1;
+  }
+
+  /* One column once two 9rem tiles and the gap no longer fit. The rem follows
+     iOS Dynamic Type, so at large text sizes the tiles stack instead of
+     crushing their labels. */
+  @container (width < 18.625rem) {
+    .bento > * {
+      grid-column: 1 / -1;
+    }
   }
 
   .tile {
@@ -702,6 +714,7 @@
      and size carry the legibility that depth was carrying before. */
   .tile-slab {
     position: relative;
+    container-type: inline-size;
     border-radius: 1.875rem;
     background-color: hsl(var(--primary));
     color: hsl(var(--primary-foreground));
@@ -763,6 +776,8 @@
     line-height: 1;
     letter-spacing: 0.16em;
     text-transform: uppercase;
+    overflow-wrap: break-word;
+    hyphens: auto;
     color: hsl(var(--muted-foreground));
   }
 

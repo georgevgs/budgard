@@ -63,7 +63,7 @@ const KeypadButton = ({ label, onPress, hasIcon }: KeypadButtonProps) => {
       type="button"
       onClick={onPress}
       aria-label={label}
-      className="flex h-14 items-center justify-center rounded-2xl bg-muted/60 type-figure transition-colors active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex h-[60px] items-center justify-center rounded-2xl bg-muted/60 type-figure transition-colors active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       {renderFace(label, hasIcon)}
     </button>

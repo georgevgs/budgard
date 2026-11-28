@@ -7,6 +7,7 @@ type BudgetUsedTileProps = {
   spentThisMonth: number;
   monthlyBudget: number | null;
   currency: string;
+  isWide: boolean;
 };
 
 const RADIUS = 34;
@@ -25,49 +26,53 @@ export const BudgetUsedTile = ({
   spentThisMonth,
   monthlyBudget,
   currency,
+  isWide,
 }: BudgetUsedTileProps) => {
   const { t } = useTranslation();
   const percent = resolvePercent(spentThisMonth, monthlyBudget);
 
   return (
     <BentoTile
+      isWide={isWide}
       to="/plan"
       ariaLabel={resolveAriaLabel(spentThisMonth, monthlyBudget, t)}
-      className="flex flex-col p-4"
+      className="@container flex flex-col p-4"
     >
       <TileLabel>{t('today.tiles.budgetUsed')}</TileLabel>
-      <div
-        className="relative mt-3 flex flex-1 items-center justify-center"
-        aria-hidden="true"
-      >
-        <svg viewBox="0 0 84 84" className="h-21 w-21">
-          <circle
-            cx="42"
-            cy="42"
-            r={RADIUS}
-            fill="none"
-            className="stroke-border/60"
-            strokeWidth="9"
-          />
-          <circle
-            cx="42"
-            cy="42"
-            r={RADIUS}
-            fill="none"
-            className="stroke-primary"
-            strokeWidth="9"
-            strokeLinecap="round"
-            strokeDasharray={`${(percent / 100) * CIRCUMFERENCE} ${CIRCUMFERENCE}`}
-            transform="rotate(-90 42 42)"
-          />
-        </svg>
-        <span className="absolute inset-0 flex items-center justify-center type-figure-sm">
-          {percent}%
-        </span>
+      <div className="flex flex-1 flex-col @xs:flex-row @xs:items-center @xs:gap-5">
+        <div
+          className="relative mt-3 flex flex-1 items-center justify-center @xs:flex-none"
+          aria-hidden="true"
+        >
+          <svg viewBox="0 0 84 84" className="h-21 w-21">
+            <circle
+              cx="42"
+              cy="42"
+              r={RADIUS}
+              fill="none"
+              className="stroke-border/60"
+              strokeWidth="9"
+            />
+            <circle
+              cx="42"
+              cy="42"
+              r={RADIUS}
+              fill="none"
+              className="stroke-primary"
+              strokeWidth="9"
+              strokeLinecap="round"
+              strokeDasharray={`${(percent / 100) * CIRCUMFERENCE} ${CIRCUMFERENCE}`}
+              transform="rotate(-90 42 42)"
+            />
+          </svg>
+          <span className="absolute inset-0 flex items-center justify-center type-figure-sm">
+            {percent}%
+          </span>
+        </div>
+        <p className="mt-3 text-[0.72rem] leading-snug text-muted-foreground">
+          {describeCaption(spentThisMonth, monthlyBudget, currency, t)}
+        </p>
       </div>
-      <p className="mt-3 text-[0.72rem] leading-snug text-muted-foreground">
-        {renderCaption(spentThisMonth, monthlyBudget, currency, t)}
-      </p>
     </BentoTile>
   );
 };
@@ -103,7 +108,7 @@ const resolveAriaLabel = (
   });
 };
 
-const renderCaption = (
+const describeCaption = (
   spent: number,
   budget: number | null,
   currency: string,

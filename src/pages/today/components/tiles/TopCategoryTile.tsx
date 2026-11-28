@@ -7,6 +7,7 @@ import { BentoTile, TileLabel } from '@/common/components/bento';
 type TopCategoryTileProps = {
   category: TopCategory | null;
   currency: string;
+  isWide: boolean;
 };
 
 // The grid's one inverted tile. It is the loudest thing here that costs no
@@ -15,6 +16,7 @@ type TopCategoryTileProps = {
 export const TopCategoryTile = ({
   category,
   currency,
+  isWide,
 }: TopCategoryTileProps) => {
   const { t } = useTranslation();
 
@@ -25,6 +27,7 @@ export const TopCategoryTile = ({
   return (
     <BentoTile
       tone="ink"
+      isWide={isWide}
       to="/trends"
       ariaLabel={t('today.tiles.topCategory')}
       className="flex min-h-26 flex-col justify-between p-4"

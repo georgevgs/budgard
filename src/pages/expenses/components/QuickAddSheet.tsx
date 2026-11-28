@@ -10,7 +10,6 @@ import { QuickReceiptScanAction } from '@/pages/expenses/components/QuickReceipt
 import { useQuickAddDraft } from '@/common/hooks/useQuickAddDraft';
 import { useQuickReceiptScan } from '@/pages/expenses/hooks/useQuickReceiptScan';
 import { cn, formatCurrency } from '@/constants/utils';
-import type { TranslateFunction } from '@/constants/translate';
 import type { ReceiptOptions } from '@/common/hooks/dataOps/useExpenseOps';
 import type { ExpenseWritePayload } from '@/common/api/dataService';
 import type { ExpenseTemplate } from '@/types/ExpenseTemplate';
@@ -60,7 +59,7 @@ export const QuickAddSheet = ({
           <div className="h-1.5 w-12 rounded-full bg-muted-foreground/20" />
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-4">
           <DialogTitle className="sr-only">
             {t('expenses.addExpense')}
           </DialogTitle>
@@ -73,7 +72,7 @@ export const QuickAddSheet = ({
             <p
               data-draggable-area
               className={cn(
-                'min-w-0 text-center type-figure-xl',
+                'min-w-0 text-center type-figure-xl text-[46px]',
                 amountTone(draft.pad.isEmpty),
               )}
               aria-live="polite"
@@ -104,19 +103,19 @@ export const QuickAddSheet = ({
           <div className="mt-4">
             <AmountKeypad pad={draft.pad} />
           </div>
-
-          {renderActions(
-            draft,
-            () =>
-              openFullForm(
-                draft.toFullForm(),
-                receiptScan.receiptFile,
-                onOpenFullForm,
-              ),
-            receiptScan.receiptOptions,
-            t,
-          )}
         </div>
+
+        <QuickAddActions
+          draft={draft}
+          receiptOptions={receiptScan.receiptOptions}
+          onMoreDetails={() =>
+            openFullForm(
+              draft.toFullForm(),
+              receiptScan.receiptFile,
+              onOpenFullForm,
+            )
+          }
+        />
       </DialogContent>
     </Dialog>
   );
@@ -140,45 +139,56 @@ const renderTemplates = (
   );
 };
 
-const renderActions = (
-  draft: Draft,
-  onMoreDetails: () => void,
-  receiptOptions: ReceiptOptions | undefined,
-  t: TranslateFunction,
-) => (
-  <div className="mt-4">
-    {renderSaveHint(draft.pad.isEmpty, t)}
-    <div className="flex items-center gap-3">
-      <Button
-        type="button"
-        variant="ghost"
-        className="shrink-0 text-muted-foreground"
-        onClick={onMoreDetails}
-      >
-        {t('expenses.quickAdd.moreDetails')}
-      </Button>
-      <Button
-        type="button"
-        className="flex-1 rounded-full"
-        disabled={!draft.canSave}
-        onClick={() => draft.submit(receiptOptions)}
-      >
-        {t('common.save')}
-      </Button>
-    </div>
-  </div>
-);
-
-const renderSaveHint = (isAmountEmpty: boolean, t: TranslateFunction) => {
-  if (!isAmountEmpty) {
-    return null;
-  }
+// Pinned below the scroll and sized in px like the dock, so Save stays on
+// screen and on one row when iOS text grows.
+const QuickAddActions = ({
+  draft,
+  receiptOptions,
+  onMoreDetails,
+}: {
+  draft: Draft;
+  receiptOptions: ReceiptOptions | undefined;
+  onMoreDetails: () => void;
+}) => {
+  const { t } = useTranslation();
 
   return (
-    <p className="mb-2 text-center text-xs text-muted-foreground">
-      {t('expenses.quickAdd.saveHint')}
-    </p>
+    <div className="shrink-0 px-5 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+      <QuickAddSaveHint isAmountEmpty={draft.pad.isEmpty} />
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-[48px] shrink-0 px-[16px] text-[15px] text-muted-foreground"
+          onClick={onMoreDetails}
+        >
+          {t('expenses.quickAdd.moreDetails')}
+        </Button>
+        <Button
+          type="button"
+          className="h-[48px] flex-1 rounded-full px-[16px] text-[15px]"
+          disabled={false === draft.canSave}
+          onClick={() => draft.submit(receiptOptions)}
+        >
+          {t('common.save')}
+        </Button>
+      </div>
+    </div>
   );
+};
+
+const QuickAddSaveHint = ({ isAmountEmpty }: { isAmountEmpty: boolean }) => {
+  const { t } = useTranslation();
+
+  if (isAmountEmpty) {
+    return (
+      <p className="mb-2 text-center text-xs text-muted-foreground">
+        {t('expenses.quickAdd.saveHint')}
+      </p>
+    );
+  } else {
+    return null;
+  }
 };
 
 const openFullForm = (

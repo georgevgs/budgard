@@ -84,16 +84,19 @@ export const BASE_TOKENS: TokenMap = {
   // the Activity feed's day dividers, the pull-to-refresh indicator — should
   // go on reading the height from one place if a bar ever comes back.
   '--header-height': '0rem',
-  '--dock-bottom': 'calc(env(safe-area-inset-bottom) + 0.75rem)',
-  '--dock-height': '3.5rem',
+  // The dock is set in px, not rem. On iOS the root rem follows Dynamic Type,
+  // and iOS itself never grows a tab bar with the text size, a rem dock grew
+  // until it covered the screen it was meant to navigate.
+  '--dock-bottom': 'calc(env(safe-area-inset-bottom) + 12px)',
+  '--dock-height': '56px',
   '--dock-clearance': 'calc(var(--dock-bottom) + var(--dock-height))',
-  '--dock-action-slot': '4.25rem',
-  // Phone-first: 1rem from each edge. Past ~30rem the dock stops stretching
+  '--dock-action-slot': '68px',
+  // Phone-first: 16px from each edge. Past 480px the dock stops stretching
   // and centres instead, so it never spans a tablet window.
-  '--dock-max-width': '30rem',
+  '--dock-max-width': '480px',
   '--dock-edge':
-    'max(1rem, env(safe-area-inset-left), env(safe-area-inset-right), calc((100% - var(--dock-max-width)) / 2))',
-  '--dock-inset': 'calc(var(--dock-clearance) + 0.5rem)',
+    'max(16px, env(safe-area-inset-left), env(safe-area-inset-right), calc((100% - var(--dock-max-width)) / 2))',
+  '--dock-inset': 'calc(var(--dock-clearance) + 8px)',
   // Modal context should remain recognisable instead of being almost erased.
   // The colour is themed below; this shared alpha keeps routine dialogs calm
   // and prevents nested confirmations from compounding into a black screen.

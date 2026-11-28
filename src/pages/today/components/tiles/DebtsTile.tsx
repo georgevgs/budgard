@@ -10,13 +10,14 @@ import { BentoTile, TileLabel } from '@/common/components/bento';
 // once someone has switched it ON, zero is the answer they asked for. A tile
 // that silently refuses to appear reads as a broken toggle, not as an empty
 // state, which is why this does not return null the way the others do.
-export const DebtsTile = () => {
+export const DebtsTile = ({ isWide }: { isWide: boolean }) => {
   const { t } = useTranslation();
   const { summary } = useDebts();
   const { defaultCurrency, isSecondaryLoaded } = useDataConfig();
 
   return (
     <BentoTile
+      isWide={isWide}
       to="/debts"
       ariaLabel={t('today.tiles.debts')}
       className="flex min-h-26 flex-col justify-between p-4"

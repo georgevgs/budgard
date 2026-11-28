@@ -13,7 +13,10 @@ import type { DailyPace } from '@/pages/today/hooks/useDailyPace';
 import type { TopCategory } from '@/pages/today/hooks/useTopCategory';
 import type { useTodayGuidance } from '@/pages/today/hooks/useTodayGuidance';
 import type { Insight } from '@/common/hooks/useSpendingInsights';
-import type { TodayTileId } from '@/pages/today/utils/bentoLayout';
+import {
+  findUnpairedHalfTiles,
+  type TodayTileId,
+} from '@/pages/today/utils/bentoLayout';
 import { BentoGrid } from '@/common/components/bento';
 
 type TodayGridProps = {
@@ -33,12 +36,23 @@ export const TodayGrid = (props: TodayGridProps) => {
     return <EmptyGrid onArrange={props.onArrange} />;
   }
 
+  const unpairedTiles = findUnpairedHalfTiles(
+    props.visible.filter((id) => isShown(id, props.topCategory)),
+  );
+
   return (
     <BentoGrid className="mt-4">
-      {props.visible.map((id) => renderTile(id, props))}
+      {props.visible.map((id) =>
+        renderTileOrNull(id, unpairedTiles.includes(id), props),
+      )}
     </BentoGrid>
   );
 };
+
+// Top category is the one half tile that can have nothing to show. Its tile
+// returns null then, so it cannot be anyone's partner on a row.
+const isShown = (id: TodayTileId, topCategory: TopCategory | null): boolean =>
+  'topCategory' !== id || null !== topCategory;
 
 // Every module can be hidden, which means all of them can be — ten taps in
 // Arrange and this is the screen. The way back has to be on it: the header's
@@ -76,10 +90,14 @@ const pickInsight = (insights: Insight[]): Insight | null => {
   return fresh ?? null;
 };
 
-const renderTile = (id: TodayTileId, props: TodayGridProps) => {
+const renderTileOrNull = (
+  id: TodayTileId,
+  isWide: boolean,
+  props: TodayGridProps,
+) => {
   const { guidance } = props;
 
-  if (id === 'safeToSpend') {
+  if ('safeToSpend' === id) {
     return (
       <SafeToSpendTile
         key={id}
@@ -92,21 +110,19 @@ const renderTile = (id: TodayTileId, props: TodayGridProps) => {
         currency={guidance.currency}
       />
     );
-  }
-  if (id === 'budgetUsed') {
+  } else if ('budgetUsed' === id) {
     return (
       <BudgetUsedTile
         key={id}
         spentThisMonth={guidance.budgetSpent}
         monthlyBudget={props.monthlyBudget}
         currency={guidance.currency}
+        isWide={isWide}
       />
     );
-  }
-  if (id === 'monthPace') {
-    return <MonthPaceTile key={id} pace={props.pace} />;
-  }
-  if (id === 'upcoming') {
+  } else if ('monthPace' === id) {
+    return <MonthPaceTile key={id} pace={props.pace} isWide={isWide} />;
+  } else if ('upcoming' === id) {
     return (
       <UpcomingTile
         key={id}
@@ -114,20 +130,18 @@ const renderTile = (id: TodayTileId, props: TodayGridProps) => {
         currency={guidance.currency}
       />
     );
-  }
-  if (id === 'topCategory') {
+  } else if ('topCategory' === id) {
     return (
       <TopCategoryTile
         key={id}
         category={props.topCategory}
         currency={guidance.currency}
+        isWide={isWide}
       />
     );
-  }
-  if (id === 'insight') {
+  } else if ('insight' === id) {
     return <InsightTile key={id} insight={pickInsight(guidance.insights)} />;
-  }
-  if (id === 'recentActivity') {
+  } else if ('recentActivity' === id) {
     return (
       <RecentActivityTile
         key={id}
@@ -135,18 +149,15 @@ const renderTile = (id: TodayTileId, props: TodayGridProps) => {
         currency={guidance.currency}
       />
     );
-  }
-  if (id === 'weeklyRecap') {
+  } else if ('weeklyRecap' === id) {
     return <WeeklyRecapTile key={id} />;
+  } else if ('netWorth' === id) {
+    return <NetWorthTile key={id} isWide={isWide} />;
+  } else if ('debts' === id) {
+    return <DebtsTile key={id} isWide={isWide} />;
+  } else {
+    return renderUnhandled(id);
   }
-  if (id === 'netWorth') {
-    return <NetWorthTile key={id} />;
-  }
-  if (id === 'debts') {
-    return <DebtsTile key={id} />;
-  }
-
-  return renderUnhandled(id);
 };
 
 // `id` is narrowed to `never` by the branches above, so adding a tile to

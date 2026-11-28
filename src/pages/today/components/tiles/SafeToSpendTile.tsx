@@ -33,7 +33,7 @@ export const SafeToSpendTile = (props: SafeToSpendTileProps) => {
       onClick={() => trackProductEvent({ name: 'monthly_position_opened' })}
       className="px-5.5 pt-5.5 pb-5"
     >
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         {renderLabel(props, t)}
         {renderChip(props, t)}
       </div>

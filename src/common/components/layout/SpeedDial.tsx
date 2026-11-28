@@ -195,7 +195,7 @@ const getToggleClass = (isOpen: boolean): string => {
   // hue across the page around it, which is the one thing the palette will not
   // do. The orange stops at the circle now and the depth is grey.
   const base =
-    'h-14 w-14 rounded-full lift transition-transform duration-200 pointer-events-auto';
+    'size-(--dock-height) rounded-full lift [&_svg]:size-[18px] transition-transform duration-200 pointer-events-auto';
   if (isOpen) {
     return cn(base, 'rotate-45');
   }

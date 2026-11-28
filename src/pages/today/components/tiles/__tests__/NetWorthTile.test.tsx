@@ -27,7 +27,7 @@ import { NetWorthTile } from '@/pages/today/components/tiles/NetWorthTile';
 const renderTile = () =>
   render(
     <MemoryRouter>
-      <NetWorthTile />
+      <NetWorthTile isWide={false} />
     </MemoryRouter>,
   );
 

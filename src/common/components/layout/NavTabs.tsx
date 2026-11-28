@@ -51,7 +51,7 @@ export const NavTabs = () => {
       className="nav-dock pointer-events-none fixed inset-x-(--dock-edge) bottom-(--dock-bottom) z-50"
       aria-label={t('navigation.ariaLabel')}
     >
-      <div className="glass-capsule pointer-events-auto relative flex h-(--dock-height) items-stretch p-1">
+      <div className="glass-capsule pointer-events-auto relative flex h-(--dock-height) items-stretch p-[4px]">
         {renderIndicator(
           tabs.findIndex((tab) => tab.path === owningTab),
           tabs.length,
@@ -73,13 +73,13 @@ const renderTab = (tab: Tab, isActive: boolean) => {
       onClick={() => haptics.selection()}
       aria-current={currentPage(isActive)}
       className={cn(
-        'relative z-10 flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        'relative z-10 flex min-w-0 flex-1 flex-col items-center justify-center gap-[4px] rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         { active: isActive },
       )}
     >
       <Icon
         className={cn(
-          'h-5 w-5 shrink-0 transition-colors',
+          'size-[20px] shrink-0 transition-colors',
           getTabToneClassName(isActive),
         )}
       />
@@ -105,9 +105,9 @@ const renderIndicator = (activeIndex: number, tabCount: number) => {
   return (
     <span
       aria-hidden="true"
-      className="nav-indicator absolute inset-y-1 left-1"
+      className="nav-indicator absolute inset-y-[4px] left-[4px]"
       style={{
-        width: `calc((100% - 0.5rem) / ${tabCount})`,
+        width: `calc((100% - 8px) / ${tabCount})`,
         transform: `translateX(${activeIndex * 100}%)`,
       }}
     >

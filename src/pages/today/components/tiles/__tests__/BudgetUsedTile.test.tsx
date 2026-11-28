@@ -13,6 +13,7 @@ const renderTile = (overrides: Overrides = {}) => {
         spentThisMonth={600}
         monthlyBudget={1000}
         currency="EUR"
+        isWide={false}
         {...overrides}
       />
     </MemoryRouter>,

@@ -46,6 +46,31 @@ const WIDE_TILES: readonly TodayTileId[] = [
 export const isWideTodayTile = (id: TodayTileId): boolean =>
   WIDE_TILES.includes(id);
 
+/**
+ * Half tiles sit side by side in pairs. One left without a partner, before a
+ * wide tile or at the end of the grid, would leave a hole next to it, so it
+ * takes the whole row instead.
+ */
+export const findUnpairedHalfTiles = (tiles: TodayTileId[]): TodayTileId[] =>
+  splitIntoHalfTileRuns(tiles)
+    .filter((run) => 1 === run.length % 2)
+    .map((run) => run[run.length - 1]);
+
+// The half tiles between two wide tiles, in order.
+const splitIntoHalfTileRuns = (tiles: TodayTileId[]): TodayTileId[][] =>
+  tiles.reduce<TodayTileId[][]>(
+    (runs, tile) => {
+      if (isWideTodayTile(tile)) {
+        return [...runs, []];
+      } else {
+        const currentRun = runs[runs.length - 1];
+
+        return [...runs.slice(0, -1), [...currentRun, tile]];
+      }
+    },
+    [[]],
+  );
+
 export const isDefaultLayout = (layout: TodayLayout): boolean => {
   if (!hasSameOrder(layout.visible, DEFAULT_VISIBLE)) {
     return false;

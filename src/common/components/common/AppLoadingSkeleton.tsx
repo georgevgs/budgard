@@ -23,14 +23,14 @@ export const AppLoadingSkeleton = () => {
 
       {/* Nav tabs */}
       <div className="fixed inset-x-(--dock-edge) bottom-(--dock-bottom) pr-(--dock-action-slot)">
-        <div className="glass-capsule flex h-(--dock-height) items-stretch p-1">
+        <div className="glass-capsule flex h-(--dock-height) items-stretch p-[4px]">
           {NAV_TABS.map((i) => (
             <div
               key={`nav-${i}`}
-              className="flex flex-1 flex-col items-center justify-center gap-1"
+              className="flex flex-1 flex-col items-center justify-center gap-[4px]"
             >
-              <Skeleton className="h-5 w-5 rounded-sm" />
-              <Skeleton className="h-2 w-10" />
+              <Skeleton className="size-[20px] rounded-sm" />
+              <Skeleton className="h-[8px] w-[40px]" />
             </div>
           ))}
         </div>
