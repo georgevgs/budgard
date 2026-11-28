@@ -37,7 +37,7 @@ export const SafeToSpendTile = (props: SafeToSpendTileProps) => {
         {renderLabel(props, t)}
         {renderChip(props, t)}
       </div>
-      <p className="mt-3.5 type-slab">
+      <p className="figure-rise mt-3.5 type-slab">
         {whole}
         <span className="type-fraction">{fraction}</span>
       </p>

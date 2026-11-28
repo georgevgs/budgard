@@ -1147,6 +1147,48 @@
     animation: amount-pop 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
+  /* Today's modules arrive top to bottom on a short ramp, capped at the
+     sixth so a long grid does not keep the last tile waiting. */
+  .bento-enter > * {
+    animation: card-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .bento-enter > :nth-child(2) {
+    animation-delay: 40ms;
+  }
+
+  .bento-enter > :nth-child(3) {
+    animation-delay: 80ms;
+  }
+
+  .bento-enter > :nth-child(4) {
+    animation-delay: 120ms;
+  }
+
+  .bento-enter > :nth-child(5) {
+    animation-delay: 160ms;
+  }
+
+  .bento-enter > :nth-child(n + 6) {
+    animation-delay: 200ms;
+  }
+
+  /* The headline figure rises into place after its slab has landed. */
+  @keyframes figure-rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .figure-rise {
+    animation: figure-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
+  }
+
   /* The pull-to-refresh spinner. Its own keyframe rather than Tailwind's
      `spin`, because the class is applied from CSS by stage, not from React. */
   @keyframes pull-spin {

@@ -33,7 +33,7 @@ const TransactionRow = ({
       aria-label={t('activity.openTransaction', {
         description: transaction.description,
       })}
-      className="flex w-full cursor-pointer items-center gap-3.5 px-4 py-3 text-left transition-colors hover:bg-foreground/4 active:bg-foreground/7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+      className="flex w-full cursor-pointer items-center gap-3.5 px-4 py-3 text-left transition-[background-color,transform] hover:bg-foreground/4 active:scale-[0.985] active:bg-foreground/7 motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
     >
       <CategoryGlyph transaction={transaction} className="h-10 w-10" />
       <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3.5 gap-y-1">

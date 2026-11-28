@@ -43,7 +43,7 @@ export const TodayGrid = (props: TodayGridProps) => {
   );
 
   return (
-    <BentoGrid className="mt-4">
+    <BentoGrid className="bento-enter mt-4">
       {props.visible.map((id) =>
         renderTileOrNull(id, unpairedTiles.includes(id), props),
       )}

@@ -41,7 +41,7 @@ export const ActivityTransactionRow = (props: ActivityTransactionRowProps) => {
         aria-label={t('activity.openTransaction', {
           description: transaction.description,
         })}
-        className="flex min-w-0 flex-1 items-center gap-3.5 rounded-[1.375rem] py-3 pl-4 pr-2 text-left transition-colors hover:bg-foreground/4 active:bg-foreground/7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+        className="flex min-w-0 flex-1 items-center gap-3.5 rounded-[1.375rem] py-3 pl-4 pr-2 text-left transition-[background-color,transform] hover:bg-foreground/4 active:scale-[0.985] active:bg-foreground/7 motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
       >
         {renderCategoryMark(transaction)}
         <span className="min-w-0 flex-1">
