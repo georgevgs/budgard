@@ -8,10 +8,6 @@ const quickAdd = vi.hoisted(() => ({
   openIncomeEntry: vi.fn(),
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
-
 vi.mock('@/common/contexts/QuickAddContext', () => ({
   useQuickAdd: () => quickAdd,
 }));
